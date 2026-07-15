@@ -1,0 +1,15 @@
+{
+    "positive": {
+        "model_exact": 0.15,
+        "attrs_exact": 0.1,
+        "category_match": 0.08,
+        "series_match": 0.05,
+        "brand_match": 0.05
+    },
+    "negative": {
+        "category_conflict": -0.3,
+        "medium_conflict": -0.2,
+        "pipe_conflict": -0.3,
+        "attrs_deviation_2x": -0.15
+    }
+}

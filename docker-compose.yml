@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  matcher-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: material-matcher
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist uploads and generated reports on the host
+      - ./app/uploads:/app/app/uploads
+      # Persist the SQLite database file on the host for runtime updates
+      - ./app/materials.db:/app/app/materials.db
+    restart: always

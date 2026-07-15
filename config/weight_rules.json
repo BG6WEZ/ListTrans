@@ -1,0 +1,22 @@
+{
+    "scene_a": {
+        "model": 0.5,
+        "attrs": 0.3,
+        "text": 0.2,
+        "vector_boost": 0.2,
+        "base_attr": 0.1
+    },
+    "scene_b": {
+        "attrs": 0.5,
+        "text": 0.3,
+        "model": 0.1,
+        "vector_boost": 0.2,
+        "base_attr": 0.1
+    },
+    "scene_c": {
+        "text": 0.6,
+        "vector_boost": 0.3,
+        "model": 0.05,
+        "attrs": 0.05
+    }
+}

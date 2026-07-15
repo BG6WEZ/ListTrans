@@ -1,0 +1,23 @@
+# Python dependencies and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Database and indexes (as requested: "不要包含任何测试数据和库")
+app/materials.db
+app/vector_cache/
+app/uploads/
+logs/
+.system_generated/
+
+# Excel test data and sample files (as requested: "不要包含任何测试数据和库")
+*.xlsx
+*.xls
+*.csv
+doc/sample/
+doc/*.xlsx
