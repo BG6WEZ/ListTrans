@@ -129,9 +129,12 @@ def extract_model(text: str) -> str:
     ]
     
     for r in model_regexes:
-        match = re.search(r, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
+        for match in re.finditer(r, text, re.IGNORECASE):
+            val = match.group(1).strip()
+            val_upper = val.upper()
+            if any(val_upper.startswith(prefix) for prefix in ["DN", "DE", "PN", "Ф", "Φ"]):
+                continue
+            return val
             
     # Try name lines
     name_match = re.search(r'1\.(?:名称|名称及型号)\s*[:：]\s*(.*)', text)
@@ -139,7 +142,10 @@ def extract_model(text: str) -> str:
         line = name_match.group(1)
         trail_match = re.search(r'([A-Za-z0-9\-]+)$', line)
         if trail_match:
-            return trail_match.group(1).strip()
+            val = trail_match.group(1).strip()
+            val_upper = val.upper()
+            if not any(val_upper.startswith(prefix) for prefix in ["DN", "DE", "PN", "Ф", "Φ"]):
+                return val
             
     return ""
 
@@ -244,6 +250,19 @@ def extract_general_params(text: str) -> Dict[str, Any]:
     sections = parse_numbered_headers(text)
     if not sections:
         return parse_sub_parameters(text)
+
+    # Validate that sections look like real Chinese numbered headers.
+    # A valid header key should contain at least one CJK character and
+    # must not look like a numeric value or unit string (e.g. "新风量m³/h" is
+    # a false-positive where 5750 was parsed as the section number).
+    def _is_valid_header_key(key: str) -> bool:
+        has_cjk = any('\u4e00' <= c <= '\u9fff' for c in key)
+        has_unit_suffix = bool(re.search(r'(?:m³|m3|/h|kW|kw|Pa|MPa|mm|mm²|mm2)\s*$', key))
+        return has_cjk and not has_unit_suffix
+
+    if not any(_is_valid_header_key(k) for k in sections):
+        # All matched "headers" are false positives; fall back to flat parsing
+        return parse_sub_parameters(text)
         
     for k, v in sections.items():
         if "工作内容" in k:
@@ -259,6 +278,29 @@ def extract_general_params(text: str) -> Dict[str, Any]:
             
     return attrs
 
+def remove_construction_info(text: str) -> str:
+    """Strip out installation instruction lines, billing notes, and construction processes."""
+    if not text:
+        return ""
+    # Split by newline or semicolons
+    lines = re.split(r'[\n\r；;]', text)
+    clean_lines = []
+    exclude_keywords = [
+        "工作内容", "安装形式", "安装方式", "本体安装", "打标", "加固", "焊压接线", "端子", "接线", "调试",
+        "试运转", "就位", "搬运", "运输", "勾缝", "清理", "保护", "单独计算", "单价暂按", "信息价", "计价",
+        "配合比", "搅拌", "捣平", "压实", "铺抹", "对缝", "地漏居中", "甲供", "打胶要求", "启动方式",
+        "减震垫", "不含垂直", "水平搬运", "基底", "基层", "面层", "施工"
+    ]
+    for line in lines:
+        line_strip = line.strip()
+        if not line_strip:
+            continue
+        # Check if line contains any of the exclude keywords
+        if any(kw in line_strip for kw in exclude_keywords):
+            continue
+        clean_lines.append(line_strip)
+    return "\n".join(clean_lines)
+
 @lru_cache(maxsize=100000)
 def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]:
     """
@@ -267,105 +309,177 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
     params = {}
     if not text:
         return params
-        
+
+    # Strip construction notes first
+    text_clean = remove_construction_info(text)
+    
     # Start with dynamic general structural parsing
-    attrs = extract_general_params(text)
+    attrs = extract_general_params(text_clean)
     
     # Defaults
-    params['model'] = extract_model(text)
+    params['model'] = extract_model(text_clean)
     
-    # 1. Check if category is Electrical (电气)
-    is_electrical = any(k in category_hint or k in text for k in ["电气", "电缆", "导线", "断路器", "开关", "配电", "线缆"])
-    # 2. Check if category is Water/Plumbing (给排水/管道)
-    is_water = any(k in category_hint or k in text for k in ["给水", "排水", "阀门", "管道", "管件", "紫铜管", "不锈钢管", "塑料管", "蝶阀"])
-    
+    # Categorization rules
+    is_hvac = any(k in category_hint for k in ["暖通", "多联机", "空调", "通风", "风管", "风阀", "风机", "盘管", "风机盘管"]) or (not category_hint and any(k in text_clean for k in ["机组", "风机", "风管", "冷水机组", "风量"]))
+    is_elec_strong = any(k in category_hint for k in ["强电", "动力", "照明", "配电", "电气", "电缆", "线缆", "电线"]) or (not category_hint and any(k in text_clean for k in ["电缆", "导线", "断路器", "开关", "配电箱", "Pe=", "配电柜"]))
+    is_elec_weak = any(k in category_hint for k in ["弱电", "智能化", "自控", "监控", "消防", "网络", "通信"]) or (not category_hint and any(k in text_clean for k in ["对讲", "呼叫", "总服务器", "液晶呼叫", "分机", "总线"]))
+    is_water = (any(k in category_hint for k in ["给排水", "给水", "排水", "水处理", "纯水", "消防水", "管", "管道", "管件", "阀门", "法兰"]) and not any(k in category_hint for k in ["风管", "风阀", "风机", "盘管"])) or (not category_hint and any(k in text_clean for k in ["水盆", "洗手盆", "感应龙头", "水管", "阀门", "蝶阀", "消火栓", "喷淋"]))
+    is_gas = any(k in category_hint for k in ["医气", "气体", "医用气体"]) or (not category_hint and any(k in text_clean for k in ["氧气", "吸引", "医用气体", "终端", "脱脂无缝紫铜管"]))
+    is_decor = any(k in category_hint for k in ["装饰", "建材", "装修"]) or (not category_hint and any(k in text_clean for k in ["砌块墙", "硫酸钡", "水泥", "地砖", "橡胶卷材", "金属板", "防霉", "涂料", "涂刷"]))
+
     specific_attrs = {}
-    if is_electrical:
-        # Extract Electrical parameters: 电压 (V), 电流 (A), 极数 (P), 功率 (kW)
-        volt_match = re.search(r'(?:电压|额定电压)?(?:[^\d]*?)(\d+)\s*V', text, re.IGNORECASE)
+
+    # 1. Strong Electrical Parameters
+    if is_elec_strong:
+        # Power Pe
+        pe_match = re.search(r'(?:Pe|功率|容量|电机功率|电机容量)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦)?', text_clean, re.IGNORECASE)
+        if pe_match:
+            specific_attrs['功率'] = float(pe_match.group(1))
+            
+        # Voltage
+        volt_match = re.search(r'(?:电压|额定电压)?(?:[^\d]*?)(\d+)\s*V', text_clean, re.IGNORECASE)
         if volt_match:
             specific_attrs['电压'] = float(volt_match.group(1))
             
-        curr_match = re.search(r'(?:电流|额定电流)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*A(?!\w)', text, re.IGNORECASE)
+        # Current
+        curr_match = re.search(r'(?:电流|额定电流)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*A(?!\w)', text_clean, re.IGNORECASE)
         if curr_match:
             specific_attrs['电流'] = float(curr_match.group(1))
             
-        poles_match = re.search(r'(?:极数)(?:[^\d]*?)(\d+)\s*P\b', text, re.IGNORECASE)
+        # Poles
+        poles_match = re.search(r'(?:极数)(?:[^\d]*?)(\d+)\s*P\b', text_clean, re.IGNORECASE)
+        if not poles_match:
+            poles_match = re.search(r'\b(\d+)\s*P\b', text_clean, re.IGNORECASE)
         if poles_match:
             specific_attrs['极数'] = int(poles_match.group(1))
-            
-        pwr_match = re.search(r'(?:功率|容量|电机功率|电机容量)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|千瓦)', text, re.IGNORECASE)
-        if pwr_match:
-            specific_attrs['功率'] = float(pwr_match.group(1))
-
-        # Extract Cable/Conductor parameters: 芯数, 截面积
-        cable_matches = re.findall(r'(\d+)\s*[*x×]\s*(\d+(?:\.\d+)?)(?:\s*mm²|\s*mm2)?', text, re.IGNORECASE)
+ 
+        # Cable multiplier (Cores & Area)
+        cable_matches = re.findall(r'(\d+)\s*[*x×]\s*(\d+(?:\.\d+)?)(?:\s*mm²|\s*mm2)?', text_clean, re.IGNORECASE)
         if cable_matches:
             cores_list = [int(m[0]) for m in cable_matches]
             area_list = [float(m[1]) for m in cable_matches]
             specific_attrs['芯数'] = "+".join(str(c) for c in cores_list)
             specific_attrs['截面积'] = "+".join(str(a) for a in area_list)
         else:
-            single_match = re.search(r'(?:BV|BYJ|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)?\s*-?\s*(\d+(?:\.\d+)?)\s*(?:mm2|mm²)', text, re.IGNORECASE)
+            single_match = re.search(r'(?:BV|BYJ|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)?\s*-?\s*(\d+(?:\.\d+)?)\s*(?:mm2|mm²)', text_clean, re.IGNORECASE)
             if not single_match:
-                single_match = re.search(r'\b(?:BV|BYJ|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)-(\d+(?:\.\d+)?)\b', text, re.IGNORECASE)
+                single_match = re.search(r'\b(?:BV|BYJ|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)-(\d+(?:\.\d+)?)\b', text_clean, re.IGNORECASE)
             if single_match:
                 specific_attrs['芯数'] = "1"
                 specific_attrs['截面积'] = str(float(single_match.group(1)))
+ 
+    # 2. Plumbing / Gas / Pure Water Parameters
+    elif is_water or is_gas:
+        # Check for outer diameter and wall thickness inside parenthesis, e.g. DN65（75*5.5）
+        size_match = re.search(r'(?:DN|de|Ф|Φ|管径|口径)\s*(\d+)\s*[（(]\s*(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)\s*[）)]', text_clean, re.IGNORECASE)
+        if size_match:
+            specific_attrs['管径'] = int(size_match.group(1))
+            specific_attrs['外径'] = float(size_match.group(2))
+            specific_attrs['壁厚'] = float(size_match.group(3))
+        else:
+            dn_match = re.search(r'(?:DN|de|Ф|Φ|管径|口径)(?:[^\d]*?)(\d+)', text_clean, re.IGNORECASE)
+            if dn_match:
+                specific_attrs['管径'] = int(dn_match.group(1))
+                
+            # Fallback check for outer diameter and wall thickness: e.g. de75*5.5 or De75*5.5
+            de_match = re.search(r'(?:de|De)\s*(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', text_clean, re.IGNORECASE)
+            if de_match:
+                specific_attrs['外径'] = float(de_match.group(1))
+                specific_attrs['壁厚'] = float(de_match.group(2))
             
-    elif is_water:
-        # Extract Water parameters: 管径 (DN), 压力 (MPa)
-        dn_match = re.search(r'(?:DN|Ф|Φ|管径)(?:[^\d]*?)(\d+)', text, re.IGNORECASE)
-        if dn_match:
-            specific_attrs['管径'] = int(dn_match.group(1))
-            
-        press_match = re.search(r'(?:压力|PN|工作压力)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:MPa|pn)', text, re.IGNORECASE)
+        # Pressure (MPa / PN)
+        press_match = re.search(r'(?:压力|PN|工作压力|设计压力)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:MPa|pn)?', text_clean, re.IGNORECASE)
+        if not press_match:
+            press_match = re.search(r'(\d+(?:\.\d+)?)\s*MPa', text_clean, re.IGNORECASE)
         if press_match:
             specific_attrs['压力'] = float(press_match.group(1))
+
+        # Material
+        materials_list = [
+            "PSP钢塑复合管", "钢塑复合管", "PSP钢塑", "PSP", "无缝钢管", "镀锌钢管", "焊接钢管", "防腐钢管",
+            "不锈钢管", "不锈钢", "紫铜管", "铜管", "PPR", "PVC-U", "PVC", "PE", "铸铁管", "铸铁", "黄铜", "碳钢"
+        ]
+        for mat in materials_list:
+            if mat in text_clean:
+                specific_attrs['材质'] = mat
+                break
             
-    else:
-        # Default/HVAC parameters: 风量, 新风量, 余压, 功率, 制冷量, 制热量, 过滤段, 尺寸
-        vol_match = re.search(r'(?:机组|送|排|风机|处理)?风量(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text)
+    # 3. HVAC Parameters
+    elif is_hvac:
+        vol_match = re.search(r'(?:机组|送|排|风机|处理)?风量(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text_clean, re.IGNORECASE)
         if vol_match:
             specific_attrs['风量'] = parse_number_or_range(vol_match.group(1))
             
-        fresh_vol_match = re.search(r'新风量(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text)
+        fresh_vol_match = re.search(r'新风量(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text_clean, re.IGNORECASE)
         if fresh_vol_match:
             specific_attrs['新风量'] = parse_number_or_range(fresh_vol_match.group(1))
             
-        pressure_match = re.search(r'(?:机外)?余压(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text, re.IGNORECASE)
+        pressure_match = re.search(r'(?:机外)?余压(?:[^\d]*?)(\d+(?:\s*[-~—至]\s*\d+)?)', text_clean, re.IGNORECASE)
         if pressure_match:
             specific_attrs['余压'] = parse_number_or_range(pressure_match.group(1))
             
-        power_match = re.search(r'(?:功率|风机功率|风机类型及功率|电机功率)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|千瓦)', text, re.IGNORECASE)
+        power_match = re.search(r'(?:功率|风机功率|风机类型及功率|电机功率)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦)?', text_clean, re.IGNORECASE)
         if power_match:
             specific_attrs['功率'] = float(power_match.group(1))
             
-        cooling_match = re.search(r'制冷量(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|千瓦)', text, re.IGNORECASE)
+        cooling_match = re.search(r'制冷量(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦)?', text_clean, re.IGNORECASE)
         if cooling_match:
             specific_attrs['制冷量'] = float(cooling_match.group(1))
             
-        heating_match = re.search(r'制热量(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|千瓦)', text, re.IGNORECASE)
+        heating_match = re.search(r'制热量(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦)?', text_clean, re.IGNORECASE)
         if heating_match:
             specific_attrs['制热量'] = float(heating_match.group(1))
             
-        dim_match = re.search(r'(\d+\s*[\*x×]\s*\d+(?:\s*[\*x×]\s*\d+)?)', text, re.IGNORECASE)
+        dim_match = re.search(r'(\d+\s*[\*x×]\s*\d+(?:\s*[\*x×]\s*\d+)?)', text_clean, re.IGNORECASE)
         if dim_match:
             specific_attrs['尺寸'] = dim_match.group(1).replace('×', '*').replace('x', '*').replace(' ', '').strip()
             
-        filter_match = re.search(r'(?:过滤段|过滤器|过滤效率)(?:[^\d]*?)([A-Za-z0-9\+\/\s]+)', text)
+        filter_match = re.search(r'(?:过滤段|过滤器|过滤效率)\s*[:：]?\s*([A-Za-z0-9\+\/\s]+)', text_clean, re.IGNORECASE)
         if filter_match:
             filters = re.split(r'[\+\/\s]+', filter_match.group(1).strip())
             specific_attrs['过滤段'] = [f.strip() for f in filters if f.strip()]
         else:
             inline_filters = []
-            if "中效" in text:
+            if "中效" in text_clean:
                 inline_filters.append("中效")
-            if "高效" in text or "H13" in text or "H14" in text:
+            if "高效" in text_clean or "H13" in text_clean or "H14" in text_clean:
                 inline_filters.append("高效")
-            if "粗效" in text or "初效" in text or "G4" in text:
+            if "粗效" in text_clean or "初效" in text_clean or "G4" in text_clean:
                 inline_filters.append("初效")
             specific_attrs['过滤段'] = inline_filters
+
+    # 4. Weak Electrical Parameters
+    elif is_elec_weak:
+        # Ports/Specs
+        ports_match = re.search(r'(\d+)\s*(?:口|位|极|针|线)', text_clean)
+        if ports_match:
+            specific_attrs['接口数量'] = int(ports_match.group(1))
+        # Voltage
+        volt_match = re.search(r'(?:AC|DC)?\s*(\d+)\s*V', text_clean, re.IGNORECASE)
+        if volt_match:
+            specific_attrs['电压'] = float(volt_match.group(1))
+
+    # 5. Decoration Parameters
+    elif is_decor:
+        # Thickness
+        thick_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mm厚|厚|cm厚)', text_clean)
+        if thick_match:
+            specific_attrs['厚度'] = float(thick_match.group(1))
+        # Dimensions
+        dim_match = re.search(r'(\d+)\s*[*x×]\s*(\d+)(?:\s*[*x×]\s*(\d+))?', text_clean, re.IGNORECASE)
+        if dim_match:
+            specific_attrs['尺寸'] = dim_match.group(0).replace('×', '*').replace('x', '*').replace(' ', '').strip()
+
+    # Extract common parameters (power, dimensions) if not already found in specific_attrs
+    if '功率' not in specific_attrs:
+        power_match = re.search(r'(?:功率|风机功率|风机类型及功率|电机功率)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦)?', text_clean, re.IGNORECASE)
+        if power_match:
+            specific_attrs['功率'] = float(power_match.group(1))
+            
+    if '尺寸' not in specific_attrs:
+        dim_match = re.search(r'(\d+\s*[\*x×]\s*\d+(?:\s*[\*x×]\s*\d+)?)', text_clean, re.IGNORECASE)
+        if dim_match:
+            specific_attrs['尺寸'] = dim_match.group(1).replace('×', '*').replace('x', '*').replace(' ', '').strip()
 
     # Merge specific_attrs into attrs (overwriting any raw string attributes with cleaned values)
     for k, v in specific_attrs.items():

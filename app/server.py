@@ -56,15 +56,15 @@ executor = ThreadPoolExecutor(max_workers=10)
 async def startup_event():
     """Startup initialization of DB and vector index."""
     logger.info("Server started. Initializing SQLite DB and vector index mapping.")
-    # Ensure database is loaded and check/rebuild vector index
-    if not os.path.exists(DB_PATH):
-        proj_dir = os.path.dirname(os.path.dirname(__file__))
-        xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
-        init_db(xlsx_path)
-        logger.info("SQLite DB initialized from default sample Excel.")
-    else:
-        index_manager.check_db_timestamp_and_build(DB_PATH)
-        logger.info("SQLite DB checked and vector index verified.")
+    proj_dir = os.path.dirname(os.path.dirname(__file__))
+    xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
+    
+    # Always call init_db to check schema and self-heal if necessary
+    init_db(xlsx_path)
+    
+    # Verify/build vector index
+    index_manager.check_db_timestamp_and_build(DB_PATH)
+    logger.info("SQLite DB checked and vector index verified.")
 
 class MatchedItemModel(BaseModel):
     original_row_idx: int
@@ -89,6 +89,7 @@ class RematchRequest(BaseModel):
     row_id: int
     text: str
     fixed_params: Dict[str, Any] # {air_volume, power, dn, model}
+    professional: Optional[str] = "暖通"
 
 class ConfigSaveRequest(BaseModel):
     config_type: str # alias, units, stop_words, weights, tolerances, boosts
@@ -118,67 +119,145 @@ async def upload_file(file: UploadFile = File(...)):
         
     try:
         wb = openpyxl.load_workbook(temp_path, data_only=True)
-        # Determine sheets
-        sheet = None
-        professional = "暖通"
-        for name in ["暖通专业", "电气专业", "给排水专业"]:
-            if name in wb.sheetnames:
-                sheet = wb[name]
-                if "暖通" in name:
-                    professional = "暖通"
-                elif "电气" in name:
-                    professional = "电气"
-                elif "给排水" in name:
-                    professional = "给排水"
-                break
-        if sheet is None:
-            sheet = wb.active
-            if "电气" in sheet.title:
-                professional = "电气"
-            elif "给排水" in sheet.title:
-                professional = "给排水"
-            else:
-                professional = "暖通"
-            
         raw_rows = []
-        for r in range(1, sheet.max_row + 1):
-            val_b = sheet.cell(r, 2).value  # 名称
-            val_c = sheet.cell(r, 3).value  # 规格
+        
+        # Helper to classify professional by sheet name
+        def get_professional_by_sheet(sheet_name: str) -> str:
+            name_lower = sheet_name.lower()
+            if any(kw in name_lower for kw in ["装饰", "地材", "卷材", "橡胶", "pvc", "门", "手术室", "无影灯", "打胶", "自动门"]):
+                return "装饰"
+            if any(kw in name_lower for kw in ["强电", "动力", "照明", "变配电", "配电"]):
+                return "强电"
+            if any(kw in name_lower for kw in ["弱电", "智能化", "自控", "监控", "消防", "网络", "通信"]):
+                return "弱电"
+            if any(kw in name_lower for kw in ["给排水", "给水", "排水", "消火栓", "喷淋"]):
+                return "给排水"
+            if any(kw in name_lower for kw in ["暖通", "多联机", "空调", "通风"]):
+                return "暖通"
+            if any(kw in name_lower for kw in ["医气", "气体", "氧气", "吸引"]):
+                return "医气"
+            if any(kw in name_lower for kw in ["纯水", "水处理"]):
+                return "纯水"
+            return "暖通" # Fallback
             
-            # Skip headers, empty rows, etc.
-            if not val_b or str(val_b).strip() == "" or str(val_b).strip() == "*名称" or str(val_b).strip() == "合计":
-                continue
-            if str(val_b).strip().endswith("部分") or str(val_b).strip().startswith("机组设备"):
-                continue
-            if val_c is None or str(val_c).strip() == "" or str(val_c).strip() == "规格型号/特征":
+        exclude_kws = ["说明", "汇总", "商务部", "备用"]
+        
+        global_row_counter = 1
+        for sheet_name in wb.sheetnames:
+            # Check sheet exclusion
+            if any(kw in sheet_name for kw in exclude_kws):
                 continue
                 
-            qty_val = sheet.cell(r, 8).value
-            if qty_val is None:
-                qty_val = sheet.cell(r, 5).value
-            try:
-                qty = float(qty_val) if qty_val is not None else 0.0
-            except ValueError:
-                qty = 0.0
+            sheet = wb[sheet_name]
+            professional = get_professional_by_sheet(sheet_name)
+            
+            # Find the header row in first 10 rows
+            header_row = None
+            for r in range(1, 11):
+                if r > sheet.max_row:
+                    break
+                row_vals = [sheet.cell(r, c).value for c in range(1, sheet.max_column + 1)]
+                row_strs = [str(x).strip() for x in row_vals if x is not None]
+                if any(x in ["*编码", "项目编码", "编码", "项目名称", "*名称", "名称"] for x in row_strs) and any("规格" in x or "特征" in x for x in row_strs):
+                    header_row = r
+                    break
+            
+            if not header_row:
+                # Fallback if no matching header row found: default column positions
+                code_idx = 1
+                name_idx = 2
+                spec_idx = 3
+                unit_idx = 4
+                qty_idx = 5
+                loss_idx = None
+                category_idx = None
+                brand_idx = None
+                start_r = 1
+            else:
+                start_r = header_row + 1
+                headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
                 
-            loss_val = sheet.cell(r, 9).value
-            try:
-                loss = float(loss_val) if loss_val is not None else 1.0
-            except ValueError:
+                # Default mappings
+                code_idx = 1
+                name_idx = 2
+                spec_idx = 3
+                unit_idx = 4
+                qty_idx = 5
+                loss_idx = None
+                category_idx = None
+                brand_idx = None
+                
+                for idx, h in enumerate(headers):
+                    if not h:
+                        continue
+                    h_str = str(h).strip()
+                    if "编码" in h_str:
+                        code_idx = idx + 1
+                    elif "名称" in h_str:
+                        name_idx = idx + 1
+                    elif "规格" in h_str or "特征" in h_str:
+                        spec_idx = idx + 1
+                    elif "单位" in h_str:
+                        unit_idx = idx + 1
+                    elif h_str in ["*数量", "数量", "工程量"]:
+                        qty_idx = idx + 1
+                    elif "损耗" in h_str:
+                        loss_idx = idx + 1
+                    elif h_str in ["甲供材品类", "品类", "分类"]:
+                        category_idx = idx + 1
+                    elif "品牌" in h_str:
+                        brand_idx = idx + 1
+            
+            # Extract data rows
+            for r in range(start_r, sheet.max_row + 1):
+                val_b = sheet.cell(r, name_idx).value  # 名称
+                val_c = sheet.cell(r, spec_idx).value  # 规格
+                
+                # Skip headers, empty rows, total summary, subheadings
+                if not val_b or str(val_b).strip() == "" or str(val_b).strip() == "*名称" or str(val_b).strip() == "合计" or str(val_b).strip() == "项目名称":
+                    continue
+                if str(val_b).strip().endswith("部分") or str(val_b).strip().startswith("机组设备"):
+                    continue
+                if val_c is None or str(val_c).strip() == "" or str(val_c).strip() == "规格型号/特征":
+                    continue
+                    
+                qty_val = sheet.cell(r, qty_idx).value
+                try:
+                    qty = float(qty_val) if qty_val is not None else 0.0
+                except ValueError:
+                    qty = 0.0
+                    
                 loss = 1.0
+                if loss_idx:
+                    loss_val = sheet.cell(r, loss_idx).value
+                    try:
+                        loss = float(loss_val) if loss_val is not None else 1.0
+                    except ValueError:
+                        loss = 1.0
                 
-            raw_rows.append({
-                "row_idx": r,
-                "name": str(val_b).strip(),
-                "specification": str(val_c).strip(),
-                "unit": str(sheet.cell(r, 4).value or "台").strip(),
-                "qty": qty,
-                "loss": loss,
-                "category": str(sheet.cell(r, 10).value or "").strip(),
-                "brand": str(sheet.cell(r, 11).value or "").strip(),
-                "professional": professional
-            })
-            
+                category = ""
+                if category_idx:
+                    category = str(sheet.cell(r, category_idx).value or "").strip()
+                    if category in ["", "/"]:
+                        continue
+                    
+                brand = ""
+                if brand_idx:
+                    brand = str(sheet.cell(r, brand_idx).value or "").strip()
+                    
+                raw_rows.append({
+                    "row_idx": global_row_counter,
+                    "name": str(val_b).strip(),
+                    "specification": str(val_c).strip(),
+                    "unit": str(sheet.cell(r, unit_idx).value or "台").strip(),
+                    "qty": qty,
+                    "loss": loss,
+                    "category": category,
+                    "brand": brand,
+                    "professional": professional
+                })
+                global_row_counter += 1
+                
         wb.close()
         os.remove(temp_path)
         
@@ -213,10 +292,11 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "name": item["name"],
                 "specification": item["specification"],
                 "category": item["category"],
-                "brand": item["brand"]
+                "brand": item["brand"],
+                "professional": item.get("professional", "暖通")
             }
-            # Pre-parse specs
-            query_info["parsed_spec"] = extract_params(item["specification"], item["category"])
+            # Pre-parse specs with professional category hint
+            query_info["parsed_spec"] = extract_params(item["specification"], item["professional"])
             
             q_vector = query_vectors[i] if query_vectors is not None else None
             match_jobs.append((query_info, q_vector, item))
@@ -303,12 +383,14 @@ async def api_match_single(payload: Dict[str, Any]):
     name = payload.get("name", "") or extract_device_name(text)
     category = payload.get("category", "")
     brand = payload.get("brand", "")
+    professional = payload.get("professional", "暖通")
     
     query_info = {
         "name": name,
         "specification": text,
         "category": category,
-        "brand": brand
+        "brand": brand,
+        "professional": professional
     }
     if "parsed_spec" in payload:
         query_info["parsed_spec"] = payload["parsed_spec"]
@@ -320,15 +402,31 @@ async def api_match_single(payload: Dict[str, Any]):
 async def api_rematch(req: RematchRequest):
     """Rematch item after manual parameters override."""
     fixed = req.fixed_params
-    parsed = extract_params(req.text)
+    professional = req.professional or "暖通"
+    parsed = extract_params(req.text, professional)
     
-    # Overwrite extracted params with user manually entered attributes
-    if "air_volume" in fixed and fixed["air_volume"] is not None:
-        parsed["attrs"]["风量"] = fixed["air_volume"]
-    if "power" in fixed and fixed["power"] is not None:
-        parsed["attrs"]["功率"] = fixed["power"]
-    if "dn" in fixed and fixed["dn"] is not None:
-        parsed["attrs"]["管径"] = fixed["dn"]
+    # Overwrite extracted params with user manually entered attributes based on professional category
+    if professional == "强电":
+        if "air_volume" in fixed and fixed["air_volume"] is not None:
+            parsed["attrs"]["芯数"] = str(int(fixed["air_volume"]))
+        if "power" in fixed and fixed["power"] is not None:
+            parsed["attrs"]["功率"] = fixed["power"]
+        if "dn" in fixed and fixed["dn"] is not None:
+            parsed["attrs"]["截面积"] = str(fixed["dn"])
+    elif professional in ["给排水", "纯水", "医气"]:
+        if "dn" in fixed and fixed["dn"] is not None:
+            parsed["attrs"]["管径"] = fixed["dn"]
+        if "power" in fixed and fixed["power"] is not None:
+            parsed["attrs"]["压力"] = fixed["power"]
+    else:
+        # HVAC / default
+        if "air_volume" in fixed and fixed["air_volume"] is not None:
+            parsed["attrs"]["风量"] = fixed["air_volume"]
+        if "power" in fixed and fixed["power"] is not None:
+            parsed["attrs"]["功率"] = fixed["power"]
+        if "dn" in fixed and fixed["dn"] is not None:
+            parsed["attrs"]["管径"] = fixed["dn"]
+            
     if "model" in fixed and fixed["model"]:
         parsed["model"] = fixed["model"]
         
@@ -336,6 +434,7 @@ async def api_rematch(req: RematchRequest):
         "name": extract_device_name(req.text),
         "specification": req.text,
         "category": "",
+        "professional": professional,
         "parsed_spec": parsed
     }
     

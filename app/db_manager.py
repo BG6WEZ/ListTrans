@@ -17,8 +17,25 @@ def init_db(xlsx_path=None, force_reload=False):
     Initialize SQLite database.
     If database does not exist or force_reload is True, import data from xlsx_path.
     """
+    import json
     db_exists = os.path.exists(DB_PATH)
     
+    if db_exists and not force_reload:
+        # Schema version check for self-healing (check for parsed_params column)
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT parsed_params FROM materials LIMIT 1")
+            cursor.execute("SELECT COUNT(*) FROM materials")
+            row_count = cursor.fetchone()[0]
+            conn.close()
+            if row_count == 0:
+                print("Database is empty. Triggering auto reload...")
+                force_reload = True
+        except sqlite3.OperationalError:
+            print("Database schema mismatch (missing parsed_params). Triggering auto reload...")
+            force_reload = True
+            
     if not db_exists or force_reload:
         print("Initializing database...")
         conn = get_db_connection()
@@ -35,7 +52,8 @@ def init_db(xlsx_path=None, force_reload=False):
                 unit TEXT,
                 brand TEXT,
                 description TEXT,
-                search_tokens TEXT
+                search_tokens TEXT,
+                parsed_params TEXT
             )
         """)
         
@@ -83,20 +101,29 @@ def init_db(xlsx_path=None, force_reload=False):
             df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
             df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
             
-            # Create search tokens for LIKE optimization
+            # Create search tokens for LIKE optimization and pre-parse parameters
+            from app.preprocessor import extract_params
             search_tokens_list = []
+            parsed_params_list = []
             for _, row in df_cleaned.iterrows():
                 tokens = f"{row['name']} {row['specification']} {row['category']}".lower()
                 search_tokens_list.append(tokens)
+                
+                # Pre-parse params and serialize to JSON
+                full_spec = f"{row['specification']} {row['description']}".strip()
+                parsed = extract_params(full_spec, row['category'])
+                parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
+                
             df_cleaned["search_tokens"] = search_tokens_list
+            df_cleaned["parsed_params"] = parsed_params_list
             
             # Write to SQL
-            records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens"]].values.tolist()
+            records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
             
             cursor.executemany("""
                 INSERT OR REPLACE INTO materials 
-                (code, category, name, specification, unit, brand, description, search_tokens)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (code, category, name, specification, unit, brand, description, search_tokens, parsed_params)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, records)
             
             if has_fts:
@@ -288,6 +315,7 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     Import materials from Excel file into SQLite database.
     mode: "replace" (full replacement) or "append" (incremental add).
     """
+    import json
     if not os.path.exists(xlsx_path):
         raise FileNotFoundError(f"Excel file not found: {xlsx_path}")
         
@@ -318,12 +346,21 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
     df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
     
-    # Create search tokens
+    # Create search tokens and pre-parse parameters
+    from app.preprocessor import extract_params
     search_tokens_list = []
+    parsed_params_list = []
     for _, row in df_cleaned.iterrows():
         tokens = f"{row['name']} {row['specification']} {row['category']}".lower()
         search_tokens_list.append(tokens)
+        
+        # Pre-parse params and serialize to JSON
+        full_spec = f"{row['specification']} {row['description']}".strip()
+        parsed = extract_params(full_spec, row['category'])
+        parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
+        
     df_cleaned["search_tokens"] = search_tokens_list
+    df_cleaned["parsed_params"] = parsed_params_list
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -340,11 +377,11 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         conn.commit()
         
     # Write to SQL materials table
-    records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens"]].values.tolist()
+    records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
     cursor.executemany("""
         INSERT OR REPLACE INTO materials 
-        (code, category, name, specification, unit, brand, description, search_tokens)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (code, category, name, specification, unit, brand, description, search_tokens, parsed_params)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, records)
     
     # Write to FTS virtual table

@@ -2,6 +2,9 @@ let items = []; // Holds all matched rows from original Excel
 let selectedItem = null; // Selected row dict
 let currentFilter = 'all'; // Current filter tab
 let searchQuery = ''; // Search query on left list
+let currentProfessional = '全部'; // Active professional tab filter
+let professionals = []; // List of professionals detected in uploaded list
+let originalFileName = ""; // Uploaded original list filename
 
 // Pagination variables
 let currentPage = 1;
@@ -133,20 +136,106 @@ function initEventListeners() {
     openParamBtn.addEventListener('click', () => {
         if (!selectedItem) return;
         
-        // Parse original specification values to pre-populate
-        // Extract model, air volume, power, dn if possible or pre-filled
         const text = selectedItem.original_spec;
+        const prof = selectedItem.professional || "暖通";
         
-        // Set placeholder or initial fields based on original_spec regex
-        const volMatch = text.match(/(?:风量)\s*[:：]?\s*(\d+)/i);
-        const pwrMatch = text.match(/(?:功率)\s*[:：]?\s*(\d+(?:\.\d+)?)/i);
-        const dnMatch = text.match(/(?:DN|Ф|Φ|管径)\s*[:：]?\s*(\d+)/i);
+        const modelInput = document.getElementById('modal-param-model');
+        const volInput = document.getElementById('modal-param-volume');
+        const pwrInput = document.getElementById('modal-param-power');
+        const dnInput = document.getElementById('modal-param-dn');
+        
+        const volWrapper = volInput.parentNode;
+        const pwrWrapper = pwrInput.parentNode;
+        const dnWrapper = dnInput.parentNode;
+        
+        const volLabel = volWrapper.querySelector('label');
+        const pwrLabel = pwrWrapper.querySelector('label');
+        const dnLabel = dnWrapper.querySelector('label');
+        
+        let volVal = '';
+        let pwrVal = '';
+        let dnVal = '';
+        
         const modelMatch = text.match(/([A-Z]+-[A-Z]+-[A-Z0-9\-]+)/i);
+        const modelVal = modelMatch ? modelMatch[1] : '';
 
-        document.getElementById('modal-param-model').value = modelMatch ? modelMatch[1] : '';
-        document.getElementById('modal-param-volume').value = volMatch ? volMatch[1] : '';
-        document.getElementById('modal-param-power').value = pwrMatch ? pwrMatch[1] : '';
-        document.getElementById('modal-param-dn').value = dnMatch ? dnMatch[1] : '';
+        // Configure layout and parse values based on professional field
+        if (prof === "强电") {
+            volWrapper.style.display = 'flex';
+            volLabel.innerText = "电缆芯数 (如 5)";
+            volInput.placeholder = "如 5";
+            
+            pwrWrapper.style.display = 'flex';
+            pwrLabel.innerText = "额定功率 Pe (kW)";
+            pwrInput.placeholder = "如 15";
+            
+            dnWrapper.style.display = 'flex';
+            dnLabel.innerText = "线芯截面积 (mm²)";
+            dnInput.placeholder = "如 2.5";
+            
+            const cableMatch = text.match(/(\d+)\s*[*x×]\s*(\d+(?:\.\d+)?)/i);
+            if (cableMatch) {
+                volVal = cableMatch[1];
+                dnVal = cableMatch[2];
+            } else {
+                const singleMatch = text.match(/(?:BV|BYJ|YJV|WDZ-YJY|BVR)-(\d+(?:\.\d+)?)/i);
+                if (singleMatch) {
+                    volVal = "1";
+                    dnVal = singleMatch[1];
+                }
+            }
+            const peMatch = text.match(/(?:Pe|功率)\s*[:：=]?\s*(\d+(?:\.\d+)?)/i);
+            pwrVal = peMatch ? peMatch[1] : '';
+            
+        } else if (prof === "给排水" || prof === "纯水" || prof === "医气") {
+            volWrapper.style.display = 'none';
+            
+            pwrWrapper.style.display = 'flex';
+            pwrLabel.innerText = "工作压力 (MPa)";
+            pwrInput.placeholder = "如 1.6";
+            
+            dnWrapper.style.display = 'flex';
+            dnLabel.innerText = "管道口径 / DN (mm)";
+            dnInput.placeholder = "如 100";
+            
+            const dnMatch = text.match(/(?:DN|Ф|Φ|管径)\s*[:：]?\s*(\d+)/i);
+            dnVal = dnMatch ? dnMatch[1] : '';
+            const pressMatch = text.match(/(?:压力|PN|工作压力)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(?:MPa|pn)?/i);
+            pwrVal = pressMatch ? pressMatch[1] : '';
+            
+        } else if (prof === "暖通") {
+            volWrapper.style.display = 'flex';
+            volLabel.innerText = "风量 / 流量 (m³/h)";
+            volInput.placeholder = "如 8000";
+            
+            pwrWrapper.style.display = 'flex';
+            pwrLabel.innerText = "电机功率 (kW)";
+            pwrInput.placeholder = "如 5.5";
+            
+            dnWrapper.style.display = 'none';
+            
+            const volMatch = text.match(/(?:风量)\s*[:：]?\s*(\d+)/i);
+            const pwrMatch = text.match(/(?:功率)\s*[:：]?\s*(\d+(?:\.\d+)?)/i);
+            volVal = volMatch ? volMatch[1] : '';
+            pwrVal = pwrMatch ? pwrMatch[1] : '';
+            
+        } else {
+            // Decoration / other
+            volWrapper.style.display = 'none';
+            pwrWrapper.style.display = 'none';
+            
+            dnWrapper.style.display = 'flex';
+            dnLabel.innerText = "厚度 / 尺寸 (mm)";
+            dnInput.placeholder = "如 100";
+            
+            const thickMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:mm厚|厚)/i);
+            dnVal = thickMatch ? thickMatch[1] : '';
+        }
+
+        modelInput.value = modelVal;
+        volInput.value = volVal;
+        pwrInput.value = pwrVal;
+        dnInput.value = dnVal;
         
         paramModal.style.display = 'flex';
     });
@@ -235,7 +324,21 @@ async function handleFileUpload(file) {
             item.initial_auto_code = item.matched_code;
         });
         
+        // Initialize professional list
+        const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
+        professionals = ['全部', ...uniqueProfs];
+        currentProfessional = uniqueProfs.includes('暖通') ? '暖通' : uniqueProfs[0] || '全部';
+        
+        // Render professional tabs
+        renderProfessionalTabs();
+        
         // Hide welcome slate & show workbench
+        originalFileName = file.name;
+        const uploadedFilenameEl = document.getElementById('uploaded-filename');
+        if (uploadedFilenameEl) {
+            uploadedFilenameEl.innerText = ` - ${file.name}`;
+            uploadedFilenameEl.title = file.name;
+        }
         document.getElementById('welcome-slate').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
         document.getElementById('export-btn').disabled = false;
@@ -261,6 +364,38 @@ async function handleFileUpload(file) {
     }
 }
 
+// 1.5 Render Professional Page tabs
+function renderProfessionalTabs() {
+    const wrapper = document.getElementById('prof-tabs-wrapper');
+    const container = document.getElementById('prof-tabs');
+    container.innerHTML = '';
+    
+    const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
+    
+    if (uniqueProfs.length === 0) {
+        wrapper.style.display = 'none';
+        return;
+    }
+    
+    wrapper.style.display = 'block';
+    
+    const tabs = ['全部', ...uniqueProfs];
+    
+    tabs.forEach(prof => {
+        const btn = document.createElement('button');
+        btn.className = `prof-tab ${currentProfessional === prof ? 'active' : ''}`;
+        btn.innerText = prof;
+        btn.addEventListener('click', () => {
+            currentProfessional = prof;
+            currentPage = 1;
+            renderProfessionalTabs();
+            renderTable();
+            updateProgress();
+        });
+        container.appendChild(btn);
+    });
+}
+
 // 2. Render Left Panel Items Table (Paginated V0.0.2)
 function renderTable() {
     const tbody = document.getElementById('items-tbody');
@@ -268,6 +403,11 @@ function renderTable() {
     
     // Filter items
     let filtered = items.filter(item => {
+        // Professional filter
+        if (currentProfessional !== '全部' && item.professional !== currentProfessional) {
+            return false;
+        }
+        
         // Status filter
         if (currentFilter === 'exact') {
             return item.is_exact;
@@ -355,6 +495,16 @@ function selectRow(item) {
     // Hide prompt & show editor
     document.getElementById('select-prompt').style.display = 'none';
     document.getElementById('detail-editor').style.display = 'flex';
+    
+    // Reset scroll positions to top
+    const fixedTop = document.querySelector('.detail-fixed-top');
+    if (fixedTop) {
+        fixedTop.scrollTop = 0;
+    }
+    const scrollBottom = document.querySelector('.detail-scroll-bottom');
+    if (scrollBottom) {
+        scrollBottom.scrollTop = 0;
+    }
     
     // Fill original item metadata
     document.getElementById('lbl-row-idx').innerText = item.original_row_idx;
@@ -584,6 +734,7 @@ async function runParamRematch() {
             body: JSON.stringify({
                 row_id: selectedItem.original_row_idx,
                 text: selectedItem.original_spec,
+                professional: selectedItem.professional || "暖通",
                 fixed_params: {
                     model: model || null,
                     air_volume: volume,
@@ -646,11 +797,15 @@ function renderParamChips() {
     
     block.style.display = 'block';
     
-    // Initialize active_params if not present
+    // Initialize active_params if not present, and ensure all keys are initialized
     if (!selectedItem.active_params) {
         selectedItem.active_params = {};
-        if (model) selectedItem.active_params['model'] = true;
-        for (const k in attrs) {
+    }
+    if (model && selectedItem.active_params['model'] === undefined) {
+        selectedItem.active_params['model'] = true;
+    }
+    for (const k in attrs) {
+        if (selectedItem.active_params[k] === undefined) {
             selectedItem.active_params[k] = true;
         }
     }
@@ -715,6 +870,7 @@ async function rematchCurrentWithParams() {
                 text: selectedItem.original_spec,
                 name: selectedItem.original_name,
                 category: selectedItem.original_category || "",
+                professional: selectedItem.professional || "暖通",
                 parsed_spec: customizedSpec
             })
         });
@@ -764,19 +920,26 @@ async function batchApplyParamsAndRematch() {
     showLoading("批量对齐特征并重新匹配中...", `系统正在更新 ${similarItems.length} 个同类设备的过滤参数，并并发计算最佳套用项，请稍候...`);
     
     try {
+        // Clone the source of truth to prevent it from being mutated during the map loop
+        const sourceActiveParams = Object.assign({}, selectedItem.active_params || {});
+        
         const promises = similarItems.map(async (it) => {
             // Synchronize active_params
             it.active_params = {};
             if (it.parsed_spec) {
                 if (it.parsed_spec.model) {
-                    it.active_params['model'] = !!selectedItem.active_params['model'];
+                    if ('model' in sourceActiveParams) {
+                        it.active_params['model'] = sourceActiveParams['model'];
+                    } else {
+                        it.active_params['model'] = true;
+                    }
                 }
                 if (it.parsed_spec.attrs) {
                     for (const k in it.parsed_spec.attrs) {
-                        if (k in selectedItem.active_params) {
-                            it.active_params[k] = selectedItem.active_params[k];
+                        if (k in sourceActiveParams) {
+                            it.active_params[k] = sourceActiveParams[k];
                         } else {
-                            it.active_params[k] = false;
+                            it.active_params[k] = true;
                         }
                     }
                 }
@@ -801,6 +964,7 @@ async function batchApplyParamsAndRematch() {
                     text: it.original_spec,
                     name: it.original_name,
                     category: it.original_category || "",
+                    professional: it.professional || "暖通",
                     parsed_spec: customizedSpec
                 })
             });
@@ -843,11 +1007,25 @@ async function batchApplyParamsAndRematch() {
 function updateProgress() {
     if (items.length === 0) return;
     
+    // 1. Overall progress
     const matchedCount = items.filter(item => item.is_exact || item.matched_code !== "").length;
-    const progressPercent = Math.round((matchedCount / items.length) * 100);
+    const progressPercent = Math.round((matchedCount / items.length) * 100) || 0;
     
     document.getElementById('match-progress-bar').style.width = `${progressPercent}%`;
     document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+    
+    // 2. Current Professional progress
+    let profItems = items;
+    if (currentProfessional !== '全部') {
+        profItems = items.filter(item => item.professional === currentProfessional);
+    }
+    
+    const profMatchedCount = profItems.filter(item => item.is_exact || item.matched_code !== "").length;
+    const profProgressPercent = Math.round((profMatchedCount / profItems.length) * 100) || 0;
+    
+    document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}匹配进度:`;
+    document.getElementById('current-prof-progress-bar').style.width = `${profProgressPercent}%`;
+    document.getElementById('current-prof-progress-percent').innerText = `${profProgressPercent}%`;
 }
 
 // 9. Export standard sheet blob handler (V0.0.2 non-destructive)
@@ -876,7 +1054,14 @@ async function handleExport() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `标准清单_物料转换_${new Date().toISOString().slice(0,10)}.xlsx`;
+        
+        let downloadName = `标准清单_已匹配_${new Date().toISOString().slice(0,10)}.xlsx`;
+        if (originalFileName) {
+            const dotIdx = originalFileName.lastIndexOf('.');
+            const baseName = dotIdx !== -1 ? originalFileName.substring(0, dotIdx) : originalFileName;
+            downloadName = `${baseName}_已匹配.xlsx`;
+        }
+        a.download = downloadName;
         document.body.appendChild(a);
         a.click();
         

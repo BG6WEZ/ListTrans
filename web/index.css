@@ -1033,3 +1033,34 @@ body {
     color: var(--color-text-muted);
 }
 
+/* Professional Tab Styles */
+.prof-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+.prof-tabs::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+.prof-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition-smooth);
+}
+.prof-tab:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-primary-hover);
+    background: rgba(255, 255, 255, 0.06);
+}
+.prof-tab.active {
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+

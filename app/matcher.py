@@ -60,8 +60,9 @@ DEFAULT_BOOSTS = {
     "negative": {
         "category_conflict": -0.30,
         "medium_conflict": -0.20,
-        "pipe_conflict": -0.30,
-        "cable_conflict": -0.30,
+        "pipe_conflict": -0.40,
+        "cable_conflict": -0.40,
+        "model_conflict": -0.25,
         "attrs_deviation_2x": -0.15
     }
 }
@@ -109,6 +110,78 @@ def check_series_match(m1: str, m2: str) -> bool:
     p2 = m2.split("-")[0].strip().lower()
     return p1 == p2 and len(p1) > 1
 
+UNIT_CLASSES = {
+    "length": ["米", "千米", "厘米", "毫米", "m", "km", "cm", "mm", "根", "支", "条", "卷", "盘"],
+    "area": ["平方米", "平方厘米", "m2", "m²", "cm2", "平方"],
+    "weight": ["千克", "吨", "克", "公斤", "kg", "t", "g"],
+    "volume": ["立方米", "升", "毫升", "m3", "m³", "l", "ml"],
+    "quantity": ["个", "套", "台", "根", "块", "卷", "盘", "箱", "只", "支", "把", "双", "盒", "具", "樘", "顶", "盏", "面", "座", "台", "套", "件"]
+}
+
+def check_unit_compatibility(u1: str, u2: str) -> bool:
+    if not u1 or not u2:
+        return True
+    u1_clean = u1.strip().lower()
+    u2_clean = u2.strip().lower()
+    if u1_clean == u2_clean:
+        return True
+        
+    u1_cats = [cat for cat, units in UNIT_CLASSES.items() if any(u in u1_clean or u1_clean in u for u in units)]
+    u2_cats = [cat for cat, units in UNIT_CLASSES.items() if any(u in u2_clean or u2_clean in u for u in units)]
+    
+    if not u1_cats or not u2_cats:
+        return True
+        
+    share = set(u1_cats).intersection(u2_cats)
+    return len(share) > 0
+
+def standardize_brand(b: str) -> str:
+    if not b:
+        return ""
+    b_clean = b.strip().lower()
+    mappings = {
+        "华为": "huawei", "huanwei": "huawei",
+        "华三": "h3c", "h3c": "h3c",
+        "海康威视": "hikvision", "海康": "hikvision", "hik": "hikvision",
+        "大华": "dahua",
+        "联塑": "liansu", "lesson": "liansu",
+        "远东": "yuandong",
+        "起帆": "qifan",
+        "西门子": "siemens",
+        "施耐德": "schneider",
+        "abb": "abb"
+    }
+    for k, v in mappings.items():
+        if k in b_clean:
+            return v
+    return b_clean
+
+def get_professional_category(category_name: str, spec_text: str = "") -> str:
+    cat = category_name or ""
+    spec = spec_text or ""
+    # 暖通
+    if any(k in cat for k in ["暖通", "多联机", "空调", "通风"]) or any(k in spec for k in ["机组", "风机", "风管", "冷水机组", "风量"]):
+        return "暖通"
+    # 强电
+    if any(k in cat for k in ["强电", "动力", "照明", "变配电", "配电", "电气"]) or any(k in spec for k in ["电缆", "导线", "断路器", "开关", "配电箱", "Pe=", "配电柜"]):
+        return "强电"
+    # 弱电
+    if any(k in cat for k in ["弱电", "智能化", "自控", "监控", "消防", "网络", "通信"]) or any(k in spec for k in ["对讲", "呼叫", "总服务器", "液晶呼叫", "分机", "总线"]):
+        return "弱电"
+    # 给排水
+    if any(k in cat for k in ["给排水", "给水", "排水", "水处理", "消防水"]) or any(k in spec for k in ["水盆", "洗手盆", "感应龙头", "水管", "阀门", "蝶阀", "消火栓", "喷淋"]):
+        return "给排水"
+    # 医气
+    if any(k in cat for k in ["医气", "气体", "医用气体"]) or any(k in spec for k in ["氧气", "吸引", "医用气体", "终端", "脱脂无缝紫铜管"]):
+        return "医气"
+    # 纯水
+    if any(k in cat for k in ["纯水"]):
+        return "纯水"
+    # 装饰
+    if any(k in cat for k in ["装饰", "建材", "装修"]) or any(k in spec for k in ["砌块墙", "硫酸钡", "水泥", "地砖", "橡胶卷材", "金属板", "防霉", "涂料", "涂刷"]):
+        return "装饰"
+    return "其它"
+
 def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], semantic_score: float = 0.0) -> Tuple[float, List[str]]:
     """
     Score a candidate against the query info using V0.0.2 scoring system.
@@ -119,7 +192,8 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     q_name = query_info.get("name", "")
     q_spec_text = query_info.get("specification", "")
     q_category = query_info.get("category", "")
-    q_parsed = query_info.get("parsed_spec") or extract_params(q_spec_text, q_category)
+    
+    q_parsed = query_info.get("parsed_spec") or extract_params(q_spec_text, query_info.get("professional", q_category))
     q_model = q_parsed.get("model", "")
     q_attrs = q_parsed.get("attrs", {})
     
@@ -128,22 +202,73 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     c_category = candidate.get("category", "")
     c_desc = candidate.get("description", "")
     c_full_spec = f"{c_spec_text} {c_desc}".strip()
-    c_parsed = extract_params(c_full_spec, c_category)
+    
+    # 1. Professional category conflict check
+    q_prof = query_info.get("professional")
+    if q_prof and q_prof != "全部" and q_prof != "其它":
+        c_prof = get_professional_category(c_category, c_full_spec)
+        if c_prof != "其它" and q_prof != c_prof:
+            return 0.0, ["专业冲突阻断"]
+            
+    # 2. Brand conflict check
+    q_brand = query_info.get("brand") or q_attrs.get("品牌")
+    c_brand = candidate.get("brand") or candidate.get("brand_tag") or (candidate.get("parsed_params") and "品牌" in candidate["parsed_params"])
+    if not c_brand and "parsed_params" in candidate and candidate["parsed_params"]:
+        import json
+        try:
+            c_p = json.loads(candidate["parsed_params"])
+            c_brand = c_p.get("attrs", {}).get("品牌", "")
+        except Exception:
+            pass
+    if q_brand and c_brand:
+        q_brand_std = standardize_brand(str(q_brand))
+        c_brand_std = standardize_brand(str(c_brand))
+        if q_brand_std and c_brand_std and q_brand_std != c_brand_std:
+            return 0.0, ["品牌冲突阻断"]
+            
+    # 3. Unit incompatibility check
+    q_unit = query_info.get("unit") or query_info.get("original_unit")
+    c_unit = candidate.get("unit")
+    if q_unit and c_unit and not check_unit_compatibility(str(q_unit), str(c_unit)):
+        return 0.0, ["单位不可换算阻断"]
+    
+
+    
+    # Load pre-parsed params if available to boost speed
+    c_parsed = None
+    if "parsed_params" in candidate and candidate["parsed_params"]:
+        import json
+        try:
+            c_parsed = json.loads(candidate["parsed_params"])
+        except Exception:
+            pass
+            
+    if not c_parsed:
+        c_parsed = extract_params(c_full_spec, query_info.get("professional", c_category))
+        
     c_model = c_parsed.get("model", "")
     c_attrs = c_parsed.get("attrs", {})
     
     # 1. Model similarity score
     model_score = 0.0
     model_matched_exact = False
+    model_conflict = False
     if q_model:
-        if q_model.lower() == c_model.lower() or q_model.lower() in c_full_spec.lower() or q_model.lower() in c_name.lower():
-            model_score = 1.0
-            model_matched_exact = True
-            reasons.append("型号完全吻合")
+        if c_model:
+            if q_model.lower() == c_model.lower() or q_model.lower() in c_full_spec.lower() or q_model.lower() in c_name.lower():
+                model_score = 1.0
+                model_matched_exact = True
+                reasons.append("型号完全吻合")
+            elif check_series_match(q_model, c_model):
+                model_score = 0.7
+                reasons.append("型号系列相近")
+            else:
+                model_score = 0.0
+                model_conflict = True
+                reasons.append("型号冲突")
         else:
-            model_score = calculate_text_similarity(q_model, c_model)
-            if model_score > 0.6:
-                reasons.append("型号部分相近")
+            # Candidate has no model (generic catalog item)
+            model_score = 0.0
                 
     # 2. Text/Category similarity score
     name_sim = calculate_text_similarity(q_name, c_name)
@@ -276,10 +401,15 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         
     # Core attributes boosts (HVAC/Water domain-specific prioritization)
     if q_attrs.get("风量") is not None and c_attrs.get("风量") is not None:
-        diff_vol = abs(q_attrs["风量"] - c_attrs["风量"]) / max(q_attrs["风量"], c_attrs["风量"], 1)
-        if diff_vol <= tolerance_rules.get("风量", 0.15):
-            base_score += 0.08
-            reasons.append("核心风量匹配")
+        try:
+            q_vol = float(q_attrs["风量"])
+            c_vol = float(c_attrs["风量"])
+            diff_vol = abs(q_vol - c_vol) / max(q_vol, c_vol, 1.0)
+            if diff_vol <= tolerance_rules.get("风量", 0.15):
+                base_score += 0.08
+                reasons.append("核心风量匹配")
+        except (ValueError, TypeError):
+            pass
             
     if q_attrs.get("管径") is not None and c_attrs.get("管径") is not None:
         if q_attrs["管径"] == c_attrs["管径"]:
@@ -304,7 +434,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     q_dn = q_attrs.get("管径")
     c_dn = c_attrs.get("管径")
     if q_dn is not None and c_dn is not None and q_dn != c_dn:
-        base_score += neg_rules.get("pipe_conflict", -0.30)
+        base_score += neg_rules.get("pipe_conflict", -0.40)
         reasons.append("管径强冲突")
 
     # Cable spec conflict check (e.g. 5x2.5 vs 5x4 or 4x2.5)
@@ -314,8 +444,22 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     c_area = c_attrs.get("截面积")
     if (q_cores is not None and c_cores is not None and q_cores != c_cores) or \
        (q_area is not None and c_area is not None and q_area != c_area):
-        base_score += neg_rules.get("cable_conflict", -0.30)
+        base_score += neg_rules.get("cable_conflict", -0.40)
         reasons.append("电线电缆规格冲突")
+        
+    # Power conflict check (e.g. 10kW vs 40kW)
+    q_power = q_attrs.get("功率")
+    c_power = c_attrs.get("功率")
+    if q_power is not None and c_power is not None:
+        try:
+            q_p = float(q_power)
+            c_p = float(c_power)
+            diff_ratio = abs(q_p - c_p) / max(q_p, c_p, 1e-5)
+            if diff_ratio > 0.50:
+                base_score -= 0.35
+                reasons.append("功率严重偏离")
+        except (ValueError, TypeError):
+            pass
         
     # Out of 2x tolerance check
     has_large_deviation = False
@@ -331,6 +475,10 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if has_large_deviation:
         base_score += neg_rules.get("attrs_deviation_2x", -0.15)
         reasons.append("参数超限偏离")
+        
+    if model_conflict:
+        base_score += neg_rules.get("model_conflict", -0.25)
+        reasons.append("型号冲突扣分")
         
     # Bound to [0.0, 1.0] and convert to 100 points
     final_score = max(0.0, min(1.0, base_score)) * 100.0

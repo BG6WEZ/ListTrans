@@ -67,7 +67,13 @@
                 <!-- Left Panel: List Items -->
                 <div class="panel list-panel">
                     <div class="panel-header">
-                        <h3>原始清单项目 (<span id="items-count">0</span>)</h3>
+                        <h3>原始清单项目 (<span id="items-count">0</span>)<span id="uploaded-filename" style="font-size: 11px; font-weight: normal; color: var(--color-text-muted); margin-left: 6px; max-width: 260px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom;" title=""></span></h3>
+                        <!-- Professional Tab Bar -->
+                        <div class="prof-tabs-wrapper" id="prof-tabs-wrapper" style="display: none; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; width: 100%;">
+                            <div class="prof-tabs" id="prof-tabs" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; width: 100%; max-width: 100%;">
+                                <!-- Dynamically loaded tabs -->
+                            </div>
+                        </div>
                         <div class="filter-bar">
                             <button class="filter-tab active" data-filter="all">全部</button>
                             <button class="filter-tab" data-filter="exact"><span class="badge badge-success"></span> 精确匹配</button>
@@ -101,13 +107,20 @@
                             <button class="btn" id="next-page-btn" style="padding: 4px 8px; font-size: 11px;">下一页 <i class="fa-solid fa-chevron-right"></i></button>
                         </div>
                     </div>
-                    <div class="panel-footer status-bar">
-                        <div class="progress-info">
-                            <span class="label">自动匹配进度:</span>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" id="match-progress-bar" style="width: 0%;"></div>
+                    <div class="panel-footer status-bar" style="display: flex; flex-direction: column; gap: 8px; height: auto; padding: 12px 16px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.1);">
+                        <div class="progress-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <span class="label" id="current-prof-progress-label" style="font-size: 12px; color: var(--color-text-primary);">暖通匹配进度:</span>
+                            <div class="progress-bar-container" style="flex: 1; margin: 0 10px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-bar" id="current-prof-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px; transition: width 0.3s ease;"></div>
                             </div>
-                            <span class="value" id="progress-percent">0%</span>
+                            <span class="value" id="current-prof-progress-percent" style="font-size: 12px; font-weight: 600; min-width: 32px; text-align: right;">0%</span>
+                        </div>
+                        <div class="progress-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <span class="label" style="font-size: 12px; color: var(--color-text-secondary);">总体匹配进度:</span>
+                            <div class="progress-bar-container" style="flex: 1; margin: 0 10px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-bar" id="match-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px; transition: width 0.3s ease;"></div>
+                            </div>
+                            <span class="value" id="progress-percent" style="font-size: 12px; font-weight: 600; min-width: 32px; text-align: right; color: var(--color-success);">0%</span>
                         </div>
                     </div>
                 </div>
@@ -207,10 +220,10 @@
                                 <div class="manual-search-section">
                                     <div class="section-header" style="margin-top: 0; padding-top: 0; border-top: none;">
                                         <h4>从全局物料库中搜索</h4>
-                                        <span class="sub">若推荐项不满意，可手动在4.6万行全局数据库中检索</span>
+                                        <span class="sub">若推荐项不满意，可手动在4.6万行全局数据库中检索（支持用英文/中文逗号、空格隔开多个关键字同时搜索）</span>
                                     </div>
                                     <div class="manual-search-bar">
-                                        <input type="text" id="manual-search-input" placeholder="输入物料名称、规格型号或编码进行精确查找...">
+                                        <input type="text" id="manual-search-input" placeholder="输入物料名称、规格型号或编码，可用逗号或空格隔开多个条件，如：复合管, DN65">
                                         <button class="btn btn-primary" id="manual-search-btn">
                                             <i class="fa-solid fa-magnifying-glass"></i> 搜索
                                         </button>

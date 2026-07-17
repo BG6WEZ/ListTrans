@@ -1,6 +1,13 @@
 import unittest
 import os
 import json
+from app.db_manager import init_db
+
+# Ensure SQLite DB is initialized with parsed_params column and data
+proj_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+xlsx_path = os.path.join(proj_dir, "doc", "sample", "基础数据", "物料明细.xlsx")
+init_db(xlsx_path)
+
 from app.preprocessor import extract_params as parse_spec, extract_device_name, extract_model
 from app.matcher import match_item
 from app.report_generator import generate_standard_report
@@ -10,7 +17,7 @@ class TestHVACParser(unittest.TestCase):
         self.assertEqual(extract_model("1.名称:医用洁卫型空调机组(室外型)RAU-Q-D301"), "RAU-Q-D301")
         self.assertEqual(extract_model("新风机组PAU-Q-D301(室外型)"), "PAU-Q-D301")
         self.assertEqual(extract_model("电动防火阀 2.22.54.0113"), "2.22.54.0113")
-        self.assertEqual(extract_model("风机管件 DN100"), "DN100")
+        self.assertEqual(extract_model("风机管件 DN100"), "")
         
     def test_spec_attribute_parsing(self):
         spec1 = "1.名称:医用洁卫型空调机组(室外型)RAU-Q-D301\n2.规格:机组风量:8000m3/h；新风量:2400m3/h；机外余压:650Pa；过滤段:F8;制冷量:24kw;功率:5.5kw\n3.功能段..."
@@ -27,6 +34,13 @@ class TestHVACParser(unittest.TestCase):
         parsed2 = parse_spec(spec2)
         self.assertEqual(parsed2["attrs"]["风量"], 5200)
         self.assertEqual(parsed2["attrs"]["新风量"], 5200)
+        
+        spec3 = "1.名称:复合管\n2.规格:3.材质、规格：PSP钢塑复合管，DN65（75*5.5）"
+        parsed3 = parse_spec(spec3, "给排水")
+        self.assertEqual(parsed3["attrs"]["材质"], "PSP钢塑复合管")
+        self.assertEqual(parsed3["attrs"]["管径"], 65)
+        self.assertEqual(parsed3["attrs"]["外径"], 75.0)
+        self.assertEqual(parsed3["attrs"]["壁厚"], 5.5)
         
     def test_device_name_extraction(self):
         text1 = "1.名称:医用洁卫型空调机组(室外型)RAU-Q-D301\n2.规格:..."
@@ -47,6 +61,62 @@ class TestHVACMatcher(unittest.TestCase):
         top = res["top_candidates"][0]
         self.assertIn(top["code"], ["3.60.21.1553", "3.60.21.0231"])
         self.assertTrue(top["score"] > 60.0)
+        
+        # Test 1: Brand Conflict (should get score 0.0 and "品牌冲突阻断")
+        brand_query = {
+            "name": "交换机",
+            "specification": "华为 S5735",
+            "category": "网络交换机",
+            "brand": "华为",
+            "professional": "弱电"
+        }
+        brand_cand = {
+            "name": "交换机",
+            "specification": "华三 S5735",
+            "category": "网络交换机",
+            "brand": "华三",
+            "description": ""
+        }
+        from app.matcher import score_candidate
+        score, reasons = score_candidate(brand_query, brand_cand)
+        self.assertEqual(score, 0.0)
+        self.assertIn("品牌冲突阻断", reasons)
+
+        # Test 2: Unit Incompatibility (should get score 0.0 and "单位不可换算阻断")
+        unit_query = {
+            "name": "给水管",
+            "specification": "PSP DN65",
+            "category": "给水管道",
+            "unit": "米",
+            "professional": "给排水"
+        }
+        unit_cand = {
+            "name": "给水管",
+            "specification": "PSP DN65",
+            "category": "给水管道",
+            "unit": "台",
+            "description": ""
+        }
+        score, reasons = score_candidate(unit_query, unit_cand)
+        self.assertEqual(score, 0.0)
+        self.assertIn("单位不可换算阻断", reasons)
+
+        # Test 3: Professional Mismatch (should get score 0.0 and "专业冲突阻断")
+        prof_query = {
+            "name": "复合管",
+            "specification": "PSP DN65",
+            "category": "给水管道",
+            "professional": "给排水"
+        }
+        prof_cand = {
+            "name": "配电箱",
+            "specification": "XM-15kW",
+            "category": "动力配电箱",
+            "description": ""
+        }
+        score, reasons = score_candidate(prof_query, prof_cand)
+        self.assertEqual(score, 0.0)
+        self.assertIn("专业冲突阻断", reasons)
 
 if __name__ == "__main__":
     unittest.main()
