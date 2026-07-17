@@ -1,0 +1,20 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.vscode
+.idea
+
+# Local data / caches
+app/uploads/*
+app/vector_cache/*
+app/__pycache__/*
+
+# Exclude documentation / logs
+logs/*
+.gemini/*
+.agents/*
+tests/*

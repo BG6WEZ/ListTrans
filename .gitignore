@@ -21,3 +21,6 @@ logs/
 *.csv
 doc/sample/
 doc/*.xlsx
+
+# Large files
+*.tar

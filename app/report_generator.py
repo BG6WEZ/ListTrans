@@ -2,6 +2,7 @@ import openpyxl
 import os
 import copy
 from typing import List, Dict, Any, Optional
+from openpyxl.styles import Font, PatternFill
 from app.db_manager import query_by_code
 
 def build_historical_price_map(template_path: str) -> Dict[str, float]:
@@ -50,8 +51,8 @@ def apply_style_dict(dest_cell, style_dict: Dict[str, Any]):
 
 def generate_standard_report(matched_items: List[Dict[str, Any]], template_path: str, output_path: str):
     """
-    Standard report generator.
-    Only contains the content of the currently uploaded table.
+    Standard report generator with grouped professional categories,
+    parent-child rows styling, and multi-row flat export.
     """
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Template file not found at {template_path}")
@@ -63,69 +64,154 @@ def generate_standard_report(matched_items: List[Dict[str, Any]], template_path:
     wb = openpyxl.load_workbook(template_path, data_only=False)
     sheet = wb["模板"]
     
-    # 1. Determine target professional from matched_items
-    target_prof = "暖通"
-    if matched_items:
-        # Determine professional from the first item
-        target_prof = matched_items[0].get("professional") or "暖通"
-        
-    # 2. Extract style templates
-    style_templates = []
-    
     # Cache style template from row 3 if exists, or row 2
+    style_templates = []
     if sheet.max_row >= 3:
         style_templates = [get_cell_style_dict(sheet.cell(3, c)) for c in range(1, 17)]
     elif sheet.max_row >= 2:
         style_templates = [get_cell_style_dict(sheet.cell(2, c)) for c in range(1, 17)]
         
-    # 3. Clear all rows from Row 3 onwards
+    # Clear all rows from Row 3 onwards
     max_r = sheet.max_row
     if max_r >= 3:
         sheet.delete_rows(3, max_r - 2)
         
-    # 4. Write New matched rows next
-    current_row = 3
-    
+    # Group items by professional category, preserving order
+    prof_groups = {}
+    prof_order = []
     for item in matched_items:
-        code = item.get("matched_code", "")
-        # Look up price from cache
-        price = price_map.get(str(code).strip(), None)
+        prof = item.get("professional") or "暖通"
+        if prof not in prof_groups:
+            prof_groups[prof] = []
+            prof_order.append(prof)
+        prof_groups[prof].append(item)
         
-        row_data = {
-            1: "",  # Re-numbered sequentially later
-            2: "材料费",
-            3: "手动录入",
-            4: item.get("matched_category", ""),
-            5: code,
-            6: item.get("matched_name", ""),
-            7: item.get("matched_spec", ""),
-            8: item.get("matched_unit", item.get("original_unit", "")),
-            9: item.get("original_qty", 0),
-            10: item.get("original_loss", 1),
-            11: item.get("matched_brand", ""),
-            12: None,
-            13: price,
-            14: "标段一",
-            15: item.get("professional") or target_prof,
-            16: None
-        }
-        
+    # Set fills
+    orange_fill = PatternFill(start_color="FFE8D6", end_color="FFE8D6", fill_type="solid")
+    gray_fill = PatternFill(start_color="F2F4F7", end_color="F2F4F7", fill_type="solid")
+    no_fill = PatternFill(fill_type=None)
+    
+    current_row = 3
+    target_prof = "暖通"
+    
+    # Write professional groupings and their items
+    for prof_idx, prof in enumerate(prof_order, start=1):
+        # 1. Write Professional Grouping Row
         for c in range(1, 17):
             cell = sheet.cell(current_row, c)
-            cell.value = row_data.get(c)
-            # Apply template style
+            if c == 1:
+                cell.value = prof_idx
+            elif c == 6:
+                cell.value = prof
+            elif c == 15:
+                cell.value = prof
+            else:
+                cell.value = None
+                
             if style_templates:
                 apply_style_dict(cell, style_templates[c - 1])
+                
+            # Styling grouping row
+            cell.font = Font(name=cell.font.name if cell.font else "Arial", size=cell.font.size if cell.font else 11, bold=True)
+            cell.fill = gray_fill
         current_row += 1
         
-    # 5. Re-number column A (*序号) sequentially starting from Row 3
-    # Format: "1.1", "1.2", ...
-    for r in range(3, current_row):
-        sheet.cell(r, 1).value = f"1.{r - 2}"
-        
+        # 2. Write Items
+        for item_idx, item in enumerate(prof_groups[prof], start=1):
+            sec_idx = f"{prof_idx}.{item_idx}"
+            
+            # A. Write Original List Row (Orange)
+            original_row_data = {
+                1: sec_idx,
+                2: "材料费",
+                3: "手动录入",
+                4: item.get("original_category", ""),
+                5: item.get("original_code", ""),
+                6: item.get("original_name", ""),
+                7: item.get("original_spec", ""),
+                8: item.get("original_unit", ""),
+                9: item.get("original_qty", 0),
+                10: item.get("original_loss", 1.0),
+                11: item.get("original_brand", ""),
+                12: None,
+                13: None,  # No price on original row
+                14: "标段一",
+                15: prof,
+                16: None
+            }
+            for c in range(1, 17):
+                cell = sheet.cell(current_row, c)
+                cell.value = original_row_data.get(c)
+                if style_templates:
+                    apply_style_dict(cell, style_templates[c - 1])
+                cell.fill = orange_fill
+            current_row += 1
+            
+            # B. Write Matched Material Row(s)
+            bindings = item.get("bindings")
+            if bindings:
+                for b in bindings:
+                    code = b.get("code", "")
+                    price = price_map.get(str(code).strip(), None)
+                    match_row_data = {
+                        1: None, # Column A is empty/None
+                        2: "材料费",
+                        3: "手动录入",
+                        4: b.get("category", ""),
+                        5: code,
+                        6: b.get("name", ""),
+                        7: b.get("specification", ""),
+                        8: b.get("unit", item.get("original_unit", "")),
+                        9: b.get("qty", item.get("original_qty", 0)),
+                        10: item.get("original_loss", 1.0),
+                        11: b.get("brand", ""),
+                        12: None,
+                        13: price,
+                        14: "标段一",
+                        15: prof,
+                        16: None
+                    }
+                    for c in range(1, 17):
+                        cell = sheet.cell(current_row, c)
+                        cell.value = match_row_data.get(c)
+                        if style_templates:
+                            apply_style_dict(cell, style_templates[c - 1])
+                        cell.fill = no_fill
+                    current_row += 1
+            else:
+                # Fallback to single item match if any code is present
+                code = item.get("matched_code", "")
+                if code:
+                    price = price_map.get(str(code).strip(), None)
+                    match_row_data = {
+                        1: None,
+                        2: "材料费",
+                        3: "手动录入",
+                        4: item.get("matched_category", ""),
+                        5: code,
+                        6: item.get("matched_name", ""),
+                        7: item.get("matched_spec", ""),
+                        8: item.get("matched_unit", item.get("original_unit", "")),
+                        9: item.get("original_qty", 0),
+                        10: item.get("original_loss", 1.0),
+                        11: item.get("matched_brand", ""),
+                        12: None,
+                        13: price,
+                        14: "标段一",
+                        15: prof,
+                        16: None
+                    }
+                    for c in range(1, 17):
+                        cell = sheet.cell(current_row, c)
+                        cell.value = match_row_data.get(c)
+                        if style_templates:
+                            apply_style_dict(cell, style_templates[c - 1])
+                        cell.fill = no_fill
+                    current_row += 1
+                    
     # Save the output workbook
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     wb.save(output_path)
     wb.close()
     
-    print(f"Generated standard format Excel with {len(matched_items)} written rows.")
+    print(f"Generated standard format Excel with {len(matched_items)} items written.")

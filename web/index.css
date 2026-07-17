@@ -614,7 +614,7 @@ body {
 /* Match Status Banner Card */
 .match-status-card {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
     padding: 16px;
     border-radius: var(--radius-md);
@@ -635,6 +635,7 @@ body {
 .status-indicator-icon {
     font-size: 24px;
     color: var(--color-success);
+    margin-top: -2px; /* Slight alignment correction */
 }
 
 .match-status-card.fuzzy .status-indicator-icon {
@@ -645,15 +646,66 @@ body {
     color: var(--color-danger);
 }
 
+.status-info {
+    flex: 1;
+}
+
 .status-info h4 {
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
-.status-info p {
+.status-info p,
+.status-info #status-desc {
     font-size: 12px;
     color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+/* Matched material details grid V0.0.2 */
+.matched-info-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 16px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    padding-top: 10px;
+    width: 100%;
+}
+
+.matched-info-item {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.matched-info-item.full-width {
+    grid-column: span 2;
+}
+
+.matched-info-label {
+    color: var(--color-text-muted);
+    min-width: 60px;
+    flex-shrink: 0;
+}
+
+.matched-info-value {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.matched-info-value.code-badge {
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--color-success);
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
 }
 
 /* Recommendation Section Header */
@@ -1062,5 +1114,24 @@ body {
     color: #60a5fa;
     background: rgba(59, 130, 246, 0.15);
     border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* Multi-material bound list styles */
+.bound-material-item {
+    transition: var(--transition-smooth);
+}
+.bound-material-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.bound-qty-input:focus {
+    border-color: var(--color-success) !important;
+    outline: none;
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.2);
+}
+.btn-delete-binding:hover {
+    color: #f87171 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-radius: 4px;
 }
 

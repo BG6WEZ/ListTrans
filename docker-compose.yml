@@ -2,12 +2,10 @@ version: '3.8'
 
 services:
   matcher-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: material-matcher:latest
     container_name: material-matcher
     ports:
-      - "8000:8000"
+      - "18080:18080"
     volumes:
       # Persist uploads and generated reports on the host
       - ./app/uploads:/app/app/uploads

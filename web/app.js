@@ -276,7 +276,69 @@ function initEventListeners() {
 
     startDbImportBtn.addEventListener('click', handleDbUploadAndImport);
     refreshLogsBtn.addEventListener('click', loadAndRenderLogs);
-    
+
+    // Confirm match finished button click listener
+    document.getElementById('confirm-match-finished-btn').addEventListener('click', async () => {
+        if (!selectedItem) return;
+        
+        if (!selectedItem.bindings || selectedItem.bindings.length === 0) {
+            if (!confirm("当前清单行未绑定任何物料，确定要标记为已确认吗？")) {
+                return;
+            }
+        }
+        
+        showLoading("正在保存绑定记录...", "正在记录当前绑定关系以更新统计推荐值，并自动流转至下一行，请稍候...");
+        
+        try {
+            const response = await fetch(`${backendUrl}/api/binding/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    original_name: selectedItem.original_name,
+                    original_spec: selectedItem.original_spec,
+                    original_qty: selectedItem.original_qty,
+                    bindings: selectedItem.bindings || []
+                })
+            });
+            
+            if (!response.ok) throw new Error("提交绑定日志失败");
+            
+            selectedItem.is_exact = true;
+            
+            // Find next unconfirmed item for auto flow (Task 4)
+            const curIdx = items.findIndex(it => it.original_row_idx === selectedItem.original_row_idx);
+            let nextItem = null;
+            for (let i = curIdx + 1; i < items.length; i++) {
+                if (!items[i].is_exact) {
+                    nextItem = items[i];
+                    break;
+                }
+            }
+            if (!nextItem) {
+                for (let i = 0; i < curIdx; i++) {
+                    if (!items[i].is_exact) {
+                        nextItem = items[i];
+                        break;
+                    }
+                }
+            }
+            
+            renderTable();
+            updateProgress();
+            
+            if (nextItem) {
+                jumpToItem(nextItem);
+            } else {
+                selectRow(selectedItem);
+            }
+            
+        } catch (e) {
+            alert(e.message);
+        } finally {
+            hideLoading();
+        }
+    });
+
     // Auto-refresh interval for logs (runs every 3 seconds if config is visible and checkbox is checked)
     setInterval(() => {
         const configDashboard = document.getElementById('config-dashboard');
@@ -285,6 +347,31 @@ function initEventListeners() {
             loadAndRenderLogs();
         }
     }, 3000);
+}
+
+// 3.8 Jump to and Highlight a Row across Pages
+function jumpToItem(item) {
+    let filtered = items.filter(it => {
+        if (currentProfessional !== '全部' && it.professional !== currentProfessional) return false;
+        if (currentFilter === 'exact') return it.is_exact;
+        else if (currentFilter === 'fuzzy') return !it.is_exact && it.matched_code !== "";
+        else if (currentFilter === 'unmatched') return it.matched_code === "";
+        return true;
+    });
+    if (searchQuery) {
+        filtered = filtered.filter(it => {
+            return it.original_name.toLowerCase().includes(searchQuery) || 
+                   it.original_spec.toLowerCase().includes(searchQuery) ||
+                   it.matched_code.toLowerCase().includes(searchQuery);
+        });
+    }
+    
+    const idx = filtered.findIndex(it => it.original_row_idx === item.original_row_idx);
+    if (idx !== -1) {
+        currentPage = Math.floor(idx / pageSize) + 1;
+    }
+    selectRow(item);
+    renderTable();
 }
 
 // Show/Hide Spinner Overlay
@@ -322,6 +409,20 @@ async function handleFileUpload(file) {
         // Cache initial matching codes to check if user manual overrides later (for learning feedback loop)
         items.forEach(item => {
             item.initial_auto_code = item.matched_code;
+            if (!item.bindings) {
+                item.bindings = [];
+                if (item.matched_code) {
+                    item.bindings.push({
+                        code: item.matched_code,
+                        name: item.matched_name || "",
+                        specification: item.matched_spec || "",
+                        unit: item.matched_unit || "",
+                        brand: item.matched_brand || "",
+                        category: item.matched_category || "",
+                        qty: item.original_qty
+                    });
+                }
+            }
         });
         
         // Initialize professional list
@@ -464,6 +565,17 @@ function renderTable() {
             statusHtml = `<span class="row-status-pill unmatched"><i class="fa-solid fa-triangle-exclamation"></i> 未匹配</span>`;
         }
         
+        let codeDisplay = '-';
+        if (item.bindings && item.bindings.length > 0) {
+            if (item.bindings.length === 1) {
+                codeDisplay = item.bindings[0].code;
+            } else {
+                codeDisplay = `${item.bindings[0].code} (+${item.bindings.length - 1})`;
+            }
+        } else if (item.matched_code) {
+            codeDisplay = item.matched_code;
+        }
+
         tr.innerHTML = `
             <td>${item.original_row_idx}</td>
             <td>
@@ -472,7 +584,7 @@ function renderTable() {
                     ${item.original_spec.replace(/\n/g, ' ')}
                 </div>
             </td>
-            <td><code class="row-code-lbl">${item.matched_code || '-'}</code></td>
+            <td><code class="row-code-lbl">${codeDisplay}</code></td>
             <td>${statusHtml}</td>
         `;
         
@@ -491,6 +603,37 @@ function renderTable() {
 // 3. Selection Handler
 function selectRow(item) {
     selectedItem = item;
+    if (!selectedItem.bindings) {
+        selectedItem.bindings = [];
+        if (selectedItem.matched_code) {
+            const codes = selectedItem.matched_code.split(",");
+            if (codes.length === 1) {
+                selectedItem.bindings.push({
+                    code: selectedItem.matched_code,
+                    name: selectedItem.matched_name || "",
+                    specification: selectedItem.matched_spec || "",
+                    unit: selectedItem.matched_unit || "",
+                    brand: selectedItem.matched_brand || "",
+                    category: selectedItem.matched_category || "",
+                    qty: selectedItem.original_qty
+                });
+            } else {
+                codes.forEach(c => {
+                    selectedItem.bindings.push({
+                        code: c.trim(),
+                        name: "已关联物料",
+                        specification: "",
+                        unit: selectedItem.original_unit,
+                        brand: "",
+                        category: "",
+                        qty: selectedItem.original_qty
+                    });
+                });
+            }
+        }
+    }
+    
+    renderBoundMaterials();
     
     // Hide prompt & show editor
     document.getElementById('select-prompt').style.display = 'none';
@@ -526,7 +669,35 @@ function selectRow(item) {
     if (item.is_exact) {
         statusCard.classList.add('exact');
         statusTitle.innerText = "已完成精确匹配 / 人工确认";
-        statusDesc.innerText = `当前绑定的物料编码为: ${item.matched_code} (${item.matched_name})`;
+        statusDesc.innerHTML = `
+            <div style="margin-bottom: 6px;">当前已绑定以下物料的完整信息：</div>
+            <div class="matched-info-grid">
+                <div class="matched-info-item">
+                    <span class="matched-info-label">物料编码:</span>
+                    <span class="matched-info-value code-badge">${item.matched_code || '-'}</span>
+                </div>
+                <div class="matched-info-item">
+                    <span class="matched-info-label">物料名称:</span>
+                    <span class="matched-info-value">${item.matched_name || '-'}</span>
+                </div>
+                <div class="matched-info-item full-width">
+                    <span class="matched-info-label">规格型号:</span>
+                    <span class="matched-info-value">${item.matched_spec || '-'}</span>
+                </div>
+                <div class="matched-info-item">
+                    <span class="matched-info-label">品牌:</span>
+                    <span class="matched-info-value">${item.matched_brand || '-'}</span>
+                </div>
+                <div class="matched-info-item">
+                    <span class="matched-info-label">品类:</span>
+                    <span class="matched-info-value">${item.matched_category || '-'}</span>
+                </div>
+                <div class="matched-info-item">
+                    <span class="matched-info-label">单位:</span>
+                    <span class="matched-info-value">${item.matched_unit || '个'}</span>
+                </div>
+            </div>
+        `;
     } else if (item.matched_code) {
         statusCard.classList.add('fuzzy');
         statusTitle.innerText = "自动匹配相似度低于阈值，请人工校准";
@@ -547,6 +718,74 @@ function selectRow(item) {
     `;
 }
 
+// 3.5 Render Bound Materials List
+function renderBoundMaterials() {
+    const container = document.getElementById('bound-materials-list');
+    container.innerHTML = '';
+    
+    if (!selectedItem) return;
+    
+    if (!selectedItem.bindings) {
+        selectedItem.bindings = [];
+    }
+    
+    document.getElementById('bound-materials-count').innerText = selectedItem.bindings.length;
+    
+    if (selectedItem.bindings.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--color-text-muted); font-size: 13px; padding: 15px; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">暂无绑定物料，请点击下方推荐卡片或检索套用以绑定</div>`;
+        return;
+    }
+    
+    selectedItem.bindings.forEach((b, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bound-material-item';
+        div.style = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); gap: 16px;';
+        
+        div.innerHTML = `
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 600; font-size: 13.5px; color: var(--color-text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${b.name}</span>
+                    <span class="code-badge" style="font-family: monospace; font-size: 11px; padding: 1px 6px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); border-radius: 3px;">${b.code}</span>
+                </div>
+                <div style="font-size: 11px; color: var(--color-text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                    规格: ${b.specification || '无'} | 品牌: ${b.brand || '无'} | 分类: ${b.category || '无'}
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="font-size: 12px; color: var(--color-text-secondary);">工程量:</span>
+                    <input type="number" class="bound-qty-input" value="${b.qty !== undefined ? b.qty : selectedItem.original_qty}" style="width: 80px; padding: 4px 6px; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: 4px; color: var(--color-text-primary); font-size: 12.5px; font-weight: 500;" />
+                    <span style="font-size: 12px; color: var(--color-text-muted); min-width: 16px;">${b.unit || selectedItem.original_unit || '个'}</span>
+                </div>
+                <button class="btn btn-delete-binding" style="padding: 4px 8px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 13px;" title="删除绑定">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `;
+        
+        const qtyInput = div.querySelector('.bound-qty-input');
+        qtyInput.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            b.qty = isNaN(val) ? 0.0 : val;
+        });
+        
+        const deleteBtn = div.querySelector('.btn-delete-binding');
+        deleteBtn.addEventListener('click', () => {
+            selectedItem.bindings.splice(idx, 1);
+            selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
+            if (selectedItem.bindings.length === 0) {
+                selectedItem.matched_code = "";
+            }
+            renderBoundMaterials();
+            renderCandidates();
+            renderTable();
+            updateProgress();
+        });
+        
+        container.appendChild(div);
+    });
+}
+
 // 4. Render Top 10 Candidates List with coloured tags (V0.0.2)
 function renderCandidates() {
     const container = document.getElementById('candidates-container');
@@ -561,8 +800,7 @@ function renderCandidates() {
         const card = document.createElement('div');
         card.className = 'candidate-card';
         
-        // If current matched code matches this candidate, set active
-        const isActive = selectedItem.matched_code === cand.code;
+        const isActive = selectedItem.bindings && selectedItem.bindings.some(b => b.code === cand.code);
         if (isActive) {
             card.classList.add('active');
         }
@@ -615,27 +853,40 @@ function renderCandidates() {
 async function applyMatchCandidate(cand) {
     if (!selectedItem) return;
     
-    const wasCorrected = selectedItem.initial_auto_code !== cand.code;
+    if (!selectedItem.bindings) {
+        selectedItem.bindings = [];
+    }
     
-    // Submit user correction sample to backend self-learning loop (TASK 6)
+    // Check duplicates
+    if (selectedItem.bindings.some(b => b.code === cand.code)) {
+        alert(`物料 ${cand.code} (${cand.name}) 已经绑定了！`);
+        return;
+    }
+    
+    const wasCorrected = selectedItem.initial_auto_code !== cand.code;
     if (wasCorrected) {
         submitFeedbackSample(selectedItem.original_row_idx, selectedItem.original_spec, selectedItem.initial_auto_code, cand.code, false);
     } else {
         submitFeedbackSample(selectedItem.original_row_idx, selectedItem.original_spec, selectedItem.initial_auto_code, cand.code, true);
     }
     
-    selectedItem.matched_code = cand.code;
-    selectedItem.matched_name = cand.name;
-    selectedItem.matched_category = cand.category || "";
-    selectedItem.matched_spec = cand.specification || "";
-    selectedItem.matched_unit = cand.unit || "";
-    selectedItem.matched_brand = cand.brand || "";
+    // Push new bound material
+    selectedItem.bindings.push({
+        code: cand.code,
+        name: cand.name,
+        specification: cand.specification || "",
+        unit: cand.unit || selectedItem.original_unit || "个",
+        brand: cand.brand || "",
+        category: cand.category || "",
+        qty: selectedItem.original_qty
+    });
     
-    // User manual selection acts as exact match
-    selectedItem.is_exact = true;
+    // Update matched_code to be comma-separated list of bound codes
+    selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
     
-    // Re-select row to update UI
-    selectRow(selectedItem);
+    // Render incremental updates instead of selectRow to keep scroll position and search results
+    renderBoundMaterials();
+    renderCandidates();
     renderTable();
     updateProgress();
 }
@@ -756,11 +1007,25 @@ async function runParamRematch() {
         selectedItem.top_candidates = data.top_candidates;
         
         if (data.top_candidates && data.top_candidates.length > 0) {
-            selectedItem.matched_name = data.top_candidates[0].name;
-            selectedItem.matched_category = data.top_candidates[0].category || "";
-            selectedItem.matched_spec = data.top_candidates[0].specification || "";
-            selectedItem.matched_unit = data.top_candidates[0].unit || "";
-            selectedItem.matched_brand = data.top_candidates[0].brand || "";
+            const top = data.top_candidates[0];
+            selectedItem.matched_name = top.name;
+            selectedItem.matched_category = top.category || "";
+            selectedItem.matched_spec = top.specification || "";
+            selectedItem.matched_unit = top.unit || "";
+            selectedItem.matched_brand = top.brand || "";
+            
+            if (data.is_exact) {
+                selectedItem.bindings = [{
+                    code: top.code,
+                    name: top.name,
+                    specification: top.specification || "",
+                    unit: top.unit || selectedItem.original_unit || "个",
+                    brand: top.brand || "",
+                    category: top.category || "",
+                    qty: selectedItem.original_qty
+                }];
+                selectedItem.matched_code = top.code;
+            }
         }
         
         selectRow(selectedItem);
@@ -885,11 +1150,25 @@ async function rematchCurrentWithParams() {
         selectedItem.top_candidates = data.top_candidates;
         
         if (data.top_candidates && data.top_candidates.length > 0) {
-            selectedItem.matched_name = data.top_candidates[0].name;
-            selectedItem.matched_category = data.top_candidates[0].category || "";
-            selectedItem.matched_spec = data.top_candidates[0].specification || "";
-            selectedItem.matched_unit = data.top_candidates[0].unit || "";
-            selectedItem.matched_brand = data.top_candidates[0].brand || "";
+            const top = data.top_candidates[0];
+            selectedItem.matched_name = top.name;
+            selectedItem.matched_category = top.category || "";
+            selectedItem.matched_spec = top.specification || "";
+            selectedItem.matched_unit = top.unit || "";
+            selectedItem.matched_brand = top.brand || "";
+            
+            if (data.is_exact) {
+                selectedItem.bindings = [{
+                    code: top.code,
+                    name: top.name,
+                    specification: top.specification || "",
+                    unit: top.unit || selectedItem.original_unit || "个",
+                    brand: top.brand || "",
+                    category: top.category || "",
+                    qty: selectedItem.original_qty
+                }];
+                selectedItem.matched_code = top.code;
+            }
         }
         
         selectRow(selectedItem);
@@ -979,11 +1258,25 @@ async function batchApplyParamsAndRematch() {
             it.top_candidates = data.top_candidates;
             
             if (data.top_candidates && data.top_candidates.length > 0) {
-                it.matched_name = data.top_candidates[0].name;
-                it.matched_category = data.top_candidates[0].category || "";
-                it.matched_spec = data.top_candidates[0].specification || "";
-                it.matched_unit = data.top_candidates[0].unit || "";
-                it.matched_brand = data.top_candidates[0].brand || "";
+                const top = data.top_candidates[0];
+                it.matched_name = top.name;
+                it.matched_category = top.category || "";
+                it.matched_spec = top.specification || "";
+                it.matched_unit = top.unit || "";
+                it.matched_brand = top.brand || "";
+                
+                if (data.is_exact) {
+                    it.bindings = [{
+                        code: top.code,
+                        name: top.name,
+                        specification: top.specification || "",
+                        unit: top.unit || it.original_unit || "个",
+                        brand: top.brand || "",
+                        category: top.category || "",
+                        qty: it.original_qty
+                    }];
+                    it.matched_code = top.code;
+                }
             }
         });
         
@@ -1090,7 +1383,9 @@ function jsonPayloadData() {
             matched_spec: item.matched_spec,
             matched_unit: item.matched_unit,
             matched_brand: item.matched_brand,
-            professional: item.professional || "暖通"
+            professional: item.professional || "暖通",
+            original_code: item.original_code || "",
+            bindings: item.bindings || null
         };
     });
     return JSON.stringify({ items: mapped });
@@ -1214,31 +1509,126 @@ async function loadAndRenderSuggestions() {
         tbody.innerHTML = '';
         if (suggestions.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无新建议，样本数据持续沉淀中...</td></tr>`;
-            return;
+        } else {
+            suggestions.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><code style="font-size: 13px;">${s.suggested_typo}</code></td>
+                    <td><strong>${s.suggested_correction}</strong></td>
+                    <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px;">${s.confidence_count} 次</span></td>
+                    <td><button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳为别名</button></td>
+                `;
+                
+                tr.querySelector('button').addEventListener('click', () => {
+                    // Add to alias list
+                    addConfigTableRow('alias-tbody', s.suggested_typo, s.suggested_correction);
+                    // Remove suggestion row from HTML
+                    tr.remove();
+                    if (tbody.children.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">建议已被处理</td></tr>`;
+                    }
+                });
+                tbody.appendChild(tr);
+            });
         }
         
-        suggestions.forEach(s => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><code style="font-size: 13px;">${s.suggested_typo}</code></td>
-                <td><strong>${s.suggested_correction}</strong></td>
-                <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px;">${s.confidence_count} 次</span></td>
-                <td><button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳为别名</button></td>
-            `;
-            
-            tr.querySelector('button').addEventListener('click', () => {
-                // Add to alias list
-                addConfigTableRow('alias-tbody', s.suggested_typo, s.suggested_correction);
-                // Remove suggestion row from HTML
-                tr.remove();
-                if (tbody.children.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">建议已被处理</td></tr>`;
-                }
-            });
-            tbody.appendChild(tr);
-        });
+        // Also load binding recommendations and confirmed rules
+        await loadAndRenderBindingSuggestionsAndRules();
     } catch (e) {
         console.error("Failed to load matching suggestions", e);
+    }
+}
+
+// 10.5 Load and Render auto-binding suggestions and active rules
+async function loadAndRenderBindingSuggestionsAndRules() {
+    const suggTbody = document.getElementById('binding-suggestions-tbody');
+    const rulesTbody = document.getElementById('binding-rules-tbody');
+    
+    try {
+        // 1. Suggestions
+        const suggResp = await fetch(`${backendUrl}/api/binding/suggestions`);
+        if (suggResp.ok) {
+            const suggData = await suggResp.json();
+            const suggestions = suggData.suggestions || [];
+            suggTbody.innerHTML = '';
+            if (suggestions.length === 0) {
+                suggTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无自动学习到的绑定组合推荐</td></tr>`;
+            } else {
+                suggestions.forEach(s => {
+                    const tr = document.createElement('tr');
+                    
+                    const boundListHtml = s.bindings.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${b.code}</code> <strong>${b.name}</strong> (比例: ${b.qty_ratio.toFixed(2)})</div>`).join('');
+                    
+                    tr.innerHTML = `
+                        <td><strong>${s.original_name}</strong></td>
+                        <td><div style="display: flex; flex-direction: column; gap: 4px;">${boundListHtml}</div></td>
+                        <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px; font-size: 11px;">${s.confidence_count} 次</span></td>
+                        <td><button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳规则</button></td>
+                    `;
+                    
+                    tr.querySelector('button').addEventListener('click', async () => {
+                        const confirmResp = await fetch(`${backendUrl}/api/binding/rules/confirm`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                original_name: s.original_name,
+                                bindings: s.bindings
+                            })
+                        });
+                        if (confirmResp.ok) {
+                            alert(`已启用原始清单 "${s.original_name}" 对应的多物料自动绑定推荐规则！`);
+                            loadAndRenderBindingSuggestionsAndRules();
+                        } else {
+                            alert('采纳规则失败');
+                        }
+                    });
+                    
+                    suggTbody.appendChild(tr);
+                });
+            }
+        }
+        
+        // 2. Confirmed Rules
+        const rulesResp = await fetch(`${backendUrl}/api/binding/rules`);
+        if (rulesResp.ok) {
+            const rulesData = await rulesResp.json();
+            const rules = rulesData.rules || [];
+            rulesTbody.innerHTML = '';
+            if (rules.length === 0) {
+                rulesTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 20px;">当前暂无启用的绑定推荐规则</td></tr>`;
+            } else {
+                rules.forEach(r => {
+                    const tr = document.createElement('tr');
+                    
+                    const boundListHtml = r.bound_materials.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${b.code}</code> <strong>${b.name}</strong> (比例: ${b.qty_ratio.toFixed(2)})</div>`).join('');
+                    
+                    tr.innerHTML = `
+                        <td><strong>${r.original_name}</strong></td>
+                        <td><div style="display: flex; flex-direction: column; gap: 4px;">${boundListHtml}</div></td>
+                        <td><button class="btn btn-secondary" style="padding: 4px 8px; color: var(--color-danger); border-color: var(--color-danger-border); font-size: 11px;"><i class="fa-solid fa-trash"></i> 删除</button></td>
+                    `;
+                    
+                    tr.querySelector('button').addEventListener('click', async () => {
+                        if (confirm(`确定要删除针对 "${r.original_name}" 的自动绑定推荐规则吗？`)) {
+                            const delResp = await fetch(`${backendUrl}/api/binding/rules/delete`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ original_name: r.original_name })
+                            });
+                            if (delResp.ok) {
+                                loadAndRenderBindingSuggestionsAndRules();
+                            } else {
+                                alert('删除失败');
+                            }
+                        }
+                    });
+                    
+                    rulesTbody.appendChild(tr);
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Failed to load binding suggestions and rules", e);
     }
 }
 

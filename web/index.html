@@ -193,6 +193,19 @@
 
                             <!-- Bottom: Recommendations / Candidate Selector (Scrollable) -->
                             <div class="detail-scroll-bottom scroll-y">
+                                <!-- Bound Materials Section -->
+                                <div class="glass-card section-card bound-materials-card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; margin-bottom: 16px;">
+                                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                        <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 已绑定物料 (<span id="bound-materials-count">0</span>)</span>
+                                        <button class="btn btn-success" id="confirm-match-finished-btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 600;">
+                                            <i class="fa-solid fa-circle-check"></i> 确认匹配完成
+                                        </button>
+                                    </div>
+                                    <div class="bound-materials-list" id="bound-materials-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+                                        <!-- Loaded dynamically -->
+                                    </div>
+                                </div>
+
                                 <!-- Middle: Matching Decision Status -->
                                 <div class="match-status-card" id="match-status-card">
                                     <div class="status-indicator-icon">
@@ -200,7 +213,7 @@
                                     </div>
                                     <div class="status-info">
                                         <h4 id="status-title">已完成 100% 精确匹配</h4>
-                                        <p id="status-desc">系统已在物料明细表中为您自动锁定了唯一的匹配物料。</p>
+                                        <div id="status-desc">系统已在物料明细表中为您自动锁定了唯一的匹配物料。</div>
                                     </div>
                                 </div>
 
@@ -359,6 +372,56 @@
                                    </tr>
                                </tbody>
                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Card 5.5: Auto-Binding Rules Self-Learning & Management -->
+                    <div class="glass-card section-card" style="display: flex; flex-direction: column; gap: 16px; padding: 16px; grid-column: span 2;">
+                        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                            <span class="section-tag" style="background-color: rgba(168, 85, 247, 0.15); color: #c084fc;"><i class="fa-solid fa-robot"></i> 智能多物料自动绑定规则统计学习与管理</span>
+                        </div>
+                        <div class="sub-layout-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                            <!-- Left Sub-card: Suggestions -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--border-color); padding-right: 16px;">
+                                <h4 style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary);"><i class="fa-solid fa-graduation-cap"></i> 系统统计学习到的绑定推荐 (点击采纳)</h4>
+                                <div style="max-height: 250px; overflow-y: auto; margin-top: 8px;">
+                                    <table class="search-table" style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>清单项目名称</th>
+                                                <th>推荐绑定物料</th>
+                                                <th width="70">频次</th>
+                                                <th width="70">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="binding-suggestions-tbody">
+                                            <tr>
+                                                <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无自学习建议</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Right Sub-card: Confirmed Rules -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 8px;">
+                                <h4 style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary);"><i class="fa-solid fa-square-poll-horizontal"></i> 当前已启用的自动绑定推荐规则</h4>
+                                <div style="max-height: 250px; overflow-y: auto; margin-top: 8px;">
+                                    <table class="search-table" style="width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>清单项目名称</th>
+                                                <th>自动绑定推荐物料</th>
+                                                <th width="70">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="binding-rules-tbody">
+                                            <tr>
+                                                <td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无启用规则</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

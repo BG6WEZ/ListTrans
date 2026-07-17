@@ -49,6 +49,27 @@ app.add_middleware(
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Configuration and feedback files for auto-binding
+BINDING_FEEDBACK_FILE = os.path.join(os.path.dirname(__file__), "binding_feedback.json")
+AUTO_BINDING_RULES_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "auto_binding_rules.json")
+
+def load_auto_binding_rules() -> List[Dict[str, Any]]:
+    if not os.path.exists(AUTO_BINDING_RULES_FILE):
+        return []
+    try:
+        with open(AUTO_BINDING_RULES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading auto binding rules: {e}")
+        return []
+
+def save_auto_binding_rules(rules: List[Dict[str, Any]]):
+    try:
+        with open(AUTO_BINDING_RULES_FILE, "w", encoding="utf-8") as f:
+            json.dump(rules, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logger.error(f"Error saving auto binding rules: {e}")
+
 # Thread Pool for concurrent matching
 executor = ThreadPoolExecutor(max_workers=10)
 
@@ -66,6 +87,16 @@ async def startup_event():
     index_manager.check_db_timestamp_and_build(DB_PATH)
     logger.info("SQLite DB checked and vector index verified.")
 
+class BindingModel(BaseModel):
+    code: str
+    name: str
+    specification: str
+    unit: str
+    brand: str
+    category: str
+    qty: float
+    qty_ratio: Optional[float] = 1.0
+
 class MatchedItemModel(BaseModel):
     original_row_idx: int
     original_name: str
@@ -80,6 +111,8 @@ class MatchedItemModel(BaseModel):
     matched_unit: str
     matched_brand: str
     professional: Optional[str] = "暖通"
+    original_code: Optional[str] = ""
+    bindings: Optional[List[BindingModel]] = None
 
 
 class ExportRequest(BaseModel):
@@ -245,8 +278,13 @@ async def upload_file(file: UploadFile = File(...)):
                 if brand_idx:
                     brand = str(sheet.cell(r, brand_idx).value or "").strip()
                     
+                original_code = ""
+                if code_idx:
+                    original_code = str(sheet.cell(r, code_idx).value or "").strip()
+                    
                 raw_rows.append({
                     "row_idx": global_row_counter,
+                    "code": original_code,
                     "name": str(val_b).strip(),
                     "specification": str(val_c).strip(),
                     "unit": str(sheet.cell(r, unit_idx).value or "台").strip(),
@@ -274,6 +312,10 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Helper to perform batch encoding and threadpool matching in chunks of 500."""
     total_results = []
     
+    # Load confirmed auto-binding rules
+    rules = load_auto_binding_rules()
+    rules_map = {r["original_name"].strip(): r["bound_materials"] for r in rules if r.get("original_name")}
+    
     # Process in chunks of 500
     chunk_size = 500
     for idx in range(0, len(raw_rows), chunk_size):
@@ -296,7 +338,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "professional": item.get("professional", "暖通")
             }
             # Pre-parse specs with professional category hint
-            query_info["parsed_spec"] = extract_params(item["specification"], item["professional"])
+            query_info["parsed_spec"] = extract_params(item["specification"], query_info["professional"])
             
             q_vector = query_vectors[i] if query_vectors is not None else None
             match_jobs.append((query_info, q_vector, item))
@@ -324,29 +366,87 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         final_chunk_results = []
         for i, (q_info, q_vector, item) in enumerate(match_jobs):
             res = first_pass_results[i]
-            # If not exact match, rerun matching with confirmed series info to adjust ranks
-            if not res["is_exact"] and confirmed_series:
-                res = match_item(q_info, q_vector, confirmed_series)
+            
+            item_name_clean = item["name"].strip()
+            rule_bindings = rules_map.get(item_name_clean)
+            
+            if rule_bindings:
+                # Apply confirmed auto-binding rule
+                bindings_list = []
+                for rb in rule_bindings:
+                    ratio = rb.get("qty_ratio", 1.0)
+                    bindings_list.append({
+                        "code": rb.get("code", ""),
+                        "name": rb.get("name", ""),
+                        "specification": rb.get("specification", ""),
+                        "unit": rb.get("unit", ""),
+                        "brand": rb.get("brand", ""),
+                        "category": rb.get("category", ""),
+                        "qty": float(item["qty"]) * ratio
+                    })
+                first_b = bindings_list[0] if bindings_list else {}
+                final_chunk_results.append({
+                    "original_row_idx": item["row_idx"],
+                    "original_name": item["name"],
+                    "original_spec": item["specification"],
+                    "original_qty": item["qty"],
+                    "original_unit": item["unit"],
+                    "original_loss": item["loss"],
+                    "original_category": item["category"],
+                    "professional": item.get("professional", "暖通"),
+                    "original_code": item.get("code", ""),
+                    "parsed_spec": q_info["parsed_spec"],
+                    "is_exact": True, # Rule match counts as exact
+                    "matched_code": ",".join([b["code"] for b in bindings_list]),
+                    "matched_name": first_b.get("name", ""),
+                    "matched_category": first_b.get("category", ""),
+                    "matched_spec": first_b.get("specification", ""),
+                    "matched_unit": first_b.get("unit", ""),
+                    "matched_brand": first_b.get("brand", ""),
+                    "top_candidates": res["top_candidates"],
+                    "bindings": bindings_list
+                })
+            else:
+                # If not exact match, rerun matching with confirmed series info to adjust ranks
+                if not res["is_exact"] and confirmed_series:
+                    res = match_item(q_info, q_vector, confirmed_series)
+                    
+                top_cands = res["top_candidates"]
+                first_cand = top_cands[0] if top_cands else None
                 
-            final_chunk_results.append({
-                "original_row_idx": item["row_idx"],
-                "original_name": item["name"],
-                "original_spec": item["specification"],
-                "original_qty": item["qty"],
-                "original_unit": item["unit"],
-                "original_loss": item["loss"],
-                "original_category": item["category"],
-                "professional": item.get("professional", "暖通"),
-                "parsed_spec": q_info["parsed_spec"],
-                "is_exact": res["is_exact"],
-                "matched_code": res["matched_code"] or "",
-                "matched_name": res["top_candidates"][0]["name"] if res["top_candidates"] else "",
-                "matched_category": res["top_candidates"][0]["category"] if res["top_candidates"] else "",
-                "matched_spec": res["top_candidates"][0]["specification"] if res["top_candidates"] else "",
-                "matched_unit": res["top_candidates"][0]["unit"] if res["top_candidates"] else "",
-                "matched_brand": res["top_candidates"][0]["brand"] if res["top_candidates"] else "",
-                "top_candidates": res["top_candidates"]
-            })
+                bindings_list = []
+                if first_cand:
+                    bindings_list.append({
+                        "code": res["matched_code"] or first_cand.get("code", ""),
+                        "name": first_cand.get("name", ""),
+                        "specification": first_cand.get("specification", ""),
+                        "unit": first_cand.get("unit", item["unit"]),
+                        "brand": first_cand.get("brand", ""),
+                        "category": first_cand.get("category", ""),
+                        "qty": float(item["qty"])
+                    })
+                    
+                final_chunk_results.append({
+                    "original_row_idx": item["row_idx"],
+                    "original_name": item["name"],
+                    "original_spec": item["specification"],
+                    "original_qty": item["qty"],
+                    "original_unit": item["unit"],
+                    "original_loss": item["loss"],
+                    "original_category": item["category"],
+                    "professional": item.get("professional", "暖通"),
+                    "original_code": item.get("code", ""),
+                    "parsed_spec": q_info["parsed_spec"],
+                    "is_exact": res["is_exact"],
+                    "matched_code": res["matched_code"] or "",
+                    "matched_name": first_cand.get("name", "") if first_cand else "",
+                    "matched_category": first_cand.get("category", "") if first_cand else "",
+                    "matched_spec": first_cand.get("specification", "") if first_cand else "",
+                    "matched_unit": first_cand.get("unit", "") if first_cand else "",
+                    "matched_brand": first_cand.get("brand", "") if first_cand else "",
+                    "top_candidates": top_cands,
+                    "bindings": bindings_list
+                })
             
         total_results.extend(final_chunk_results)
         
@@ -485,6 +585,169 @@ async def api_submit_feedback(req: FeedbackSubmitRequest):
         save_feedback_sample(req.dict())
         return {"code": 0, "msg": "反馈提交成功"}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class BindingSubmitRequest(BaseModel):
+    original_name: str
+    original_spec: str
+    original_qty: float
+    bindings: List[BindingModel]
+
+class BindingRuleConfirmRequest(BaseModel):
+    original_name: str
+    bindings: List[BindingModel]
+
+class BindingRuleDeleteRequest(BaseModel):
+    original_name: str
+
+@app.post("/api/binding/submit")
+async def api_submit_binding(req: BindingSubmitRequest):
+    """Submit a list item's confirmed bindings to the feedback log for learning."""
+    try:
+        binds = []
+        original_qty = req.original_qty if req.original_qty > 0 else 1.0
+        for b in req.bindings:
+            binds.append({
+                "code": b.code,
+                "name": b.name,
+                "specification": b.specification,
+                "unit": b.unit,
+                "brand": b.brand,
+                "category": b.category,
+                "qty": b.qty,
+                "qty_ratio": float(b.qty) / float(original_qty)
+            })
+        
+        # Save to binding_feedback.json
+        samples = []
+        if os.path.exists(BINDING_FEEDBACK_FILE):
+            try:
+                with open(BINDING_FEEDBACK_FILE, "r", encoding="utf-8") as f:
+                    samples = json.load(f)
+            except Exception:
+                pass
+        
+        samples.append({
+            "original_name": req.original_name,
+            "original_spec": req.original_spec,
+            "bindings": binds
+        })
+        
+        with open(BINDING_FEEDBACK_FILE, "w", encoding="utf-8") as f:
+            json.dump(samples, f, ensure_ascii=False, indent=4)
+            
+        return {"code": 0, "msg": "绑定关系已提交记录"}
+    except Exception as e:
+        logger.error(f"Error in api_submit_binding: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/binding/suggestions")
+async def api_get_binding_suggestions():
+    """Analyze binding feedback logs and suggest auto-binding rules."""
+    try:
+        if not os.path.exists(BINDING_FEEDBACK_FILE):
+            return JSONResponse(content={"suggestions": []})
+            
+        with open(BINDING_FEEDBACK_FILE, "r", encoding="utf-8") as f:
+            samples = json.load(f)
+            
+        groups = {} # original_name -> { serialized_bindings -> count }
+        bindings_map = {} # serialized_bindings -> bindings_list
+        
+        for s in samples:
+            name = s.get("original_name", "").strip()
+            binds = s.get("bindings", [])
+            if not name or not binds:
+                continue
+                
+            # Normalize by sorting on material code
+            sorted_binds = sorted(binds, key=lambda x: x.get("code", ""))
+            
+            cleaned_binds = []
+            for b in sorted_binds:
+                cleaned_binds.append({
+                    "code": b.get("code", ""),
+                    "name": b.get("name", ""),
+                    "specification": b.get("specification", ""),
+                    "unit": b.get("unit", ""),
+                    "brand": b.get("brand", ""),
+                    "category": b.get("category", ""),
+                    "qty_ratio": b.get("qty_ratio", 1.0)
+                })
+                
+            serialized = json.dumps(cleaned_binds, ensure_ascii=False)
+            bindings_map[serialized] = cleaned_binds
+            
+            if name not in groups:
+                groups[name] = {}
+            groups[name][serialized] = groups[name].get(serialized, 0) + 1
+            
+        suggestions = []
+        for name, spec_groups in groups.items():
+            for serialized, count in spec_groups.items():
+                suggestions.append({
+                    "original_name": name,
+                    "bindings": bindings_map[serialized],
+                    "confidence_count": count
+                })
+                
+        suggestions.sort(key=lambda x: x["confidence_count"], reverse=True)
+        return JSONResponse(content={"suggestions": suggestions})
+    except Exception as e:
+        logger.error(f"Error in api_get_binding_suggestions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/binding/rules/confirm")
+async def api_confirm_binding_rule(req: BindingRuleConfirmRequest):
+    """Confirm/Enable a learned auto-binding rule."""
+    try:
+        rules = load_auto_binding_rules()
+        
+        new_rule = {
+            "original_name": req.original_name.strip(),
+            "bound_materials": [
+                {
+                    "code": b.code,
+                    "name": b.name,
+                    "specification": b.specification,
+                    "unit": b.unit,
+                    "brand": b.brand,
+                    "category": b.category,
+                    "qty_ratio": b.qty_ratio if b.qty_ratio is not None else 1.0
+                }
+                for b in req.bindings
+            ]
+        }
+        
+        rules = [r for r in rules if r.get("original_name", "").strip() != req.original_name.strip()]
+        rules.append(new_rule)
+        
+        save_auto_binding_rules(rules)
+        return {"code": 0, "msg": "规则已成功启用并保存"}
+    except Exception as e:
+        logger.error(f"Error in api_confirm_binding_rule: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/binding/rules/delete")
+async def api_delete_binding_rule(req: BindingRuleDeleteRequest):
+    """Delete a confirmed auto-binding rule."""
+    try:
+        rules = load_auto_binding_rules()
+        rules = [r for r in rules if r.get("original_name", "").strip() != req.original_name.strip()]
+        save_auto_binding_rules(rules)
+        return {"code": 0, "msg": "规则已删除"}
+    except Exception as e:
+        logger.error(f"Error in api_delete_binding_rule: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/binding/rules")
+async def api_get_binding_rules():
+    """Retrieve all confirmed auto-binding rules."""
+    try:
+        rules = load_auto_binding_rules()
+        return JSONResponse(content={"rules": rules})
+    except Exception as e:
+        logger.error(f"Error in api_get_binding_rules: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/search")

@@ -1,0 +1,3044 @@
+[
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ10（DN8*1.0）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 470.282,
+                "qty_ratio": 0.05111604187784679
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ12（DN10*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 5704.041,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D18（DN15*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0509",
+                "name": "衬塑复合管",
+                "specification": "衬塑复合钢管，DN15*2.5；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 4696.432,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D25（DN20*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.28.0501",
+                "name": "衬塑复合钢管",
+                "specification": "衬塑复合钢管，DN15（20*2.0）；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 333.839,
+                "qty_ratio": 0.1960484813890215
+            },
+            {
+                "code": "2.17.07.0100",
+                "name": "无缝钢管",
+                "specification": "D25*2",
+                "unit": "m",
+                "brand": "国产优质",
+                "category": "无缝钢管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.28.0663",
+                "name": "衬塑复合钢管",
+                "specification": "衬塑复合钢管，DN15（20*2.0）；螺纹连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D45(DN40*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1757.59,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.28.0504",
+                "name": "衬塑复合钢管",
+                "specification": "衬塑复合钢管，DN32（40*3.5）；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 1757.59,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ10（DN8*1.0）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.38.01.0121",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ32*厚度2.5、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ12（DN10*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 5704.041,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.05.0159",
+                "name": "不锈钢管管件",
+                "specification": "316，不锈钢管管件，综合规格",
+                "unit": "批",
+                "brand": "福兰特",
+                "category": "不锈钢管",
+                "qty": 5704.041,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.38.02.1050",
+                "name": "不锈钢管管件",
+                "specification": "SS316L BA级不锈钢管管件，综合规格",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "不锈钢脱脂气管",
+                "qty": 5704.041,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.07.0400",
+                "name": "无缝钢管管件",
+                "specification": "无缝钢管管件\n三通、正通、弯头、直接",
+                "unit": "批",
+                "brand": "国产优质",
+                "category": "无缝钢管",
+                "qty": 5704.041,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D18（DN15*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0509",
+                "name": "衬塑复合管",
+                "specification": "衬塑复合钢管，DN15*2.5；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 4696.432,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D25（DN20*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D45(DN40*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1757.59,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D57(DN50*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 890.169,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN20\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 200.775,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN25\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 125.338,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN32\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 133.577,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN40\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 18.147,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN50\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 18.731,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "UPVC球阀",
+        "original_spec": "1.名称：UPVC球阀\n2.材质:塑料\n3.规格：DN20\n4.连接形式：胶水粘接\n5.工作内容：切管、清理、阀门安装",
+        "bindings": [
+            {
+                "code": "2.18.09.0015",
+                "name": "UPVC球阀",
+                "specification": "DN40",
+                "unit": "个",
+                "brand": "联塑",
+                "category": "塑料管件",
+                "qty": 27.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用全自动切换笑气汇流排",
+        "original_spec": "1.名称：医用全自动切换笑气汇流排\n2.规格：8+8\n3.材质：不锈钢\n4.工作内容：支架制作安装、安装、找平找正、固定、软管与气瓶连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.11.23.0417",
+                "name": "医用自动平开门（铅防护）",
+                "specification": "4个铅当量，1100×2100，单开，国产电机，下沉式",
+                "unit": "樘",
+                "brand": "",
+                "category": "特种门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D18\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用全自动切换二氧化碳汇流排",
+        "original_spec": "1.名称：医用全自动切换二氧化碳汇流排\n2.规格：5+5\n3.材质：不锈钢\n4.工作内容：支架制作安装、安装、找平找正、固定、软管与气瓶连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.11.23.2150",
+                "name": "医用自动平移门",
+                "specification": "2000*2200；单开；进口电机",
+                "unit": "樘",
+                "brand": "",
+                "category": "特种门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D18\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用全自动切换氮气汇流排",
+        "original_spec": "1.名称：医用全自动切换氮气汇流排\n2.规格：10+10\n3.材质：不锈钢\n4.工作内容：支架制作安装、安装、找平找正、固定、软管与气瓶连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.11.23.0429",
+                "name": "医用自动平开门（铅防护）",
+                "specification": "4个铅当量，1100×2100，单开，进口电机，下沉式",
+                "unit": "樘",
+                "brand": "",
+                "category": "特种门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D35\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气二级减压箱",
+        "original_spec": "1.名称：医用氧气二级减压箱\n2.规格：≤20m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1252",
+                "name": "医用气体流量仪(氧气)",
+                "specification": "20~999L/min，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "套",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气二级减压箱",
+        "original_spec": "1.名称：医用氧气二级减压箱\n2.规格：28m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1252",
+                "name": "医用气体流量仪(氧气)",
+                "specification": "20~999L/min，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "套",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气二级减压箱（定制）",
+        "original_spec": "1.名称：医用氧气二级减压箱（定制）\n2.规格：100m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.11.23.0169",
+                "name": "医用手动气密封平开门（铅防护）",
+                "specification": "2个铅当量，1000*2200，单开，国产电机",
+                "unit": "樘",
+                "brand": "",
+                "category": "特种门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压缩空气二级减压箱",
+        "original_spec": "1.名称：压缩空气二级减压箱\n2.规格：≤20m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 5.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用压缩空气二级减压箱",
+        "original_spec": "1.名称：医用压缩空气二级减压箱\n2.规格：28m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用压缩空气二级减压箱",
+        "original_spec": "1.名称：医用压缩空气二级减压箱\n2.规格：50m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用压缩空气二级减压箱（定制）",
+        "original_spec": "1.名称：医用压缩空气二级减压箱（定制）\n2.规格：100m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0172",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、铜+塑料压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气流量仪",
+        "original_spec": "1.名称：医用氧气流量仪\n2.规格：5~300L/min\n3.工作内容：安装、固定、单体试运转",
+        "bindings": [
+            {
+                "code": "2.38.07.1221",
+                "name": "氧气流量仪",
+                "specification": "测量范围30-3000,焊接头球帽，定制款",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气流量仪",
+        "original_spec": "1.名称：医用氧气流量仪\n2.规格：8~400L/min\n3.工作内容：安装、固定、单体试运转",
+        "bindings": [
+            {
+                "code": "2.24.13.0001",
+                "name": "医用氧气流量计",
+                "specification": "2~200L/min，最大总流量：99999.99m3，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "台",
+                "brand": "",
+                "category": "差压、流量仪表",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气流量仪",
+        "original_spec": "1.名称：医用氧气流量仪\n2.规格：20~999L/min\n3.工作内容：安装、固定、单体试运转",
+        "bindings": [
+            {
+                "code": "2.24.13.0001",
+                "name": "医用氧气流量计",
+                "specification": "2~200L/min，最大总流量：99999.99m3，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "台",
+                "brand": "",
+                "category": "差压、流量仪表",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用气体压力监测报警装置（含传感器）",
+        "original_spec": "1.名称：医用气体压力监测报警装置（含传感器）\n2.规格：三气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.08.0020",
+                "name": "惰性气体压力传感器",
+                "specification": "测量范围：(-0.1~0~40)MPa,量程内可选；\n介质：与316不锈钢兼容的各种流质介质。",
+                "unit": "个",
+                "brand": "",
+                "category": "实验室特气材料",
+                "qty": 8.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用气体压力监测报警装置（含传感器）",
+        "original_spec": "1.名称：医用气体压力监测报警装置（含传感器）\n2.规格：六气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.08.0020",
+                "name": "惰性气体压力传感器",
+                "specification": "测量范围：(-0.1~0~40)MPa,量程内可选；\n介质：与316不锈钢兼容的各种流质介质。",
+                "unit": "个",
+                "brand": "",
+                "category": "实验室特气材料",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用气体区域控制箱",
+        "original_spec": "1.名称：医用气体区域控制箱\n2.规格：三气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1402",
+                "name": "气体面板箱",
+                "specification": "300*300,",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 11.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "手术室气体控制箱",
+        "original_spec": "1.名称：手术室气体控制箱\n2.规格：三气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1402",
+                "name": "气体面板箱",
+                "specification": "300*300,",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "手术室气体控制箱",
+        "original_spec": "1.名称：手术室气体控制箱\n2.规格：四气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1407",
+                "name": "气体面板箱",
+                "specification": "1200*400*150",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "手术室气体控制箱",
+        "original_spec": "1.名称：手术室气体控制箱\n2.规格：六气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1407",
+                "name": "气体面板箱",
+                "specification": "1200*400*150",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 20.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D10\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0027",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN20、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 30.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D18\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 30.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D25\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0029",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN25、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D35\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D89\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用铜质维修阀",
+        "original_spec": "1.名称：医用铜质维修阀\n2.材质：铜质\n3.规格：D10\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.1002",
+                "name": "医用铜球阀",
+                "specification": "脱脂，DN10",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 403.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用铜质维修阀",
+        "original_spec": "1.名称：医用铜质维修阀\n2.材质：铜质\n3.规格：D12\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0036",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN125、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 125.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压力表",
+        "original_spec": "1.名称：压力表\n2.规格：带旋塞阀\n3.工作内容：清理、表计试验、安装、固定、配合单体试运转",
+        "bindings": [
+            {
+                "code": "2.24.11.0081",
+                "name": "压力表",
+                "specification": "机械真空",
+                "unit": "个",
+                "brand": "埃美柯",
+                "category": "压力仪表",
+                "qty": 12.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "等电位接地端子箱",
+        "original_spec": "1.名称：等电位接地端子箱\n2.工作内容：本体安装、接线",
+        "bindings": [
+            {
+                "code": "2.27.06.0110",
+                "name": "等电位端子箱",
+                "specification": "通用物料，关键参数：尺寸、铜牌厚度，请放到备注里",
+                "unit": "台",
+                "brand": "国产优质",
+                "category": "接地装置",
+                "qty": 19.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "接地导线",
+        "original_spec": "1.名称：接地导线\n2.配线形式：管内穿线\n3.规格：BVR-6mm²\n4.材质：铜芯\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+        "bindings": [
+            {
+                "code": "2.38.08.0070",
+                "name": "钢瓶接头",
+                "specification": "316L材质，接口形式：W21.8、G5/8",
+                "unit": "个",
+                "brand": "",
+                "category": "实验室特气材料",
+                "qty": 935.407,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 865.01,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医疗设备带",
+        "original_spec": "1.名称：医疗设备带\n2.规格：固定式铝合金设备带，不含插座、网络接口、床头灯、开关及呼叫分机等配件\n3.工作内容：测位、划线、稳装、找平找正、组对、固定、接线、接管、端头板安装、密封胶收口",
+        "bindings": [
+            {
+                "code": "2.26.41.0712",
+                "name": "设备带插座",
+                "specification": "设备带插座",
+                "unit": "个",
+                "brand": "德奥",
+                "category": "电源插座",
+                "qty": 267.225,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "气体终端",
+        "original_spec": "1.名称：医用气体终端\n2.气体种类：各种气体\n3.工作内容：开孔、螺栓固定、与管道连接、含宝塔头焊接",
+        "bindings": [
+            {
+                "code": "2.38.07.0154",
+                "name": "笑气气体终端",
+                "specification": "国标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 605.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "五孔插座",
+        "original_spec": "1.名称：五孔插座\n2.规格：220V、10A\n3.安装形式：暗装、设备带安装\n4.工作内容：设备带开孔、插座安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.26.41.0513",
+                "name": "五孔插座",
+                "specification": "暗装，250V 16A",
+                "unit": "个",
+                "brand": "德奥",
+                "category": "电源插座",
+                "qty": 390.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "单控开关",
+        "original_spec": "1.名称：单控开关\n2.规格：220V、10A\n3.安装形式：暗装、设备带安装\n4.工作内容：设备带开孔、开关安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.26.33.0019",
+                "name": "双联单控开关",
+                "specification": "防溅，翘板式，10A，250V",
+                "unit": "个",
+                "brand": "港博",
+                "category": "开关、插座功能件",
+                "qty": 130.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "床头灯",
+        "original_spec": "1.名称:床头灯\n2.类型:嵌入式安装，8W\n3.安装形式：设备带安装\n4.工作内容：设备带开孔、灯具安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.30.73.0212",
+                "name": "智能床头卡",
+                "specification": "5寸液晶屏",
+                "unit": "台",
+                "brand": "狄耐克",
+                "category": "护理呼应信号系统",
+                "qty": 130.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配线",
+        "original_spec": "1.名称：电线\n2.配线形式：管内穿线\n3.规格：WDZB-BYJ-4.0mm²\n4.材质：铜芯线\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+        "bindings": [
+            {
+                "code": "2.30.81.0939",
+                "name": "拼接屏线材及辅料",
+                "specification": "含网线\\电源插排\\控制线\\信号跳线\\多方向拼接调节挂钩\\安装辅材等",
+                "unit": "批",
+                "brand": "华平",
+                "category": "数字化手术室系统",
+                "qty": 1052.30301523355,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 264.724,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "模块式液氧罐",
+        "original_spec": "1.型号、规格:液氧罐5m3\n2.安装方式:落地安装",
+        "bindings": [
+            {
+                "code": "1.00.05.9016",
+                "name": "环氧水磨石",
+                "specification": "10mm厚环氧水磨石地坪施工，包工包料",
+                "unit": "㎡",
+                "brand": "/",
+                "category": "安装用工",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "空温式汽化器",
+        "original_spec": "1.名称：空温式汽化器\n2.规格：汽化量300m³/h、工作压力：≤3.0MPa、其它：翅片采用热效力极高的特种铝合金",
+        "bindings": [
+            {
+                "code": "3.60.11.0604",
+                "name": "空压机组",
+                "specification": "一体式机组，无油涡旋空压机，L≥0.8m³/min，排气压力:0.8MPa；",
+                "unit": "套",
+                "brand": "超捷",
+                "category": "医用气体设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "成品分气缸",
+        "original_spec": "1.名称：成品分气缸\n2.规格：二进四出",
+        "bindings": [
+            {
+                "code": "3.61.11.3133",
+                "name": "气瓶柜",
+                "specification": "双瓶气瓶柜880221A",
+                "unit": "台",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "双回路调压装置",
+        "original_spec": "1.名称：双回路调压装置\n2.规格：调压流量300Nm³/h;进气压力0.6~0.8Mpa;管道及阀门材质:不锈钢",
+        "bindings": [
+            {
+                "code": "3.51.01.0531",
+                "name": "增压泵",
+                "specification": "流量m³/h：2，扬程m：14，功率kw：0.5",
+                "unit": "台",
+                "brand": "凯泉",
+                "category": "离心式水泵",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用全自动切换氧气汇流排",
+        "original_spec": "1.名称：医用全自动切换氧气汇流排\n2.规格：10+10  \n3.材质：不锈钢\n4.工作内容：支架制作安装、安装、找平找正、固定、软管与气瓶连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.11.23.0381",
+                "name": "医用自动平开门（铅防护）",
+                "specification": "3个铅当量，1100×2100，单开，进口电机，下沉式",
+                "unit": "樘",
+                "brand": "",
+                "category": "特种门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢低温截止阀",
+        "original_spec": "1.名称：不锈钢低温截止阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.01.3033",
+                "name": "低温截止阀",
+                "specification": "不锈钢，DN32，焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "截止阀",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢截止阀",
+        "original_spec": "1.名称：医用不锈钢截止阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0029",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN25、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢止回阀",
+        "original_spec": "1.名称：医用不锈钢止回阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "油式旋片真空泵",
+        "original_spec": "1.名称：油式旋片真空泵\n2.规格：单泵抽气量:≥200m3/h、单机功率:≥5.5KW、负压范围:-0.03~-0.07MPa",
+        "bindings": [
+            {
+                "code": "3.60.11.0604",
+                "name": "空压机组",
+                "specification": "一体式机组，无油涡旋空压机，L≥0.8m³/min，排气压力:0.8MPa；",
+                "unit": "套",
+                "brand": "超捷",
+                "category": "医用气体设备",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "真空罐",
+        "original_spec": "1.名称：真空罐\n2.规格：带排污阀、容积:2m3,材质:碳钢",
+        "bindings": [
+            {
+                "code": "2.19.45.0105",
+                "name": "真空破坏器",
+                "specification": "DN20，材质304不锈钢，螺纹连接",
+                "unit": "个",
+                "brand": "",
+                "category": "倒流防止器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "集污罐",
+        "original_spec": "1.名称：集污罐\n2.规格：材质:不锈钢,容积:50L",
+        "bindings": [
+            {
+                "code": "3.50.25.7853",
+                "name": "集风箱",
+                "specification": "7000*2000*500，镀锌钢板",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "除菌过滤器",
+        "original_spec": "1.名称：除菌过滤器\n2.规格：≥400m3/h",
+        "bindings": [
+            {
+                "code": "3.50.25.0237",
+                "name": "高效过滤器",
+                "specification": "524*524*90，H14,液槽式",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "吸引分气缸",
+        "original_spec": "1.名称：吸引分气缸\n2.规格：一进4出",
+        "bindings": [
+            {
+                "code": "2.23.25.0020",
+                "name": "分配阀",
+                "specification": "分配阀",
+                "unit": "个",
+                "brand": "国产优质",
+                "category": "灭火装置专用阀门",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "真空（负压）排气消毒灭菌装置置",
+        "original_spec": "1.名称：真空（负压）排气消毒灭菌装置\n2.规格：杀灭效率≥99.99%,处理量大于等于400m³/h",
+        "bindings": [
+            {
+                "code": "3.61.27.7156",
+                "name": "脉动真空高压灭菌锅",
+                "specification": "容积：800升 工作压力：0.1MPa～0.23 MPa 工作温度：121℃~136℃",
+                "unit": "台",
+                "brand": "",
+                "category": "实验室其他设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "负压压力传感器",
+        "original_spec": "1.名称：负压压力传感器",
+        "bindings": [
+            {
+                "code": "3.60.33.9021",
+                "name": "压力传感器",
+                "specification": "设定点范围：0~±1000pa；输出信号0~10V；供电电压24VDC；",
+                "unit": "个",
+                "brand": "晶安翔",
+                "category": "精密风量调节装置",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "负压电控柜",
+        "original_spec": "1.名称、型号:负压电控柜\n2.规格:带PLC控制,三泵联动,含报警装置,RS485远传报警\n3.基础形式、材质、规格:10#槽钢\n4.安装方式:落地式",
+        "bindings": [
+            {
+                "code": "3.60.33.9047",
+                "name": "房间控制器",
+                "specification": "房间控制器（含控制软件）；RS485通讯协议；",
+                "unit": "个",
+                "brand": "晶安翔",
+                "category": "精密风量调节装置",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D159\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D76(DN65*3.0)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.07.0130",
+                "name": "无缝钢管",
+                "specification": "D42.5*3.5",
+                "unit": "m",
+                "brand": "国产优质",
+                "category": "无缝钢管",
+                "qty": 280.707,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D89(DN80*3.0)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷",
+        "bindings": [
+            {
+                "code": "2.17.07.0178",
+                "name": "无缝钢管",
+                "specification": "D89*3.5",
+                "unit": "m",
+                "brand": "国产优质",
+                "category": "无缝钢管",
+                "qty": 396.714,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D108(DN100*3.0)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0625",
+                "name": "内衬塑复合钢管",
+                "specification": "内衬塑复合钢管(冷水型)，DN100*4.0mm，沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 240.152,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D133(DN125*3.0)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0626",
+                "name": "内衬塑复合钢管",
+                "specification": "内衬塑复合钢管(冷水型)，DN125*4.0mm，沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 84.859,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D219(DN200*3.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0629",
+                "name": "内衬塑复合钢管",
+                "specification": "内衬塑复合钢管(冷水型)，DN200*6.0mm，沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 211.62,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "牙科信号线",
+        "original_spec": "1.名称：控制线\n2.规格：WDZC-RYYP 3*1\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、清理场地、做标记、线路通路测试",
+        "bindings": [
+            {
+                "code": "2.38.01.0284",
+                "name": "黄铜管件",
+                "specification": "承口内丝接头 35*1 1/4\"",
+                "unit": "个",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 208.985,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 208.985,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN20\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 42.867,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN32\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 37.355,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "UPVC球阀",
+        "original_spec": "1.名称：UPVC球阀\n2.材质:塑料\n3.规格：DN20\n4.连接形式：胶水粘接\n5.工作内容：切管、清理、阀门安装",
+        "bindings": [
+            {
+                "code": "2.18.09.0015",
+                "name": "UPVC球阀",
+                "specification": "DN40",
+                "unit": "个",
+                "brand": "联塑",
+                "category": "塑料管件",
+                "qty": 6.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "无热吸附式干燥机",
+        "original_spec": "1.名称：无热吸附式干燥机\n2.规格：L≥4.8m3/min",
+        "bindings": [
+            {
+                "code": "3.50.05.0237",
+                "name": "风冷螺杆式冷水（热泵）机组",
+                "specification": "制冷量KW:991~1020，热泵型，定频",
+                "unit": "台",
+                "brand": "天加",
+                "category": "冷热水机组",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "储气罐",
+        "original_spec": "1.名称：储气罐\n2.规格：容积:2m3",
+        "bindings": [
+            {
+                "code": "2.23.29.0010",
+                "name": "隔膜式气压水罐",
+                "specification": "隔膜式气压水罐",
+                "unit": "台",
+                "brand": "国产优质",
+                "category": "隔膜式气压水罐",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "初级过滤器",
+        "original_spec": "1.名称：初级过滤器\n2.规格：过滤精度:1u,含油量: 0.5ppm L:4.8m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.22.51.0373",
+                "name": "初效过滤器",
+                "specification": "600*600*45，纸框",
+                "unit": "个",
+                "brand": "华星鹏",
+                "category": "风口过滤器、过滤网",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "活性炭过滤器",
+        "original_spec": "1.名称：活性炭过滤器\n2.规格：含油量:0.003ppm, 除味 L:4.8m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.18.19.1020",
+                "name": "蒸汽过滤器",
+                "specification": "DN200",
+                "unit": "个",
+                "brand": "",
+                "category": "过滤器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.18.19.1014",
+                "name": "蒸汽过滤器",
+                "specification": "DN50",
+                "unit": "个",
+                "brand": "",
+                "category": "过滤器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "3.50.25.0239",
+                "name": "高效过滤器",
+                "specification": "670*670*90，H14,液槽式",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.18.19.1011",
+                "name": "蒸汽过滤器",
+                "specification": "DN25",
+                "unit": "个",
+                "brand": "",
+                "category": "过滤器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压缩空气成品分气缸",
+        "original_spec": "1.名称：压缩空气成品分气缸\n2.规格：一进4出",
+        "bindings": [
+            {
+                "code": "2.38.07.0170",
+                "name": "压缩空气气体终端",
+                "specification": "国标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "PLC电控柜",
+        "original_spec": "1.名称：PLC电控柜\n2.参数：触摸屏是示系统压力、露点；压缩机运行收序显示(显示正在运行及下一台要运行的压缩机)、运行状况(运行、待机或停机备用状态）、干燥机的运行状态显示，系统报警。可储存最近的报警内容,具有网络传输功能。每台压缩机设有独立电路系统，PLC故障时,能自动转至压力开关控制模式工作,确保连续供气:控制触摸屏显示每台压缩机的运行时间、报警及停机显示。电机过载跳机报警,备用运行时报警、露点报警及环境温度报警,带485信号远传",
+        "bindings": [
+            {
+                "code": "2.15.21.0703",
+                "name": "电伴热专用电气控制系统",
+                "specification": "二控三回路",
+                "unit": "套",
+                "brand": "绿光",
+                "category": "电伴热带、电伴热电缆",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配电柜",
+        "original_spec": "1.名称：空气配电柜\n2.规格：详见设计\n3.基础形式、材质、规格：10#槽钢\n4.安装方式：落地式",
+        "bindings": [
+            {
+                "code": "3.60.01.1070",
+                "name": "电脑柜",
+                "specification": "1097*1817*350装配嵌入式：面框采用1.2厚电解钢板制，上部设置吊柜，采用玻璃移门，下部镂空，台面采用1.2mm不锈钢板，配两组220V五孔插座和一组网络插座，外翻边＝50mm。",
+                "unit": "个",
+                "brand": "菲戈特",
+                "category": "手术室嵌入式净化设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "一氧化碳浓度仪",
+        "original_spec": "1.名称：一氧化碳浓度仪",
+        "bindings": [
+            {
+                "code": "2.23.01.0032",
+                "name": "二氧化碳灭火器",
+                "specification": "5KG",
+                "unit": "个",
+                "brand": "国产优质",
+                "category": "灭火器",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "露点监测仪",
+        "original_spec": "1.名称：露点监测仪",
+        "bindings": [
+            {
+                "code": "2.24.23.1003",
+                "name": "气体检测仪",
+                "specification": "氨气检测探头",
+                "unit": "个",
+                "brand": "",
+                "category": "过程分析仪表",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D57\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 21.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢止回阀",
+        "original_spec": "1.名称：医用不锈钢止回阀\n2.材质：不锈钢\n3.规格：D57\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "一体式无油涡旋式空压机(内置冷冻式干燥机、储气罐)",
+        "original_spec": "1.名称：一体式无油涡旋式空压机(内置冷冻式干燥机、储气罐)\n2.规格：L≥1.5m³/min",
+        "bindings": [
+            {
+                "code": "3.60.11.0604",
+                "name": "空压机组",
+                "specification": "一体式机组，无油涡旋空压机，L≥0.8m³/min，排气压力:0.8MPa；",
+                "unit": "套",
+                "brand": "超捷",
+                "category": "医用气体设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "初级过滤器",
+        "original_spec": "1.名称：初级过滤器\n2.规格：过滤精度:1u,含油量: 0.5ppm L:1.5m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.22.51.0373",
+                "name": "初效过滤器",
+                "specification": "600*600*45，纸框",
+                "unit": "个",
+                "brand": "华星鹏",
+                "category": "风口过滤器、过滤网",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "活性炭过滤器",
+        "original_spec": "1.名称：活性炭过滤器\n2.规格：含油量:0.003ppm, 除味 L:1.5m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.18.19.1020",
+                "name": "蒸汽过滤器",
+                "specification": "DN200",
+                "unit": "个",
+                "brand": "",
+                "category": "过滤器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配电柜",
+        "original_spec": "1.名称：空气配电柜\n2.规格：详见设计\n3.基础形式、材质、规格：10#槽钢\n4.安装方式：落地式",
+        "bindings": [
+            {
+                "code": "3.60.01.1070",
+                "name": "电脑柜",
+                "specification": "1097*1817*350装配嵌入式：面框采用1.2厚电解钢板制，上部设置吊柜，采用玻璃移门，下部镂空，台面采用1.2mm不锈钢板，配两组220V五孔插座和一组网络插座，外翻边＝50mm。",
+                "unit": "个",
+                "brand": "菲戈特",
+                "category": "手术室嵌入式净化设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D38\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 5.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "气环式真空泵",
+        "original_spec": "1.名称：气环式真空泵\n2.规格：单泵抽气量:≥318m3/h、单机功率:≥3KW、负压范围:-15~-18KPa",
+        "bindings": [
+            {
+                "code": "3.50.05.0085",
+                "name": "风冷螺杆式冷水（热泵）机组",
+                "specification": "制冷量KW:451~480，热泵型，定频",
+                "unit": "台",
+                "brand": "天加",
+                "category": "冷热水机组",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "汽水分离罐",
+        "original_spec": "1.名称：汽水分离罐\n2.材质：304不锈钢\n3.主要技术参数：200L/不锈钢",
+        "bindings": [
+            {
+                "code": "2.19.53.0031",
+                "name": "气水分离器",
+                "specification": "蒸汽气水分离器，DN32，法兰，不锈钢",
+                "unit": "个",
+                "brand": "",
+                "category": "气水分离器",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用细菌过滤器",
+        "original_spec": "1.名称：医用细菌过滤器\n2.规格：处理气量:≥318m3/h",
+        "bindings": [
+            {
+                "code": "3.50.25.5305",
+                "name": "医用净化过滤箱",
+                "specification": "风量m³/h：16001~17000，配中效过滤器，PP",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "真空（负压）排气消毒灭菌装置置",
+        "original_spec": "1.名称：真空（负压）排气消毒灭菌装置\n2.规格：杀灭效率≥99.99%,处理量大于等于400m³/h",
+        "bindings": [
+            {
+                "code": "3.61.27.7156",
+                "name": "脉动真空高压灭菌锅",
+                "specification": "容积：800升 工作压力：0.1MPa～0.23 MPa 工作温度：121℃~136℃",
+                "unit": "台",
+                "brand": "",
+                "category": "实验室其他设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "牙科电控柜",
+        "original_spec": "1.名称、型号:牙科电控柜\n2.规格:带PLC控制,两泵联动,含报警装置,RS485远传报警\n3.基础形式、材质、规格:10#槽钢\n4.安装方式:落地式",
+        "bindings": [
+            {
+                "code": "3.60.33.9047",
+                "name": "房间控制器",
+                "specification": "房间控制器（含控制软件）；RS485通讯协议；",
+                "unit": "个",
+                "brand": "晶安翔",
+                "category": "精密风量调节装置",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "一体式无油涡旋式空压机(内置冷冻式干燥机、储气罐)",
+        "original_spec": "1.名称：一体式无油涡旋式空压机(内置冷冻式干燥机、储气罐)\n2.规格：L≥1.2m³/min",
+        "bindings": [
+            {
+                "code": "3.60.11.0604",
+                "name": "空压机组",
+                "specification": "一体式机组，无油涡旋空压机，L≥0.8m³/min，排气压力:0.8MPa；",
+                "unit": "套",
+                "brand": "超捷",
+                "category": "医用气体设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "初级过滤器",
+        "original_spec": "1.名称：初级过滤器\n2.规格：过滤精度:1u,含油量: 0.5ppm L:1.5m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.22.51.0373",
+                "name": "初效过滤器",
+                "specification": "600*600*45，纸框",
+                "unit": "个",
+                "brand": "华星鹏",
+                "category": "风口过滤器、过滤网",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "活性炭过滤器",
+        "original_spec": "1.名称：活性炭过滤器\n2.规格：含油量:0.003ppm, 除味 L:1.5m3/min、带自动排水装置",
+        "bindings": [
+            {
+                "code": "2.18.19.1020",
+                "name": "蒸汽过滤器",
+                "specification": "DN200",
+                "unit": "个",
+                "brand": "",
+                "category": "过滤器",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配电柜",
+        "original_spec": "1.名称：空气配电柜\n2.规格：详见设计\n3.基础形式、材质、规格：10#槽钢\n4.安装方式：落地式",
+        "bindings": [
+            {
+                "code": "3.60.01.1070",
+                "name": "电脑柜",
+                "specification": "1097*1817*350装配嵌入式：面框采用1.2厚电解钢板制，上部设置吊柜，采用玻璃移门，下部镂空，台面采用1.2mm不锈钢板，配两组220V五孔插座和一组网络插座，外翻边＝50mm。",
+                "unit": "个",
+                "brand": "菲戈特",
+                "category": "手术室嵌入式净化设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "油式旋片真空泵",
+        "original_spec": "1.名称：油式旋片真空泵\n2.规格：单泵抽气量:≥63m3/h、单机功率:≥2.2KW、负压范围:-0.03~-0.07MPa",
+        "bindings": [
+            {
+                "code": "3.60.11.0604",
+                "name": "空压机组",
+                "specification": "一体式机组，无油涡旋空压机，L≥0.8m³/min，排气压力:0.8MPa；",
+                "unit": "套",
+                "brand": "超捷",
+                "category": "医用气体设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "真空罐",
+        "original_spec": "1.名称：真空罐\n2.规格：带排污阀、容积:0.5m3,材质:碳钢",
+        "bindings": [
+            {
+                "code": "2.24.11.0085",
+                "name": "真空压力表",
+                "specification": "-0.1~0Mpa，Y-100，自带304不锈钢表弯、旋塞阀",
+                "unit": "个",
+                "brand": "埃美柯",
+                "category": "压力仪表",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "集污罐",
+        "original_spec": "1.名称：集污罐\n2.规格：材质:不锈钢,容积:50L",
+        "bindings": [
+            {
+                "code": "3.50.25.7853",
+                "name": "集风箱",
+                "specification": "7000*2000*500，镀锌钢板",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用细菌过滤器",
+        "original_spec": "1.名称：医用细菌过滤器\n2.规格：≥63m3/h",
+        "bindings": [
+            {
+                "code": "3.50.25.5305",
+                "name": "医用净化过滤箱",
+                "specification": "风量m³/h：16001~17000，配中效过滤器，PP",
+                "unit": "个",
+                "brand": "宝源",
+                "category": "净化过滤设备",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "真空（负压）排气消毒灭菌装置置",
+        "original_spec": "1.名称：真空（负压）排气消毒灭菌装置置\n2.规格：杀灭效率≥99.99%,处理量大于63m³/h",
+        "bindings": [
+            {
+                "code": "3.61.27.7156",
+                "name": "脉动真空高压灭菌锅",
+                "specification": "容积：800升 工作压力：0.1MPa～0.23 MPa 工作温度：121℃~136℃",
+                "unit": "台",
+                "brand": "",
+                "category": "实验室其他设备",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "负压压力传感器",
+        "original_spec": "1.名称：负压压力传感器",
+        "bindings": [
+            {
+                "code": "3.60.33.9021",
+                "name": "压力传感器",
+                "specification": "设定点范围：0~±1000pa；输出信号0~10V；供电电压24VDC；",
+                "unit": "个",
+                "brand": "晶安翔",
+                "category": "精密风量调节装置",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "负压电控柜",
+        "original_spec": "1.名称、型号:负压电控柜\n2.规格:带PLC控制,两泵联动,含报警装置,RS485远传报警\n3.基础形式、材质、规格:10#槽钢\n4.安装方式:落地式",
+        "bindings": [
+            {
+                "code": "3.60.33.9047",
+                "name": "房间控制器",
+                "specification": "房间控制器（含控制软件）；RS485通讯协议；",
+                "unit": "个",
+                "brand": "晶安翔",
+                "category": "精密风量调节装置",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 7.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气二级减压箱",
+        "original_spec": "1.名称：医用氧气二级减压箱\n2.规格：≤28m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1252",
+                "name": "医用气体流量仪(氧气)",
+                "specification": "20~999L/min，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "套",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气二级减压箱",
+        "original_spec": "1.名称：医用氧气二级减压箱\n2.规格：≤20m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.1252",
+                "name": "医用气体流量仪(氧气)",
+                "specification": "20~999L/min，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "套",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 22.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压缩空气二级减压箱",
+        "original_spec": "1.名称：压缩空气二级减压箱\n2.规格：≤50m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压缩空气二级减压箱",
+        "original_spec": "1.名称：压缩空气二级减压箱\n2.规格：≤35m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "压缩空气二级减压箱",
+        "original_spec": "1.名称：压缩空气二级减压箱\n2.规格：≤20m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.07.0164",
+                "name": "压缩空气气体终端",
+                "specification": "德标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 22.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气流量仪",
+        "original_spec": "1.名称：医用氧气流量仪\n2.规格：8~400L/min\n3.工作内容：安装、固定、单体试运转",
+        "bindings": [
+            {
+                "code": "2.24.13.0001",
+                "name": "医用氧气流量计",
+                "specification": "2~200L/min，最大总流量：99999.99m3，进气压力 0~0.6Mpa，RS485通讯。",
+                "unit": "台",
+                "brand": "",
+                "category": "差压、流量仪表",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用氧气流量仪",
+        "original_spec": "1.名称：医用氧气流量仪\n2.规格：5~300L/min\n3.工作内容：安装、固定、单体试运转",
+        "bindings": [
+            {
+                "code": "2.38.07.1221",
+                "name": "氧气流量仪",
+                "specification": "测量范围30-3000,焊接头球帽，定制款",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 22.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用气体压力监测报警装置（含传感器）",
+        "original_spec": "1.名称：医用气体压力监测报警装置（含传感器）\n2.规格：三气\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查",
+        "bindings": [
+            {
+                "code": "2.38.08.0020",
+                "name": "惰性气体压力传感器",
+                "specification": "测量范围：(-0.1~0~40)MPa,量程内可选；\n介质：与316不锈钢兼容的各种流质介质。",
+                "unit": "个",
+                "brand": "",
+                "category": "实验室特气材料",
+                "qty": 24.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "RYYP 4*0.75信号线",
+        "original_spec": "1.名称：控制线\n2.规格：RYYP 4*0.75\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、清理场地、做标记、线路通路测试",
+        "bindings": [
+            {
+                "code": "2.30.29.0005",
+                "name": "超五类4对SF/UTP双屏蔽网线",
+                "specification": "4*2*0.5，超五类4对SF/UTP双屏蔽网线",
+                "unit": "m",
+                "brand": "普天",
+                "category": "综合布线系统",
+                "qty": 817.686,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 817.686,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢波纹软接",
+        "original_spec": "1.材质：不锈钢波纹软接\n2.规格：DN15\n3.连接形式：螺纹连接\n4.工作内容：切管、套丝、加垫、安装、试压检查",
+        "bindings": [
+            {
+                "code": "2.18.15.0010",
+                "name": "不锈钢波纹软接",
+                "specification": "304-DN15-PN10",
+                "unit": "个",
+                "brand": "",
+                "category": "管接头",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢波纹软接",
+        "original_spec": "1.类型：不锈钢波纹软接\n2.规格：DN20\n3.连接形式：螺纹连接\n4.工作内容：切管、套丝、加垫、安装、试压检查",
+        "bindings": [
+            {
+                "code": "2.18.15.0111",
+                "name": "不锈钢波纹软接",
+                "specification": "304-DN20-PN16",
+                "unit": "个",
+                "brand": "",
+                "category": "管接头",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢波纹软接",
+        "original_spec": "1.类型：不锈钢波纹软接\n2.规格：DN25\n3.连接形式：螺纹连接\n4.工作内容：切管、套丝、加垫、安装、试压检查",
+        "bindings": [
+            {
+                "code": "2.18.15.0112",
+                "name": "不锈钢波纹软接",
+                "specification": "304-DN25-PN16",
+                "unit": "个",
+                "brand": "",
+                "category": "管接头",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢波纹软接",
+        "original_spec": "1.类型：不锈钢波纹软接\n2.规格：DN50\n3.连接形式：螺纹连接\n4.工作内容：切管、套丝、加垫、安装、试压检查",
+        "bindings": [
+            {
+                "code": "2.18.15.0012",
+                "name": "不锈钢波纹软接",
+                "specification": "304-DN25-PN10",
+                "unit": "个",
+                "brand": "",
+                "category": "管接头",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "不锈钢波纹软接",
+        "original_spec": "1.类型：法兰橡胶软接头\n2.规格：DN80\n3.连接形式：法兰连接\n4.工作内容：切管、焊接、制垫、加垫、安装组对、紧螺栓、安装、试压检查、钢制法兰垫\n5、包含法兰材料及安装费",
+        "bindings": [
+            {
+                "code": "2.19.49.0099",
+                "name": "不锈钢波纹软管",
+                "specification": "DN80，300mm，PN16，不锈钢波纹软管、法兰可用镀锌法兰",
+                "unit": "套",
+                "brand": "",
+                "category": "软接",
+                "qty": 1.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D10\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0027",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN20、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 12.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D18\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 104.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D25\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0029",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN25、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 19.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D38\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 6.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D45\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 15.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D57\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 3.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D76\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用不锈钢球阀",
+        "original_spec": "1.名称：医用不锈钢球阀\n2.材质：不锈钢\n3.规格：D89\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0030",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN32、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 2.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用铜质维修阀",
+        "original_spec": "1.名称：医用铜质维修阀\n2.材质：铜质\n3.规格：D10\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.1002",
+                "name": "医用铜球阀",
+                "specification": "脱脂，DN10",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 541.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用铜质维修阀",
+        "original_spec": "1.名称：医用铜质维修阀\n2.材质：铜质\n3.规格：D12\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装",
+        "bindings": [
+            {
+                "code": "2.19.05.0036",
+                "name": "医用不锈钢球阀",
+                "specification": "不锈钢 DN125、焊接",
+                "unit": "个",
+                "brand": "",
+                "category": "球阀",
+                "qty": 118.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "等电位接地端子箱",
+        "original_spec": "1.名称：等电位接地端子箱\n2.工作内容：本体安装、接线",
+        "bindings": [
+            {
+                "code": "2.27.06.0110",
+                "name": "等电位端子箱",
+                "specification": "通用物料，关键参数：尺寸、铜牌厚度，请放到备注里",
+                "unit": "台",
+                "brand": "国产优质",
+                "category": "接地装置",
+                "qty": 52.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "接地导线",
+        "original_spec": "1.名称：接地导线\n2.配线形式：管内穿线\n3.规格：BVR-6mm²\n4.材质：铜芯\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+        "bindings": [
+            {
+                "code": "2.38.08.0070",
+                "name": "钢瓶接头",
+                "specification": "316L材质，接口形式：W21.8、G5/8",
+                "unit": "个",
+                "brand": "",
+                "category": "实验室特气材料",
+                "qty": 4960.64,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 4960.64,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医疗设备带",
+        "original_spec": "1.名称：医疗设备带\n2.规格：固定式铝合金设备带，不含插座、网络接口、床头灯、开关及呼叫分机等配件\n3.工作内容：测位、划线、稳装、找平找正、组对、固定、接线、接管、端头板安装、密封胶收口",
+        "bindings": [
+            {
+                "code": "2.26.41.0712",
+                "name": "设备带插座",
+                "specification": "设备带插座",
+                "unit": "个",
+                "brand": "德奥",
+                "category": "电源插座",
+                "qty": 1787.606,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "气体终端",
+        "original_spec": "1.名称：医用气体终端\n2.气体种类：各种气体\n3.工作内容：开孔、螺栓固定、与管道连接、含宝塔头焊接",
+        "bindings": [
+            {
+                "code": "2.38.07.0154",
+                "name": "笑气气体终端",
+                "specification": "国标系列,一体成型、全金属压盖底座、带防错插功能",
+                "unit": "个",
+                "brand": "利华",
+                "category": "病床周边材料",
+                "qty": 1902.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "五孔插座带单口USB",
+        "original_spec": "1.名称：五孔插座带单口USB\n2.规格：10A  250V  二/三极  插座带一位1A  USB\n3.安装方式：暗装\n4.工作内容：测位、划线、打眼、缠埋螺体、固定底盒、清扫盒子、上塑料台、缠钢丝弹簧垫、装插座、接线、装盖、打胶收口",
+        "bindings": [
+            {
+                "code": "2.30.83.1329",
+                "name": "应急发放终端",
+                "specification": "通讯接口：支持USB及RS-232",
+                "unit": "台",
+                "brand": "智莱",
+                "category": "行为管理系统",
+                "qty": 597.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "五孔插座",
+        "original_spec": "1.名称：五孔插座\n2.规格：220V、10A\n3.安装形式：暗装、设备带安装\n4.工作内容：设备带开孔、插座安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.26.41.0513",
+                "name": "五孔插座",
+                "specification": "暗装，250V 16A",
+                "unit": "个",
+                "brand": "德奥",
+                "category": "电源插座",
+                "qty": 2287.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "单控开关",
+        "original_spec": "1.名称：单控开关\n2.规格：220V、10A\n3.安装形式：暗装、设备带安装\n4.工作内容：设备带开孔、开关安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.26.33.0019",
+                "name": "双联单控开关",
+                "specification": "防溅，翘板式，10A，250V",
+                "unit": "个",
+                "brand": "港博",
+                "category": "开关、插座功能件",
+                "qty": 806.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "床头灯",
+        "original_spec": "1.名称:床头灯\n2.类型:嵌入式安装，8W\n3.安装形式：设备带安装\n4.工作内容：设备带开孔、灯具安装、接线、螺栓固定",
+        "bindings": [
+            {
+                "code": "2.30.73.0212",
+                "name": "智能床头卡",
+                "specification": "5寸液晶屏",
+                "unit": "台",
+                "brand": "狄耐克",
+                "category": "护理呼应信号系统",
+                "qty": 806.0,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配线",
+        "original_spec": "1.名称：电线\n2.配线形式：管内穿线\n3.规格：WDZB-BYJ-4.0mm²\n4.材质：铜芯线\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+        "bindings": [
+            {
+                "code": "2.30.81.0939",
+                "name": "拼接屏线材及辅料",
+                "specification": "含网线\\电源插排\\控制线\\信号跳线\\多方向拼接调节挂钩\\安装辅材等",
+                "unit": "批",
+                "brand": "华平",
+                "category": "数字化手术室系统",
+                "qty": 11863.791,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "配管",
+        "original_spec": "1.名称：线管\n2.材质：套接紧定式镀锌钢导管JDG\n3.规格：JDG20\n4.工作内容：测位、划线、打眼、埋螺栓、锯管、配管、接地、穿引线",
+        "bindings": [
+            {
+                "code": "3.61.11.2202",
+                "name": "软管",
+                "specification": "材质：不锈钢 规格：DN6",
+                "unit": "根",
+                "brand": "科恩",
+                "category": "实验室配件",
+                "qty": 3954.597,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ10（DN8*1.0）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.38.01.0121",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ32*厚度2.5、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 9200.282,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ12（DN10*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 111111.0,
+                "qty_ratio": 19.479348062189594
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 22222.0,
+                "qty_ratio": 3.8958345495763442
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D18（DN15*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0509",
+                "name": "衬塑复合管",
+                "specification": "衬塑复合钢管，DN15*2.5；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 4696.432,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D25（DN20*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D45(DN40*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1757.59,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D57(DN50*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 890.169,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN20\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 200.775,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ10（DN8*1.0）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1110.282,
+                "qty_ratio": 0.12067912700936775
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 500.282,
+                "qty_ratio": 0.054376811493386835
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝紫铜管",
+        "original_spec": "1.材质：医用脱脂无缝铜管\n2.规格：φ12（DN10*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.38.01.0124",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ72*厚度3、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 504.041,
+                "qty_ratio": 0.088365599055126
+            },
+            {
+                "code": "2.38.01.0121",
+                "name": "医气脱脂无缝紫铜管",
+                "specification": "外径φ32*厚度2.5、焊接",
+                "unit": "m",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 14.041,
+                "qty_ratio": 0.0024615881968590336
+            },
+            {
+                "code": "2.38.01.3099",
+                "name": "医用脱脂无缝紫铜管管件",
+                "specification": "通用参数",
+                "unit": "批",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 704.041,
+                "qty_ratio": 0.12342846062992886
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D18（DN15*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.28.0509",
+                "name": "衬塑复合管",
+                "specification": "衬塑复合钢管，DN15*2.5；沟槽(卡箍)连接",
+                "unit": "m",
+                "brand": "新兴",
+                "category": "复合管",
+                "qty": 4696.432,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D25（DN20*2.0）\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1702.839,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D45(DN40*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 1757.59,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "医用脱脂无缝不锈钢管",
+        "original_spec": "1.材质：医用脱脂无缝不锈钢管\n2.规格：D57(DN50*2.5)\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "WL1000386478",
+                "name": "医用脱脂无缝不锈钢管",
+                "specification": "DN32*2.5,D38",
+                "unit": "米",
+                "brand": "海亮",
+                "category": "脱脂无缝紫铜管",
+                "qty": 890.169,
+                "qty_ratio": 1.0
+            }
+        ]
+    },
+    {
+        "original_name": "高强度UPVC管",
+        "original_spec": "1.材质：高强度UPVC管\n2.规格：DN20\n3.连接形式：承插式粘接连接\n4.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、空气吹扫、喷涂标识\n5.管件为甲供材",
+        "bindings": [
+            {
+                "code": "2.17.25.0095",
+                "name": "UPVC管",
+                "specification": "DN40（D50*3.7）",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 200.775,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.25.0192",
+                "name": "UPVC管",
+                "specification": "美标，SCH80，胶粘，DN400",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 200.775,
+                "qty_ratio": 1.0
+            },
+            {
+                "code": "2.17.25.0194",
+                "name": "UPVC管",
+                "specification": "美标，SCH80，胶粘，DN300",
+                "unit": "m",
+                "brand": "联塑",
+                "category": "塑料管",
+                "qty": 200.775,
+                "qty_ratio": 1.0
+            }
+        ]
+    }
+]
