@@ -11,17 +11,23 @@ def build_historical_price_map(template_path: str) -> Dict[str, float]:
     This helps us preserve existing prices for matched materials.
     """
     price_map = {}
-    if not os.path.exists(template_path):
+    if not template_path or not os.path.exists(template_path):
         return price_map
         
     try:
         wb = openpyxl.load_workbook(template_path, data_only=True)
-        sheet = wb["模板"]
+        if "模板" in wb.sheetnames:
+            sheet = wb["模板"]
+        else:
+            sheet = wb.active
         for r in range(3, sheet.max_row + 1):
             code = sheet.cell(r, 5).value  # *清单编码 (Column E)
             price = sheet.cell(r, 13).value  # 单价(无税) (Column M)
             if code and price is not None:
-                price_map[str(code).strip()] = float(price)
+                try:
+                    price_map[str(code).strip()] = float(price)
+                except (ValueError, TypeError):
+                    pass
     except Exception as e:
         print(f"Error building historical price map: {e}")
         
@@ -54,16 +60,48 @@ def generate_standard_report(matched_items: List[Dict[str, Any]], template_path:
     Standard report generator with grouped professional categories,
     parent-child rows styling, and multi-row flat export.
     """
-    if not os.path.exists(template_path):
-        raise FileNotFoundError(f"Template file not found at {template_path}")
+    # Build price map if template path is valid
+    price_map = {}
+    if template_path and os.path.exists(template_path):
+        price_map = build_historical_price_map(template_path)
+
+    wb = None
+    if template_path and os.path.exists(template_path):
+        try:
+            wb = openpyxl.load_workbook(template_path, data_only=False)
+            if "模板" in wb.sheetnames:
+                sheet = wb["模板"]
+            else:
+                sheet = wb.active
+                sheet.title = "模板"
+        except Exception as e:
+            print(f"Error loading template file: {e}. Falling back to system built-in template.")
+            wb = None
+
+    if wb is None:
+        # Build built-in template dynamically
+        wb = openpyxl.Workbook()
+        sheet = wb.active
+        sheet.title = "模板"
         
-    # Build price map from template
-    price_map = build_historical_price_map(template_path)
-    
-    # Load workbook preserving formulas
-    wb = openpyxl.load_workbook(template_path, data_only=False)
-    sheet = wb["模板"]
-    
+        headers = [
+            '*序号', '*费用类型', '*清单类型', '*材料类型', '*清单编码', 
+            '*清单名称', '*特征/规格型号', '单位', '*工程量', '材料损耗', 
+            '品牌', '竞聘系数', '单价(无税)', '备注', '专业'
+        ]
+        # Set headers styling
+        for col_idx, header in enumerate(headers, start=1):
+            cell = sheet.cell(1, col_idx)
+            cell.value = header
+            cell.font = Font(name="微软雅黑", size=11, bold=True)
+            cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+            
+        # Add dummy row 2 for styling template cache
+        for col_idx in range(1, 17):
+            cell = sheet.cell(2, col_idx)
+            cell.value = None
+            cell.font = Font(name="微软雅黑", size=10)
+            
     # Cache style template from row 3 if exists, or row 2
     style_templates = []
     if sheet.max_row >= 3:
