@@ -160,5 +160,46 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(attrs2.get("六管制"), "六管制")
         self.assertEqual(attrs2.get("变频电机"), "变频电机")
 
+class TestDatabaseImport(unittest.TestCase):
+    def test_disabled_code_filtering(self):
+        import pandas as pd
+        from app.db_manager import import_materials_from_excel, query_by_code
+        
+        # Define mock material data including disabled/inactive codes
+        data = {
+            "物料分类": ["暖通", "暖通", "给排水", "电气", "电气"],
+            "物料编码": ["WZ-1001", "WZ-1002（禁用）", "WZ-1003", "WZ-1004(已禁用）", "WZ-1005（无效停用）"],
+            "物料名称": ["风机", "风机", "给水管", "电缆", "电缆"],
+            "规格/型号": ["FN-1", "FN-2", "DN50", "3*2.5", "5*4"],
+            "计量单位": ["台", "台", "米", "米", "米"],
+            "常用品牌": ["", "", "", "", ""],
+            "描述": ["", "", "", "", ""]
+        }
+        df = pd.DataFrame(data)
+        
+        # Write to temporary Excel file with a header offset (using startrow=1 to leave the first row empty)
+        temp_xlsx = os.path.join(os.path.dirname(DB_PATH), "temp_test_import.xlsx")
+        df.to_excel(temp_xlsx, index=False, startrow=1)
+        
+        try:
+            # Import using "replace" mode
+            meta = import_materials_from_excel(temp_xlsx, mode="replace", filename="temp_test_import.xlsx")
+            
+            # Assert metadata values
+            self.assertEqual(meta["total_rows"], 5)
+            self.assertEqual(meta["imported_rows"], 2) # WZ-1001, WZ-1003 are valid
+            self.assertEqual(meta["disabled_rows"], 3) # WZ-1002, WZ-1004, WZ-1005 are disabled
+            
+            # Assert query validations
+            self.assertIsNotNone(query_by_code("WZ-1001"))
+            self.assertIsNotNone(query_by_code("WZ-1003"))
+            self.assertIsNone(query_by_code("WZ-1002（禁用）"))
+            self.assertIsNone(query_by_code("WZ-1004(已禁用）"))
+            self.assertIsNone(query_by_code("WZ-1005（无效停用）"))
+            
+        finally:
+            if os.path.exists(temp_xlsx):
+                os.remove(temp_xlsx)
+
 if __name__ == "__main__":
     unittest.main()

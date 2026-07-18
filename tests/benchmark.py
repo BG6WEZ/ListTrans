@@ -76,8 +76,9 @@ def run_performance_test():
     # 2. Batch encode queries to avoid PyTorch CPU contention
     from app.vector_index import index_manager
     texts_to_encode = [f"{item['name']} {item['specification']}".strip() for item in workload]
-    print(f"正在进行 2000 行文本的批量向量化...")
     embeddings = index_manager.encode_queries(texts_to_encode)
+    if embeddings is None:
+        embeddings = [None] * len(workload)
     print(f"向量化完成，耗时: {time.time() - start_time:.2f} 秒。开始并发匹配...")
     
     # Run batch matching using ThreadPoolExecutor (V2.2 batch scheduler)

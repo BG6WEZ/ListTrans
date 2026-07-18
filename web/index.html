@@ -431,7 +431,10 @@
                             <span class="section-tag" style="background-color: var(--color-primary-glow); color: var(--color-primary);"><i class="fa-solid fa-database"></i> 全局物料明细库管理</span>
                         </div>
                         <div class="db-meta-info" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--color-text-secondary); background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                            <div><strong>当前物料行数：</strong><span id="db-meta-row-count" style="color: #60a5fa; font-weight: 600;">-</span> 行</div>
+                            <div><strong>物料总行数：</strong><span id="db-meta-total-count" style="color: var(--color-text-primary); font-weight: 600;">-</span> 行</div>
+                            <div><strong>入库行数：</strong><span id="db-meta-imported-count" style="color: #4ade80; font-weight: 600;">-</span> 行</div>
+                            <div><strong>禁用行数：</strong><span id="db-meta-disabled-count" style="color: #f87171; font-weight: 600;">-</span> 行</div>
+                            <div style="display: none;"><span id="db-meta-row-count">-</span></div>
                             <div><strong>最近更新日期：</strong><span id="db-meta-last-date" style="color: var(--color-text-primary);">-</span></div>
                             <div><strong>最近更新文件：</strong><span id="db-meta-filename" style="color: var(--color-text-primary); font-family: monospace;">-</span></div>
                         </div>

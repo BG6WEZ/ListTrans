@@ -1700,16 +1700,34 @@ async function submitSaveConfig(configType, data) {
     return response.json();
 }
 
+// Helper to render DB metadata stats
+function renderDbMetadata(meta) {
+    if (!meta) return;
+    const totalRows = (meta.total_rows !== undefined ? meta.total_rows : meta.row_count) || 0;
+    const importedRows = (meta.imported_rows !== undefined ? meta.imported_rows : meta.row_count) || 0;
+    const disabledRows = meta.disabled_rows || 0;
+
+    const totalEl = document.getElementById('db-meta-total-count');
+    const importedEl = document.getElementById('db-meta-imported-count');
+    const disabledEl = document.getElementById('db-meta-disabled-count');
+    const rowCountEl = document.getElementById('db-meta-row-count');
+
+    if (totalEl) totalEl.innerText = totalRows.toLocaleString();
+    if (importedEl) importedEl.innerText = importedRows.toLocaleString();
+    if (disabledEl) disabledEl.innerText = disabledRows.toLocaleString();
+    if (rowCountEl) rowCountEl.innerText = importedRows.toLocaleString();
+
+    document.getElementById('db-meta-last-date').innerText = meta.last_upload_date || '-';
+    document.getElementById('db-meta-filename').innerText = meta.filename || '-';
+}
+
 // 10.1 Load & Render Database Metadata
 async function loadAndRenderDbMetadata() {
     try {
         const response = await fetch(`${backendUrl}/api/db/metadata`);
         if (!response.ok) throw new Error("获取数据库指标失败");
         const meta = await response.json();
-        
-        document.getElementById('db-meta-row-count').innerText = meta.row_count.toLocaleString();
-        document.getElementById('db-meta-last-date').innerText = meta.last_upload_date;
-        document.getElementById('db-meta-filename').innerText = meta.filename;
+        renderDbMetadata(meta);
     } catch (e) {
         console.error("Error loading DB metadata:", e);
     }
@@ -1778,10 +1796,7 @@ async function handleDbUploadAndImport() {
         dbFileLabel.innerText = '未选择文件';
         
         // Re-render fresh metadata
-        const meta = data.metadata;
-        document.getElementById('db-meta-row-count').innerText = meta.row_count.toLocaleString();
-        document.getElementById('db-meta-last-date').innerText = meta.last_upload_date;
-        document.getElementById('db-meta-filename').innerText = meta.filename;
+        renderDbMetadata(data.metadata);
         
         alert("物料明细库导入及向量索引重建已全部完成！");
         

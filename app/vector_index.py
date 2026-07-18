@@ -8,13 +8,13 @@ from typing import List, Dict, Tuple, Any, Optional
 try:
     import faiss
     HAS_FAISS = True
-except ImportError:
+except Exception:
     HAS_FAISS = False
 
 try:
     from sentence_transformers import SentenceTransformer
     HAS_SENTENCE_TRANSFORMERS = True
-except ImportError:
+except Exception:
     HAS_SENTENCE_TRANSFORMERS = False
 
 DB_DIR = os.path.dirname(__file__)
@@ -70,8 +70,13 @@ class VectorIndexManager:
             return None
         try:
             embeddings = self.model.encode(texts, batch_size=64, show_progress_bar=False, convert_to_numpy=True)
-            # Normalize for cosine similarity (Inner Product of normalized vectors is cosine similarity)
-            faiss.normalize_L2(embeddings)
+            if HAS_FAISS:
+                faiss.normalize_L2(embeddings)
+            else:
+                # L2 normalize using numpy
+                norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+                norms = np.where(norms == 0, 1.0, norms)
+                embeddings = embeddings / norms
             return embeddings
         except Exception as e:
             print(f"Error encoding query texts: {e}")

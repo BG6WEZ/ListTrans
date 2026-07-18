@@ -71,89 +71,12 @@ def init_db(xlsx_path=None, force_reload=False):
             has_fts = False
             
         conn.commit()
+        conn.close()
         
         if xlsx_path and os.path.exists(xlsx_path):
-            print(f"Loading data from {xlsx_path}...")
-            df = pd.read_excel(xlsx_path, header=1)
-            
-            # Map columns
-            df = df.rename(columns={
-                "物料分类": "category",
-                "物料编码": "code",
-                "物料名称": "name",
-                "规格/型号": "specification",
-                "计量单位": "unit",
-                "常用品牌": "brand",
-                "描述": "description"
-            })
-            
-            required_cols = ["code", "category", "name", "specification", "unit", "brand", "description"]
-            for col in required_cols:
-                if col not in df.columns:
-                    df[col] = ""
-                    
-            df_cleaned = df[required_cols].dropna(subset=["code"])
-            df_cleaned["code"] = df_cleaned["code"].astype(str).str.strip()
-            df_cleaned["category"] = df_cleaned["category"].fillna("").astype(str).str.strip()
-            df_cleaned["name"] = df_cleaned["name"].fillna("").astype(str).str.strip()
-            df_cleaned["specification"] = df_cleaned["specification"].fillna("").astype(str).str.strip()
-            df_cleaned["unit"] = df_cleaned["unit"].fillna("").astype(str).str.strip()
-            df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
-            df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
-            
-            # Create search tokens for LIKE optimization and pre-parse parameters
-            from app.preprocessor import extract_params
-            search_tokens_list = []
-            parsed_params_list = []
-            for _, row in df_cleaned.iterrows():
-                tokens = f"{row['name']} {row['specification']} {row['category']}".lower()
-                search_tokens_list.append(tokens)
-                
-                # Pre-parse params and serialize to JSON
-                full_spec = f"{row['specification']} {row['description']}".strip()
-                parsed = extract_params(full_spec, row['category'])
-                parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
-                
-            df_cleaned["search_tokens"] = search_tokens_list
-            df_cleaned["parsed_params"] = parsed_params_list
-            
-            # Write to SQL
-            records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
-            
-            cursor.executemany("""
-                INSERT OR REPLACE INTO materials 
-                (code, category, name, specification, unit, brand, description, search_tokens, parsed_params)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, records)
-            
-            if has_fts:
-                # Import fts_tokenize locally to avoid circular dependencies
-                from app.preprocessor import fts_tokenize
-                
-                # Apply character spacing to columns inside the FTS table
-                fts_records = []
-                for _, row in df_cleaned.iterrows():
-                    fts_records.append([
-                        row["code"],
-                        fts_tokenize(row["category"]),
-                        fts_tokenize(row["name"]),
-                        fts_tokenize(row["specification"]),
-                        fts_tokenize(row["brand"]),
-                        fts_tokenize(row["description"])
-                    ])
-                
-                cursor.executemany("""
-                    INSERT OR REPLACE INTO materials_fts 
-                    (code, category, name, specification, brand, description)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, fts_records)
-                
-            conn.commit()
-            print(f"Imported {len(records)} material rows into database.")
+            import_materials_from_excel(xlsx_path, mode="replace", filename=os.path.basename(xlsx_path))
         else:
             print("No source Excel file loaded. Database is empty.")
-        
-        conn.close()
         
         # Build vector index cache if vector index exists
         try:
@@ -285,15 +208,33 @@ def get_db_metadata() -> Dict[str, Any]:
     cursor.execute("SELECT value FROM materials_metadata WHERE key = 'filename'")
     row = cursor.fetchone()
     filename = row[0] if row else "未知"
+
+    # Get total_rows
+    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'total_rows'")
+    row = cursor.fetchone()
+    total_rows = int(row[0]) if row else row_count
+
+    # Get imported_rows
+    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'imported_rows'")
+    row = cursor.fetchone()
+    imported_rows = int(row[0]) if row else row_count
+
+    # Get disabled_rows
+    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'disabled_rows'")
+    row = cursor.fetchone()
+    disabled_rows = int(row[0]) if row else 0
     
     conn.close()
     return {
         "row_count": row_count,
         "last_upload_date": last_upload_date,
-        "filename": filename
+        "filename": filename,
+        "total_rows": total_rows,
+        "imported_rows": imported_rows,
+        "disabled_rows": disabled_rows
     }
 
-def update_db_metadata(row_count: int, filename: str):
+def update_db_metadata(total_rows: int, imported_rows: int, disabled_rows: int, filename: str):
     """Save upload logs and timestamp details to SQLite."""
     import datetime
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -307,6 +248,9 @@ def update_db_metadata(row_count: int, filename: str):
     """)
     cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('last_upload_date', ?)", (now_str,))
     cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('filename', ?)", (filename,))
+    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('total_rows', ?)", (str(total_rows),))
+    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('imported_rows', ?)", (str(imported_rows),))
+    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('disabled_rows', ?)", (str(disabled_rows),))
     conn.commit()
     conn.close()
 
@@ -346,6 +290,18 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
     df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
     
+    # Filter out materials where code contains comments/annotations such as 禁用, 停用, 无效
+    disabled_mask = df_cleaned["code"].apply(lambda x: any(kw in str(x) for kw in ["禁用", "停用", "无效"]))
+    df_disabled = df_cleaned[disabled_mask]
+    df_imported = df_cleaned[~disabled_mask]
+    
+    total_rows = len(df_cleaned)
+    disabled_rows = len(df_disabled)
+    imported_rows = len(df_imported)
+    
+    # Work with imported rows only
+    df_cleaned = df_imported
+    
     # Create search tokens and pre-parse parameters
     from app.preprocessor import extract_params
     search_tokens_list = []
@@ -359,6 +315,7 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         parsed = extract_params(full_spec, row['category'])
         parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
         
+    df_cleaned = df_cleaned.copy()  # Avoid SettingWithCopyWarning
     df_cleaned["search_tokens"] = search_tokens_list
     df_cleaned["parsed_params"] = parsed_params_list
     
@@ -406,8 +363,18 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     conn.commit()
     conn.close()
     
-    # Update upload metadata
-    update_db_metadata(len(df_cleaned), filename)
+    # Compute aggregate stats
+    old_meta = get_db_metadata()
+    if mode == "append":
+        new_total = old_meta.get("total_rows", 0) + total_rows
+        new_imported = old_meta.get("imported_rows", 0) + imported_rows
+        new_disabled = old_meta.get("disabled_rows", 0) + disabled_rows
+    else:
+        new_total = total_rows
+        new_imported = imported_rows
+        new_disabled = disabled_rows
+        
+    update_db_metadata(new_total, new_imported, new_disabled, filename)
     
     # Return fresh metadata
     return get_db_metadata()
