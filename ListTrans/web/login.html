@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华康洁净物料匹配工具 - 登录</title>
+    <link rel="stylesheet" href="login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-decorations">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="logo500.png" alt="Logo" class="logo">
+            <h1>华康物料清单匹配系统</h1>
+            <p>基于 NLP 与全文检索的洁净工程清单智能比对平台</p>
+        </div>
+        <form id="login-form">
+            <div class="error-container" id="error-msg"></div>
+            <div class="input-group">
+                <label for="username">用户名</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="请输入用户名">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="password">密码</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入密码">
+                </div>
+            </div>
+            <button type="submit" id="submit-btn" class="login-btn">
+                <span>登录系统</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
+        <div class="login-footer">
+            <p>© 2026 华康洁净系统工程有限公司 · 版权所有</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        
+        // Redirect to index if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = 'index.html';
+        }
+
+        const form = document.getElementById('login-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const loader = document.getElementById('loader');
+        const errorMsg = document.getElementById('error-msg');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+            submitBtn.classList.add('loading');
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || '登录失败，请检查用户名或密码。');
+                }
+
+                // Store Token and User info
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+                
+                // Redirect
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorMsg.innerText = err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.classList.remove('loading');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -5,12 +5,12 @@ import shutil
 import uuid
 import pandas as pd
 import openpyxl
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor
 import json
 
@@ -35,16 +35,168 @@ if not logger.handlers:
     logger.addHandler(fh)
 
 
-app = FastAPI(title="华康洁净物料清单匹配工具")
+from dotenv import load_dotenv
+load_dotenv()
+
+ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",")
+
+app = FastAPI(
+    title="华康洁净物料清单匹配工具",
+    docs_url="/docs" if ENABLE_DOCS else None,
+    redoc_url="/redoc" if ENABLE_DOCS else None
+)
 
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
+
+# Include Auth and Session dependencies
+from app.auth_middleware import require_employee, require_manager, require_director, require_admin, get_current_user
+from app.admin_api import router as admin_router
+app.include_router(admin_router)
+
+# Authentication and Session API Endpoints
+from app.auth_manager import (
+    verify_password, get_user_by_username, create_access_token, 
+    update_user_last_login, log_login_attempt, is_user_locked_out,
+    security_logger
+)
+from app.session_manager import (
+    save_draft_session, get_draft_session, save_named_session, list_saved_sessions,
+    get_session_by_id, update_named_session, delete_session_by_id
+)
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class DraftSaveRequest(BaseModel):
+    original_filename: str
+    professional: str
+    items_json: str
+
+class NamedSaveRequest(BaseModel):
+    session_name: str
+    original_filename: str
+    professional: str
+    items_json: str
+
+class UpdateSessionRequest(BaseModel):
+    items_json: str
+
+@app.post("/api/auth/login")
+async def api_login(req: LoginRequest, request: Request):
+    username = req.username.strip()
+    ip = request.client.host if request.client else "unknown"
+    
+    is_locked, remaining = is_user_locked_out(username, ip)
+    if is_locked:
+        raise HTTPException(
+            status_code=429,
+            detail=f"登录失败次数过多。为了账号安全，已临时锁定，请在 {remaining} 秒后再试。"
+        )
+        
+    user = get_user_by_username(username)
+    if not user or not verify_password(req.password, user["password_hash"]):
+        log_login_attempt(username, ip, success=False)
+        security_logger.warning(f"Failed login attempt for username '{username}' from IP {ip}.")
+        raise HTTPException(status_code=400, detail="用户名或密码错误。")
+        
+    if not user["is_active"]:
+        log_login_attempt(username, ip, success=False)
+        security_logger.warning(f"Inactive username '{username}' tried to login from IP {ip}.")
+        raise HTTPException(status_code=403, detail="该账号已被停用，请联系管理员。")
+        
+    log_login_attempt(username, ip, success=True)
+    update_user_last_login(user["id"])
+    
+    access_token = create_access_token(data={"sub": username, "role": user["role"]})
+    security_logger.info(f"User '{username}' logged in successfully from IP {ip}.")
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "username": username,
+        "role": user["role"]
+    }
+
+@app.post("/api/session/draft")
+async def api_save_draft(req: DraftSaveRequest, current_user: dict = Depends(get_current_user)):
+    save_draft_session(current_user["id"], req.original_filename, req.professional, req.items_json)
+    return {"success": True}
+
+@app.get("/api/session/draft")
+async def api_get_draft(current_user: dict = Depends(get_current_user)):
+    draft = get_draft_session(current_user["id"])
+    if not draft:
+        return {"draft": None}
+    return {
+        "draft": {
+            "id": draft["id"],
+            "original_filename": draft["original_filename"],
+            "professional": draft["professional"],
+            "items_json": draft["items_json"],
+            "updated_at": draft["updated_at"]
+        }
+    }
+
+@app.post("/api/session/save")
+async def api_save_session(req: NamedSaveRequest, current_user: dict = Depends(get_current_user)):
+    session_id = save_named_session(
+        current_user["id"], req.session_name, req.original_filename, req.professional, req.items_json
+    )
+    return {"success": True, "session_id": session_id}
+
+@app.get("/api/session/list")
+async def api_list_sessions(current_user: dict = Depends(get_current_user)):
+    sessions = list_saved_sessions(current_user["id"])
+    return {"sessions": sessions}
+
+@app.get("/api/session/{session_id}")
+async def api_get_session(session_id: str, current_user: dict = Depends(get_current_user)):
+    session = get_session_by_id(current_user["id"], session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="未找到该工作进度记录。")
+    return {
+        "session": {
+            "id": session["id"],
+            "session_name": session["session_name"],
+            "original_filename": session["original_filename"],
+            "professional": session["professional"],
+            "items_json": session["items_json"],
+            "updated_at": session["updated_at"]
+        }
+    }
+
+@app.put("/api/session/{session_id}")
+async def api_update_session(session_id: str, req: UpdateSessionRequest, current_user: dict = Depends(get_current_user)):
+    session = get_session_by_id(current_user["id"], session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="未找到该工作进度记录。")
+    update_named_session(current_user["id"], session_id, req.items_json)
+    return {"success": True}
+
+@app.delete("/api/session/{session_id}")
+async def api_delete_session(session_id: str, current_user: dict = Depends(get_current_user)):
+    session = get_session_by_id(current_user["id"], session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="未找到该工作进度记录。")
+    delete_session_by_id(current_user["id"], session_id)
+    return {"success": True}
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -76,7 +228,18 @@ executor = ThreadPoolExecutor(max_workers=10)
 @app.on_event("startup")
 async def startup_event():
     """Startup initialization of DB and vector index."""
-    logger.info("Server started. Initializing SQLite DB and vector index mapping.")
+    logger.info("Server started. Initializing Auth, Session, SQLite DB and vector index mapping.")
+    
+    # Initialize Auth and Session databases
+    from app.auth_manager import init_auth_db
+    from app.session_manager import init_session_db, clean_old_draft_sessions
+    init_auth_db()
+    init_session_db()
+    try:
+        clean_old_draft_sessions()
+    except Exception as e:
+        logger.error(f"Error cleaning old drafts on startup: {e}")
+
     proj_dir = os.path.dirname(os.path.dirname(__file__))
     xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
     
@@ -85,7 +248,7 @@ async def startup_event():
     
     # Verify/build vector index
     index_manager.check_db_timestamp_and_build(DB_PATH)
-    logger.info("SQLite DB checked and vector index verified.")
+    logger.info("SQLite DB, Auth DB, Session DB checked and vector index verified.")
 
 class BindingModel(BaseModel):
     code: str
@@ -135,7 +298,7 @@ class FeedbackSubmitRequest(BaseModel):
     manual_code: str
     is_correct: bool
 
-@app.post("/api/upload")
+@app.post("/api/upload", dependencies=[Depends(require_employee)])
 async def upload_file(file: UploadFile = File(...)):
     """
     Upload original list and perform high performance batch matching.
@@ -452,7 +615,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         
     return total_results
 
-@app.post("/api/batch_match")
+@app.post("/api/batch_match", dependencies=[Depends(require_employee)])
 async def api_batch_match(payload: Dict[str, Any]):
     """Match a batch of lines sent as JSON."""
     rows = payload.get("rows", [])
@@ -476,7 +639,7 @@ async def api_batch_match(payload: Dict[str, Any]):
     results = batch_match_rows(raw_rows)
     return JSONResponse(content={"results": results})
 
-@app.post("/api/match")
+@app.post("/api/match", dependencies=[Depends(require_employee)])
 async def api_match_single(payload: Dict[str, Any]):
     """Match a single query item."""
     text = payload.get("text", "")
@@ -498,7 +661,7 @@ async def api_match_single(payload: Dict[str, Any]):
     res = match_item(query_info)
     return JSONResponse(content=res)
 
-@app.post("/api/rematch")
+@app.post("/api/rematch", dependencies=[Depends(require_employee)])
 async def api_rematch(req: RematchRequest):
     """Rematch item after manual parameters override."""
     fixed = req.fixed_params
@@ -541,7 +704,7 @@ async def api_rematch(req: RematchRequest):
     res = match_item(query_info)
     return JSONResponse(content=res)
 
-@app.post("/api/refresh_vector")
+@app.post("/api/refresh_vector", dependencies=[Depends(require_employee)])
 async def api_refresh_vector():
     """Trigger manual vector index rebuild."""
     try:
@@ -550,7 +713,7 @@ async def api_refresh_vector():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/config/save")
+@app.post("/api/config/save", dependencies=[Depends(require_admin)])
 async def api_save_config(req: ConfigSaveRequest):
     """Save user configuration panels variables to config json files."""
     filename_map = {
@@ -577,7 +740,7 @@ async def api_save_config(req: ConfigSaveRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/feedback/submit")
+@app.post("/api/feedback/submit", dependencies=[Depends(require_employee)])
 async def api_submit_feedback(req: FeedbackSubmitRequest):
     """Submit human calibration logs."""
     from app.feedback_train import save_feedback_sample
@@ -600,7 +763,7 @@ class BindingRuleConfirmRequest(BaseModel):
 class BindingRuleDeleteRequest(BaseModel):
     original_name: str
 
-@app.post("/api/binding/submit")
+@app.post("/api/binding/submit", dependencies=[Depends(require_employee)])
 async def api_submit_binding(req: BindingSubmitRequest):
     """Submit a list item's confirmed bindings to the feedback log for learning."""
     try:
@@ -641,7 +804,7 @@ async def api_submit_binding(req: BindingSubmitRequest):
         logger.error(f"Error in api_submit_binding: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/binding/suggestions")
+@app.get("/api/binding/suggestions", dependencies=[Depends(require_employee)])
 async def api_get_binding_suggestions():
     """Analyze binding feedback logs and suggest auto-binding rules."""
     try:
@@ -697,7 +860,7 @@ async def api_get_binding_suggestions():
         logger.error(f"Error in api_get_binding_suggestions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/binding/rules/confirm")
+@app.post("/api/binding/rules/confirm", dependencies=[Depends(require_employee)])
 async def api_confirm_binding_rule(req: BindingRuleConfirmRequest):
     """Confirm/Enable a learned auto-binding rule."""
     try:
@@ -728,7 +891,7 @@ async def api_confirm_binding_rule(req: BindingRuleConfirmRequest):
         logger.error(f"Error in api_confirm_binding_rule: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/binding/rules/delete")
+@app.post("/api/binding/rules/delete", dependencies=[Depends(require_employee)])
 async def api_delete_binding_rule(req: BindingRuleDeleteRequest):
     """Delete a confirmed auto-binding rule."""
     try:
@@ -740,7 +903,7 @@ async def api_delete_binding_rule(req: BindingRuleDeleteRequest):
         logger.error(f"Error in api_delete_binding_rule: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/binding/rules")
+@app.get("/api/binding/rules", dependencies=[Depends(require_employee)])
 async def api_get_binding_rules():
     """Retrieve all confirmed auto-binding rules."""
     try:
@@ -750,13 +913,13 @@ async def api_get_binding_rules():
         logger.error(f"Error in api_get_binding_rules: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/search")
+@app.get("/api/search", dependencies=[Depends(require_employee)])
 async def search_materials(keyword: str = "", limit: int = 50):
     """Search database for materials by keyword."""
     results = search_materials_keyword(keyword, limit=limit)
     return JSONResponse(content={"results": results})
 
-@app.post("/api/export")
+@app.post("/api/export", dependencies=[Depends(require_employee)])
 async def export_report(req: ExportRequest):
     """Export final verified matched items back to standard report template."""
     logger.info(f"Exporting matched items list as standard Excel report: {len(req.items)} rows.")
@@ -779,7 +942,7 @@ async def export_report(req: ExportRequest):
         logger.error(f"Error generating standard report: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating standard report: {str(e)}")
 
-@app.get("/api/config/load")
+@app.get("/api/config/load", dependencies=[Depends(require_manager)])
 async def api_load_all_configs():
     """Load and return all runtime configurations for UI edit board."""
     from app.preprocessor import alias_dict, unit_rules, stop_words
@@ -793,14 +956,14 @@ async def api_load_all_configs():
         "boosts": boost_rules
     })
 
-@app.get("/api/feedback/suggestions")
+@app.get("/api/feedback/suggestions", dependencies=[Depends(require_employee)])
 async def api_get_feedback_suggestions():
     """Get alias/typo correction recommendations from user corrections."""
     from app.feedback_train import get_feedback_suggestions
     suggestions = get_feedback_suggestions()
     return JSONResponse(content={"suggestions": suggestions})
 
-@app.get("/api/logs")
+@app.get("/api/logs", dependencies=[Depends(require_director)])
 async def api_get_logs(limit: int = 100):
     """Retrieve the last N lines of system execution logs."""
     log_path = "logs/app_runtime.log"
@@ -815,7 +978,7 @@ async def api_get_logs(limit: int = 100):
     except Exception as e:
         return JSONResponse(content={"logs": [f"Error reading log file: {str(e)}"]})
 
-@app.get("/api/db/metadata")
+@app.get("/api/db/metadata", dependencies=[Depends(require_manager)])
 async def api_db_metadata():
     """Get metadata for the current global material database."""
     from app.db_manager import get_db_metadata
@@ -826,7 +989,7 @@ async def api_db_metadata():
         logger.error(f"Error querying db metadata: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/db/upload")
+@app.post("/api/db/upload", dependencies=[Depends(require_director)])
 async def api_db_upload(
     file: UploadFile = File(...),
     mode: str = Form("replace") # "replace" or "append"

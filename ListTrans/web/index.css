@@ -1135,3 +1135,16 @@ body {
     border-radius: 4px;
 }
 
+.btn-info {
+    background-color: #0284c7;
+    border-color: #0284c7;
+    color: white;
+}
+.btn-info:hover {
+    background-color: #0369a1;
+    border-color: #0369a1;
+}
+.user-badge-role {
+    text-transform: uppercase;
+}
+

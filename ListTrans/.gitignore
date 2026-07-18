@@ -1,0 +1,22 @@
+# Python virtualenv & package caches
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local database files
+app/*.db
+app/vector_cache/
+*.db
+
+# Logs
+logs/
+*.log
+
+# Local environment configs
+.env
+.DS_Store
+.idea/
+.vscode/

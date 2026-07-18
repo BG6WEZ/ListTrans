@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>华康洁净物料清单匹配工具</title>
@@ -18,7 +23,7 @@
                 <img src="logo500.png" alt="Logo" class="logo-img" style="height: 38px; border-radius: 4px; background-color: white; padding: 2px;" />
                 <div class="logo-text">
                     <h1>华康洁净物料清单匹配工具</h1>
-                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.2</span></span>
+                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.4</span></span>
                 </div>
             </div>
             
@@ -27,7 +32,13 @@
                 <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
             </div>
             
-            <div class="header-actions">
+            <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn btn-secondary" id="history-trigger">
+                    <i class="fa-solid fa-history"></i> 历史记录
+                </button>
+                <button class="btn btn-info" id="save-trigger" style="display: none; background-color: #0284c7; border-color: #0284c7; color: white;">
+                    <i class="fa-solid fa-floppy-disk"></i> 暂存进度
+                </button>
                 <div class="upload-btn-wrapper">
                     <button class="btn btn-primary" id="upload-trigger">
                         <i class="fa-solid fa-cloud-arrow-up"></i> 上传原始清单
@@ -37,6 +48,12 @@
                 <button class="btn btn-success" id="export-btn" disabled>
                     <i class="fa-solid fa-file-excel"></i> 导出标准格式
                 </button>
+                <div class="user-profile-bar" style="display: flex; align-items: center; gap: 10px; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;">
+                    <span class="user-badge-role" id="user-role-lbl" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 600;">-</span>
+                    <span class="username-display" id="username-lbl" style="font-size: 13px; font-weight: 500;">-</span>
+                    <a href="admin.html" class="btn btn-primary" id="admin-panel-link" style="display: none; padding: 4px 8px; font-size: 11px; text-decoration: none; background-color: #475569; border-color: #475569;"><i class="fa-solid fa-cog"></i> 管理</a>
+                    <button class="btn btn-danger" id="logout-btn" style="padding: 4px 8px; font-size: 11px; background-color: #dc2626; border-color: #dc2626; color: white;"><i class="fa-solid fa-sign-out-alt"></i> 退出</button>
+                </div>
             </div>
         </header>
 
@@ -503,6 +520,54 @@
             <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
                 <button class="btn btn-secondary" id="cancel-param-btn">取消</button>
                 <button class="btn btn-primary" id="confirm-param-btn">确定重匹配</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Session Modal -->
+    <div class="loading-overlay" id="save-session-modal" style="display: none; justify-content: center; align-items: center; z-index: 101;">
+        <div class="glass-card" style="width: 400px; padding: 24px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="font-weight: 600;"><i class="fa-solid fa-save text-primary"></i> 在线保存当前进度</h3>
+                <button id="close-save-session-modal" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: var(--color-text-secondary);">记录名称</label>
+                    <input type="text" id="save-session-name" style="width: 100%; padding: 8px; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--color-text-primary);" placeholder="如：北京医院项目第一阶段匹配">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
+                <button class="btn btn-secondary" id="cancel-save-session-btn">取消</button>
+                <button class="btn btn-primary" id="confirm-save-session-btn">保存进度</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load History Modal -->
+    <div class="loading-overlay" id="history-modal" style="display: none; justify-content: center; align-items: center; z-index: 101;">
+        <div class="glass-card" style="width: 650px; max-height: 80vh; padding: 24px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-md); overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="font-weight: 600;"><i class="fa-solid fa-history text-primary"></i> 历史保存进度</h3>
+                <button id="close-history-modal" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="overflow-y: auto; flex: 1; min-height: 250px;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.02);">
+                            <th style="padding: 10px; text-align: left;">记录名称</th>
+                            <th style="padding: 10px; text-align: left;">清单文件</th>
+                            <th style="padding: 10px; text-align: left;">修改时间</th>
+                            <th style="padding: 10px; text-align: left; width: 140px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-sessions-tbody">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <button class="btn btn-secondary" id="close-history-btn">关闭</button>
             </div>
         </div>
     </div>

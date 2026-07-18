@@ -1,3 +1,45 @@
+// Intercept all fetch requests to inject authentication headers and handle token expiration
+const originalFetch = window.fetch;
+window.fetch = async function (url, options) {
+    options = options || {};
+    options.headers = options.headers || {};
+    
+    const token = localStorage.getItem('token');
+    
+    let isApi = false;
+    if (typeof url === 'string') {
+        isApi = url.includes('/api/') || url.startsWith('api/');
+    } else if (url && typeof url.url === 'string') {
+        isApi = url.url.includes('/api/') || url.url.startsWith('api/');
+    }
+    
+    if (token && isApi) {
+        if (options.headers instanceof Headers) {
+            options.headers.set('Authorization', `Bearer ${token}`);
+        } else if (Array.isArray(options.headers)) {
+            const hasAuth = options.headers.some(h => h[0].toLowerCase() === 'authorization');
+            if (!hasAuth) {
+                options.headers.push(['Authorization', `Bearer ${token}`]);
+            }
+        } else {
+            options.headers['Authorization'] = `Bearer ${token}`;
+        }
+    }
+    
+    try {
+        const response = await originalFetch(url, options);
+        if (response.status === 401) {
+            alert("您的登录会话已失效，请重新登录。");
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+        return response;
+    } catch (error) {
+        console.error("Fetch network error:", error);
+        throw error;
+    }
+};
+
 let items = []; // Holds all matched rows from original Excel
 let selectedItem = null; // Selected row dict
 let currentFilter = 'all'; // Current filter tab
@@ -24,8 +66,72 @@ let configs = {
 const backendUrl = ''; // Relative paths since hosted on same server
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Process User profile info
+    const username = localStorage.getItem('username') || '-';
+    const role = localStorage.getItem('role') || 'employee';
+    
+    const usernameLbl = document.getElementById('username-lbl');
+    const roleLbl = document.getElementById('user-role-lbl');
+    const adminLink = document.getElementById('admin-panel-link');
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    if (usernameLbl) usernameLbl.innerText = username;
+    if (roleLbl) {
+        let roleCn = '普通员工';
+        if (role === 'admin') roleCn = '管理员';
+        else if (role === 'director') roleCn = '总监';
+        else if (role === 'manager') roleCn = '经理';
+        roleLbl.innerText = roleCn;
+    }
+    
+    if (role === 'admin' && adminLink) {
+        adminLink.style.display = 'inline-flex';
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            if (confirm('确认退出系统吗？')) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
+    // Role constraints in UI
+    if (role === 'employee') {
+        const navConfig = document.getElementById('nav-config');
+        if (navConfig) {
+            navConfig.style.display = 'none';
+        }
+    }
+
+    if (role !== 'admin') {
+        const saveAllConfigsBtn = document.getElementById('save-all-configs-btn');
+        if (saveAllConfigsBtn) {
+            saveAllConfigsBtn.disabled = true;
+            saveAllConfigsBtn.title = "权限不足，只有管理员可以保存修改配置。";
+        }
+    }
+    
+    if (role !== 'admin' && role !== 'director') {
+        const selectDbBtn = document.getElementById('btn-select-db-file');
+        const startDbImportBtn = document.getElementById('btn-start-db-import');
+        if (selectDbBtn) {
+            selectDbBtn.disabled = true;
+            selectDbBtn.title = "权限不足，只有总监和管理员可以导入物料库。";
+        }
+        if (startDbImportBtn) {
+            startDbImportBtn.disabled = true;
+            startDbImportBtn.title = "权限不足，只有总监和管理员可以导入物料库。";
+        }
+    }
+
     initEventListeners();
     setupNavigation();
+    
+    // Check for auto-saved progress drafts on startup
+    checkForDraft();
+    startAutoSave();
 });
 
 function setupNavigation() {
@@ -339,6 +445,55 @@ function initEventListeners() {
         }
     });
 
+    // Save Session triggers
+    const saveTrigger = document.getElementById('save-trigger');
+    const saveSessionModal = document.getElementById('save-session-modal');
+    const closeSaveSessionModal = document.getElementById('close-save-session-modal');
+    const cancelSaveSessionBtn = document.getElementById('cancel-save-session-btn');
+    const confirmSaveSessionBtn = document.getElementById('confirm-save-session-btn');
+    const saveSessionNameInput = document.getElementById('save-session-name');
+
+    if (saveTrigger) {
+        saveTrigger.addEventListener('click', () => {
+            if (items.length === 0) return;
+            let suggestedName = originalFileName ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : '清单进度';
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}`;
+            saveSessionNameInput.value = `${suggestedName}_备份_${timeStr}`;
+            saveSessionModal.style.display = 'flex';
+        });
+    }
+
+    if (closeSaveSessionModal) closeSaveSessionModal.addEventListener('click', () => saveSessionModal.style.display = 'none');
+    if (cancelSaveSessionBtn) cancelSaveSessionBtn.addEventListener('click', () => saveSessionModal.style.display = 'none');
+    
+    if (confirmSaveSessionBtn) {
+        confirmSaveSessionBtn.addEventListener('click', async () => {
+            const sessionName = saveSessionNameInput.value.trim();
+            if (!sessionName) {
+                alert("请输入保存进度记录的名称。");
+                return;
+            }
+            await saveNamedSession(sessionName);
+        });
+    }
+
+    // History Modal triggers
+    const historyTrigger = document.getElementById('history-trigger');
+    const historyModal = document.getElementById('history-modal');
+    const closeHistoryModal = document.getElementById('close-history-modal');
+    const closeHistoryBtn = document.getElementById('close-history-btn');
+
+    if (historyTrigger) {
+        historyTrigger.addEventListener('click', async () => {
+            await fetchAndRenderHistorySessions();
+            historyModal.style.display = 'flex';
+        });
+    }
+
+    if (closeHistoryModal) closeHistoryModal.addEventListener('click', () => historyModal.style.display = 'none');
+    if (closeHistoryBtn) closeHistoryBtn.addEventListener('click', () => historyModal.style.display = 'none');
+
     // Auto-refresh interval for logs (runs every 3 seconds if config is visible and checkbox is checked)
     setInterval(() => {
         const configDashboard = document.getElementById('config-dashboard');
@@ -443,6 +598,11 @@ async function handleFileUpload(file) {
         document.getElementById('welcome-slate').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
         document.getElementById('export-btn').disabled = false;
+        
+        const saveTrigger = document.getElementById('save-trigger');
+        if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+        
+        saveDraft();
         
         // Clear selection
         selectedItem = null;
@@ -857,9 +1017,18 @@ async function applyMatchCandidate(cand) {
         selectedItem.bindings = [];
     }
     
-    // Check duplicates
-    if (selectedItem.bindings.some(b => b.code === cand.code)) {
-        alert(`物料 ${cand.code} (${cand.name}) 已经绑定了！`);
+    // Check duplicates / Already bound: if so, directly unbind without prompt
+    const existingIndex = selectedItem.bindings.findIndex(b => b.code === cand.code);
+    if (existingIndex !== -1) {
+        selectedItem.bindings.splice(existingIndex, 1);
+        selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
+        if (selectedItem.bindings.length === 0) {
+            selectedItem.matched_code = "";
+        }
+        renderBoundMaterials();
+        renderCandidates();
+        renderTable();
+        updateProgress();
         return;
     }
     
@@ -1777,7 +1946,7 @@ async function handleDbUploadAndImport() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('mode', importMode);
-    
+
     try {
         const response = await fetch(`${backendUrl}/api/db/upload`, {
             method: 'POST',
@@ -1810,3 +1979,238 @@ async function handleDbUploadAndImport() {
         hideLoading();
     }
 }
+
+// ==========================================
+// 工作暂存与保存 (Draft and Saved Sessions)
+// ==========================================
+
+let autoSaveInterval = null;
+let activeSessionId = null;
+
+function startAutoSave() {
+    if (autoSaveInterval) clearInterval(autoSaveInterval);
+    autoSaveInterval = setInterval(async () => {
+        await saveDraft();
+    }, 180000); // 3 minutes
+}
+
+async function saveDraft() {
+    if (items.length === 0) return;
+    try {
+        const payload = {
+            original_filename: originalFileName,
+            professional: currentProfessional || '全部',
+            items_json: JSON.stringify(items)
+        };
+        await fetch(`${backendUrl}/api/session/draft`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        console.log("Draft auto-saved successfully.");
+    } catch (err) {
+        console.error("Failed to auto-save draft:", err);
+    }
+}
+
+async function checkForDraft() {
+    try {
+        const res = await fetch(`${backendUrl}/api/session/draft`);
+        const data = await res.json();
+        if (res.ok && data.draft && items.length === 0) {
+            const draft = data.draft;
+            const draftTime = draft.updated_at;
+            if (confirm(`系统检测到您有未保存的编辑草稿（${draft.original_filename}，最后编辑时间：${draftTime}，共 ${JSON.parse(draft.items_json).length} 条数据）。\n\n是否载入该草稿并继续工作？`)) {
+                // Restore state
+                originalFileName = draft.original_filename;
+                currentProfessional = draft.professional || '全部';
+                items = JSON.parse(draft.items_json);
+                
+                document.getElementById('welcome-slate').style.display = 'none';
+                document.getElementById('workbench').style.display = 'flex';
+                document.getElementById('export-btn').disabled = false;
+                
+                const saveTrigger = document.getElementById('save-trigger');
+                if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+                
+                // Recover professionals list
+                const profSet = new Set(items.map(it => it.professional).filter(Boolean));
+                professionals = ['全部', ...Array.from(profSet)];
+                
+                renderProfessionalTabs();
+                currentPage = 1;
+                renderTable();
+                updateProgress();
+            }
+        }
+    } catch (err) {
+        console.error("Error checking for draft:", err);
+    }
+}
+
+async function saveNamedSession(name) {
+    if (items.length === 0) return;
+    try {
+        showLoading("正在保存工作进度...", "正在备份当前清单匹配工作状态，请稍候...");
+        const payload = {
+            session_name: name,
+            original_filename: originalFileName,
+            professional: currentProfessional || '全部',
+            items_json: JSON.stringify(items)
+        };
+        
+        let res;
+        if (activeSessionId) {
+            // Update existing named session
+            res = await fetch(`${backendUrl}/api/session/${activeSessionId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items_json: payload.items_json })
+            });
+        } else {
+            // Create a new named session
+            res = await fetch(`${backendUrl}/api/session/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "保存进度请求失败");
+        
+        if (data.session_id) {
+            activeSessionId = data.session_id;
+        }
+        
+        alert("进度保存成功！您可以在【历史记录】中随时重新加载或管理该记录。");
+        document.getElementById('save-session-modal').style.display = 'none';
+    } catch (err) {
+        alert(`保存失败: ${err.message}`);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function fetchAndRenderHistorySessions() {
+    const tbody = document.getElementById('history-sessions-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted);">正在加载历史记录...</td></tr>';
+    
+    try {
+        const res = await fetch(`${backendUrl}/api/session/list`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "加载历史列表失败");
+        
+        const sessions = data.sessions || [];
+        if (sessions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--color-text-muted);">暂无在线保存记录</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        sessions.forEach(sess => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.innerHTML = `
+                <td style="padding: 10px;"><strong>${sess.session_name}</strong></td>
+                <td style="padding: 10px; color: var(--color-text-secondary);">${sess.original_filename}</td>
+                <td style="padding: 10px; color: var(--color-text-muted); font-size: 12px;">${sess.updated_at}</td>
+                <td style="padding: 10px;">
+                    <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px;" onclick="loadSession('${sess.id}')">恢复</button>
+                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px; background-color: #dc2626; border-color: #dc2626;" onclick="deleteSession('${sess.id}', '${sess.session_name}')">删除</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-danger);">${err.message}</td></tr>`;
+    }
+}
+
+async function loadSession(sessionId) {
+    if (items.length > 0 && !confirm("恢复此保存进度将覆盖您当前的工作台，确定要继续吗？")) {
+        return;
+    }
+    
+    try {
+        showLoading("正在恢复工作进度...", "正在从云端载入项目匹配数据并还原，请稍候...");
+        const res = await fetch(`${backendUrl}/api/session/${sessionId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "恢复失败");
+        
+        const session = data.session;
+        originalFileName = session.original_filename;
+        currentProfessional = session.professional || '全部';
+        items = JSON.parse(session.items_json);
+        
+        // Render view
+        document.getElementById('welcome-slate').style.display = 'none';
+        document.getElementById('workbench').style.display = 'flex';
+        document.getElementById('export-btn').disabled = false;
+        
+        const saveTrigger = document.getElementById('save-trigger');
+        if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+        
+        const uploadedFilenameEl = document.getElementById('uploaded-filename');
+        if (uploadedFilenameEl) {
+            uploadedFilenameEl.innerText = ` - ${session.original_filename}`;
+            uploadedFilenameEl.title = session.original_filename;
+        }
+        
+        // Recover professionals list
+        const profSet = new Set(items.map(it => it.professional).filter(Boolean));
+        professionals = ['全部', ...Array.from(profSet)];
+        
+        renderProfessionalTabs();
+        selectedItem = null;
+        document.getElementById('select-prompt').style.display = 'flex';
+        document.getElementById('detail-editor').style.display = 'none';
+        
+        currentPage = 1;
+        renderTable();
+        updateProgress();
+        
+        activeSessionId = sessionId;
+        document.getElementById('history-modal').style.display = 'none';
+        alert("进度已成功恢复！");
+    } catch (err) {
+        alert(`加载失败: ${err.message}`);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function deleteSession(sessionId, name) {
+    if (!confirm(`确定要彻底删除保存的进度 "${name}" 吗？此操作不可逆。`)) return;
+    
+    try {
+        showLoading("正在删除...", "正在清理服务器上的保存记录...");
+        const res = await fetch(`${backendUrl}/api/session/${sessionId}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "删除失败");
+        
+        if (activeSessionId === sessionId) {
+            activeSessionId = null;
+        }
+        
+        alert("删除成功。");
+        await fetchAndRenderHistorySessions();
+    } catch (err) {
+        alert(`删除失败: ${err.message}`);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Safe navigation alert on leave
+window.addEventListener('beforeunload', (e) => {
+    if (items.length > 0) {
+        const msg = '您有未保存的清单匹配工作，刷新或离开可能导致最新的编辑内容丢失，确定离开吗？';
+        e.preventDefault();
+        e.returnValue = msg;
+        return msg;
+    }
+});

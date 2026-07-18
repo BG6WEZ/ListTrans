@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统管理 - 华康洁净物料匹配工具</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 20px;
+        }
+        .admin-header h1 {
+            font-size: 24px;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fff 0%, #8a99ad 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .user-table th, .user-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .user-table th {
+            background: rgba(255,255,255,0.04);
+            font-weight: 600;
+            color: #8a99ad;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .user-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-active {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+        }
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(45, 130, 255, 0.15);
+            color: #2d82ff;
+        }
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #f1f3f9;
+            margin-right: 6px;
+        }
+        .btn-action:hover {
+            background: rgba(255,255,255,0.12);
+        }
+        .btn-danger-action {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .btn-danger-action:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        .btn-primary-action {
+            background: #2d82ff;
+            border-color: #2d82ff;
+            color: white;
+        }
+        .btn-primary-action:hover {
+            background: #1e62c9;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: #0d1220;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 32px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            margin-bottom: 24px;
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #8a99ad;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #2d82ff;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        .modal-footer button {
+            margin-left: 10px;
+        }
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            color: #8a99ad;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        .nav-back:hover {
+            color: #2d82ff;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="admin-container">
+        <a href="index.html" class="nav-back">← 返回智能工作台</a>
+        
+        <div class="admin-header">
+            <div>
+                <h1>系统用户权限管理</h1>
+                <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">新增用户、分配角色、启用/禁用账号及管理员密码重置</p>
+            </div>
+            <button class="btn-action btn-primary-action" onclick="openCreateModal()">＋ 新增用户</button>
+        </div>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>角色</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>最后登录</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="user-list-body">
+                <!-- User rows dynamically injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal" id="create-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增系统用户</h2>
+            </div>
+            <form id="create-form">
+                <div class="form-group">
+                    <label for="create-username">用户名</label>
+                    <input type="text" id="create-username" required placeholder="请输入用户名，至少3位">
+                </div>
+                <div class="form-group">
+                    <label for="create-password">密码</label>
+                    <input type="password" id="create-password" required placeholder="请输入密码，至少6位">
+                </div>
+                <div class="form-group">
+                    <label for="create-role">角色</label>
+                    <select id="create-role">
+                        <option value="employee">普通员工 (使用智能工作台)</option>
+                        <option value="manager">经理 (智能工作台 + 查看词典规则)</option>
+                        <option value="director">总监 (智能工作台 + 查看配置 + 管理物料库)</option>
+                        <option value="admin">系统管理员 (完整权限 + 用户管理)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('create-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">创建用户</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改用户权限</h2>
+            </div>
+            <form id="edit-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="edit-username" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                </div>
+                <div class="form-group">
+                    <label for="edit-role">角色</label>
+                    <select id="edit-role">
+                        <option value="employee">普通员工</option>
+                        <option value="manager">经理</option>
+                        <option value="director">总监</option>
+                        <option value="admin">系统管理员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-status">账号状态</label>
+                    <select id="edit-status">
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('edit-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>重置用户密码</h2>
+            </div>
+            <form id="password-form">
+                <input type="hidden" id="password-user-id">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="password-username" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                </div>
+                <div class="form-group">
+                    <label for="password-new">新密码</label>
+                    <input type="password" id="password-new" required placeholder="请输入新密码，至少6位">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('password-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">重置密码</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        // Security check
+        if (!token || role !== 'admin') {
+            alert('权限不足，请使用管理员账号登录。');
+            window.location.href = 'login.html';
+        }
+
+        // Fetch headers helper
+        function getAuthHeaders() {
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Load users on startup
+        async function fetchUsers() {
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (res.status === 401 || res.status === 403) {
+                    alert('会话失效或权限不足，请重新登录。');
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const data = await res.json();
+                renderUsers(data);
+            } catch (err) {
+                console.error(err);
+                alert('加载用户列表失败。');
+            }
+        }
+
+        function renderUsers(users) {
+            const body = document.getElementById('user-list-body');
+            body.innerHTML = '';
+            
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                
+                const statusText = user.is_active ? '启用' : '禁用';
+                const statusClass = user.is_active ? 'status-active' : 'status-inactive';
+                
+                let roleCn = '普通员工';
+                if(user.role === 'admin') roleCn = '系统管理员';
+                else if(user.role === 'director') roleCn = '总监';
+                else if(user.role === 'manager') roleCn = '经理';
+
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><strong>${user.username}</strong></td>
+                    <td><span class="role-badge">${roleCn}</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${user.created_at || '-'}</td>
+                    <td>${user.last_login || '-'}</td>
+                    <td>
+                        <button class="btn-action" onclick="openEditModal(${user.id}, '${user.username}', '${user.role}', ${user.is_active})">权限配置</button>
+                        <button class="btn-action" onclick="openPasswordModal(${user.id}, '${user.username}')">密码重置</button>
+                        <button class="btn-action btn-danger-action" onclick="deleteUser(${user.id}, '${user.username}')">删除</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Modal Helpers
+        function openCreateModal() {
+            document.getElementById('create-form').reset();
+            document.getElementById('create-modal').style.display = 'flex';
+        }
+
+        function openEditModal(id, username, role, isActive) {
+            document.getElementById('edit-user-id').value = id;
+            document.getElementById('edit-username').value = username;
+            document.getElementById('edit-role').value = role;
+            document.getElementById('edit-status').value = isActive ? "1" : "0";
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function openPasswordModal(id, username) {
+            document.getElementById('password-user-id').value = id;
+            document.getElementById('password-username').value = username;
+            document.getElementById('password-new').value = '';
+            document.getElementById('password-modal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Submits
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('create-username').value;
+            const password = document.getElementById('create-password').value;
+            const role = document.getElementById('create-role').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ username, password, role })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '创建用户失败');
+                alert(data.detail);
+                closeModal('create-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value;
+            const role = document.getElementById('edit-role').value;
+            const is_active = document.getElementById('edit-status').value === "1";
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ role, is_active })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '保存修改失败');
+                alert(data.detail);
+                closeModal('edit-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('password-user-id').value;
+            const new_password = document.getElementById('password-new').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}/password`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ new_password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '密码重置失败');
+                alert(data.detail);
+                closeModal('password-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function deleteUser(id, username) {
+            if (!confirm(`确定要彻底删除用户 "${username}" 吗？此操作无法撤销。`)) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '删除用户失败');
+                alert(data.detail);
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // Initialize page
+        fetchUsers();
+    </script>
+</body>
+</html>
