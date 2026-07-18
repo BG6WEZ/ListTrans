@@ -100,6 +100,19 @@ graph TD
 * **登录限速防御**：限制同一 IP 或同一用户名在 5 分钟内最多尝试 5 次登录，超过则自动锁定该 IP/用户名 15 分钟，防止暴力破解。所有安全事件（登录成功/失败、账号锁定、未授权接口尝试）详细记录至独立日志 `logs/security.log`。
 * **安全响应头拦截**：FastAPI 配置自定义安全中间件，自动向所有前端请求注入 `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY` 及 `X-XSS-Protection: 1; mode=block`，防御点击劫持和 XSS 注入。
 
+### 7. 系统技术栈配置
+本系统基于轻量级、无打包编译的 Vanilla Web 架构与高性能 FastAPI 异步框架设计，降低运行开销并保证多端部署兼容性：
+* **前端 (Frontend)**：HTML5 + Vanilla CSS (卡片式微光玻璃拟态设计、50/50 独立滚动分屏布局) + 原生 JavaScript (ES6+，中央全局 fetch 鉴权钩子)。
+* **后端 (Backend)**：FastAPI (基于 Starlette 与 Pydantic V2) + Uvicorn ASGI 服务器，全面支持异步并发处理；使用 `python-jose` 和原生 `bcrypt` 模块实现安全的 JWT Token 生成与验证。
+* **数据存储 (Database)**：双 `SQLite 3` 独立数据库：
+  * [materials.db](file:///Users/tlyer/Project/ListTrans/app/materials.db)：全局企业标准物料明细及全文倒排检索。
+  * [auth.db](file:///Users/tlyer/Project/ListTrans/app/auth.db)：用户账户、RBAC 角色权限体系以及所有工作进度备份、定时自动暂存草稿数据。
+* **搜索与 NLP 服务 (Search & NLP)**：
+  * `SentenceTransformers` (`paraphrase-multilingual-MiniLM-L12-v2` 预训练模型) + `FAISS-CPU` 向量内积检索。
+  * `Numpy` 提供在无编译 FAISS 环境下的余弦相似度降级矩阵算法。
+  * SQLite `FTS5` 虚拟全文索引模块，提供多词联合精准搜索。
+* **Excel 解析与导出 (Excel Engine)**：`openpyxl` (实现单元格样式、数字格式与合计公式的无损精准复制) + `pandas` (快速解析原始表头及清单)。
+
 ---
 
 ## 三、 功能模块设计
