@@ -4,7 +4,34 @@
 
 ---
 
-## 🌟 V0.0.4 核心特性
+## 🌟 V0.0.5 核心特性
+
+> **V0.0.5 是"结构化改造 + 可回归度量"的关键版本**。在 V0.0.4 安全与会话体系之上，本版完成了方案 [final_structuring_master_plan.md](./doc/final_structuring_master_plan.md) 提出的 30 域结构化 Schema、配置驱动 Hard Gates、单向缺失惩罚、异步局部重算、金标回归、以及利川清单专项优化。金标 326 条实测 Top-1 **96.32%** / Top-3 **97.55%** / Must **100%**。
+
+### V0.0.5 新增能力速览
+
+1. **30 域结构化 Schema 与配置驱动的域路由**
+   * 385 品类折叠至 30 域，全部由 [config/domain_schema.json](./config/domain_schema.json)、[config/category_domain_map.json](./config/category_domain_map.json) 等 6 份 JSON 字典驱动。
+   * `Category Overwrite` 强特征覆写；电缆二级分流（wire / cable_power / cable_control）；`domain_router` 双端一致。
+2. **配置化 Hard Gates + 单向非对称缺失惩罚**
+   * `conflict_caps` / `deviation_caps` / `ratio_penalties` 从 `domain_schema.json.hard_gates` 动态读取。
+   * `has_conflict` 采用相对公差（`diff_ratio > tolerance`）判定，替代旧的绝对差硬编码。
+   * Must 缺失 -0.15、Should 缺失 -0.05，仅在查询侧有值而候选侧缺失时扣分。
+3. **行级 `parsed_schema_version` + 异步局部重算**
+   * `materials` 主表新增 `parsed_schema_version INTEGER DEFAULT 0` 行级列，`init_db` 支持 `ALTER TABLE` 自愈迁移。
+   * `POST /api/db/reparse` 支持按 `code` / `category` / `parsed_schema_version < 2` 三种粒度局部重算。
+   * 全量重算走"临时表 + Exclusive Lock + 原子改名 + FAISS 热重载"路径。
+4. **`/api/db/schema/stats` 域统计接口**
+   * 返回每个域的物料数量、Must 字段填充率，作为 Phase 5 前端仪表盘的数据源。
+5. **金标回归与基线度量**
+   * `tests/fixtures/ground_truth_500.json` 326 条金标（146 条含 `must_attrs`）。
+   * `python tests/regression_runner.py` 一键跑分并写 `doc/baseline_metrics_v0.0.5.md`。
+6. **弱电/自控专业专项优化**
+   * FTS 引入同义词映射（"网线↔双绞线↔对线"、"配电箱↔配电柜"等）。
+   * `generic` 域强制降级到 `scene_c`（文本+向量主导），消除通用件评分塌陷。
+   * "材质、规格：PSP钢塑复合管" 类无表头文本可直抽设备名。
+
+### V0.0.4 已有能力（保留）
 
 1. **双路混合召回引擎**
    * **关键词召回**：基于 SQLite FTS5 的中文分词优化（单字空格分词化），保障中文工业型号与规格的精确、高召回检索。
@@ -89,7 +116,7 @@ python -m unittest tests/test_auto_binding.py
 
 ---
 
-## 📁 目录结构 (V0.0.4)
+## 📁 目录结构 (V0.0.5)
 
 ```
 ListTrans/
@@ -107,7 +134,7 @@ ListTrans/
 │   ├── auth.db               # [运行时自动生成] 用户及工作会话数据库
 │   └── materials.db          # [运行时自动生成] 标准企业物料明细库
 ├── doc/                      # 方案设计与技术规范文档
-│   ├── technical_solution.md # 系统技术方案说明书 (V0.0.4)
+│   ├── technical_solution.md # 系统技术方案说明书 (V0.0.5)
 │   └── sample/               # 模板文件样例（原始清单、标准格式、物料明细）
 ├── logs/                     # 运行及安全日志归档文件夹
 │   ├── app_runtime.log       # 系统运行业务日志

@@ -1,0 +1,1570 @@
+{
+    "schema_version": 2,
+    "fan": {
+        "must": [
+            {
+                "key": "风量",
+                "type": "float",
+                "unit": "m³/h",
+                "extract_regex": "(?:风量|处理风量|循环风量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:m³/h|m3/h|CMH|l/s|CFM)?)"
+            },
+            {
+                "key": "机外余压",
+                "type": "float",
+                "unit": "Pa",
+                "extract_regex": "(?:(?:机外余压|余压|静压|风压)[:：]?\\s*)?([\\d\\.~\\-—及或到≥≤<>左右约]+\\s*(?:Pa|kPa|MPa|mmH2O))"
+            },
+            {
+                "key": "机型",
+                "type": "enum",
+                "options": [
+                    "轴流",
+                    "离心",
+                    "管道",
+                    "斜流",
+                    "混流"
+                ]
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "镀锌钢板",
+                    "不锈钢",
+                    "玻璃钢",
+                    "铝合金",
+                    "PP"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "功率",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:功率|电机功率|风机功率)[:：]?\\s*([\\d\\.~\\\\-—≥≤<>左右约]+(?:kW|W|HP)?)"
+            },
+            {
+                "key": "转速",
+                "type": "float",
+                "unit": "rpm",
+                "extract_regex": "(?:转速|r/min)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:rpm|r/min)?"
+            },
+            {
+                "key": "噪音",
+                "type": "float",
+                "unit": "dB",
+                "extract_regex": "(?:噪音|噪声)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:dB|db)?"
+            },
+            {
+                "key": "口径",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "(?:口径|直通|直径)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*mm"
+            }
+        ],
+        "flags": [
+            "防爆",
+            "防腐",
+            "变频",
+            "静音",
+            "耐高温"
+        ],
+        "weights": {
+            "风量": 0.25,
+            "机外余压": 0.2,
+            "机型": 0.15,
+            "材质": 0.1,
+            "功率": 0.1,
+            "flags": 0.2
+        },
+        "unit_class": "quantity",
+        "hard_gates": {
+            "conflict_caps": {
+                "机型": 30
+            },
+            "deviation_caps": {
+                "风量": {
+                    "ratio": 0.5,
+                    "abs_diff_standard": 500,
+                    "abs_diff_small": 200,
+                    "small_threshold": 500,
+                    "cap": 30
+                },
+                "机外余压": {
+                    "ratio": 0.5,
+                    "abs_diff_standard": 200,
+                    "cap": 30
+                }
+            }
+        }
+    },
+    "damper": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "镀锌钢板",
+                    "不锈钢",
+                    "碳钢",
+                    "PP",
+                    "铝合金"
+                ]
+            },
+            {
+                "key": "控制方式",
+                "type": "enum",
+                "options": [
+                    "手动",
+                    "电动",
+                    "气动",
+                    "自动复位"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "熔断温度",
+                "type": "int",
+                "extract_regex": "(\\d+)\\s*[cC℃]"
+            },
+            {
+                "key": "执行器扭矩",
+                "type": "float",
+                "unit": "Nm",
+                "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*Nm"
+            },
+            {
+                "key": "电源",
+                "type": "enum",
+                "options": [
+                    "DC24V",
+                    "AC220V"
+                ]
+            }
+        ],
+        "flags": [
+            "防火",
+            "密闭",
+            "调节",
+            "止回"
+        ],
+        "weights": {
+            "尺寸": 0.25,
+            "材质": 0.15,
+            "控制方式": 0.2,
+            "flags": 0.2,
+            "熔断温度": 0.1,
+            "电源": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "silencer": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+(?:\\s*[*x×]\\s*\\d+)?)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "镀锌钢板",
+                    "不锈钢",
+                    "碳钢",
+                    "PP"
+                ]
+            },
+            {
+                "key": "消声形式",
+                "type": "enum",
+                "options": [
+                    "阻性",
+                    "抗性",
+                    "复合"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "长度",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "L\\s*[:：]?\\s*(\\d+)|长度\\s*[:：]?\\s*(\\d+)"
+            },
+            {
+                "key": "消声量",
+                "type": "float",
+                "unit": "dB",
+                "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*dB"
+            }
+        ],
+        "flags": [
+            "卫生级",
+            "耐高温"
+        ],
+        "weights": {
+            "尺寸": 0.35,
+            "材质": 0.2,
+            "消声形式": 0.25,
+            "flags": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "plenum": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+(?:\\s*[*x×]\\s*\\d+)?)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "镀锌钢板",
+                    "不锈钢",
+                    "玻璃钢",
+                    "PP"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "板材厚度",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "(?:厚度|板厚|厚)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*mm"
+            }
+        ],
+        "flags": [
+            "保温",
+            "防腐",
+            "卫生级"
+        ],
+        "weights": {
+            "尺寸": 0.4,
+            "材质": 0.3,
+            "板材厚度": 0.1,
+            "flags": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {}
+        }
+    },
+    "filter_ffu": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+(?:\\s*[*x×]\\s*\\d+)?)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "冷轧钢板",
+                    "不锈钢",
+                    "铝板",
+                    "PP"
+                ]
+            },
+            {
+                "key": "过滤效率",
+                "type": "enum",
+                "options": [
+                    "G4",
+                    "F5",
+                    "F6",
+                    "F7",
+                    "F8",
+                    "F9",
+                    "H10",
+                    "H11",
+                    "H12",
+                    "H13",
+                    "H14",
+                    "U15",
+                    "U16"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "额定风量",
+                "type": "float",
+                "unit": "m³/h",
+                "extract_regex": "(?:风量|处理风量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:m³/h|m3/h|CMH)?)"
+            },
+            {
+                "key": "粒径",
+                "type": "float",
+                "unit": "μm",
+                "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*μm"
+            }
+        ],
+        "flags": [
+            "直流电机",
+            "带控制器",
+            "DOP检测口"
+        ],
+        "weights": {
+            "尺寸": 0.25,
+            "过滤效率": 0.3,
+            "材质": 0.15,
+            "额定风量": 0.15,
+            "flags": 0.15
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "chiller": {
+        "must": [
+            {
+                "key": "制冷量",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:制冷量|冷量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:kW|kw|千瓦|W|HP|kcal/h)?)"
+            },
+            {
+                "key": "机型",
+                "type": "enum",
+                "options": [
+                    "螺杆",
+                    "离心",
+                    "涡旋",
+                    "风冷",
+                    "水冷",
+                    "热泵"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "制热量",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:制热量|热量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:kW|kw|W|HP|kcal/h)?)"
+            },
+            {
+                "key": "COP",
+                "type": "float",
+                "extract_regex": "COP[:：]?\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "水侧管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:口径|管径)[:：]?\\s*(?:DN|de)?(\\d+)"
+            }
+        ],
+        "flags": [
+            "变频",
+            "内置板换",
+            "低温制热型"
+        ],
+        "weights": {
+            "制冷量": 0.35,
+            "机型": 0.25,
+            "制热量": 0.1,
+            "flags": 0.2,
+            "COP": 0.1
+        },
+        "unit_class": "quantity",
+        "hard_gates": {
+            "deviation_caps": {
+                "制冷量": {
+                    "ratio": 0.5,
+                    "abs_diff_standard": 100,
+                    "cap": 30
+                }
+            }
+        }
+    },
+    "ahu": {
+        "must": [
+            {
+                "key": "风量",
+                "type": "float",
+                "unit": "m³/h",
+                "extract_regex": "(?:风量|处理风量|循环风量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:m³/h|m3/h|CMH|l/s|CFM)?)"
+            },
+            {
+                "key": "机外余压",
+                "type": "float",
+                "unit": "Pa",
+                "extract_regex": "(?:(?:机外余压|余压|静压|风压)[:：]?\\s*)?([\\d\\.~\\-—及或到≥≤<>左右约]+\\s*(?:Pa|kPa|MPa|mmH2O))"
+            },
+            {
+                "key": "过滤等级",
+                "type": "enum",
+                "options": [
+                    "初效",
+                    "中效",
+                    "亚高效",
+                    "高效",
+                    "超高效"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "制冷量",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:制冷量|冷量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:kW|kw|W|HP|kcal/h)?)"
+            },
+            {
+                "key": "加湿量",
+                "type": "float",
+                "unit": "kg/h",
+                "extract_regex": "(?:加湿量|加湿)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:kg/h|Kg/h)?"
+            },
+            {
+                "key": "盘管排数",
+                "type": "int",
+                "extract_regex": "(\\d+)\\s*排管|(\\d+)R"
+            },
+            {
+                "key": "新风量",
+                "type": "float",
+                "unit": "m³/h",
+                "extract_regex": "(?:新风量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:m³/h|m3/h|CMH|l/s|CFM)?)"
+            }
+        ],
+        "flags": [
+            "变频",
+            "防爆",
+            "热回收",
+            "组合式"
+        ],
+        "weights": {
+            "风量": 0.25,
+            "机外余压": 0.15,
+            "过滤等级": 0.15,
+            "制冷量": 0.15,
+            "flags": 0.15,
+            "其他": 0.15
+        },
+        "unit_class": "quantity",
+        "hard_gates": {
+            "deviation_caps": {
+                "风量": {
+                    "ratio": 0.5,
+                    "abs_diff_standard": 500,
+                    "abs_diff_small": 200,
+                    "small_threshold": 500,
+                    "cap": 30
+                }
+            }
+        }
+    },
+    "manifold": {
+        "must": [
+            {
+                "key": "缸体直径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:直径|口径|缸径)[:：]?\\s*(?:DN|Ф|Φ)?(\\d+)"
+            },
+            {
+                "key": "缸体长度",
+                "type": "float",
+                "unit": "m",
+                "extract_regex": "(?:长度|长)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*m"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "碳钢",
+                    "不锈钢",
+                    "不锈钢304",
+                    "不锈钢316L"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "设计压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "(?:设计压力|压力)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*MPa"
+            },
+            {
+                "key": "封头形式",
+                "type": "enum",
+                "options": [
+                    "椭圆",
+                    "平板",
+                    "球形"
+                ]
+            }
+        ],
+        "flags": [
+            "保温"
+        ],
+        "weights": {
+            "缸体直径": 0.3,
+            "缸体长度": 0.25,
+            "材质": 0.25,
+            "设计压力": 0.1,
+            "flags": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "cable_power": {
+        "must": [
+            {
+                "key": "型号族",
+                "type": "enum",
+                "options": [
+                    "YJV",
+                    "YJY",
+                    "YJLV",
+                    "BV",
+                    "BVR",
+                    "RVV",
+                    "RV",
+                    "KVV",
+                    "WDZ-YJY",
+                    "WDZ-BYJ",
+                    "ZR-YJV",
+                    "ZC-YJV",
+                    "NH-YJV"
+                ]
+            },
+            {
+                "key": "芯数",
+                "type": "int",
+                "extract_regex": "(?:^|[^\\d])(\\d+)\\s*[x*×]"
+            },
+            {
+                "key": "截面积",
+                "type": "float",
+                "unit": "mm²",
+                "extract_regex": "[x*×]\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm2|mm²|平方)?"
+            }
+        ],
+        "should": [
+            {
+                "key": "电压等级",
+                "type": "enum",
+                "options": [
+                    "0.6/1kV",
+                    "1kV",
+                    "450/750V",
+                    "300/500V"
+                ]
+            },
+            {
+                "key": "护套颜色",
+                "type": "str",
+                "extract_regex": "(?:颜色|护套色)[:：]?\\s*(\\w+)"
+            }
+        ],
+        "flags": [
+            "阻燃-ZA",
+            "阻燃-ZB",
+            "阻燃-ZC",
+            "耐火-NH",
+            "无卤低烟",
+            "屏蔽",
+            "铠装"
+        ],
+        "weights": {
+            "型号族": 0.25,
+            "芯数": 0.25,
+            "截面积": 0.25,
+            "电压等级": 0.1,
+            "flags": 0.15
+        },
+        "unit_class": "length",
+        "hard_gates": {
+            "conflict_caps": {
+                "芯数": 30,
+                "截面积": 30
+            }
+        }
+    },
+    "cable_control": {
+        "must": [
+            {
+                "key": "型号族",
+                "type": "enum",
+                "options": [
+                    "KVV",
+                    "KVVR",
+                    "RVVP",
+                    "RVV"
+                ]
+            },
+            {
+                "key": "芯数",
+                "type": "int",
+                "extract_regex": "(?:^|[^\\d])(\\d+)\\s*[x*×]"
+            },
+            {
+                "key": "截面积",
+                "type": "float",
+                "unit": "mm²",
+                "extract_regex": "[x*×]\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm2|mm²|平方)?"
+            }
+        ],
+        "should": [
+            {
+                "key": "电压等级",
+                "type": "enum",
+                "options": [
+                    "450/750V",
+                    "300/500V"
+                ]
+            },
+            {
+                "key": "屏蔽类型",
+                "type": "enum",
+                "options": [
+                    "铜网",
+                    "铝箔",
+                    "双层"
+                ]
+            }
+        ],
+        "flags": [
+            "阻燃",
+            "耐火",
+            "无卤",
+            "双绞"
+        ],
+        "weights": {
+            "型号族": 0.25,
+            "芯数": 0.25,
+            "截面积": 0.25,
+            "屏蔽类型": 0.1,
+            "flags": 0.15
+        },
+        "unit_class": "length",
+        "hard_gates": {
+            "conflict_caps": {
+                "芯数": 30,
+                "截面积": 30
+            }
+        }
+    },
+    "wire": {
+        "must": [
+            {
+                "key": "型号族",
+                "type": "enum",
+                "options": [
+                    "BV",
+                    "BVR",
+                    "BLV",
+                    "BYJ"
+                ]
+            },
+            {
+                "key": "截面积",
+                "type": "float",
+                "unit": "mm²",
+                "extract_regex": "(?:BV|BVR|BYJ|BLV)?\\s*-?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm2|mm²)"
+            }
+        ],
+        "should": [
+            {
+                "key": "电压等级",
+                "type": "enum",
+                "options": [
+                    "450/750V",
+                    "300/500V"
+                ]
+            },
+            {
+                "key": "颜色",
+                "type": "str"
+            }
+        ],
+        "flags": [
+            "阻燃",
+            "耐火",
+            "无卤"
+        ],
+        "weights": {
+            "型号族": 0.35,
+            "截面积": 0.4,
+            "电压等级": 0.1,
+            "flags": 0.15
+        },
+        "unit_class": "length",
+        "hard_gates": {
+            "conflict_caps": {
+                "截面积": 30
+            }
+        }
+    },
+    "valve_water": {
+        "must": [
+            {
+                "key": "阀型",
+                "type": "enum",
+                "options": [
+                    "蝶阀",
+                    "球阀",
+                    "截止阀",
+                    "止回阀",
+                    "闸阀",
+                    "平衡阀",
+                    "隔膜阀",
+                    "减压阀",
+                    "安全阀",
+                    "疏水阀"
+                ]
+            },
+            {
+                "key": "管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:DN|de|Ф|Φ|管径|口径)(?:[^\\d]*?)(\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "不锈钢304",
+                    "不锈钢316L",
+                    "铸铁",
+                    "黄铜",
+                    "碳钢",
+                    "PPH",
+                    "UPVC"
+                ]
+            },
+            {
+                "key": "连接方式",
+                "type": "enum",
+                "options": [
+                    "法兰",
+                    "螺纹",
+                    "卡箍",
+                    "焊接",
+                    "由令",
+                    "卡盘"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "(?:压力|PN|工作压力|设计压力)(?:[^\\d]*?)(\\d+(?:\\.\\d+)?)\\s*(?:MPa|pn)?"
+            },
+            {
+                "key": "驱动",
+                "type": "enum",
+                "options": [
+                    "手动",
+                    "电动",
+                    "气动"
+                ]
+            },
+            {
+                "key": "密封面",
+                "type": "enum",
+                "options": [
+                    "软密封",
+                    "硬密封",
+                    "橡胶",
+                    "PTFE",
+                    "EPDM"
+                ]
+            },
+            {
+                "key": "介质",
+                "type": "str"
+            }
+        ],
+        "flags": [
+            "保温",
+            "防爆"
+        ],
+        "weights": {
+            "阀型": 0.15,
+            "管径": 0.25,
+            "材质": 0.15,
+            "连接方式": 0.15,
+            "压力": 0.1,
+            "驱动": 0.1,
+            "flags": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管径": 30
+            },
+            "ratio_penalties": {
+                "连接方式": 0.5
+            }
+        }
+    },
+    "valve_medical_gas": {
+        "must": [
+            {
+                "key": "介质",
+                "type": "enum",
+                "options": [
+                    "氧气",
+                    "负压",
+                    "空压",
+                    "CO2",
+                    "N2O",
+                    "氮气"
+                ]
+            },
+            {
+                "key": "管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:DN|de|Ф|Φ|管径|口径)(?:[^\\d]*?)(\\d+)"
+            },
+            {
+                "key": "连接方式",
+                "type": "enum",
+                "options": [
+                    "螺纹",
+                    "焊接",
+                    "法兰",
+                    "卡套"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "(?:压力|PN|工作压力|设计压力)(?:[^\\d]*?)(\\d+(?:\\.\\d+)?)\\s*(?:MPa|pn)?"
+            },
+            {
+                "key": "驱动",
+                "type": "enum",
+                "options": [
+                    "手动",
+                    "电磁",
+                    "气动"
+                ]
+            }
+        ],
+        "flags": [
+            "脱脂",
+            "无缝"
+        ],
+        "weights": {
+            "介质": 0.3,
+            "管径": 0.25,
+            "连接方式": 0.15,
+            "压力": 0.1,
+            "驱动": 0.1,
+            "flags": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管径": 30
+            }
+        }
+    },
+    "pipe_steel": {
+        "must": [
+            {
+                "key": "管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:DN|de|Ф|Φ|管径|口径)(?:[^\\d]*?)(\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "焊接钢管",
+                    "无缝钢管",
+                    "镀锌钢管",
+                    "碳钢"
+                ]
+            },
+            {
+                "key": "连接方式",
+                "type": "enum",
+                "options": [
+                    "丝接",
+                    "卡箍",
+                    "焊接",
+                    "法兰"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "Ф\\s*(\\d+(?:\\.\\d+)?)\\s*[*x×]\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "PN\\s*(\\d+(?:\\.\\d+)?)"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "管径": 0.4,
+            "材质": 0.3,
+            "连接方式": 0.2,
+            "其他": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管径": 30
+            }
+        }
+    },
+    "pipe_ss": {
+        "must": [
+            {
+                "key": "管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:DN|de|Ф|Φ|管径|口径)(?:[^\\d]*?)(\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "不锈钢304",
+                    "不锈钢316L",
+                    "不锈钢"
+                ]
+            },
+            {
+                "key": "连接方式",
+                "type": "enum",
+                "options": [
+                    "氩弧焊",
+                    "卡压",
+                    "法兰"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "Ф\\s*(\\d+(?:\\.\\d+)?)\\s*[*x×]\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "壁厚",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "[*x×]\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "(?:压力|PN|工作压力|设计压力)(?:[^\\d]*?)(\\d+(?:\\.\\d+)?)\\s*(?:MPa|pn)?"
+            }
+        ],
+        "flags": [
+            "脱脂",
+            "无缝"
+        ],
+        "weights": {
+            "管径": 0.4,
+            "材质": 0.3,
+            "连接方式": 0.15,
+            "flags": 0.15
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管径": 30
+            }
+        }
+    },
+    "pipe_plastic": {
+        "must": [
+            {
+                "key": "管径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:DN|de|De|Ф|Φ|管径|口径)(?:[^\\d]*?)(\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "UPVC",
+                    "PPH",
+                    "PPR",
+                    "PE",
+                    "PVC",
+                    "Clean-PVC"
+                ]
+            },
+            {
+                "key": "壁厚",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "[*x×]\\s*(\\d+(?:\\.\\d+)?)"
+            }
+        ],
+        "should": [
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "PN\\s*(\\d+(?:\\.\\d+)?)"
+            }
+        ],
+        "flags": [
+            "超纯水级"
+        ],
+        "weights": {
+            "管径": 0.35,
+            "材质": 0.3,
+            "壁厚": 0.2,
+            "flags": 0.15
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管径": 30
+            }
+        }
+    },
+    "pipe_copper": {
+        "must": [
+            {
+                "key": "外径",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "Ф\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "壁厚",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "[*x×]\\s*(\\d+(?:\\.\\d+)?)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "紫铜",
+                    "脱脂紫铜"
+                ]
+            }
+        ],
+        "flags": [
+            "脱脂",
+            "无缝"
+        ],
+        "weights": {
+            "外径": 0.4,
+            "壁厚": 0.3,
+            "材质": 0.15,
+            "flags": 0.15
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "外径": 30
+            }
+        },
+        "should": [
+            {
+                "key": "压力",
+                "type": "float",
+                "unit": "MPa",
+                "extract_regex": "(?:压力|PN|工作压力|设计压力)(?:[^\\d]*?)(\\d+(?:\\.\\d+)?)\\s*(?:MPa|pn)?"
+            }
+        ]
+    },
+    "medical_gas": {
+        "must": [
+            {
+                "key": "介质",
+                "type": "enum",
+                "options": [
+                    "氧气",
+                    "负压",
+                    "空压",
+                    "CO2",
+                    "N2O",
+                    "氮气"
+                ]
+            },
+            {
+                "key": "安装形式",
+                "type": "enum",
+                "options": [
+                    "壁装",
+                    "吊装",
+                    "设备带"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "接口数",
+                "type": "int",
+                "extract_regex": "(\\d+)\\s*个接口|(\\d+)位"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "介质": 0.5,
+            "安装形式": 0.3,
+            "接口数": 0.2
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "door": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "钢制",
+                    "不锈钢",
+                    "木制",
+                    "铝合金"
+                ]
+            },
+            {
+                "key": "开启形式",
+                "type": "enum",
+                "options": [
+                    "平开",
+                    "推拉",
+                    "自动",
+                    "平移"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "防火等级",
+                "type": "enum",
+                "options": [
+                    "甲级",
+                    "乙级",
+                    "丙级"
+                ]
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "尺寸": 0.4,
+            "材质": 0.3,
+            "开启形式": 0.2,
+            "其他": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "ratio_penalties": {
+                "尺寸": 0.5
+            }
+        }
+    },
+    "window": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "铝合金",
+                    "塑钢",
+                    "不锈钢"
+                ]
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "尺寸": 0.6,
+            "材质": 0.4
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "purification": {
+        "must": [
+            {
+                "key": "设备类型",
+                "type": "enum",
+                "options": [
+                    "工作台",
+                    "风淋室",
+                    "货淋室",
+                    "传递窗"
+                ]
+            },
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+(?:\\s*[*x×]\\s*\\d+)?)"
+            }
+        ],
+        "should": [
+            {
+                "key": "功率",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:功率)[:：]?\\s*([\\d\\.~\\\\-—≥≤<>左右约]+(?:kW|w|W)?)"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "设备类型": 0.5,
+            "尺寸": 0.3,
+            "功率": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "air_terminal": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "铝合金",
+                    "不锈钢",
+                    "ABS",
+                    "镀锌钢板"
+                ]
+            }
+        ],
+        "should": [
+            {
+                "key": "散流形式",
+                "type": "enum",
+                "options": [
+                    "方伞",
+                    "圆伞",
+                    "侧送",
+                    "双层百叶"
+                ]
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "尺寸": 0.5,
+            "材质": 0.3,
+            "散流形式": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "pump": {
+        "must": [
+            {
+                "key": "流量",
+                "type": "float",
+                "unit": "m³/h",
+                "extract_regex": "(?:流量)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+(?:m³/h|m3/h|l/s|t/h)?)"
+            },
+            {
+                "key": "扬程",
+                "type": "float",
+                "unit": "m",
+                "extract_regex": "(?:扬程)[:：]?\\s*([\\d\\.~\\\\-—及或到≥≤<>左右约]+m)"
+            },
+            {
+                "key": "功率",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:功率|电机功率)[:：]?\\s*([\\d\\.~\\\\-—≥≤<>左右约]+(?:kW|W|HP)?)"
+            }
+        ],
+        "should": [
+            {
+                "key": "口径",
+                "type": "float",
+                "unit": "DN",
+                "extract_regex": "(?:口径|DN|管径)[:：]?\\s*(\\d+)"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "流量": 0.3,
+            "扬程": 0.3,
+            "功率": 0.3,
+            "口径": 0.1
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "heat_exchanger": {
+        "must": [
+            {
+                "key": "换热面积",
+                "type": "float",
+                "unit": "㎡",
+                "extract_regex": "(?:换热面积|面积)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:m2|㎡|平方米)?"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "不锈钢304",
+                    "不锈钢316L",
+                    "钛板",
+                    "铜板"
+                ]
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "换热面积": 0.6,
+            "材质": 0.4
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "elevator": {
+        "must": [
+            {
+                "key": "载重",
+                "type": "int",
+                "unit": "kg",
+                "extract_regex": "(\\d+)\\s*(?:kg|KG|Kg|公斤)"
+            },
+            {
+                "key": "层站",
+                "type": "str",
+                "extract_regex": "(\\d+/\\d+/\\d+)"
+            }
+        ],
+        "should": [
+            {
+                "key": "速度",
+                "type": "float",
+                "unit": "m/s",
+                "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*m/s"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "载重": 0.4,
+            "层站": 0.4,
+            "速度": 0.2
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "lighting": {
+        "must": [
+            {
+                "key": "功率",
+                "type": "float",
+                "unit": "W",
+                "extract_regex": "(?:功率|W)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:W|w|瓦)?"
+            },
+            {
+                "key": "类型",
+                "type": "enum",
+                "options": [
+                    "格栅灯",
+                    "筒灯",
+                    "射灯",
+                    "面板灯",
+                    "应急灯",
+                    "紫外线消毒灯"
+                ]
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "功率": 0.5,
+            "类型": 0.5
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "switchgear": {
+        "must": [
+            {
+                "key": "类型",
+                "type": "enum",
+                "options": [
+                    "配电箱",
+                    "控制柜",
+                    "开关柜",
+                    "明装插座",
+                    "暗装插座",
+                    "面板"
+                ]
+            },
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+(?:\\s*[*x×]\\s*\\d+)?)"
+            }
+        ],
+        "should": [
+            {
+                "key": "回路数",
+                "type": "int",
+                "extract_regex": "(\\d+)\\s*回路"
+            },
+            {
+                "key": "额定电流",
+                "type": "float",
+                "unit": "A",
+                "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*A"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "类型": 0.5,
+            "尺寸": 0.3,
+            "其他": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "cable_tray": {
+        "must": [
+            {
+                "key": "尺寸",
+                "type": "str",
+                "extract_regex": "(\\d+\\s*[*x×]\\s*\\d+)"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "防火",
+                    "镀锌",
+                    "喷塑",
+                    "不锈钢",
+                    "铝合金"
+                ]
+            },
+            {
+                "key": "厚度",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "(?:厚度|厚|板厚)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*mm"
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "尺寸": 0.4,
+            "材质": 0.4,
+            "厚度": 0.2
+        },
+        "unit_class": "dimension",
+        "hard_gates": {}
+    },
+    "weak_current": {
+        "must": [
+            {
+                "key": "类型",
+                "type": "enum",
+                "options": [
+                    "呼叫分机",
+                    "控制主机",
+                    "摄像机",
+                    "对讲终端",
+                    "探测器"
+                ]
+            },
+            {
+                "key": "接口数",
+                "type": "int",
+                "extract_regex": "(\\d+)\\s*(?:口|位|极|P)"
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "类型": 0.6,
+            "接口数": 0.4
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "decoration": {
+        "must": [
+            {
+                "key": "厚度",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "(?:厚度|厚|板厚)[:：]?\\s*(\\d+(?:\\.\\d+)?)\\s*mm"
+            },
+            {
+                "key": "材质",
+                "type": "enum",
+                "options": [
+                    "岩棉",
+                    "石膏板",
+                    "硅酸钙",
+                    "瓷砖",
+                    "PVC地板",
+                    "涂料"
+                ]
+            }
+        ],
+        "should": [],
+        "flags": [],
+        "weights": {
+            "厚度": 0.5,
+            "材质": 0.5
+        },
+        "unit_class": "quantity",
+        "hard_gates": {}
+    },
+    "generic": {
+        "must": [],
+        "should": [],
+        "flags": [],
+        "weights": {},
+        "unit_class": "quantity",
+        "hard_gates": {}
+    }
+}

@@ -1,4 +1,4 @@
-# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.4)
+# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.5)
 
 本说明书详细阐述了华康洁净物料清单匹配工具的设计与技术方案。该工具作为通用的清单数据处理平台，旨在通过结构化参数解析、多路召回（FTS5全文倒排+语义向量搜索）、双轨制打分、前端可视化校对，将项目设计原始清单（包括暖通、电气、给排水专业）精准匹配至企业的标准物料库，并无损输出为符合规范的“标准格式”报表。
 
@@ -11,6 +11,7 @@
 | V0.0.1 | 2026-07-15 | 系统架构组 | 初始起草，定义核心多线程语义向量匹配及双路打分架构。 |
 | V0.0.2 | 2026-07-16 | 系统开发组 | 添加 50/50 滚动工作台页面、物料库全/增量更新、免重启向量索引重建及日志控制台。 |
 | V0.0.4 | 2026-07-18 | 开发二组 | **公网安全与数据持久化改造**：<br>1. 引入 JWT 状态管理与 Bearer Token 接口防御；<br>2. 建立 RBAC 角色体系（员工/经理/总监/管理员）与 UI 动态权限过滤；<br>3. 引入登录频次限制（5分钟失败5次锁号/IP 15分钟）与独立 `security.log` 安全日志审计；<br>4. 增加工作会话暂存机制：包含 3分钟静默草稿自动暂存（起步提示恢复）与多版本手动命名进度备份（支持覆盖更新）；<br>5. 优化推荐候选区交互：点击已激活卡片可直接无弹窗解绑；<br>6. 整理并精简了项目工程文档。 |
+| V0.0.5 | 2026-07-21 | 结构化组 | **结构化改造与可回归度量**：<br>1. 落地 30 域结构化 Schema，385 品类折叠映射，6 份受控字典（`domain_schema.json` / `category_domain_map.json` / `unit_norm.json` / `material_dict.json` / `connection_dict.json` / `flags_dict.json`）；<br>2. 配置化 Hard Gates：`conflict_caps` / `deviation_caps` / `ratio_penalties` 从 JSON 动态读取，取代硬编码封顶；<br>3. `has_conflict` 采用相对公差判定，配合单向非对称缺失惩罚（Must -0.15 / Should -0.05）；<br>4. `materials` 主表新增 `parsed_schema_version` 行级列 + 自愈 `ALTER TABLE` 迁移；`POST /api/db/reparse` 支持 code / category / 陈旧行级三种粒度的**局部**异步重算；<br>5. 新增 `GET /api/db/schema/stats` 域统计接口；<br>6. 建立金标回归：`tests/fixtures/ground_truth_500.json`（当前 326 条）+ `tests/regression_runner.py` 一键出 `baseline_metrics_v0.0.5.md`；<br>7. 弱电/自控专项：FTS 同义词映射 + `generic` 域强制降级到 `scene_c` + "材质、规格" 无表头抽取。<br>**金标实测 Top-1 96.32% / Top-3 97.55% / Must 100%。** |
 
 ---
 
@@ -172,7 +173,7 @@ ListTrans/
 
 ---
 
-## 五、 核心 API 接口说明 (V0.0.4)
+## 五、 核心 API 接口说明 (V0.0.5)
 
 ### 1. `POST /api/auth/login`
 * **功能**：用户登录，签发 JWT 令牌。
@@ -194,3 +195,45 @@ ListTrans/
 
 ### 7. `GET /api/config/load` & `POST /api/config/save`
 * **功能**：读取/保存规则词典配置（普通员工禁止操作）。
+
+### 8. `POST /api/db/reparse`（V0.0.5 增强）
+* **功能**：[仅总监及以上] 触发异步结构化重算。
+* **参数**：可选 `codes: List[str]` 或 `category: str` 触发**局部**重算；不传参数则执行**全量**双缓冲原子重算。
+* **实现**：局部重算走 `UPDATE materials` in-place；全量重算走 `materials_temp` + Exclusive Lock + 原子改名 + FAISS 热重载。
+
+### 9. `GET /api/db/schema/stats`（V0.0.5 新增）
+* **功能**：[仅经理及以上] 返回 30 域的物料数量分布及 Must 字段填充率，用于前端仪表盘可视化结构化率。
+
+---
+
+## 六、 V0.0.5 结构化改造要点
+
+### 1. 30 域 Schema 与配置驱动
+* [config/domain_schema.json](../config/domain_schema.json)：每域定义 `must` / `should` / `flags` / `weights` / `hard_gates` 五段结构；抽取用的正则表达式（`extract_regex`）内嵌其中。
+* [config/category_domain_map.json](../config/category_domain_map.json)：385 品类→30 域的静态映射 + `overwrite_rules`（正文强特征覆写）+ `high_risk_categories`（品类漂移高危名单）。
+* [config/unit_norm.json](../config/unit_norm.json)：airflow / pressure / power / voltage 四类量级换算。
+* [config/material_dict.json](../config/material_dict.json)、[config/connection_dict.json](../config/connection_dict.json)、[config/flags_dict.json](../config/flags_dict.json)：三份受控词典。
+
+### 2. 匹配层配置化 Hard Gates
+`matcher.score_candidate` 结束段统一读取 `domain_config["hard_gates"]`：
+* `conflict_caps`：一旦冲突则封顶得分（如电缆芯数/截面积冲突 → 得分 ≤ 30）。
+* `deviation_caps`：数值偏差超阈值封顶（如通风机风量偏差 > 50% 且绝对差 > 500 → 得分 ≤ 30；小风量兜底：≤ 500 m³/h 且绝对差 > 200 时同样封顶）。
+* `ratio_penalties`：轻微冲突按比例扣分（如阀门连接方式不同 → 得分 × 0.5）。
+
+### 3. 单向非对称缺失惩罚
+仅当"查询侧指定但候选侧缺失"时扣分：Must -0.15、Should -0.05。**保护参数完备的高质量物料不因双向对齐被反向筛选**。
+
+### 4. 异步局部重算与 FAISS 热重载
+* `POST /api/db/reparse`：支持 `code` / `category` / `parsed_schema_version < 2` 三种粒度。
+* 全量重算走"临时表 → Exclusive Lock → 原子改名 → FAISS `check_db_timestamp_and_build(force=True)` 热重载"。
+* 主表新增 `parsed_schema_version INTEGER DEFAULT 0` 列 + `init_db` 中的 `ALTER TABLE` 自愈迁移。
+
+### 5. 金标回归度量
+* [tests/fixtures/ground_truth_500.json](../tests/fixtures/ground_truth_500.json) 326 条（146 条含 `must_attrs`）。
+* 运行 `python tests/regression_runner.py`，输出至 [doc/baseline_metrics_v0.0.5.md](./baseline_metrics_v0.0.5.md)。
+* **当前实测**：Top-1 **96.32%** / Top-3 **97.55%** / Must 字段结构化率 **100%** / 单行平均 167 ms。
+
+### 6. 弱电/自控专业专项
+* FTS 同义词映射：`网线 ↔ 双绞线 ↔ 对线 ↔ 网络线`、`配电箱 ↔ 配电柜`、`开关 ↔ 功能件 ↔ 面板`。
+* `generic` 域强制降级到 `scene_c`（文本 0.60 + 向量 0.30 主导）。
+* `extract_device_name` 支持从 "材质、规格：PSP钢塑复合管" 类无 `1.名称` 头文本抽取设备名。

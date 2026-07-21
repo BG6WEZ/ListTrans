@@ -1,0 +1,58 @@
+{
+    "schema_version": 2,
+    "unit_classes": {
+        "airflow": {
+            "standard": "m³/h",
+            "conversions": {
+                "m³/h": 1.0,
+                "m3/h": 1.0,
+                "cmh": 1.0,
+                "CMH": 1.0,
+                "l/s": 3.6,
+                "CFM": 1.699
+            }
+        },
+        "pressure": {
+            "standard": "Pa",
+            "conversions": {
+                "Pa": 1.0,
+                "pa": 1.0,
+                "kPa": 1000.0,
+                "kpa": 1000.0,
+                "MPa": 1000000.0,
+                "mmH2O": 9.80665
+            }
+        },
+        "power": {
+            "standard": "kW",
+            "conversions": {
+                "kW": 1.0,
+                "kw": 1.0,
+                "W": 0.001,
+                "w": 0.001,
+                "HP": 0.735,
+                "kcal/h": 0.001163
+            }
+        },
+        "voltage": {
+            "standard": "V",
+            "conversions": {
+                "V": 1.0,
+                "v": 1.0,
+                "kV": 1000.0,
+                "kv": 1000.0
+            }
+        },
+        "diameter": {
+            "standard": "mm",
+            "conversions": {
+                "DN": 1.0,
+                "De": 1.0,
+                "de": 1.0,
+                "Ф": 1.0,
+                "Φ": 1.0,
+                "mm": 1.0
+            }
+        }
+    }
+}

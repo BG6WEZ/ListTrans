@@ -5,7 +5,7 @@ import shutil
 import uuid
 import pandas as pd
 import openpyxl
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 
 from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_PATH
-from app.preprocessor import extract_params, clean_text, reload_preprocessor_configs, extract_device_name
+from app.preprocessor import extract_params, clean_text, reload_preprocessor_configs, extract_device_name, remove_construction_info
 from app.vector_index import index_manager
 from app.matcher import match_item, reload_matcher_configs
 from app.report_generator import generate_standard_report
@@ -246,9 +246,18 @@ async def startup_event():
     # Always call init_db to check schema and self-heal if necessary
     init_db(xlsx_path)
     
-    # Verify/build vector index
-    index_manager.check_db_timestamp_and_build(DB_PATH)
-    logger.info("SQLite DB, Auth DB, Session DB checked and vector index verified.")
+    # Verify/build vector index asynchronously in background thread to avoid blocking server startup
+    import threading
+    def build_index_async():
+        logger.info("Starting background vector index verification/build...")
+        try:
+            index_manager.check_db_timestamp_and_build(DB_PATH)
+            logger.info("Background vector index verification/build completed.")
+        except Exception as e:
+            logger.error(f"Error in background vector index build: {e}")
+
+    threading.Thread(target=build_index_async, daemon=True).start()
+    logger.info("SQLite DB, Auth DB, Session DB checked. Vector index build started in background.")
 
 class BindingModel(BaseModel):
     code: str
@@ -373,12 +382,12 @@ async def upload_file(file: UploadFile = File(...)):
                 start_r = header_row + 1
                 headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
                 
-                # Default mappings
-                code_idx = 1
-                name_idx = 2
-                spec_idx = 3
-                unit_idx = 4
-                qty_idx = 5
+                # Default mappings (use first match to prevent duplicate trailing columns from overwriting indices)
+                code_idx = None
+                name_idx = None
+                spec_idx = None
+                unit_idx = None
+                qty_idx = None
                 loss_idx = None
                 category_idx = None
                 brand_idx = None
@@ -387,22 +396,29 @@ async def upload_file(file: UploadFile = File(...)):
                     if not h:
                         continue
                     h_str = str(h).strip()
-                    if "编码" in h_str:
+                    if "编码" in h_str and code_idx is None:
                         code_idx = idx + 1
-                    elif "名称" in h_str:
+                    elif "名称" in h_str and name_idx is None:
                         name_idx = idx + 1
-                    elif "规格" in h_str or "特征" in h_str:
+                    elif ("规格" in h_str or "特征" in h_str) and spec_idx is None:
                         spec_idx = idx + 1
-                    elif "单位" in h_str:
+                    elif "单位" in h_str and unit_idx is None:
                         unit_idx = idx + 1
-                    elif h_str in ["*数量", "数量", "工程量"]:
+                    elif h_str in ["*数量", "数量", "工程量"] and qty_idx is None:
                         qty_idx = idx + 1
-                    elif "损耗" in h_str:
+                    elif "损耗" in h_str and loss_idx is None:
                         loss_idx = idx + 1
-                    elif h_str in ["甲供材品类", "品类", "分类"]:
+                    elif h_str in ["甲供材品类", "品类", "分类"] and category_idx is None:
                         category_idx = idx + 1
-                    elif "品牌" in h_str:
+                    elif "品牌" in h_str and brand_idx is None:
                         brand_idx = idx + 1
+
+                # Set fallbacks if not found
+                if code_idx is None: code_idx = 1
+                if name_idx is None: name_idx = 2
+                if spec_idx is None: spec_idx = 3
+                if unit_idx is None: unit_idx = 4
+                if qty_idx is None: qty_idx = 5
             
             # Extract data rows
             for r in range(start_r, sheet.max_row + 1):
@@ -484,19 +500,35 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     for idx in range(0, len(raw_rows), chunk_size):
         chunk = raw_rows[idx : idx + chunk_size]
         
-        # 1. Batch vector encoding (main thread, avoiding PyTorch thread thrashing)
+        # 1. Pre-process chunk to extract refined names and clean specifications (removing construction noise)
+        preprocessed_chunk = []
+        for item in chunk:
+            raw_name = item["name"].strip()
+            real_name = raw_name
+            if len(raw_name) <= 3 or any(kw in raw_name for kw in ["柜", "线", "管", "阀", "箱", "板", "支架", "按钮"]):
+                real_name = extract_device_name(item["specification"], raw_name)
+            
+            clean_spec = remove_construction_info(item["specification"])
+            preprocessed_chunk.append({
+                "real_name": real_name,
+                "clean_spec": clean_spec,
+                "item": item
+            })
+            
+        # 2. Batch vector encoding (main thread, avoiding PyTorch thread thrashing)
         query_vectors = None
         if index_manager.is_enabled:
-            texts_to_encode = [f"{item['name']} {item['specification']}".strip() for item in chunk]
+            texts_to_encode = [f"{p['real_name']} {p['clean_spec']}".strip() for p in preprocessed_chunk]
             query_vectors = index_manager.encode_queries(texts_to_encode)
             
-        # 2. Extract parameters and prepare match items
+        # 3. Prepare match jobs for execution
         match_jobs = []
-        for i, item in enumerate(chunk):
+        for i, p in enumerate(preprocessed_chunk):
+            item = p["item"]
             query_info = {
-                "name": item["name"],
+                "name": p["real_name"],
                 "specification": item["specification"],
-                "category": item["category"],
+                "category": p["real_name"],
                 "brand": item["brand"],
                 "professional": item.get("professional", "暖通")
             }
@@ -506,7 +538,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             q_vector = query_vectors[i] if query_vectors is not None else None
             match_jobs.append((query_info, q_vector, item))
             
-        # 3. First pass: Submit matching to ThreadPool to find exact matches for series clustering
+        # 4. Submit matching to ThreadPool to find exact matches for series clustering
         futures = []
         for q_info, q_vector, item in match_jobs:
             futures.append(executor.submit(match_item, q_info, q_vector))
@@ -1029,6 +1061,55 @@ async def api_db_upload(
         if os.path.exists(temp_path):
             os.remove(temp_path)
         raise HTTPException(status_code=500, detail=f"Database import failed: {str(e)}")
+
+from pydantic import BaseModel
+from typing import Optional, List
+
+class ReparseRequest(BaseModel):
+    category: Optional[str] = None
+    codes: Optional[List[str]] = None
+
+@app.get("/api/db/schema/stats", dependencies=[Depends(require_manager)])
+async def api_db_schema_stats():
+    """Get structural metrics and field extraction stats for each domain."""
+    from app.db_manager import get_db_schema_stats
+    try:
+        stats = get_db_schema_stats()
+        return JSONResponse(content=stats)
+    except Exception as e:
+        logger.error(f"Error querying db schema stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/db/reparse", dependencies=[Depends(require_director)])
+async def api_db_reparse(background_tasks: BackgroundTasks, req: Optional[ReparseRequest] = None):
+    """
+    Asynchronously reparse materials in the database with the new schema definitions.
+    If req specifies category or codes, performs partial incremental reparse in place.
+    Otherwise, performs double-buffer atomic swap full reparse.
+    """
+    from app.db_manager import reparse_materials_db_asymmetric, reparse_materials_db_partial
+    
+    category = req.category if req else None
+    codes = req.codes if req else None
+    
+    def run_reparse_and_log():
+        logger.info("Starting background database reparse...")
+        try:
+            if category or codes:
+                res = reparse_materials_db_partial(category=category, codes=codes)
+            else:
+                res = reparse_materials_db_asymmetric()
+            logger.info(f"Database reparse completed. Details: {res}")
+            
+            # Hot reload FAISS memory cache in current running server process
+            logger.info("Hot reloading vector index in running process...")
+            index_manager.load_cache()
+            logger.info("Hot reload completed successfully.")
+        except Exception as e:
+            logger.error(f"Error during background database reparse: {e}")
+
+    background_tasks.add_task(run_reparse_and_log)
+    return JSONResponse(content={"success": True, "message": "Reparse task started in background."})
 
 # Mount web static directory
 web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")

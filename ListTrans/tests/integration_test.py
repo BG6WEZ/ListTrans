@@ -135,8 +135,8 @@ class TestMatcher(unittest.TestCase):
         score2, reasons2 = score_candidate(query_info, candidate2, semantic_score=0.8)
         
         self.assertTrue(score1 > score2)
-        self.assertIn("电缆规格匹配", reasons1)
-        self.assertIn("电线电缆规格冲突", reasons2)
+        self.assertIn("核心参数在公差范围内", reasons1)
+        self.assertIn("截面积冲突拦截", reasons2)
 
     def test_general_param_extraction(self):
         text = "1.名称: 空压机\n2.规格：排气量 ：≥1.40m3/min,排气压力：0.8MPa,单机功率：≥11KW\n3.材质：不锈钢\n4.工作内容：基础浇筑、设备吊装及调试"
@@ -161,6 +161,30 @@ class TestMatcher(unittest.TestCase):
         self.assertEqual(attrs2.get("变频电机"), "变频电机")
 
 class TestDatabaseImport(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from app.db_manager import DB_PATH, init_db
+        import shutil
+        cls.db_backup = DB_PATH + ".bak"
+        if os.path.exists(DB_PATH):
+            shutil.copyfile(DB_PATH, cls.db_backup)
+        init_db()
+
+    @classmethod
+    def tearDownClass(cls):
+        from app.db_manager import DB_PATH
+        import shutil
+        if hasattr(cls, "db_backup") and os.path.exists(cls.db_backup):
+            shutil.copyfile(cls.db_backup, DB_PATH)
+            os.remove(cls.db_backup)
+            
+            # Hot reload FAISS memory cache in running processes if index was modified
+            try:
+                from app.vector_index import index_manager
+                index_manager.load_cache()
+            except Exception:
+                pass
+
     def test_disabled_code_filtering(self):
         import pandas as pd
         from app.db_manager import import_materials_from_excel, query_by_code
@@ -200,6 +224,19 @@ class TestDatabaseImport(unittest.TestCase):
         finally:
             if os.path.exists(temp_xlsx):
                 os.remove(temp_xlsx)
+
+    def test_schema_stats_and_partial_reparse(self):
+        from app.db_manager import get_db_schema_stats, reparse_materials_db_partial
+        # Load stats
+        stats = get_db_schema_stats()
+        self.assertIn("total_rows", stats)
+        self.assertIn("overall_structuring_rate", stats)
+        self.assertIn("domains", stats)
+        
+        # Test partial reparse (with non-existent code to verify it executes clean query return)
+        res = reparse_materials_db_partial(codes=["NON_EXISTENT_CODE_123"])
+        self.assertEqual(res["status"], "success")
+        self.assertEqual(res["reparsed_rows"], 0)
 
 if __name__ == "__main__":
     unittest.main()

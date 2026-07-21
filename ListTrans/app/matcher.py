@@ -88,9 +88,47 @@ def calculate_text_similarity(s1: str, s2: str) -> float:
     s1, s2 = s1.lower().strip(), s2.lower().strip()
     return difflib.SequenceMatcher(None, s1, s2).ratio()
 
+def check_dimension_conflict(q_val, c_val, max_deviation=0.10):
+    """
+    Check if two dimension strings (like A*B or A*B*C) conflict.
+    If either component has a relative deviation > max_deviation, return True.
+    """
+    if not q_val or not c_val:
+        return False
+    try:
+        q_parts = [float(x) for x in str(q_val).split('*')]
+        c_parts = [float(x) for x in str(c_val).split('*')]
+        if len(q_parts) == len(c_parts):
+            for q_p, c_p in zip(q_parts, c_parts):
+                if abs(q_p - c_p) / max(q_p, c_p, 1e-5) > max_deviation:
+                    return True
+            return False
+    except Exception:
+        pass
+    return str(q_val).strip().lower() != str(c_val).strip().lower()
+
+def has_conflict(attr: str, q_v, c_v) -> bool:
+    """Generic conflict check for attributes."""
+    if q_v is None or c_v is None:
+        return False
+    if attr == "尺寸":
+        return check_dimension_conflict(q_v, c_v, max_deviation=0.10)
+    if isinstance(q_v, (int, float)) and isinstance(c_v, (int, float)):
+        # Check if deviation exceeds the tolerance rule
+        tol = tolerance_rules.get(attr, 0.0)
+        tol = max(tol, 1e-5)
+        diff_ratio = abs(q_v - c_v) / max(q_v, c_v, 1e-5)
+        return diff_ratio > tol
+    return str(q_v).strip().lower() != str(c_v).strip().lower()
+
 def check_category_conflict(cat1: str, cat2: str) -> bool:
     """Detect if two category strings are physically incompatible."""
     c1, c2 = cat1.lower(), cat2.lower()
+    
+    # If both are fans or fan-related, do not conflict
+    if "风机" in c1 and "风机" in c2:
+        return False
+        
     incompatible_pairs = [
         ("风机", "泵"), ("风机", "阀"), ("风机", "箱"), ("风管", "水管"), 
         ("阀", "管道"), ("消声", "风机"), ("冷水", "热水"), ("空调", "风阀"),
@@ -98,6 +136,12 @@ def check_category_conflict(cat1: str, cat2: str) -> bool:
     ]
     for p1, p2 in incompatible_pairs:
         if (p1 in c1 and p2 in c2) or (p1 in c2 and p2 in c1):
+            # Special bypass for "风机" vs "箱" where one is a fan cabinet/box (风机箱/机型)
+            if (p1 == "风机" and p2 == "箱") or (p1 == "箱" and p2 == "风机"):
+                if "风机" in c1 and ("风机" in c2 or "机" in c2):
+                    continue
+                if "风机" in c2 and ("风机" in c1 or "机" in c1):
+                    continue
             return True
     return False
 
@@ -197,11 +241,15 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     q_model = q_parsed.get("model", "")
     q_attrs = q_parsed.get("attrs", {})
     
-    c_name = candidate.get("name", "")
+    c_name = candidate.get("name", "").strip()
     c_spec_text = candidate.get("specification", "")
     c_category = candidate.get("category", "")
     c_desc = candidate.get("description", "")
     c_full_spec = f"{c_spec_text} {c_desc}".strip()
+    
+    # Refine generic or short candidate names using specification text
+    if len(c_name) <= 3 or any(kw in c_name for kw in ["柜", "线", "管", "阀", "箱", "板", "机", "按钮"]):
+        c_name = extract_device_name(c_full_spec, c_name)
     
     # 1. Professional category conflict check
     q_prof = query_info.get("professional")
@@ -244,7 +292,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             pass
             
     if not c_parsed:
-        c_parsed = extract_params(c_full_spec, query_info.get("professional", c_category))
+        c_parsed = extract_params(c_full_spec, c_category)
         
     c_model = c_parsed.get("model", "")
     c_attrs = c_parsed.get("attrs", {})
@@ -271,88 +319,174 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             model_score = 0.0
                 
     # 2. Text/Category similarity score
-    name_sim = calculate_text_similarity(q_name, c_name)
+    # Calculate name similarity with synonym awareness
+    weak_cable_syns = ["网线", "双绞线", "对线", "网络线"]
+    is_syn = any(s in q_name for s in weak_cable_syns) and any(s in c_name for s in weak_cable_syns)
+    if is_syn:
+        name_sim = 0.95
+    else:
+        name_sim = calculate_text_similarity(q_name, c_name)
+        
     cat_sim = calculate_text_similarity(q_category, c_category)
     text_score = max(name_sim, cat_sim)
     if text_score > 0.8:
         reasons.append("品类名称一致")
         
     # 3. Attribute comparison score
-    attr_score = 0.0
-    valid_attrs_count = 0
+    from app.domain_router import route_domain
+    from app.domain_extractors import domain_schema
+    
+    domain = route_domain(c_category, c_name, c_full_spec, q_prof or "")
+    domain_config = domain_schema.get(domain, {})
+    must_keys = [f["key"] for f in domain_config.get("must", [])]
+    should_keys = [f["key"] for f in domain_config.get("should", [])]
+
+    # We will accumulate individual attribute scores and their weights
+    attr_scores = {}
+    attr_weights = {}
+    
     all_attrs_in_tolerance = True
     has_any_attr = False
-    
-    # Check all registered attributes in query and candidate
-    common_attrs = set(q_attrs.keys()).intersection(c_attrs.keys())
-    
-    for attr in common_attrs:
-        q_val = q_attrs.get(attr)
-        c_val = c_attrs.get(attr)
-        
-        # Skip if either is None
-        if q_val is None or c_val is None:
+    missing_penalty = 0.0
+
+    # Filter out range/inequality suffix subfields from top-level loop keys
+    processed_keys = set()
+    for attr in q_attrs.keys():
+        if attr.endswith("_min") or attr.endswith("_max") or attr.endswith("_op") or attr.endswith("_base"):
             continue
-            
-        has_any_attr = True
-        
-        if attr == "过滤段":
-            # Compare filters as overlap
-            q_fils = set(q_val)
-            c_fils = set(c_val)
-            if q_fils and c_fils:
-                valid_attrs_count += 1
-                intersect = len(q_fils.intersection(c_fils))
-                union = len(q_fils.union(c_fils))
-                fil_score = intersect / union if union > 0 else 0.0
-                attr_score += fil_score
-                if fil_score < 0.8:
-                    all_attrs_in_tolerance = False
-            continue
-            
-        if attr == "尺寸":
-            # Direct string comparison or text similarity
-            valid_attrs_count += 1
-            if q_val == c_val:
-                attr_score += 1.0
-            else:
-                sim = calculate_text_similarity(q_val, c_val)
-                attr_score += sim
-                if sim < 0.8:
-                    all_attrs_in_tolerance = False
+        processed_keys.add(attr)
+
+    # A. Match standard flags group if defined in schema
+    flags_list = domain_config.get("flags", [])
+    if flags_list:
+        q_flags = [f for f in flags_list if q_attrs.get(f) is True]
+        c_flags = [f for f in flags_list if c_attrs.get(f) is True]
+        if q_flags:
+            has_any_attr = True
+            matched_flags_count = len(set(q_flags).intersection(set(c_flags)))
+            flags_score = matched_flags_count / len(q_flags)
+            attr_scores["flags"] = flags_score
+            attr_weights["flags"] = domain_config.get("weights", {}).get("flags", 0.1)
+
+    # B. Match Must & Should attributes
+    for attr in processed_keys:
+        # Skip flags which are handled as a group above
+        if flags_list and attr in flags_list:
             continue
 
-        if attr in ["芯数", "截面积"]:
-            # Direct string comparison for cores and cross-sectional area
-            valid_attrs_count += 1
-            if q_val == c_val:
-                attr_score += 1.0
-            else:
-                all_attrs_in_tolerance = False
+        q_val = q_attrs.get(attr)
+        c_val = c_attrs.get(attr)
+
+        if q_val is None:
             continue
-            
-        # Numerical attributes
-        if isinstance(q_val, (int, float)) and isinstance(c_val, (int, float)):
-            valid_attrs_count += 1
-            diff_ratio = abs(q_val - c_val) / max(q_val, c_val, 1e-5)
-            tolerance = tolerance_rules.get(attr, 0.15)
-            
-            if diff_ratio == 0:
-                attr_score += 1.0
-            elif diff_ratio <= tolerance:
-                # Slight decay from 1.0 to 0.85 within tolerance
-                attr_score += 1.0 - 0.15 * (diff_ratio / tolerance)
-            elif tolerance < diff_ratio <= 2 * tolerance:
-                # Decay from 0.85 to 0.4
-                attr_score += 0.85 - ((diff_ratio - tolerance) / tolerance) * 0.45
-                all_attrs_in_tolerance = False
-            else:
-                attr_score += 0.1 # Minimum score instead of complete rejection
-                all_attrs_in_tolerance = False
+
+        has_any_attr = True
+
+        if c_val is not None:
+            # Candidate has the value. Compare it!
+            # 1. Range overlap ratio logic
+            if f"{attr}_min" in q_attrs and f"{attr}_min" in c_attrs:
+                q_min = q_attrs[f"{attr}_min"]
+                q_max = q_attrs[f"{attr}_max"]
+                c_min = c_attrs[f"{attr}_min"]
+                c_max = c_attrs[f"{attr}_max"]
+                overlap = max(0.0, min(q_max, c_max) - max(q_min, c_min))
+                union = max(q_max, c_max) - min(q_min, c_min)
+                overlap_ratio = overlap / union if union > 0 else 0.0
+                attr_scores[attr] = overlap_ratio
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+
+            # 2. Inequality logic evaluation
+            elif f"{attr}_op" in q_attrs:
+                op = q_attrs[f"{attr}_op"]
+                base_val = q_attrs[f"{attr}_base"]
+                satisfied = False
+                try:
+                    if f"{attr}_min" in c_attrs:
+                        c_min = c_attrs[f"{attr}_min"]
+                        c_max = c_attrs[f"{attr}_max"]
+                        if op == ">=": satisfied = (c_min >= base_val)
+                        elif op == "<=": satisfied = (c_max <= base_val)
+                        elif op == ">": satisfied = (c_min > base_val)
+                        elif op == "<": satisfied = (c_max < base_val)
+                    else:
+                        c_v = float(c_val)
+                        if op == ">=": satisfied = (c_v >= base_val)
+                        elif op == "<=": satisfied = (c_v <= base_val)
+                        elif op == ">": satisfied = (c_v > base_val)
+                        elif op == "<": satisfied = (c_v < base_val)
+                except Exception:
+                    pass
                 
-    # Normalize attribute score
-    if valid_attrs_count > 0:
-        attr_score = attr_score / valid_attrs_count
+                attr_scores[attr] = 1.0 if satisfied else 0.0
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+
+            # 3. Special non-numerical types (filters, dimensions, cables)
+            elif attr == "过滤段":
+                q_fils = set(q_val) if isinstance(q_val, list) else set([q_val])
+                c_fils = set(c_val) if isinstance(c_val, list) else set([c_val])
+                if q_fils and c_fils:
+                    intersect = len(q_fils.intersection(c_fils))
+                    union = len(q_fils.union(c_fils))
+                    fil_score = intersect / union if union > 0 else 0.0
+                    attr_scores[attr] = fil_score
+                    attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+            elif attr == "尺寸":
+                if q_val == c_val:
+                    sim = 1.0
+                else:
+                    sim = calculate_text_similarity(str(q_val), str(c_val))
+                attr_scores[attr] = sim
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+            elif attr in ["芯数", "截面积"]:
+                attr_scores[attr] = 1.0 if q_val == c_val else 0.0
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+
+            # 4. Numerical attributes standard comparison
+            elif isinstance(q_val, (int, float)) and isinstance(c_val, (int, float)):
+                diff_ratio = abs(q_val - c_val) / max(q_val, c_val, 1e-5)
+                tolerance = tolerance_rules.get(attr, 0.15)
+                if diff_ratio == 0:
+                    sim_score = 1.0
+                elif diff_ratio <= tolerance:
+                    sim_score = 1.0 - 0.15 * (diff_ratio / tolerance)
+                elif tolerance < diff_ratio <= 2 * tolerance:
+                    sim_score = 0.85 - ((diff_ratio - tolerance) / tolerance) * 0.45
+                else:
+                    sim_score = 0.1
+                attr_scores[attr] = sim_score
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+
+            # 5. Fallback direct match (boolean flags or enum strings)
+            else:
+                sim_score = 1.0 if str(q_val).lower() == str(c_val).lower() else 0.0
+                attr_scores[attr] = sim_score
+                attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                continue
+        else:
+            # Single-direction missing penalty: only when Query specifies but Candidate lacks
+            if attr in must_keys:
+                missing_penalty += 0.15
+                reasons.append(f"必填属性缺失处罚: {attr}")
+            elif attr in should_keys:
+                missing_penalty += 0.05
+                reasons.append(f"选填属性缺失处罚: {attr}")
+
+    # Calculate weighted average attributes score
+    if attr_scores:
+        sum_weighted_scores = sum(attr_scores[k] * attr_weights[k] for k in attr_scores)
+        sum_weights = sum(attr_weights[k] for k in attr_scores)
+        attr_score = sum_weighted_scores / sum_weights if sum_weights > 0 else 0.0
+        
+        for k, s in attr_scores.items():
+            if (k in tolerance_rules or k == "尺寸" or k in ["芯数", "截面积"]) and s < 0.8:
+                all_attrs_in_tolerance = False
         if all_attrs_in_tolerance:
             reasons.append("核心参数在公差范围内")
     else:
@@ -361,9 +495,9 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         all_attrs_in_tolerance = False
 
     # Determine Scenario and weights
-    if q_model:
+    if q_model and c_model:
         scene = "scene_a"
-    elif has_any_attr:
+    elif has_any_attr and domain != "generic":
         scene = "scene_b"
     else:
         scene = "scene_c"
@@ -375,7 +509,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         weights.get("model", 0.0) * model_score +
         weights.get("attrs", 0.0) * attr_score +
         weights.get("text", 0.0) * text_score
-    )
+    ) - missing_penalty
     
     # Add semantic vector contribution (weight is positive boost)
     if semantic_score > 0.0:
@@ -388,8 +522,22 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     pos_rules = boost_rules.get("positive", DEFAULT_BOOSTS["positive"])
     if model_matched_exact:
         base_score += pos_rules.get("model_exact", 0.15)
-    if valid_attrs_count > 0 and all_attrs_in_tolerance:
+        
+    # Exact or synonym name match boost
+    name_matched = False
+    if q_name == c_name:
+        name_matched = True
+    else:
+        weak_cable_syns = ["网线", "双绞线", "对线", "网络线"]
+        if any(s in q_name for s in weak_cable_syns) and any(s in c_name for s in weak_cable_syns):
+            name_matched = True
+    if name_matched:
+        base_score += 0.12
+    if attr_scores and all_attrs_in_tolerance:
         base_score += pos_rules.get("attrs_exact", 0.10)
+        # Additional confidence boost if names/categories are also reasonably similar
+        if text_score >= 0.5:
+            base_score += 0.08
     if cat_sim > 0.9:
         base_score += pos_rules.get("category_match", 0.08)
     if check_series_match(q_model, c_model):
@@ -399,27 +547,6 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         base_score += pos_rules.get("brand_match", 0.05)
         reasons.append("品牌一致")
         
-    # Core attributes boosts (HVAC/Water domain-specific prioritization)
-    if q_attrs.get("风量") is not None and c_attrs.get("风量") is not None:
-        try:
-            q_vol = float(q_attrs["风量"])
-            c_vol = float(c_attrs["风量"])
-            diff_vol = abs(q_vol - c_vol) / max(q_vol, c_vol, 1.0)
-            if diff_vol <= tolerance_rules.get("风量", 0.15):
-                base_score += 0.08
-                reasons.append("核心风量匹配")
-        except (ValueError, TypeError):
-            pass
-            
-    if q_attrs.get("管径") is not None and c_attrs.get("管径") is not None:
-        if q_attrs["管径"] == c_attrs["管径"]:
-            base_score += 0.08
-            reasons.append("管道口径匹配")
-
-    if q_attrs.get("芯数") is not None and c_attrs.get("芯数") is not None and q_attrs["芯数"] == c_attrs["芯数"] and \
-       q_attrs.get("截面积") is not None and c_attrs.get("截面积") is not None and q_attrs["截面积"] == c_attrs["截面积"]:
-        base_score += 0.12
-        reasons.append("电缆规格匹配")
         
     # Apply Negative Boosts
     neg_rules = boost_rules.get("negative", DEFAULT_BOOSTS["negative"])
@@ -429,41 +556,10 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if "冷水" in q_spec_text and "热水" in c_full_spec or "热水" in q_spec_text and "冷水" in c_full_spec:
         base_score += neg_rules.get("medium_conflict", -0.20)
         reasons.append("温水介质冲突")
-        
-    # Pipe diameter conflict check (e.g. DN100 vs DN50)
-    q_dn = q_attrs.get("管径")
-    c_dn = c_attrs.get("管径")
-    if q_dn is not None and c_dn is not None and q_dn != c_dn:
-        base_score += neg_rules.get("pipe_conflict", -0.40)
-        reasons.append("管径强冲突")
 
-    # Cable spec conflict check (e.g. 5x2.5 vs 5x4 or 4x2.5)
-    q_cores = q_attrs.get("芯数")
-    c_cores = c_attrs.get("芯数")
-    q_area = q_attrs.get("截面积")
-    c_area = c_attrs.get("截面积")
-    if (q_cores is not None and c_cores is not None and q_cores != c_cores) or \
-       (q_area is not None and c_area is not None and q_area != c_area):
-        base_score += neg_rules.get("cable_conflict", -0.40)
-        reasons.append("电线电缆规格冲突")
-        
-    # Power conflict check (e.g. 10kW vs 40kW)
-    q_power = q_attrs.get("功率")
-    c_power = c_attrs.get("功率")
-    if q_power is not None and c_power is not None:
-        try:
-            q_p = float(q_power)
-            c_p = float(c_power)
-            diff_ratio = abs(q_p - c_p) / max(q_p, c_p, 1e-5)
-            if diff_ratio > 0.50:
-                base_score -= 0.35
-                reasons.append("功率严重偏离")
-        except (ValueError, TypeError):
-            pass
-        
     # Out of 2x tolerance check
     has_large_deviation = False
-    for attr in common_attrs:
+    for attr in processed_keys:
         q_val = q_attrs.get(attr)
         c_val = c_attrs.get(attr)
         if isinstance(q_val, (int, float)) and isinstance(c_val, (int, float)):
@@ -480,6 +576,52 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         base_score += neg_rules.get("model_conflict", -0.25)
         reasons.append("型号冲突扣分")
         
+    # === Configuration-driven Hard Gates ===
+    # 1. Conflict Caps
+    conflict_caps = domain_config.get("hard_gates", {}).get("conflict_caps", {})
+    for attr_name, cap_val in conflict_caps.items():
+        q_val = q_attrs.get(attr_name)
+        c_val = c_attrs.get(attr_name)
+        if q_val is not None and c_val is not None:
+            if has_conflict(attr_name, q_val, c_val):
+                base_score = min(base_score, cap_val / 100.0)
+                reasons.append(f"{attr_name}冲突拦截")
+
+    # 2. Deviation Caps
+    deviation_caps = domain_config.get("hard_gates", {}).get("deviation_caps", {})
+    for attr_name, cap_config in deviation_caps.items():
+        q_val = q_attrs.get(attr_name)
+        c_val = c_attrs.get(attr_name)
+        if isinstance(q_val, (int, float)) and isinstance(c_val, (int, float)):
+            diff_ratio = abs(q_val - c_val) / max(q_val, c_val, 1e-5)
+            abs_diff = abs(q_val - c_val)
+            
+            ratio = cap_config.get("ratio", 0.5)
+            cap_val = cap_config.get("cap", 30) / 100.0
+            
+            small_threshold = cap_config.get("small_threshold")
+            abs_diff_small = cap_config.get("abs_diff_small")
+            abs_diff_standard = cap_config.get("abs_diff_standard")
+            
+            if small_threshold is not None and q_val <= small_threshold:
+                limit = abs_diff_small
+            else:
+                limit = abs_diff_standard
+                
+            if diff_ratio > ratio and (limit is None or abs_diff > limit):
+                base_score = min(base_score, cap_val)
+                reasons.append(f"{attr_name}偏差过大拦截")
+
+    # 3. Ratio Penalties
+    ratio_penalties = domain_config.get("hard_gates", {}).get("ratio_penalties", {})
+    for attr_name, penalty_ratio in ratio_penalties.items():
+        q_val = q_attrs.get(attr_name)
+        c_val = c_attrs.get(attr_name)
+        if q_val is not None and c_val is not None:
+            if has_conflict(attr_name, q_val, c_val):
+                base_score = base_score * penalty_ratio
+                reasons.append(f"{attr_name}冲突惩罚")
+
     # Bound to [0.0, 1.0] and convert to 100 points
     final_score = max(0.0, min(1.0, base_score)) * 100.0
     
