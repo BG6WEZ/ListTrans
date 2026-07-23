@@ -3,12 +3,12 @@ import os
 import re
 import sqlite3
 import pandas as pd
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "materials.db")
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -97,13 +97,6 @@ def init_db(xlsx_path=None, force_reload=False):
             index_manager.check_db_timestamp_and_build(DB_PATH, force=True)
         except Exception as e:
             print(f"Error rebuilding vector index during init_db: {e}")
-    else:
-        # Always check index on startup
-        try:
-            from app.vector_index import index_manager
-            index_manager.check_db_timestamp_and_build(DB_PATH)
-        except Exception as e:
-            print(f"Error loading vector index during startup check: {e}")
 
 def get_all_materials(limit=1000):
     conn = get_db_connection()
@@ -157,7 +150,7 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
             # Check if this raw word has synonyms
             syns = None
             for key, val in synonym_map.items():
-                if rw == key or key in rw:
+                if rw == key:
                     syns = val
                     break
             
@@ -352,7 +345,15 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     df_cleaned = df_imported
     
     # Create search tokens and pre-parse parameters
-    from app.preprocessor import extract_params
+    from app.preprocessor import extract_params, extract_device_name
+    from app.domain_router import route_domain
+    from app.normalizer import clean_text_standard
+    from app.domain_extractors import domain_schema
+    from app.llm_client import llm_client
+    
+    llm_enabled = llm_client.is_enabled()
+    pending_tasks = []
+    
     search_tokens_list = []
     parsed_params_list = []
     for _, row in df_cleaned.iterrows():
@@ -363,6 +364,22 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         full_spec = f"{row['specification']} {row['description']}".strip()
         parsed = extract_params(full_spec, row['category'])
         parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
+        
+        if llm_enabled:
+            # Check if any must keys are missing
+            name_extracted = extract_device_name(full_spec, row['category'])
+            text_clean = clean_text_standard(full_spec)
+            domain = route_domain(row['category'], name_extracted, text_clean, row['category'])
+            domain_config = domain_schema.get(domain, {})
+            must_keys = [field["key"] for field in domain_config.get("must", [])]
+            
+            is_missing_must = False
+            for mk in must_keys:
+                if mk not in parsed.get("attrs", {}):
+                    is_missing_must = True
+                    break
+            if is_missing_must:
+                pending_tasks.append((row['code'], full_spec, row['category']))
         
     df_cleaned = df_cleaned.copy()  # Avoid SettingWithCopyWarning
     df_cleaned["search_tokens"] = search_tokens_list
@@ -426,6 +443,9 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         
     update_db_metadata(new_total, new_imported, new_disabled, filename)
     
+    if llm_enabled and pending_tasks:
+        process_llm_extraction_async(pending_tasks)
+    
     # Return fresh metadata
     return get_db_metadata()
 
@@ -480,7 +500,15 @@ def reparse_materials_db_asymmetric() -> Dict[str, Any]:
     conn.close()
     
     # 4. Perform reparsing in memory or batch inserts
-    from app.preprocessor import extract_params, fts_tokenize
+    from app.preprocessor import extract_params, fts_tokenize, extract_device_name
+    from app.domain_router import route_domain
+    from app.normalizer import clean_text_standard
+    from app.domain_extractors import domain_schema
+    from app.llm_client import llm_client
+    
+    llm_enabled = llm_client.is_enabled()
+    pending_tasks = []
+    
     records = []
     fts_records = []
     for row in rows:
@@ -491,6 +519,21 @@ def reparse_materials_db_asymmetric() -> Dict[str, Any]:
         parsed_params_str = json.dumps(parsed, ensure_ascii=False)
         
         records.append([code, category, name, specification, unit, brand, description, tokens, parsed_params_str, 2])
+        
+        if llm_enabled:
+            name_extracted = extract_device_name(full_spec, category)
+            text_clean = clean_text_standard(full_spec)
+            domain = route_domain(category, name_extracted, text_clean, category)
+            domain_config = domain_schema.get(domain, {})
+            must_keys = [field["key"] for field in domain_config.get("must", [])]
+            
+            is_missing_must = False
+            for mk in must_keys:
+                if mk not in parsed.get("attrs", {}):
+                    is_missing_must = True
+                    break
+            if is_missing_must:
+                pending_tasks.append((code, full_spec, category))
         if has_fts:
             fts_records.append([
                 code,
@@ -569,6 +612,9 @@ def reparse_materials_db_asymmetric() -> Dict[str, Any]:
         print("Vector index rebuilt successfully.")
     except Exception as e:
         print(f"Error rebuilding vector index: {e}")
+        
+    if llm_enabled and pending_tasks:
+        process_llm_extraction_async(pending_tasks)
         
     return {"status": "success", "reparsed_rows": len(rows)}
 
@@ -675,6 +721,15 @@ def reparse_materials_db_partial(category: str = None, codes: List[str] = None) 
         
     print(f"Partially reparsing {len(rows)} materials...")
     
+    from app.llm_client import llm_client
+    from app.domain_router import route_domain
+    from app.preprocessor import extract_device_name
+    from app.normalizer import clean_text_standard
+    from app.domain_extractors import domain_schema
+    
+    llm_enabled = llm_client.is_enabled()
+    pending_tasks = []
+    
     updated_records = []
     for row in rows:
         code, cat, name, spec, unit, brand, desc = row
@@ -683,6 +738,21 @@ def reparse_materials_db_partial(category: str = None, codes: List[str] = None) 
         parsed = extract_params(full_spec, cat)
         parsed_params_str = json.dumps(parsed, ensure_ascii=False)
         updated_records.append([tokens, parsed_params_str, 2, code])
+        
+        if llm_enabled:
+            name_extracted = extract_device_name(full_spec, cat)
+            text_clean = clean_text_standard(full_spec)
+            domain = route_domain(cat, name_extracted, text_clean, cat)
+            domain_config = domain_schema.get(domain, {})
+            must_keys = [field["key"] for field in domain_config.get("must", [])]
+            
+            is_missing_must = False
+            for mk in must_keys:
+                if mk not in parsed.get("attrs", {}):
+                    is_missing_must = True
+                    break
+            if is_missing_must:
+                pending_tasks.append((code, full_spec, cat))
         
     cursor.executemany("""
         UPDATE materials 
@@ -721,4 +791,94 @@ def reparse_materials_db_partial(category: str = None, codes: List[str] = None) 
     except Exception as e:
         print(f"Error rebuilding vector index: {e}")
         
+    if llm_enabled and pending_tasks:
+        process_llm_extraction_async(pending_tasks)
+        
     return {"status": "success", "reparsed_rows": len(rows)}
+
+
+def process_llm_extraction_async(pending_tasks: List[Tuple[str, str, str]]):
+    """
+    Asynchronously calls LLM to extract parameters for the given list of (code, full_spec, category).
+    Then updates the database.
+    """
+    import threading
+    import logging
+    
+    def run():
+        from app.llm_client import llm_client
+        from app.domain_router import route_domain
+        from app.preprocessor import extract_device_name
+        from app.normalizer import clean_text_standard
+        from app.domain_extractors import domain_schema
+        import json
+        import time
+        
+        # Limit to first 50 items to prevent billing overflow and circuit breaker flooding
+        tasks_to_run = pending_tasks[:50]
+        
+        logger_db = logging.getLogger("db_manager_async")
+        logger_db.info(f"Starting async LLM extraction for {len(tasks_to_run)} items (truncated from {len(pending_tasks)}).")
+        
+        # Connect to DB
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        for code, full_spec, category in tasks_to_run:
+            # Check circuit breaker
+            if llm_client.check_circuit_breaker():
+                logger_db.warning("Circuit breaker is open. Aborting remaining async extraction.")
+                break
+                
+            try:
+                # Add delay between calls to respect rate limit
+                time.sleep(1.0)
+                
+                # Route domain
+                name_extracted = extract_device_name(full_spec, category)
+                text_clean = clean_text_standard(full_spec)
+                domain = route_domain(category, name_extracted, text_clean, category)
+                
+                domain_config = domain_schema.get(domain, {})
+                must_keys = [field["key"] for field in domain_config.get("must", [])]
+                should_keys = [field["key"] for field in domain_config.get("should", [])]
+                flags = domain_config.get("flags", [])
+                
+                # Fetch current parsed_params to merge with
+                cursor.execute("SELECT parsed_params FROM materials WHERE code = ?", (code,))
+                row = cursor.fetchone()
+                if not row:
+                    continue
+                parsed = json.loads(row[0])
+                
+                llm_parsed = llm_client.extract_params_by_llm(full_spec, domain, must_keys, should_keys, flags)
+                if llm_parsed:
+                    # Update parsed dict
+                    if llm_parsed.get("model"):
+                        parsed["model"] = llm_parsed["model"]
+                    for k, v in llm_parsed.get("attrs", {}).items():
+                        parsed["attrs"][k] = v
+                        
+                    # Also double-write keys for frontend compatibility
+                    if "机外余压" in parsed["attrs"]:
+                        parsed["attrs"]["余压"] = parsed["attrs"]["机外余压"]
+                    if "管径" in parsed["attrs"]:
+                        parsed["attrs"]["口径"] = parsed["attrs"]["管径"]
+                    if "过滤等级" in parsed["attrs"]:
+                        parsed["attrs"]["过滤段"] = [parsed["attrs"]["过滤等级"]] if isinstance(parsed["attrs"]["过滤等级"], str) else parsed["attrs"]["过滤等级"]
+                    
+                    # Update DB
+                    cursor.execute(
+                        "UPDATE materials SET parsed_params = ? WHERE code = ?",
+                        (json.dumps(parsed, ensure_ascii=False), code)
+                    )
+                    conn.commit()
+            except Exception as e:
+                logger_db.error(f"Failed to process async LLM extraction for code {code}: {e}")
+                
+        conn.close()
+        logger_db.info("Async LLM extraction completed.")
+        
+    thread = threading.Thread(target=run, name="LLMExtractionAsync")
+    thread.daemon = True
+    thread.start()

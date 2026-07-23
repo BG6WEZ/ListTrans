@@ -63,7 +63,7 @@ let configs = {
     boosts: {}
 };
 
-const backendUrl = ''; // Relative paths since hosted on same server
+const backendUrl = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:8000';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Process User profile info
@@ -136,13 +136,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupNavigation() {
     const navWorkbench = document.getElementById('nav-workbench');
+    const navMaterials = document.getElementById('nav-materials');
     const navConfig = document.getElementById('nav-config');
+    
     const workbenchEl = document.getElementById('workbench');
+    const materialsDashboardEl = document.getElementById('materials-dashboard');
     const configDashboardEl = document.getElementById('config-dashboard');
     const welcomeSlate = document.getElementById('welcome-slate');
 
     navWorkbench.addEventListener('click', () => {
         navWorkbench.classList.add('active');
+        if (navMaterials) navMaterials.classList.remove('active');
         navConfig.classList.remove('active');
         
         if (items.length > 0) {
@@ -152,15 +156,35 @@ function setupNavigation() {
             welcomeSlate.style.display = 'flex';
             workbenchEl.style.display = 'none';
         }
+        if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
         configDashboardEl.style.display = 'none';
     });
+
+    if (navMaterials) {
+        navMaterials.addEventListener('click', () => {
+            navMaterials.classList.add('active');
+            navWorkbench.classList.remove('active');
+            navConfig.classList.remove('active');
+            
+            workbenchEl.style.display = 'none';
+            welcomeSlate.style.display = 'none';
+            configDashboardEl.style.display = 'none';
+            if (materialsDashboardEl) materialsDashboardEl.style.display = 'flex';
+            
+            loadAndRenderDbMetadata();
+            loadAndRenderDataPortrait();
+            loadAndRenderMaterialTable(1);
+        });
+    }
 
     navConfig.addEventListener('click', () => {
         navConfig.classList.add('active');
         navWorkbench.classList.remove('active');
+        if (navMaterials) navMaterials.classList.remove('active');
         
         workbenchEl.style.display = 'none';
         welcomeSlate.style.display = 'none';
+        if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
         configDashboardEl.style.display = 'flex';
         
         loadAndRenderConfigs();
@@ -173,7 +197,16 @@ function initEventListeners() {
     const uploadTrigger = document.getElementById('upload-trigger');
     const welcomeUploadBtn = document.getElementById('welcome-upload-btn');
     
-    uploadTrigger.addEventListener('click', () => fileInput.click());
+    const handleUploadClick = () => {
+        if (items.length > 0) {
+            document.getElementById('upload-confirm-filename').innerText = originalFileName || '当前清单';
+            document.getElementById('upload-confirm-modal').style.display = 'flex';
+        } else {
+            fileInput.click();
+        }
+    };
+    
+    uploadTrigger.addEventListener('click', handleUploadClick);
     welcomeUploadBtn.addEventListener('click', () => fileInput.click());
     
     fileInput.addEventListener('change', (e) => {
@@ -383,6 +416,65 @@ function initEventListeners() {
     startDbImportBtn.addEventListener('click', handleDbUploadAndImport);
     refreshLogsBtn.addEventListener('click', loadAndRenderLogs);
 
+    const refreshPortraitBtn = document.getElementById('btn-refresh-portrait');
+    if (refreshPortraitBtn) {
+        refreshPortraitBtn.addEventListener('click', async () => {
+            const icon = refreshPortraitBtn.querySelector('i');
+            if (icon) icon.classList.add('fa-spin');
+            refreshPortraitBtn.disabled = true;
+            try {
+                await Promise.all([
+                    loadAndRenderDbMetadata(),
+                    loadAndRenderDataPortrait(),
+                    loadAndRenderMaterialTable(1)
+                ]);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+                refreshPortraitBtn.disabled = false;
+            }
+        });
+    }
+    
+    const systemResetBtn = document.getElementById('btn-system-reset');
+    if (systemResetBtn) systemResetBtn.addEventListener('click', handleSystemReset);
+
+    // Master Material Table search and pagination listeners
+    const dbSearchBtn = document.getElementById('db-search-btn');
+    if (dbSearchBtn) dbSearchBtn.addEventListener('click', () => loadAndRenderMaterialTable(1));
+
+    const dbSearchResetBtn = document.getElementById('db-search-reset-btn');
+    if (dbSearchResetBtn) {
+        dbSearchResetBtn.addEventListener('click', () => {
+            const catSel = document.getElementById('db-category-select');
+            const srcInp = document.getElementById('db-search-input');
+            if (catSel) catSel.value = '';
+            if (srcInp) srcInp.value = '';
+            loadAndRenderMaterialTable(1);
+        });
+    }
+
+    const dbCategorySelect = document.getElementById('db-category-select');
+    if (dbCategorySelect) dbCategorySelect.addEventListener('change', () => loadAndRenderMaterialTable(1));
+
+    const dbSearchInput = document.getElementById('db-search-input');
+    if (dbSearchInput) {
+        dbSearchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') loadAndRenderMaterialTable(1);
+        });
+    }
+
+    const dbPrevBtn = document.getElementById('db-prev-page-btn');
+    if (dbPrevBtn) dbPrevBtn.addEventListener('click', () => {
+        if (currentDbPage > 1) loadAndRenderMaterialTable(currentDbPage - 1);
+    });
+
+    const dbNextBtn = document.getElementById('db-next-page-btn');
+    if (dbNextBtn) dbNextBtn.addEventListener('click', () => {
+        if (currentDbPage < currentDbTotalPages) loadAndRenderMaterialTable(currentDbPage + 1);
+    });
+
     // Confirm match finished button click listener
     document.getElementById('confirm-match-finished-btn').addEventListener('click', async () => {
         if (!selectedItem) return;
@@ -494,6 +586,72 @@ function initEventListeners() {
     if (closeHistoryModal) closeHistoryModal.addEventListener('click', () => historyModal.style.display = 'none');
     if (closeHistoryBtn) closeHistoryBtn.addEventListener('click', () => historyModal.style.display = 'none');
 
+    // End Task Modal triggers
+    const endTaskTrigger = document.getElementById('end-task-trigger');
+    const endTaskModal = document.getElementById('end-task-modal');
+    const closeEndTaskModal = document.getElementById('close-end-task-modal');
+    const endTaskCancelBtn = document.getElementById('end-task-cancel-btn');
+    const endTaskSaveBtn = document.getElementById('end-task-save-btn');
+    const endTaskDirectBtn = document.getElementById('end-task-direct-btn');
+
+    if (endTaskTrigger) {
+        endTaskTrigger.addEventListener('click', () => {
+            document.getElementById('end-task-filename').innerText = originalFileName || '当前清单';
+            endTaskModal.style.display = 'flex';
+        });
+    }
+
+    if (closeEndTaskModal) closeEndTaskModal.addEventListener('click', () => endTaskModal.style.display = 'none');
+    if (endTaskCancelBtn) endTaskCancelBtn.addEventListener('click', () => endTaskModal.style.display = 'none');
+    
+    if (endTaskDirectBtn) {
+        endTaskDirectBtn.addEventListener('click', async () => {
+            endTaskModal.style.display = 'none';
+            await resetAndEndTask();
+        });
+    }
+
+    if (endTaskSaveBtn) {
+        endTaskSaveBtn.addEventListener('click', () => {
+            endTaskModal.style.display = 'none';
+            // Open save session modal
+            let suggestedName = originalFileName ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : '清单进度';
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}`;
+            saveSessionNameInput.value = `${suggestedName}_备份_${timeStr}`;
+            saveSessionModal.style.display = 'flex';
+        });
+    }
+
+    // Upload Confirm Modal triggers
+    const uploadConfirmModal = document.getElementById('upload-confirm-modal');
+    const closeUploadConfirmModal = document.getElementById('close-upload-confirm-modal');
+    const uploadConfirmCancelBtn = document.getElementById('upload-confirm-cancel-btn');
+    const uploadConfirmSaveBtn = document.getElementById('upload-confirm-save-btn');
+    const uploadConfirmOverrideBtn = document.getElementById('upload-confirm-override-btn');
+
+    if (closeUploadConfirmModal) closeUploadConfirmModal.addEventListener('click', () => uploadConfirmModal.style.display = 'none');
+    if (uploadConfirmCancelBtn) uploadConfirmCancelBtn.addEventListener('click', () => uploadConfirmModal.style.display = 'none');
+
+    if (uploadConfirmOverrideBtn) {
+        uploadConfirmOverrideBtn.addEventListener('click', async () => {
+            uploadConfirmModal.style.display = 'none';
+            await resetAndEndTask();
+            fileInput.click();
+        });
+    }
+
+    if (uploadConfirmSaveBtn) {
+        uploadConfirmSaveBtn.addEventListener('click', () => {
+            uploadConfirmModal.style.display = 'none';
+            let suggestedName = originalFileName ? originalFileName.substring(0, originalFileName.lastIndexOf('.')) : '清单进度';
+            const now = new Date();
+            const timeStr = `${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}`;
+            saveSessionNameInput.value = `${suggestedName}_备份_${timeStr}`;
+            saveSessionModal.style.display = 'flex';
+        });
+    }
+
     // Auto-refresh interval for logs (runs every 3 seconds if config is visible and checkbox is checked)
     setInterval(() => {
         const configDashboard = document.getElementById('config-dashboard');
@@ -540,6 +698,56 @@ function hideLoading() {
     document.getElementById('loading-overlay').style.display = 'none';
 }
 
+// Task lifecycle control: End and reset current workbench task
+async function resetAndEndTask() {
+    items = [];
+    originalFileName = '';
+    activeSessionId = null;
+    searchQuery = '';
+    currentFilter = 'all';
+    currentPage = 1;
+    selectedItem = null;
+    professionals = ['全部'];
+    currentProfessional = '全部';
+    
+    // Reset search DOM
+    const listSearch = document.getElementById('list-search');
+    if (listSearch) listSearch.value = '';
+    
+    // Reset filter tabs DOM
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(t => {
+        if (t.dataset.filter === 'all') t.classList.add('active');
+        else t.classList.remove('active');
+    });
+    
+    // Toggle UI views
+    document.getElementById('welcome-slate').style.display = 'flex';
+    document.getElementById('workbench').style.display = 'none';
+    document.getElementById('export-btn').disabled = true;
+    
+    const saveTrigger = document.getElementById('save-trigger');
+    if (saveTrigger) saveTrigger.style.display = 'none';
+    
+    const endTaskTrigger = document.getElementById('end-task-trigger');
+    if (endTaskTrigger) endTaskTrigger.style.display = 'none';
+    
+    const uploadedFilenameEl = document.getElementById('uploaded-filename');
+    if (uploadedFilenameEl) uploadedFilenameEl.innerText = '';
+    
+    if (autoSaveInterval) {
+        clearInterval(autoSaveInterval);
+        autoSaveInterval = null;
+    }
+    
+    // Delete auto-saved draft on server
+    try {
+        await fetch(`${backendUrl}/api/session/draft`, { method: 'DELETE' });
+    } catch (e) {
+        console.error("Failed to clear backend draft:", e);
+    }
+}
+
 // 1. File Upload Handler
 async function handleFileUpload(file) {
     showLoading("正在上传并分析清单...", "系统正在提取规格参数并执行高性能多线程语义匹配，请稍候...");
@@ -559,9 +767,26 @@ async function handleFileUpload(file) {
         }
         
         const data = await response.json();
+        
+        // 1. Reset all state and search filters to guarantee new file displays cleanly
+        searchQuery = '';
+        const listSearch = document.getElementById('list-search');
+        if (listSearch) listSearch.value = '';
+        
+        currentFilter = 'all';
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        filterTabs.forEach(t => {
+            if (t.dataset.filter === 'all') t.classList.add('active');
+            else t.classList.remove('active');
+        });
+        
+        activeSessionId = null;
+        currentPage = 1;
+        selectedItem = null;
+        
         items = data.items;
         
-        // Cache initial matching codes to check if user manual overrides later (for learning feedback loop)
+        // Cache initial matching codes
         items.forEach(item => {
             item.initial_auto_code = item.matched_code;
             if (!item.bindings) {
@@ -602,15 +827,15 @@ async function handleFileUpload(file) {
         const saveTrigger = document.getElementById('save-trigger');
         if (saveTrigger) saveTrigger.style.display = 'inline-flex';
         
+        const endTaskTrigger = document.getElementById('end-task-trigger');
+        if (endTaskTrigger) endTaskTrigger.style.display = 'inline-flex';
+        
+        startAutoSave();
         saveDraft();
         
-        // Clear selection
-        selectedItem = null;
+        // Clear selection UI
         document.getElementById('select-prompt').style.display = 'flex';
         document.getElementById('detail-editor').style.display = 'none';
-        
-        // Reset pagination
-        currentPage = 1;
         
         // Update table & status
         renderTable();
@@ -620,7 +845,7 @@ async function handleFileUpload(file) {
         alert(`错误: ${error.message}`);
     } finally {
         hideLoading();
-        // Reset file input value
+        // Reset file input value so re-selecting any file triggers 'change' event
         document.getElementById('xlsx-file-input').value = "";
     }
 }
@@ -1530,6 +1755,12 @@ async function handleExport() {
         window.URL.revokeObjectURL(url);
         a.remove();
         
+        setTimeout(() => {
+            if (confirm("报表导出成功！是否立即结束当前匹配任务并清空工作台？\n（点击【确定】将结束当前任务并返回首页；点击【取消】可保留当前工作台继续查看）")) {
+                resetAndEndTask();
+            }
+        }, 300);
+        
     } catch (error) {
         alert(`导出失败: ${error.message}`);
     } finally {
@@ -1964,8 +2195,9 @@ async function handleDbUploadAndImport() {
         dbUploadInput.value = '';
         dbFileLabel.innerText = '未选择文件';
         
-        // Re-render fresh metadata
+        // Re-render fresh metadata and portrait
         renderDbMetadata(data.metadata);
+        loadAndRenderDataPortrait();
         
         alert("物料明细库导入及向量索引重建已全部完成！");
         
@@ -1977,6 +2209,218 @@ async function handleDbUploadAndImport() {
         startDbImportBtn.disabled = false;
     } finally {
         hideLoading();
+    }
+}
+
+async function loadAndRenderDataPortrait() {
+    try {
+        const response = await fetch(`${backendUrl}/api/db/portrait`);
+        if (!response.ok) return;
+        const data = await response.json();
+        
+        // Render Metric Cards
+        const totalEl = document.getElementById('portrait-total-items');
+        if (totalEl) totalEl.innerText = (data.total_items || 0).toLocaleString();
+        
+        const validEl = document.getElementById('portrait-valid-items');
+        if (validEl) validEl.innerText = (data.valid_materials || 0).toLocaleString();
+        
+        const catEl = document.getElementById('portrait-cat-count');
+        if (catEl) catEl.innerText = (data.category_count || 0).toLocaleString();
+        
+        const specRateEl = document.getElementById('portrait-spec-rate');
+        if (specRateEl) specRateEl.innerText = `${data.spec_nonempty_rate || 0}%`;
+        
+        const specCountEl = document.getElementById('portrait-spec-count');
+        if (specCountEl) specCountEl.innerText = (data.spec_nonempty_count || 0).toLocaleString();
+        
+        const modelRateEl = document.getElementById('portrait-model-rate');
+        if (modelRateEl) modelRateEl.innerText = `${data.model_extracted_rate || 0}%`;
+        
+        const modelMissEl = document.getElementById('portrait-model-missing');
+        if (modelMissEl) modelMissEl.innerText = (data.model_missing_count || 0).toLocaleString();
+        
+        // Render Bars
+        const rawSpecRate = data.spec_nonempty_rate || 0;
+        const modelRate = data.model_extracted_rate || 0;
+        const attrRate = data.structured_attr_rate || 0;
+        
+        const barRawText = document.getElementById('bar-raw-spec-text');
+        const barRaw = document.getElementById('bar-raw-spec');
+        if (barRawText) barRawText.innerText = `${rawSpecRate}%`;
+        if (barRaw) barRaw.style.width = `${Math.min(100, Math.max(0, rawSpecRate))}%`;
+        
+        const barModelText = document.getElementById('bar-model-text');
+        const barModel = document.getElementById('bar-model');
+        if (barModelText) barModelText.innerText = `${modelRate}% (${(data.model_extracted_count || 0).toLocaleString()}条)`;
+        if (barModel) barModel.style.width = `${Math.min(100, Math.max(0, modelRate))}%`;
+        
+        const barAttrText = document.getElementById('bar-attr-text');
+        const barAttr = document.getElementById('bar-attr');
+        if (barAttrText) barAttrText.innerText = `${attrRate}% (${(data.structured_attr_count || 0).toLocaleString()}条)`;
+        if (barAttr) barAttr.style.width = `${Math.min(100, Math.max(0, attrRate))}%`;
+        
+        // Render Top 5 Categories
+        const catContainer = document.getElementById('portrait-categories-list');
+        if (catContainer) {
+            catContainer.innerHTML = '';
+            (data.top_categories || []).forEach((c, idx) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; flex-direction: column; gap: 4px; font-size: 13px;';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span><strong style="color: var(--color-primary); font-family: monospace;">Top ${idx+1}.</strong> ${c.category}</span>
+                        <span style="color: var(--color-text-secondary);">${c.count.toLocaleString()} 行 (${c.percent}%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${c.percent}%; height: 100%; background: var(--color-primary); border-radius: 3px;"></div>
+                    </div>
+                `;
+                catContainer.appendChild(item);
+            });
+        }
+        
+        // Render Top 5 Units
+        const unitContainer = document.getElementById('portrait-units-list');
+        if (unitContainer) {
+            unitContainer.innerHTML = '';
+            (data.top_units || []).forEach((u, idx) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; flex-direction: column; gap: 4px; font-size: 13px;';
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span><strong style="color: #a855f7; font-family: monospace;">Top ${idx+1}.</strong> ${u.unit}</span>
+                        <span style="color: var(--color-text-secondary);">${u.count.toLocaleString()} 行 (${u.percent}%)</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${u.percent}%; height: 100%; background: #a855f7; border-radius: 3px;"></div>
+                    </div>
+                `;
+                unitContainer.appendChild(item);
+            });
+        }
+        
+    } catch (e) {
+        console.error("Failed to load data portrait:", e);
+    }
+}
+
+async function handleSystemReset() {
+    if (!confirm("⚠️ 高危操作确认！\n\n确定要一键清理系统所有运行期数据吗？\n（包含：所有暂存工作草稿、历史保存会话、上传的临时清单及反馈日志）\n\n注意：此操作不可逆！标准物料库和系统账号将被安全保留。")) {
+        return;
+    }
+    
+    showLoading("正在清理系统运行数据...", "系统正在清空临时会话、临时文件及历史日志，请稍候...");
+    try {
+        const response = await fetch(`${backendUrl}/api/system/reset`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "清理失败");
+        
+        await resetAndEndTask();
+        alert(data.message || "系统运行数据已全量清理完毕，已恢复干净运行状态！");
+    } catch (e) {
+        alert(`清理失败: ${e.message}`);
+    } finally {
+        hideLoading();
+    }
+}
+
+let currentDbPage = 1;
+let currentDbTotalPages = 1;
+
+async function loadAndRenderMaterialTable(page = 1) {
+    currentDbPage = page;
+    const categorySelect = document.getElementById('db-category-select');
+    const searchInput = document.getElementById('db-search-input');
+    const tbody = document.getElementById('db-materials-tbody');
+    
+    const category = categorySelect ? categorySelect.value : '';
+    const keyword = searchInput ? searchInput.value.trim() : '';
+    
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 25px;"><i class="fa-solid fa-spinner fa-spin"></i> 正在检索全局物料数据库...</td></tr>`;
+    }
+    
+    try {
+        const url = `${backendUrl}/api/db/materials?page=${page}&page_size=20&category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(keyword)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("获取物料列表失败");
+        
+        const data = await response.json();
+        
+        // Populate category dropdown options if not populated yet
+        if (categorySelect && categorySelect.options.length <= 1 && data.categories) {
+            data.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                categorySelect.appendChild(opt);
+            });
+        }
+        
+        // Update pagination labels
+        currentDbTotalPages = data.total_pages || 1;
+        const startItem = data.total > 0 ? (data.page - 1) * data.page_size + 1 : 0;
+        const endItem = Math.min(data.total, data.page * data.page_size);
+        
+        const totalLbl = document.getElementById('db-table-total-label');
+        if (totalLbl) totalLbl.innerText = `(共 ${(data.total || 0).toLocaleString()} 条记录)`;
+        
+        const countLbl = document.getElementById('db-total-count');
+        if (countLbl) countLbl.innerText = (data.total || 0).toLocaleString();
+        
+        const startLbl = document.getElementById('db-page-start');
+        if (startLbl) startLbl.innerText = startItem.toLocaleString();
+        
+        const endLbl = document.getElementById('db-page-end');
+        if (endLbl) endLbl.innerText = endItem.toLocaleString();
+        
+        const curPageLbl = document.getElementById('db-current-page');
+        if (curPageLbl) curPageLbl.innerText = data.page;
+        
+        const totalPagesLbl = document.getElementById('db-total-pages');
+        if (totalPagesLbl) totalPagesLbl.innerText = currentDbTotalPages;
+        
+        const prevBtn = document.getElementById('db-prev-page-btn');
+        if (prevBtn) prevBtn.disabled = (data.page <= 1);
+        
+        const nextBtn = document.getElementById('db-next-page-btn');
+        if (nextBtn) nextBtn.disabled = (data.page >= currentDbTotalPages);
+        
+        // Render Table Rows
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        
+        if (!data.items || data.items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 30px;">未查找到匹配条件的物料记录</td></tr>`;
+            return;
+        }
+        
+        data.items.forEach(item => {
+            const tr = document.createElement('tr');
+            const modelTag = item.model 
+                ? `<span style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; font-weight: 500;">${item.model}</span>` 
+                : `<span style="color: var(--color-text-muted); font-size: 11px;">未提取</span>`;
+                
+            tr.innerHTML = `
+                <td style="font-family: monospace; color: var(--color-text-secondary); font-size: 12px;">${item.code}</td>
+                <td style="font-weight: 500; color: var(--color-text-primary);">${item.name}</td>
+                <td style="color: var(--color-text-secondary); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.specification}">${item.specification || '-'}</td>
+                <td>${modelTag}</td>
+                <td><span style="background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 12px;">${item.category || '未分类'}</span></td>
+                <td>${item.unit || '-'}</td>
+                <td style="color: var(--color-text-secondary);">${item.brand || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+    } catch (e) {
+        console.error("Error loading material table:", e);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171; padding: 25px;">加载失败: ${e.message}</td></tr>`;
+        }
     }
 }
 
@@ -2032,6 +2476,17 @@ async function checkForDraft() {
                 
                 const saveTrigger = document.getElementById('save-trigger');
                 if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+                
+                const endTaskTrigger = document.getElementById('end-task-trigger');
+                if (endTaskTrigger) endTaskTrigger.style.display = 'inline-flex';
+                
+                const uploadedFilenameEl = document.getElementById('uploaded-filename');
+                if (uploadedFilenameEl) {
+                    uploadedFilenameEl.innerText = ` - ${draft.original_filename}`;
+                    uploadedFilenameEl.title = draft.original_filename;
+                }
+
+                startAutoSave();
                 
                 // Recover professionals list
                 const profSet = new Set(items.map(it => it.professional).filter(Boolean));
@@ -2151,6 +2606,11 @@ async function loadSession(sessionId) {
         
         const saveTrigger = document.getElementById('save-trigger');
         if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+        
+        const endTaskTrigger = document.getElementById('end-task-trigger');
+        if (endTaskTrigger) endTaskTrigger.style.display = 'inline-flex';
+        
+        startAutoSave();
         
         const uploadedFilenameEl = document.getElementById('uploaded-filename');
         if (uploadedFilenameEl) {

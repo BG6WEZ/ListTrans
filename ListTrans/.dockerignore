@@ -1,0 +1,23 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.vscode
+.idea
+*.bak
+python_local/
+
+int_out.txt
+reg_out.txt
+
+# Local runtime data / caches
+app/uploads/*
+app/vector_cache/*
+app/__pycache__/*
+logs/*
+.gemini/*
+.agents/*
+tests/*

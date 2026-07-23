@@ -155,7 +155,7 @@ class TestMatcher(unittest.TestCase):
         text2 = "送风量m³/h：5750；新风量m³/h：5750；六管制，变频电机"
         params2 = extract_params(text2, "风机盘管")
         attrs2 = params2.get("attrs", {})
-        self.assertEqual(attrs2.get("送风量"), "5750")
+        self.assertEqual(attrs2.get("送风量"), 5750.0)
         self.assertEqual(attrs2.get("新风量"), 5750.0)
         self.assertEqual(attrs2.get("六管制"), "六管制")
         self.assertEqual(attrs2.get("变频电机"), "变频电机")

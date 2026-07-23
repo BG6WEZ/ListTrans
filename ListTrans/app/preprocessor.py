@@ -206,9 +206,12 @@ def parse_sub_parameters(content: str) -> Dict[str, str]:
             k = colon_match.group(1).strip()
             v = colon_match.group(2).strip()
             if k and len(k) < 15 and not k.isdigit():
-                # Clean unit suffix from key (e.g. 送风量m³/h -> 送风量)
-                k_clean = re.sub(r'\(.*?\)|（.*?）|\[.*?\]|［.*?］', '', k)
+                # Clean unit suffix and section numbers from key (e.g. 3.材质、规格 -> 材质)
+                k_clean = re.sub(r'^\d+[\.．、\s]*', '', k)
+                k_clean = re.sub(r'\(.*?\)|（.*?）|\[.*?\]|［.*?］', '', k_clean)
                 k_clean = re.sub(r'(?:m³/h|m3/h|kW|W|Pa|MPa|mm|mm2|mm²|m|t|A|V|P)$', '', k_clean, flags=re.IGNORECASE).strip()
+                if "材质" in k_clean:
+                    k_clean = "材质"
                 if k_clean:
                     sub_params[k_clean] = v
         else:
@@ -222,9 +225,12 @@ def parse_sub_parameters(content: str) -> Dict[str, str]:
                 if k_clean:
                     sub_params[k_clean] = v
             else:
-                # No colon present - treat as a boolean feature tag if short, contains no digits, and not a number
+                # No colon present - treat as material if keyword present, else boolean feature tag
                 if len(part) < 15 and not any(c.isdigit() for c in part):
-                    sub_params[part] = part
+                    if any(mat in part for mat in ["钢", "铁", "铜", "铝", "塑", "PVC", "PPR", "PE", "UPVC", "HDPE", "不锈钢", "合金"]):
+                        sub_params["材质"] = part
+                    else:
+                        sub_params[part] = part
     return sub_params
 
 def extract_general_params(text: str) -> Dict[str, Any]:
@@ -235,9 +241,6 @@ def extract_general_params(text: str) -> Dict[str, Any]:
         return parse_sub_parameters(text)
 
     # Validate that sections look like real Chinese numbered headers.
-    # A valid header key should contain at least one CJK character and
-    # must not look like a numeric value or unit string (e.g. "新风量m³/h" is
-    # a false-positive where 5750 was parsed as the section number).
     def _is_valid_header_key(key: str) -> bool:
         has_cjk = any('\u4e00' <= c <= '\u9fff' for c in key)
         has_unit_suffix = bool(re.search(r'(?:m³|m3|/h|kW|kw|Pa|MPa|mm|mm²|mm2)\s*$', key))
@@ -250,6 +253,7 @@ def extract_general_params(text: str) -> Dict[str, Any]:
     for k, v in sections.items():
         if "工作内容" in k:
             continue
+        hk = "材质" if "材质" in k else k
         if ":" in v or "：" in v or ";" in v or "；" in v or "," in v or "，" in v:
             sub = parse_sub_parameters(v)
             if sub:
@@ -257,7 +261,7 @@ def extract_general_params(text: str) -> Dict[str, Any]:
                     attrs[sk] = sv
                 continue
         if len(v) <= 40:
-            attrs[k] = v
+            attrs[hk] = v
             
     return attrs
 
@@ -269,18 +273,25 @@ def remove_construction_info(text: str) -> str:
     lines = re.split(r'[\n\r；;]', text)
     clean_lines = []
     exclude_keywords = [
-        "工作内容", "安装形式", "安装方式", "本体安装", "打标", "加固", "焊压接线", "端子", "接线", "调试",
-        "试运转", "就位", "搬运", "运输", "勾缝", "清理", "保护", "单独计算", "单价暂按", "信息价", "计价",
-        "配合比", "搅拌", "捣平", "压实", "铺抹", "对缝", "地漏居中", "甲供", "打胶要求", "启动方式",
-        "减震垫", "不含垂直", "水平搬运", "基底", "基层", "面层", "施工"
+        "工作内容", "施工内容", "安装形式", "安装方式", "本体安装", "打标", "加固", "焊压接线", "端子", "接线", "调试",
+        "试运转", "就位", "搬运", "运输", "清理", "保护", "单独计算", "单价暂按", "信息价", "计价",
+        "配合比", "搅拌", "捣平", "压实", "对缝", "地漏居中", "打胶要求", "启动方式",
+        "减震垫", "不含垂直", "水平搬运", "施工"
     ]
     for line in lines:
         line_strip = line.strip()
         if not line_strip:
             continue
-        # Check if line contains any of the exclude keywords
-        if any(kw in line_strip for kw in exclude_keywords):
+        # Always strip explicit work content headers
+        if re.search(r'^\d*[\.．、\s]*(?:工作内容|施工内容|工作包含|安装方式|施工要求)', line_strip):
             continue
+        # Never filter out lines that contain explicit spec/parameter markers or dimensions
+        has_spec_marker = any(kw in line_strip for kw in ["规格", "型号", "材质", "尺寸", "参数", "DN", "m3/h", "m³/h", "kW", "kw", "Pa", "kPa", "mm"])
+        has_dimension = bool(re.search(r'\d+(?:\.\d+)?\s*[*x×]\s*\d+', line_strip))
+        
+        if not (has_spec_marker or has_dimension):
+            if any(kw in line_strip for kw in exclude_keywords):
+                continue
         clean_lines.append(line_strip)
     return "\n".join(clean_lines)
 
@@ -312,20 +323,64 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
     for k, v in domain_attrs.items():
         attrs[k] = v
 
+    # 3b. Specialized Extractors Triggering based on domain or keyword hints
+    from app.domain_extractors import (
+        extract_cable_params, extract_pipe_params, extract_decoration_params,
+        extract_conduit_params, extract_switchgear_params, extract_power_range,
+        extract_switch_gang_control
+    )
+    
+    if any(k in text_clean for k in ["kw", "千瓦", "功率", "配电箱", "箱", "柜"]):
+        pw_attrs = extract_power_range(text_no_const)
+        attrs.update(pw_attrs)
+
+    if any(k in text_clean for k in ["联", "控", "位", "开关", "插座"]):
+        sw_gang_attrs = extract_switch_gang_control(text_no_const)
+        attrs.update(sw_gang_attrs)
+
+    if any(k in text_clean for k in ["线管", "jdg", "kbg", "导管", "穿线管", "kjg"]):
+        cd_attrs = extract_conduit_params(text_no_const)
+        attrs.update(cd_attrs)
+
+    if any(k in domain for k in ["switchgear", "panel", "cabinet"]) or any(k in text_clean for k in ["箱", "柜", "配电", "控制箱", "ap", "al", "ale", "at", "acp", "ax", "atd", "afc"]):
+        sw_attrs = extract_switchgear_params(text_no_const)
+        attrs.update(sw_attrs)
+
+    if any(k in domain for k in ["cable", "wire"]) or any(k in text_clean for k in ["缆", "线", "yjv", "byj", "nh", "wdz", "rvv", "bvr", "bv"]):
+        c_attrs = extract_cable_params(text_no_const)
+        attrs.update(c_attrs)
+
+    if any(k in domain for k in ["pipe", "steel", "ss", "copper"]) or any(k in text_clean for k in ["管", "dn", "de", "不锈钢", "方管", "镀锌", "紫铜"]):
+        p_attrs = extract_pipe_params(text_no_const)
+        attrs.update(p_attrs)
+
+    if any(k in domain for k in ["decor", "board", "door", "tile", "keel", "panel"]) or any(k in text_clean for k in ["砖", "板", "龙骨", "门", "踢脚线", "石材", "涂料"]):
+        d_attrs = extract_decoration_params(text_no_const)
+        attrs.update(d_attrs)
+
     # Post-process all extracted keys to cast to float/int using domain schema definitions
     from app.domain_extractors import domain_schema, parse_numeric_complex
     domain_config = domain_schema.get(domain, {})
     fields = domain_config.get("must", []) + domain_config.get("should", [])
-    for field in fields:
-        key = field["key"]
-        ftype = field.get("type", "str")
+    
+    # Track keys to process
+    numeric_keys = {f["key"]: f.get("type", "str") for f in fields}
+    # Common numeric attributes across domains
+    common_numeric = ["功率", "制冷量", "制热量", "风量", "送风量", "新风量", "排风量", "余压", "机外余压", "管径", "口径", "外径", "壁厚", "厚度", "涂膜厚度", "量程", "扬程"]
+    for ck in common_numeric:
+        if ck not in numeric_keys:
+            numeric_keys[ck] = "float"
+
+    for key, ftype in numeric_keys.items():
+        if key in ["材质", "品牌", "单位", "型式", "功能", "名称", "规格", "连接方式"]:
+            continue
         if domain in ["cable_power", "cable_control", "wire"] and key in ["芯数", "截面积"]:
             continue
         if key in attrs and isinstance(attrs[key], str):
-            if ftype == "float" or ftype == "int":
+            if ftype in ["float", "int"] or key in common_numeric:
                 parsed = parse_numeric_complex(attrs[key])
                 if "val" in parsed:
-                    attrs[key] = int(parsed["val"]) if ftype == "int" else parsed["val"]
+                    attrs[key] = int(parsed["val"]) if ftype == "int" else float(parsed["val"])
                     if "min_val" in parsed and "max_val" in parsed:
                         attrs[f"{key}_min"] = parsed["min_val"]
                         attrs[f"{key}_max"] = parsed["max_val"]
@@ -357,6 +412,17 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
         attrs.pop("芯数_max", None)
         attrs.pop("截面积_min", None)
         attrs.pop("截面积_max", None)
+
+    if "送风量" in attrs and "风量" not in attrs:
+        attrs["风量"] = attrs["送风量"]
+    if "机外余压" in attrs and "余压" not in attrs:
+        attrs["余压"] = attrs["机外余压"]
+    if "涂膜厚度" in attrs and "厚度" not in attrs:
+        attrs["厚度"] = attrs["涂膜厚度"]
+    if "过滤段" in attrs and isinstance(attrs["过滤段"], str):
+        attrs["过滤段"] = [attrs["过滤段"]]
+    if "过滤等级" in attrs and isinstance(attrs["过滤等级"], str):
+        attrs["过滤段"] = [attrs["过滤等级"]]
 
     return {
         "model": model,

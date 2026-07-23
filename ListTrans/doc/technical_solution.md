@@ -1,4 +1,4 @@
-# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.5)
+# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.6)
 
 本说明书详细阐述了华康洁净物料清单匹配工具的设计与技术方案。该工具作为通用的清单数据处理平台，旨在通过结构化参数解析、多路召回（FTS5全文倒排+语义向量搜索）、双轨制打分、前端可视化校对，将项目设计原始清单（包括暖通、电气、给排水专业）精准匹配至企业的标准物料库，并无损输出为符合规范的“标准格式”报表。
 
@@ -12,6 +12,7 @@
 | V0.0.2 | 2026-07-16 | 系统开发组 | 添加 50/50 滚动工作台页面、物料库全/增量更新、免重启向量索引重建及日志控制台。 |
 | V0.0.4 | 2026-07-18 | 开发二组 | **公网安全与数据持久化改造**：<br>1. 引入 JWT 状态管理与 Bearer Token 接口防御；<br>2. 建立 RBAC 角色体系（员工/经理/总监/管理员）与 UI 动态权限过滤；<br>3. 引入登录频次限制（5分钟失败5次锁号/IP 15分钟）与独立 `security.log` 安全日志审计；<br>4. 增加工作会话暂存机制：包含 3分钟静默草稿自动暂存（起步提示恢复）与多版本手动命名进度备份（支持覆盖更新）；<br>5. 优化推荐候选区交互：点击已激活卡片可直接无弹窗解绑；<br>6. 整理并精简了项目工程文档。 |
 | V0.0.5 | 2026-07-21 | 结构化组 | **结构化改造与可回归度量**：<br>1. 落地 30 域结构化 Schema，385 品类折叠映射，6 份受控字典（`domain_schema.json` / `category_domain_map.json` / `unit_norm.json` / `material_dict.json` / `connection_dict.json` / `flags_dict.json`）；<br>2. 配置化 Hard Gates：`conflict_caps` / `deviation_caps` / `ratio_penalties` 从 JSON 动态读取，取代硬编码封顶；<br>3. `has_conflict` 采用相对公差判定，配合单向非对称缺失惩罚（Must -0.15 / Should -0.05）；<br>4. `materials` 主表新增 `parsed_schema_version` 行级列 + 自愈 `ALTER TABLE` 迁移；`POST /api/db/reparse` 支持 code / category / 陈旧行级三种粒度的**局部**异步重算；<br>5. 新增 `GET /api/db/schema/stats` 域统计接口；<br>6. 建立金标回归：`tests/fixtures/ground_truth_500.json`（当前 326 条）+ `tests/regression_runner.py` 一键出 `baseline_metrics_v0.0.5.md`；<br>7. 弱电/自控专项：FTS 同义词映射 + `generic` 域强制降级到 `scene_c` + "材质、规格" 无表头抽取。<br>**金标实测 Top-1 96.32% / Top-3 97.55% / Must 100%。** |
+| V0.0.6 | 2026-07-23 | 架构与算法组 | **大模型混合增强与询价清洗预处理**：<br>1. 询价描述预处理器 (`query_preprocessor.py`)：实现物料描述主块与“施工内容/工作内容/调试”等杂质噪声块的自动切分与过滤；提取 1.名称/2.规格二级键值结构；支持 MAU/PAU/AHU 等 14 类空调机组专有名词抽取；<br>2. 通义千问 LLM 混合增强 (`llm_client.py`)：接入 Qwen DashScope 大模型，内置 SQLite `llm_cache` 智能缓存、并发信号量隔离 (3 并发) 与 Circuit Breaker 熔断重试；提供 `/api/llm/status` 与 `/api/llm/toggle` 控制接口；<br>3. 系统管理与 REST API 扩展：`GET /api/db/materials` 物料库多条件分页接口与 `DELETE /api/system/reset` 系统数据一键清理恢复接口；<br>4. 自动化测试与离线治理工具：`scripts/batch_llm_structure.py` 离线批量治理工具与 `tests/test_llm_integration.py` / `tests/test_query_preprocessor.py` 测试套件。 |
 
 ---
 
@@ -135,40 +136,60 @@ graph TD
 
 ---
 
-## 四、 物理结构与工程目录 (V0.0.4)
+## 四、 物理结构与工程目录 (V0.0.5)
 
 ```
 ListTrans/
 ├── app/
 │   ├── __init__.py
-│   ├── db_manager.py        # 数据库驱动、全/增量导入、多词检索
-│   ├── preprocessor.py      # 表头提取、物理属性与单位清洗
-│   ├── matcher.py           # 属性评分、线缆管径软硬约束扣分
-│   ├── report_generator.py  # 样式复制、反填历史均价排版导出
-│   ├── auth_manager.py      # 用户登录校验、bcrypt哈希、JWT签发与锁定限制
-│   ├── auth_middleware.py   # FastAPI 鉴权拦截器与角色限制
+│   ├── db_manager.py        # 数据库驱动、全/增量导入、SQLite WAL模式配置
+│   ├── preprocessor.py      # 文本清洗、施工杂质过滤、物理参数与单位标准化
+│   ├── domain_router.py     # 30个专业领域路由映射引擎
+│   ├── domain_extractors.py # 领域专用参数提取器与复杂数值解析器
+│   ├── vector_index.py      # FAISS 向量索引管理器与 SentenceTransformer 模型缓存
+│   ├── matcher.py           # L1 FTS5全文检索 + L2 FAISS向量 + 多维硬约束打分引擎
+│   ├── llm_client.py        # 通义千问 DashScope 大模型 API 客户端封装
+│   ├── report_generator.py  # 样式复制、反填历史均价排版无损导出
+│   ├── auth_manager.py      # 用户登录校验、bcrypt哈希、JWT签发与防爆破限制
+│   ├── auth_middleware.py   # FastAPI 鉴权拦截器与角色控制
 │   ├── admin_api.py         # 管理员用户管理接口 (增删改查、改密码)
 │   ├── session_manager.py   # 会话持久化、静默草稿与备份保存逻辑
-│   └── server.py            # FastAPI Web 路由层与安全中间件
+│   ├── server.py            # FastAPI Web 路由层、局域网0.0.0.0监听与跨域配置
+│   ├── materials.db         # 标准物料明细 SQLite 核心数据库
+│   └── sessions.db          # 用户账号与工作会话 SQLite 数据库
+├── config/
+│   ├── alias_dict.json      # 行业专业同义词/别名对照字典
+│   ├── units_dict.json      # 计量单位大类归一化映射字典
+│   ├── stopwords.json       # 预处理停用词列表
+│   ├── domain_schema.json   # 30个专业域 Schema 规范 (must/should/flags)
+│   └── auto_binding_rules.json # 系统自主学习沉淀的自动绑定推荐规则
+├── scripts/
+│   └── batch_llm_structure.py # 离线大模型批处理治理工具 (并发批处理物料库结构化)
+├── tests/
+│   ├── regression_runner.py # 基准回归自动化评测工具
+│   └── fixtures/
+│       └── ground_truth_500.json # 326行金标基准测试数据集
 ├── doc/
 │   ├── technical_solution.md # [本文件] 升级版系统技术方案说明书
-│   └── sample/
-│       ├── 原始清单.xlsx     # 待匹配输入模板
-│       ├── 标准格式.xlsx     # 报表导出样式与公式模板
-│       └── 物料明细.xlsx     # 4.6万行全局企业物料源数据库
+│   ├── Data Portrait.md      # 物料库数字画像分析报告
+│   ├── data_structuring_overview.md # 数据结构化总体通俗说明文档
+│   ├── llm_structuring_guide.md     # 离线大模型批处理工具使用指南
+│   ├── baseline_metrics_v0.0.5.md   # 最新基准评测报告 (Top1: 89.57%)
+│   └── *.xlsx                # 现场实盘测试清单与标杆样本表
 ├── logs/
 │   ├── app_runtime.log      # 系统运行业务日志
 │   └── security.log         # 安全审计与登录爆破拦截日志
 ├── web/
-│   ├── index.html           # 50/50大屏工作台主页面
+│   ├── index.html           # 50/50大屏工作台主页面 (含任务恢复/结束/暂存Modal)
 │   ├── index.css            # 暗色系高档毛玻璃特效样式表
-│   ├── app.js               # 带有中央 token 拦截器的交互核心
+│   ├── app.js               # 带有 token 拦截器与任务全生命周期的前端主逻辑
 │   ├── login.html           # 玻璃拟态登录界面
 │   ├── login.css            # 登录界面定制样式
 │   ├── admin.html           # 用户管理与角色分配控制面板
 │   └── logo500.png          # 企业品牌徽标
+├── start.bat                # Windows 一键本地/局域网服务启动脚本
 ├── requirements.txt         # 生产依赖包声明文件
-└── .env.example             # 部署环境变量模版
+└── .env                     # 部署环境变量与大模型 API 密钥配置
 ```
 
 ---

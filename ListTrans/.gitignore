@@ -8,12 +8,18 @@ __pycache__/
 
 # Local database files
 app/*.db
-app/vector_cache/
+app/*.db-shm
+app/*.db-wal
+app/*.bak
 *.db
+*.db-shm
+*.db-wal
+*.bak
 
 # Logs
 logs/
 *.log
+*_out.txt
 
 # Local environment configs
 .env

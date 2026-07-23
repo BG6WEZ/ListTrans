@@ -2,13 +2,21 @@ version: '3.8'
 
 services:
   matcher-app:
-    image: material-matcher:latest
+    image: material-matcher:v0.0.5
     container_name: material-matcher
     ports:
       - "18080:18080"
+    env_file:
+      - .env
     volumes:
-      # Persist uploads and generated reports on the host
+      # 持久化上传目录
       - ./app/uploads:/app/app/uploads
-      # Persist the SQLite database file on the host for runtime updates
+      # 持久化物料基础数据库
       - ./app/materials.db:/app/app/materials.db
+      # 持久化用户及系统配置数据库
+      - ./app/auth.db:/app/app/auth.db
+      # 持久化向量索引缓存
+      - ./app/vector_cache:/app/app/vector_cache
+      # 持久化日志输出
+      - ./logs:/app/logs
     restart: always

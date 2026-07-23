@@ -73,7 +73,7 @@ def route_domain(category: str, name: str, specification: str, professional_hint
         return "fan"
     if "消声器" in name_clean:
         return "silencer"
-    if "静压箱" in name_clean:
+    if any(kw in name_clean for kw in ["静压箱", "集风箱", "稳压箱", "风箱", "负压箱", "回风箱"]):
         return "plenum"
     if "过滤器" in name_clean or "FFU" in name_clean:
         return "filter_ffu"
@@ -81,7 +81,7 @@ def route_domain(category: str, name: str, specification: str, professional_hint
         return "air_terminal"
     if "冷热水" in name_clean or "冷水机" in name_clean:
         return "chiller"
-    if "空调" in name_clean or "风机盘管" in name_clean:
+    if any(kw in full_text.upper() for kw in ["AHU", "MAU", "PAU", "RAU", "FAU", "FCU", "RCU", "DOAS", "VAV", "RTU", "HRU", "ERU", "HPU", "FPU", "空调", "风机盘管", "新风柜", "全新风", "回风机组", "预空调", "变风量", "热回收"]):
         return "ahu"
     if "集配器" in name_clean:
         return "manifold"

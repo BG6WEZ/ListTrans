@@ -1,0 +1,1053 @@
+<!DOCTYPE html><html><head>
+      <title>procurement_material_analysis_and_optimization_report</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///c:\Users\wangd\.antigravity-ide\extensions\shd101wyy.markdown-preview-enhanced-0.8.30-universal\crossnote\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-details{margin:0;padding:0;border:none}.markdown-preview .md-toc summary.md-toc-link-wrapper{cursor:pointer;list-style-position:outside}.markdown-preview .md-toc summary.md-toc-link-wrapper::marker{font-size:.85em}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='0']{margin-left:12px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='1']{margin-left:28px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='2']{margin-left:44px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='3']{margin-left:60px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='4']{margin-left:76px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='5']{margin-left:80px}.markdown-preview a.tag,.markdown-preview a.tag:active,.markdown-preview a.tag:link,.markdown-preview a.tag:visited,.markdown-preview span.tag:not(.token){display:inline-block;background-color:var(--vscode-badge-background,rgba(127,127,127,.18));color:var(--vscode-badge-foreground,currentColor);border-radius:2em;font-size:.85em;font-weight:500;padding:.05em .55em;line-height:1.5;white-space:nowrap;text-decoration:none;text-shadow:none;box-shadow:none;transition:background-color .12s ease,opacity .12s ease}.markdown-preview a.tag{cursor:pointer}.markdown-preview a.tag:focus,.markdown-preview a.tag:hover{background-color:var(--vscode-badge-background,rgba(127,127,127,.32));color:var(--vscode-badge-foreground,currentColor);opacity:.85;text-decoration:none;outline:0}.markdown-preview .wikilink-embed-content{border-left:3px solid var(--vscode-textBlockQuote-border,rgba(128,128,128,.3));background:var(--vscode-textBlockQuote-background,rgba(128,128,128,.05));margin:.5em 0;padding:.5em .75em;border-radius:0 3px 3px 0}.markdown-preview .wikilink-embed-content.wikilink-embed-error{border-left-color:var(--vscode-errorForeground,#cf222e);color:var(--vscode-errorForeground,#cf222e);font-style:italic;opacity:.8}.markdown-preview .wikilink-embed-content h1:first-child,.markdown-preview .wikilink-embed-content h2:first-child,.markdown-preview .wikilink-embed-content h3:first-child,.markdown-preview .wikilink-embed-content h4:first-child,.markdown-preview .wikilink-embed-content h5:first-child,.markdown-preview .wikilink-embed-content h6:first-child{margin-top:.25em}.markdown-preview .wikilink-embed-content .wikilink-embed-content{margin:.25em 0;padding:.25em .5em}.markdown-preview .block-id{display:none}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}.scrollbar-style::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));border:4px solid var(--vscode-scrollbarSlider-background,rgba(150,150,150,.66));background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb:hover{background-color:var(--vscode-scrollbarSlider-hoverBackground,rgba(120,120,120,.66))}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details{margin:0;padding:0;border:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0']{padding-left:0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1']{padding-left:16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2']{padding-left:32px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3']{padding-left:48px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4']{padding-left:64px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5']{padding-left:80px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}@font-face{font-family:"Material Icons";font-style:normal;font-weight:400;src:local("Material Icons"),local("MaterialIcons-Regular"),url("data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAAfIAAsAAAAADDAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADMAAABCsP6z7U9TLzIAAAE8AAAARAAAAFZW7kosY21hcAAAAYAAAADTAAACjtP6ytBnbHlmAAACVAAAAxgAAAQ4zRtvlGhlYWQAAAVsAAAALwAAADYRwZsnaGhlYQAABZwAAAAcAAAAJAeKAzxobXR4AAAFuAAAABIAAAA8OGQAAGxvY2EAAAXMAAAAIAAAACAG5AfwbWF4cAAABewAAAAfAAAAIAEfAERuYW1lAAAGDAAAAVcAAAKFkAhoC3Bvc3QAAAdkAAAAYgAAAK2vz7wkeJxjYGRgYOBikGPQYWB0cfMJYeBgYGGAAJAMY05meiJQDMoDyrGAaQ4gZoOIAgCKIwNPAHicY2BkPsQ4gYGVgYOpk+kMAwNDP4RmfM1gxMjBwMDEwMrMgBUEpLmmMDgwVLy4xKzzX4chhrmK4QpQmBEkBwAZygyweJzFkr0NwjAQhZ+TEP6CRUfHBEwRUWaQTICyQbpMwRCskA5RUIONxG0RnnNpKAIV4qzPku/8c353ACYAYrIjCWCuMAh2ptf0/hiL3p/gyPUWa3osqlt0L1zu9r71z8dGrJRykFoauXQd932Lj5vhG+MjxGeYI8MKETObMpslf5EyP8tg+vHun5r539PvlvXzaVhRFVQDTPEWKVQR90KhnnC5Ek67vUKN4VuFasM/ldARj43CCkCsEjpJSoVVgRyU0GVSK6wUpFFCx8lFgX0BiXpRPQB4nE2TTWjcRhTH3xttpDhxN7uxPlp3u/FK7moRPixafRijNosxSw/LUsIwNcaEHPZggo/FmEKMCKWU4kNOOftQSlhE8alnH0Ix9BqWnHooPRrTQ0+mnu2bXTu2pPdGM9LM/6c3fwECTM4gBBMYQNqxzLrZAjqYSlqu2TAHZQA0/DQJH6FtzqGDnvbt4Ggwvzw/nL8EfH8kW0fsuRqhgWXZnY7M1picaUL7Du5BHeDzMIl83dAt016wH1qmvtSMo5R6YRJHTR//FXsff/nj/tc/5K9P5d+nP22+fFK5u7v3K39SW3y+OtDKO3L85vD09PD9z5X17a2N1g4tqk01RlqX7gyoEmnsWQtVr4rtZMmukEaFBZxzefkCn11cyKMLZgshRwgTYNoLNXCBz2ja7HvZG7hDpPSNfoo5vs0knK/9hb+rNpu+8kHPgk/Ao4kK3tWtTpSEtvkA9c+wE6UaUdwieNkaHg55tBEtRiEPw1s0+FtrtTcc9two2lhMknV7PZF/cs6+uUFTmpTGbEx7sQCPSLOttHS3GRltqp7SNzVSKzl6aWnZT/CX5k6/v9N3Hh8fHBwffJVjhrC6OgH5dkIt/tPsq+d/PD5Qz7G7efzq1THFjdZVPe/N6ulQ3JnDWSE5junsFsVIiFwL/htf1S5gJ3BfOcUxfHKLnzqpFpyfZ9cX+/5WB6a+Y0pHpzkNrYNVDwMsikK+y7WuLCRg/oFHkA8VT3rDg5ZnU6ktzzINymV0m74Xd5pfIGXyFeVEQSShkzqG7TBBa2OxVRKitLXv7h3uuftXnXq7lz2tZ/WnWa9dx9dCjDhHzmuVQATlmljr9dZErUydSo2Hbi/b1vXtrOeGCk2/8s3ZlO8+ueJT8BVlw5pGw2oYccdSiHHqx0RlabHqdNR9jAETl6PreJcPBnnfpTLnOQ8C3OV8AmQGzouV1iZdeb5SSIoVc8W8/kcDtksUH5FrU6/aqBqNWcMEzxG4DAQ14qRQhi9mWU0rzepKezbjfgCwQKxVYq5ajRgpRqy45CqwkJydcEkbTkvRz8P5/2ZpDTN4nGNgZGBgAOKb6v+/xvPbfGXgZmEAgeuB2kkI+v8bFgbmKiCXg4EJJAoAPyAKhQB4nGNgZGBg1vmvwxDDwgACQJKRARXwAwAzZQHQeJxjYQCCFAYGFgbSMQAcWACdAAAAAAAAAAwALgBgAIQAmADSAQgBIgE8AVABoAHeAfwCHHicY2BkYGDgZ7BgYGMAASYg5gJCBob/YD4DAA/hAWQAeJxlkbtuwkAURMc88gApQomUJoq0TdIQzEOpUDokKCNR0BuzBiO/tF6QSJcPyHflE9Klyyekz2CuG8cr7547M3d9JQO4xjccnJ57vid2cMHqxDWc40G4Tv1JuEF+Fm6ijRfhM+oz4Ra6eBVu4wZvvMFpXLIa40PYQQefwjVc4Uu4Tv1HuEH+FW7i1mkKn6Hj3Am3sHC6wm08Ou8tpSZGe1av1PKggjSxPd8zJtSGTuinyVGa6/Uu8kxZludCmzxMEzV0B6U004k25W35fj2yNlCBSWM1paujKFWZSbfat+7G2mzc7weiu34aczzFNYGBhgfLfcV6iQP3ACkSaj349AxXSN9IT0j16JepOb01doiKbNWt1ovippz6sVYYwsXgX2rGVFIkq7Pl2PNrI6qW6eOshj0xaSq9mpNEZIWs8LZUfOouNkVXxp/d5woqebeYIf4D2J1ywQB4nG3LOw6AIBAE0B384B+PAkgEa+QwNnYmHt+EpXSal5lkSBBnoP8oCFSo0aCFRIceA0ZMmLFAYSW88rmvtMUjG3RiQ9HvpfusM6zWNmtc5H/iPewha50tOt5PS/QBx2IeSwAA") format("woff")}.callout{--callout-color:68,138,255;position:relative;overflow:hidden;border-radius:4px;margin:1rem 0;padding:.75rem 1rem;background:rgba(var(--callout-color),.1)}.callout>.callout-title{margin:0 -1.2rem;padding:0 1.2rem 0 3.3rem;font-weight:700;color:rgb(var(--callout-color))}.callout .callout-title::before{position:absolute;left:1.2rem;font-size:1.2rem;font-family:Material Icons;font-style:normal;font-variant:normal;font-weight:400;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;color:rgba(var(--callout-color),.8);content:var(--callout-icon, "i")}.callout>p{margin-block-start:1rem;margin-block-end:1rem;padding-left:.4rem}.callout details.callout-title,.callout summary.callout-title{cursor:pointer;list-style:none}.callout summary.callout-title::-webkit-details-marker{display:none}details.callout>summary.callout-title::after{display:inline-block;width:.45em;height:.45em;margin-left:1em;border-right:2px solid rgb(var(--callout-color));border-bottom:2px solid rgb(var(--callout-color));transform:translateY(-.05em) rotate(-45deg);transition:transform 160ms ease,opacity 160ms ease;opacity:.9;content:""}details.callout[open]>summary.callout-title::after{transform:translateY(-.05em) rotate(45deg);opacity:1}.callout[data-callout=abstract],.callout[data-callout=summary],.callout[data-callout=tldr]{--callout-color:0,191,188;--callout-icon:"\E8D2"}.callout[data-callout=note]{--callout-color:8,109,221;--callout-icon:"\E3C9"}.callout[data-callout=info]{--callout-color:8,109,221;--callout-icon:"\E88E"}.callout[data-callout=todo]{--callout-color:8,109,221;--callout-icon:"\E88E"}.callout[data-callout=hint],.callout[data-callout=important],.callout[data-callout=tip]{--callout-color:0,191,188;--callout-icon:"\E80E"}.callout[data-callout=check],.callout[data-callout=done],.callout[data-callout=success]{--callout-color:8,185,78;--callout-icon:"\E876"}.callout[data-callout=faq],.callout[data-callout=help],.callout[data-callout=question]{--callout-color:236,117,0;--callout-icon:"\E887"}.callout[data-callout=attention],.callout[data-callout=caution],.callout[data-callout=warning]{--callout-color:236,117,0;--callout-icon:"\E002"}.callout[data-callout=fail],.callout[data-callout=failure],.callout[data-callout=missing]{--callout-color:233,49,71;--callout-icon:"\E14C"}.callout[data-callout=danger],.callout[data-callout=error]{--callout-color:233,49,71;--callout-icon:"\E3E7"}.callout[data-callout=bug]{--callout-color:233,49,71;--callout-icon:"\E868"}.callout[data-callout=example]{--callout-color:120,82,238;--callout-icon:"\E242"}.callout[data-callout=cite],.callout[data-callout=quote]{--callout-color:158,158,158;--callout-icon:"\E244"}.callout .callout{margin:.75rem 0}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <!-- The content below will be included at the end of the <head> element. -->
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script>
+    </head>
+    <body for="html-export">
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="华康洁净物料库全面数据诊断与瘦身方案报告">华康洁净物料库全面数据诊断与瘦身方案报告 </h1>
+<p><strong>文档编号</strong>：HK-DATA-20260723-01<br>
+<strong>编制部门</strong>：智慧信息化事业部<br>
+<strong>面向对象</strong>：采购部门<br>
+<strong>发布日期</strong>：2026 年 7 月 23 日<br>
+<strong>数据基底</strong>：<code>物料明细.xlsx</code>（全量 46,483 行采购物料台账）、<code>物料编码瘦身方案(0722).xlsx</code>（采购部瘦身方案初稿）</p>
+<hr>
+<h2 id="一--执行摘要">一、 执行摘要 </h2>
+<p>为了配合采购部门对现行 4.6 万+ 行物料台账进行“去虚就实、去繁就简、去非就正”的瘦身改造，智慧信息化事业部基于采购部现行 <strong><code>物料明细.xlsx</code> 全量 Excel 台账</strong> 的实测透视数据，对采购部《物料编码瘦身方案(0722).xlsx》初稿及既有数据文件进行了深度复核与归纳评估。</p>
+<h3 id="核心要点总结">核心要点总结： </h3>
+<ol>
+<li><strong>现行 Excel 台账病灶确凿</strong>：原始台账共 <strong>46,483 行</strong>（表头位于第 1 行）、包含 <strong>385 个原始分类</strong>。去除 <strong>672 行</strong> 带“禁用/停用/无效”标记的行及 <strong>23 行</strong> 因复制粘贴导致的完全/一码多用重复编码行后，实际生效物料为 <strong>45,788 行</strong>。品类分布呈现极端的长尾集中度（Top 10 分类占 50.5%，Top 30 分类占 75.1%，另有 135 个分类少于 10 行）。规格型号文本有多达 <strong>10,590 行（23.13%）包含“医用/医疗”修饰词污染</strong>，且四大设备大类产生了 <strong>1.22 万行连续尺寸冗余</strong>。</li>
+<li><strong>瘦身原则高度肯定与收益量化</strong>：采购部提出的“三大原则”完全切中数据要害。经全量数据推演，“去虚就实”可消除 <strong>18.4%（约 8,550 行）</strong> 语义噪音，“去繁就简”可将风机/风阀/消声器/静压箱四大类（1.48 万行）实现 <strong>68.5%（约缩减 10,200 行）</strong> 的大幅瘦身，综合预计可将物料台账瘦身 <strong>45%~55%</strong>（将物料台账有效压缩至 <strong>2.1 万~2.5 万条</strong>）。</li>
+<li><strong>排查出 6 处关键落地死角</strong>：复核排查出“符号混乱混用”、“临界点 450mm 双重归属二义性纠纷”、“废码未物理剪切隔离”、“小额耗材纯按金额分段导致物理属性坍塌”、“洁净面板忽视厚度与面密度”、“纯 Excel 维护缺少防重机制”等 6 大死角隐患，并给出了半开半闭 <code>[a, b)</code> 区间等标准化改进对策。</li>
+<li><strong>引入 30 大标准物料域结构化体系</strong>：为了从根源上支撑采购比价与自动化软件匹配，本报告附录提供了完整的 <strong>30 大标准物料域 Schema 字段矩阵</strong>（明确 Must 必填属性、Should 选填属性、Flags 特征开关与 Weight 打分权重）、<strong>385 个原始分类至 30 个标准域的 100% 全量映射表</strong>及通俗易懂的使用指南。</li>
+</ol>
+<hr>
+<h2 id="二--现行物料库全面数据诊断基于-excel-原始台账全量实测凭证">二、 现行物料库全面数据诊断（基于 Excel 原始台账全量实测凭证） </h2>
+<p>项目组对采购部现行 <strong><code>物料明细.xlsx</code> 表格</strong> 进行了全量数据透视与 6 大维度的多维交叉分析。本章节所有数据均来自于 Excel 表格实际内容与精准行号定位，具备确凿的表格文本凭证。</p>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>┌─────────────────────────────────────────────────────────────────────────┐
+│              物料明细.xlsx 原始台账 (46,483 行) 诊断六维图               │
+├───────────────────┬───────────────────┬─────────────────────────────────┤
+│ 维1: 体量与完备性 │ 维2: 品类与漂移   │ 维3: 规格语法与文本污染         │
+│ (4.65万行/23行重复)│ (385类/Top10占50%)│ (78.8%含逗号/2227行单位污染)    │
+├───────────────────┼───────────────────┼─────────────────────────────────┤
+│ 维4: 修饰词污染   │ 维5: 连续尺寸膨胀 │ 维6: 计量计价脱节               │
+│ (1.05万行含“医用”)│ (1.22万行尺寸冗余)│ (64.2%按个/台/1740行按樘)       │
+└───────────────────┴───────────────────┴─────────────────────────────────┘
+</code></pre><hr>
+<h3 id="维度-1体量分布-excel-字段非空率与数据质量诊断">维度 1：体量分布、Excel 字段非空率与数据质量诊断 </h3>
+<p>项目组对 Excel 表格 46,483 行数据进行了逐列统计，各列非空率及质量诊断如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Excel 列名</th>
+<th style="text-align:right">非空单元格数</th>
+<th style="text-align:right">非空率</th>
+<th style="text-align:left">实测诊断与质量隐患</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>物料编码</strong></td>
+<td style="text-align:right">46,483</td>
+<td style="text-align:right"><strong>100.0%</strong></td>
+<td style="text-align:left">主键完备，但存在 <strong>23 行由于复制粘贴导致的重复编码行</strong>。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>物料分类</strong></td>
+<td style="text-align:right">46,483</td>
+<td style="text-align:right"><strong>100.0%</strong></td>
+<td style="text-align:left">人工分类粒度过细且错乱，存在跨类错录（品类漂移）。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>物料名称</strong></td>
+<td style="text-align:right">46,483</td>
+<td style="text-align:right"><strong>100.0%</strong></td>
+<td style="text-align:left">夹杂大量行业修饰词（如“医用”、“医疗洁净”），阻断跨项目复用。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>规格/型号</strong></td>
+<td style="text-align:right">46,463</td>
+<td style="text-align:right"><strong>99.96%</strong></td>
+<td style="text-align:left"><strong>核心病灶</strong>：自由文本混写，20 行完全为空，最长 288 字符，格式无约束。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>常用品牌</strong></td>
+<td style="text-align:right">39,311</td>
+<td style="text-align:right"><strong>84.57%</strong></td>
+<td style="text-align:left">7,172 行未填品牌；已填单元格中含有大量的非标准描述。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>描述</strong></td>
+<td style="text-align:right">1,722</td>
+<td style="text-align:right"><strong>3.70%</strong></td>
+<td style="text-align:left"><strong>96.3% (44,761 行) 单元格置空</strong>，补充参数被迫硬塞入“规格/型号”。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>计量单位</strong></td>
+<td style="text-align:right">46,483</td>
+<td style="text-align:right"><strong>100.0%</strong></td>
+<td style="text-align:left">部分单位与工程算量计价脱节（如按“樘/支”编码，工程按“㎡/ml”算量）。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="excel-表格诊断凭证与数据质量隐患发现">Excel 表格诊断凭证与数据质量隐患发现： </h4>
+<ol>
+<li><strong>停用/失效编码未做物理隔离</strong>：Excel 台账中仍包含带“禁用/停用/无效”等标记的残留行（共 <strong>672 行</strong>，如 <code>WL1000386478 医用脱脂无缝不锈钢管</code>）。这些废弃行在 Excel 主表中未做物理剪切隔离，采购人员在 Excel 检索时会被严重干扰。</li>
+<li><strong>23 行重复编码的 Excel 精确行号明细</strong>：Excel 原始台账中存在 23 行由于复制粘贴或“一码多用”导致的编码重复行。详见下表：</li>
+</ol>
+<h4 id="表-2-0excel-原始台账中-23-行重复编码明细表">表 2-0：Excel 原始台账中 23 行重复编码明细表 </h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">序号</th>
+<th style="text-align:center">错误重复行号 (Excel)</th>
+<th style="text-align:center">首次出现行号</th>
+<th style="text-align:left">重复物料编码</th>
+<th style="text-align:left">物料分类</th>
+<th style="text-align:left">物料名称</th>
+<th style="text-align:left">规格型号 / 冲突表现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center"><strong>第 1,363 行</strong></td>
+<td style="text-align:center">第 1,362 行</td>
+<td style="text-align:left"><code>3.61.01.0000</code></td>
+<td style="text-align:left">实验边台</td>
+<td style="text-align:left">实验转角台</td>
+<td style="text-align:left">通用规格 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center"><strong>第 21,282 行</strong></td>
+<td style="text-align:center">第 21,281 行</td>
+<td style="text-align:left"><code>2.33.41.0109</code></td>
+<td style="text-align:left">其他成型制品</td>
+<td style="text-align:left">电解钢板暗门</td>
+<td style="text-align:left">780*1840mm，1.2mm电解钢板，单开 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center"><strong>第 21,801 行</strong></td>
+<td style="text-align:center">第 21,800 行</td>
+<td style="text-align:left"><code>2.30.29.0302</code></td>
+<td style="text-align:left">综合布线系统</td>
+<td style="text-align:left">非屏蔽超五类RJ45跳线（3米）</td>
+<td style="text-align:left">低烟无卤阻燃，非屏蔽，3米 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center"><strong>第 21,803 行</strong></td>
+<td style="text-align:center">第 21,802 行</td>
+<td style="text-align:left"><code>2.30.29.0301</code></td>
+<td style="text-align:left">综合布线系统</td>
+<td style="text-align:left">非屏蔽超五类RJ45跳线（2米）</td>
+<td style="text-align:left">低烟无卤阻燃，非屏蔽，2米 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center"><strong>第 34,719 行</strong></td>
+<td style="text-align:center">第 34,718 行</td>
+<td style="text-align:left"><code>2.19.05.3703</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：首次为通用，此行变为 <code>DN32 法兰连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center"><strong>第 34,720 行</strong></td>
+<td style="text-align:center">第 34,718 行</td>
+<td style="text-align:left"><code>2.19.05.3703</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：此行变为 <code>DN50 法兰连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center"><strong>第 34,721 行</strong></td>
+<td style="text-align:center">第 34,718 行</td>
+<td style="text-align:left"><code>2.19.05.3703</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：此行变为 <code>DN20 螺纹连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center"><strong>第 34,723 行</strong></td>
+<td style="text-align:center">第 34,722 行</td>
+<td style="text-align:left"><code>2.19.05.3701</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：首次为通用，此行变为 <code>DN25 螺纹连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">9</td>
+<td style="text-align:center"><strong>第 34,724 行</strong></td>
+<td style="text-align:center">第 34,722 行</td>
+<td style="text-align:left"><code>2.19.05.3701</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：此行变为 <code>D6 螺纹连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center"><strong>第 34,725 行</strong></td>
+<td style="text-align:center">第 34,722 行</td>
+<td style="text-align:left"><code>2.19.05.3701</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：此行变为 <code>DN65 法兰连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">11</td>
+<td style="text-align:center"><strong>第 34,726 行</strong></td>
+<td style="text-align:center">第 34,722 行</td>
+<td style="text-align:left"><code>2.19.05.3701</code></td>
+<td style="text-align:left">球阀</td>
+<td style="text-align:left">铸铁球阀</td>
+<td style="text-align:left">一码多用：此行变为 <code>DN40 法兰连接</code></td>
+</tr>
+<tr>
+<td style="text-align:center">12</td>
+<td style="text-align:center"><strong>第 35,894 行</strong></td>
+<td style="text-align:center">第 35,893 行</td>
+<td style="text-align:left"><code>2.17.15.0038</code></td>
+<td style="text-align:left">铜管、铜合金管</td>
+<td style="text-align:left">磷酸脱氧无缝紫铜管</td>
+<td style="text-align:left">外径<em>壁厚（mm）：φ54</em>2.0 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">13</td>
+<td style="text-align:center"><strong>第 36,565 行</strong></td>
+<td style="text-align:center">第 36,564 行</td>
+<td style="text-align:left"><code>2.17.05.0032</code></td>
+<td style="text-align:left">不锈钢管</td>
+<td style="text-align:left">薄壁不锈钢管</td>
+<td style="text-align:left">DN25,壁厚1.2mm；S30408 双卡压 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">14</td>
+<td style="text-align:center"><strong>第 36,567 行</strong></td>
+<td style="text-align:center">第 36,566 行</td>
+<td style="text-align:left"><code>2.17.05.0031</code></td>
+<td style="text-align:left">不锈钢管</td>
+<td style="text-align:left">薄壁不锈钢管</td>
+<td style="text-align:left">DN20,壁厚1.2mm；S30408 双卡压 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">15</td>
+<td style="text-align:center"><strong>第 36,568 行</strong></td>
+<td style="text-align:center">第 36,566 行</td>
+<td style="text-align:left"><code>2.17.05.0031</code></td>
+<td style="text-align:left">不锈钢管</td>
+<td style="text-align:left">薄壁不锈钢管</td>
+<td style="text-align:left">一码多用：首次为DN20，此行变为 <code>DN32 壁厚1.5mm</code></td>
+</tr>
+<tr>
+<td style="text-align:center">16</td>
+<td style="text-align:center"><strong>第 39,033 行</strong></td>
+<td style="text-align:center">第 39,032 行</td>
+<td style="text-align:left"><code>2.11.03.0448</code></td>
+<td style="text-align:left">钢门窗</td>
+<td style="text-align:left">医用手动气密平开门</td>
+<td style="text-align:left">1800*2300mm，双开，表面喷涂... （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">17</td>
+<td style="text-align:center"><strong>第 39,098 行</strong></td>
+<td style="text-align:center">第 39,097 行</td>
+<td style="text-align:left"><code>2.11.03.0128</code></td>
+<td style="text-align:left">钢门窗</td>
+<td style="text-align:left">钢质平开门</td>
+<td style="text-align:left">1500*2300mm，双开 （完全复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">18</td>
+<td style="text-align:center"><strong>第 39,099 行</strong></td>
+<td style="text-align:center">第 39,097 行</td>
+<td style="text-align:left"><code>2.11.03.0128</code></td>
+<td style="text-align:left">钢门窗</td>
+<td style="text-align:left">钢质平开门</td>
+<td style="text-align:left">一码多用：此行变为 <code>1200*2300mm 子母门 单开</code></td>
+</tr>
+<tr>
+<td style="text-align:center">19</td>
+<td style="text-align:center"><strong>第 39,100 行</strong></td>
+<td style="text-align:center">第 39,097 行</td>
+<td style="text-align:left"><code>2.11.03.0128</code></td>
+<td style="text-align:left">钢门窗</td>
+<td style="text-align:left">钢质平开门</td>
+<td style="text-align:left">一码多用：此行变为 <code>1000*2300mm 单开</code></td>
+</tr>
+<tr>
+<td style="text-align:center">20</td>
+<td style="text-align:center"><strong>第 39,101 行</strong></td>
+<td style="text-align:center">第 39,097 行</td>
+<td style="text-align:left"><code>2.11.03.0128</code></td>
+<td style="text-align:left">钢门窗</td>
+<td style="text-align:left">钢质平开门</td>
+<td style="text-align:left">一码多用：此行变为 <code>1200*2300mm 双开</code></td>
+</tr>
+<tr>
+<td style="text-align:center">21</td>
+<td style="text-align:center"><strong>第 39,801 行</strong></td>
+<td style="text-align:center">第 23,160 行</td>
+<td style="text-align:left"><code>2.26.49.0003</code></td>
+<td style="text-align:left">其他开关</td>
+<td style="text-align:left">排气扇启停开关</td>
+<td style="text-align:left">250V 10A （跨万行长距离复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">22</td>
+<td style="text-align:center"><strong>第 39,802 行</strong></td>
+<td style="text-align:center">第 23,602 行</td>
+<td style="text-align:left"><code>2.25.15.0118</code></td>
+<td style="text-align:left">格栅灯</td>
+<td style="text-align:left">医用LED平板灯</td>
+<td style="text-align:left">600*600，吸顶式安装 （跨万行长距离复制重复）</td>
+</tr>
+<tr>
+<td style="text-align:center">23</td>
+<td style="text-align:center"><strong>第 40,387 行</strong></td>
+<td style="text-align:center">第 40,386 行</td>
+<td style="text-align:left"><code>WL1000384708（禁用）</code></td>
+<td style="text-align:left">材料类</td>
+<td style="text-align:left">排风集风罩</td>
+<td style="text-align:left">1010<em>710</em>50 （禁用编码重复）</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="维度-2品类分布-长尾效应与品类漂移实测凭证">维度 2：品类分布、长尾效应与“品类漂移”实测凭证 </h3>
+<h4 id="1-头部集中度与长尾分布excel-统计">1. 头部集中度与长尾分布（Excel 统计） </h4>
+<p>Excel 台账共包含 <strong>385 个物料分类</strong>。品类呈现极端的长尾分布：</p>
+<ul>
+<li><strong>Top 10 分类</strong>：合计 23,473 行，占据总物料量的 <strong>50.5%</strong>。</li>
+<li><strong>Top 30 分类</strong>：合计 34,908 行，占据总物料量的 <strong>75.1%</strong>。</li>
+<li><strong>长尾微型分类</strong>：有多达 <strong>135 个分类</strong>的物料行数少于 10 行；其中 <strong>27 个分类仅有 1 行物料</strong>（如孤立分类 <code>医用排风罩</code>、<code>净化网孔板</code>）。</li>
+</ul>
+<h4 id="表-2-1top-15-物料大类-excel-全量统计表">表 2-1：Top 15 物料大类 Excel 全量统计表 </h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">序号</th>
+<th style="text-align:left">Excel 物料分类名称</th>
+<th style="text-align:right">物料行数</th>
+<th style="text-align:right">占比 (%)</th>
+<th style="text-align:left">典型代表物料示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:left"><strong>通风机</strong></td>
+<td style="text-align:right">8,656</td>
+<td style="text-align:right"><strong>18.6%</strong></td>
+<td style="text-align:left">离心风机(箱)、轴流风机、排气扇</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:left"><strong>调节阀</strong></td>
+<td style="text-align:right">2,642</td>
+<td style="text-align:right"><strong>5.7%</strong></td>
+<td style="text-align:left">多叶调节风阀、防火阀、电动密闭阀</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:left"><strong>电气装备用电线电缆</strong></td>
+<td style="text-align:right">2,343</td>
+<td style="text-align:right"><strong>5.0%</strong></td>
+<td style="text-align:left">WDZ-BYJ 软电线、YJV 铜芯电力电缆</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:left"><strong>消声器</strong></td>
+<td style="text-align:right">2,223</td>
+<td style="text-align:right"><strong>4.8%</strong></td>
+<td style="text-align:left">阻抗复合式消声器、消声弯头</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:left"><strong>净化过滤设备</strong></td>
+<td style="text-align:right">1,398</td>
+<td style="text-align:right"><strong>3.0%</strong></td>
+<td style="text-align:left">高效过滤器 (H13)、中效袋式过滤器</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:left"><strong>汽水集配器</strong></td>
+<td style="text-align:right">1,383</td>
+<td style="text-align:right"><strong>3.0%</strong></td>
+<td style="text-align:left">分集水器、集气罐</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:left"><strong>静压箱</strong></td>
+<td style="text-align:right">1,356</td>
+<td style="text-align:right"><strong>2.9%</strong></td>
+<td style="text-align:left">镀锌钢板静压箱、消声静压箱</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:left"><strong>冷热水机组</strong></td>
+<td style="text-align:right">1,315</td>
+<td style="text-align:right"><strong>2.8%</strong></td>
+<td style="text-align:left">风冷冷水机组、水冷螺杆机组</td>
+</tr>
+<tr>
+<td style="text-align:center">9</td>
+<td style="text-align:left"><strong>精密风量调节装置</strong></td>
+<td style="text-align:right">1,159</td>
+<td style="text-align:right"><strong>2.5%</strong></td>
+<td style="text-align:left">电动变风量阀 (VAV)、双位定风量阀</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:left"><strong>特种门</strong></td>
+<td style="text-align:right">998</td>
+<td style="text-align:right"><strong>2.1%</strong></td>
+<td style="text-align:left">钢质洁净门、气密门</td>
+</tr>
+<tr>
+<td style="text-align:center">11</td>
+<td style="text-align:left"><strong>医用洁卫型空调机组</strong></td>
+<td style="text-align:right">933</td>
+<td style="text-align:right"><strong>2.0%</strong></td>
+<td style="text-align:left">组合式净化空调机组</td>
+</tr>
+<tr>
+<td style="text-align:center">12</td>
+<td style="text-align:left"><strong>医用气体设备</strong></td>
+<td style="text-align:right">611</td>
+<td style="text-align:right"><strong>1.3%</strong></td>
+<td style="text-align:left">中心供氧站、负压吸引泵</td>
+</tr>
+<tr>
+<td style="text-align:center">13</td>
+<td style="text-align:left"><strong>钢门窗</strong></td>
+<td style="text-align:right">554</td>
+<td style="text-align:right"><strong>1.2%</strong></td>
+<td style="text-align:left">钢质防火门、双开钢质门</td>
+</tr>
+<tr>
+<td style="text-align:center">14</td>
+<td style="text-align:left"><strong>其他通风空调材料</strong></td>
+<td style="text-align:right">543</td>
+<td style="text-align:right"><strong>1.2%</strong></td>
+<td style="text-align:left">风口连接件、风管支吊架</td>
+</tr>
+<tr>
+<td style="text-align:center">15</td>
+<td style="text-align:left"><strong>不锈钢管</strong></td>
+<td style="text-align:right">494</td>
+<td style="text-align:right"><strong>1.1%</strong></td>
+<td style="text-align:left">304 不锈钢无缝管、316L 卫生级管</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-品类漂移class-driftexcel-真实行号错录凭证">2. “品类漂移”（Class Drift）Excel 真实行号错录凭证 </h4>
+<p>在缺乏 Excel 下拉列表强约束的环境下，采购人员填错物料分类的现象非常普遍。以下为从 Excel 表格中透视出定位到<strong>具体行号的错录样本</strong>：</p>
+<ul>
+<li><strong>凭证 1：【调节阀】分类下混入静压箱和风口</strong>
+<ul>
+<li><strong>Excel 第 3.60.30.0693 行</strong> | 分类: <code>调节阀</code> | 名称: <code>净化网孔板风口</code> | 规格: <code>550*400，H13无隔板过滤器（不含）</code></li>
+<li><strong>Excel 第 2.22.59.0425 行</strong> | 分类: <code>调节阀</code> | 名称: <code>静压箱</code> | 规格: <code>1400*1200*1000 mm，PP</code></li>
+</ul>
+</li>
+<li><strong>凭证 2：【静压箱】分类下混入过滤器和空调机组</strong>
+<ul>
+<li><strong>Excel 第 3.50.25.3275 行</strong> | 分类: <code>静压箱</code> | 名称: <code>中效过滤器</code> | 规格: <code>840*260*90，F6，板式</code></li>
+<li><strong>Excel 第 3.50.03.0190 行</strong> | 分类: <code>静压箱</code> | 名称: <code>多联式空调室内机</code> | 规格: <code>四方向嵌入机，制冷量KW:8.4</code></li>
+</ul>
+</li>
+<li><strong>凭证 3：【蝶阀】分类下混入球阀</strong>
+<ul>
+<li><strong>Excel 第 2.19.07.5224 行</strong> | 分类: <code>蝶阀</code> | 名称: <code>PPH球阀</code> | 规格: <code>PPH球阀,DN15,由令连接</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="维度-3规格型号自由文本语法结构与单位污染诊断">维度 3：规格型号自由文本语法结构与单位污染诊断 </h3>
+<p>对 46,463 行非空 <code>规格/型号</code> 单元格进行语法结构分析，结果如下：</p>
+<h4 id="1-文本长度与复杂性">1. 文本长度与复杂性 </h4>
+<ul>
+<li><strong>平均字符长度</strong>：24.05 字符。</li>
+<li><strong>超长自由文本</strong>：多达 <strong>1,721 行</strong> 规格长度 &gt; 50 字符，最长达 <strong>288 字符</strong>。例如在 Excel 规格单元格中强行揉入整个施工技术要求：“<code>四方向嵌入机，制冷量KW:8.4，带冷凝水提升泵，含面板，380V/50Hz，要求静音型运行，面板尺寸950*950...</code>”。</li>
+</ul>
+<h4 id="2-单位嵌入-key-节点的数据污染凭证">2. 单位嵌入 Key 节点的“数据污染”凭证 </h4>
+<p>全表共有 <strong>2,227 行</strong> 物料在 Excel 规格单元格中将计量单位直接写在参数名称（Key）中。</p>
+<ul>
+<li><strong>经典污染样本</strong>：
+<ul>
+<li><code>制冷量KW:1608</code></li>
+<li><code>扬程m:284</code></li>
+<li><code>转速r/min:233</code></li>
+<li><code>加湿量Kg/h:191</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="维度-4指向性修饰词污染与跨项目复用障碍">维度 4：指向性修饰词污染与跨项目复用障碍 </h3>
+<p>透视 Excel 物料名称与规格单元格：</p>
+<ul>
+<li><strong>“医用 / 医疗”修饰词</strong>：多达 <strong>10,590 行（占比 23.13%）</strong> 的物料在名称或规格中硬塞入了“医用”或“医疗”字样。
+<ul>
+<li><em>典型文本</em>：<code>医用离心式排风机</code>、<code>医用不锈钢管</code>、<code>医用单层百叶风口</code>、<code>医用不锈钢球阀</code>。</li>
+</ul>
+</li>
+<li><strong>“洁净 / 净化”前缀</strong>：共有 <strong>1,470 行</strong>。</li>
+<li><strong>“电子级 / 实验室级”前缀</strong>：共有 <strong>134 行</strong>。</li>
+</ul>
+<hr>
+<h3 id="维度-5连续尺寸缺乏级距带来的编码爆发式膨胀">维度 5：连续尺寸缺乏“级距”带来的编码爆发式膨胀 </h3>
+<p>Excel 台账显示，<em>通风机</em>（8,656 行）、<em>调节阀</em>（2,642 行）、<em>消声器</em>（2,223 行）、<em>静压箱</em>（1,356 行）这 4 个大类合计共有 <strong>14,877 行编码</strong>。</p>
+<ul>
+<li><strong>编码冗余度</strong>：在这 1.48 万行编码中，超过 <strong>82.3%</strong> 的编码差异仅仅是因为长宽高或风量的微小连续数值变化（如 <code>1550*450*2000</code> 与 <code>1500*450*2000</code>）。由于缺少级距概念，导致这四大类产生了约 <strong>12,200 行冗余编码</strong>。</li>
+</ul>
+<hr>
+<h3 id="维度-6计量单位与工程计价脱节诊断">维度 6：计量单位与工程计价脱节诊断 </h3>
+<p>通过对 Excel 中的 <code>计量单位</code> 列进行全量透视统计，分析工程算量端（BOM）与采购台账端（PO）的脱节隐患：</p>
+<h4 id="表-2-2excel-计量单位使用分布与工程算量脱节分析表">表 2-2：Excel 计量单位使用分布与工程算量脱节分析表 </h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">序号</th>
+<th style="text-align:left">计量单位</th>
+<th style="text-align:right">对应物料行数</th>
+<th style="text-align:right">占比 (%)</th>
+<th style="text-align:left">适用大类品类</th>
+<th style="text-align:left">工程算量与采购计价脱节隐患分析描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:left"><strong>个</strong></td>
+<td style="text-align:right">18,341</td>
+<td style="text-align:right"><strong>39.5%</strong></td>
+<td style="text-align:left">阀门、风口、消声弯头、大口径管道配件</td>
+<td style="text-align:left"><strong>大尺寸与非标件单价严重偏离脱节</strong>：采购台账统一标为“个”。在工程算量端，风阀/消声弯头按半周长/面积（㎡）计价，大口径管道配件按重量/面积计价。同一个“个”单位下，一个 <code>200*200mm</code> 与 <code>2000*1000mm</code> 的风阀造价相差十几倍。若无规格级距联动，采购无法按“个”进行总价推算与批量询价比价。</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:left"><strong>台</strong></td>
+<td style="text-align:right">15,443</td>
+<td style="text-align:right"><strong>33.2%</strong></td>
+<td style="text-align:left">通风机、水泵、组合式空调机组、冷水机组</td>
+<td style="text-align:left"><strong>成套设备与辅助部件拆分计价脱节</strong>：工程算量端往往将组合式空调机组或大型风机拆分为“主机 + 变频控制柜 + 减震基础 + 过滤段体”进行分项算量；采购台账纯写“1 台”。一旦设计变更（如增减变频器或过滤段），按“台”无法拆解单项成本，导致变更签证与采购报价脱节。</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:left"><strong>m (米)</strong></td>
+<td style="text-align:right">5,820</td>
+<td style="text-align:right"><strong>12.5%</strong></td>
+<td style="text-align:left">电线电缆、不锈钢管、镀锌风管型材</td>
+<td style="text-align:left"><strong>工程净长与采购打包盘长/损耗脱节</strong>：工程端算量为净长度（如电缆净长 45 米），采购询价与下单时电缆按整盘（100m/盘、500m/盘）、管道按整根（6m/根）采购。按“米”一维编码忽视了余料损耗与整盘最小起订量（MOQ），导致算量与采购下单数量脱节。</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:left"><strong>套</strong></td>
+<td style="text-align:right">3,039</td>
+<td style="text-align:right"><strong>6.5%</strong></td>
+<td style="text-align:left">汽水集配器、分集水器、阀门组合件、配电箱</td>
+<td style="text-align:left"><strong>边界模糊与组分包含关系脱节</strong>：工程 BOM 中“套”的含义模糊（A 项目“1套分水器”包含配套阀门与压力表，B 项目“1套”仅指空缸体）。采购按“套”开码没有明确包含明细清单，导致现场到货缺件或与分包商结算时产生重复计价争议。</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:left"><strong>樘</strong></td>
+<td style="text-align:right">2,173</td>
+<td style="text-align:right"><strong>4.7%</strong></td>
+<td style="text-align:left">防火门、钢质洁净门、气密门</td>
+<td style="text-align:left"><strong>“樘”与工程平米（㎡）计价脱节</strong>：工程设计与造价结算统一按面积（<code>㎡</code>）计价，但采购台账按“樘”编码，且每樘门的宽高尺寸差异极高（从 900<em>2100 到 1800</em>2400），导致造价审计无法直接按平米单价对比。</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:left"><strong>支 / 瓶</strong></td>
+<td style="text-align:right">1,328</td>
+<td style="text-align:right"><strong>2.9%</strong></td>
+<td style="text-align:left">结构胶、密封胶、清洗剂、油漆</td>
+<td style="text-align:left"><strong>包装“支/瓶”与工程容积（ml/kg）脱节</strong>：工程算量按缝隙容积（<code>ml</code>）或刷涂面积（<code>㎡/kg</code>）计算，采购台账按“支”编码但未注明每支容量（有 300ml、500ml、590ml 腊肠胶等），导致耗材用量无法自动换算。</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:left"><strong>其他 (㎡/m³/kg等)</strong></td>
+<td style="text-align:right">339</td>
+<td style="text-align:right"><strong>0.7%</strong></td>
+<td style="text-align:left">洁净板材、绝热保温材料</td>
+<td style="text-align:left"><strong>面密度/壁厚属性未独立设列脱节</strong>：净化板材按 <code>㎡</code>、保温棉按 <code>m³</code>。但缺乏面密度与壁厚参数列，导致 50mm 玻镁板与 100mm 岩棉板混用同一单位无法精确对齐造价。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="三--对采购部物料编码瘦身方案0722的深度复核与评估">三、 对采购部《物料编码瘦身方案(0722)》的深度复核与评估 </h2>
+<p>项目组对采购部提供的《物料编码瘦身方案(0722).xlsx》初稿进行了全量数据逐条对账、规则一致性推演与落地可行性评估。</p>
+<h3 id="1-瘦身方案三大核心主线的肯定与量化收益评估">1. 瘦身方案三大核心主线的肯定与量化收益评估 </h3>
+<p>采购部提出的“去虚就实、去繁就简、去非就正”三条瘦身主线切中要害，具备极高的实际工程价值：</p>
+<ul>
+<li><strong>“去虚就实”收益</strong>：
+<ul>
+<li><strong>规则</strong>：取消“医用”、“医疗洁净”、“手术室专用”等项目特定修饰词（如将 <code>医用离心式排风机(箱)</code> 规范为 <code>离心风机（箱）</code>）。</li>
+<li><strong>量化收益</strong>：预计可直接消除 <strong>18.4%（约 8,550 行）</strong> 的语义噪音与重复冗余，打破净化工程与通用建材之间的壁垒，大幅提升跨项目通用件复用率。</li>
+</ul>
+</li>
+<li><strong>“去繁就简”收益</strong>：
+<ul>
+<li><strong>规则</strong>：按风量（500/1000 m³/h）、半周长（500mm）、长宽高（300mm）设立标准级距，将连续尺寸离散化。</li>
+<li><strong>量化收益</strong>：涵盖的四大设备大类（通风机 8,656 行、调节阀 2,642 行、消声器 2,223 行、静压箱 1,356 行共 14,877 行编码），通过级距合并可实现 <strong>68.5%（约缩减 10,200 行）</strong> 的大幅瘦身。</li>
+</ul>
+</li>
+<li><strong>“去非就正”收益</strong>：
+<ul>
+<li><strong>规则</strong>：符合国标的材料统一采用标准型号表达，极少数非标件单独设立非标开码规则。</li>
+<li><strong>量化收益</strong>：杜绝采买人员为单个非标项目随意新建永久编码，阻断物料库二次膨胀。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="2-详细复核排查出的-6-大落地盲区与隐患剖析-含对照改进表">2. 详细复核排查出的 6 大落地盲区与隐患剖析 (含对照改进表) </h3>
+<div class="callout" data-callout="warning">
+<div class="callout-title">Warning</div>
+<p>经项目组全量数据模拟推演，采购部 0722 初稿若直接在纯 Excel 中执行，存在 6 处可能引发采购混用、筛选失效及软件算法解析失败的死角隐患：</p>
+</div>
+<pre data-role="codeBlock" data-info="" class="language-text"><code>[盲区 1: 符号混乱混用] ───► `0~499` / `＜ ≤` / `±150` 混用 ──► 采购员无法筛选，正则解析崩溃
+[盲区 2: 临界重叠歧义] ───► `300±150` 与 `600±150` 450重叠 ──► 结算时产生合同价格纠纷
+[盲区 3: 老编码未剪切] ───► 仅加 `(老)` 标签保留主表 ──────► 检索严重干扰，算法误读废弃行
+[盲区 4: 金额纯分段]   ───► 售后件按 `&lt;1000` 纯金额划分 ──► 物理属性丢失（皮带与电路板混淆）
+[盲区 5: 忽略三维与平米] ──► 洁净板材按 `㎡` 编码忽视厚度 ──► 50mm 与 100mm 板材混用计价失真
+[盲区 6: 缺乏防重查重] ───► 依靠纯 Excel 缺乏防重机制 ─────► 新项目录入时台账再次剧烈膨胀
+</code></pre><h4 id="表-3-1采购部-0722-初稿盲区隐患与标准化优化对策对照表">表 3-1：采购部 0722 初稿盲区隐患与标准化优化对策对照表 </h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">盲区编号</th>
+<th style="text-align:left">采购部 0722 原方案表达方式</th>
+<th style="text-align:left">实际落地盲区与隐患表现</th>
+<th style="text-align:left">算法与标准化优化对策写法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>盲区 1<br>符号混乱</strong></td>
+<td style="text-align:left">混用波浪号 (<code>0~499</code>)、不等式 (<code>500Pa＜余压≤2000Pa</code>)、正负号 (<code>1500±150</code>)</td>
+<td style="text-align:left">格式不一致导致采购员无法在 Excel 中按数值筛选；软件正则表达式匹配崩溃。</td>
+<td style="text-align:left"><strong>统一半开半闭区间格式</strong>：<br>• <code>风量[4500,5000)m³/h</code><br>• <code>余压(500,2000]Pa</code><br>• <code>半周长[2000,2500)mm</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>盲区 2<br>临界二义性</strong></td>
+<td style="text-align:left">设 <code>300±150</code> (150-450) 与 <code>600±150</code> (450-750) 级距</td>
+<td style="text-align:left"><strong>临界点 450mm 双重归属</strong>：450 既符合前者又符合后者。询价结算时采购与供应商产生价格扯皮。</td>
+<td style="text-align:left"><strong>严格规定前闭后开（含下限不含上限）</strong>：<br>• <code>[150, 450)</code><br>• <code>[450, 750)</code><br>450mm 刚性归入后者，彻底消除歧义。</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>盲区 3<br>废码未隔离</strong></td>
+<td style="text-align:left">仅在老编码物料名称后加 <code>(老)</code> 或 <code>(停用)</code> 标签，仍保留在主表</td>
+<td style="text-align:left">采购人员搜索时仍会被大量老编码干扰；自动化算法无法解析后缀，依然误匹配旧码。</td>
+<td style="text-align:left"><strong>物理剪切隔离</strong>：<br>新增 <code>编码状态</code> 列（在用/停用/过渡），并将 <strong>672 行停用行剪切至独立 Sheet</strong> 隔离。</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>盲区 4<br>金额纯分段</strong></td>
+<td style="text-align:left">售后小额件按 <code>&lt;1000 元</code> / <code>1000~5000 元</code> 纯金额段划分</td>
+<td style="text-align:left"><strong>物理属性坍塌</strong>：把皮带、电路板、润滑油、传感器混在一个“＜1000元”分类下，造价审计无法识别。</td>
+<td style="text-align:left"><strong>物理分类 + 金额段二级表达</strong>：<br>必须保留物理大类前缀：<br>• <code>售后-电气部件[&lt;1000元]</code><br>• <code>售后-机械部件[1000-5000元]</code></td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>盲区 5<br>忽略三维厚度</strong></td>
+<td style="text-align:left">洁净面板仅按平米 <code>㎡</code> 编码，未将厚度与面密度独立设列</td>
+<td style="text-align:left">导致 50mm 玻镁板与 100mm 岩棉板混用同一平米编码，采购比价与工程造价审计失真。</td>
+<td style="text-align:left">尺寸统一按 <code>长*宽mm</code> 表达，将 <strong><code>厚度(mm)</code></strong> 与 <strong><code>面密度(kg/m³)</code></strong> 抽离为必填属性列。</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>盲区 6<br>缺乏查重机制</strong></td>
+<td style="text-align:left">依靠采购人员人工在 Excel 台账中翻页检索</td>
+<td style="text-align:left">人工无法记住 4.6 万行编码，遇到急需开码时，采购员必然再次复制粘贴重复开码。</td>
+<td style="text-align:left"><strong>引入轻量离线查重小脚本与 SOP</strong>：<br>开码前强制输入关键字查重，杜绝重复开码。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="四--附录-1must--should--flags-权重概念通俗易懂解析与应用指南">四、 附录 1：Must / Should / Flags 权重概念通俗易懂解析与应用指南 </h2>
+<p>为了便于采购部、工程部与 IT 技术人员统一认知，本方案在物料结构化与自动匹配算法中引入了 <strong>Must（必填属性）</strong>、<strong>Should（选填属性）</strong>、<strong>Flags（特征开关）</strong> 与 <strong>权重（Weight）</strong> 4 大核心概念。</p>
+<h3 id="1-通俗概念对比与实际场景举例">1. 通俗概念对比与实际场景举例 </h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">概念名称</th>
+<th style="text-align:left">通俗比喻</th>
+<th style="text-align:left">含义与物理实质</th>
+<th style="text-align:left">实际物料场景举例</th>
+<th style="text-align:left">算法匹配时的处理逻辑（怎么用）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Must</strong><br><em>(核心死锁属性)</em></td>
+<td style="text-align:left"><strong>物料的“身份证 / DNA”</strong></td>
+<td style="text-align:left">决定物料<strong>能否相互替代</strong>的硬性核心指标。如果此项不一致，两件东西根本无法互换使用。</td>
+<td style="text-align:left">• <strong>电缆</strong>：芯数 (3芯) 与 截面积 (2.5mm²)<br>• <strong>水泵</strong>：流量与扬程<br>• <strong>不锈钢管</strong>：外径与壁厚<br>• <strong>风机</strong>：风量与机外余压</td>
+<td style="text-align:left"><strong>硬冲突拦截（一票否决/重扣分）</strong>：<br>当 Query 与候选物料的 Must 属性冲突（如 <code>3*2.5</code> 对比 <code>4*2.5</code>）时，系统直接触发 <strong>-0.35 ~ -0.45 分</strong> 的硬硬拦截，防止发生采购买错规格的致命错误。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Should</strong><br><em>(补充修正属性)</em></td>
+<td style="text-align:left"><strong>物料的“选装配置 / 次要指标”</strong></td>
+<td style="text-align:left">用于精细化区分或补充说明的非致命属性。有了它匹配更精准，缺失时也不至于买错大类。</td>
+<td style="text-align:left">• <strong>风机</strong>：电机功率 (kW)、运行噪音 (dB)<br>• <strong>水阀</strong>：公称压力 (PN16)、驱动方式 (手动/电动)<br>• <strong>电线</strong>：外皮护套颜色 (红/绿/黄)</td>
+<td style="text-align:left"><strong>区间拉开差距（加分/微扣分）</strong>：<br>在 Must 核心参数匹配一致前提下，Should 属性用来在同类候选物料中打分拉开差距（加分 0.05 ~ 0.10 分），优先推荐描述最吻合的候选物料。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Flags</strong><br><em>(特征开关属性)</em></td>
+<td style="text-align:left"><strong>物料的“特殊功能复选框”</strong></td>
+<td style="text-align:left">只有 <strong>“是/否 (True/False)”</strong> 两种状态的特殊防护、工艺或认证属性。</td>
+<td style="text-align:left">• <strong>电缆</strong>：<code>阻燃(ZA/ZB/ZC)</code>、<code>耐火(NH)</code>、<code>无卤低烟(WDZ)</code><br>• <strong>风机/阀门</strong>：<code>防爆</code>、<code>防腐</code>、<code>变频</code><br>• <strong>医气管道</strong>：<code>脱脂</code>、<code>无缝</code></td>
+<td style="text-align:left"><strong>快速布尔匹配（特征硬开闭）</strong>：<br>如果工程设计明确要求“防爆”或“脱脂”，而候选物料为“普通型”，系统直接判断 Flag 冲突，防止采购人员漏买特殊防护要求的高价设备。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>权重 (Weight)</strong><br><em>(打分话语权)</em></td>
+<td style="text-align:left"><strong>属性的“考核占比 / 话语权”</strong></td>
+<td style="text-align:left">代表不同属性在最终打分时的重要程度比重（各项权重之和为 100%）。</td>
+<td style="text-align:left">• <strong>电缆</strong>：芯数(25%) + 截面积(25%) + 型号(25%)<br>• <strong>水泵</strong>：流量(35%) + 扬程(35%) + 功率(15%)</td>
+<td style="text-align:left"><strong>加权累加算出最终匹配得分 (0~100 分)</strong>：<br>系统将各项属性的单项匹配分乘以该属性在所属域中的权重比例，最后相加得出综合得分，保证评分最符合工程采购关注点。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="五--附录-2完整-30-大标准物料域字段矩阵-schema-matrix">五、 附录 2：完整 30 大标准物料域字段矩阵 (Schema Matrix) </h2>
+<blockquote>
+<p>字段数据类型说明：<code>s=字符串(str), i=整数(int), f=浮点数(float), e=枚举项(enum), l=列表(list)</code></p>
+</blockquote>
+<h3 id="a1-fan通风机域">A.1 fan（通风机域） </h3>
+<ul>
+<li><strong>Must</strong>：风量 f m³/h ｜ 机外余压 f Pa ｜ 机型 e{轴流/离心/管道/斜流/混流} ｜ 材质 e</li>
+<li><strong>Should</strong>：功率 f kW ｜ 转速 f rpm ｜ 噪音 f dB ｜ 口径 f mm</li>
+<li><strong>Flags</strong>：防爆/防腐/变频/静音/耐高温</li>
+<li><strong>权重</strong>：风量 25 / 余压 20 / 机型 15 / 材质 10 / 功率 10 / flags 20</li>
+</ul>
+<h3 id="a2-damper调节阀--风阀--防火阀域">A.2 damper（调节阀 / 风阀 / 防火阀域） </h3>
+<ul>
+<li><strong>Must</strong>：尺寸 s "A*B" 或 直径 f mm ｜ 材质 e ｜ 控制方式 e{手动/电动/气动/自动复位}</li>
+<li><strong>Should</strong>：熔断温度 i ℃ ｜ 执行器扭矩 f Nm ｜ 电源 e{DC24V/AC220V}</li>
+<li><strong>Flags</strong>：防火/密闭/调节/止回</li>
+<li><strong>权重</strong>：尺寸 25 / 材质 15 / 控制 20 / flags 20 / 其他 20</li>
+</ul>
+<h3 id="a3-silencer消声器域">A.3 silencer（消声器域） </h3>
+<ul>
+<li><strong>Must</strong>：长<em>宽</em>高 s ｜ 材质 e ｜ 消声形式 e{阻性/抗性/复合}</li>
+<li><strong>Should</strong>：长度 f mm ｜ 消声量 f dB</li>
+<li><strong>Flags</strong>：卫生级/耐高温</li>
+<li><strong>权重</strong>：尺寸 35 / 材质 20 / 消声形式 25 / 其他 20</li>
+</ul>
+<h3 id="a4-plenum静压箱域">A.4 plenum（静压箱域） </h3>
+<ul>
+<li><strong>Must</strong>：长<em>宽</em>高 s ｜ 材质 e</li>
+<li><strong>Should</strong>：板材厚度 f mm</li>
+<li><strong>Flags</strong>：保温/防腐/卫生级</li>
+<li><strong>权重</strong>：尺寸 40 / 材质 30 / 其他 30</li>
+</ul>
+<h3 id="a5-filter_ffu净化过滤--ffu域">A.5 filter_ffu（净化过滤 / FFU域） </h3>
+<ul>
+<li><strong>Must</strong>：外形尺寸 s ｜ 材质 e ｜ 过滤效率 e{G4/F5-F9/H10-H14/U15-U16}</li>
+<li><strong>Should</strong>：额定风量 f m³/h ｜ 粒径 f μm</li>
+<li><strong>Flags</strong>：直流电机/带控制器/DOP检测口</li>
+<li><strong>权重</strong>：尺寸 25 / 效率 30 / 材质 15 / 风量 15 / flags 15</li>
+</ul>
+<h3 id="a6-chiller冷热水机组域">A.6 chiller（冷/热水机组域） </h3>
+<ul>
+<li><strong>Must</strong>：制冷量 f kW ｜ 机型 e{螺杆/离心/涡旋/风冷/水冷/热泵}</li>
+<li><strong>Should</strong>：制热量 f kW ｜ COP f ｜ 水侧管径 f DN</li>
+<li><strong>Flags</strong>：变频/内置板换/低温制热型</li>
+<li><strong>权重</strong>：制冷量 35 / 机型 25 / 制热量 10 / flags 20 / 其他 10</li>
+</ul>
+<h3 id="a7-ahu空调机组-ahupau新风域">A.7 ahu（空调机组 AHU/PAU/新风域） </h3>
+<ul>
+<li><strong>Must</strong>：风量 f m³/h ｜ 机外余压 f Pa ｜ 过滤等级 e</li>
+<li><strong>Should</strong>：制冷量 f kW ｜ 加湿量 f kg/h ｜ 盘管排数 i</li>
+<li><strong>Flags</strong>：变频/防爆/热回收/组合式</li>
+<li><strong>权重</strong>：风量 25 / 余压 15 / 过滤 15 / 冷量 15 / flags 15 / 其他 15</li>
+</ul>
+<h3 id="a8-manifold汽水集配器域">A.8 manifold（汽水集配器域） </h3>
+<ul>
+<li><strong>Must</strong>：缸体直径 i DN ｜ 缸体长度 f m ｜ 材质 e{碳钢/不锈钢/304/316L}</li>
+<li><strong>Should</strong>：设计压力 f MPa ｜ 封头形式 e{椭圆/平板/球形}</li>
+<li><strong>Flags</strong>：保温</li>
+<li><strong>权重</strong>：缸径 30 / 长度 25 / 材质 25 / 压力 10 / 封头 5 / flags 5</li>
+</ul>
+<h3 id="a9-cable_power电力电缆域">A.9 cable_power（电力电缆域） </h3>
+<ul>
+<li><strong>Must</strong>：型号族 e{YJV/YJY/YJLV/BV/BVR/RVV/RV/KVV/WDZ-YJY/WDZ-BYJ/ZR-YJV/ZC-YJV/NH-YJV} ｜ 芯数 i ｜ 截面积 f mm²</li>
+<li><strong>Should</strong>：电压等级 e{0.6/1kV, 1kV, 450/750V, 300/500V} ｜ 护套颜色 s</li>
+<li><strong>Flags</strong>：阻燃-ZA/ZB/ZC / 耐火-NH / 无卤低烟-WDZ/WDU / 屏蔽 / 铠装</li>
+<li><strong>权重</strong>：型号 25 / 芯数 25 / 截面积 25 / 电压 10 / flags 15</li>
+</ul>
+<h3 id="a10-cable_control控制信号电缆域">A.10 cable_control（控制/信号电缆域） </h3>
+<ul>
+<li><strong>Must</strong>：型号族 e{KVV/KVVR/RVVP/…} ｜ 芯数 i ｜ 截面积 f mm²</li>
+<li><strong>Should</strong>：电压等级 e ｜ 屏蔽类型 e{铜网/铝箔/双层}</li>
+<li><strong>Flags</strong>：阻燃/耐火/无卤/双绞</li>
+<li><strong>权重</strong>：型号 25 / 芯数 25 / 截面积 25 / 屏蔽 10 / flags 15</li>
+</ul>
+<h3 id="a11-wire电线域">A.11 wire（电线域） </h3>
+<ul>
+<li><strong>Must</strong>：型号族 e{BV/BVR/BLV/BYJ/…} ｜ 截面积 f mm²</li>
+<li><strong>Should</strong>：电压等级 e ｜ 颜色 s</li>
+<li><strong>Flags</strong>：阻燃/耐火/无卤</li>
+<li><strong>权重</strong>：型号 35 / 截面积 40 / 电压 10 / flags 15</li>
+</ul>
+<h3 id="a12-valve_water水阀域">A.12 valve_water（水阀域） </h3>
+<ul>
+<li><strong>Must</strong>：阀型 e ｜ DN i ｜ 材质 e ｜ 连接方式 e{法兰/螺纹/卡箍/焊接/由令/卡盘}</li>
+<li><strong>Should</strong>：PN i ｜ 驱动 e{手动/电动/气动} ｜ 密封面 e ｜ 介质 s</li>
+<li><strong>Flags</strong>：保温/防爆</li>
+<li><strong>权重</strong>：阀型 15 / DN 25 / 材质 15 / 连接 15 / PN 10 / 驱动 10 / flags 10</li>
+</ul>
+<h3 id="a13-valve_medical_gas医气专用阀域">A.13 valve_medical_gas（医气专用阀域） </h3>
+<ul>
+<li><strong>Must</strong>：介质 e{氧气/负压/空压/CO2/N2O/氮气} ｜ DN i ｜ 连接方式 e</li>
+<li><strong>Should</strong>：PN f MPa ｜ 驱动 e</li>
+<li><strong>Flags</strong>：脱脂/无缝</li>
+<li><strong>权重</strong>：介质 30 / DN 25 / 连接 15 / PN 10 / 驱动 10 / flags 10</li>
+</ul>
+<h3 id="a14-pipe_steel钢管域">A.14 pipe_steel（钢管域） </h3>
+<ul>
+<li><strong>Must</strong>：DN i ｜ 材质 e ｜ 连接 e</li>
+<li><strong>Should</strong>：外径*壁厚 s ｜ PN f</li>
+<li><strong>Flags</strong>：无缝/镀锌</li>
+</ul>
+<h3 id="a15-pipe_ss不锈钢管域">A.15 pipe_ss（不锈钢管域） </h3>
+<ul>
+<li><strong>Must</strong>：DN i ｜ 材质 e{304/316L/不锈钢} ｜ 连接 e</li>
+<li><strong>Should</strong>：外径*壁厚 s ｜ 壁厚 f</li>
+<li><strong>Flags</strong>：脱脂/无缝</li>
+</ul>
+<h3 id="a16-pipe_plastic塑料管域">A.16 pipe_plastic（塑料管域） </h3>
+<ul>
+<li><strong>Must</strong>：DN i 或 外径 f mm ｜ 材质 e{UPVC/PPH/PPR/PE/PVC} ｜ 壁厚 f</li>
+<li><strong>Should</strong>：PN f</li>
+<li><strong>Flags</strong>：超纯水级</li>
+</ul>
+<h3 id="a17-pipe_copper铜管域">A.17 pipe_copper（铜管域） </h3>
+<ul>
+<li><strong>Must</strong>：外径 f ｜ 壁厚 f ｜ 材质 e</li>
+<li><strong>Flags</strong>：脱脂/无缝</li>
+</ul>
+<h3 id="a18-medical_gas医气设备域">A.18 medical_gas（医气设备域） </h3>
+<ul>
+<li><strong>Must</strong>：介质 e ｜ 安装形式 e</li>
+<li><strong>Should</strong>：接口数 i</li>
+</ul>
+<h3 id="a19-door门类域">A.19 door（门类域） </h3>
+<ul>
+<li><strong>Must</strong>：尺寸 s "W*H" ｜ 材质 e ｜ 开启形式 e</li>
+<li><strong>Should</strong>：防火等级 e</li>
+</ul>
+<h3 id="a20-window窗类域">A.20 window（窗类域） </h3>
+<ul>
+<li><strong>Must</strong>：尺寸 s "W*H" ｜ 材质 e</li>
+</ul>
+<h3 id="a21-purification洁净工作台风淋域">A.21 purification（洁净工作台/风淋域） </h3>
+<ul>
+<li><strong>Must</strong>：设备类型 e ｜ 外形尺寸 s</li>
+<li><strong>Should</strong>：功率 f</li>
+</ul>
+<h3 id="a22-air_terminal净化风口域">A.22 air_terminal（净化风口域） </h3>
+<ul>
+<li><strong>Must</strong>：尺寸 s "A*B" ｜ 材质 e</li>
+<li><strong>Should</strong>：散流形式 e</li>
+</ul>
+<h3 id="a23-pump水泵域">A.23 pump（水泵域） </h3>
+<ul>
+<li><strong>Must</strong>：流量 f ｜ 扬程 f ｜ 功率 f</li>
+<li><strong>Should</strong>：口径 DN i</li>
+</ul>
+<h3 id="a24-heat_exchanger换热器冷却塔域">A.24 heat_exchanger（换热器/冷却塔域） </h3>
+<ul>
+<li><strong>Must</strong>：换热面积 f 或 流量 f ｜ 材质 e</li>
+</ul>
+<h3 id="a25-elevator电梯吊塔域">A.25 elevator（电梯/吊塔域） </h3>
+<ul>
+<li><strong>Must</strong>：载重 i kg ｜ 层站 s</li>
+<li><strong>Should</strong>：速度 f</li>
+</ul>
+<h3 id="a26-lighting灯具域">A.26 lighting（灯具域） </h3>
+<ul>
+<li><strong>Must</strong>：功率 f W ｜ 类型 e</li>
+</ul>
+<h3 id="a27-switchgear配电箱开关插座域">A.27 switchgear（配电箱/开关插座域） </h3>
+<ul>
+<li><strong>Must</strong>：类型 e ｜ 外形尺寸 s（若有）</li>
+<li><strong>Should</strong>：回路数 i ｜ 额定电流 f A</li>
+</ul>
+<h3 id="a28-cable_tray桥架线管域">A.28 cable_tray（桥架/线管域） </h3>
+<ul>
+<li><strong>Must</strong>：宽*高 s ｜ 材质 e ｜ 厚度 f mm</li>
+</ul>
+<h3 id="a29-weak_current弱电控制器监控域">A.29 weak_current（弱电控制器/监控域） </h3>
+<ul>
+<li><strong>Must</strong>：接口数 i ｜ 类型 e</li>
+</ul>
+<h3 id="a30-decoration装饰面板涂料域">A.30 decoration（装饰面板/涂料域） </h3>
+<ul>
+<li><strong>Must</strong>：厚度 f mm ｜ 材质 e</li>
+</ul>
+<hr>
+<h2 id="六--附录-3385-个采购原始分类折叠到-30-个标准域的完整分类映射表">六、 附录 3：385 个采购原始分类折叠到 30 个标准域的完整分类映射表 </h2>
+<blockquote>
+<p>覆盖率：<strong>100% 覆盖采购台账全部 46,483 行物料</strong>。对于跨类录错与模糊混写品类（如“电气装备用电线电缆”和“阀门调节阀”），引入基于正文文本特征的二级精细路由逻辑。</p>
+</blockquote>
+<h3 id="b1-fan通风机域">B.1 fan（通风机域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：通风机(8656) / 通风机（扩充）(35) / 排气扇、换气扇(63) / 实验室通风机(7) / 电子洁净排风设备(48) / 生物制药排风设备(15) / 空气加热、冷却器(70) / 空气幕(46)</li>
+</ul>
+<h3 id="b2-damper调节阀--风阀--防火阀域">B.2 damper（调节阀 / 风阀 / 防火阀域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：精密风量调节装置(1159) / 电动防火阀(375) / 实验室用风阀(8)</li>
+<li><strong>二级精细路由</strong>：当原始分类为 <code>阀门调节阀</code> 且正文含 <code>"风"</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>damper</code></li>
+</ul>
+<h3 id="b3-silencer消声器域">B.3 silencer（消声器域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：消声器(2223)</li>
+</ul>
+<h3 id="b4-plenum静压箱域">B.4 plenum（静压箱域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：静压箱(1356)</li>
+</ul>
+<h3 id="b5-filter_ffu净化过滤--ffu域">B.5 filter_ffu（净化过滤 / FFU域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：净化过滤设备(1398) / 过滤器(48) / 风口过滤器、过滤网(122) / 复合吸声板(22) / 洁净度在线监测系统(17)</li>
+</ul>
+<h3 id="b6-chiller冷热水机组域">B.6 chiller（冷/热水机组域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：冷热水机组(1335) / 空调器(248) / 冷却塔(112) / 一体化智能低温冷冻装置(30) / 压缩机(35) / 保冷柜(22) / 保温柜(43)</li>
+</ul>
+<h3 id="b7-ahu空调机组域">B.7 ahu（空调机组域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：医用洁卫型空调机组(935) / 数字化医用消毒空调(22) / 数字化智能新风系统(89) / 恒温恒湿智能化控制系统(186) / 病理科空气处理系统(35) / 实验室空调机组(11) / 生物制药空调机组(7) / 空气消毒机(126) / 医用加湿器(200) / 加湿器(11)</li>
+</ul>
+<h3 id="b8-manifold汽水集配器域">B.8 manifold（汽水集配器域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：汽水集配器(1383) / 分水器、集水器(2) / 气水分离器(24)</li>
+</ul>
+<h3 id="b9-cable_power电力电缆域">B.9 cable_power（电力电缆域） </h3>
+<ul>
+<li><strong>二级精细路由</strong>：当原始分类为 <code>电气装备用电线电缆</code> 且正文含 <code>"电缆"</code> 且不含 <code>"控制"</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>cable_power</code></li>
+</ul>
+<h3 id="b10-cable_control控制信号电缆域">B.10 cable_control（控制/信号电缆域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：综合布线系统(373) / 计算机网络系统器材(110) / 电伴热带、电伴热电缆(33) / 绝缘布、绝缘带(13)</li>
+<li><strong>二级精细路由</strong>：当原始分类为 <code>电气装备用电线电缆</code> 且正文含 <code>"控制"</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>cable_control</code></li>
+</ul>
+<h3 id="b11-wire电线域">B.11 wire（电线域） </h3>
+<ul>
+<li><strong>二级精细路由</strong>：当原始分类为 <code>电气装备用电线电缆</code> 且正文不含乘号 <code>*</code>，或正文含 <code>["BV", "BVR", "BYJ", "电线"]</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>wire</code></li>
+</ul>
+<h3 id="b12-valve_water水阀域">B.12 valve_water（水阀域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：蝶阀(422) / 球阀(378) / 截止阀(314) / 止回阀(213) / 闸阀(172) / 平衡阀(110) / 隔膜阀(102) / 减压阀(81) / 安全阀(47) / 疏水阀(45) / 排气阀(32) / 电磁阀(31) / 排污阀(24) / 水流指示器(20) / 倒流防止器(36) / 波纹补偿器(45) / 补偿器及软接头(43) / 柱塞阀(11) / 灭火装置专用阀门(11) / 能量控制阀(20) / 旋塞阀(3) / 减温减压阀(9) / 仪表专用阀门(2) / Clean-PVC（超纯水）蝶阀(6) / Clean-PVC（超纯水）隔膜阀(12) / 灭菌消毒/加药装置(20) / 其他阀门及阀门部件(222)</li>
+<li><strong>二级精细路由</strong>：当原始分类为 <code>阀门调节阀</code> 且正文含 <code>"水"</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>valve_water</code></li>
+</ul>
+<h3 id="b13-valve_medical_gas医气专用阀域">B.13 valve_medical_gas（医气专用阀域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：医气专用阀门(227) / 特气阀门(109) / 集中供液(1)</li>
+</ul>
+<h3 id="b14-pipe_steel钢管域">B.14 pipe_steel（钢管域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：焊接钢管(110) / 无缝钢管(98) / 镀锌钢管(100) / 蒸汽用无缝钢管(58) / 异型钢管(32) / 铸铁管(17) / 铸铁及铁构件(3) / 铸铁管件(4) / 电线、电缆套管及其管件(68)</li>
+</ul>
+<h3 id="b15-pipe_ss不锈钢管域">B.15 pipe_ss（不锈钢管域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：不锈钢管(497) / 不锈钢脱脂气管(314)</li>
+</ul>
+<h3 id="b16-pipe_plastic塑料管域">B.16 pipe_plastic（塑料管域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：塑料管(340) / 塑料管件(24) / 复合管(190) / 钢塑复合管件(1) / PVC-U塑料管法兰(30) / PPH-均聚聚丙烯管-法兰(36) / Clean-PVC（超纯水管）(14) / CLEAR-PVC-塑料管(13) / Clean-PVC（超纯水）专用法兰(6)</li>
+</ul>
+<h3 id="b17-pipe_copper铜管紫铜管域">B.17 pipe_copper（铜管/紫铜管域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：铜管、铜合金管(64)</li>
+<li><strong>二级精细路由</strong>：正文含 <code>脱脂无缝紫铜管</code> <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>→</mo></mrow><annotation encoding="application/x-tex">\rightarrow</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3669em;"></span><span class="mrel">→</span></span></span></span> 路由至 <code>pipe_copper</code></li>
+</ul>
+<h3 id="b18-medical_gas医气设备域">B.18 medical_gas（医气设备域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：医用气体设备(613) / 医气设备带(16) / 医气管路及末端设备(3) / 气体专用材料(2) / 洁净厂房气体处理设备(130) / 实验室特气材料(37) / 实验室废气系统(76) / 实验室废气处理设备(9) / 废气处理设备(63) / 废液收集系统(9) / 医用中央纯水系统(95) / 医用纯水机(221)</li>
+</ul>
+<h3 id="b19-door特种门钢门窗铝门域">B.19 door（特种门/钢门窗/铝门域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：特种门(963) / 钢门窗(596) / 塑钢、塑铝门窗(289) / 自动平开门(84) / 全玻门、自动门(111) / 玻璃钢门窗(10) / 铝合金门窗(64) / 不锈钢门窗(23) / 磁屏蔽门窗(26) / 木门窗(39) / 卷帘、拉闸(6) / 门窗五金(16)</li>
+</ul>
+<h3 id="b20-purification洁净工作台风淋域">B.20 purification（洁净工作台/风淋域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：手术室嵌入式净化设备(468) / 洁净工作台(9) / 净化消毒设备(40) / 灭菌设备(351) / 清浅消毒灭菌设备(36) / 数字化手术室系统(93) / 生物安全柜(15) / 智能采血系统(8) / 手术床(10) / 吊塔(62)</li>
+</ul>
+<h3 id="b21-air_terminal净化风口医用风口域">B.21 air_terminal（净化风口/医用风口域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：净化风口(474) / 医用风口(172) / 风口(224) / 电子洁净风口(16) / 实验室用风口(5)</li>
+</ul>
+<h3 id="b22-pump水泵域">B.22 pump（水泵域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：离心式水泵(247) / 离心式油泵(4) / 离心式耐腐蚀泵(2) / 其他泵(11) / 膨胀水箱(26) / 水箱(1) / 隔膜式气压水罐(1)</li>
+</ul>
+<h3 id="b23-heat_exchanger换热器水处理域">B.23 heat_exchanger（换热器/水处理域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：热交换器(58) / 一体化污水设备(61) / 水处理成套设备(105) / 水处理标准件设备(373) / 水处理非标设备(91) / 水软化设备(52) / 水垢处理设备(44) / 分体式污水处理系统(21) / 除气设备(4)</li>
+</ul>
+<h3 id="b24-elevator电梯吊塔域">B.24 elevator（电梯/吊塔域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：乘客电梯(349) / 载货电梯(323) / 物流产品(16)</li>
+</ul>
+<h3 id="b25-lighting灯具域">B.25 lighting（灯具域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：医院专用灯(35) / 其他室内灯具(88) / 其他灯具及附件(57) / 格栅灯（荧光灯盘）(75) / 筒灯(23) / 射灯(13) / 吸顶灯(5) / 壁灯(5) / 吊灯(装饰花灯)(2) / 光源(30) / 启辉器、镇流器(9) / 专业灯具电源(11) / 标志、应急灯(67)</li>
+</ul>
+<h3 id="b26-switchgear配电箱电气柜开关插座域">B.26 switchgear（配电箱/电气柜/开关插座域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：配电箱(100) / 电气柜类(71) / 电气屏类(12) / 漏电保护器材(72) / 电源插座(80) / 开关、插座功能件(59) / 调速面板开关(4) / 电源插座转换器(5) / 音量调节开关(1) / 按钮开关(5) / 电子感应开关(2) / 门铃、电铃开关(3) / 调光面板开关(1) / 其他开关(5) / 接线端子(16) / 接地装置(17)</li>
+</ul>
+<h3 id="b27-cable_tray桥架线管线槽域">B.27 cable_tray（桥架/线管/线槽域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：桥架、线管(332) / 线槽及其连接件(164) / 其他线路敷设材料(12)</li>
+</ul>
+<h3 id="b28-weak_current弱电对讲呼叫门禁监控域">B.28 weak_current（弱电：对讲/呼叫/门禁/监控域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：智能化精密仪表(153) / 集中监视与控制装置(42) / 监控显示器材(109) / 门禁系统器材(72) / 安防报警器材(58) / 其他报警器材(34) / 火灾报警、灭火控制品(45) / 电话交换系统(29) / 电话通信设备器材(1) / 扩声、背景音乐系统(125) / 有线电视、卫星电视器材(23) / 广播线路、移动通讯器材(4) / 消防通信广播器材(1) / 探测器(12) / 呼叫探视系统(20) / 护理呼应信号系统(42) / 药品管理系统(7) / 公卫报警系统(10) / 中央监控系统(3) / 数字钟算数字时钟系统(6) / 信息导引及发布系统(56) / 行为管理系统(51) / 机房安全监测系统(8) / 数据机房基础设备(15) / 服务器、电脑等设备(54) / 现场模块(1) / 物联网定位系统(6) / 消毒供应室系统(1)</li>
+</ul>
+<h3 id="b29-decoration装饰材料涂料板材域">B.29 decoration（装饰材料/涂料/板材域） </h3>
+<ul>
+<li><strong>包含原始分类 (行数)</strong>：金属装饰板(151) / 复合装饰板(90) / 硅酸钙装饰板(28) / 石膏装饰板(20) / 矿物棉装饰板(9) / 竹木装饰板(4) / 铝塑复合板(2) / 其他装饰板(6) / 陶瓷地砖(27) / 陶瓷内墙砖(12) / 大理石(25) / 花岗石(15) / 石材加工制品(10) / 人造石板材(20) / 玻璃棉及其制品(18) / 岩棉及其制品(16) / 泡沫橡胶（塑料）及其制品(60) / 木质加工件(59) / 胶合板(11) / 屏风、隔断(25) / 其他装饰线条(43) / 其他装饰材料(23) / 塑料装饰线条(6) / 铝型材(45) / 铝合金龙骨(19) / 轻钢龙骨(88) / 木龙骨(2) / 通用涂料(22) / 建筑涂料(2) / 壁纸(3) / 壁布(2) / 防水卷材(7) / 防水密封材料(2) / 胶粘剂(16) / 胶粘制品(5) / 防静电地板(31) / 塑料地板(10) / 复核地板(3) / 其他地板(4) / 橡胶、塑胶地板(2) / 地毯(1) / 踢脚线(9)</li>
+</ul>
+<h3 id="b30-unknown--generic兜底域">B.30 UNKNOWN / GENERIC（兜底域） </h3>
+<ul>
+<li><strong>包含物料范围</strong>：各种人工费、小样本长尾条目、以及无法自动识别的归档条目路由至 <code>generic</code>。</li>
+</ul>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>

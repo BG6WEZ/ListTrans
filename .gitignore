@@ -9,11 +9,13 @@ env/
 .env
 
 # Database and indexes (as requested: "不要包含任何测试数据和库")
-**/app/materials.db
+**/app/materials.db*
 **/app/vector_cache/
 **/app/uploads/
 **/logs/
 **/.system_generated/
+*.bak
+*_out.txt
 
 # Excel test data and sample files (as requested: "不要包含任何测试数据和库")
 *.xlsx

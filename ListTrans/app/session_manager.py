@@ -65,6 +65,14 @@ def get_draft_session(user_id: int) -> Optional[Dict[str, Any]]:
     conn.close()
     return dict(row) if row else None
 
+def clear_draft_session(user_id: int):
+    """Delete draft session for the user."""
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM work_sessions WHERE user_id = ? AND session_type = 'draft'", (user_id,))
+    conn.commit()
+    conn.close()
+
 def save_named_session(user_id: int, session_name: str, original_filename: str, professional: str, items_json: str) -> str:
     """Save a named session. Creates a new record."""
     conn = get_auth_connection()
@@ -120,6 +128,14 @@ def delete_session_by_id(user_id: int, session_id: str):
     conn = get_auth_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM work_sessions WHERE id = ? AND user_id = ?", (session_id, user_id))
+    conn.commit()
+    conn.close()
+
+def clear_all_runtime_data():
+    """Clear all draft and saved work sessions for system reset."""
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM work_sessions")
     conn.commit()
     conn.close()
 

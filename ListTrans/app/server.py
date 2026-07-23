@@ -5,7 +5,7 @@ import shutil
 import uuid
 import pandas as pd
 import openpyxl
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks, Query
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,8 +14,9 @@ from typing import List, Optional, Dict, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor
 import json
 
-from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_PATH
+from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_PATH, get_db_connection
 from app.preprocessor import extract_params, clean_text, reload_preprocessor_configs, extract_device_name, remove_construction_info
+from app.query_preprocessor import extract_query_params
 from app.vector_index import index_manager
 from app.matcher import match_item, reload_matcher_configs
 from app.report_generator import generate_standard_report
@@ -77,8 +78,8 @@ from app.auth_manager import (
     security_logger
 )
 from app.session_manager import (
-    save_draft_session, get_draft_session, save_named_session, list_saved_sessions,
-    get_session_by_id, update_named_session, delete_session_by_id
+    save_draft_session, get_draft_session, clear_draft_session, save_named_session, list_saved_sessions,
+    get_session_by_id, update_named_session, delete_session_by_id, clear_all_runtime_data
 )
 
 class LoginRequest(BaseModel):
@@ -154,6 +155,11 @@ async def api_get_draft(current_user: dict = Depends(get_current_user)):
         }
     }
 
+@app.delete("/api/session/draft")
+async def api_delete_draft(current_user: dict = Depends(get_current_user)):
+    clear_draft_session(current_user["id"])
+    return {"success": True}
+
 @app.post("/api/session/save")
 async def api_save_session(req: NamedSaveRequest, current_user: dict = Depends(get_current_user)):
     session_id = save_named_session(
@@ -197,6 +203,210 @@ async def api_delete_session(session_id: str, current_user: dict = Depends(get_c
         raise HTTPException(status_code=404, detail="未找到该工作进度记录。")
     delete_session_by_id(current_user["id"], session_id)
     return {"success": True}
+
+@app.get("/api/db/portrait")
+async def api_get_db_portrait():
+    """Calculate and return live Data Portrait metrics for materials.db."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 1. Total items
+        total_items = cursor.execute("SELECT COUNT(*) FROM materials").fetchone()[0]
+        
+        if total_items == 0:
+            conn.close()
+            return {
+                "total_items": 0,
+                "valid_materials": 0,
+                "disabled_count": 0,
+                "category_count": 0,
+                "spec_nonempty_count": 0,
+                "spec_nonempty_rate": 0.0,
+                "model_extracted_count": 0,
+                "model_missing_count": 0,
+                "model_extracted_rate": 0.0,
+                "structured_attr_count": 0,
+                "structured_attr_rate": 0.0,
+                "top_categories": [],
+                "top_units": []
+            }
+            
+        # 2. Disabled / Invalid
+        disabled_count = cursor.execute(
+            "SELECT COUNT(*) FROM materials WHERE code LIKE '%禁用%' OR code LIKE '%停用%' OR code LIKE '%无效%' OR name LIKE '%禁用%' OR name LIKE '%停用%'"
+        ).fetchone()[0]
+        valid_materials = max(0, total_items - disabled_count)
+        
+        # 3. Category count
+        category_count = cursor.execute("SELECT COUNT(DISTINCT category) FROM materials WHERE category IS NOT NULL AND category != ''").fetchone()[0]
+        
+        # 4. Raw specification non-empty count
+        spec_nonempty_count = cursor.execute(
+            "SELECT COUNT(*) FROM materials WHERE specification IS NOT NULL AND TRIM(specification) != ''"
+        ).fetchone()[0]
+        spec_nonempty_rate = round((spec_nonempty_count / total_items) * 100, 2)
+        
+        # 5. Extracted JSON Model / Attrs stats
+        rows = cursor.execute("SELECT parsed_params FROM materials").fetchall()
+        model_extracted_count = 0
+        structured_attr_count = 0
+        
+        for r in rows:
+            p_json = r[0]
+            if p_json:
+                try:
+                    p = json.loads(p_json)
+                    if p.get("model"):
+                        model_extracted_count += 1
+                    attrs = p.get("attrs", {})
+                    if isinstance(attrs, dict) and len([k for k, v in attrs.items() if v]) >= 2:
+                        structured_attr_count += 1
+                except Exception:
+                    pass
+                    
+        model_missing_count = total_items - model_extracted_count
+        model_extracted_rate = round((model_extracted_count / total_items) * 100, 2)
+        structured_attr_rate = round((structured_attr_count / total_items) * 100, 2)
+        
+        # 6. Top 5 Categories
+        top_cats = cursor.execute(
+            "SELECT category, COUNT(*) as cnt FROM materials WHERE category IS NOT NULL AND category != '' GROUP BY category ORDER BY cnt DESC LIMIT 5"
+        ).fetchall()
+        top_categories = [{"category": row[0], "count": row[1], "percent": round((row[1]/total_items)*100, 1)} for row in top_cats]
+        
+        # 7. Top 5 Units
+        top_u = cursor.execute(
+            "SELECT unit, COUNT(*) as cnt FROM materials WHERE unit IS NOT NULL AND unit != '' GROUP BY unit ORDER BY cnt DESC LIMIT 5"
+        ).fetchall()
+        top_units = [{"unit": row[0], "count": row[1], "percent": round((row[1]/total_items)*100, 1)} for row in top_u]
+        
+        conn.close()
+        
+        return {
+            "total_items": total_items,
+            "valid_materials": valid_materials,
+            "disabled_count": disabled_count,
+            "category_count": category_count,
+            "spec_nonempty_count": spec_nonempty_count,
+            "spec_nonempty_rate": spec_nonempty_rate,
+            "model_extracted_count": model_extracted_count,
+            "model_missing_count": model_missing_count,
+            "model_extracted_rate": model_extracted_rate,
+            "structured_attr_count": structured_attr_count,
+            "structured_attr_rate": structured_attr_rate,
+            "top_categories": top_categories,
+            "top_units": top_units
+        }
+    except Exception as e:
+        logger.error(f"Error computing data portrait: {e}")
+        raise HTTPException(status_code=500, detail=f"生成物料库数字画像失败: {str(e)}")
+
+@app.delete("/api/system/reset")
+async def api_system_reset(current_user: dict = Depends(get_current_user)):
+    """Reset system runtime data (clear sessions, uploads, and feedback log)."""
+    try:
+        # 1. Clear work_sessions database table
+        clear_all_runtime_data()
+        
+        # 2. Clear uploaded files in UPLOAD_DIR
+        if os.path.exists(UPLOAD_DIR):
+            for filename in os.listdir(UPLOAD_DIR):
+                filepath = os.path.join(UPLOAD_DIR, filename)
+                if os.path.isfile(filepath):
+                    try:
+                        os.remove(filepath)
+                    except Exception as e:
+                        logger.error(f"Failed to delete upload file {filepath}: {e}")
+                        
+        # 3. Clear binding_feedback.json
+        if os.path.exists(BINDING_FEEDBACK_FILE):
+            try:
+                with open(BINDING_FEEDBACK_FILE, "w", encoding="utf-8") as f:
+                    json.dump({}, f)
+            except Exception as e:
+                logger.error(f"Failed to reset binding feedback file: {e}")
+                
+        security_logger.info(f"System runtime data reset executed by user '{current_user.get('username')}'.")
+        return {"success": True, "message": "系统运行数据（会话草稿、上传临时文件及反馈日志）已全面清理恢复干净状态！"}
+    except Exception as e:
+        logger.error(f"Error executing system reset: {e}")
+        raise HTTPException(status_code=500, detail=f"清理系统数据失败: {str(e)}")
+
+@app.get("/api/db/materials")
+async def api_get_db_materials(
+    keyword: Optional[str] = None,
+    category: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100)
+):
+    """Query and search master materials with pagination."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        where_clauses = []
+        params = []
+        
+        if category and category.strip():
+            where_clauses.append("category = ?")
+            params.append(category.strip())
+            
+        if keyword and keyword.strip():
+            kw = f"%{keyword.strip()}%"
+            where_clauses.append("(code LIKE ? OR name LIKE ? OR specification LIKE ? OR parsed_params LIKE ?)")
+            params.extend([kw, kw, kw, kw])
+            
+        where_str = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+        
+        # Count total matching
+        count_sql = f"SELECT COUNT(*) FROM materials{where_str}"
+        total_count = cursor.execute(count_sql, params).fetchone()[0]
+        
+        # Fetch paginated items
+        offset = (page - 1) * page_size
+        data_sql = f"SELECT code, name, specification, unit, category, brand, parsed_params FROM materials{where_str} ORDER BY rowid ASC LIMIT ? OFFSET ?"
+        data_params = params + [page_size, offset]
+        rows = cursor.execute(data_sql, data_params).fetchall()
+        
+        items = []
+        for r in rows:
+            parsed = {}
+            if r[6]:
+                try:
+                    parsed = json.loads(r[6])
+                except Exception:
+                    pass
+            items.append({
+                "code": r[0] or "",
+                "name": r[1] or "",
+                "specification": r[2] or "",
+                "unit": r[3] or "",
+                "category": r[4] or "",
+                "brand": r[5] or "",
+                "model": parsed.get("model", ""),
+                "attrs": parsed.get("attrs", {})
+            })
+            
+        conn.close()
+        
+        # Get list of unique categories for frontend dropdown filter
+        conn_cat = get_db_connection()
+        cat_rows = conn_cat.cursor().execute("SELECT DISTINCT category FROM materials WHERE category IS NOT NULL AND category != '' ORDER BY category ASC").fetchall()
+        all_categories = [c[0] for c in cat_rows]
+        conn_cat.close()
+        
+        return {
+            "total": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": max(1, (total_count + page_size - 1) // page_size),
+            "categories": all_categories,
+            "items": items
+        }
+    except Exception as e:
+        logger.error(f"Error querying materials: {e}")
+        raise HTTPException(status_code=500, detail=f"查询物料表失败: {str(e)}")
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -527,13 +737,13 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             item = p["item"]
             query_info = {
                 "name": p["real_name"],
-                "specification": item["specification"],
-                "category": p["real_name"],
+                "specification": p["clean_spec"],
+                "category": item.get("category") or item.get("professional") or p["real_name"],
                 "brand": item["brand"],
                 "professional": item.get("professional", "暖通")
             }
             # Pre-parse specs with professional category hint
-            query_info["parsed_spec"] = extract_params(item["specification"], query_info["professional"])
+            query_info["parsed_spec"] = extract_query_params(item.get("name", ""), item["specification"], query_info["professional"])
             
             q_vector = query_vectors[i] if query_vectors is not None else None
             match_jobs.append((query_info, q_vector, item))
@@ -1111,6 +1321,33 @@ async def api_db_reparse(background_tasks: BackgroundTasks, req: Optional[Repars
     background_tasks.add_task(run_reparse_and_log)
     return JSONResponse(content={"success": True, "message": "Reparse task started in background."})
 
+
+class LLMToggleRequest(BaseModel):
+    enabled: bool
+
+@app.get("/api/llm/status", dependencies=[Depends(require_manager)])
+async def api_llm_status():
+    """Get Tongyi Qwen LLM integration stats and circuit status."""
+    from app.llm_client import llm_client
+    try:
+        return JSONResponse(content=llm_client.get_stats())
+    except Exception as e:
+        logger.error(f"Error querying LLM status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/llm/toggle", dependencies=[Depends(require_director)])
+async def api_llm_toggle(req: LLMToggleRequest):
+    """Enable or disable Tongyi Qwen LLM integration dynamically."""
+    from app.llm_client import llm_client
+    try:
+        os.environ["LLM_ENABLED"] = "true" if req.enabled else "false"
+        logger.info(f"LLM integration has been dynamically {'enabled' if req.enabled else 'disabled'}.")
+        return JSONResponse(content={"success": True, "llm_enabled": llm_client.is_enabled()})
+    except Exception as e:
+        logger.error(f"Error toggling LLM integration: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Mount web static directory
 web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
 os.makedirs(web_dir, exist_ok=True)
@@ -1118,4 +1355,6 @@ app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run(app, host=host, port=port)

@@ -1,0 +1,10 @@
+{
+  "qwen_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "model_matching": "qwen3.7-plus",
+  "model_extracting": "qwen-turbo",
+  "l2_score_min": 60.0,
+  "l2_score_max": 85.0,
+  "timeout_seconds": 30.0,
+  "max_consecutive_failures": 5,
+  "cooldown_seconds": 600
+}

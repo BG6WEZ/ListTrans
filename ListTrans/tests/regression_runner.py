@@ -9,6 +9,7 @@ sys.path.append(r"c:\Users\wangd\project\ListTrans\ListTrans")
 
 from app.matcher import match_item
 from app.preprocessor import extract_params
+from app.query_preprocessor import extract_query_params
 
 def run_regression():
     from app.db_manager import init_db
@@ -68,7 +69,7 @@ def run_regression():
             
         # 2. Evaluate Must Attribute Extraction
         try:
-            parsed = extract_params(spec, cat)
+            parsed = extract_query_params(name, spec, cat)
             attrs = parsed.get("attrs", {})
             
             for k, expected_val in gt_must.items():

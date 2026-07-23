@@ -394,6 +394,26 @@
     "ahu": {
         "must": [
             {
+                "key": "机组类型",
+                "type": "enum",
+                "options": [
+                    "AHU",
+                    "MAU",
+                    "PAU",
+                    "RAU",
+                    "FAU",
+                    "FCU",
+                    "RCU",
+                    "DOAS",
+                    "VAV",
+                    "RTU",
+                    "HRU",
+                    "ERU",
+                    "HPU",
+                    "FPU"
+                ]
+            },
+            {
                 "key": "风量",
                 "type": "float",
                 "unit": "m³/h",
@@ -449,15 +469,18 @@
             "组合式"
         ],
         "weights": {
-            "风量": 0.25,
+            "机组类型": 0.25,
+            "风量": 0.20,
             "机外余压": 0.15,
             "过滤等级": 0.15,
             "制冷量": 0.15,
-            "flags": 0.15,
-            "其他": 0.15
+            "flags": 0.10
         },
         "unit_class": "quantity",
         "hard_gates": {
+            "conflict_caps": {
+                "机组类型": 40
+            },
             "deviation_caps": {
                 "风量": {
                     "ratio": 0.5,

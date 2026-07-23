@@ -4,65 +4,32 @@
 
 ---
 
-## 🌟 V0.0.5 核心特性
+## 🌟 V0.0.6 核心特性 (最新升级)
+
+> **V0.0.6 是"大模型混合增强 + 询价预处理清洗"的重要版本**。在 V0.0.5 30域 Schema 与硬约束打分体系之上，本版集成了通义千问 LLM 混合增强匹配与精准 Query 预处理清洗分片引擎，进一步提升复杂、非标及施工描述干扰清单的匹配召回率与准确度。
+
+### V0.0.6 新增能力速览
+
+1. **Query 询价描述预处理与杂质噪声切分 (`query_preprocessor.py`)**
+   * **文本分片**：自动切分物料描述主块与“工作内容/施工部位/调试/全费用”等施工说明噪声块，消除冗余干扰。
+   * **二级键值解析**：精准提取 `1.名称` / `2.规格型号` 等标号键值结构。
+   * **HVAC 专有名词映射**：涵盖 MAU、PAU、RAU、FAU、FCU、RCU、DOAS、VAV、RTU、HRU、ERU、HPU、FPU、AHU 等 14 类空调机组的专业中英文映射识别。
+2. **通义千问 LLM 混合增强引擎 (`llm_client.py`)**
+   * 支持通过 DashScope API 接入 `qwen-plus` / `qwen-turbo` 大模型。
+   * **智能缓存与防刷**：内置 SQLite `llm_cache` 结果持久化缓存，支持信号量并发控制 (Max 3) 与熔断降级 (Circuit Breaker)。
+   * **动态控制 API**：提供 `/api/llm/status` 实时监控接口与 `/api/llm/toggle` 动态开关接口。
+3. **数据管理与系统重置 API 增强**
+   * `GET /api/db/materials`：物料标准库多条件与分页查询接口。
+   * `DELETE /api/system/reset`：一键清空系统运行数据（草稿会话、临时上传文件及绑定日志）。
+4. **离线治理工具与自动化测试集**
+   * `scripts/batch_llm_structure.py`：离线大模型批处理物料结构化工具。
+   * `tests/test_query_preprocessor.py` 与 `tests/test_llm_integration.py` 单元测试保护。
+
+---
+
+## 🌟 V0.0.5 历史特性
 
 > **V0.0.5 是"结构化改造 + 可回归度量"的关键版本**。在 V0.0.4 安全与会话体系之上，本版完成了方案 [final_structuring_master_plan.md](./doc/final_structuring_master_plan.md) 提出的 30 域结构化 Schema、配置驱动 Hard Gates、单向缺失惩罚、异步局部重算、金标回归、以及利川清单专项优化。金标 326 条实测 Top-1 **96.32%** / Top-3 **97.55%** / Must **100%**。
-
-### V0.0.5 新增能力速览
-
-1. **30 域结构化 Schema 与配置驱动的域路由**
-   * 385 品类折叠至 30 域，全部由 [config/domain_schema.json](./config/domain_schema.json)、[config/category_domain_map.json](./config/category_domain_map.json) 等 6 份 JSON 字典驱动。
-   * `Category Overwrite` 强特征覆写；电缆二级分流（wire / cable_power / cable_control）；`domain_router` 双端一致。
-2. **配置化 Hard Gates + 单向非对称缺失惩罚**
-   * `conflict_caps` / `deviation_caps` / `ratio_penalties` 从 `domain_schema.json.hard_gates` 动态读取。
-   * `has_conflict` 采用相对公差（`diff_ratio > tolerance`）判定，替代旧的绝对差硬编码。
-   * Must 缺失 -0.15、Should 缺失 -0.05，仅在查询侧有值而候选侧缺失时扣分。
-3. **行级 `parsed_schema_version` + 异步局部重算**
-   * `materials` 主表新增 `parsed_schema_version INTEGER DEFAULT 0` 行级列，`init_db` 支持 `ALTER TABLE` 自愈迁移。
-   * `POST /api/db/reparse` 支持按 `code` / `category` / `parsed_schema_version < 2` 三种粒度局部重算。
-   * 全量重算走"临时表 + Exclusive Lock + 原子改名 + FAISS 热重载"路径。
-4. **`/api/db/schema/stats` 域统计接口**
-   * 返回每个域的物料数量、Must 字段填充率，作为 Phase 5 前端仪表盘的数据源。
-5. **金标回归与基线度量**
-   * `tests/fixtures/ground_truth_500.json` 326 条金标（146 条含 `must_attrs`）。
-   * `python tests/regression_runner.py` 一键跑分并写 `doc/baseline_metrics_v0.0.5.md`。
-6. **弱电/自控专业专项优化**
-   * FTS 引入同义词映射（"网线↔双绞线↔对线"、"配电箱↔配电柜"等）。
-   * `generic` 域强制降级到 `scene_c`（文本+向量主导），消除通用件评分塌陷。
-   * "材质、规格：PSP钢塑复合管" 类无表头文本可直抽设备名。
-
-### V0.0.4 已有能力（保留）
-
-1. **双路混合召回引擎**
-   * **关键词召回**：基于 SQLite FTS5 的中文分词优化（单字空格分词化），保障中文工业型号与规格的精确、高召回检索。
-   * **语义向量召回**：使用 `paraphrase-multilingual-MiniLM-L12-v2` 预训练模型（384维）提取文本特征。
-   * **双轨高可用**：优先使用 `faiss-cpu` 索引检索，若环境兼容性问题导致加载失败，自动无缝降级为 `Numpy` 矩阵相似度检索。
-
-2. **多专业自适应打分与阶梯公差过滤**
-   * 支持针对暖通、电气、给排水等多专业的核心参数（风量、功率、DN管径等）正则提取。
-   * 自适应评估场景权重（含型号/无型号/纯文本），套用对应比重进行综合打分。
-   * 采用阶梯公差计分机制（在允许偏离度内得满分，超出线性衰减，防止特殊非标物料遗漏）。
-
-3. **[NEW] 用户身份认证与 RBAC 动态权限管理 (V0.0.4)**
-   * **JWT 安全验证**：采用基于 Token 的无状态鉴权。密码使用原生 `bcrypt` 模块进行加盐哈希存储。
-   * **精细化角色控制**：
-     * `employee` (员工)：使用工作台进行匹配、校对和导出。
-     * `manager` (经理)：查看工作台，只读查看系统配置词典。
-     * `director` (总监)：具有经理权限，且可在线上传、替换/增量更新物料库。
-     * `admin` (管理员)：完整权限，包括增加、修改、停用系统账号，分配角色权限。
-   * **动态 UI 渲染**：前端全局 fetch 钩子自动注入 Bearer Token，并在接收到 `401` 时跳转重定向；前端自动根据登录账号角色隐藏无权查看的功能卡片。
-
-4. **[NEW] 双轨工作进度暂存与多版本保存 (V0.0.4)**
-   * **草稿静默自动暂存**：用户编辑时，前端每 3 分钟自动保存一次 items 快照。下次登录时若检测到草稿，系统会主动提示“是否恢复上次未完的编辑工作”。
-   * **手动多版本备份**：支持在工作台任意阶段命名保存（支持覆盖已存版本），可在【历史记录】中随时一键恢复或永久删除。历史记录按登录账号严格进行物理隔离。
-
-5. **[NEW] 点击劫持防御与暴力破解锁死 (V0.0.4)**
-   * **登录限速防御**：限制同一 IP 或同一用户名在 5 分钟内最多尝试 5 次登录，超过则自动锁定该 IP/用户名 15 分钟，所有安全事件写入独立日志 `logs/security.log`。
-   * **安全响应头注入**：服务端强制注入 `X-Content-Type-Options: nosniff`、`X-Frame-Options: DENY` 等安全防护响应头。
-
-6. **非破坏性 Excel 导出回写**
-   * **无损写入**：保留其他专业的数据行、顶部表头、以及底部的合计公式行，避免覆盖历史数据。
-   * 完整套用模板行样式，自动根据匹配物料编码填充历史库单价，并对 A 列序号重新进行全局连续排版。
 
 ---
 
@@ -71,9 +38,9 @@
 * **前端**：HTML5 + Vanilla CSS + Vanilla JavaScript (纯原生，带中央 Token 拦截钩子)
 * **后端**：FastAPI + Uvicorn + Pydantic V2 + ThreadPoolExecutor
 * **数据库**：双 `SQLite 3` 独立数据库文件（内置 FTS5 全文索引）
-  * `app/materials.db`：保存全局企业标准物料明细及全文倒排检索。
+  * `app/materials.db`：保存全局企业标准物料明细、LLM 缓存及全文倒排检索。
   * `app/auth.db`：保存用户账号、RBAC 角色权限体系，以及自动暂存草稿和历史命名进度。
-* **计算与自然语言处理**：SentenceTransformers (PyTorch-based) + Numpy + FAISS-CPU (可选)
+* **计算与自然语言处理**：SentenceTransformers (PyTorch-based) + Numpy + FAISS-CPU (可选) + 通义千问 LLM API Client
 * **Excel 解析**：openpyxl + pandas
 
 ---
@@ -84,7 +51,7 @@
 
 若在 Windows 下直接运行：
 1. 确保安装了 Python 3.9 ~ 3.11 版本。
-2. 复制配置模板：将根目录下的 `.env.example` 复制为 `.env` 并按需调整密钥和初始管理员密码。
+2. 复制配置模板：将根目录下的 `.env.example` 复制为 `.env` 并按需调整密钥和初始管理员密码（大模型接入需配置 `DASHSCOPE_API_KEY`）。
 3. 安装依赖项：
    ```bash
    pip install -r requirements.txt
@@ -108,15 +75,19 @@
 
 ## 🧪 自动化测试
 
-项目提供了单元测试及 API 测试方案。
+项目提供了单元测试及基准回归测试方案。
 在项目根目录下执行以下命令运行测试：
 ```bash
-python -m unittest tests/test_auto_binding.py
+# 运行单元测试
+python -m pytest tests/
+
+# 运行金标基准回归测试
+python tests/regression_runner.py
 ```
 
 ---
 
-## 📁 目录结构 (V0.0.5)
+## 📁 目录结构 (V0.0.6)
 
 ```
 ListTrans/
@@ -124,22 +95,39 @@ ListTrans/
 │   ├── admin_api.py          # 管理员用户管理 API 路由
 │   ├── auth_manager.py       # 登录、bcrypt 加密、JWT 签发及防爆破锁定
 │   ├── auth_middleware.py    # API 鉴权拦截器与角色限制
-│   ├── session_manager.py    # 自动草稿与历史版本保存数据库逻辑
-│   ├── server.py             # FastAPI 服务主入口与安全响应头
-│   ├── report_generator.py   # Excel 报表精准样式复制回写模块
 │   ├── db_manager.py         # SQLite 标准物料库导入及 FTS5 全文索引
-│   ├── preprocessor.py       # 文本清洗与参数提取
+│   ├── domain_extractors.py  # 领域特征抽取器
+│   ├── domain_router.py     # 30 域路由映射引擎
+│   ├── llm_client.py         # 通义千问 LLM 客户端封装与 caching 熔断机制
 │   ├── matcher.py            # 混合打分与匹配决策引擎
+│   ├── preprocessor.py       # 文本清洗与参数提取
+│   ├── query_preprocessor.py # 询价描述预处理与施工杂质分片提取
+│   ├── report_generator.py   # Excel 报表精准样式复制回写模块
+│   ├── server.py             # FastAPI 服务主入口与安全响应头
+│   ├── session_manager.py    # 自动草稿与历史版本保存数据库逻辑
 │   ├── binding_feedback.json # 用户历史绑定反馈记录
 │   ├── auth.db               # [运行时自动生成] 用户及工作会话数据库
-│   └── materials.db          # [运行时自动生成] 标准企业物料明细库
+│   └── materials.db          # [运行时自动生成] 标准企业物料明细库 (含 llm_cache)
+├── config/                   # 系统配置文件与字典
+│   ├── llm_config.json       # LLM 评分与抽取阈值配置
+│   ├── llm_prompts.json      # LLM 提示词模板
+│   ├── domain_schema.json    # 30 域 Schema 定义
+│   └── alias_dict.json       # 同义词别名字典
 ├── doc/                      # 方案设计与技术规范文档
-│   ├── technical_solution.md # 系统技术方案说明书 (V0.0.5)
+│   ├── technical_solution.md # 系统技术方案说明书 (V0.0.6)
+│   ├── Data Portrait.md      # 物料库数字画像分析报告
+│   ├── baseline_metrics_v0.0.5.md # 基准回归评测数据
 │   └── sample/               # 模板文件样例（原始清单、标准格式、物料明细）
 ├── logs/                     # 运行及安全日志归档文件夹
 │   ├── app_runtime.log       # 系统运行业务日志
 │   └── security.log          # 登录防爆破与敏感操作审计日志
-├── tests/                    # 单元测试模块
+├── scripts/                  # 批处理与数据治理脚本
+│   ├── batch_llm_structure.py# 大模型批处理物料库结构化工具
+│   └── export_structured_db.py # 结构化物料库导出工具
+├── tests/                    # 单元测试与基准回归模块
+│   ├── test_llm_integration.py
+│   ├── test_query_preprocessor.py
+│   └── regression_runner.py
 ├── web/                      # 前端网页静态资源
 │   ├── index.html            # 智能匹配工作台主页
 │   ├── index.css             # 交互设计与高档玻璃微光样式

@@ -27,9 +27,10 @@
                 </div>
             </div>
             
-            <div class="nav-links" style="display: flex; gap: 20px; margin-left: 40px; margin-right: auto;">
-                <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
-                <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
+            <div class="nav-links" style="display: flex; gap: 16px; margin-left: 30px; margin-right: auto;">
+                <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
+                <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全局物料明细库</button>
+                <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
             </div>
             
             <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
@@ -38,6 +39,9 @@
                 </button>
                 <button class="btn btn-info" id="save-trigger" style="display: none; background-color: #0284c7; border-color: #0284c7; color: white;">
                     <i class="fa-solid fa-floppy-disk"></i> 暂存进度
+                </button>
+                <button class="btn btn-warning" id="end-task-trigger" style="display: none; background-color: #d97706; border-color: #b45309; color: white;">
+                    <i class="fa-solid fa-flag-checkered"></i> 结束任务
                 </button>
                 <div class="upload-btn-wrapper">
                     <button class="btn btn-primary" id="upload-trigger">
@@ -373,6 +377,9 @@
                         <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
                             <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-brain"></i> 人工校对样本自学习优化建议</span>
                         </div>
+                        <div style="background: rgba(59, 130, 246, 0.08); border-left: 3px solid var(--color-primary); padding: 10px 14px; border-radius: 4px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 8px;">
+                            💡 <strong>自学习优化说明：</strong>系统后台会实时跟踪预算员在工作台上的手动修正记录。当同一非标词或错别字被多次手动修正时，系统会自动提炼出优化建议。点击【采纳为别名】后，该词对将永久写入别名库，未来上传的清单即可 100% 自动精确纠错！
+                        </div>
                         <div style="max-height: 250px; overflow-y: auto;">
                            <table class="search-table" style="width: 100%;">
                                <thead>
@@ -397,42 +404,16 @@
                         <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
                             <span class="section-tag" style="background-color: rgba(168, 85, 247, 0.15); color: #c084fc;"><i class="fa-solid fa-robot"></i> 智能多物料自动绑定规则统计学习与管理</span>
                         </div>
+                        <div style="background: rgba(168, 85, 247, 0.08); border-left: 3px solid #c084fc; padding: 10px 14px; border-radius: 4px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 4px;">
+                            🤖 <strong>规则学习说明：</strong>工程清单中部分项目（如「防滑地砖」）往往包含瓷砖本体、美缝剂、干硬性水泥砂浆等多主辅材组合。当人工完成多次多物料绑定后，系统会自动统计置信频次并在此推荐规则。点击【采纳规则】后，未来遇到相同名称的清单行，系统将 100% 自动一次性勾选并完成多物料组合绑定！
+                        </div>
                         <div class="sub-layout-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                             <!-- Left Sub-card: Suggestions -->
                             <div style="display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--border-color); padding-right: 16px;">
                                 <h4 style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary);"><i class="fa-solid fa-graduation-cap"></i> 系统统计学习到的绑定推荐 (点击采纳)</h4>
                                 <div style="max-height: 250px; overflow-y: auto; margin-top: 8px;">
                                     <table class="search-table" style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th>清单项目名称</th>
-                                                <th>推荐绑定物料</th>
-                                                <th width="70">频次</th>
-                                                <th width="70">操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="binding-suggestions-tbody">
-                                            <tr>
-                                                <td colspan="4" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无自学习建议</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- Right Sub-card: Confirmed Rules -->
-                            <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 8px;">
-                                <h4 style="font-size: 13px; font-weight: 600; color: var(--color-text-secondary);"><i class="fa-solid fa-square-poll-horizontal"></i> 当前已启用的自动绑定推荐规则</h4>
-                                <div style="max-height: 250px; overflow-y: auto; margin-top: 8px;">
-                                    <table class="search-table" style="width: 100%;">
-                                        <thead>
-                                            <tr>
-                                                <th>清单项目名称</th>
-                                                <th>自动绑定推荐物料</th>
-                                                <th width="70">操作</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="binding-rules-tbody">
-                                            <tr>
+                                                                       <tr>
                                                 <td colspan="3" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无启用规则</td>
                                             </tr>
                                         </tbody>
@@ -442,50 +423,217 @@
                         </div>
                     </div>
 
-                    <!-- Card 6: Global Material DB Upload & Metadata -->
-                    <div class="glass-card section-card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px;">
-                        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                            <span class="section-tag" style="background-color: var(--color-primary-glow); color: var(--color-primary);"><i class="fa-solid fa-database"></i> 全局物料明细库管理</span>
-                        </div>
-                        <div class="db-meta-info" style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--color-text-secondary); background: rgba(255,255,255,0.02); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                            <div><strong>物料总行数：</strong><span id="db-meta-total-count" style="color: var(--color-text-primary); font-weight: 600;">-</span> 行</div>
-                            <div><strong>入库行数：</strong><span id="db-meta-imported-count" style="color: #4ade80; font-weight: 600;">-</span> 行</div>
-                            <div><strong>禁用行数：</strong><span id="db-meta-disabled-count" style="color: #f87171; font-weight: 600;">-</span> 行</div>
-                            <div style="display: none;"><span id="db-meta-row-count">-</span></div>
-                            <div><strong>最近更新日期：</strong><span id="db-meta-last-date" style="color: var(--color-text-primary);">-</span></div>
-                            <div><strong>最近更新文件：</strong><span id="db-meta-filename" style="color: var(--color-text-primary); font-family: monospace;">-</span></div>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                            <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
-                                <span style="font-weight: 500;">导入模式：</span>
-                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                    <input type="radio" name="db-import-mode" value="replace" checked style="cursor: pointer;"> 全量替换
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                                    <input type="radio" name="db-import-mode" value="append" style="cursor: pointer;"> 增量添加
-                                </label>
-                            </div>
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <input type="file" id="db-upload-input" style="display: none;" accept=".xlsx">
-                                <button class="btn btn-primary" id="btn-select-db-file" style="flex: 1;"><i class="fa-solid fa-file-excel"></i> 选择物料Excel库</button>
-                                <button class="btn btn-success" id="btn-start-db-import" style="flex: 1;" disabled><i class="fa-solid fa-upload"></i> 开始导入</button>
-                            </div>
-                            <div id="db-selected-file-label" style="font-size: 11.5px; color: var(--color-text-muted); text-align: center; font-family: monospace; min-height: 18px;">未选择文件</div>
-                        </div>
-                    </div>
-
-                    <!-- Card 7: System Runtime Logs -->
-                    <div class="glass-card section-card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px;">
+                    <!-- Card 6: System Runtime Logs -->
+                    <div class="glass-card section-card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; grid-column: span 2;">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                            <span class="section-tag" style="background-color: var(--color-primary-glow); color: var(--color-primary);"><i class="fa-solid fa-list-check"></i> 系统运行日志</span>
+                            <span class="section-tag" style="background-color: var(--color-primary-glow); color: var(--color-primary);"><i class="fa-solid fa-list-check"></i> 系统运行日志追踪</span>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <label style="font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--color-text-muted);">
                                     <input type="checkbox" id="auto-refresh-logs" checked> 自动刷新
                                 </label>
-                                <button class="btn btn-primary" id="btn-refresh-logs" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-arrows-rotate"></i> 刷新</button>
+                                <button class="btn btn-primary" id="btn-refresh-logs" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-arrows-rotate"></i> 刷新日志</button>
                             </div>
                         </div>
                         <pre id="log-console" style="margin: 0; background: #05070c; color: #a3b8cc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; text-align: left;"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Materials Dashboard (Dedicated Page) -->
+            <div class="workbench" id="materials-dashboard" style="display: none; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; flex-direction: column; gap: 24px; overflow-y: auto;">
+                <!-- Header Banner -->
+                <div class="glass-card" style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <div>
+                        <h2 style="font-size: 20px; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 10px;">
+                            <i class="fa-solid fa-boxes-stacked text-primary"></i> 全局标准物料明细库与数字画像
+                        </h2>
+                        <p style="font-size: 13px; color: var(--color-text-secondary); margin-top: 4px;">
+                            包含 4.5 万+ 标准物料库的在线维护、全量/增量导入、系统运行数据重置与实时数据结构化画像分析
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" id="btn-refresh-portrait" style="background: rgba(59, 130, 246, 0.15); border-color: var(--color-primary); color: var(--color-primary);">
+                            <i class="fa-solid fa-arrows-rotate"></i> 刷新数字画像
+                        </button>
+                        <button class="btn btn-danger" id="btn-system-reset" style="background-color: #dc2626; border-color: #dc2626; color: white;">
+                            <i class="fa-solid fa-broom"></i> 一键清理系统运行数据
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Top Metric Cards Grid -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">物料库总行数</span>
+                        <div style="font-size: 26px; font-weight: 700; color: #3b82f6;" id="portrait-total-items">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">有效物料量: <strong id="portrait-valid-items" style="color: #4ade80;">-</strong></div>
+                    </div>
+                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">专业分类总数</span>
+                        <div style="font-size: 26px; font-weight: 700; color: #a855f7;" id="portrait-cat-count">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">涵盖暖通、强电、给排水等</div>
+                    </div>
+                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">原始规格非空率</span>
+                        <div style="font-size: 26px; font-weight: 700; color: #f59e0b;" id="portrait-spec-rate">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">Excel 规格列非空数: <span id="portrait-spec-count">-</span></div>
+                    </div>
+                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">标准型号 (Model) 提取率</span>
+                        <div style="font-size: 26px; font-weight: 700; color: #ef4444;" id="portrait-model-rate">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">缺失型号数: <strong id="portrait-model-missing" style="color: #f87171;">-</strong> (大模型治理主战场)</div>
+                    </div>
+                </div>
+
+                <!-- Middle Content Grid: Maintenance & Structural Contrast -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Left Card: Material Library Maintenance & Import -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-cloud-arrow-up text-primary"></i> 物料明细库在线导入与更新
+                        </h3>
+                        <div class="db-meta-info" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--color-text-secondary); background: rgba(255,255,255,0.02); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <div><strong>物料库当前总行数：</strong><span id="db-meta-total-count" style="color: var(--color-text-primary); font-weight: 600;">-</span> 行</div>
+                            <div><strong>有效入库行数：</strong><span id="db-meta-imported-count" style="color: #4ade80; font-weight: 600;">-</span> 行</div>
+                            <div><strong>禁用/停用行数：</strong><span id="db-meta-disabled-count" style="color: #f87171; font-weight: 600;">-</span> 行</div>
+                            <div><strong>最近更新时间：</strong><span id="db-meta-last-date" style="color: var(--color-text-primary);">-</span></div>
+                            <div><strong>最近更新文件名：</strong><span id="db-meta-filename" style="color: var(--color-text-primary); font-family: monospace;">-</span></div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 4px;">
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
+                                <span style="font-weight: 500;">导入更新模式：</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="radio" name="db-import-mode" value="replace" checked style="cursor: pointer;"> 全量覆盖 (Rebuild)
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <input type="radio" name="db-import-mode" value="append" style="cursor: pointer;"> 增量追加 (Append)
+                                </label>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="file" id="db-upload-input" style="display: none;" accept=".xlsx">
+                                <button class="btn btn-primary" id="btn-select-db-file" style="flex: 1; padding: 10px;"><i class="fa-solid fa-file-excel"></i> 选择物料 Excel 库</button>
+                                <button class="btn btn-success" id="btn-start-db-import" style="flex: 1; padding: 10px;" disabled><i class="fa-solid fa-upload"></i> 开始导入并重建向量</button>
+                            </div>
+                            <div id="db-selected-file-label" style="font-size: 12px; color: var(--color-text-muted); text-align: center; font-family: monospace;">未选择文件</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Card: Structural Analysis Contrast -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-chart-pie text-primary"></i> 物料结构化质量对比分析
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Bar 1: Raw Spec -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                                    <span>Excel 原始【规格/型号】列非空率</span>
+                                    <strong style="color: #f59e0b;" id="bar-raw-spec-text">99.96%</strong>
+                                </div>
+                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                    <div id="bar-raw-spec" style="width: 99.96%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 5px;"></div>
+                                </div>
+                                <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">单元格未空着，但大多填的是非标段落文本</span>
+                            </div>
+                            <!-- Bar 2: Extracted Model -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                                    <span>结构化标准型号 (Model) 提取率</span>
+                                    <strong style="color: #ef4444;" id="bar-model-text">10.85%</strong>
+                                </div>
+                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                    <div id="bar-model" style="width: 10.85%; height: 100%; background: linear-gradient(90deg, #ef4444, #f87171); border-radius: 5px;"></div>
+                                </div>
+                                <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">传统正则无法从段落提取标准型号，需大模型批处理治理</span>
+                            </div>
+                            <!-- Bar 3: Multi-attribute Structuring -->
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                                    <span>多属性物理参数结构化率 (≥2 项)</span>
+                                    <strong style="color: #4ade80;" id="bar-attr-text">85.32%</strong>
+                                </div>
+                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                    <div id="bar-attr" style="width: 85.32%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 5px;"></div>
+                                </div>
+                                <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">已提取风量、管径、功率、材质等有效技术参数</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Content Grid: Category & Unit Distribution -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Top 5 Categories -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-list-ol text-primary"></i> 核心品类分布 Top 5
+                        </h3>
+                        <div id="portrait-categories-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+                    <!-- Top 5 Units -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+                        <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-scale-balanced text-primary"></i> 常用计量单位分布 Top 5
+                        </h3>
+                        <div id="portrait-units-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Content: Master Material Table Search & Browsing -->
+                <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-table-list text-primary"></i> 全局标准物料在线明细表
+                            <span style="font-size: 12px; font-weight: normal; color: var(--color-text-muted);" id="db-table-total-label">(共 0 条记录)</span>
+                        </h3>
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <!-- Category Filter Dropdown -->
+                            <select id="db-category-select" style="padding: 8px 12px; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--color-text-primary); font-size: 13px;">
+                                <option value="">全部专业分类</option>
+                            </select>
+                            <!-- Search Input -->
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <input type="text" id="db-search-input" style="padding: 8px 12px; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--color-text-primary); font-size: 13px; width: 260px;" placeholder="搜索编码、名称、规格型号...">
+                                <button class="btn btn-primary" id="db-search-btn" style="padding: 8px 14px;"><i class="fa-solid fa-magnifying-glass"></i> 查询</button>
+                                <button class="btn btn-secondary" id="db-search-reset-btn" style="padding: 8px 12px;"><i class="fa-solid fa-rotate-left"></i> 重置</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Material Data Table -->
+                    <div style="max-height: 500px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                        <table class="search-table" style="width: 100%; font-size: 13px; text-align: left;">
+                            <thead style="position: sticky; top: 0; background: var(--bg-surface); z-index: 5;">
+                                <tr>
+                                    <th width="140">物料编码</th>
+                                    <th width="180">标准物料名称</th>
+                                    <th>原始规格 / 特征描述</th>
+                                    <th width="140">提取标准型号</th>
+                                    <th width="110">专业分类</th>
+                                    <th width="70">单位</th>
+                                    <th width="100">品牌/厂商</th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-materials-tbody">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 30px;">正在加载全局物料明细...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination Footer -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--color-text-secondary); margin-top: 4px;">
+                        <div>显示第 <span id="db-page-start">0</span> - <span id="db-page-end">0</span> 条，共 <span id="db-total-count">0</span> 条</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn btn-secondary" id="db-prev-page-btn" disabled style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-chevron-left"></i> 上一页</button>
+                            <span>第 <span id="db-current-page" style="font-weight: 600; color: var(--color-text-primary);">1</span> / <span id="db-total-pages">1</span> 页</span>
+                            <button class="btn btn-secondary" id="db-next-page-btn" disabled style="padding: 4px 10px; font-size: 12px;">下一页 <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -568,6 +716,44 @@
             </div>
             <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
                 <button class="btn btn-secondary" id="close-history-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Task Modal -->
+    <div class="loading-overlay" id="end-task-modal" style="display: none; justify-content: center; align-items: center; z-index: 102;">
+        <div class="glass-card" style="width: 440px; padding: 24px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="font-weight: 600; color: #f59e0b;"><i class="fa-solid fa-flag-checkered"></i> 结束当前匹配任务</h3>
+                <button id="close-end-task-modal" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.6;">
+                您即将结束当前清单「<strong id="end-task-filename" style="color: var(--color-text-primary);"></strong>」的匹配工作。<br>
+                结束任务将关闭当前工作台，请选择如何保存当前进度：
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+                <button class="btn btn-primary" id="end-task-save-btn" style="justify-content: center;"><i class="fa-solid fa-floppy-disk"></i> 暂存进度并结束任务</button>
+                <button class="btn btn-secondary" id="end-task-direct-btn" style="justify-content: center; background-color: #64748b; border-color: #64748b; color: white;"><i class="fa-solid fa-trash-can"></i> 不保存直接结束</button>
+                <button class="btn btn-secondary" id="end-task-cancel-btn" style="justify-content: center;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Confirm Modal (When task is ongoing) -->
+    <div class="loading-overlay" id="upload-confirm-modal" style="display: none; justify-content: center; align-items: center; z-index: 102;">
+        <div class="glass-card" style="width: 460px; padding: 24px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="font-weight: 600; color: #3b82f6;"><i class="fa-solid fa-triangle-exclamation text-warning"></i> 检测到有正在进行的任务</h3>
+                <button id="close-upload-confirm-modal" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 18px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p style="font-size: 13px; color: var(--color-text-secondary); line-height: 1.6;">
+                当前有正在处理的清单「<strong id="upload-confirm-filename" style="color: var(--color-text-primary);"></strong>」。<br>
+                直接上传新清单将覆盖当前工作台。请选择操作：
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+                <button class="btn btn-primary" id="upload-confirm-save-btn" style="justify-content: center;"><i class="fa-solid fa-floppy-disk"></i> 暂存当前任务并开始新清单</button>
+                <button class="btn btn-warning" id="upload-confirm-override-btn" style="justify-content: center; background-color: #d97706; border-color: #b45309; color: white;"><i class="fa-solid fa-arrow-right-to-bracket"></i> 结束当前任务并开始新清单</button>
+                <button class="btn btn-secondary" id="upload-confirm-cancel-btn" style="justify-content: center;">取消</button>
             </div>
         </div>
     </div>
