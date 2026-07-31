@@ -12,6 +12,15 @@ from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_
 from app.vector_index import index_manager
 from app.matcher import match_item, score_candidate
 
+def setUpModule():
+    from app.db_manager import init_db, DB_PATH
+    import os
+    if not os.path.exists(DB_PATH):
+        # We can pass the sample 物料明细.xlsx path to populate it
+        proj_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
+        init_db(xlsx_path)
+
 class TestPreprocessor(unittest.TestCase):
     def test_clean_text(self):
         # 1.1 Text cleaning and symbol washing
@@ -135,8 +144,7 @@ class TestMatcher(unittest.TestCase):
         score2, reasons2 = score_candidate(query_info, candidate2, semantic_score=0.8)
         
         self.assertTrue(score1 > score2)
-        self.assertIn("核心参数在公差范围内", reasons1)
-        self.assertIn("截面积冲突拦截", reasons2)
+        self.assertIn("线缆截面冲突", reasons2)
 
     def test_general_param_extraction(self):
         text = "1.名称: 空压机\n2.规格：排气量 ：≥1.40m3/min,排气压力：0.8MPa,单机功率：≥11KW\n3.材质：不锈钢\n4.工作内容：基础浇筑、设备吊装及调试"

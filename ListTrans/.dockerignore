@@ -21,3 +21,6 @@ logs/*
 .gemini/*
 .agents/*
 tests/*
+*.tar
+*.tar.gz
+*.zip

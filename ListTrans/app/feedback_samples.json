@@ -544,5 +544,33 @@
         "auto_code": "",
         "manual_code": "2.07.05.0011",
         "is_correct": false
+    },
+    {
+        "row_id": 48,
+        "raw_text": "1.名称、型号：EF-01\n2.安装方式：嵌入式、半周长0.5米以内、Pe=3kw\n3.工作内容：本体安装、打标",
+        "auto_code": "",
+        "manual_code": "3.55.09.0250",
+        "is_correct": false
+    },
+    {
+        "row_id": 4,
+        "raw_text": "1.名称：地面聚合物水泥基防水涂料\n2.涂膜厚度：1.5厚\n3.反边高度：四周沿墙上翻300mm高\n4.素面平整、补缺、四周抹小八字角、两道成活\n5.工作内容：清理基层、调配及涂刷涂料、防水试验、细沙保护",
+        "auto_code": "",
+        "manual_code": "2.13.35.0011",
+        "is_correct": false
+    },
+    {
+        "row_id": 20,
+        "raw_text": "1.名称：隔音降噪板\n2.工作内容：铺钉面层、钉压条、清理",
+        "auto_code": "",
+        "manual_code": "2.09.11.2005",
+        "is_correct": false
+    },
+    {
+        "row_id": 20,
+        "raw_text": "1.名称：隔音降噪板\n2.工作内容：铺钉面层、钉压条、清理",
+        "auto_code": "",
+        "manual_code": "2.09.05.0201",
+        "is_correct": false
     }
 ]

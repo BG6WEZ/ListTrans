@@ -24,6 +24,37 @@ connection_dict = load_json_config("connection_dict.json", {})
 flags_dict = load_json_config("flags_dict.json", {})
 unit_rules = load_json_config("unit_rules.json", {})
 
+alias_rx, alias_map = None, {}
+material_rx, material_map = None, {}
+connection_rx, connection_map = None, {}
+flags_rx, flags_map = None, {}
+unit_rx_list = []
+
+def compile_configs():
+    global alias_rx, alias_map, material_rx, material_map, connection_rx, connection_map, flags_rx, flags_map, unit_rx_list
+    
+    def _build_compiled_regex(d: dict):
+        if not d:
+            return None, {}
+        lower_map = {k.lower(): v for k, v in d.items()}
+        sorted_keys = sorted(d.keys(), key=len, reverse=True)
+        pattern = "|".join(map(re.escape, sorted_keys))
+        rx = re.compile(pattern, re.IGNORECASE)
+        return rx, lower_map
+
+    alias_rx, alias_map = _build_compiled_regex(alias_dict)
+    material_rx, material_map = _build_compiled_regex(material_dict)
+    connection_rx, connection_map = _build_compiled_regex(connection_dict)
+    flags_rx, flags_map = _build_compiled_regex(flags_dict)
+    
+    unit_rx_list = []
+    for raw_unit, standard in unit_rules.items():
+        pattern = re.compile(r'(?<=\d)\s*' + re.escape(raw_unit) + r'(?=\b|[^a-zA-Z]|$)', re.IGNORECASE)
+        unit_rx_list.append((pattern, standard))
+
+# Build initial compiled regexes
+compile_configs()
+
 def to_half_width(text: str) -> str:
     """Convert full-width characters to half-width."""
     result = []
@@ -52,21 +83,20 @@ def clean_text_standard(text: str) -> str:
     text = re.sub(r'[ \t]+', ' ', text)
 
     # 3. Apply alias dictionary typos replacement
-    for typo, corrected in alias_dict.items():
-        text = re.sub(re.escape(typo), corrected, text, flags=re.IGNORECASE)
+    if alias_rx:
+        text = alias_rx.sub(lambda m: alias_map.get(m.group(0).lower(), m.group(0)), text)
 
     # 4. Standardize materials, connections and flags using synonym dictionaries
-    for syn_word, std_word in material_dict.items():
-        text = re.sub(re.escape(syn_word), std_word, text, flags=re.IGNORECASE)
-    for syn_word, std_word in connection_dict.items():
-        text = re.sub(re.escape(syn_word), std_word, text, flags=re.IGNORECASE)
-    for syn_word, std_word in flags_dict.items():
-        text = re.sub(re.escape(syn_word), std_word, text, flags=re.IGNORECASE)
+    if material_rx:
+        text = material_rx.sub(lambda m: material_map.get(m.group(0).lower(), m.group(0)), text)
+    if connection_rx:
+        text = connection_rx.sub(lambda m: connection_map.get(m.group(0).lower(), m.group(0)), text)
+    if flags_rx:
+        text = flags_rx.sub(lambda m: flags_map.get(m.group(0).lower(), m.group(0)), text)
 
     # 5. Clean up units in raw text using unit_rules mapping
-    for raw_unit, standard in unit_rules.items():
-        pattern = r'(?<=\d)\s*' + re.escape(raw_unit) + r'(?=\b|[^a-zA-Z]|$)'
-        text = re.sub(pattern, standard, text, flags=re.IGNORECASE)
+    for pattern, standard in unit_rx_list:
+        text = pattern.sub(standard, text)
 
     # 6. Remove unit labels from parameter names to avoid regex matching digits inside units (e.g. 风量m3/h -> 风量)
     header_unit_pattern = r'(风量|新风量|处理风量|循环风量|余压|机外余压|静压|风压|制冷量|冷量|制热量|加湿量|功率|配电功率|管径|口径|DN|De|截面积)\s*[\(\uff08]?\s*(?:m³/h|m3/h|kW|kw|W|w|Pa|pa|kg/h|mm|mm²|mm2)\s*[\)\uff09]?'
@@ -82,6 +112,7 @@ def reload_normalizer_configs():
     connection_dict = load_json_config("connection_dict.json", {})
     flags_dict = load_json_config("flags_dict.json", {})
     unit_rules = load_json_config("unit_rules.json", {})
+    compile_configs()
 
 def convert_de_to_dn(val: float, text: str) -> float:
     """

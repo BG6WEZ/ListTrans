@@ -1,6 +1,16 @@
 import os
 import time
 import json
+import threading
+
+# Prevent OpenBLAS/PyTorch OpenMP thread thrashing and HuggingFace Tokenizers deadlock
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import numpy as np
 from typing import List, Dict, Tuple, Any, Optional
 
@@ -25,43 +35,50 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 class VectorIndexManager:
     def __init__(self):
         self.model: Optional[Any] = None
-        self.use_faiss = HAS_FAISS
-        
+        self.use_faiss = False
+        self._lock = threading.RLock()
+
         # FAISS index and mappings
         self.faiss_index: Optional[Any] = None
-        
+
         # Fallback Numpy structures
         self.numpy_embeddings: Optional[np.ndarray] = None # Shape: (N, 384)
-        
+
         # Shared mappings: index position -> material dict (code, name, spec, category)
         self.index_to_material: List[Dict[str, str]] = []
-        
+
         self.model_name_or_path = "paraphrase-multilingual-MiniLM-L12-v2"
-        self._initialize_model()
+        # Lazy load model on demand to prevent PyTorch C++ threads deadlocking with Uvicorn asyncio loop on import
 
     def _initialize_model(self):
-        if not HAS_SENTENCE_TRANSFORMERS:
-            print("Warning: sentence-transformers is not installed. Semantic search will be disabled.")
+        if not HAS_SENTENCE_TRANSFORMERS or self.model is not None:
             return
 
-        # Check offline path first
+        # Force offline mode to prevent intranet/network hangs (P0 Fix H3)
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
         offline_model_path = os.path.join(MODEL_DIR, self.model_name_or_path)
         if os.path.exists(offline_model_path):
             model_path = offline_model_path
             print(f"Loading offline sentence-transformers model from {model_path}...")
         else:
             model_path = self.model_name_or_path
-            print(f"Offline model not found at {offline_model_path}. Loading/downloading model from HF Hub: {model_path}...")
-            
+            print(f"Offline directory absent at {offline_model_path}. Loading from local HuggingFace cache...")
+
         try:
             self.model = SentenceTransformer(model_path)
             print("SentenceTransformer model loaded successfully.")
         except Exception as e:
-            print(f"Error loading SentenceTransformer model: {e}. Semantic search is disabled.")
+            print(f"Warning: Local SentenceTransformer model load failed: {e}. Fallback to keyword FTS5 search.")
             self.model = None
 
     @property
     def is_enabled(self) -> bool:
+        if self.model is None and HAS_SENTENCE_TRANSFORMERS:
+            with self._lock:
+                if self.model is None:
+                    self._initialize_model()
         return self.model is not None
 
     def encode_queries(self, texts: List[str]) -> Optional[np.ndarray]:
@@ -69,14 +86,12 @@ class VectorIndexManager:
         if not self.is_enabled or not texts:
             return None
         try:
-            embeddings = self.model.encode(texts, batch_size=64, show_progress_bar=False, convert_to_numpy=True)
-            if HAS_FAISS:
-                faiss.normalize_L2(embeddings)
-            else:
-                # L2 normalize using numpy
-                norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-                norms = np.where(norms == 0, 1.0, norms)
-                embeddings = embeddings / norms
+            with self._lock:
+                embeddings = self.model.encode(texts, batch_size=64, show_progress_bar=False, convert_to_numpy=True)
+            # L2 normalize using pure Numpy (preventing FAISS C++ OpenMP deadlock on Windows)
+            norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+            norms = np.where(norms == 0, 1.0, norms)
+            embeddings = embeddings / norms
             return embeddings
         except Exception as e:
             print(f"Error encoding query texts: {e}")
@@ -145,7 +160,7 @@ class VectorIndexManager:
         except Exception as e:
             print(f"Error saving vector cache: {e}")
 
-    def build_index(self, materials: List[Dict[str, Any]]):
+    def build_index(self, materials: List[Dict[str, Any]], task_id: Optional[str] = None):
         """
         Build index from scratch.
         materials: List of Dict containing 'code', 'name', 'specification', 'category'
@@ -168,13 +183,36 @@ class VectorIndexManager:
             # Build search text (name + spec)
             texts.append(f"{m['name']} {m['specification']}".strip())
 
-        # Encode all texts in batches
-        embeddings = self.encode_queries(texts)
-        if embeddings is None:
-            print("Error: Failed to encode materials. Index not built.")
-            return
+        # Encode all texts in chunked batches to report progress
+        self.numpy_embeddings = None
+        embeddings_list = []
+        chunk_size = 500
+        total_items = len(texts)
+        
+        for idx in range(0, total_items, chunk_size):
+            chunk_texts = texts[idx : idx + chunk_size]
+            chunk_embs = self.encode_queries(chunk_texts)
+            if chunk_embs is None:
+                print(f"Error: Failed to encode chunk starting at {idx}")
+                return
+            embeddings_list.append(chunk_embs)
+            
+            if task_id:
+                try:
+                    from app.server import upload_tasks
+                    if task_id in upload_tasks:
+                        prog = min(95, int(10 + ((idx + len(chunk_texts)) / total_items) * 85))
+                        upload_tasks[task_id]["vectorization_progress"] = prog
+                        upload_tasks[task_id]["current_step"] = f"正在重建向量特征: ({idx + len(chunk_texts)}/{total_items})"
+                except Exception as e:
+                    print(f"Error updating task progress in build_index: {e}")
 
-        self.numpy_embeddings = embeddings
+        if embeddings_list:
+            embeddings = np.vstack(embeddings_list)
+            self.numpy_embeddings = embeddings
+        else:
+            print("Error: No embeddings generated. Index not built.")
+            return
         
         if self.use_faiss:
             try:
@@ -235,6 +273,14 @@ class VectorIndexManager:
         query_vector: normalized 1D embedding array.
         Returns: List of (material_dict, similarity_score)
         """
+        import time
+        def log_vector_debug(msg: str):
+            try:
+                with open("c:/Users/wangd/project/ListTrans/ListTrans/logs/debug_match.log", "a", encoding="utf-8") as f:
+                    f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - VECTOR: {msg}\n")
+            except Exception:
+                pass
+
         if query_vector is None:
             return []
             
@@ -252,7 +298,7 @@ class VectorIndexManager:
                     results.append((self.index_to_material[idx], float(score)))
                 return results
             except Exception as e:
-                print(f"Error during FAISS search: {e}. Falling back to Numpy.")
+                log_vector_debug(f"Error during FAISS search: {e}. Falling back to Numpy.")
                 self.use_faiss = False
 
         if self.numpy_embeddings is not None:
@@ -260,7 +306,12 @@ class VectorIndexManager:
                 # Compute dot product (since vectors are normalized, this is cosine similarity)
                 # numpy_embeddings shape: (N, 384), query_vector shape: (384,)
                 q_vec_1d = query_vector.squeeze()
-                scores = np.dot(self.numpy_embeddings, q_vec_1d)
+                
+                log_vector_debug(f"Starting np.einsum computation with shape {self.numpy_embeddings.shape}...")
+                t0 = time.time()
+                # Use np.einsum to avoid OpenBLAS/MKL thread pool deadlocks in background threads while keeping 6x speedup over element-wise sum
+                scores = np.einsum('ij,j->i', self.numpy_embeddings, q_vec_1d)
+                log_vector_debug(f"np.einsum computation completed in {time.time() - t0:.4f}s.")
                 
                 # Get top_k indices sorted descending
                 top_k = min(top_k, len(scores))
@@ -272,7 +323,7 @@ class VectorIndexManager:
                     results.append((self.index_to_material[idx], float(scores[idx])))
                 return results
             except Exception as e:
-                print(f"Error during Numpy search: {e}")
+                log_vector_debug(f"Error during Numpy search: {e}")
                 
         return []
 
@@ -280,44 +331,35 @@ class VectorIndexManager:
         """Check SQLite file modification time and rebuild if cache is outdated."""
         if not self.is_enabled:
             return
-            
-        timestamp_file = os.path.join(CACHE_DIR, "db_timestamp.txt")
-        db_mtime = os.path.getmtime(db_path) if os.path.exists(db_path) else 0
-        
-        cached_mtime = 0
-        if os.path.exists(timestamp_file):
-            try:
-                with open(timestamp_file, "r") as f:
-                    cached_mtime = float(f.read().strip())
-            except ValueError:
-                pass
 
+        # 1. Try loading existing vector cache first
         cache_loaded = self.load_cache()
-        
-        if force or not cache_loaded or db_mtime > cached_mtime:
-            print("Rebuilding vector index from SQLite database...")
-            # Query all materials from SQLite
-            import sqlite3
-            conn = sqlite3.connect(db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute("SELECT code, name, specification, category FROM materials")
-            rows = cursor.fetchall()
-            materials = [dict(r) for r in rows]
-            conn.close()
-            
-            if materials:
-                self.build_index(materials)
-                # Save timestamp
-                try:
-                    with open(timestamp_file, "w") as f:
-                        f.write(str(db_mtime))
-                except Exception as e:
-                    print(f"Error saving DB timestamp: {e}")
-            else:
-                print("Warning: Database is empty. Vector index not built.")
+        if cache_loaded and not force:
+            print(f"Vector index is up-to-date. Successfully loaded {len(self.index_to_material)} materials from cache.")
+            return
+
+        print("Rebuilding vector index from SQLite database...")
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT code, name, specification, category FROM materials")
+        rows = cursor.fetchall()
+        materials = [dict(r) for r in rows]
+        conn.close()
+
+        if materials:
+            self.build_index(materials)
+            self.save_cache()
+            timestamp_file = os.path.join(CACHE_DIR, "db_timestamp.txt")
+            db_mtime = os.path.getmtime(db_path) if os.path.exists(db_path) else 0
+            try:
+                with open(timestamp_file, "w") as f:
+                    f.write(str(db_mtime))
+            except Exception as e:
+                print(f"Error saving DB timestamp: {e}")
         else:
-            print("Vector index is up-to-date. Loaded from cache.")
+            print("Warning: Database is empty. Vector index not built.")
 
 # Global instance
 index_manager = VectorIndexManager()

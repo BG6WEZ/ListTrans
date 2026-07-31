@@ -205,6 +205,12 @@ class ConfigDrivenExtractor:
         if self.domain in ["cable_power", "cable_control", "wire"]:
             c_attrs = extract_cable_params(text)
             attrs.update(c_attrs)
+        elif self.domain == "conduit":
+            conduit_attrs = extract_conduit_params(text)
+            attrs.update(conduit_attrs)
+        elif self.domain == "ups":
+            ups_attrs = extract_ups_params(text)
+            attrs.update(ups_attrs)
 
         return attrs
 
@@ -402,31 +408,138 @@ def extract_switchgear_params(text: str) -> Dict[str, Any]:
     return params
 
 def extract_conduit_params(text: str) -> Dict[str, Any]:
-    """Extract line pipe & conduit parameters (JDG, KBG, SC, PVC, diameter, thickness)."""
+    """
+    Extract electrical conduit parameters with full business rules:
+    - Pipe type codes: JDG, KBG, SC, RC, MT, PC, FPC, KPC, CP
+    - Outer diameter extraction (direct for JDG/KBG/MT/PC/FPC/KPC, DN→OD table for SC/RC)
+    - Installation method codes: WC, CC, FC, CE, WE
+    """
+    params = {}
+    if not text:
+        return params
+    t_clean = to_half_width(text).strip()
+
+    # ── 1. Pipe type code dictionary (hardcoded fixed rules) ─────────────────
+    CONDUIT_TYPE_MAP = {
+        "JDG":  "套接紧定式镀锌薄壁钢导管",
+        "KBG":  "套接扣压式薄壁钢导管",
+        "SC":   "热镀锌焊接厚壁钢管",
+        "RC":   "水煤气钢管",
+        "MT":   "黑铁薄壁电线管",
+        "PC":   "硬质阻燃PVC塑料管",
+        "FPC":  "PVC半硬电线管",
+        "KPC":  "PVC塑料波纹管",
+        "CP":   "金属蛇皮波纹管",
+    }
+
+    # ── 2. DN → Outer Diameter mapping for SC / RC (nominal → actual OD mm) ──
+    SC_RC_DN_TO_OD = {
+        15: 21.3, 20: 26.9, 25: 33.7, 32: 42.4,
+        40: 48.3, 50: 60.3, 65: 76.1, 80: 88.9, 100: 114.3,
+    }
+
+    # ── 3. Installation method code dictionary ────────────────────────────────
+    INSTALL_MODE_MAP = {
+        "WC": "暗敷设在墙内",
+        "CC": "暗敷设在顶板/屋面内",
+        "FC": "暗敷设在地面/地板内",
+        "CE": "沿天棚顶板明敷",
+        "WE": "沿墙面明敷",
+        "BE": "沿屋架或跨屋架明敷",
+        "CLE": "沿柱明敷",
+        "SCE": "沿钢索明敷",
+    }
+
+    # ── 4. Match pipe type code (longest match wins) ─────────────────────────
+    # Using Unicode/ASCII safe lookbehind/lookahead to prevent \b boundary failures with Chinese characters
+    type_order = ["FPC", "KPC", "KBG", "JDG", "SC", "RC", "MT", "PC", "CP"]
+    matched_type = None
+    for code in type_order:
+        pattern = r'(?<![a-zA-Z])' + re.escape(code) + r'(?![a-zA-Z])'
+        if re.search(pattern, t_clean, re.IGNORECASE):
+            matched_type = code.upper()
+            break
+
+    # ── 5. Extract size number and wall thickness ──────────────────────────
+    size_num = None
+
+    # A. Check for "size*thickness" pattern (e.g., 20*1.6, 25*1.2, DN32*2.0)
+    m_thick = re.search(r'(?:DN|de|De|Φ|φ)?\s*(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', t_clean, re.IGNORECASE)
+    if m_thick:
+        size_num = float(m_thick.group(1))
+        if size_num.is_integer():
+            size_num = int(size_num)
+        params["壁厚"] = float(m_thick.group(2))
+    else:
+        # B. Check: Type code followed immediately by optional spaces and digits
+        # e.g., "JDG16", "SC 50", "KBG20"
+        if matched_type:
+            m_type_size = re.search(r'(?<![a-zA-Z])' + re.escape(matched_type) + r'\s*(\d+)\b', t_clean, re.IGNORECASE)
+            if m_type_size:
+                size_num = int(m_type_size.group(1))
+        
+        # C. Fallback: Standalone digits
+        if size_num is None:
+            m_digits = re.search(r'(?:DN|de|De|Φ|φ)?\s*(\d+)\b', t_clean, re.IGNORECASE)
+            if m_digits:
+                size_num = int(m_digits.group(1))
+
+    if matched_type:
+        params["管型代码"] = matched_type
+        params["管型名称"] = CONDUIT_TYPE_MAP.get(matched_type, matched_type)
+
+    if size_num is not None:
+        params["规格数字"] = size_num
+        # SC/RC: number = DN nominal diameter → convert to outer diameter
+        if matched_type in ("SC", "RC"):
+            params["公称直径DN"] = size_num
+            od = SC_RC_DN_TO_OD.get(size_num)
+            if od:
+                params["外径mm"] = od
+            else:
+                # Linear interpolation fallback (rare sizes)
+                params["外径mm"] = size_num  # keep raw if not in table
+        else:
+            # JDG/KBG/MT/PC/FPC/KPC/CP: number = outer diameter directly
+            params["外径mm"] = float(size_num)
+
+    # ── 6. Extract installation method ────────────────────────────────────────
+    for code, desc in INSTALL_MODE_MAP.items():
+        if re.search(r'\b' + code + r'\b', t_clean, re.IGNORECASE):
+            params["敷设方式代码"] = code.upper()
+            params["敷设方式"] = desc
+            break
+
+    # ── 7. Legacy dn field for backward compatibility ─────────────────────────
+    if "外径mm" in params and "dn" not in params:
+        params["dn"] = params["外径mm"]
+    if "管型代码" in params and "model" not in params:
+        params["model"] = params["管型代码"]
+
+    return params
+
+def extract_ups_params(text: str) -> Dict[str, Any]:
+    """Extract UPS parameters: capacity (kVA), backup time (min), voltage (V)."""
     params = {}
     if not text:
         return params
     t_clean = to_half_width(text).strip()
     
-    # 1. Combined Model & Diameter (e.g. JDG20 -> model: JDG, dn: 20)
-    jdg_match = re.search(r'\b(JDG|KBG|SC|PVC-U|PVC|KJG|TC)\s*(\d+(?:\.\d+)?)\b', t_clean, re.IGNORECASE)
-    if jdg_match:
-        params["model"] = jdg_match.group(1).upper()
-        params["dn"] = float(jdg_match.group(2))
-    else:
-        model_match = re.search(r'\b(JDG|KBG|SC|PVC-U|PVC|KJG|TC)\b', t_clean, re.IGNORECASE)
-        if model_match:
-            params["model"] = model_match.group(1).upper()
-
-        size_match = re.search(r'(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', t_clean)
-        if size_match:
-            params["dn"] = float(size_match.group(1))
-            params["wall_thickness"] = float(size_match.group(2))
-        else:
-            dn_match = re.search(r'(?:DN|Φ|de|Φ)?\s*(\d+(?:\.\d+)?)', t_clean)
-            if dn_match:
-                params["dn"] = float(dn_match.group(1))
-
+    # 1. Capacity (容量/Pe/P/额定/KVA)
+    cap_match = re.search(r'(?:容量|Pe|P|额定)?\s*(\d+(?:\.\d+)?)\s*(?:kva|千伏安)\b', t_clean, re.IGNORECASE)
+    if cap_match:
+        params["容量"] = float(cap_match.group(1))
+        
+    # 2. Backup time (后备时间/后备/min/Min/MIN/分钟)
+    time_match = re.search(r'(?:后备时间|后备)?\s*(?:[≥>=]?)?\s*(\d+(?:\.\d+)?)\s*(?:min|分钟)\b', t_clean, re.IGNORECASE)
+    if time_match:
+        params["后备时间"] = float(time_match.group(1))
+        
+    # 3. Voltage (电压/380v/220v)
+    volt_match = re.search(r'(?:电压|供电电压|工作电压)?\s*(\d+(?:\.\d+)?)\s*(?:v|伏)\b', t_clean, re.IGNORECASE)
+    if volt_match:
+        params["电压"] = float(volt_match.group(1))
+        
     return params
 
 def extract_power_range(text: str) -> Dict[str, float]:

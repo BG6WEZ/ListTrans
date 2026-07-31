@@ -63,7 +63,7 @@ let configs = {
     boosts: {}
 };
 
-const backendUrl = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:8000';
+const backendUrl = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:18080';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Process User profile info
@@ -687,14 +687,61 @@ function jumpToItem(item) {
     renderTable();
 }
 
-// Show/Hide Spinner Overlay
-function showLoading(title, subtitle) {
+// Show/Hide Spinner Overlay with dynamic timer and safety timeout guard
+let loadingSafetyTimer = null;
+let loadingIntervalTimer = null;
+
+function showLoading(title, subtitle, timeoutMs = 180000) {
     document.getElementById('loading-title').innerText = title || "处理中...";
-    document.getElementById('loading-subtitle').innerText = subtitle || "";
+    const subtitleEl = document.getElementById('loading-subtitle');
+    const timerEl = document.getElementById('loading-timer');
+    const baseSubtitle = subtitle || "";
+    subtitleEl.innerText = baseSubtitle;
+    
+    if (timerEl) {
+        timerEl.innerText = "已用时 0 秒";
+        timerEl.style.display = 'inline-block';
+    }
+    
     document.getElementById('loading-overlay').style.display = 'flex';
+    
+    // Hide progress bars container by default for non-upload loaders
+    const segContainer = document.getElementById('segmented-progress-container');
+    if (segContainer) segContainer.style.display = 'none';
+    
+    let secondsElapsed = 0;
+    if (loadingIntervalTimer) clearInterval(loadingIntervalTimer);
+    loadingIntervalTimer = setInterval(() => {
+        secondsElapsed += 1;
+        if (timerEl) {
+            timerEl.innerText = `已用时 ${secondsElapsed} 秒`;
+        }
+    }, 1000);
+
+    if (loadingSafetyTimer) clearTimeout(loadingSafetyTimer);
+    if (timeoutMs && timeoutMs > 0) {
+        loadingSafetyTimer = setTimeout(() => {
+            hideLoading();
+            alert(`操作提示：后台处理超时（超过 ${timeoutMs / 1000} 秒），已自动中断界面挂起。请检查服务器连接或拆分超大型清单。`);
+        }, timeoutMs);
+    }
 }
 
 function hideLoading() {
+    if (loadingIntervalTimer) {
+        clearInterval(loadingIntervalTimer);
+        loadingIntervalTimer = null;
+    }
+    if (loadingSafetyTimer) {
+        clearTimeout(loadingSafetyTimer);
+        loadingSafetyTimer = null;
+    }
+    if (window.uploadPollInterval) {
+        clearInterval(window.uploadPollInterval);
+        window.uploadPollInterval = null;
+    }
+    const timerEl = document.getElementById('loading-timer');
+    if (timerEl) timerEl.style.display = 'none';
     document.getElementById('loading-overlay').style.display = 'none';
 }
 
@@ -750,7 +797,19 @@ async function resetAndEndTask() {
 
 // 1. File Upload Handler
 async function handleFileUpload(file) {
-    showLoading("正在上传并分析清单...", "系统正在提取规格参数并执行高性能多线程语义匹配，请稍候...");
+    showLoading("正在上传并分析清单...", "系统正在初始化后台比对任务...", 0);
+    
+    // Show and reset the segmented progress container
+    const segContainer = document.getElementById('segmented-progress-container');
+    if (segContainer) {
+        segContainer.style.display = 'flex';
+        document.getElementById('progress-bar-structuring').style.width = '0%';
+        document.getElementById('progress-val-structuring').innerText = '0%';
+        document.getElementById('progress-bar-vectorization').style.width = '0%';
+        document.getElementById('progress-val-vectorization').innerText = '0%';
+        document.getElementById('progress-bar-matching').style.width = '0%';
+        document.getElementById('progress-val-matching').innerText = '0%';
+    }
     
     const formData = new FormData();
     formData.append('file', file);
@@ -758,7 +817,10 @@ async function handleFileUpload(file) {
     try {
         const response = await fetch(`${backendUrl}/api/upload`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
         
         if (!response.ok) {
@@ -766,88 +828,145 @@ async function handleFileUpload(file) {
             throw new Error(err.detail || "解析Excel清单时发生错误");
         }
         
-        const data = await response.json();
+        const uploadRes = await response.json();
+        const taskId = uploadRes.task_id;
         
-        // 1. Reset all state and search filters to guarantee new file displays cleanly
-        searchQuery = '';
-        const listSearch = document.getElementById('list-search');
-        if (listSearch) listSearch.value = '';
-        
-        currentFilter = 'all';
-        const filterTabs = document.querySelectorAll('.filter-tab');
-        filterTabs.forEach(t => {
-            if (t.dataset.filter === 'all') t.classList.add('active');
-            else t.classList.remove('active');
-        });
-        
-        activeSessionId = null;
-        currentPage = 1;
-        selectedItem = null;
-        
-        items = data.items;
-        
-        // Cache initial matching codes
-        items.forEach(item => {
-            item.initial_auto_code = item.matched_code;
-            if (!item.bindings) {
-                item.bindings = [];
-                if (item.matched_code) {
-                    item.bindings.push({
-                        code: item.matched_code,
-                        name: item.matched_name || "",
-                        specification: item.matched_spec || "",
-                        unit: item.matched_unit || "",
-                        brand: item.matched_brand || "",
-                        category: item.matched_category || "",
-                        qty: item.original_qty
-                    });
+        // Start polling status
+        if (window.uploadPollInterval) clearInterval(window.uploadPollInterval);
+        window.uploadPollInterval = setInterval(async () => {
+            try {
+                const statusRes = await fetch(`${backendUrl}/api/upload/status?task_id=${taskId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!statusRes.ok) {
+                    const err = await statusRes.json();
+                    throw new Error(err.detail || "查询任务进度失败");
                 }
+                
+                const taskState = await statusRes.json();
+                
+                // Update UI text and progress bars
+                document.getElementById('loading-subtitle').innerText = "系统正在全速处理特征提取与算法比对，这可能需要一点时间...";
+                const currentItemEl = document.getElementById('progress-current-item');
+                if (currentItemEl) {
+                    currentItemEl.innerText = taskState.current_step || "准备就绪...";
+                }
+                
+                document.getElementById('progress-bar-structuring').style.width = `${taskState.structuring_progress}%`;
+                document.getElementById('progress-val-structuring').innerText = `${taskState.structuring_progress}%`;
+                
+                document.getElementById('progress-bar-vectorization').style.width = `${taskState.vectorization_progress}%`;
+                document.getElementById('progress-val-vectorization').innerText = `${taskState.vectorization_progress}%`;
+                
+                document.getElementById('progress-bar-matching').style.width = `${taskState.matching_progress}%`;
+                document.getElementById('progress-val-matching').innerText = `${taskState.matching_progress}%`;
+                
+                if (taskState.status === 'completed') {
+                    clearInterval(window.uploadPollInterval);
+                    window.uploadPollInterval = null;
+                    hideLoading();
+                    processUploadResult(taskState.result, file.name);
+                } else if (taskState.status === 'failed') {
+                    clearInterval(window.uploadPollInterval);
+                    window.uploadPollInterval = null;
+                    hideLoading();
+                    alert(`比对处理失败: ${taskState.error}`);
+                }
+            } catch (err) {
+                console.error("Error polling task status:", err);
+                clearInterval(window.uploadPollInterval);
+                window.uploadPollInterval = null;
+                hideLoading();
+                alert(`轮询进度失败: ${err.message}`);
             }
-        });
-        
-        // Initialize professional list
-        const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
-        professionals = ['全部', ...uniqueProfs];
-        currentProfessional = uniqueProfs.includes('暖通') ? '暖通' : uniqueProfs[0] || '全部';
-        
-        // Render professional tabs
-        renderProfessionalTabs();
-        
-        // Hide welcome slate & show workbench
-        originalFileName = file.name;
-        const uploadedFilenameEl = document.getElementById('uploaded-filename');
-        if (uploadedFilenameEl) {
-            uploadedFilenameEl.innerText = ` - ${file.name}`;
-            uploadedFilenameEl.title = file.name;
-        }
-        document.getElementById('welcome-slate').style.display = 'none';
-        document.getElementById('workbench').style.display = 'flex';
-        document.getElementById('export-btn').disabled = false;
-        
-        const saveTrigger = document.getElementById('save-trigger');
-        if (saveTrigger) saveTrigger.style.display = 'inline-flex';
-        
-        const endTaskTrigger = document.getElementById('end-task-trigger');
-        if (endTaskTrigger) endTaskTrigger.style.display = 'inline-flex';
-        
-        startAutoSave();
-        saveDraft();
-        
-        // Clear selection UI
-        document.getElementById('select-prompt').style.display = 'flex';
-        document.getElementById('detail-editor').style.display = 'none';
-        
-        // Update table & status
-        renderTable();
-        updateProgress();
+        }, 800);
         
     } catch (error) {
+        hideLoading();
         alert(`错误: ${error.message}`);
     } finally {
-        hideLoading();
         // Reset file input value so re-selecting any file triggers 'change' event
         document.getElementById('xlsx-file-input').value = "";
     }
+}
+
+// Processing matching results helper
+function processUploadResult(resultItems, fileName) {
+    // 1. Reset all state and search filters to guarantee new file displays cleanly
+    searchQuery = '';
+    const listSearch = document.getElementById('list-search');
+    if (listSearch) listSearch.value = '';
+    
+    currentFilter = 'all';
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(t => {
+        if (t.dataset.filter === 'all') t.classList.add('active');
+        else t.classList.remove('active');
+    });
+    
+    activeSessionId = null;
+    currentPage = 1;
+    selectedItem = null;
+    
+    items = resultItems;
+    
+    // Cache initial matching codes
+    items.forEach(item => {
+        item.initial_auto_code = item.matched_code;
+        if (!item.bindings) {
+            item.bindings = [];
+            if (item.matched_code) {
+                item.bindings.push({
+                    code: item.matched_code,
+                    name: item.matched_name || "",
+                    specification: item.matched_spec || "",
+                    unit: item.matched_unit || "",
+                    brand: item.matched_brand || "",
+                    category: item.matched_category || "",
+                    qty: item.original_qty
+                });
+            }
+        }
+    });
+    
+    // Initialize professional list
+    const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
+    professionals = ['全部', ...uniqueProfs];
+    currentProfessional = uniqueProfs.includes('暖通') ? '暖通' : uniqueProfs[0] || '全部';
+    
+    // Render professional tabs
+    renderProfessionalTabs();
+    
+    // Hide welcome slate & show workbench
+    originalFileName = fileName;
+    const uploadedFilenameEl = document.getElementById('uploaded-filename');
+    if (uploadedFilenameEl) {
+        uploadedFilenameEl.innerText = ` - ${fileName}`;
+        uploadedFilenameEl.title = fileName;
+    }
+    document.getElementById('welcome-slate').style.display = 'none';
+    document.getElementById('workbench').style.display = 'flex';
+    document.getElementById('export-btn').disabled = false;
+    
+    const saveTrigger = document.getElementById('save-trigger');
+    if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+    
+    const endTaskTrigger = document.getElementById('end-task-trigger');
+    if (endTaskTrigger) endTaskTrigger.style.display = 'inline-flex';
+    
+    startAutoSave();
+    saveDraft();
+    
+    // Clear selection UI
+    document.getElementById('select-prompt').style.display = 'flex';
+    document.getElementById('detail-editor').style.display = 'none';
+    
+    // Update table & status
+    renderTable();
+    updateProgress();
 }
 
 // 1.5 Render Professional Page tabs
@@ -1719,7 +1838,7 @@ function updateProgress() {
 async function handleExport() {
     if (items.length === 0) return;
     
-    showLoading("正在精准写入模板并导出报表...", "系统正在执行非破坏性写入，自动填充价格列并重新生成序号，请稍候...");
+    showLoading("正在精准写入模板并导出报表...", "系统正在执行非破坏性写入，自动填充价格列并重新生成序号，请稍候...", 0);
     
     try {
         const response = await fetch(`${backendUrl}/api/export`, {
@@ -2171,7 +2290,20 @@ async function handleDbUploadAndImport() {
         return;
     }
     
-    showLoading("正在导入物料库并重建向量索引...", "系统正在导入 Excel 并重新训练生成 FAISS 特征向量，请勿刷新页面...");
+    showLoading("正在导入物料库并重建向量索引...", "系统正在初始化后台导入任务...", 0);
+    
+    // Show and reset the segmented progress container
+    const segContainer = document.getElementById('segmented-progress-container');
+    if (segContainer) {
+        segContainer.style.display = 'flex';
+        document.getElementById('progress-bar-structuring').style.width = '0%';
+        document.getElementById('progress-val-structuring').innerText = '0%';
+        document.getElementById('progress-bar-vectorization').style.width = '0%';
+        document.getElementById('progress-val-vectorization').innerText = '0%';
+        document.getElementById('progress-bar-matching').style.width = '0%';
+        document.getElementById('progress-val-matching').innerText = '0%';
+    }
+    
     startDbImportBtn.disabled = true;
     
     const formData = new FormData();
@@ -2181,7 +2313,10 @@ async function handleDbUploadAndImport() {
     try {
         const response = await fetch(`${backendUrl}/api/db/upload`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
         });
         
         if (!response.ok) {
@@ -2189,26 +2324,77 @@ async function handleDbUploadAndImport() {
             throw new Error(errData.detail || "导入失败");
         }
         
-        const data = await response.json();
+        const uploadRes = await response.json();
+        const taskId = uploadRes.task_id;
         
-        // Reset file inputs
-        dbUploadInput.value = '';
-        dbFileLabel.innerText = '未选择文件';
-        
-        // Re-render fresh metadata and portrait
-        renderDbMetadata(data.metadata);
-        loadAndRenderDataPortrait();
-        
-        alert("物料明细库导入及向量索引重建已全部完成！");
-        
-        // Refresh logs immediately
-        loadAndRenderLogs();
+        // Start polling status
+        if (window.uploadPollInterval) clearInterval(window.uploadPollInterval);
+        window.uploadPollInterval = setInterval(async () => {
+            try {
+                const statusRes = await fetch(`${backendUrl}/api/upload/status?task_id=${taskId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!statusRes.ok) {
+                    const err = await statusRes.json();
+                    throw new Error(err.detail || "查询任务进度失败");
+                }
+                
+                const taskState = await statusRes.json();
+                
+                document.getElementById('loading-subtitle').innerText = "系统正在进行物料解析与向量索引重建，请勿刷新页面...";
+                const currentItemEl = document.getElementById('progress-current-item');
+                if (currentItemEl) {
+                    currentItemEl.innerText = taskState.current_step || "导入中...";
+                }
+                
+                document.getElementById('progress-bar-structuring').style.width = `${taskState.structuring_progress}%`;
+                document.getElementById('progress-val-structuring').innerText = `${taskState.structuring_progress}%`;
+                
+                document.getElementById('progress-bar-vectorization').style.width = `${taskState.vectorization_progress}%`;
+                document.getElementById('progress-val-vectorization').innerText = `${taskState.vectorization_progress}%`;
+                
+                document.getElementById('progress-bar-matching').style.width = `${taskState.matching_progress}%`;
+                document.getElementById('progress-val-matching').innerText = `${taskState.matching_progress}%`;
+                
+                if (taskState.status === 'completed') {
+                    clearInterval(window.uploadPollInterval);
+                    window.uploadPollInterval = null;
+                    hideLoading();
+                    
+                    // Reset file inputs
+                    dbUploadInput.value = '';
+                    dbFileLabel.innerText = '未选择文件';
+                    
+                    // Re-render fresh metadata and portrait
+                    renderDbMetadata(taskState.result);
+                    loadAndRenderDataPortrait();
+                    
+                    alert("物料明细库导入及向量索引重建已全部完成！");
+                    loadAndRenderLogs();
+                } else if (taskState.status === 'failed') {
+                    clearInterval(window.uploadPollInterval);
+                    window.uploadPollInterval = null;
+                    hideLoading();
+                    alert(`导入失败: ${taskState.error}`);
+                    startDbImportBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Error polling db import status:", err);
+                clearInterval(window.uploadPollInterval);
+                window.uploadPollInterval = null;
+                hideLoading();
+                alert(`轮询进度失败: ${err.message}`);
+                startDbImportBtn.disabled = false;
+            }
+        }, 1000);
         
     } catch (e) {
+        hideLoading();
         alert(`导入出错: ${e.message}`);
         startDbImportBtn.disabled = false;
-    } finally {
-        hideLoading();
     }
 }
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import difflib
 import re
 from typing import Dict, Any, List, Tuple, Optional
@@ -288,8 +289,20 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     
 
     
-    # Dynamically extract candidate parameters to ensure latest extractor rules apply
-    c_parsed = extract_params(f"{c_name} {c_full_spec}", c_category)
+    # Load pre-computed parsed parameters if present to avoid extremely slow dynamic extraction on every match candidate
+    c_parsed = None
+    if "parsed_params" in candidate and candidate["parsed_params"]:
+        import json
+        try:
+            if isinstance(candidate["parsed_params"], str):
+                c_parsed = json.loads(candidate["parsed_params"])
+            elif isinstance(candidate["parsed_params"], dict):
+                c_parsed = candidate["parsed_params"]
+        except Exception:
+            pass
+    if not c_parsed:
+        c_parsed = extract_params(f"{c_name} {c_full_spec}", c_category)
+        
     c_model = c_parsed.get("model", "")
     c_attrs = c_parsed.get("attrs", {})
     
@@ -484,13 +497,11 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
                 continue
         else:
-            # Single-direction missing penalty: only when Query specifies but Candidate lacks
+            # Single-direction missing penalty: only when Query specifies Must field but Candidate lacks it
             if attr in must_keys:
                 missing_penalty += 0.15
                 reasons.append(f"必填属性缺失处罚: {attr}")
-            elif attr in should_keys:
-                missing_penalty += 0.05
-                reasons.append(f"选填属性缺失处罚: {attr}")
+            # Should fields follow "reward if present, do not penalize if missing" strategy
 
     # Calculate weighted average attributes score
     if attr_scores:
@@ -858,16 +869,10 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
     q_parsed = query_info.get("parsed_spec") or extract_params(q_spec_text, q_category)
     q_model = q_parsed.get("model", "")
     
-    # 1. Path A1: Model exact prefix search
-    if q_model:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        # LIKE model% search
-        cursor.execute("SELECT * FROM materials WHERE search_tokens LIKE ? LIMIT 100", (f"%{q_model.lower()}%",))
-        rows = cursor.fetchall()
-        conn.close()
-        for r in rows:
-            cand = dict(r)
+    # 1. Path A1: Model search via FTS5 (avoiding disk table scan)
+    if q_model and len(q_model) >= 2:
+        model_results = search_materials_keyword(q_model, limit=100)
+        for cand in model_results:
             cand["recall_source"] = "model_match"
             cand["semantic_score"] = 0.0
             candidates[cand["code"]] = cand
@@ -913,16 +918,15 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
             vector_results = index_manager.search(q_vec, top_k=200)
             for m, score in vector_results:
                 code = m["code"]
-                # Query full row if not already in candidates
                 if code not in candidates:
-                    # Let's query from DB or reuse manager mapping
-                    db_row = query_by_code(code)
-                    if db_row:
-                        db_row["recall_source"] = "semantic"
-                        db_row["semantic_score"] = score
-                        candidates[code] = db_row
+                    cand = dict(m)
+                    cand["recall_source"] = "semantic"
+                    cand["semantic_score"] = score
+                    cand.setdefault("unit", "台")
+                    cand.setdefault("brand", "")
+                    cand.setdefault("description", "")
+                    candidates[code] = cand
                 else:
-                    # Just update semantic score
                     candidates[code]["semantic_score"] = score
 
     # Fallback search if candidates is empty
@@ -954,6 +958,27 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
     # 1. Recall
     candidates = hybrid_recall(query_info, query_vector)
     
+    # Enrich candidates with DB data (parsed_params, unit, brand, description) in a single batch query
+    if candidates:
+        codes = [c["code"] for c in candidates if c.get("code")]
+        if codes:
+            from app.db_manager import get_db_connection
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            placeholders = ",".join(["?"] * len(codes))
+            cursor.execute(f"""
+                SELECT code, unit, brand, description, parsed_params 
+                FROM materials 
+                WHERE code IN ({placeholders})
+            """, codes)
+            db_data = {row["code"]: dict(row) for row in cursor.fetchall()}
+            conn.close()
+            
+            for cand in candidates:
+                code = cand["code"]
+                if code in db_data:
+                    cand.update(db_data[code])
+    
     # 2. Score
     scored_candidates = []
     for cand in candidates:
@@ -962,7 +987,13 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
         # Apply series clustering boost if candidate belongs to a confirmed series
         if check_series_match(q_model, cand.get("specification", "")):
             # If batch_confirmed_series list contains this candidate's series prefix
-            c_model = extract_params(cand.get("specification", "")).get("model", "")
+            c_parsed = None
+            if "parsed_params" in cand and cand["parsed_params"]:
+                try:
+                    c_parsed = json.loads(cand["parsed_params"])
+                except Exception:
+                    pass
+            c_model = c_parsed.get("model", "") if c_parsed else extract_params(cand.get("specification", "")).get("model", "")
             if c_model:
                 c_prefix = c_model.split("-")[0].strip().lower()
                 if c_prefix in batch_confirmed_series:
@@ -970,6 +1001,17 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
                     if "同批确认系列优先" not in reasons:
                         reasons.append("系列优先")
                         
+        # Extract wall thickness for conduit tie-breaker
+        c_parsed = None
+        if "parsed_params" in cand and cand["parsed_params"]:
+            try:
+                c_parsed = json.loads(cand["parsed_params"]) if isinstance(cand["parsed_params"], str) else cand["parsed_params"]
+            except Exception:
+                pass
+        
+        c_attrs = c_parsed.get("attrs", {}) if c_parsed else {}
+        c_thickness = c_attrs.get("\u58c1\u539a") or c_attrs.get("\u539a\u5ea6")
+
         scored_candidates.append({
             "code": cand["code"],
             "name": cand["name"],
@@ -979,14 +1021,42 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             "brand": cand["brand"],
             "description": cand["description"],
             "score": score,
-            "match_reasons": reasons[:2]
+            "match_reasons": reasons[:2],
+            "c_thickness": c_thickness
         })
         
-    # Sort by score descending, with exact text match and spec similarity as tie-breakers
+    # Check if query has specified wall thickness
+    q_parsed = query_info.get("parsed_spec", {}) if query_info else {}
+    q_attrs = query_info.get("attrs") or q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+    q_thickness = q_attrs.get("壁厚") or q_attrs.get("厚度")
+
+    # Helper function to get clean numeric thickness for candidate as tiebreaker sorting key
+    def get_thickness_tiebreaker(cand_item):
+        if q_thickness is not None:
+            return 0.0
+        val = cand_item.get("c_thickness")
+        if val is None:
+            return -999.0
+        if isinstance(val, (int, float)):
+            return -float(val)
+        try:
+            return -float(val)
+        except (ValueError, TypeError):
+            import re
+            m = re.search(r'(\d+(?:\.\d+)?)', str(val))
+            if m:
+                try:
+                    return -float(m.group(1))
+                except Exception:
+                    pass
+            return -999.0
+
+    # Sort by score descending, with exact text match, spec similarity, and thickness tie-breakers
     scored_candidates.sort(key=lambda x: (
         x["score"],
         1.0 if "名称与规格完全一致" in x.get("match_reasons", []) else (0.5 if "规格型号完全一致" in x.get("match_reasons", []) else 0.0),
-        calculate_text_similarity(q_spec_text, x.get("specification", ""))
+        calculate_text_similarity(q_spec_text, x.get("specification", "")),
+        get_thickness_tiebreaker(x)
     ), reverse=True)
     
     # Threshold for 100% exact match

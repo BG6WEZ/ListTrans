@@ -122,6 +122,7 @@ def extract_model(text: str) -> str:
             
     return ""
 
+@lru_cache(maxsize=20000)
 def fts_tokenize(text: str) -> str:
     """
     Generate space-separated tokens for FTS5 indexing and queries.
@@ -327,8 +328,12 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
     from app.domain_extractors import (
         extract_cable_params, extract_pipe_params, extract_decoration_params,
         extract_conduit_params, extract_switchgear_params, extract_power_range,
-        extract_switch_gang_control
+        extract_switch_gang_control, extract_ups_params
     )
+
+    if domain == "ups" or any(k in text_clean for k in ["ups", "不间断电源", "电池屏", "电池柜", "蓄电池"]):
+        ups_attrs = extract_ups_params(text_no_const)
+        attrs.update(ups_attrs)
     
     if any(k in text_clean for k in ["kw", "千瓦", "功率", "配电箱", "箱", "柜"]):
         pw_attrs = extract_power_range(text_no_const)
@@ -338,7 +343,7 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
         sw_gang_attrs = extract_switch_gang_control(text_no_const)
         attrs.update(sw_gang_attrs)
 
-    if any(k in text_clean for k in ["线管", "jdg", "kbg", "导管", "穿线管", "kjg"]):
+    if domain == "conduit" or any(k in text_clean for k in ["线管", "jdg", "kbg", "导管", "穿线管", "kjg", "fpc", "kpc", "sc", "rc", "mt", "pc"]):
         cd_attrs = extract_conduit_params(text_no_const)
         attrs.update(cd_attrs)
 

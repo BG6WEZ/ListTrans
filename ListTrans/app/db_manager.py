@@ -4,12 +4,21 @@ import re
 import sqlite3
 import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
+from functools import lru_cache
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "materials.db")
+
+# Prevent OpenBLAS/PyTorch thread conflicts or multi-threaded connection locks
+_HAS_FTS_CACHE: Optional[bool] = None
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
     return conn
 
 def init_db(xlsx_path=None, force_reload=False):
@@ -106,6 +115,7 @@ def get_all_materials(limit=1000):
     conn.close()
     return [dict(r) for r in rows]
 
+@lru_cache(maxsize=50000)
 def query_by_code(code: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -114,10 +124,10 @@ def query_by_code(code: str) -> Optional[Dict[str, Any]]:
     conn.close()
     return dict(row) if row else None
 
-def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, Any]]:
+@lru_cache(maxsize=10000)
+def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> List[Dict[str, Any]]:
     """
-    Search database for materials using keyword.
-    Supports multi-word fuzzy search separated by spaces, commas, or semicolons.
+    Core cached search routine with standard fetch_limit=150 to maximize LRU cache hit rates.
     """
     if not keyword:
         return []
@@ -131,9 +141,11 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
         conn.close()
         return []
         
-    # Check if materials_fts exists
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
-    has_fts = cursor.fetchone() is not None
+    global _HAS_FTS_CACHE
+    if _HAS_FTS_CACHE is None:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
+        _HAS_FTS_CACHE = (cursor.fetchone() is not None)
+    has_fts = _HAS_FTS_CACHE
     
     if has_fts:
         from app.preprocessor import fts_tokenize
@@ -188,11 +200,10 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
                     WHERE materials_fts MATCH ?
                     ORDER BY rank
                     LIMIT ?
-                """, (fts_query, limit))
+                """, (fts_query, fetch_limit))
                 results = cursor.fetchall()
-                if results:
-                    conn.close()
-                    return [dict(r) for r in results]
+                conn.close()
+                return [dict(r) for r in results]
             except sqlite3.OperationalError:
                 pass
                 
@@ -207,7 +218,7 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
         like_tokens = raw_words
         
     like_clauses = " AND ".join(["search_tokens LIKE ?"] * len(like_tokens))
-    params = [f"%{t.lower()}%" for t in like_tokens] + [limit]
+    params = [f"%{t.lower()}%" for t in like_tokens] + [fetch_limit]
     
     cursor.execute(f"""
         SELECT * FROM materials 
@@ -218,6 +229,12 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
     results = cursor.fetchall()
     conn.close()
     return [dict(r) for r in results]
+
+def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, Any]]:
+    """Public search entry point with unified LRU caching."""
+    fetch_limit = max(150, limit)
+    cached = _search_materials_keyword_cached(keyword, fetch_limit)
+    return cached[:limit]
 
 def get_db_metadata() -> Dict[str, Any]:
     """Retrieve database row counts and last upload timestamps."""
@@ -296,7 +313,7 @@ def update_db_metadata(total_rows: int, imported_rows: int, disabled_rows: int, 
     conn.commit()
     conn.close()
 
-def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename: str = "materials.xlsx") -> Dict[str, Any]:
+def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename: str = "materials.xlsx", task_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Import materials from Excel file into SQLite database.
     mode: "replace" (full replacement) or "append" (incremental add).
@@ -356,7 +373,8 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     
     search_tokens_list = []
     parsed_params_list = []
-    for _, row in df_cleaned.iterrows():
+    
+    for idx, (_, row) in enumerate(df_cleaned.iterrows()):
         tokens = f"{row['name']} {row['specification']} {row['category']}".lower()
         search_tokens_list.append(tokens)
         
@@ -380,6 +398,16 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
                     break
             if is_missing_must:
                 pending_tasks.append((row['code'], full_spec, row['category']))
+                
+        if task_id and idx % 100 == 0:
+            try:
+                from app.server import upload_tasks
+                if task_id in upload_tasks:
+                    prog = min(90, int(10 + (idx / total_rows) * 80))
+                    upload_tasks[task_id]["structuring_progress"] = prog
+                    upload_tasks[task_id]["current_step"] = f"正在解析属性: {row['name'][:15]} ({idx}/{total_rows})"
+            except Exception as e:
+                print(f"Error updating task progress in import_materials_from_excel: {e}")
         
     df_cleaned = df_cleaned.copy()  # Avoid SettingWithCopyWarning
     df_cleaned["search_tokens"] = search_tokens_list

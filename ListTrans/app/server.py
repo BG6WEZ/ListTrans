@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
+
+# Prevent OpenBLAS/PyTorch OpenMP thread thrashing on multi-threaded numpy matrix ops (P1 Fix H2)
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+
 import logging
 import shutil
 import uuid
@@ -16,7 +25,7 @@ import json
 
 from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_PATH, get_db_connection
 from app.preprocessor import extract_params, clean_text, reload_preprocessor_configs, extract_device_name, remove_construction_info
-from app.query_preprocessor import extract_query_params
+from app.query_preprocessor import extract_query_params, is_valid_query_item
 from app.vector_index import index_manager
 from app.matcher import match_item, reload_matcher_configs
 from app.report_generator import generate_standard_report
@@ -40,7 +49,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:18080,http://localhost:18080").split(",")
 
 app = FastAPI(
     title="华康洁净物料清单匹配工具",
@@ -323,7 +332,7 @@ async def api_system_reset(current_user: dict = Depends(get_current_user)):
         if os.path.exists(BINDING_FEEDBACK_FILE):
             try:
                 with open(BINDING_FEEDBACK_FILE, "w", encoding="utf-8") as f:
-                    json.dump({}, f)
+                    json.dump([], f)
             except Exception as e:
                 logger.error(f"Failed to reset binding feedback file: {e}")
                 
@@ -432,8 +441,8 @@ def save_auto_binding_rules(rules: List[Dict[str, Any]]):
     except Exception as e:
         logger.error(f"Error saving auto binding rules: {e}")
 
-# Thread Pool for concurrent matching
-executor = ThreadPoolExecutor(max_workers=10)
+# Thread Pool for concurrent matching (4 workers optimal for CPU throughput without thread thrashing)
+executor = ThreadPoolExecutor(max_workers=4)
 
 @app.on_event("startup")
 async def startup_event():
@@ -456,18 +465,15 @@ async def startup_event():
     # Always call init_db to check schema and self-heal if necessary
     init_db(xlsx_path)
     
-    # Verify/build vector index asynchronously in background thread to avoid blocking server startup
-    import threading
-    def build_index_async():
-        logger.info("Starting background vector index verification/build...")
-        try:
-            index_manager.check_db_timestamp_and_build(DB_PATH)
-            logger.info("Background vector index verification/build completed.")
-        except Exception as e:
-            logger.error(f"Error in background vector index build: {e}")
+    # Verify/load vector index on main thread
+    logger.info("Initializing vector index mapping...")
+    try:
+        index_manager.check_db_timestamp_and_build(DB_PATH)
+        logger.info("Vector index initialization completed.")
+    except Exception as e:
+        logger.error(f"Error in vector index initialization: {e}")
 
-    threading.Thread(target=build_index_async, daemon=True).start()
-    logger.info("SQLite DB, Auth DB, Session DB checked. Vector index build started in background.")
+    logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
 
 class BindingModel(BaseModel):
     code: str
@@ -503,7 +509,7 @@ class ExportRequest(BaseModel):
 class RematchRequest(BaseModel):
     row_id: int
     text: str
-    fixed_params: Dict[str, Any] # {air_volume, power, dn, model}
+    fixed_params: Dict[str, Any]
     professional: Optional[str] = "暖通"
 
 class ConfigSaveRequest(BaseModel):
@@ -517,21 +523,9 @@ class FeedbackSubmitRequest(BaseModel):
     manual_code: str
     is_correct: bool
 
-@app.post("/api/upload", dependencies=[Depends(require_employee)])
-async def upload_file(file: UploadFile = File(...)):
-    """
-    Upload original list and perform high performance batch matching.
-    """
-    if not file.filename.endswith((".xlsx", ".xls")):
-        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
-        
-    logger.info(f"Received query list Excel upload: {file.filename}")
-    file_id = str(uuid.uuid4())
-    temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{file.filename}")
-    
-    with open(temp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
+upload_tasks = {}
+
+def async_process_upload_task(task_id: str, temp_path: str):
     try:
         wb = openpyxl.load_workbook(temp_path, data_only=True)
         raw_rows = []
@@ -557,8 +551,13 @@ async def upload_file(file: UploadFile = File(...)):
             
         exclude_kws = ["说明", "汇总", "商务部", "备用"]
         
+        # Phase 1: Structuring
+        upload_tasks[task_id]["current_step"] = "正在读取并解析 Excel 工作表..."
+        upload_tasks[task_id]["structuring_progress"] = 5
+        
         global_row_counter = 1
-        for sheet_name in wb.sheetnames:
+        total_sheets = len(wb.sheetnames)
+        for s_idx, sheet_name in enumerate(wb.sheetnames):
             # Check sheet exclusion
             if any(kw in sheet_name for kw in exclude_kws):
                 continue
@@ -578,7 +577,6 @@ async def upload_file(file: UploadFile = File(...)):
                     break
             
             if not header_row:
-                # Fallback if no matching header row found: default column positions
                 code_idx = 1
                 name_idx = 2
                 spec_idx = 3
@@ -592,7 +590,6 @@ async def upload_file(file: UploadFile = File(...)):
                 start_r = header_row + 1
                 headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
                 
-                # Default mappings (use first match to prevent duplicate trailing columns from overwriting indices)
                 code_idx = None
                 name_idx = None
                 spec_idx = None
@@ -623,7 +620,6 @@ async def upload_file(file: UploadFile = File(...)):
                     elif "品牌" in h_str and brand_idx is None:
                         brand_idx = idx + 1
 
-                # Set fallbacks if not found
                 if code_idx is None: code_idx = 1
                 if name_idx is None: name_idx = 2
                 if spec_idx is None: spec_idx = 3
@@ -631,24 +627,28 @@ async def upload_file(file: UploadFile = File(...)):
                 if qty_idx is None: qty_idx = 5
             
             # Extract data rows
-            for r in range(start_r, sheet.max_row + 1):
-                val_b = sheet.cell(r, name_idx).value  # 名称
-                val_c = sheet.cell(r, spec_idx).value  # 规格
-                
-                # Skip headers, empty rows, total summary, subheadings
-                if not val_b or str(val_b).strip() == "" or str(val_b).strip() == "*名称" or str(val_b).strip() == "合计" or str(val_b).strip() == "项目名称":
+            total_r = sheet.max_row
+            for r in range(start_r, total_r + 1):
+                val_b = sheet.cell(r, name_idx).value
+                val_c = sheet.cell(r, spec_idx).value
+                val_b_str = str(val_b or "").strip()
+                val_c_str = str(val_c or "").strip()
+                unit_str = str(sheet.cell(r, unit_idx).value or "台").strip() if unit_idx else "台"
+
+                original_code = ""
+                if code_idx:
+                    original_code = str(sheet.cell(r, code_idx).value or "").strip()
+
+                is_valid, _ = is_valid_query_item(val_b_str, val_c_str, unit_str, original_code, r)
+                if not is_valid:
                     continue
-                if str(val_b).strip().endswith("部分") or str(val_b).strip().startswith("机组设备"):
-                    continue
-                if val_c is None or str(val_c).strip() == "" or str(val_c).strip() == "规格型号/特征":
-                    continue
-                    
+
                 qty_val = sheet.cell(r, qty_idx).value
                 try:
                     qty = float(qty_val) if qty_val is not None else 0.0
                 except ValueError:
                     qty = 0.0
-                    
+
                 loss = 1.0
                 if loss_idx:
                     loss_val = sheet.cell(r, loss_idx).value
@@ -656,27 +656,21 @@ async def upload_file(file: UploadFile = File(...)):
                         loss = float(loss_val) if loss_val is not None else 1.0
                     except ValueError:
                         loss = 1.0
-                
+
                 category = ""
                 if category_idx:
                     category = str(sheet.cell(r, category_idx).value or "").strip()
-                    if category in ["", "/"]:
-                        continue
-                    
+
                 brand = ""
                 if brand_idx:
                     brand = str(sheet.cell(r, brand_idx).value or "").strip()
-                    
-                original_code = ""
-                if code_idx:
-                    original_code = str(sheet.cell(r, code_idx).value or "").strip()
-                    
+
                 raw_rows.append({
                     "row_idx": global_row_counter,
                     "code": original_code,
-                    "name": str(val_b).strip(),
-                    "specification": str(val_c).strip(),
-                    "unit": str(sheet.cell(r, unit_idx).value or "台").strip(),
+                    "name": val_b_str,
+                    "specification": val_c_str,
+                    "unit": unit_str,
                     "qty": qty,
                     "loss": loss,
                     "category": category,
@@ -684,78 +678,196 @@ async def upload_file(file: UploadFile = File(...)):
                     "professional": professional
                 })
                 global_row_counter += 1
-                
+
+            # Update sheet level progress
+            sheet_prog = min(95, int(5 + ((s_idx + 1) / total_sheets) * 90))
+            upload_tasks[task_id]["structuring_progress"] = sheet_prog
+
         wb.close()
         os.remove(temp_path)
         
-        # Batch match the collected rows
-        parsed_rows = batch_match_rows(raw_rows)
-        return JSONResponse(content={"items": parsed_rows})
+        upload_tasks[task_id]["structuring_progress"] = 100
+        upload_tasks[task_id]["current_step"] = "Excel 清单数据解析完成，开始智能特征比对..."
+        
+        # Batch match matching rows
+        parsed_rows = batch_match_rows(raw_rows, task_id=task_id)
+        
+        upload_tasks[task_id]["status"] = "completed"
+        upload_tasks[task_id]["result"] = parsed_rows
+        upload_tasks[task_id]["current_step"] = "所有清单项目已智能比对匹配完成！"
         
     except Exception as e:
         if os.path.exists(temp_path):
-            os.remove(temp_path)
-        raise HTTPException(status_code=500, detail=f"Error parsing original list: {str(e)}")
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+        logger.error(f"Error during async process upload task: {e}")
+        upload_tasks[task_id]["status"] = "failed"
+        upload_tasks[task_id]["error"] = str(e)
+        upload_tasks[task_id]["current_step"] = f"处理出错: {str(e)}"
 
-def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Helper to perform batch encoding and threadpool matching in chunks of 500."""
-    total_results = []
+@app.post("/api/upload", dependencies=[Depends(require_employee)])
+async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    """
+    Upload original list and start high performance batch matching background task.
+    """
+    if not file.filename.endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
+        
+    logger.info(f"Received query list Excel upload: {file.filename}")
+    file_id = str(uuid.uuid4())
+    temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{file.filename}")
     
+    with open(temp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    task_id = str(uuid.uuid4())
+    upload_tasks[task_id] = {
+        "status": "processing",
+        "structuring_progress": 0,
+        "vectorization_progress": 0,
+        "matching_progress": 0,
+        "current_step": "正在初始化后台比对任务...",
+        "result": None,
+        "error": None
+    }
+    
+    background_tasks.add_task(async_process_upload_task, task_id, temp_path)
+    return JSONResponse(content={"task_id": task_id})
+
+@app.get("/api/upload/status", dependencies=[Depends(require_employee)])
+async def get_upload_status(task_id: str):
+    """
+    Query current upload process progress status.
+    """
+    if task_id not in upload_tasks:
+        raise HTTPException(status_code=404, detail="指定任务不存在")
+    return JSONResponse(content=upload_tasks[task_id])
+
+def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Helper to perform batch encoding and threadpool matching in chunks of 500."""
+    import time
+    
+    def log_debug(msg: str):
+        try:
+            with open("c:/Users/wangd/project/ListTrans/ListTrans/logs/debug_match.log", "a", encoding="utf-8") as f:
+                f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {msg}\n")
+        except Exception:
+            pass
+            
+    log_debug(f"batch_match_rows started for {len(raw_rows)} rows. task_id: {task_id}")
+    total_results = []
+    total_items = len(raw_rows)
+
     # Load confirmed auto-binding rules
+    log_debug("Loading auto binding rules...")
     rules = load_auto_binding_rules()
     rules_map = {r["original_name"].strip(): r["bound_materials"] for r in rules if r.get("original_name")}
+    log_debug(f"Loaded {len(rules_map)} rules.")
+
+    # Step 1: Pre-process all rows
+    if task_id:
+        upload_tasks[task_id]["current_step"] = "正在对清单特征参数进行清洗与解析..."
     
-    # Process in chunks of 500
-    chunk_size = 500
-    for idx in range(0, len(raw_rows), chunk_size):
-        chunk = raw_rows[idx : idx + chunk_size]
+    log_debug("Step 1: Preprocessing query parameters...")
+    preprocessed_rows = []
+    for idx, item in enumerate(raw_rows):
+        raw_name = item["name"].strip()
+        raw_spec = item["specification"].strip()
+        prof = item.get("professional", "暖通")
+
+        parsed_info = extract_query_params(raw_name, raw_spec, prof)
+        real_name = parsed_info.get("name") or raw_name
+        clean_spec = parsed_info.get("spec") or raw_spec
+
+        preprocessed_rows.append({
+            "real_name": real_name,
+            "clean_spec": clean_spec,
+            "parsed_info": parsed_info,
+            "item": item
+        })
         
-        # 1. Pre-process chunk to extract refined names and clean specifications (removing construction noise)
-        preprocessed_chunk = []
-        for item in chunk:
-            raw_name = item["name"].strip()
-            real_name = raw_name
-            if len(raw_name) <= 3 or any(kw in raw_name for kw in ["柜", "线", "管", "阀", "箱", "板", "支架", "按钮"]):
-                real_name = extract_device_name(item["specification"], raw_name)
+        if task_id and idx % 5 == 0:
+            upload_tasks[task_id]["current_step"] = f"【解析特征】 {raw_name[:25]} ({idx}/{total_items})"
+    log_debug(f"Preprocessing completed for {len(preprocessed_rows)} rows.")
+
+    # Step 2: Batch Vectorization (Encoding)
+    if task_id:
+        upload_tasks[task_id]["current_step"] = "正在生成文本语义特征（向量化中）..."
+        upload_tasks[task_id]["vectorization_progress"] = 0
+
+    log_debug("Step 2: Batch encoding...")
+    from app.vector_index import index_manager
+    embeddings_list = [None] * total_items
+    
+    if index_manager.is_enabled:
+        chunk_size = 500
+        for idx in range(0, total_items, chunk_size):
+            chunk = preprocessed_rows[idx : idx + chunk_size]
+            chunk_texts = [f"{p['real_name']} {p['clean_spec']}".strip() for p in chunk]
             
-            clean_spec = remove_construction_info(item["specification"])
-            preprocessed_chunk.append({
-                "real_name": real_name,
-                "clean_spec": clean_spec,
-                "item": item
-            })
+            log_debug(f"Encoding chunk {idx} to {idx + len(chunk)}...")
+            # Batch encode
+            chunk_embeddings = index_manager.encode_queries(chunk_texts)
+            if chunk_embeddings is not None:
+                for offset, emb in enumerate(chunk_embeddings):
+                    embeddings_list[idx + offset] = emb
             
-        # 2. Batch vector encoding (main thread, avoiding PyTorch thread thrashing)
-        query_vectors = None
-        if index_manager.is_enabled:
-            texts_to_encode = [f"{p['real_name']} {p['clean_spec']}".strip() for p in preprocessed_chunk]
-            query_vectors = index_manager.encode_queries(texts_to_encode)
-            
-        # 3. Prepare match jobs for execution
+            if task_id:
+                vect_progress = min(100, int(((idx + len(chunk)) / total_items) * 100))
+                upload_tasks[task_id]["vectorization_progress"] = vect_progress
+                upload_tasks[task_id]["current_step"] = f"【特征提取】 {chunk[0]['real_name'][:25]} ({idx + len(chunk)}/{total_items})"
+    else:
+        log_debug("Vector index not enabled. Skipping vector encoding.")
+        if task_id:
+            upload_tasks[task_id]["vectorization_progress"] = 100
+    log_debug("Encoding completed.")
+
+    # Step 3: Fast Matching (Search & Score)
+    if task_id:
+        upload_tasks[task_id]["current_step"] = "正在与标准库进行高精匹配与重打分..."
+        upload_tasks[task_id]["matching_progress"] = 0
+
+    log_debug("Step 3: Sequential matching...")
+    # Process in chunks of 500 for matching and series rank boosting
+    chunk_size = 500
+    for idx in range(0, total_items, chunk_size):
+        chunk = preprocessed_rows[idx : idx + chunk_size]
+        chunk_embeddings = embeddings_list[idx : idx + chunk_size]
+        
+        # Prepare match jobs
         match_jobs = []
-        for i, p in enumerate(preprocessed_chunk):
+        for offset, p in enumerate(chunk):
             item = p["item"]
+            q_vector = chunk_embeddings[offset]
             query_info = {
                 "name": p["real_name"],
                 "specification": p["clean_spec"],
                 "category": item.get("category") or item.get("professional") or p["real_name"],
                 "brand": item["brand"],
-                "professional": item.get("professional", "暖通")
+                "professional": item.get("professional", "暖通"),
+                "parsed_spec": p["parsed_info"]
             }
-            # Pre-parse specs with professional category hint
-            query_info["parsed_spec"] = extract_query_params(item.get("name", ""), item["specification"], query_info["professional"])
-            
-            q_vector = query_vectors[i] if query_vectors is not None else None
             match_jobs.append((query_info, q_vector, item))
             
-        # 4. Submit matching to ThreadPool to find exact matches for series clustering
-        futures = []
-        for q_info, q_vector, item in match_jobs:
-            futures.append(executor.submit(match_item, q_info, q_vector))
+        log_debug(f"Matching jobs chunk {idx} to {idx + len(chunk)}...")
+        # First pass sequential matching (using pre-computed vectors)
+        first_pass_results = []
+        for offset, (q_info, q_vector, item) in enumerate(match_jobs):
+            current_idx = idx + offset + 1
+            if task_id:
+                upload_tasks[task_id]["current_step"] = f"【智能匹配】 {q_info['name'][:25]} ({current_idx}/{total_items})"
+                upload_tasks[task_id]["matching_progress"] = min(100, int((current_idx / total_items) * 100))
             
-        # Collect first-pass results
-        first_pass_results = [f.result() for f in futures]
+            log_debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
+            t_start_match = time.time()
+            res = match_item(q_info, q_vector)
+            t_elapsed_match = time.time() - t_start_match
+            log_debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
+            first_pass_results.append(res)
         
+        log_debug(f"Determining confirmed series for chunk {idx}...")
         # Determine confirmed series from exact matches (Score >= 85)
         confirmed_series = []
         for res in first_pass_results:
@@ -766,12 +878,13 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     prefix = model.split("-")[0].strip().lower()
                     if prefix not in confirmed_series:
                         confirmed_series.append(prefix)
+        log_debug(f"Confirmed series: {confirmed_series}")
                         
-        # 4. Second pass: re-match non-exact matches using series clustering (fast, pure memory sorting)
+        # Second pass: re-match non-exact matches using series clustering
+        log_debug(f"Second pass matching for chunk {idx}...")
         final_chunk_results = []
         for i, (q_info, q_vector, item) in enumerate(match_jobs):
             res = first_pass_results[i]
-            
             item_name_clean = item["name"].strip()
             rule_bindings = rules_map.get(item_name_clean)
             
@@ -812,9 +925,18 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "bindings": bindings_list
                 })
             else:
-                # If not exact match, rerun matching with confirmed series info to adjust ranks
-                if not res["is_exact"] and confirmed_series:
-                    res = match_item(q_info, q_vector, confirmed_series)
+                # Fast in-memory series rank boost without re-running full recall/scoring
+                if not res["is_exact"] and confirmed_series and res.get("top_candidates"):
+                    for cand in res["top_candidates"]:
+                        c_spec = cand.get("specification", "")
+                        c_model = extract_params(c_spec).get("model", "")
+                        if c_model:
+                            c_prefix = c_model.split("-")[0].strip().lower()
+                            if c_prefix in confirmed_series:
+                                cand["score"] = min(100.0, cand["score"] + 5.0)
+                                if "系列优先" not in cand.get("match_reasons", []):
+                                    cand.setdefault("match_reasons", []).append("系列优先")
+                    res["top_candidates"].sort(key=lambda x: x["score"], reverse=True)
                     
                 top_cands = res["top_candidates"]
                 first_cand = top_cands[0] if top_cands else None
@@ -855,6 +977,12 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             
         total_results.extend(final_chunk_results)
         
+        if task_id:
+            match_progress = min(100, int(((idx + len(chunk)) / total_items) * 100))
+            upload_tasks[task_id]["matching_progress"] = match_progress
+            upload_tasks[task_id]["current_step"] = f"正在与企业标准库进行深度比对与打分... ({idx + len(chunk)}/{total_items})"
+            
+    log_debug("batch_match_rows completed.")
     return total_results
 
 @app.post("/api/batch_match", dependencies=[Depends(require_employee)])
@@ -1028,7 +1156,9 @@ async def api_submit_binding(req: BindingSubmitRequest):
         if os.path.exists(BINDING_FEEDBACK_FILE):
             try:
                 with open(BINDING_FEEDBACK_FILE, "r", encoding="utf-8") as f:
-                    samples = json.load(f)
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        samples = data
             except Exception:
                 pass
         
@@ -1055,6 +1185,8 @@ async def api_get_binding_suggestions():
             
         with open(BINDING_FEEDBACK_FILE, "r", encoding="utf-8") as f:
             samples = json.load(f)
+            if not isinstance(samples, list):
+                samples = []
             
         groups = {} # original_name -> { serialized_bindings -> count }
         bindings_map = {} # serialized_bindings -> bindings_list
@@ -1231,23 +1363,19 @@ async def api_db_metadata():
         logger.error(f"Error querying db metadata: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/db/upload", dependencies=[Depends(require_director)])
-async def api_db_upload(
-    file: UploadFile = File(...),
-    mode: str = Form("replace") # "replace" or "append"
-):
-    """Upload and import materials to the global database, then rebuild FAISS index."""
-    temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{file.filename}")
+def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str):
     try:
-        # Save temp file
-        with open(temp_path, "wb") as f:
-            shutil.copyfileobj(file.file, f)
-            
-        logger.info(f"Received material Excel import. Filename: {file.filename}, Mode: {mode}")
+        logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}")
+        upload_tasks[task_id]["current_step"] = "正在解析并清洗物料数据..."
+        upload_tasks[task_id]["structuring_progress"] = 10
         
         # Import to SQLite
         from app.db_manager import import_materials_from_excel, get_db_connection
-        meta = import_materials_from_excel(temp_path, mode, file.filename)
+        meta = import_materials_from_excel(temp_path, mode, filename, task_id=task_id)
+        
+        upload_tasks[task_id]["structuring_progress"] = 100
+        upload_tasks[task_id]["current_step"] = "物料数据结构化完成，开始重建向量索引..."
+        upload_tasks[task_id]["vectorization_progress"] = 10
         
         # Reload vector index mapping & index from sqlite
         conn = get_db_connection()
@@ -1256,21 +1384,59 @@ async def api_db_upload(
         materials = [dict(row) for row in cursor.fetchall()]
         conn.close()
         
-        logger.info(f"Rebuilding vector index for {len(materials)} materials...")
-        index_manager.build_index(materials)
+        upload_tasks[task_id]["current_step"] = f"正在为 {len(materials)} 项物料生成向量特征并重建索引..."
+        upload_tasks[task_id]["vectorization_progress"] = 30
+        
+        # Rebuild vector index
+        index_manager.build_index(materials, task_id=task_id)
         index_manager.save_cache()
         logger.info("Vector index rebuilt and saved successfully.")
         
+        upload_tasks[task_id]["vectorization_progress"] = 100
+        upload_tasks[task_id]["matching_progress"] = 100
+        upload_tasks[task_id]["status"] = "completed"
+        upload_tasks[task_id]["result"] = meta
+        upload_tasks[task_id]["current_step"] = "标准物料数据库导入及向量索引重建全部完成！"
+    except Exception as e:
+        logger.error(f"Error during async process db upload task: {e}")
+        upload_tasks[task_id]["status"] = "failed"
+        upload_tasks[task_id]["error"] = str(e)
+        upload_tasks[task_id]["current_step"] = f"导入出错: {str(e)}"
+    finally:
         # Clean up temp file
         if os.path.exists(temp_path):
-            os.remove(temp_path)
-            
-        return JSONResponse(content={"success": True, "metadata": meta})
-    except Exception as e:
-        logger.error(f"Error importing material database: {e}")
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-        raise HTTPException(status_code=500, detail=f"Database import failed: {str(e)}")
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+@app.post("/api/db/upload", dependencies=[Depends(require_director)])
+async def api_db_upload(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    mode: str = Form("replace") # "replace" or "append"
+):
+    """Upload and import materials to the global database, then rebuild FAISS index asynchronously."""
+    if not file.filename.endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
+        
+    temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{file.filename}")
+    with open(temp_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+        
+    task_id = str(uuid.uuid4())
+    upload_tasks[task_id] = {
+        "status": "processing",
+        "structuring_progress": 0,
+        "vectorization_progress": 0,
+        "matching_progress": 0,
+        "current_step": "正在初始化后台物料库导入任务...",
+        "result": None,
+        "error": None
+    }
+    
+    background_tasks.add_task(async_process_db_upload_task, task_id, temp_path, mode, file.filename)
+    return JSONResponse(content={"task_id": task_id})
 
 from pydantic import BaseModel
 from typing import Optional, List
@@ -1356,5 +1522,5 @@ app.mount("/", StaticFiles(directory=web_dir, html=True), name="static")
 if __name__ == "__main__":
     import uvicorn
     host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8000"))
+    port = int(os.getenv("PORT", "18080"))
     uvicorn.run(app, host=host, port=port)

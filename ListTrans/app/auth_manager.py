@@ -70,7 +70,7 @@ def init_auth_db():
     admin_exists = cursor.fetchone() is not None
     if not admin_exists:
         admin_user = os.getenv("ADMIN_USERNAME", "admin")
-        admin_pass = os.getenv("ADMIN_PASSWORD", "AdminPassword@2026")
+        admin_pass = os.getenv("ADMIN_PASSWORD", "admin")
         hashed_pass = get_password_hash(admin_pass)
         
         try:

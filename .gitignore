@@ -30,3 +30,5 @@ env/
 
 # Large files
 *.tar
+*.zip
+**/model_offline/

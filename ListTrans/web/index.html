@@ -23,7 +23,7 @@
                 <img src="logo500.png" alt="Logo" class="logo-img" style="height: 38px; border-radius: 4px; background-color: white; padding: 2px;" />
                 <div class="logo-text">
                     <h1>华康洁净物料清单匹配工具</h1>
-                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.5</span></span>
+                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.6</span></span>
                 </div>
             </div>
             
@@ -760,10 +760,52 @@
 
     <!-- Spinner / Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay" style="display: none;">
-        <div class="spinner-card">
-            <div class="spinner"></div>
-            <h3 id="loading-title">正在处理中...</h3>
-            <p id="loading-subtitle">系统正在解析目标列规格参数并比对检索库...</p>
+        <div class="spinner-card" style="width: 480px; padding: 30px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div class="spinner" style="margin-bottom: 8px;"></div>
+            <h3 id="loading-title" style="margin: 0; font-size: 18px; font-weight: 600;">正在处理中...</h3>
+            <span id="loading-timer" style="font-size: 11px; color: var(--color-text-muted); font-family: monospace; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); display: none;">已用时 0 秒</span>
+            <p id="loading-subtitle" style="margin: 0; color: var(--color-text-secondary); font-size: 13px; text-align: center; line-height: 1.5; min-height: 38px; display: flex; align-items: center; justify-content: center;">系统正在读取清单数据，请稍候...</p>
+            
+            <!-- Segmented Progress Section -->
+            <div class="segmented-progress" id="segmented-progress-container" style="display: none; flex-direction: column; gap: 14px; width: 100%; text-align: left; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                <!-- 1. Structuring Progress -->
+                <div class="progress-step-item">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                        <span style="color: var(--color-text-primary); font-weight: 500;"><i class="fa-solid fa-list-check" style="margin-right: 8px; color: #3b82f6; width: 16px; text-align: center;"></i> 1. 数据结构化进度</span>
+                        <span id="progress-val-structuring" style="font-weight: 600; color: #3b82f6;">0%</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+                        <div id="progress-bar-structuring" style="width: 0%; height: 100%; background: #3b82f6; border-radius: 3px; transition: width 0.2s ease;"></div>
+                    </div>
+                </div>
+                
+                <!-- 2. Vectorization Progress -->
+                <div class="progress-step-item">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                        <span style="color: var(--color-text-primary); font-weight: 500;"><i class="fa-solid fa-bezier-curve" style="margin-right: 8px; color: #a855f7; width: 16px; text-align: center;"></i> 2. 文本向量化进度</span>
+                        <span id="progress-val-vectorization" style="font-weight: 600; color: #a855f7;">0%</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+                        <div id="progress-bar-vectorization" style="width: 0%; height: 100%; background: #a855f7; border-radius: 3px; transition: width 0.2s ease;"></div>
+                    </div>
+                </div>
+                
+                <!-- 3. Matching Progress -->
+                <div class="progress-step-item">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                        <span style="color: var(--color-text-primary); font-weight: 500;"><i class="fa-solid fa-circle-check" style="margin-right: 8px; color: #10b981; width: 16px; text-align: center;"></i> 3. 智能匹配进度</span>
+                        <span id="progress-val-matching" style="font-weight: 600; color: #10b981;">0%</span>
+                    </div>
+                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03);">
+                        <div id="progress-bar-matching" style="width: 0%; height: 100%; background: #10b981; border-radius: 3px; transition: width 0.2s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- Real-time dynamic logs -->
+                <div id="progress-current-item" style="margin-top: 6px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.08); font-size: 11px; color: #c084fc; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: monospace; line-height: 1.5; min-height: 18px;">
+                    正在启动匹配系统...
+                </div>
+            </div>
         </div>
     </div>
 

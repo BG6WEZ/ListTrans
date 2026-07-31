@@ -57,7 +57,7 @@
    pip install -r requirements.txt
    ```
 4. 双击运行根目录下的 [start.bat](file:///Users/tlyer/Project/ListTrans/start.bat)。
-5. 系统会自动启动 Web 服务并调用默认浏览器打开本地页面：`http://127.0.0.1:8000`。
+5. 系统会自动启动 Web 服务并调用默认浏览器打开本地页面：`http://127.0.0.1:18080`。
 6. 使用默认管理员账号进行登录测试：
    * **用户名**：`admin`
    * **密码**：`AdminPassword@2026`

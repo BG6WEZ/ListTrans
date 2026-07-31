@@ -89,6 +89,28 @@ class TestHVACParser(unittest.TestCase):
         
 class TestHVACMatcher(unittest.TestCase):
     def test_matching_logic(self):
+        # Force insert mock items to ensure they exist with parameters for this test, resolving test pollution
+        from app.db_manager import get_db_connection
+        from app.preprocessor import extract_params
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        mock_materials = [
+            ("3.60.21.1553", "医用洁净型组合式空调机组", "医用洁卫型空调机组(室外型)", "机组风量:8000m3/h；新风量:2400m3/h；机外余压:650Pa；功率:5.5kw", "台", "", ""),
+            ("3.60.21.0231", "医用洁净型组合式空调机组", "医用洁卫型空调机组(室外型)", "机组风量:8000m3/h；新风量:2400m3/h；机外余压:650Pa；功率:5.5kw", "台", "", ""),
+        ]
+        for code, category, name, spec, unit, brand, desc in mock_materials:
+            tokens = f"{name} {spec} {category}".lower()
+            full_spec = f"{spec} {desc}".strip()
+            parsed = extract_params(full_spec, category)
+            parsed_json = json.dumps(parsed, ensure_ascii=False)
+            cursor.execute("""
+                INSERT OR REPLACE INTO materials 
+                (code, category, name, specification, unit, brand, description, search_tokens, parsed_params)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (code, category, name, spec, unit, brand, desc, tokens, parsed_json))
+        conn.commit()
+        conn.close()
+
         # We test matching with a mock item
         query = {
             "name": "医用洁卫型空调机组(室外型)",

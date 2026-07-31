@@ -58,14 +58,21 @@ def run_regression():
             top_candidates = match_res.get("top_candidates", [])
             
             top_codes = [c.get("code") for c in top_candidates[:3]]
+            is_top1 = False
             if top_codes:
                 if top_codes[0] == gt_code:
                     top1_hits += 1
+                    is_top1 = True
                 if gt_code in top_codes:
                     top3_hits += 1
+            if not is_top1 and idx < 30:
+                print(f"Mismatch [{idx}]: Query Name='{name}', Spec='{spec.replace(chr(10), ' ')}', Cat='{cat}'")
+                print(f"  GT Code: {gt_code}")
+                print(f"  Top Codes matched: {top_codes}")
+                if top_candidates:
+                    print(f"  Top candidate: Code={top_candidates[0]['code']}, Name='{top_candidates[0]['name']}', Spec='{top_candidates[0]['specification']}', Score={top_candidates[0]['score']}")
         except Exception as e:
-            # print(f"Match error for item {idx}: {e}")
-            pass
+            print(f"Match error for item {idx}: {e}")
             
         # 2. Evaluate Must Attribute Extraction
         try:

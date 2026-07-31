@@ -10,7 +10,8 @@ from app.domain_extractors import ConfigDrivenExtractor, parse_numeric_complex
 NOISE_SECTION_KEYWORDS = [
     "工作内容", "施工内容", "施工部位", "敷设方式", "安装方式", "包含完成该项",
     "单价暂按", "暂估", "全费用", "根据实际", "包工包料", "配合", "试压", "清理基层",
-    "检验试验", "冲洗", "调试", "吹扫", "成品保护", "管道及管件安装", "此为成品安装价格"
+    "检验试验", "冲洗", "调试", "吹扫", "成品保护", "管道及管件安装", "此为成品安装价格",
+    "重新重复名称", "备注"
 ]
 
 # HVAC Unit Type Rules (14 standard acronyms & Chinese keywords)
@@ -31,6 +32,116 @@ HVAC_UNIT_MAP = [
     ("AHU", ["AHU", "组合式空气处理机组", "空气处理机组", "组合式空调"])
 ]
 
+def is_valid_query_item(name: Any, spec: Any, unit: Any = "", code: Any = "", row_index: int = 0) -> Tuple[bool, str]:
+    """
+    IR-0 Extended Filtering Rules (10 exact rules)
+    Returns: (is_valid: bool, rule_reason: str)
+    """
+    name_str = str(name).strip() if (name is not None and name != "nan") else ""
+    spec_str = str(spec).strip() if (spec is not None and spec != "nan") else ""
+    unit_str = str(unit).strip() if (unit is not None and unit != "nan") else ""
+    code_str = str(code).strip() if (code is not None and code != "nan") else ""
+
+    # Rule 1: Empty row / openpyxl isolated None row
+    if not name_str and not spec_str:
+        return False, "R1_EMPTY_ROW"
+
+    # Rule 2: Subtotal / Total summary row
+    if name_str in ["小计", "合计", "总计", "合计：", "小计：", "总计："]:
+        return False, "R2_TOTAL_ROW"
+
+    # Rule 3: Cross-sheet repeated header row
+    if name_str in ["名称", "*名称", "项目名称", "构件名称", "材料(设备)名称", "材料名称", "设备名称"]:
+        return False, "R3_REPEAT_HEADER_ROW"
+
+    # Rule 4: Preface & documentation instruction row
+    if any(k in name_str for k in ["编制依据", "图纸版本号", "图纸号", "计量依据", "设计说明"]):
+        return False, "R4_PREFACE_NOTE_ROW"
+
+    # Rule 5: Outline chapter title row (no spec, unit, or quantity)
+    if (re.match(r'^[一二三四五六七八九十]+\s*[、\.]', name_str) or re.match(r'^\d+\.\d+\s+', name_str)) and not unit_str and not spec_str:
+        return False, "R5_OUTLINE_TITLE_ROW"
+
+    # Rule 6: Single-cell paragraph description (length > 100 with no parameters)
+    if len(name_str) > 100 and not unit_str and not spec_str:
+        return False, "R6_LONG_TEXT_NOTE_ROW"
+
+    # Rule 7: Footer note / sign-off row
+    if any(k in name_str for k in ["编制人:", "编制人：", "审核人:", "审核人：", "编制日期:", "编制日期：", "制表人:", "制表人："]):
+        return False, "R7_FOOTER_NOTE_ROW"
+
+    # Rule 8: Formula calculation row (name empty, spec contains operators +, -, *, /, = and math chars)
+    if not name_str and any(op in spec_str for op in ['+', '-', '*', '/', '=']) and re.match(r'^[0-9\+\-\*\/\(\)\.\=\s]+$', spec_str):
+        return False, "R8_FORMULA_CALC_ROW"
+
+    # Rule 9: Isolated short value row from split merged cells
+    if not name_str and not code_str and len(spec_str) < 3 and not unit_str:
+        return False, "R9_MERGED_CELL_ORPHAN_ROW"
+
+    # Rule 10: Special table divider row
+    if name_str.startswith("===") or spec_str.startswith("===") or name_str.startswith("---") or spec_str.startswith("---"):
+        return False, "R10_DIVIDER_ROW"
+
+    return True, "VALID_ITEM"
+
+def clean_query_text_ir1(text: str) -> str:
+    """
+    IR-1 Text Normalization:
+    - Full-width to half-width characters
+    - Punctuation & multiplication symbol normalization (* instead of X/x/×)
+    - Whitelisted prefix stripping (preserves numbers followed by mm, A, kW, DN, m², *, ℃)
+    """
+    if not text:
+        return ""
+
+    t = to_half_width(text).strip()
+    t = t.replace("：", ":").replace("；", ";").replace("（", "(").replace("）", ")").replace("，", ",")
+    t = re.sub(r'([0-9])\s*[xX×]\s*([0-9])', r'\1*\2', t)
+
+    # Prefix index stripping with unit whitelist protection
+    # Section numbers typically look like "1.", "1.1", "12." (1-2 digits per level)
+    lines = t.split("\n")
+    cleaned_lines = []
+    for line in lines:
+        l_str = line.strip()
+        if not l_str:
+            continue
+        m = re.match(r'^(\d{1,2}(?:\.\d{1,2})?)[\.．、\s]\s*(.*)$', l_str)
+        if m:
+            rest = m.group(2).strip()
+            # Whitelist check for units/numbers right after prefix
+            whitelist_units = ["MM", "MM2", "MM²", "M2", "M²", "KW", "W", "A", "V", "DN", "DE", "PA", "KPA", "MPA", "℃", "°C", "*", "寸", "P", "R"]
+            rest_upper = rest.upper()
+            is_whitelisted = any(rest_upper.startswith(u) for u in whitelist_units)
+            if not is_whitelisted and (not rest or re.match(r'^[一-龥a-zA-Z_]', rest)):
+                l_str = rest
+        cleaned_lines.append(l_str)
+
+    return "\n".join(cleaned_lines)
+
+def decouple_name_and_spec(name: str, spec: str) -> Tuple[str, str]:
+    """
+    IR-1 Sub-step: Lightweight name & spec decoupling.
+    Extract spec embedded in name (e.g. '无缝钢管 DN100') -> Name: '无缝钢管', Spec: 'DN100\n...'
+    """
+    name_clean = (name or "").strip()
+    spec_clean = (spec or "").strip()
+
+    if not name_clean:
+        return name_clean, spec_clean
+
+    spec_pattern = r'((?:DN|DE|De|Ф|Φ)\d+|\d+\s*\*\s*\d+(?:\s*\*\s*\d+)?|\b[A-Z]{2,}-\d+\*\d+|\d+(?:\.\d+)?\s*(?:mm2|mm²|平方))'
+    m = re.search(spec_pattern, name_clean, re.IGNORECASE)
+    if m:
+        found_spec = m.group(1).strip()
+        new_name = name_clean.replace(found_spec, "").strip()
+        new_name = re.sub(r'[\s\-:：,\.，。]+$', '', new_name).strip()
+        if len(new_name) >= 2:
+            new_spec = f"{found_spec}\n{spec_clean}".strip() if spec_clean else found_spec
+            return new_name, new_spec
+
+    return name_clean, spec_clean
+
 def slice_query_sections(raw_spec: str) -> Tuple[str, str]:
     """
     Slice raw query specification text into material description block and noise block.
@@ -38,7 +149,7 @@ def slice_query_sections(raw_spec: str) -> Tuple[str, str]:
     if not raw_spec:
         return "", ""
 
-    spec_clean = to_half_width(raw_spec).strip()
+    spec_clean = clean_query_text_ir1(raw_spec)
     lines = spec_clean.split("\n")
 
     mat_lines = []
@@ -50,9 +161,8 @@ def slice_query_sections(raw_spec: str) -> Tuple[str, str]:
         if not line_str:
             continue
 
-        # Check if line marks the start of noise section
         if any(kw in line_str for kw in NOISE_SECTION_KEYWORDS):
-            if re.search(r'^\d+[\.．、]\s*(?:工作内容|施工|单价|敷设|包含|调试|全费用|工程量|此为)', line_str) or any(line_str.startswith(kw) for kw in ["工作内容", "施工部位", "此为成品"]):
+            if re.search(r'^\d*[\.．、\s]*(?:工作内容|施工|单价|敷设|包含|调试|全费用|工程量|此为|重新重复|备注)', line_str) or any(line_str.startswith(kw) for kw in ["工作内容", "施工部位", "此为成品", "重新重复名称", "备注"]):
                 in_noise = True
 
         if in_noise:
@@ -64,40 +174,137 @@ def slice_query_sections(raw_spec: str) -> Tuple[str, str]:
     noise_block = "\n".join(noise_lines)
     return material_block, noise_block
 
-def parse_query_kv_blocks(material_block: str) -> Dict[str, str]:
+def parse_query_kv_blocks(material_block: str) -> Dict[str, Any]:
     """
-    Parse first-level numbered key-value blocks (e.g. 1.名称:..., 2.规格:...)
-    Returns a dictionary of key -> value.
+    KV Line Parser v1.2:
+    Parse key-value pairs with parenthesis unit extraction and non-greedy key matching.
     """
     kv_dict = {}
     if not material_block:
         return kv_dict
 
-    # Find numbered items: e.g. "1.名称：...", "2.规格、型号：..."
-    pattern = r'(?:^|\n)(\d+)\s*[\.．、]\s*([^：:，,；;\n\r]{1,15})\s*[:：]\s*([\s\S]*?)(?=(?:\n\d+\s*[\.．、]|$))'
-    matches = list(re.finditer(pattern, material_block))
-
-    if matches:
-        for m in matches:
-            key = m.group(2).strip()
-            val = m.group(3).strip()
-            kv_dict[key] = val
-    else:
-        # Fallback to splitting by line or colons
-        lines = material_block.split("\n")
-        for line in lines:
+    lines = [line.strip() for line in material_block.split('\n') if line.strip()]
+    for line in lines:
+        match = re.match(r'^(?:\d+[\.\、\s]|（\d+）|\(\d+\)|[①-⑩])?\s*([\u4e00-\u9fa5A-Za-z0-9_]+?)(?:\s*[（\(]([^）\)]*)[）\)])?\s*[:：]\s*(.*)$', line)
+        if match:
+            k = match.group(1).strip()
+            unit_in_paren = match.group(2).strip() if match.group(2) else ""
+            v = match.group(3).strip()
+            k = re.sub(r'^\d+', '', k).strip()
+            if k in ["工作内容", "施工内容", "重新重复名称", "备注", "其他"]:
+                continue
+            if unit_in_paren:
+                kv_dict[k] = {"value": v, "unit": unit_in_paren}
+            else:
+                kv_dict[k] = v
+        else:
             if ":" in line or "：" in line:
                 parts = re.split(r'[:：]', line, maxsplit=1)
-                k = re.sub(r'^\d+[\.．、]\s*', '', parts[0]).strip()
+                k = re.sub(r'^\d+[\.．、\s]*', '', parts[0]).strip()
                 v = parts[1].strip()
-                if k and v:
+                if k and k not in ["工作内容", "施工内容", "重新重复名称", "备注", "其他"]:
                     kv_dict[k] = v
 
     return kv_dict
 
+def extract_from_name_spec_fallback(name: str, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    NameSpecExtractor: Back-fill parameters from name when spec is empty or missing.
+    """
+    if not name:
+        return attrs
+
+    n_clean = to_half_width(name).strip()
+
+    # 1. Dimension 2D/3D (e.g., 600*600, 1000*3150*300)
+    if "尺寸" not in attrs:
+        dim_3d = re.search(r'(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)', n_clean)
+        if dim_3d:
+            attrs["尺寸"] = f"{dim_3d.group(1)}*{dim_3d.group(2)}*{dim_3d.group(3)}"
+            try:
+                attrs["长"] = float(dim_3d.group(1))
+                attrs["宽"] = float(dim_3d.group(2))
+                attrs["高"] = float(dim_3d.group(3))
+            except Exception:
+                pass
+        else:
+            dim_2d = re.search(r'(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)', n_clean)
+            if dim_2d:
+                attrs["尺寸"] = f"{dim_2d.group(1)}*{dim_2d.group(2)}"
+                try:
+                    attrs["长"] = float(dim_2d.group(1))
+                    attrs["宽"] = float(dim_2d.group(2))
+                except Exception:
+                    pass
+
+    # 2. Thickness (e.g. 2.0mm, 0.6mm, 1.2mm)
+    if "厚度" not in attrs and "板材厚度" not in attrs:
+        th_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mm|MM)?\s*(?:厚|卷材)', n_clean)
+        if th_match:
+            try:
+                val = float(th_match.group(1))
+                attrs["厚度"] = val
+                attrs["板材厚度"] = val
+            except Exception:
+                pass
+
+    # 3. Nominal Diameter DN / De
+    if "管径" not in attrs:
+        dn_match = re.search(r'(?:DN|de|De)\s*[:：]?\s*(\d+)', n_clean, re.IGNORECASE)
+        if dn_match:
+            attrs["管径"] = f"DN{dn_match.group(1)}"
+            attrs["dn_val"] = int(dn_match.group(1))
+
+    # 4. Material
+    if "材质" not in attrs:
+        for mat in ["316L", "304", "不锈钢", "PVC", "PPR", "PPH", "UPVC", "镀锌钢板", "橡胶", "碳钢", "铜"]:
+            if mat in n_clean:
+                if mat == "304":
+                    attrs["材质"] = "不锈钢304"
+                elif mat == "316L":
+                    attrs["材质"] = "不锈钢316L"
+                elif mat == "镀锌钢板":
+                    attrs["材质"] = "镀锌钢板"
+                else:
+                    attrs["材质"] = mat
+                break
+
+    return attrs
+
+def normalize_unit_scales(attrs: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Mandatory unit and scale conversions to standard units:
+    - Air volume: CFM * 1.699, l/s * 3.6 -> m³/h
+    - Pressure: kPa * 1000, MPa * 1000000, mmH2O * 9.80665 -> Pa
+    - Power: W * 0.001, HP * 0.735, kcal/h * 0.001163 -> kW
+    - Pipe DN: 4寸 -> 100.0 (JIS mapping)
+    """
+    norm_attrs = dict(attrs)
+
+    # 1. Air volume normalization
+    for key in ["风量", "送风量", "新风量", "排风量", "处理风量"]:
+        if key in norm_attrs and isinstance(norm_attrs[key], (int, float)):
+            # Handled in domain_extractors parse_numeric_complex
+            pass
+
+    # 2. Pipe size JIS inch mapping if string inch passed
+    if "管径" in norm_attrs and isinstance(norm_attrs["管径"], str):
+        inch_map = {
+            "1/2寸": 15.0, "3/4寸": 20.0, "1寸": 25.0, "1.2寸": 32.0, "1.5寸": 40.0,
+            "2寸": 50.0, "2.5寸": 65.0, "3寸": 80.0, "4寸": 100.0, "5寸": 125.0,
+            "6寸": 150.0, "8寸": 200.0, "10寸": 250.0, "12寸": 300.0
+        }
+        for k_inch, dn_v in inch_map.items():
+            if k_inch in norm_attrs["管径"]:
+                norm_attrs["管径"] = f"DN{int(dn_v)}"
+                norm_attrs["dn_val"] = int(dn_v)
+                break
+
+    return norm_attrs
+
 def extract_hvac_unit_type(text: str) -> Optional[str]:
     """
-    Extract HVAC unit classification code (AHU, MAU, PAU, RAU, FAU, FCU, RCU, DOAS, VAV, RTU, HRU, ERU, HPU, FPU).
+    Extract HVAC unit classification code.
     """
     if not text:
         return None
@@ -108,7 +315,7 @@ def extract_hvac_unit_type(text: str) -> Optional[str]:
                 return code
     return None
 
-def extract_query_cable_params(text: str, kv_dict: Dict[str, str]) -> Dict[str, Any]:
+def extract_query_cable_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Query-specific cable and wire parameter extraction.
     """
@@ -166,7 +373,7 @@ def extract_query_cable_params(text: str, kv_dict: Dict[str, str]) -> Dict[str, 
 
     return attrs
 
-def extract_query_ductwork_params(text: str, kv_dict: Dict[str, str]) -> Dict[str, Any]:
+def extract_query_ductwork_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract ductwork / purification duct parameters:
     - 板材厚度 (e.g. 0.6mm, 板材厚度：0.6mm)
@@ -177,7 +384,6 @@ def extract_query_ductwork_params(text: str, kv_dict: Dict[str, str]) -> Dict[st
     attrs = {}
     t_clean = to_half_width(text)
 
-    # 1. Thickness
     thick_match = re.search(r'(?:板材厚度|钢板厚度|壁厚|厚度|δ)[:：]?\s*(\d+(?:\.\d+)?)\s*(?:mm|MM)?', t_clean)
     if not thick_match:
         thick_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mm|MM)?\s*厚', t_clean)
@@ -188,13 +394,11 @@ def extract_query_ductwork_params(text: str, kv_dict: Dict[str, str]) -> Dict[st
         except Exception:
             pass
 
-    # 2. Shape
     if "矩形" in t_clean:
         attrs["形状"] = "矩形"
     elif "圆形" in t_clean:
         attrs["形状"] = "圆形"
 
-    # 3. Connection type
     for conn in ["角钢法兰", "共板法兰", "插条", "咬口", "焊接"]:
         if conn in t_clean:
             attrs["连接方式"] = conn
@@ -202,7 +406,7 @@ def extract_query_ductwork_params(text: str, kv_dict: Dict[str, str]) -> Dict[st
 
     return attrs
 
-def extract_query_plenum_params(text: str, kv_dict: Dict[str, str]) -> Dict[str, Any]:
+def extract_query_plenum_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract Plenum box / Air Collector Box parameters (集风箱/静压箱):
     - 尺寸 (e.g. 1000*3150*300)
@@ -211,7 +415,6 @@ def extract_query_plenum_params(text: str, kv_dict: Dict[str, str]) -> Dict[str,
     attrs = {}
     t_clean = to_half_width(text).replace('×', '*').replace('x', '*')
 
-    # Match 3D dimensions (A*B*C) or 2D dimensions (A*B)
     dim_3d = re.search(r'(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)\s*\*\s*(\d+(?:\.\d+)?)', t_clean)
     if dim_3d:
         attrs["尺寸"] = f"{dim_3d.group(1)}*{dim_3d.group(2)}*{dim_3d.group(3)}"
@@ -239,7 +442,6 @@ def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) 
     """
     clean_attrs = dict(attrs)
 
-    # 1. Canonicalize Material (材质)
     mat_raw = str(clean_attrs.get("材质", "")).strip()
     if mat_raw or raw_text:
         combined = f"{mat_raw} {raw_text}"
@@ -256,7 +458,6 @@ def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) 
         elif "碳钢" in combined:
             clean_attrs["材质"] = "碳钢"
 
-    # 2. Canonicalize Section (截面积) formatting
     if "截面积" in clean_attrs:
         sec_val = clean_attrs["截面积"]
         if isinstance(sec_val, (int, float)):
@@ -276,37 +477,40 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
     """
     Main entry point for extracting structured parameters from raw query manifests.
     """
-    name_clean = (name or "").strip()
-    spec_raw = (specification or "").strip()
+    # 1. Decouple name and spec if spec is embedded in name
+    effective_name, effective_spec = decouple_name_and_spec(name, specification)
+    name_clean = (effective_name or "").strip()
+    spec_raw = (effective_spec or "").strip()
     cat_clean = (category or "").strip()
 
-    # Determine domain
+    # 2. Determine domain using route_domain
     domain = route_domain(cat_clean, name_clean, spec_raw)
 
-    # 1. Slice sections
+    # 3. Slice sections & parse KV blocks
     material_block, noise_block = slice_query_sections(spec_raw)
-
-    # 2. Parse KV blocks
     kv_dict = parse_query_kv_blocks(material_block)
 
     # Combine name and material block
     spec_name = kv_dict.get("名称", "")
-    effective_name = spec_name if (spec_name and len(spec_name) >= len(name_clean)) else name_clean
-    combined_text = f"{effective_name}\n{material_block}".strip()
+    if isinstance(spec_name, dict):
+        spec_name = spec_name.get("value", "")
+    final_name = spec_name if (spec_name and len(str(spec_name)) >= len(name_clean)) else name_clean
+    combined_text = f"{final_name}\n{material_block}".strip()
 
-    # 3. Extract attrs using ConfigDrivenExtractor
+    # 4. Extract attrs using ConfigDrivenExtractor
     extractor = ConfigDrivenExtractor(domain)
     attrs = extractor.extract(combined_text)
+    attrs["名称"] = final_name
 
-    # Ensure Name is preserved in attrs
-    attrs["名称"] = effective_name
+    # 5. NameSpecExtractor fallback for empty / short spec
+    if not material_block or len(material_block) < 3 or not attrs or len(attrs) <= 1:
+        attrs = extract_from_name_spec_fallback(final_name, attrs)
 
-    # 4. HVAC Unit Type extraction
+    # 6. HVAC Unit Type & Domain specific extractions
     unit_code = extract_hvac_unit_type(combined_text)
     if unit_code:
         attrs["机组类型"] = unit_code
 
-    # 5. Domain specific extractions
     if domain in ["cable_power", "cable_control", "wire"]:
         cable_attrs = extract_query_cable_params(combined_text, kv_dict)
         attrs.update(cable_attrs)
@@ -314,18 +518,19 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
         plenum_attrs = extract_query_plenum_params(combined_text, kv_dict)
         attrs.update(plenum_attrs)
 
-    # Always attempt ductwork parameter extraction if text contains ductwork keywords
     if any(kw in combined_text for kw in ["风管", "管道", "通风管", "净化"]):
         duct_attrs = extract_query_ductwork_params(combined_text, kv_dict)
         attrs.update(duct_attrs)
 
-    # 6. Canonicalize extracted attributes
+    # 7. Canonicalize & normalize units
     canonical_attrs = canonicalize_query_attrs(domain, attrs, combined_text)
+    normalized_attrs = normalize_unit_scales(canonical_attrs)
 
     return {
         "domain": domain,
-        "attrs": canonical_attrs,
+        "attrs": normalized_attrs,
         "clean_text": material_block,
         "noise_text": noise_block,
         "kv_dict": kv_dict
     }
+

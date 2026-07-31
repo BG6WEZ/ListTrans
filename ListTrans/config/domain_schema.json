@@ -1478,12 +1478,19 @@
                 "type": "float",
                 "unit": "A",
                 "extract_regex": "(\\d+(?:\\.\\d+)?)\\s*A"
+            },
+            {
+                "key": "功率",
+                "type": "float",
+                "unit": "kW",
+                "extract_regex": "(?:功率|规格|Pe|P)?\\s*[:：=]?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:kW|kw|千瓦|KW)\\b"
             }
         ],
         "flags": [],
         "weights": {
-            "类型": 0.5,
-            "尺寸": 0.3,
+            "类型": 0.4,
+            "尺寸": 0.2,
+            "功率": 0.2,
             "其他": 0.2
         },
         "unit_class": "dimension",
@@ -1551,6 +1558,97 @@
         },
         "unit_class": "quantity",
         "hard_gates": {}
+    },
+    "conduit": {
+        "must": [
+            {
+                "key": "管型代码",
+                "type": "enum",
+                "options": [
+                    "JDG",
+                    "KBG",
+                    "SC",
+                    "RC",
+                    "MT",
+                    "PC",
+                    "FPC",
+                    "KPC",
+                    "CP"
+                ]
+            },
+            {
+                "key": "外径mm",
+                "type": "float",
+                "unit": "mm",
+                "extract_regex": "(?:外径|De|de|Φ|φ|规格)?\\s*(\\d+(?:\\.\\d+)?)\\s*mm"
+            }
+        ],
+        "should": [
+            {
+                "key": "敷设方式代码",
+                "type": "enum",
+                "options": [
+                    "WC",
+                    "CC",
+                    "FC",
+                    "CE",
+                    "WE",
+                    "BE",
+                    "CLE",
+                    "SCE"
+                ]
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "管型代码": 0.5,
+            "外径mm": 0.4,
+            "敷设方式代码": 0.1
+        },
+        "unit_class": "dimension",
+        "hard_gates": {
+            "conflict_caps": {
+                "管型代码": 30,
+                "外径mm": 30
+            }
+        }
+    },
+    "ups": {
+        "must": [
+            {
+                "key": "容量",
+                "type": "float",
+                "unit": "kVA",
+                "extract_regex": "(?:容量|Pe|P|额定)?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:kVA|KVA|kva|千伏安)\\b"
+            },
+            {
+                "key": "后备时间",
+                "type": "float",
+                "unit": "min",
+                "extract_regex": "(?:后备时间|后备)?\\s*(?:[≥>=]?)?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:min|Min|MIN|分钟)\\b"
+            }
+        ],
+        "should": [
+            {
+                "key": "电压",
+                "type": "float",
+                "unit": "V",
+                "extract_regex": "(?:电压|供电电压|工作电压)?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:V|v|伏)\\b"
+            }
+        ],
+        "flags": [],
+        "weights": {
+            "容量": 0.5,
+            "后备时间": 0.4,
+            "电压": 0.1
+        },
+        "unit_class": "quantity",
+        "hard_gates": {
+            "conflict_caps": {
+                "容量": 30,
+                "后备时间": 30
+            }
+        }
     },
     "decoration": {
         "must": [
