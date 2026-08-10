@@ -137,3 +137,58 @@ async def delete_user(user_id: int, current_user: dict = Depends(require_admin))
         raise HTTPException(status_code=500, detail=f"删除用户失败: {e}")
     finally:
         conn.close()
+
+
+# LLM Provider Management Endpoints for Admin
+
+from app.llm_rule_engine import LLMProviderManager
+
+class LLMProviderCreate(BaseModel):
+    provider_id: str = Field(..., min_length=2, max_length=50)
+    name: str = Field(..., min_length=2)
+    base_url: str = Field(..., min_length=5)
+    model_name: str = Field(..., min_length=2)
+    api_key_enc: str = Field(...)
+    priority: int = Field(10, ge=1, le=100)
+    timeout_seconds: float = Field(8.0, ge=1.0, le=60.0)
+    is_active: bool = True
+
+class LLMProviderUpdate(BaseModel):
+    name: Optional[str] = None
+    base_url: Optional[str] = None
+    model_name: Optional[str] = None
+    api_key_enc: Optional[str] = None
+    priority: Optional[int] = None
+    timeout_seconds: Optional[float] = None
+    is_active: Optional[bool] = None
+
+@router.get("/llm-providers")
+async def list_llm_providers(current_user: dict = Depends(require_admin)):
+    """List all LLM provider configurations for administration."""
+    manager = LLMProviderManager()
+    return manager.list_providers(include_keys=False)
+
+@router.post("/llm-providers")
+async def create_llm_provider(p_data: LLMProviderCreate, current_user: dict = Depends(require_admin)):
+    """Add a new LLM provider configuration node."""
+    manager = LLMProviderManager()
+    try:
+        return manager.add_provider(p_data.model_dump())
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"添加失败: {e}")
+
+@router.put("/llm-providers/{provider_id}")
+async def update_llm_provider(provider_id: str, p_data: LLMProviderUpdate, current_user: dict = Depends(require_admin)):
+    """Update an existing LLM provider configuration."""
+    manager = LLMProviderManager()
+    try:
+        return manager.update_provider(provider_id, p_data.model_dump(exclude_none=True))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"更新失败: {e}")
+
+@router.delete("/llm-providers/{provider_id}")
+async def delete_llm_provider(provider_id: str, current_user: dict = Depends(require_admin)):
+    """Delete an LLM provider configuration node."""
+    manager = LLMProviderManager()
+    return manager.delete_provider(provider_id)
+

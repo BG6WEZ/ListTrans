@@ -23,13 +23,14 @@
                 <img src="logo500.png" alt="Logo" class="logo-img" style="height: 38px; border-radius: 4px; background-color: white; padding: 2px;" />
                 <div class="logo-text">
                     <h1>华康洁净物料清单匹配工具</h1>
-                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.6</span></span>
+                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.8</span></span>
                 </div>
             </div>
             
             <div class="nav-links" style="display: flex; gap: 16px; margin-left: 30px; margin-right: auto;">
                 <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
                 <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全局物料明细库</button>
+                <button class="nav-item" id="nav-llm-rules" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
                 <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
             </div>
             
@@ -633,6 +634,190 @@
                             <button class="btn btn-secondary" id="db-prev-page-btn" disabled style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-chevron-left"></i> 上一页</button>
                             <span>第 <span id="db-current-page" style="font-weight: 600; color: var(--color-text-primary);">1</span> / <span id="db-total-pages">1</span> 页</span>
                             <button class="btn btn-secondary" id="db-next-page-btn" disabled style="padding: 4px 10px; font-size: 12px;">下一页 <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM Rules Dashboard (V0.0.8) -->
+            <div class="llm-rules-dashboard" id="llm-rules-dashboard" style="display: none; padding: 24px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 20px;">
+                <!-- Top Action & View Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 16px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <h2 style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; color: var(--color-text-primary);">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> LLM 自然语言规则生成与审核工作台
+                        </h2>
+                        <div class="sub-nav-tabs" style="display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 6px;">
+                            <button class="sub-tab active" id="tab-rule-studio" style="padding: 6px 14px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 13px; font-weight: 500;">
+                                <i class="fa-solid fa-code"></i> 规则生成与调试 Studio
+                            </button>
+                            <button class="sub-tab" id="tab-rule-audit" style="padding: 6px 14px; border-radius: 4px; border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 13px; font-weight: 500;">
+                                <i class="fa-solid fa-clipboard-check"></i> 待审核工作台 <span class="badge" id="audit-pending-badge" style="background: #ef4444; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;">0</span>
+                            </button>
+                            <button class="sub-tab" id="tab-rule-leaderboard" style="padding: 6px 14px; border-radius: 4px; border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 13px; font-weight: 500;">
+                                <i class="fa-solid fa-chart-line"></i> 规则命中统计与排行榜
+                            </button>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" id="refresh-rules-btn"><i class="fa-solid fa-sync"></i> 刷新列表</button>
+                    </div>
+                </div>
+
+                <!-- Section 1: Rule Studio View -->
+                <div id="rule-studio-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Left: Prompt Generator Input -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> 自然语言规则生成 Studio</h3>
+                        
+                        <!-- 1. Raw Text Input (Top Priority) -->
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <i class="fa-solid fa-file-lines" style="color: #3b82f6;"></i> 1. 原始清单描述 / 样本原文（可直接粘贴清单完整内容）
+                            </label>
+                            <textarea id="rule-sample-text" rows="5" placeholder="可直接粘贴原始清单中的名称、规格、材质、施工内容等，例如：&#10;1.名称：医用洁卫型空调机组PAU-S1201&#10;2.规格：机组风量5200m3/h；机外余压400Pa；过滤器G4+F7；两管制水系统；制冷量60kw；制热量45kw&#10;3.安装形式：落地安装&#10;4.工作内容：水平搬运、安装、找正、调试&#10;5.含橡胶减震垫" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+
+                        <!-- 2. Natural Language Rule Intent Description -->
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <i class="fa-solid fa-comment-dots" style="color: #10b981;"></i> 2. 自然语言规则需求（描述需提取什么、如何清洗、如何比对）
+                            </label>
+                            <textarea id="rule-prompt-desc" rows="4" placeholder="用大白话描述您的匹配要求，例如：&#10;1、提取名称‘医用洁卫型空调机组’及缩写‘PAU’，将PAU映射为‘新风预处理机组’去物料库比对；&#10;2、提取风量5200m3/h、余压400Pa、制冷量60kw；&#10;3、将G4+F7拆分为初效+中效过滤器；&#10;4、过滤掉施工搬运、调试等杂质描述..." style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+
+                        <!-- 3. Scope Settings -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用层级</label>
+                                <select id="rule-scope-level" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;">
+                                    <option value="category">设备/物料类目 (category)</option>
+                                    <option value="discipline">专业大类 (discipline)</option>
+                                    <option value="universal">通用全域 (universal)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用目标/专业名称</label>
+                                <input type="text" id="rule-scope-target" placeholder="如：空调机组 / 暖通工程" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <button class="btn btn-primary" id="btn-generate-rule" style="flex: 1; justify-content: center; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; padding: 10px; font-weight: 600;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> 🪄 调用大模型自动编译规则
+                            </button>
+                        </div>
+                        
+                        <div style="font-size: 11px; color: var(--color-text-muted); display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> 底层基于优先容灾多模型路由器（Qwen-Max / Qwen-Plus / DeepSeek）自动调度。
+                        </div>
+                    </div>
+
+                    <!-- Right: Generated DSL Visual Editor & Sample Runner -->
+                    <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);"><i class="fa-solid fa-sliders" style="color: #10b981;"></i> 规则编译结果与预览</h3>
+                            <span class="badge" id="rule-compiler-status" style="background: rgba(255,255,255,0.1); color: var(--color-text-secondary); font-size: 11px; padding: 2px 8px; border-radius: 4px;">待生成</span>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">规则名称</label>
+                            <input type="text" id="rule-name-input" placeholder="自动生成或手动填写规则名称" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                        </div>
+
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">编译得到的 Rule DSL JSON（支持手工微调）</label>
+                            <textarea id="rule-json-editor" rows="9" style="width: 100%; padding: 10px; border-radius: 6px; background: #0f172a; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+
+                        <!-- Test Result Display Box -->
+                        <div id="rule-test-output-box" style="display: none; padding: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; font-size: 12px; line-height: 1.5;">
+                            <strong style="color: #10b981;"><i class="fa-solid fa-flask"></i> 样本测试运行结果：</strong>
+                            <div id="rule-test-output-content" style="margin-top: 6px; color: var(--color-text-primary);"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <button class="btn btn-secondary" id="btn-test-rule" style="flex: 1; justify-content: center; padding: 8px;">
+                                <i class="fa-solid fa-flask"></i> 🧪 运行样本测试
+                            </button>
+                            <button class="btn btn-info" id="btn-save-draft" style="flex: 1; justify-content: center; background: #0284c7; border: none; color: white; padding: 8px;">
+                                <i class="fa-solid fa-floppy-disk"></i> 💾 保存草稿
+                            </button>
+                            <button class="btn btn-success" id="btn-submit-audit" style="flex: 1; justify-content: center; background: #16a34a; border: none; color: white; padding: 8px;">
+                                <i class="fa-solid fa-paper-plane"></i> 📤 提交上级审核
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Audit Workbench Panel -->
+                <div id="rule-audit-panel" style="display: none; flex-direction: column; gap: 16px;">
+                    <div class="glass-card" style="padding: 20px;">
+                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);">
+                            <i class="fa-solid fa-user-check" style="color: #f59e0b;"></i> 待审核规则列表（支持经理 / 总监 / 管理员审核）
+                        </h3>
+                        <div class="table-responsive">
+                            <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); text-align: left; background: rgba(255,255,255,0.02);">
+                                        <th style="padding: 10px;">规则编号</th>
+                                        <th style="padding: 10px;">规则名称</th>
+                                        <th style="padding: 10px;">适用目标</th>
+                                        <th style="padding: 10px;">提交人</th>
+                                        <th style="padding: 10px;">提交时间</th>
+                                        <th style="padding: 10px; text-align: center;">审核操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-rules-tbody">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无待审核的规则。</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Hit Leaderboard Panel -->
+                <div id="rule-leaderboard-panel" style="display: none; flex-direction: column; gap: 16px;">
+                    <div class="glass-card" style="padding: 20px;">
+                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);">
+                            <i class="fa-solid fa-trophy" style="color: #eab308;"></i> 已生效规则命中排行榜与效果统计
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                                <span style="font-size: 12px; color: var(--color-text-secondary);">已在线生效规则数</span>
+                                <h2 id="stat-approved-count" style="margin: 8px 0 0 0; color: #3b82f6; font-size: 24px;">0</h2>
+                            </div>
+                            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                                <span style="font-size: 12px; color: var(--color-text-secondary);">待审核规则数</span>
+                                <h2 id="stat-pending-count" style="margin: 8px 0 0 0; color: #f59e0b; font-size: 24px;">0</h2>
+                            </div>
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                                <span style="font-size: 12px; color: var(--color-text-secondary);">全系统累计命中次数</span>
+                                <h2 id="stat-total-hits" style="margin: 8px 0 0 0; color: #10b981; font-size: 24px;">0</h2>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); text-align: left; background: rgba(255,255,255,0.02);">
+                                        <th style="padding: 10px;">排名</th>
+                                        <th style="padding: 10px;">规则编号</th>
+                                        <th style="padding: 10px;">规则名称</th>
+                                        <th style="padding: 10px;">作用目标</th>
+                                        <th style="padding: 10px;">创建人</th>
+                                        <th style="padding: 10px;">批准上线时间</th>
+                                        <th style="padding: 10px; text-align: right;">累计命中次数</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-tbody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无命中记录。</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

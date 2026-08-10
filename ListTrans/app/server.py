@@ -78,7 +78,9 @@ async def add_security_headers(request: Request, call_next):
 # Include Auth and Session dependencies
 from app.auth_middleware import require_employee, require_manager, require_director, require_admin, get_current_user
 from app.admin_api import router as admin_router
+from app.rule_api import router as rule_router
 app.include_router(admin_router)
+app.include_router(rule_router)
 
 # Authentication and Session API Endpoints
 from app.auth_manager import (

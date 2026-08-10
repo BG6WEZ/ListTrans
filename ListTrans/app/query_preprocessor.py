@@ -16,20 +16,22 @@ NOISE_SECTION_KEYWORDS = [
 
 # HVAC Unit Type Rules (14 standard acronyms & Chinese keywords)
 HVAC_UNIT_MAP = [
-    ("MAU", ["MAU", "全新风处理机组", "全新风机组", "100%全新风", "全新风"]),
-    ("PAU", ["PAU", "预空调机组", "新风预冷", "预处理机组"]),
-    ("RAU", ["RAU", "回风处理机组", "循环回风"]),
-    ("FAU", ["FAU", "新风空调机组", "新风柜"]),
-    ("FCU", ["FCU", "风机盘管"]),
-    ("RCU", ["RCU", "循环机组"]),
-    ("DOAS", ["DOAS", "专用新风系统", "独立新风除湿", "独立新风"]),
-    ("VAV", ["VAV", "变风量空调", "变风量"]),
-    ("RTU", ["RTU", "屋顶式", "屋顶风冷", "屋顶空调"]),
-    ("HRU", ["HRU", "热回收新风", "热回收"]),
-    ("ERU", ["ERU", "能量回收"]),
-    ("HPU", ["HPU", "湿度处理机组", "湿度处理", "加湿机组", "除湿机组"]),
-    ("FPU", ["FPU", "风机动力单元"]),
-    ("AHU", ["AHU", "组合式空气处理机组", "空气处理机组", "组合式空调"])
+    ("全新风空气处理机组", ["MAU", "全新风空气处理机组", "全新风处理机组", "全新风机组", "100%全新风", "全新风"]),
+    ("回风循环空气处理机组", ["RAU", "回风循环空气处理机组", "回风循环"]),
+    ("组合式空气处理机组", ["AHU", "组合式空气处理机组", "空气处理机组", "组合式空调", "AHU"]),
+    ("风机盘管机组", ["FCU", "风机盘管机组", "风机盘管", "FCU"]),
+    ("新风预处理机组", ["PAU", "新风预处理机组", "新风预处理", "预空调机组", "新风预冷", "预处理机组", "新风机组", "净化新风机组", "吊顶新风机组", "PAU"]),
+    ("循环空气处理机组", ["RCU", "循环空气处理机组", "循环机组", "净化循环机组", "RCU"]),
+    ("风机过滤单元", ["FFU", "风机过滤单元FFU", "风机过滤单元", "FFU"]),
+    ("热回收新风机组", ["HRV", "热回收新风机组", "热回收新风", "HRV"]),
+    ("全热回收新风机组", ["ERV", "全热回收新风机组", "全热回收", "ERV"]),
+    ("直膨式空气处理机组", ["DXU", "直膨式空气处理机组", "直膨式", "DXU"]),
+    ("洁净室专用机组", ["CRU", "洁净室专用机组", "洁净室专用", "CRU"]),
+    ("末端送风单元", ["TU", "末端送风单元", "TU"]),
+    ("变风量空调系统", ["VAV", "变风量空调系统", "变风量空调", "变风量", "VAV"]),
+    ("定风量空调系统", ["CAV", "定风量空调系统", "定风量", "CAV"]),
+    ("高效空气过滤器", ["HEPA", "高效空气过滤器", "高效过滤器", "HEPA"]),
+    ("新风风机单元", ["PAF", "新风风机单元", "新风风机", "PAF"])
 ]
 
 def is_valid_query_item(name: Any, spec: Any, unit: Any = "", code: Any = "", row_index: int = 0) -> Tuple[bool, str]:
@@ -300,6 +302,32 @@ def normalize_unit_scales(attrs: Dict[str, Any]) -> Dict[str, Any]:
                 norm_attrs["dn_val"] = int(dn_v)
                 break
 
+    # 3. Filter post-processing and mapping
+    filter_val = norm_attrs.get("机组过滤器") or norm_attrs.get("过滤段") or norm_attrs.get("过滤等级")
+    if filter_val:
+        if isinstance(filter_val, str):
+            parts = [p.strip() for p in re.split(r'[+/,，\s]', filter_val) if p.strip()]
+            norm_attrs["过滤段"] = parts
+        elif isinstance(filter_val, list):
+            norm_attrs["过滤段"] = filter_val
+
+    if "过滤段" in norm_attrs:
+        levels = []
+        for f in norm_attrs["过滤段"]:
+            f_upper = f.upper()
+            if any(x in f_upper for x in ["G1", "G2", "G3", "G4", "初效"]):
+                levels.append("初效")
+            elif any(x in f_upper for x in ["F5", "F6", "F7", "F8", "F9", "中效"]):
+                levels.append("中效")
+            elif any(x in f_upper for x in ["H10", "H11", "H12", "亚高效"]):
+                levels.append("亚高效")
+            elif any(x in f_upper for x in ["H13", "H14", "HEPA", "高效"]):
+                levels.append("高效")
+            elif any(x in f_upper for x in ["U15", "U16", "U17", "超高效"]):
+                levels.append("超高效")
+        if levels:
+            norm_attrs["过滤等级"] = levels[0]
+
     return norm_attrs
 
 def extract_hvac_unit_type(text: str) -> Optional[str]:
@@ -323,32 +351,55 @@ def extract_query_cable_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str, 
     t_clean = to_half_width(text).upper().replace('X', '*').replace('×', '*').strip()
 
     models = [
-        "WDZN-YJV22", "WDZN-YJV", "WDZN-BYJ", "WDZ-YJY", "WDZ-BYJ", "WDZ-RYJS", "WDZ-RYJ",
-        "WDZB-YJY", "WDZB-YJV", "NH-YJV22", "NH-YJV", "NH-BV", "ZR-YJV22", "ZR-YJV", "ZR-BV", "ZR-BVR",
+        # WDZN series (Low-smoke zero-halogen flame-retardant fire-resistant)
+        "WDZN-YJV22", "WDZN-YJV", "WDZN-BYJR", "WDZN-BYJ", "WDZN-KYJV", "WDZN-KYJV22",
+        # WDZB series (Low-smoke zero-halogen Class B flame-retardant)
+        "WDZB-YJV22", "WDZB-YJV", "WDZB-YJY", "WDZB-YJY22", "WDZB-BYJR", "WDZB-BYJ", "WDZB-KYJV", "WDZB-KYJV22", "WDZB-KVV", "WDZB-KVVP",
+        # WDZA series (Low-smoke zero-halogen Class A flame-retardant)
+        "WDZA-YJV22", "WDZA-YJV", "WDZA-YJY", "WDZA-YJY22", "WDZA-BYJR", "WDZA-BYJ", "WDZA-KYJV", "WDZA-KYJV22",
+        # WDZC series (Low-smoke zero-halogen Class C flame-retardant)
+        "WDZC-YJV22", "WDZC-YJV", "WDZC-YJY", "WDZC-YJY22", "WDZC-BYJR", "WDZC-BYJ", "WDZC-KYJV", "WDZC-KYJV22",
+        # WDZ series (Low-smoke zero-halogen flame-retardant)
+        "WDZ-YJV22", "WDZ-YJV", "WDZ-YJY", "WDZ-YJY22", "WDZ-BYJR", "WDZ-BYJ", "WDZ-RYJS", "WDZ-RYJ", "WDZ-KYJV", "WDZ-KYJV22",
+        # NH series (Fire-resistant)
+        "NH-YJV22", "NH-YJV", "NH-BV", "NH-BVR", "NH-KVV", "NH-KVV22",
+        # ZR series (Flame-retardant)
+        "ZR-YJV22", "ZR-YJV", "ZR-BV", "ZR-BVR", "ZR-KVV", "ZR-KVV22",
+        # Basic series
         "YJV22", "YJY22", "YJV", "YJY", "KVVP2-22", "KVVP2", "KVVP", "KVV", "RVVP", "RVV",
-        "BYJ", "BVR", "BV", "RYJS", "RYJ"
+        "BYJR", "BYJ", "BVR", "BV", "RYJS", "RYJ"
     ]
     for m in models:
         if m in t_clean:
             attrs["型号"] = m
+            for fam in ["BYJR", "BYJ", "BVR", "BV", "BLV", "YJY22", "YJY", "YJV22", "YJV", "KVVP", "KVV", "RVVP", "RVV"]:
+                if fam in m:
+                    attrs["型号族"] = fam
+                    break
             break
 
     comp_match = re.search(r'(\d+)\s*\*\s*(\d+(?:\.\d+)?)\s*\+\s*(\d+)\s*\*\s*(\d+(?:\.\d+)?)', t_clean)
     if comp_match:
         attrs["芯数"] = f"{comp_match.group(1)}+{comp_match.group(3)}"
-        attrs["截面积"] = f"{float(comp_match.group(2)):.1f}+{float(comp_match.group(4)):.1f}"
+        sec1 = float(comp_match.group(2))
+        sec2 = float(comp_match.group(4))
+        s1 = f"{int(sec1)}" if sec1.is_integer() else f"{sec1}"
+        s2 = f"{int(sec2)}" if sec2.is_integer() else f"{sec2}"
+        attrs["截面积"] = f"{s1}+{s2}"
         attrs["主芯数"] = int(comp_match.group(1))
-        attrs["主截面"] = float(comp_match.group(2))
+        attrs["主截面"] = sec1
         attrs["零芯数"] = int(comp_match.group(3))
-        attrs["零截面"] = float(comp_match.group(4))
+        attrs["零截面"] = sec2
         return attrs
 
     std_match = re.search(r'(\d+)\s*\*\s*(\d+(?:\.\d+)?)', t_clean)
     if std_match:
         attrs["芯数"] = str(int(std_match.group(1)))
-        attrs["截面积"] = f"{float(std_match.group(2)):.1f}"
+        sec = float(std_match.group(2))
+        s_str = f"{int(sec)}" if sec.is_integer() else f"{sec}"
+        attrs["截面积"] = s_str
         attrs["主芯数"] = int(std_match.group(1))
-        attrs["主截面"] = float(std_match.group(2))
+        attrs["主截面"] = sec
         return attrs
 
     sec_match = re.search(r'(?:截面|断面)?\s*(\d+(?:\.\d+)?)(?:\s*[\/到~-]\s*(\d+(?:\.\d+)?))?\s*(?:MM2|MM²|平方)', t_clean)
@@ -357,7 +408,7 @@ def extract_query_cable_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str, 
         val2 = float(sec_match.group(2)) if sec_match.group(2) else None
         target_val = val2 if val2 else val1
         attrs["截面积"] = f"{target_val:.1f}"
-        attrs["主截面"] = target_val
+        attrs["主截面"] = float(target_val)
         if "三芯" in t_clean or "3芯" in t_clean:
             attrs["芯数"] = "3"
             attrs["主芯数"] = 3
@@ -451,8 +502,8 @@ def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) 
             clean_attrs["材质"] = "不锈钢304"
         elif "不锈钢" in combined:
             clean_attrs["材质"] = "不锈钢"
-        elif any(kw in combined for kw in ["紫铜", "脱脂铜管", "脱脂紫铜"]):
-            clean_attrs["材质"] = "铜"
+        elif any(kw in combined for kw in ["紫铜", "脱脂铜管", "脱脂紫铜", "磷酸脱氧", "脱氧铜", "铜管"]):
+            clean_attrs["材质"] = "紫铜"
         elif any(kw in combined for kw in ["优质镀锌钢板", "镀锌钢板", "镀锌板", "镀锌"]):
             clean_attrs["材质"] = "镀锌钢板"
         elif "碳钢" in combined:
@@ -470,6 +521,28 @@ def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) 
                 clean_attrs["截面积"] = f"{p1:.1f}+{p2:.1f}"
             except Exception:
                 pass
+
+    # 5. Medical Gas Medium Mapping
+    if domain in ["medical_gas", "valve_medical_gas"] or any(k in raw_text for k in ["氧气", "负压", "吸引", "真空", "压缩空气", "空压", "二氧化碳", "co2", "n2o", "氮气"]):
+        med_map = {
+            "氧气": ["氧气", "o2"],
+            "负压": ["负压", "吸引", "真空", "vac"],
+            "空压": ["空压", "压缩空气", "空气", "air"],
+            "CO2": ["co2", "二氧化碳"],
+            "N2O": ["n2o", "笑气"],
+            "氮气": ["氮气", "n2"]
+        }
+        for std_name, syns in med_map.items():
+            if any(s in raw_text.lower() for s in syns):
+                clean_attrs["介质"] = std_name
+                break
+
+    # 6. Medical Gas Copper Pipe Material Mapping
+    if domain == "pipe_copper":
+        if "脱脂" in raw_text:
+            clean_attrs["材质"] = "脱脂紫铜"
+        else:
+            clean_attrs["材质"] = "紫铜"
 
     return clean_attrs
 
@@ -526,9 +599,42 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
     canonical_attrs = canonicalize_query_attrs(domain, attrs, combined_text)
     normalized_attrs = normalize_unit_scales(canonical_attrs)
 
+    # 8. Apply dynamic LLM extraction rules
+    try:
+        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
+        active_rules = LLMRuleManager.get_active_rules()
+        for r in active_rules:
+            scope_lvl = r.get("scope_level", "category")
+            scope_tgt = r.get("scope_target", "")
+            if scope_lvl == "discipline" and scope_tgt and scope_tgt not in [cat_clean, domain, "给排水", "通用"]:
+                continue
+            if scope_lvl == "category" and scope_tgt and scope_tgt not in [name_clean, final_name]:
+                continue
+            dsl = r.get("parsed_dsl", {})
+            extraction_rules = dsl.get("extraction_rules", [])
+            if extraction_rules:
+                dyn_extracted = DynamicRuleInterpreter.apply_extraction_rules(combined_text, extraction_rules)
+                for k, v in dyn_extracted.items():
+                    if v is not None:
+                        normalized_attrs[k] = v
+                        if k in ["name", "名称"]:
+                            normalized_attrs["名称"] = str(v)
+                        elif k in ["material", "材质"]:
+                            normalized_attrs["材质"] = str(v)
+                        elif k in ["specification", "规格", "dn_val", "口径", "管径"]:
+                            m_dn = re.search(r'DN\s*(\d+)', str(v), re.IGNORECASE)
+                            if m_dn:
+                                normalized_attrs["管径"] = float(m_dn.group(1))
+                                normalized_attrs["dn_val"] = float(m_dn.group(1))
+                            else:
+                                normalized_attrs["规格"] = str(v)
+    except Exception:
+        pass
+
     return {
         "domain": domain,
         "attrs": normalized_attrs,
+        "model": normalized_attrs.get("型号", "") or attrs.get("型号", ""),
         "clean_text": material_block,
         "noise_text": noise_block,
         "kv_dict": kv_dict

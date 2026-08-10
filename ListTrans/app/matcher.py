@@ -90,19 +90,25 @@ def calculate_text_similarity(s1: str, s2: str) -> float:
     s1, s2 = s1.lower().strip(), s2.lower().strip()
     return difflib.SequenceMatcher(None, s1, s2).ratio()
 
-def check_dimension_conflict(q_val, c_val, max_deviation=0.10):
+def check_dimension_conflict(q_val, c_val, max_deviation=0.15):
     """
     Check if two dimension strings (like A*B or A*B*C) conflict.
-    If either component has a relative deviation > max_deviation, return True.
+    Extracts sorted numeric components and checks relative deviations.
     """
     if not q_val or not c_val:
         return False
     try:
-        q_parts = [float(x) for x in str(q_val).split('*')]
-        c_parts = [float(x) for x in str(c_val).split('*')]
-        if len(q_parts) == len(c_parts):
+        q_parts = sorted([float(x) for x in re.findall(r'\d+(?:\.\d+)?', str(q_val))], reverse=True)
+        c_parts = sorted([float(x) for x in re.findall(r'\d+(?:\.\d+)?', str(c_val))], reverse=True)
+        if len(q_parts) == len(c_parts) and len(q_parts) > 0:
             for q_p, c_p in zip(q_parts, c_parts):
                 if abs(q_p - c_p) / max(q_p, c_p, 1e-5) > max_deviation:
+                    return True
+            return False
+        elif len(q_parts) > 0 and len(c_parts) > 0:
+            min_len = min(len(q_parts), len(c_parts))
+            for i in range(min_len):
+                if abs(q_parts[i] - c_parts[i]) / max(q_parts[i], c_parts[i], 1e-5) > max_deviation:
                     return True
             return False
     except Exception:
@@ -115,12 +121,24 @@ def has_conflict(attr: str, q_v, c_v) -> bool:
         return False
     if attr == "尺寸":
         return check_dimension_conflict(q_v, c_v, max_deviation=0.10)
-    if isinstance(q_v, (int, float)) and isinstance(c_v, (int, float)):
-        # Check if deviation exceeds the tolerance rule
+    
+    # Try numeric conversion
+    q_num, c_num = None, None
+    try:
+        q_num = float(q_v)
+    except (ValueError, TypeError):
+        pass
+    try:
+        c_num = float(c_v)
+    except (ValueError, TypeError):
+        pass
+        
+    if q_num is not None and c_num is not None:
         tol = tolerance_rules.get(attr, 0.0)
         tol = max(tol, 1e-5)
-        diff_ratio = abs(q_v - c_v) / max(q_v, c_v, 1e-5)
+        diff_ratio = abs(q_num - c_num) / max(q_num, c_num, 1e-5)
         return diff_ratio > tol
+        
     return str(q_v).strip().lower() != str(c_v).strip().lower()
 
 def check_category_conflict(cat1: str, cat2: str) -> bool:
@@ -143,6 +161,10 @@ def check_category_conflict(cat1: str, cat2: str) -> bool:
                 if "风机" in c1 and ("风机" in c2 or "机" in c2):
                     continue
                 if "风机" in c2 and ("风机" in c1 or "机" in c1):
+                    continue
+            # Special bypass for "电线" vs "电缆" when category contains combined "电线电缆" or "电线、电缆"
+            if (p1 == "电线" and p2 == "电缆") or (p1 == "电缆" and p2 == "电线"):
+                if "电线电缆" in c1 or "电线电缆" in c2 or "电线、电缆" in c1 or "电线、电缆" in c2:
                     continue
             return True
     return False
@@ -240,8 +262,8 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     q_category = query_info.get("category", "")
     
     q_parsed = query_info.get("parsed_spec") or extract_query_params(q_name, q_spec_text, query_info.get("professional", q_category))
-    q_model = q_parsed.get("model", "")
-    q_attrs = q_parsed.get("attrs", {})
+    q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+    q_model = q_parsed.get("model", "") or q_attrs.get("型号", "") or ""
     
     c_name = candidate.get("name", "").strip()
     c_spec_text = candidate.get("specification", "")
@@ -303,8 +325,8 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if not c_parsed:
         c_parsed = extract_params(f"{c_name} {c_full_spec}", c_category)
         
-    c_model = c_parsed.get("model", "")
-    c_attrs = c_parsed.get("attrs", {})
+    c_attrs = c_parsed.get("attrs", {}) if isinstance(c_parsed, dict) else {}
+    c_model = c_parsed.get("model", "") or c_attrs.get("型号", "") or ""
     
     # 1. Model similarity score
     model_score = 0.0
@@ -492,7 +514,15 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
 
             # 5. Fallback direct match (boolean flags or enum strings)
             else:
-                sim_score = 1.0 if str(q_val).lower() == str(c_val).lower() else 0.0
+                q_str, c_str = str(q_val).lower().strip(), str(c_val).lower().strip()
+                if q_str == c_str:
+                    sim_score = 1.0
+                elif (q_str in ["镀锌钢板", "镀锌板", "镀锌"] and c_str in ["镀锌钢板", "镀锌板", "镀锌"]) or \
+                     (q_str in ["不锈钢", "304", "316l", "不锈钢304"] and c_str in ["不锈钢", "304", "316l", "不锈钢304"]) or \
+                     (q_str in ["紫铜", "脱脂紫铜", "紫铜管", "铜管", "铜"] and c_str in ["紫铜", "脱脂紫铜", "紫铜管", "铜管", "铜"]):
+                    sim_score = 1.0
+                else:
+                    sim_score = 0.0
                 attr_scores[attr] = sim_score
                 attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
                 continue
@@ -772,15 +802,37 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
 
     # === Domain-Specific Hard Conflict Penalties ===
     # A. Cable Parameter Conflict Penalties
-    q_cores = q_attrs.get("芯数") or q_attrs.get("主芯数")
-    c_cores = c_attrs.get("芯数") or c_attrs.get("主芯数")
-    if q_cores and c_cores and str(q_cores) != str(c_cores):
+    q_main_cores = q_attrs.get("主芯数")
+    c_main_cores = c_attrs.get("主芯数")
+    q_cores = q_attrs.get("芯数") or q_main_cores
+    c_cores = c_attrs.get("芯数") or c_main_cores
+    if q_main_cores is not None and c_main_cores is not None:
+        try:
+            if int(q_main_cores) != int(c_main_cores):
+                base_score -= 0.45
+                reasons.append("线缆芯数冲突")
+        except (ValueError, TypeError):
+            if str(q_cores) != str(c_cores):
+                base_score -= 0.45
+                reasons.append("线缆芯数冲突")
+    elif q_cores and c_cores and str(q_cores) != str(c_cores):
         base_score -= 0.45
         reasons.append("线缆芯数冲突")
 
-    q_sec = q_attrs.get("截面积") or q_attrs.get("主截面")
-    c_sec = c_attrs.get("截面积") or c_attrs.get("主截面")
-    if q_sec and c_sec and str(q_sec) != str(c_sec):
+    q_main_sec = q_attrs.get("主截面")
+    c_main_sec = c_attrs.get("主截面")
+    q_sec = q_attrs.get("截面积") or q_main_sec
+    c_sec = c_attrs.get("截面积") or c_main_sec
+    if q_main_sec is not None and c_main_sec is not None:
+        try:
+            if abs(float(q_main_sec) - float(c_main_sec)) > 0.05:
+                base_score -= 0.45
+                reasons.append("线缆截面冲突")
+        except (ValueError, TypeError):
+            if str(q_sec) != str(c_sec):
+                base_score -= 0.45
+                reasons.append("线缆截面冲突")
+    elif q_sec and c_sec and str(q_sec) != str(c_sec):
         base_score -= 0.45
         reasons.append("线缆截面冲突")
 
@@ -806,18 +858,36 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
 
     q_mat = q_attrs.get("材质")
     c_mat = c_attrs.get("材质")
-    if q_mat and c_mat and q_mat.lower() != c_mat.lower():
-        if any(m in q_mat for m in ["304", "316", "PPH", "PPR", "铜"]) or any(m in c_mat for m in ["304", "316", "PPH", "PPR", "铜"]):
-            if q_mat != c_mat:
+    if q_mat and c_mat and str(q_mat).lower() != str(c_mat).lower():
+        q_mat_str = str(q_mat).lower()
+        c_mat_str = str(c_mat).lower()
+        copper_syns = ["紫铜", "脱脂紫铜", "紫铜管", "铜管", "铜", "无缝紫铜管", "脱脂无缝紫铜管", "磷酸脱氧无缝紫铜管", "脱氧紫铜管"]
+        if (q_mat_str in copper_syns or any(s in q_mat_str for s in ["紫铜", "脱氧铜", "冷媒铜"])) and (c_mat_str in copper_syns or any(s in c_mat_str for s in ["紫铜", "铜管"])):
+            pass
+        elif ("304" in q_mat_str and "304" in c_mat_str) or ("316" in q_mat_str and "316" in c_mat_str) or ("不锈钢" in q_mat_str and "304" in c_mat_str) or ("304" in q_mat_str and "不锈钢" in c_mat_str):
+            pass
+        elif any(m in q_mat_str for m in ["304", "316", "pph", "ppr", "铜"]) or any(m in c_mat_str for m in ["304", "316", "pph", "ppr", "铜"]):
+            if q_mat_str != c_mat_str:
                 base_score -= 0.40
                 reasons.append("管材材质冲突")
 
-    # C. Decoration Materials Conflict Penalties
+    q_od = q_attrs.get("外径")
+    c_od = c_attrs.get("外径")
+    if q_od is not None and c_od is not None:
+        try:
+            if abs(float(q_od) - float(c_od)) / max(float(q_od), float(c_od), 1e-5) > 0.10:
+                base_score -= 0.45
+                reasons.append("管材外径冲突")
+        except (ValueError, TypeError):
+            pass
+
+    # C. Decoration & Equipment Dimension Conflict Penalties
     q_dim = q_attrs.get("尺寸_2d") or q_attrs.get("尺寸")
     c_dim = c_attrs.get("尺寸_2d") or c_attrs.get("尺寸")
-    if q_dim and c_dim and str(q_dim) != str(c_dim):
-        base_score -= 0.40
-        reasons.append("尺寸规格冲突")
+    if q_dim and c_dim:
+        if check_dimension_conflict(q_dim, c_dim, max_deviation=0.15):
+            base_score -= 0.40
+            reasons.append("尺寸规格冲突")
 
     q_th = q_attrs.get("厚度")
     c_th = c_attrs.get("厚度")
@@ -841,7 +911,35 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
 
     if "手工" in q_spec_text and "机制" in c_full_spec or "机制" in q_spec_text and "手工" in c_full_spec:
         base_score -= 0.35
-        reasons.append("工艺方式冲突")
+    # E. Dynamic LLM Matching Rules (must_contain, must_not_contain, score_boost_keywords)
+    try:
+        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+        active_rules = LLMRuleManager.get_active_rules()
+        cand_text = f"{c_name} {c_full_spec} {cand.get('category', '')}"
+        q_category = query_info.get("category", "")
+        for r in active_rules:
+            scope_lvl = r.get("scope_level", "category")
+            scope_tgt = r.get("scope_target", "")
+            if scope_lvl == "discipline" and scope_tgt and scope_tgt not in [q_category, query_info.get("domain", ""), "给排水", "通用"]:
+                continue
+            if scope_lvl == "category" and scope_tgt and scope_tgt not in [q_name, query_info.get("name", "")]:
+                continue
+            dsl = r.get("parsed_dsl", {})
+            matching_rules = dsl.get("matching_rules", {})
+            if matching_rules:
+                is_excl, boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+                    q_spec_text, cand_text, matching_rules
+                )
+                if is_excl:
+                    base_score = max(0.0, base_score - 0.60)
+                    reasons.extend(dyn_reasons)
+                elif boost_val != 0:
+                    base_score = min(1.0, max(0.0, base_score + (boost_val / 100.0)))
+                    reasons.extend(dyn_reasons)
+                    if r.get("rule_id"):
+                        RuleHitStatsTracker().record_hit(r["rule_id"])
+    except Exception:
+        pass
 
     # Bound to [0.0, 1.0] and convert to 100 points
     final_score = max(0.0, min(1.0, base_score)) * 100.0
@@ -878,13 +976,20 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
             candidates[cand["code"]] = cand
 
     # 2. Path A2: SQLite FTS5 search (Top 1000)
-    # Apply alias expansion for recall (e.g. AP -> 动力配电箱, AL -> 照明配电箱)
-    from app.preprocessor import alias_dict
-    clean_keyword = q_name
+    from app.normalizer import clean_text_standard
+    clean_keyword = clean_text_standard(q_name)
+    if not clean_keyword:
+        clean_keyword = q_name
     clean_keyword = re.sub(r'[-_][a-zA-Z0-9]+', ' ', clean_keyword).strip()
-    for ak, av in alias_dict.items():
-        if ak in clean_keyword and len(ak) >= 2:
-            clean_keyword = clean_keyword.replace(ak, av)
+    
+    # Apply HVAC abbreviation expansion dynamically
+    from app.query_preprocessor import HVAC_UNIT_MAP
+    for cn_name, keywords in HVAC_UNIT_MAP:
+        for kw in keywords:
+            pattern = r'(?<![a-zA-Z])' + re.escape(kw) + r'(?![a-zA-Z])'
+            if re.search(pattern, clean_keyword, re.IGNORECASE):
+                clean_keyword = re.sub(pattern, cn_name, clean_keyword, flags=re.IGNORECASE)
+                break
     clean_keyword = re.sub(r'\(.*?\)|（.*?）|室外型|室内型', ' ', clean_keyword).strip()
     
     if clean_keyword:
@@ -892,6 +997,17 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
         for r in fts_results:
             if r["code"] not in candidates:
                 r["recall_source"] = "fts"
+                r["semantic_score"] = 0.0
+                candidates[r["code"]] = r
+
+    # Also search by extracted clean name from dynamic rules / query attributes (e.g. 截止阀)
+    q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+    extracted_name = q_attrs.get("名称") or q_attrs.get("name")
+    if extracted_name and len(str(extracted_name)) >= 2 and str(extracted_name) != clean_keyword:
+        fts_ext_results = search_materials_keyword(str(extracted_name), limit=1000)
+        for r in fts_ext_results:
+            if r["code"] not in candidates:
+                r["recall_source"] = "fts_extracted_name"
                 r["semantic_score"] = 0.0
                 candidates[r["code"]] = r
 
@@ -1010,7 +1126,8 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
                 pass
         
         c_attrs = c_parsed.get("attrs", {}) if c_parsed else {}
-        c_thickness = c_attrs.get("\u58c1\u539a") or c_attrs.get("\u539a\u5ea6")
+        c_thickness = c_attrs.get("壁厚") or c_attrs.get("厚度")
+        c_od = c_attrs.get("外径") or c_attrs.get("dn_val")
 
         scored_candidates.append({
             "code": cand["code"],
@@ -1022,13 +1139,26 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             "description": cand["description"],
             "score": score,
             "match_reasons": reasons[:2],
-            "c_thickness": c_thickness
+            "c_thickness": c_thickness,
+            "c_od": c_od
         })
         
     # Check if query has specified wall thickness
     q_parsed = query_info.get("parsed_spec", {}) if query_info else {}
     q_attrs = query_info.get("attrs") or q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
     q_thickness = q_attrs.get("壁厚") or q_attrs.get("厚度")
+    q_od_val = q_attrs.get("外径") or q_attrs.get("dn_val")
+
+    def get_od_closeness(cand_item):
+        if q_od_val is None:
+            return 0.0
+        c_od_val = cand_item.get("c_od")
+        if c_od_val is None:
+            return -999.0
+        try:
+            return -abs(float(c_od_val) - float(q_od_val))
+        except Exception:
+            return -999.0
 
     # Helper function to get clean numeric thickness for candidate as tiebreaker sorting key
     def get_thickness_tiebreaker(cand_item):
@@ -1037,6 +1167,17 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
         val = cand_item.get("c_thickness")
         if val is None:
             return -999.0
+        
+        # Standard wall thickness preference for JDG/KBG conduits
+        name_upper = str(cand_item.get("name", "")).upper()
+        if "JDG" in name_upper or "KBG" in name_upper:
+            try:
+                thickness = float(val)
+                if abs(thickness - 1.6) < 0.05:
+                    return 999.0
+            except (ValueError, TypeError):
+                pass
+
         if isinstance(val, (int, float)):
             return -float(val)
         try:
@@ -1051,12 +1192,26 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
                     pass
             return -999.0
 
-    # Sort by score descending, with exact text match, spec similarity, and thickness tie-breakers
+    def get_dim_closeness(cand_item):
+        dim_str = q_attrs.get("尺寸") or q_attrs.get("尺寸_2d")
+        if not dim_str:
+            return 0.0
+        q_dims = sorted([float(x) for x in re.findall(r'\d+(?:\.\d+)?', str(dim_str))], reverse=True)
+        c_spec = str(cand_item.get("specification", ""))
+        c_dims = sorted([float(x) for x in re.findall(r'\d+(?:\.\d+)?', c_spec)], reverse=True)
+        if len(q_dims) == len(c_dims) and len(q_dims) > 0:
+            diffs = sum(abs(q - c) for q, c in zip(q_dims, c_dims))
+            return -diffs
+        return -999.0
+
+    # Sort by score descending, with exact text match, diameter closeness, thickness tie-breaker, and dimension closeness
     scored_candidates.sort(key=lambda x: (
         x["score"],
         1.0 if "名称与规格完全一致" in x.get("match_reasons", []) else (0.5 if "规格型号完全一致" in x.get("match_reasons", []) else 0.0),
-        calculate_text_similarity(q_spec_text, x.get("specification", "")),
-        get_thickness_tiebreaker(x)
+        get_od_closeness(x),
+        get_thickness_tiebreaker(x),
+        get_dim_closeness(x),
+        calculate_text_similarity(q_spec_text, x.get("specification", ""))
     ), reverse=True)
     
     # Threshold for 100% exact match
@@ -1065,8 +1220,8 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
     
     if scored_candidates:
         top_one = scored_candidates[0]
-        # Match threshold V0.0.2: exact match if score >= 85.0
-        if top_one["score"] >= 85.0:
+        # Match threshold V0.0.2: exact match if score >= 75.0 without hard conflicts
+        if top_one["score"] >= 75.0:
             is_exact = True
             matched_code = top_one["code"]
             

@@ -132,8 +132,11 @@ class ConfigDrivenExtractor:
             if regex:
                 match = re.search(regex, text, re.IGNORECASE)
                 if match:
-                    # Take the first capture group
-                    val_found = match.group(1).strip()
+                    # Take the first non-None group value
+                    for g in match.groups():
+                        if g is not None:
+                            val_found = g.strip()
+                            break
             
             # Fallback dynamic key-value search if not matched by specific regex
             # e.g., if text has "风量: 1000" or similar
@@ -227,14 +230,31 @@ def extract_cable_params(text: str) -> Dict[str, Any]:
     
     # 1. Model extraction (Order matters: longest prefix first)
     models = [
-        "WDZN-YJV22", "WDZN-YJV", "WDZN-BYJ", "WDZ-YJY", "WDZ-BYJ", "WDZ-RYJS", "WDZ-RYJ",
-        "NH-YJV22", "NH-YJV", "NH-BV", "ZR-YJV22", "ZR-YJV", "ZR-BV", "ZR-BVR",
+        # WDZN series (Low-smoke zero-halogen flame-retardant fire-resistant)
+        "WDZN-YJV22", "WDZN-YJV", "WDZN-BYJR", "WDZN-BYJ", "WDZN-KYJV", "WDZN-KYJV22",
+        # WDZB series (Low-smoke zero-halogen Class B flame-retardant)
+        "WDZB-YJV22", "WDZB-YJV", "WDZB-YJY", "WDZB-YJY22", "WDZB-BYJR", "WDZB-BYJ", "WDZB-KYJV", "WDZB-KYJV22", "WDZB-KVV", "WDZB-KVVP",
+        # WDZA series (Low-smoke zero-halogen Class A flame-retardant)
+        "WDZA-YJV22", "WDZA-YJV", "WDZA-YJY", "WDZA-YJY22", "WDZA-BYJR", "WDZA-BYJ", "WDZA-KYJV", "WDZA-KYJV22",
+        # WDZC series (Low-smoke zero-halogen Class C flame-retardant)
+        "WDZC-YJV22", "WDZC-YJV", "WDZC-YJY", "WDZC-YJY22", "WDZC-BYJR", "WDZC-BYJ", "WDZC-KYJV", "WDZC-KYJV22",
+        # WDZ series (Low-smoke zero-halogen flame-retardant)
+        "WDZ-YJV22", "WDZ-YJV", "WDZ-YJY", "WDZ-YJY22", "WDZ-BYJR", "WDZ-BYJ", "WDZ-RYJS", "WDZ-RYJ", "WDZ-KYJV", "WDZ-KYJV22",
+        # NH series (Fire-resistant)
+        "NH-YJV22", "NH-YJV", "NH-BV", "NH-BVR", "NH-KVV", "NH-KVV22",
+        # ZR series (Flame-retardant)
+        "ZR-YJV22", "ZR-YJV", "ZR-BV", "ZR-BVR", "ZR-KVV", "ZR-KVV22",
+        # Basic series
         "YJV22", "YJY22", "YJV", "YJY", "KVVP2-22", "KVVP2", "KVVP", "KVV", "RVVP", "RVV",
-        "BYJ", "BVR", "BV", "RYJS", "RYJ"
+        "BYJR", "BYJ", "BVR", "BV", "RYJS", "RYJ"
     ]
     for m in models:
         if m in t_clean:
             attrs["型号"] = m
+            for fam in ["BYJR", "BYJ", "BVR", "BV", "BLV", "YJY22", "YJY", "YJV22", "YJV", "KVVP", "KVV", "RVVP", "RVV"]:
+                if fam in m:
+                    attrs["型号族"] = fam
+                    break
             break
             
     # 2. Cable cores & section matching (e.g., 4*50+1*25, 3*2.5, 5*10, 1*240, 2.5)
@@ -242,28 +262,35 @@ def extract_cable_params(text: str) -> Dict[str, Any]:
     comp_match = re.search(r'(\d+)\s*\*\s*(\d+(?:\.\d+)?)\s*\+\s*(\d+)\s*\*\s*(\d+(?:\.\d+)?)', t_clean)
     if comp_match:
         attrs["芯数"] = f"{comp_match.group(1)}+{comp_match.group(3)}"
-        attrs["截面积"] = f"{comp_match.group(2)}+{comp_match.group(4)}"
+        sec1 = float(comp_match.group(2))
+        sec2 = float(comp_match.group(4))
+        s1 = f"{int(sec1)}" if sec1.is_integer() else f"{sec1}"
+        s2 = f"{int(sec2)}" if sec2.is_integer() else f"{sec2}"
+        attrs["截面积"] = f"{s1}+{s2}"
         attrs["主芯数"] = int(comp_match.group(1))
-        attrs["主截面"] = float(comp_match.group(2))
+        attrs["主截面"] = sec1
         attrs["零芯数"] = int(comp_match.group(3))
-        attrs["零截面"] = float(comp_match.group(4))
+        attrs["零截面"] = sec2
     else:
         # Standard pattern: 3*2.5, 4*16, 5*6
         std_match = re.search(r'(\d+)\s*\*\s*(\d+(?:\.\d+)?)', t_clean)
         if std_match:
             attrs["芯数"] = str(int(std_match.group(1)))
-            attrs["截面积"] = str(float(std_match.group(2)))
+            sec = float(std_match.group(2))
+            s_str = f"{int(sec)}" if sec.is_integer() else f"{sec}"
+            attrs["截面积"] = s_str
             attrs["主芯数"] = int(std_match.group(1))
-            attrs["主截面"] = float(std_match.group(2))
+            attrs["主截面"] = sec
         else:
             # Single core fallback: BV-2.5, 2.5mm²
-            s_match = re.search(r'(?:BV|BYJ|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)?\s*-?\s*(\d+(?:\.\d+)?)\s*(?:MM2|MM²|平方)?', t_clean)
+            s_match = re.search(r'(?:BV|BYJ|BYJR|YJV|WDZ-YJY|BVR|RV|RVV|WDZ-BYJ)?\s*-?\s*(\d+(?:\.\d+)?)\s*(?:MM2|MM²|平方)?', t_clean)
             if s_match:
                 try:
                     val = float(s_match.group(1))
-                    if val in [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500]:
+                    if val in [0.5, 0.75, 1.0, 1.5, 2.5, 4.0, 6.0, 10.0, 16.0, 25.0, 35.0, 50.0, 70.0, 95.0, 120.0, 150.0, 185.0, 240.0, 300.0, 400.0, 500.0]:
                         attrs["芯数"] = "1"
-                        attrs["截面积"] = str(val)
+                        s_str = f"{int(val)}" if val.is_integer() else f"{val}"
+                        attrs["截面积"] = val
                         attrs["主芯数"] = 1
                         attrs["主截面"] = val
                 except ValueError:
@@ -289,12 +316,16 @@ def extract_pipe_params(text: str) -> Dict[str, Any]:
     
     # 1. Material
     mats = [
+        "磷酸脱氧无缝紫铜管", "脱氧紫铜管", "脱脂无缝紫铜管", "脱脂紫铜管", "无缝紫铜管", "磷酸脱氧紫铜管",
         "S30408", "304L", "316L", "304", "不锈钢", "无缝钢管", "镀锌钢管", "镀锌方管", "镀锌",
         "PPH", "PPR", "UPVC", "PVC", "PE", "紫铜管", "紫铜", "铜管", "铸铁"
     ]
     for m in mats:
         if m.lower() in t_clean.lower():
-            attrs["材质"] = m
+            if "铜" in m:
+                attrs["材质"] = "紫铜管"
+            else:
+                attrs["材质"] = m
             break
             
     # 2. Nominal Diameter DN / Outer Diameter De / φ
@@ -310,7 +341,7 @@ def extract_pipe_params(text: str) -> Dict[str, Any]:
                 attrs["管径"] = f"DN{int(dn_val)}"
                 attrs["dn_val"] = int(dn_val)
         else:
-            phi_match = re.search(r'[φФΦ]\s*(\d+(?:\.\d+)?)', t_clean)
+            phi_match = re.search(r'[φФΦ⌀]\s*(\d+(?:\.\d+)?)', t_clean)
             if phi_match:
                 attrs["外径"] = float(phi_match.group(1))
 
@@ -460,6 +491,24 @@ def extract_conduit_params(text: str) -> Dict[str, Any]:
             matched_type = code.upper()
             break
 
+    # Map Chinese material/pipe descriptions to standard codes
+    cn_to_code = {
+        "PC":  ["塑料管", "硬质聚氯乙烯", "聚氯乙烯", "塑料线管", "pvc"],
+        "SC":  ["焊接钢管", "钢导管", "厚壁钢管", "黑铁管", "sc"],
+        "RC":  ["镀锌钢管", "水煤气", "热浸镀锌", "rc"],
+        "JDG": ["紧定式", "套接紧定", "jdg"],
+        "KBG": ["扣压式", "kbg"],
+        "MT":  ["电线管", "薄壁黑铁", "mt", "wc"],
+        "FPC": ["半硬", "fpc"],
+        "KPC": ["波纹管", "kpc"],
+        "CP":  ["蛇皮", "可挠", "cp"]
+    }
+    if not matched_type:
+        for code, syns in cn_to_code.items():
+            if any(s in t_clean.lower() for s in syns):
+                matched_type = code
+                break
+
     # ── 5. Extract size number and wall thickness ──────────────────────────
     size_num = None
 
@@ -485,6 +534,7 @@ def extract_conduit_params(text: str) -> Dict[str, Any]:
                 size_num = int(m_digits.group(1))
 
     if matched_type:
+        params["管代号"] = matched_type
         params["管型代码"] = matched_type
         params["管型名称"] = CONDUIT_TYPE_MAP.get(matched_type, matched_type)
 

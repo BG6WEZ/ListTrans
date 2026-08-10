@@ -125,7 +125,7 @@
             padding: 32px;
             border-radius: 16px;
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .modal-header {
@@ -152,6 +152,7 @@
             border-radius: 8px;
             color: white;
             font-size: 14px;
+            box-sizing: border-box;
         }
         .form-group input:focus, .form-group select:focus {
             outline: none;
@@ -183,6 +184,7 @@
     <div class="admin-container">
         <a href="index.html" class="nav-back">← 返回智能工作台</a>
         
+        <!-- User Management Section -->
         <div class="admin-header">
             <div>
                 <h1>系统用户权限管理</h1>
@@ -207,6 +209,121 @@
                 <!-- User rows dynamically injected here -->
             </tbody>
         </table>
+
+        <!-- LLM Providers Section -->
+        <div class="admin-header" style="margin-top: 50px;">
+            <div>
+                <h1>大模型服务与优先调度配置 (LLM Priority Router)</h1>
+                <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">配置多厂家大模型节点，实现优先队列自动调度与超时降级容灾</p>
+            </div>
+            <button class="btn-action btn-primary-action" onclick="openCreateProviderModal()">＋ 新增模型节点</button>
+        </div>
+
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>优先级</th>
+                    <th>节点 ID</th>
+                    <th>名称 / 厂家</th>
+                    <th>Base URL</th>
+                    <th>模型标识</th>
+                    <th>状态</th>
+                    <th>调用 / 降级</th>
+                    <th>平均延迟</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="llm-provider-list-body">
+                <!-- Dynamically loaded -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Create LLM Provider Modal -->
+    <div class="modal" id="create-provider-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增大模型节点</h2>
+            </div>
+            <form id="create-provider-form">
+                <div class="form-group">
+                    <label for="p-id">节点 ID (英文无空格，例如 qwen-max-01 或 deepseek-v3)</label>
+                    <input type="text" id="p-id" required placeholder="如 qwen-max-01">
+                </div>
+                <div class="form-group">
+                    <label for="p-name">节点显示名称</label>
+                    <input type="text" id="p-name" required placeholder="如 阿里云 DashScope (Qwen-Max)">
+                </div>
+                <div class="form-group">
+                    <label for="p-base-url">Base URL</label>
+                    <input type="text" id="p-base-url" required placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1">
+                </div>
+                <div class="form-group">
+                    <label for="p-model-name">模型标识符</label>
+                    <input type="text" id="p-model-name" required placeholder="如 qwen-max 或 deepseek-chat">
+                </div>
+                <div class="form-group">
+                    <label for="p-api-key">API Key</label>
+                    <input type="password" id="p-api-key" required placeholder="sk-...">
+                </div>
+                <div class="form-group">
+                    <label for="p-priority">调度优先级 (1 为最高优先级，数值越小越优先)</label>
+                    <input type="number" id="p-priority" value="1" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="p-timeout">超时时间 (秒)</label>
+                    <input type="number" step="0.5" id="p-timeout" value="8.0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('create-provider-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">添加节点</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit LLM Provider Modal -->
+    <div class="modal" id="edit-provider-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改大模型节点配置</h2>
+            </div>
+            <form id="edit-provider-form">
+                <input type="hidden" id="edit-p-id">
+                <div class="form-group">
+                    <label>节点 ID</label>
+                    <input type="text" id="edit-p-id-display" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-name">节点显示名称</label>
+                    <input type="text" id="edit-p-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-base-url">Base URL</label>
+                    <input type="text" id="edit-p-base-url" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-model-name">模型标识符</label>
+                    <input type="text" id="edit-p-model-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-api-key">API Key (留空表示保持当前密钥不变)</label>
+                    <input type="password" id="edit-p-api-key" placeholder="如需更换请输入新 Key，留空保持原有不变">
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-priority">调度优先级 (1 为最高优先级)</label>
+                    <input type="number" id="edit-p-priority" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="edit-p-timeout">超时时间 (秒)</label>
+                    <input type="number" step="0.5" id="edit-p-timeout">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('edit-provider-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">保存配置</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Create User Modal -->
@@ -320,6 +437,29 @@
             };
         }
 
+        // Error message formatter helper
+        function extractErrorMessage(detail, fallback = '操作失败') {
+            if (!detail) return fallback;
+            if (typeof detail === 'string') return detail;
+            if (Array.isArray(detail)) {
+                return detail.map(item => {
+                    if (typeof item === 'string') return item;
+                    if (item && item.msg) {
+                        const loc = Array.isArray(item.loc) ? item.loc.slice(1).join('.') : '';
+                        return loc ? `【${loc}】${item.msg}` : item.msg;
+                    }
+                    return JSON.stringify(item);
+                }).join('； ');
+            }
+            if (typeof detail === 'object') {
+                if (detail.message) return detail.message;
+                if (detail.msg) return detail.msg;
+                if (detail.detail) return extractErrorMessage(detail.detail);
+                return JSON.stringify(detail);
+            }
+            return String(detail);
+        }
+
         // Load users on startup
         async function fetchUsers() {
             try {
@@ -338,7 +478,7 @@
                 renderUsers(data);
             } catch (err) {
                 console.error(err);
-                alert('加载用户列表失败。');
+                alert('加载用户列表失败: ' + extractErrorMessage(err.message));
             }
         }
 
@@ -374,6 +514,167 @@
             });
         }
 
+        // LLM Provider Management Logic
+        let currentProviders = [];
+
+        async function fetchLLMProviders() {
+            try {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers`, {
+                    headers: getAuthHeaders()
+                });
+                if (res.ok) {
+                    currentProviders = await res.json();
+                    renderProviders(currentProviders);
+                }
+            } catch (e) {
+                console.error('Failed to fetch LLM providers:', e);
+            }
+        }
+
+        function renderProviders(providers) {
+            const body = document.getElementById('llm-provider-list-body');
+            body.innerHTML = '';
+            providers.forEach(p => {
+                const tr = document.createElement('tr');
+                const statusText = p.is_active ? '已启用' : '已停用';
+                const statusClass = p.is_active ? 'status-active' : 'status-inactive';
+                
+                const safeName = (p.name || '').replace(/'/g, "\\'");
+                const safeBaseUrl = (p.base_url || '').replace(/'/g, "\\'");
+                const safeModelName = (p.model_name || '').replace(/'/g, "\\'");
+
+                tr.innerHTML = `
+                    <td><strong style="color: #3b82f6;">P${p.priority}</strong></td>
+                    <td><code>${p.provider_id}</code></td>
+                    <td><strong>${p.name}</strong></td>
+                    <td style="font-size: 12px; color: #8a99ad; max-width: 260px; word-break: break-all;">${p.base_url}</td>
+                    <td><code>${p.model_name}</code></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${p.total_calls || 0} 次 / ${p.total_failovers || 0} 降级</td>
+                    <td>${Math.round(p.avg_latency_ms || 0)} ms</td>
+                    <td>
+                        <button class="btn-action" onclick="openEditProviderModal('${p.provider_id}', '${safeName}', '${safeBaseUrl}', '${safeModelName}', ${p.priority}, ${p.timeout_seconds})">修改配置</button>
+                        <button class="btn-action" onclick="toggleProviderActive('${p.provider_id}', ${!p.is_active})">${p.is_active ? '停用' : '启用'}</button>
+                        <button class="btn-action btn-danger-action" onclick="deleteProvider('${p.provider_id}')">删除</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function openCreateProviderModal() {
+            document.getElementById('create-provider-form').reset();
+            document.getElementById('create-provider-modal').style.display = 'flex';
+        }
+
+        function openEditProviderModal(provider_id, name, base_url, model_name, priority, timeout_seconds) {
+            document.getElementById('edit-p-id').value = provider_id;
+            document.getElementById('edit-p-id-display').value = provider_id;
+            document.getElementById('edit-p-name').value = name;
+            document.getElementById('edit-p-base-url').value = base_url;
+            document.getElementById('edit-p-model-name').value = model_name;
+            document.getElementById('edit-p-api-key').value = '';
+            document.getElementById('edit-p-priority').value = priority;
+            document.getElementById('edit-p-timeout').value = timeout_seconds;
+            document.getElementById('edit-provider-modal').style.display = 'flex';
+        }
+
+        document.getElementById('create-provider-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const provider_id = document.getElementById('p-id').value.trim();
+            const name = document.getElementById('p-name').value.trim();
+            const base_url = document.getElementById('p-base-url').value.trim();
+            const model_name = document.getElementById('p-model-name').value.trim();
+            const api_key_enc = document.getElementById('p-api-key').value.trim();
+            const priority = parseInt(document.getElementById('p-priority').value) || 1;
+            const timeout_seconds = parseFloat(document.getElementById('p-timeout').value) || 8.0;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active: true })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const msg = extractErrorMessage(data.detail || data.error, '添加节点失败');
+                    throw new Error(msg);
+                }
+                alert(data.detail || '大模型节点添加成功！');
+                closeModal('create-provider-modal');
+                fetchLLMProviders();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.getElementById('edit-provider-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const provider_id = document.getElementById('edit-p-id').value;
+            const name = document.getElementById('edit-p-name').value.trim();
+            const base_url = document.getElementById('edit-p-base-url').value.trim();
+            const model_name = document.getElementById('edit-p-model-name').value.trim();
+            const api_key_enc = document.getElementById('edit-p-api-key').value.trim();
+            const priority = parseInt(document.getElementById('edit-p-priority').value) || 1;
+            const timeout_seconds = parseFloat(document.getElementById('edit-p-timeout').value) || 8.0;
+
+            const payload = { name, base_url, model_name, priority, timeout_seconds };
+            if (api_key_enc) {
+                payload.api_key_enc = api_key_enc;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers/${provider_id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(extractErrorMessage(data.detail || data.error, '修改配置失败'));
+                }
+                alert(data.detail || '节点配置更新成功！');
+                closeModal('edit-provider-modal');
+                fetchLLMProviders();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function toggleProviderActive(provider_id, is_active) {
+            try {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers/${provider_id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ is_active })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(extractErrorMessage(data.detail, '状态更新失败'));
+                }
+                fetchLLMProviders();
+            } catch (err) {
+                alert('操作失败: ' + err.message);
+            }
+        }
+
+        async function deleteProvider(provider_id) {
+            if (!confirm(`确定删除大模型节点 "${provider_id}" 吗？`)) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers/${provider_id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(extractErrorMessage(data.detail, '删除失败'));
+                }
+                fetchLLMProviders();
+            } catch (err) {
+                alert('删除失败: ' + err.message);
+            }
+        }
+
         // Modal Helpers
         function openCreateModal() {
             document.getElementById('create-form').reset();
@@ -399,10 +700,10 @@
             document.getElementById(id).style.display = 'none';
         }
 
-        // Submits
+        // User Submits
         document.getElementById('create-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = document.getElementById('create-username').value;
+            const username = document.getElementById('create-username').value.trim();
             const password = document.getElementById('create-password').value;
             const role = document.getElementById('create-role').value;
 
@@ -413,8 +714,8 @@
                     body: JSON.stringify({ username, password, role })
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || '创建用户失败');
-                alert(data.detail);
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '创建用户失败'));
+                alert(data.detail || '用户创建成功');
                 closeModal('create-modal');
                 fetchUsers();
             } catch (err) {
@@ -435,8 +736,8 @@
                     body: JSON.stringify({ role, is_active })
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || '保存修改失败');
-                alert(data.detail);
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '保存修改失败'));
+                alert(data.detail || '修改保存成功');
                 closeModal('edit-modal');
                 fetchUsers();
             } catch (err) {
@@ -456,8 +757,8 @@
                     body: JSON.stringify({ new_password })
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || '密码重置失败');
-                alert(data.detail);
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '密码重置失败'));
+                alert(data.detail || '密码重置成功');
                 closeModal('password-modal');
                 fetchUsers();
             } catch (err) {
@@ -474,8 +775,8 @@
                     headers: getAuthHeaders()
                 });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || '删除用户失败');
-                alert(data.detail);
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '删除用户失败'));
+                alert(data.detail || '用户删除成功');
                 fetchUsers();
             } catch (err) {
                 alert(err.message);
@@ -484,6 +785,7 @@
 
         // Initialize page
         fetchUsers();
+        fetchLLMProviders();
     </script>
 </body>
 </html>

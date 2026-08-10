@@ -40,6 +40,17 @@ window.fetch = async function (url, options) {
     }
 };
 
+function getAuthHeaders(extraHeaders = {}) {
+    const token = localStorage.getItem('token') || '';
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return Object.assign(headers, extraHeaders);
+}
+
 let items = []; // Holds all matched rows from original Excel
 let selectedItem = null; // Selected row dict
 let currentFilter = 'all'; // Current filter tab
@@ -137,16 +148,19 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupNavigation() {
     const navWorkbench = document.getElementById('nav-workbench');
     const navMaterials = document.getElementById('nav-materials');
+    const navLlmRules = document.getElementById('nav-llm-rules');
     const navConfig = document.getElementById('nav-config');
     
     const workbenchEl = document.getElementById('workbench');
     const materialsDashboardEl = document.getElementById('materials-dashboard');
+    const llmRulesDashboardEl = document.getElementById('llm-rules-dashboard');
     const configDashboardEl = document.getElementById('config-dashboard');
     const welcomeSlate = document.getElementById('welcome-slate');
 
     navWorkbench.addEventListener('click', () => {
         navWorkbench.classList.add('active');
         if (navMaterials) navMaterials.classList.remove('active');
+        if (navLlmRules) navLlmRules.classList.remove('active');
         navConfig.classList.remove('active');
         
         if (items.length > 0) {
@@ -157,6 +171,7 @@ function setupNavigation() {
             workbenchEl.style.display = 'none';
         }
         if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
+        if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
         configDashboardEl.style.display = 'none';
     });
 
@@ -164,11 +179,13 @@ function setupNavigation() {
         navMaterials.addEventListener('click', () => {
             navMaterials.classList.add('active');
             navWorkbench.classList.remove('active');
+            if (navLlmRules) navLlmRules.classList.remove('active');
             navConfig.classList.remove('active');
             
             workbenchEl.style.display = 'none';
             welcomeSlate.style.display = 'none';
             configDashboardEl.style.display = 'none';
+            if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
             if (materialsDashboardEl) materialsDashboardEl.style.display = 'flex';
             
             loadAndRenderDbMetadata();
@@ -177,14 +194,34 @@ function setupNavigation() {
         });
     }
 
+    if (navLlmRules) {
+        navLlmRules.addEventListener('click', () => {
+            navLlmRules.classList.add('active');
+            navWorkbench.classList.remove('active');
+            if (navMaterials) navMaterials.classList.remove('active');
+            navConfig.classList.remove('active');
+
+            workbenchEl.style.display = 'none';
+            welcomeSlate.style.display = 'none';
+            configDashboardEl.style.display = 'none';
+            if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
+            if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'flex';
+
+            loadRuleStats();
+            fetchAndRenderPendingRules();
+        });
+    }
+
     navConfig.addEventListener('click', () => {
         navConfig.classList.add('active');
         navWorkbench.classList.remove('active');
         if (navMaterials) navMaterials.classList.remove('active');
+        if (navLlmRules) navLlmRules.classList.remove('active');
         
         workbenchEl.style.display = 'none';
         welcomeSlate.style.display = 'none';
         if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
+        if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
         configDashboardEl.style.display = 'flex';
         
         loadAndRenderConfigs();
@@ -2860,3 +2897,378 @@ window.addEventListener('beforeunload', (e) => {
         return msg;
     }
 });
+
+
+// ==========================================
+// V0.0.8 LLM Rule Engine Frontend Module
+// ==========================================
+
+let currentDraftRuleId = null;
+
+function setupLlmRulesModule() {
+    const tabStudio = document.getElementById('tab-rule-studio');
+    const tabAudit = document.getElementById('tab-rule-audit');
+    const tabLeaderboard = document.getElementById('tab-rule-leaderboard');
+
+    const panelStudio = document.getElementById('rule-studio-panel');
+    const panelAudit = document.getElementById('rule-audit-panel');
+    const panelLeaderboard = document.getElementById('rule-leaderboard-panel');
+
+    if (tabStudio && tabAudit && tabLeaderboard) {
+        tabStudio.addEventListener('click', () => {
+            tabStudio.style.background = '#3b82f6';
+            tabStudio.style.color = 'white';
+            tabAudit.style.background = 'transparent';
+            tabAudit.style.color = 'var(--color-text-secondary)';
+            tabLeaderboard.style.background = 'transparent';
+            tabLeaderboard.style.color = 'var(--color-text-secondary)';
+
+            panelStudio.style.display = 'grid';
+            panelAudit.style.display = 'none';
+            panelLeaderboard.style.display = 'none';
+        });
+
+        tabAudit.addEventListener('click', () => {
+            tabAudit.style.background = '#3b82f6';
+            tabAudit.style.color = 'white';
+            tabStudio.style.background = 'transparent';
+            tabStudio.style.color = 'var(--color-text-secondary)';
+            tabLeaderboard.style.background = 'transparent';
+            tabLeaderboard.style.color = 'var(--color-text-secondary)';
+
+            panelStudio.style.display = 'none';
+            panelAudit.style.display = 'flex';
+            panelLeaderboard.style.display = 'none';
+
+            fetchAndRenderPendingRules();
+        });
+
+        tabLeaderboard.addEventListener('click', () => {
+            tabLeaderboard.style.background = '#3b82f6';
+            tabLeaderboard.style.color = 'white';
+            tabStudio.style.background = 'transparent';
+            tabStudio.style.color = 'var(--color-text-secondary)';
+            tabAudit.style.background = 'transparent';
+            tabAudit.style.color = 'var(--color-text-secondary)';
+
+            panelStudio.style.display = 'none';
+            panelAudit.style.display = 'none';
+            panelLeaderboard.style.display = 'flex';
+
+            loadRuleStats();
+        });
+    }
+
+    const btnGenerate = document.getElementById('btn-generate-rule');
+    if (btnGenerate) {
+        btnGenerate.addEventListener('click', handleGenerateRule);
+    }
+
+    const btnTest = document.getElementById('btn-test-rule');
+    if (btnTest) {
+        btnTest.addEventListener('click', handleTestRule);
+    }
+
+    const btnSave = document.getElementById('btn-save-draft');
+    if (btnSave) {
+        btnSave.addEventListener('click', handleSaveDraft);
+    }
+
+    const btnSubmit = document.getElementById('btn-submit-audit');
+    if (btnSubmit) {
+        btnSubmit.addEventListener('click', handleSubmitAudit);
+    }
+
+    const btnRefresh = document.getElementById('refresh-rules-btn');
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', () => {
+            loadRuleStats();
+            fetchAndRenderPendingRules();
+        });
+    }
+}
+
+async function handleGenerateRule() {
+    const scope_level = document.getElementById('rule-scope-level').value;
+    const scope_target = document.getElementById('rule-scope-target').value.trim();
+    const description = document.getElementById('rule-prompt-desc').value.trim();
+    const sample_text = document.getElementById('rule-sample-text').value.trim();
+
+    if (!description && !sample_text) {
+        alert('请在上方输入原始清单描述或填写自然语言规则需求！');
+        return;
+    }
+
+    const finalDescription = description || `请针对样本清单描述【${sample_text}】，自动分析提取核心设备名称与型号、提取关键规格属性、过滤施工杂质并建立标准匹配规则。`;
+
+    const statusBadge = document.getElementById('rule-compiler-status');
+    if (statusBadge) {
+        statusBadge.innerText = '正在调用大模型...';
+        statusBadge.style.background = 'rgba(59, 130, 246, 0.2)';
+        statusBadge.style.color = '#3b82f6';
+    }
+
+    showLoading("大模型智能编译中...", "系统正在通过优先容灾多模型路由器解析自然语言并生成 DSL 规则...");
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/generate`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                scope_level,
+                scope_target,
+                discipline: scope_level === 'discipline' ? scope_target : '',
+                description: finalDescription,
+                sample_text
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '规则编译生成失败');
+
+        const dsl = data.dsl_json || {};
+        document.getElementById('rule-name-input').value = dsl.rule_name || `${scope_target || '通用'}清洗比对规则`;
+        document.getElementById('rule-json-editor').value = JSON.stringify(dsl, null, 2);
+
+        currentDraftRuleId = `RULE-${Date.now()}`;
+
+        if (statusBadge) {
+            statusBadge.innerText = `编译成功 (${data.provider_name || 'LLM'}, ${data.latency_ms || 0}ms)`;
+            statusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+            statusBadge.style.color = '#10b981';
+        }
+
+        if (sample_text) {
+            handleTestRule();
+        }
+    } catch (err) {
+        alert(`编译失败: ${err.message}`);
+        if (statusBadge) {
+            statusBadge.innerText = '编译失败';
+            statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+            statusBadge.style.color = '#ef4444';
+        }
+    } finally {
+        hideLoading();
+    }
+}
+
+async function handleTestRule() {
+    const rawJson = document.getElementById('rule-json-editor').value.trim();
+    const sample_text = document.getElementById('rule-sample-text').value.trim();
+
+    if (!rawJson) {
+        alert('没有可运行的 Rule DSL JSON！');
+        return;
+    }
+    if (!sample_text) {
+        alert('请输入测试样本原文！');
+        return;
+    }
+
+    let parsed_dsl;
+    try {
+        parsed_dsl = JSON.parse(rawJson);
+    } catch (e) {
+        alert(`JSON 语法错误: ${e.message}`);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/test`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                parsed_dsl,
+                sample_text
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || '测试失败');
+
+        const box = document.getElementById('rule-test-output-box');
+        const content = document.getElementById('rule-test-output-content');
+        if (box && content) {
+            box.style.display = 'block';
+            content.innerHTML = `
+                <div><strong>清洗前：</strong> <code>${data.original_text}</code></div>
+                <div><strong>清洗后：</strong> <code style="color: #38bdf8;">${data.cleaned_text}</code></div>
+                <div><strong>提取属性：</strong> <code style="color: #f59e0b;">${JSON.stringify(data.extracted_params)}</code></div>
+                <div><strong>清洗规则应用：</strong> ${data.cleaning_logs.length ? data.cleaning_logs.join('; ') : '无修改'}</div>
+            `;
+        }
+    } catch (err) {
+        alert(`测试运行失败: ${err.message}`);
+    }
+}
+
+async function handleSaveDraft() {
+    const rawJson = document.getElementById('rule-json-editor').value.trim();
+    const rule_name = document.getElementById('rule-name-input').value.trim();
+    const scope_level = document.getElementById('rule-scope-level').value;
+    const scope_target = document.getElementById('rule-scope-target').value;
+    const description = document.getElementById('rule-prompt-desc').value.trim();
+
+    if (!rawJson || !rule_name) {
+        alert('规则名称和规则 JSON 不能为空！');
+        return;
+    }
+
+    let parsed_dsl;
+    try {
+        parsed_dsl = JSON.parse(rawJson);
+    } catch (e) {
+        alert('规则 JSON 格式错误');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                rule_id: currentDraftRuleId,
+                rule_name,
+                scope_level,
+                scope_target,
+                discipline: scope_level === 'discipline' ? scope_target : '',
+                priority: 10,
+                description,
+                parsed_dsl
+            })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || '保存草稿失败');
+        currentDraftRuleId = data.rule_id;
+        alert('草稿保存成功！');
+    } catch (err) {
+        alert(`保存失败: ${err.message}`);
+    }
+}
+
+async function handleSubmitAudit() {
+    if (!currentDraftRuleId) {
+        await handleSaveDraft();
+        if (!currentDraftRuleId) return;
+    }
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${currentDraftRuleId}/submit`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '提交审核失败');
+        alert('规则已成功提交给上级经理/总监审核！');
+        loadRuleStats();
+    } catch (err) {
+        alert(`提交失败: ${err.message}`);
+    }
+}
+
+async function fetchAndRenderPendingRules() {
+    const tbody = document.getElementById('pending-rules-tbody');
+    if (!tbody) return;
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules?status=pending_approval`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) return;
+
+        const rules = await res.json();
+        tbody.innerHTML = '';
+
+        const badge = document.getElementById('audit-pending-badge');
+        if (badge) badge.innerText = rules.length;
+
+        if (rules.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无待审核的规则。</td></tr>';
+            return;
+        }
+
+        rules.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><code>${r.rule_id}</code></td>
+                <td><strong>${r.rule_name}</strong></td>
+                <td>${r.scope_target || r.scope_level}</td>
+                <td>${r.author_name}</td>
+                <td>${r.created_at || '-'}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="auditRule('${r.rule_id}', 'approve')"><i class="fa-solid fa-check"></i> 批准上线</button>
+                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px; background: #dc2626; border-color: #dc2626; color: white;" onclick="auditRule('${r.rule_id}', 'reject')"><i class="fa-solid fa-xmark"></i> 驳回</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        console.error('Failed to fetch pending rules:', e);
+    }
+}
+
+async function auditRule(ruleId, action) {
+    const comment = prompt(action === 'approve' ? '请输入批准说明（可选）：' : '请输入驳回原因：');
+    if (action === 'reject' && comment === null) return;
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/audit`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ action, comment: comment || '' })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '审核操作失败');
+        alert(data.detail);
+        fetchAndRenderPendingRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`操作失败: ${err.message}`);
+    }
+}
+
+async function loadRuleStats() {
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/stats`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        document.getElementById('stat-approved-count').innerText = data.approved_count || 0;
+        document.getElementById('stat-pending-count').innerText = data.pending_count || 0;
+        document.getElementById('stat-total-hits').innerText = data.total_hits || 0;
+
+        const tbody = document.getElementById('leaderboard-tbody');
+        if (tbody) {
+            tbody.innerHTML = '';
+            if (!data.top_rules || data.top_rules.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-text-muted); padding: 20px;">暂无命中记录。</td></tr>';
+                return;
+            }
+
+            data.top_rules.forEach((r, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong style="color: #eab308;">#${index + 1}</strong></td>
+                    <td><code>${r.rule_id}</code></td>
+                    <td><strong>${r.rule_name}</strong></td>
+                    <td>${r.scope_target || '通用'}</td>
+                    <td>${r.author_name}</td>
+                    <td>${r.approved_at || '-'}</td>
+                    <td style="text-align: right;"><strong style="color: #10b981; font-size: 15px;">${r.hit_count}</strong> 次</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (e) {
+        console.error('Failed to load rule stats:', e);
+    }
+}
+
+// Call on startup
+document.addEventListener('DOMContentLoaded', () => {
+    setupLlmRulesModule();
+});
+

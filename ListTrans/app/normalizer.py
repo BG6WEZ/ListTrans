@@ -67,13 +67,34 @@ def to_half_width(text: str) -> str:
         result.append(chr(code))
     return "".join(result)
 
-def clean_text_standard(text: str) -> str:
+def clean_text_standard(text: str, discipline: Optional[str] = None, category: Optional[str] = None) -> str:
     """
     Apply character cleaning, full-to-half conversion, lowercase normalization,
     and alias synonym replacements on raw text.
     """
     if not text or not isinstance(text, str):
         return ""
+
+    # 0. Apply dynamic LLM DSL cleaning rules on raw structured input (e.g. multi-line manifests)
+    try:
+        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+        active_rules = LLMRuleManager.get_active_rules()
+        for r in active_rules:
+            scope_lvl = r.get("scope_level", "universal")
+            scope_tgt = r.get("scope_target", "")
+            if scope_lvl == "discipline" and scope_tgt and discipline and scope_tgt != discipline:
+                continue
+            if scope_lvl == "category" and scope_tgt and category and scope_tgt != category:
+                continue
+            dsl = r.get("parsed_dsl", {})
+            cleaning_rules = dsl.get("cleaning_rules", [])
+            if cleaning_rules:
+                text_before = text
+                text, actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
+                if text != text_before and r.get("rule_id"):
+                    RuleHitStatsTracker().record_hit(r["rule_id"])
+    except Exception:
+        pass
 
     # 1. Full-width to half-width & remove invisible control characters (except \n and \r)
     text = to_half_width(text)
@@ -103,6 +124,29 @@ def clean_text_standard(text: str) -> str:
     text = re.sub(header_unit_pattern, r'\1', text, flags=re.IGNORECASE)
 
     text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r'^(?:医用|医气|医院专用)', '', text.strip())
+
+    # 7. Apply dynamic LLM DSL cleaning rules (post-normalization pass)
+    try:
+        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+        active_rules = LLMRuleManager.get_active_rules()
+        for r in active_rules:
+            scope_lvl = r.get("scope_level", "universal")
+            scope_tgt = r.get("scope_target", "")
+            if scope_lvl == "discipline" and scope_tgt and discipline and scope_tgt != discipline:
+                continue
+            if scope_lvl == "category" and scope_tgt and category and scope_tgt != category:
+                continue
+            dsl = r.get("parsed_dsl", {})
+            cleaning_rules = dsl.get("cleaning_rules", [])
+            if cleaning_rules:
+                text_before = text
+                text, actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
+                if text != text_before and r.get("rule_id"):
+                    RuleHitStatsTracker().record_hit(r["rule_id"])
+    except Exception:
+        pass
+
     return text.strip()
 
 def reload_normalizer_configs():

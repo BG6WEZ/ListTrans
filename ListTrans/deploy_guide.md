@@ -1,6 +1,6 @@
-# 华康洁净物料清单匹配工具 V0.0.6 Windows 服务器部署指南
+# 华康洁净物料清单匹配工具 V0.0.7 Windows 服务器部署指南
 
-本指南详细描述了如何在 Windows Server 服务器上基于 Docker 容器化部署**华康洁净物料清单匹配工具 V0.0.6**。
+本指南详细描述了如何在 Windows Server 服务器上基于 Docker 容器化部署**华康洁净物料清单匹配工具 V0.0.7**。
 
 ---
 
@@ -28,7 +28,7 @@
 
 ```text
 ListTrans/
-├── material-matcher-v0.0.6.tar  # 打包生成的 Docker 镜像归档
+├── material-matcher-v0.0.7.tar  # 打包生成的 Docker 镜像归档
 ├── docker-compose.yml           # 容器服务定义文件
 ├── .env.example                 # 环境变量模板文件（复制并重命名为 .env）
 ├── model_offline/               # [重要] 离线 NLP 算法模型目录
@@ -80,9 +80,9 @@ ListTrans/
 ### 步骤 A：载入 Docker 镜像
 使用 Docker load 命令将打包好的镜像归档载入本地 Docker 镜像库：
 ```cmd
-docker load -i material-matcher-v0.0.6.tar
+docker load -i material-matcher-v0.0.7.tar
 ```
-*导入完成后，运行 `docker images`，应能看到 `material-matcher:v0.0.6` 镜像已在列表中。*
+*导入完成后，运行 `docker images`，应能看到 `material-matcher:v0.0.7` 镜像已在列表中。*
 
 ### 步骤 B：启动容器
 运行 docker-compose 启动多容器守护进程：

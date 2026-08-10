@@ -330,6 +330,31 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
         extract_conduit_params, extract_switchgear_params, extract_power_range,
         extract_switch_gang_control, extract_ups_params
     )
+    if domain in ["medical_gas", "valve_medical_gas"] or any(k in text_clean for k in ["氧气", "负压", "吸引", "真空", "压缩空气", "空压", "二氧化碳", "co2", "n2o", "氮气"]):
+        med_map = {
+            "氧气": ["氧气", "o2"],
+            "负压": ["负压", "吸引", "真空", "vac"],
+            "空压": ["空压", "压缩空气", "空气", "air"],
+            "CO2": ["co2", "二氧化碳"],
+            "N2O": ["n2o", "笑气"],
+            "氮气": ["氮气", "n2"]
+        }
+        for std_name, syns in med_map.items():
+            if any(s in text_clean for s in syns):
+                attrs["介质"] = std_name
+                break
+
+    if domain == "pipe_copper" or any(k in text_clean for k in ["紫铜", "脱脂铜", "铜管", "紫铜管"]):
+        if "脱脂" in text_clean:
+            attrs["材质"] = "脱脂紫铜"
+        else:
+            attrs["材质"] = "紫铜"
+
+    if domain in ["ahu", "filter_ffu"] or any(k in text_clean for k in ["mau", "pau", "rau", "ahu", "fcu", "rcu", "ffu", "hrv", "erv", "dxu", "cru", "tu", "vav", "cav", "hepa", "paf", "机组", "空调", "新风", "过滤单元"]):
+        from app.query_preprocessor import extract_hvac_unit_type
+        unit_type = extract_hvac_unit_type(text_no_const) or extract_hvac_unit_type(category_hint)
+        if unit_type:
+            attrs["机组类型"] = unit_type
 
     if domain == "ups" or any(k in text_clean for k in ["ups", "不间断电源", "电池屏", "电池柜", "蓄电池"]):
         ups_attrs = extract_ups_params(text_no_const)
@@ -417,6 +442,8 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
         attrs.pop("芯数_max", None)
         attrs.pop("截面积_min", None)
         attrs.pop("截面积_max", None)
+        attrs.pop("主芯数", None)
+        attrs.pop("主截面", None)
 
     if "送风量" in attrs and "风量" not in attrs:
         attrs["风量"] = attrs["送风量"]
@@ -424,10 +451,33 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
         attrs["余压"] = attrs["机外余压"]
     if "涂膜厚度" in attrs and "厚度" not in attrs:
         attrs["厚度"] = attrs["涂膜厚度"]
-    if "过滤段" in attrs and isinstance(attrs["过滤段"], str):
-        attrs["过滤段"] = [attrs["过滤段"]]
-    if "过滤等级" in attrs and isinstance(attrs["过滤等级"], str):
-        attrs["过滤段"] = [attrs["过滤等级"]]
+
+    # Post-process and merge filter attributes into attrs["过滤段"] as a list
+    filter_val = attrs.get("机组过滤器") or attrs.get("过滤段") or attrs.get("过滤等级")
+    if filter_val:
+        if isinstance(filter_val, str):
+            parts = [p.strip() for p in re.split(r'[+/,，\s]', filter_val) if p.strip()]
+            attrs["过滤段"] = parts
+        elif isinstance(filter_val, list):
+            attrs["过滤段"] = filter_val
+
+    # Map filter codes to standard Chinese filter levels for "过滤等级" must-field compatibility
+    if "过滤段" in attrs:
+        levels = []
+        for f in attrs["过滤段"]:
+            f_upper = f.upper()
+            if any(x in f_upper for x in ["G1", "G2", "G3", "G4", "初效"]):
+                levels.append("初效")
+            elif any(x in f_upper for x in ["F5", "F6", "F7", "F8", "F9", "中效"]):
+                levels.append("中效")
+            elif any(x in f_upper for x in ["H10", "H11", "H12", "亚高效"]):
+                levels.append("亚高效")
+            elif any(x in f_upper for x in ["H13", "H14", "HEPA", "高效"]):
+                levels.append("高效")
+            elif any(x in f_upper for x in ["U15", "U16", "U17", "超高效"]):
+                levels.append("超高效")
+        if levels:
+            attrs["过滤等级"] = levels[0]
 
     return {
         "model": model,
@@ -447,7 +497,7 @@ def extract_params(text: str, category_hint: str = "") -> Dict[str, Any]:
         attrs["余压"] = attrs["机外余压"]
     if "管径" in attrs:
         attrs["口径"] = attrs["管径"]
-    if "过滤等级" in attrs:
+    if "过滤等级" in attrs and "过滤段" not in attrs:
         attrs["过滤段"] = [attrs["过滤等级"]] if isinstance(attrs["过滤等级"], str) else attrs["过滤等级"]
 
     return {

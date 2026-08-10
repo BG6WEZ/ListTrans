@@ -109,9 +109,25 @@ def route_domain(category: str, name: str, specification: str, professional_hint
         return "silencer"
     if any(kw in name_clean for kw in ["静压箱", "消声静压箱", "集风箱", "稳压箱"]):
         return "plenum"
-    if any(kw in full_upper for kw in ["H13", "H14", "HEPA", "高效过滤器", "中效过滤器", "FFU"]):
+    # Medical/HVAC filter routing (with safe English boundaries)
+    if any(kw in name_clean for kw in ["高效过滤器", "中效过滤器", "高效空气过滤器"]):
         return "filter_ffu"
-    if any(kw in full_upper for kw in ["MAU", "PAU", "RAU", "FAU", "FCU", "RCU", "DOAS", "VAV", "RTU", "HRU", "ERU", "HPU", "FPU", "AHU", "组合式空气处理机组"]):
+    if any(re.search(r'(?<![a-zA-Z])' + re.escape(acronym) + r'(?![a-zA-Z])', full_upper) for acronym in ["H13", "H14", "HEPA", "FFU"]):
+        return "filter_ffu"
+
+    # HVAC unit routing (with safe English boundaries)
+    hvac_cn_keywords = [
+        "全新风空气处理机组", "回风循环空气处理机组", "组合式空气处理机组", "风机盘管机组", "新风预处理机组",
+        "循环空气处理机组", "热回收新风机组", "全热回收新风机组", "直膨式空气处理机组", "洁净室专用机组",
+        "末端送风单元", "变风量空调系统", "定风量空调系统", "新风风机单元", "定风量空调", "热回收"
+    ]
+    hvac_en_acronyms = [
+        "MAU", "PAU", "RAU", "FAU", "FCU", "RCU", "DOAS", "VAV", "RTU", "HRU", "ERU", "HPU", "FPU", "AHU",
+        "HRV", "ERV", "DXU", "CRU", "TU", "CAV", "PAF"
+    ]
+    if any(kw in full_upper for kw in hvac_cn_keywords):
+        return "ahu"
+    if any(re.search(r'(?<![a-zA-Z])' + re.escape(acronym) + r'(?![a-zA-Z])', full_upper) for acronym in hvac_en_acronyms):
         return "ahu"
     if "YJV22" in full_upper or "YJV" in full_upper or "WDZ-YJY" in full_upper:
         if "控制" not in full_upper and "KVV" not in full_upper:
@@ -140,7 +156,7 @@ def route_domain(category: str, name: str, specification: str, professional_hint
         if elec_hint or not water_hint:
             return "conduit"
     # Name-based conduit detection
-    if any(kw in name_clean for kw in ["线管", "钢导管", "镀锌薄壁"]):
+    if any(kw in name_clean for kw in ["线管", "钢导管", "镀锌薄壁", "配管", "管线"]):
         return "conduit"
 
 
@@ -148,10 +164,10 @@ def route_domain(category: str, name: str, specification: str, professional_hint
     # Tier 2: Name Head Noun & Subcategory Controlled Dict (0.85 Confidence)
     # ==========================================
     # Cable & Wire subcategories
-    if any(kw in cat_clean or kw in name_clean for kw in ["电线", "电缆"]):
+    if any(kw in cat_clean or kw in name_clean for kw in ["电线", "电缆", "配线", "控制线", "双绞线", "缆", "线"]) and "套管" not in cat_clean and "管" not in cat_clean and "管" not in name_clean:
         if any(kw in full_upper for kw in ["KVV", "KVVR", "RVVP", "控制电缆"]):
             return "cable_control"
-        elif ("*" not in spec_clean and "×" not in spec_clean) and any(kw in full_upper for kw in ["BV", "BVR", "BYJ", "BLV", "电线"]):
+        elif ("*" not in spec_clean and "×" not in spec_clean) and any(kw in full_upper for kw in ["BV", "BVR", "BYJ", "BYJR", "BLV", "电线", "配线", "线"]):
             return "wire"
         else:
             return "cable_power"
@@ -159,7 +175,7 @@ def route_domain(category: str, name: str, specification: str, professional_hint
     # Pipe subcategories
     if any(kw in cat_clean or kw in name_clean for kw in ["不锈钢管", "304管", "316L管"]):
         return "pipe_ss"
-    if any(kw in cat_clean or kw in name_clean for kw in ["紫铜管", "脱脂铜管"]):
+    if any(kw in cat_clean or kw in name_clean for kw in ["紫铜管", "脱脂铜管", "紫铜", "脱氧紫铜", "脱氧铜", "冷媒铜管"]):
         return "pipe_copper"
     if any(kw in cat_clean or kw in name_clean for kw in ["PVC管", "PPR管", "PPH管", "塑料管", "UPVC"]):
         return "pipe_plastic"
@@ -175,7 +191,11 @@ def route_domain(category: str, name: str, specification: str, professional_hint
         else:
             return "valve_water"
 
-    # Equipment head nouns
+    # HVAC & Equipment head nouns
+    if any(kw in name_clean or kw in cat_clean for kw in ["消声器", "微穿孔", "消音器"]):
+        return "silencer"
+    if any(kw in name_clean or kw in cat_clean for kw in ["集风箱", "静压箱", "消声静压箱"]):
+        return "plenum"
     if "风机" in name_clean and "风机盘管" not in name_clean:
         return "fan"
     if "冷水机" in name_clean or "冷热水机组" in name_clean:

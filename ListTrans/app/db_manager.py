@@ -379,7 +379,7 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         search_tokens_list.append(tokens)
         
         # Pre-parse params and serialize to JSON
-        full_spec = f"{row['specification']} {row['description']}".strip()
+        full_spec = f"{row['name']} {row['specification']} {row['description']}".strip()
         parsed = extract_params(full_spec, row['category'])
         parsed_params_list.append(json.dumps(parsed, ensure_ascii=False))
         

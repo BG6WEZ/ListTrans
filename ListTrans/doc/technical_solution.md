@@ -1,4 +1,4 @@
-# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.6)
+# 华康洁净物料清单匹配工具技术方案说明书 (V0.0.7)
 
 本说明书详细阐述了华康洁净物料清单匹配工具的设计与技术方案。该工具作为通用的清单数据处理平台，旨在通过结构化参数解析、多路召回（FTS5全文倒排+语义向量搜索）、双轨制打分、前端可视化校对，将项目设计原始清单（包括暖通、电气、给排水专业）精准匹配至企业的标准物料库，并无损输出为符合规范的“标准格式”报表。
 
@@ -13,6 +13,7 @@
 | V0.0.4 | 2026-07-18 | 开发二组 | **公网安全与数据持久化改造**：<br>1. 引入 JWT 状态管理与 Bearer Token 接口防御；<br>2. 建立 RBAC 角色体系（员工/经理/总监/管理员）与 UI 动态权限过滤；<br>3. 引入登录频次限制（5分钟失败5次锁号/IP 15分钟）与独立 `security.log` 安全日志审计；<br>4. 增加工作会话暂存机制：包含 3分钟静默草稿自动暂存（起步提示恢复）与多版本手动命名进度备份（支持覆盖更新）；<br>5. 优化推荐候选区交互：点击已激活卡片可直接无弹窗解绑；<br>6. 整理并精简了项目工程文档。 |
 | V0.0.5 | 2026-07-21 | 结构化组 | **结构化改造与可回归度量**：<br>1. 落地 30 域结构化 Schema，385 品类折叠映射，6 份受控字典（`domain_schema.json` / `category_domain_map.json` / `unit_norm.json` / `material_dict.json` / `connection_dict.json` / `flags_dict.json`）；<br>2. 配置化 Hard Gates：`conflict_caps` / `deviation_caps` / `ratio_penalties` 从 JSON 动态读取，取代硬编码封顶；<br>3. `has_conflict` 采用相对公差判定，配合单向非对称缺失惩罚（Must -0.15 / Should -0.05）；<br>4. `materials` 主表新增 `parsed_schema_version` 行级列 + 自愈 `ALTER TABLE` 迁移；`POST /api/db/reparse` 支持 code / category / 陈旧行级三种粒度的**局部**异步重算；<br>5. 新增 `GET /api/db/schema/stats` 域统计接口；<br>6. 建立金标回归：`tests/fixtures/ground_truth_500.json`（当前 326 条）+ `tests/regression_runner.py` 一键出 `baseline_metrics_v0.0.5.md`；<br>7. 弱电/自控专项：FTS 同义词映射 + `generic` 域强制降级到 `scene_c` + "材质、规格" 无表头抽取。<br>**金标实测 Top-1 96.32% / Top-3 97.55% / Must 100%。** |
 | V0.0.6 | 2026-07-23 | 架构与算法组 | **大模型混合增强与询价清洗预处理**：<br>1. 询价描述预处理器 (`query_preprocessor.py`)：实现物料描述主块与“施工内容/工作内容/调试”等杂质噪声块的自动切分与过滤；提取 1.名称/2.规格二级键值结构；支持 MAU/PAU/AHU 等 14 类空调机组专有名词抽取；<br>2. 通义千问 LLM 混合增强 (`llm_client.py`)：接入 Qwen DashScope 大模型，内置 SQLite `llm_cache` 智能缓存、并发信号量隔离 (3 并发) 与 Circuit Breaker 熔断重试；提供 `/api/llm/status` 与 `/api/llm/toggle` 控制接口；<br>3. 系统管理与 REST API 扩展：`GET /api/db/materials` 物料库多条件分页接口与 `DELETE /api/system/reset` 系统数据一键清理恢复接口；<br>4. 自动化测试与离线治理工具：`scripts/batch_llm_structure.py` 离线批量治理工具与 `tests/test_llm_integration.py` / `tests/test_query_preprocessor.py` 测试套件。 |
+| V0.0.7 | 2026-08-10 | 算法与业务组 | **多专业工程清洗与高精度决胜引擎**：<br>1. **暖通专业**：扩充空调机组缩写与中文映射；支持 `G4+F7` 初中高效多级过滤器拆分；微穿孔消声器修饰词清洗与材质归一；集风箱 3D 尺寸降序排序容差匹配与尺寸最接近优选算法；<br>2. **医气专业**：`medical_gas` 领域增加 `流量` 属性与 50% 容差区间；`磷酸脱氧无缝紫铜管` (φ22.23) 自动映射至最接近外径 (φ22) 与最小标准壁厚 (1.0mm) 物料；安全剥离“医用/医气/医院专用”冗余前缀；<br>3. **配管专业**：建立 PVC/JDG/SC 中文同义词智能映射；针对未标壁厚的 JDG/KBG 导管按 GB 50303 标准智能优选 1.6mm 壁厚物料；<br>4. **配线与电缆专业**：长词优先提取 `WDZB-BYJR`、`WDZB-YJY`、`BVR` 等完整阻燃耐火线缆；单芯标准截面全覆盖与 Hard Gate 30 分封顶截面拦截；复合截面主截面与主芯数数值打分对齐；<br>5. **物料库全量同步**：全量 45,789 条物料参数解析重新同步入库，55 项自动化测试 100% 通过。 |
 
 ---
 
