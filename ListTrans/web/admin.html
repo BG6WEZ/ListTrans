@@ -3,58 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>系统管理 - 华康洁净物料匹配工具</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>系统管理后台 - 华康洁净物料匹配工具</title>
     <link rel="stylesheet" href="index.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .admin-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
+            max-width: 1600px;
+            margin: 20px auto;
+            padding: 0 24px;
+        }
+        .top-navbar-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .admin-nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 6px;
+        }
+        .nav-tab-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #8a99ad;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-tab-btn.active {
+            background: #2d82ff;
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(45, 130, 255, 0.4);
+        }
+        .tab-content-pane {
+            display: none;
+        }
+        .tab-content-pane.active {
+            display: block;
         }
         .admin-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 18px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 20px;
+            padding-bottom: 16px;
         }
         .admin-header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-family: 'Outfit', sans-serif;
             background: linear-gradient(135deg, #fff 0%, #8a99ad 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .filter-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 18px;
+            border-radius: 10px;
+        }
+        .filter-toolbar input, .filter-toolbar select {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: #f1f3f9;
+            font-size: 13px;
+        }
+        .filter-toolbar input {
+            min-width: 280px;
+            flex: 1;
+        }
+        .filter-toolbar input:focus, .filter-toolbar select:focus {
+            outline: none;
+            border-color: #2d82ff;
+        }
+        .count-tag {
+            font-size: 13px;
+            color: #8a99ad;
+            margin-left: auto;
+            font-weight: 500;
+        }
+        .table-scroll-container {
+            width: 100%;
+            max-height: 640px;
+            overflow-x: auto;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
         .user-table {
             width: 100%;
-            border-collapse: collapse;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 30px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            min-width: 1200px;
         }
         .user-table th, .user-table td {
-            padding: 16px 20px;
+            padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            white-space: nowrap;
         }
         .user-table th {
-            background: rgba(255,255,255,0.04);
+            position: sticky;
+            top: 0;
+            background: #0f172a;
             font-weight: 600;
-            color: #8a99ad;
-            font-size: 13px;
-            text-transform: uppercase;
+            color: #94a3b8;
+            font-size: 12px;
             letter-spacing: 0.5px;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .user-table tr:hover td {
-            background: rgba(255,255,255,0.02);
+        .user-table tbody tr:hover td {
+            background: rgba(255,255,255,0.035);
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 500;
@@ -69,15 +166,27 @@
         }
         .role-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 500;
             background: rgba(45, 130, 255, 0.15);
             color: #2d82ff;
         }
+        .role-badge-admin {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+        .role-badge-director {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+        }
+        .role-badge-manager {
+            background: rgba(14, 165, 233, 0.15);
+            color: #38bdf8;
+        }
         .btn-action {
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 6px;
             font-size: 12px;
             cursor: pointer;
@@ -85,7 +194,7 @@
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.08);
             color: #f1f3f9;
-            margin-right: 6px;
+            margin-right: 4px;
         }
         .btn-action:hover {
             background: rgba(255,255,255,0.12);
@@ -106,6 +215,68 @@
         .btn-primary-action:hover {
             background: #1e62c9;
         }
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #8a99ad;
+        }
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pagination-controls button {
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #f1f3f9;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .pagination-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination-controls select {
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: #f1f3f9;
+            font-size: 12px;
+        }
+        .llm-stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .llm-stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .llm-stat-card .stat-title {
+            font-size: 12px;
+            color: #8a99ad;
+            margin-bottom: 6px;
+        }
+        .llm-stat-card .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            color: #f1f3f9;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -113,45 +284,54 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
             z-index: 100;
             align-items: center;
             justify-content: center;
         }
         .modal-content {
             background: #0d1220;
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 28px;
             border-radius: 16px;
             width: 100%;
-            max-width: 460px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
         .modal-header {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .modal-header h2 {
             font-size: 18px;
             font-weight: 600;
         }
+        .form-row {
+            display: flex;
+            gap: 14px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
         .form-group label {
             display: block;
             font-size: 12px;
             color: #8a99ad;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px 12px;
-            background: rgba(0,0,0,0.2);
+            padding: 9px 12px;
+            background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 8px;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             box-sizing: border-box;
         }
         .form-group input:focus, .form-group select:focus {
@@ -161,10 +341,8 @@
         .modal-footer {
             display: flex;
             justify-content: flex-end;
-            margin-top: 24px;
-        }
-        .modal-footer button {
-            margin-left: 10px;
+            margin-top: 20px;
+            gap: 10px;
         }
         .nav-back {
             display: inline-flex;
@@ -172,7 +350,6 @@
             color: #8a99ad;
             text-decoration: none;
             font-size: 14px;
-            margin-bottom: 20px;
             transition: color 0.2s;
         }
         .nav-back:hover {
@@ -182,61 +359,313 @@
 </head>
 <body class="dark-theme">
     <div class="admin-container">
-        <a href="index.html" class="nav-back">← 返回智能工作台</a>
-        
-        <!-- User Management Section -->
-        <div class="admin-header">
-            <div>
-                <h1>系统用户权限管理</h1>
-                <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">新增用户、分配角色、启用/禁用账号及管理员密码重置</p>
+        <!-- Top Bar with Back Link and Mode Switcher Tabs -->
+        <div class="top-navbar-bar">
+            <a href="index.html" class="nav-back">← 返回智能工作台</a>
+            
+            <div class="admin-nav-tabs">
+                <button class="nav-tab-btn active" id="tab-btn-users" onclick="switchAdminTab('users')">
+                    👥 用户与权限管理
+                </button>
+                <button class="nav-tab-btn" id="tab-btn-llm" onclick="switchAdminTab('llm')">
+                    🤖 大模型服务与调度配置
+                </button>
             </div>
-            <button class="btn-action btn-primary-action" onclick="openCreateModal()">＋ 新增用户</button>
         </div>
 
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>用户名</th>
-                    <th>角色</th>
-                    <th>状态</th>
-                    <th>创建时间</th>
-                    <th>最后登录</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="user-list-body">
-                <!-- User rows dynamically injected here -->
-            </tbody>
-        </table>
-
-        <!-- LLM Providers Section -->
-        <div class="admin-header" style="margin-top: 50px;">
-            <div>
-                <h1>大模型服务与优先调度配置 (LLM Priority Router)</h1>
-                <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">配置多厂家大模型节点，实现优先队列自动调度与超时降级容灾</p>
+        <!-- TAB 1: User Management Panel -->
+        <div id="tab-content-users" class="tab-content-pane active">
+            <div class="admin-header">
+                <div>
+                    <h1>系统用户与权限管理 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">V0.0.8</span></h1>
+                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">依据企业人员清单分配账号，支持手机号登录、部门职位管理与角色权限配置</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-action" onclick="syncPersonnelFromExcel()">🔄 一键同步人员清单</button>
+                    <button class="btn-action btn-primary-action" onclick="openCreateModal()">＋ 新增用户</button>
+                </div>
             </div>
-            <button class="btn-action btn-primary-action" onclick="openCreateProviderModal()">＋ 新增模型节点</button>
+
+            <!-- Filter & Search Toolbar -->
+            <div class="filter-toolbar">
+                <input type="text" id="user-search-input" placeholder="🔍 快速搜索姓名、部门、工号、职位、手机号..." oninput="handleSearchInput()">
+                <select id="user-dept-filter" onchange="handleFilterChange()">
+                    <option value="">全部1级部门</option>
+                </select>
+                <select id="user-role-filter" onchange="handleFilterChange()">
+                    <option value="">全部角色</option>
+                    <option value="employee">普通员工</option>
+                    <option value="manager">经理 / 主管</option>
+                    <option value="director">总监</option>
+                    <option value="admin">系统管理员</option>
+                </select>
+                <span class="count-tag" id="user-count-badge">加载中...</span>
+            </div>
+
+            <!-- Scrollable Table Container -->
+            <div class="table-scroll-container">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">姓名</th>
+                            <th style="width: 110px;">1级部门</th>
+                            <th style="width: 110px;">2级部门</th>
+                            <th style="width: 120px;">3级部门</th>
+                            <th style="width: 90px;">工号</th>
+                            <th style="width: 140px;">职位</th>
+                            <th style="width: 130px;">手机号 (登录账号)</th>
+                            <th style="width: 100px;">角色</th>
+                            <th style="width: 80px;">状态</th>
+                            <th style="width: 150px;">最后登录</th>
+                            <th style="width: 180px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list-body">
+                        <!-- User rows dynamically injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="pagination-bar">
+                <div id="page-info-text">显示第 0 - 0 条，共 0 位用户</div>
+                <div class="pagination-controls">
+                    <span>每页显示:</span>
+                    <select id="page-size-select" onchange="changePageSize(this.value)">
+                        <option value="20">20 条</option>
+                        <option value="50">50 条</option>
+                        <option value="100">100 条</option>
+                        <option value="9999">全部 (可滚屏查看)</option>
+                    </select>
+                    <button id="btn-first-page" onclick="goToPage(1)">首页</button>
+                    <button id="btn-prev-page" onclick="goToPage(currentPage - 1)">上一页</button>
+                    <span id="page-num-display" style="color: #fff; font-weight: 500;">第 1 / 1 页</span>
+                    <button id="btn-next-page" onclick="goToPage(currentPage + 1)">下一页</button>
+                    <button id="btn-last-page" onclick="goToPage(totalPages)">末页</button>
+                </div>
+            </div>
         </div>
 
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>优先级</th>
-                    <th>节点 ID</th>
-                    <th>名称 / 厂家</th>
-                    <th>Base URL</th>
-                    <th>模型标识</th>
-                    <th>状态</th>
-                    <th>调用 / 降级</th>
-                    <th>平均延迟</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="llm-provider-list-body">
-                <!-- Dynamically loaded -->
-            </tbody>
-        </table>
+        <!-- TAB 2: LLM Providers Management Panel -->
+        <div id="tab-content-llm" class="tab-content-pane">
+            <div class="admin-header">
+                <div>
+                    <h1>大模型服务与优先调度配置 (LLM Priority Router)</h1>
+                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">配置阿里云通义千问、DeepSeek 等多厂家大模型节点，实现优先队列自动调度与超时降级容灾</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-action btn-primary-action" onclick="openCreateProviderModal()">＋ 新增模型节点</button>
+                </div>
+            </div>
+
+            <!-- Metric Summary Cards -->
+            <div class="llm-stat-cards">
+                <div class="llm-stat-card">
+                    <div class="stat-title">已配置模型节点</div>
+                    <div class="stat-value" id="stat-total-nodes">-</div>
+                </div>
+                <div class="llm-stat-card">
+                    <div class="stat-title">活跃调度节点</div>
+                    <div class="stat-value" id="stat-active-nodes" style="color: #34d399;">-</div>
+                </div>
+                <div class="llm-stat-card">
+                    <div class="stat-title">累计智能规则生成调用</div>
+                    <div class="stat-value" id="stat-total-calls" style="color: #38bdf8;">-</div>
+                </div>
+                <div class="llm-stat-card">
+                    <div class="stat-title">当前最高优先调度通道</div>
+                    <div class="stat-value" id="stat-top-provider" style="font-size: 16px; color: #f59e0b;">-</div>
+                </div>
+            </div>
+
+            <div class="table-scroll-container">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">优先级</th>
+                            <th style="width: 140px;">节点 ID</th>
+                            <th style="width: 180px;">显示名称 / 厂家</th>
+                            <th>Base URL</th>
+                            <th style="width: 160px;">模型标识符</th>
+                            <th style="width: 90px;">超时设定</th>
+                            <th style="width: 90px;">状态</th>
+                            <th style="width: 140px;">调用 / 降级</th>
+                            <th style="width: 100px;">平均延迟</th>
+                            <th style="width: 180px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="llm-provider-list-body">
+                        <!-- Dynamically loaded -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal" id="create-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新增系统用户</h2>
+            </div>
+            <form id="create-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-name">姓名 *</label>
+                        <input type="text" id="create-name" required placeholder="如：何仁泰">
+                    </div>
+                    <div class="form-group">
+                        <label for="create-phone">手机号 (登录账号) *</label>
+                        <input type="text" id="create-phone" required placeholder="如：18258426632">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-dept1">1级部门</label>
+                        <input type="text" id="create-dept1" placeholder="如：成本中心">
+                    </div>
+                    <div class="form-group">
+                        <label for="create-dept2">2级部门</label>
+                        <input type="text" id="create-dept2" placeholder="如：成本一部">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-dept3">3级部门</label>
+                        <input type="text" id="create-dept3" placeholder="如：成本一所">
+                    </div>
+                    <div class="form-group">
+                        <label for="create-employee-no">工号</label>
+                        <input type="text" id="create-employee-no" placeholder="如：15434">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-position">职位</label>
+                        <input type="text" id="create-position" placeholder="如：造价工程师">
+                    </div>
+                    <div class="form-group">
+                        <label for="create-role">系统角色</label>
+                        <select id="create-role">
+                            <option value="employee">普通员工 (使用智能工作台)</option>
+                            <option value="manager">经理 / 主管 (智能工作台 + 查看词典规则)</option>
+                            <option value="director">总监 (工作台 + 查看配置 + 管理物料库)</option>
+                            <option value="admin">系统管理员 (完整权限 + 用户管理)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="create-password">初始密码 (默认：hkjj@12345)</label>
+                    <input type="password" id="create-password" value="hkjj@12345" required placeholder="至少6位">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('create-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">创建用户</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>修改用户与权限配置</h2>
+            </div>
+            <form id="edit-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-name">姓名</label>
+                        <input type="text" id="edit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-phone">手机号 (登录账号)</label>
+                        <input type="text" id="edit-phone" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-dept1">1级部门</label>
+                        <input type="text" id="edit-dept1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-dept2">2级部门</label>
+                        <input type="text" id="edit-dept2">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-dept3">3级部门</label>
+                        <input type="text" id="edit-dept3">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-employee-no">工号</label>
+                        <input type="text" id="edit-employee-no">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-position">职位</label>
+                        <input type="text" id="edit-position">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-role">系统角色</label>
+                        <select id="edit-role">
+                            <option value="employee">普通员工</option>
+                            <option value="manager">经理 / 主管</option>
+                            <option value="director">总监</option>
+                            <option value="admin">系统管理员</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-status">账号状态</label>
+                    <select id="edit-status">
+                        <option value="1">启用</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('edit-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Password Reset Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>重置用户密码</h2>
+            </div>
+            <form id="password-form">
+                <input type="hidden" id="password-user-id">
+                <div class="form-group">
+                    <label>登录账号 / 手机号</label>
+                    <input type="text" id="password-username" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                </div>
+                <div class="form-group">
+                    <label for="password-new">新密码</label>
+                    <input type="password" id="password-new" value="hkjj@12345" required placeholder="请输入新密码，至少6位">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('password-modal')">取消</button>
+                    <button type="submit" class="btn-action btn-primary-action">重置密码</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Create LLM Provider Modal -->
@@ -326,107 +755,32 @@
         </div>
     </div>
 
-    <!-- Create User Modal -->
-    <div class="modal" id="create-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>新增系统用户</h2>
-            </div>
-            <form id="create-form">
-                <div class="form-group">
-                    <label for="create-username">用户名</label>
-                    <input type="text" id="create-username" required placeholder="请输入用户名，至少3位">
-                </div>
-                <div class="form-group">
-                    <label for="create-password">密码</label>
-                    <input type="password" id="create-password" required placeholder="请输入密码，至少6位">
-                </div>
-                <div class="form-group">
-                    <label for="create-role">角色</label>
-                    <select id="create-role">
-                        <option value="employee">普通员工 (使用智能工作台)</option>
-                        <option value="manager">经理 (智能工作台 + 查看词典规则)</option>
-                        <option value="director">总监 (智能工作台 + 查看配置 + 管理物料库)</option>
-                        <option value="admin">系统管理员 (完整权限 + 用户管理)</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-action" onclick="closeModal('create-modal')">取消</button>
-                    <button type="submit" class="btn-action btn-primary-action">创建用户</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit User Modal -->
-    <div class="modal" id="edit-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>修改用户权限</h2>
-            </div>
-            <form id="edit-form">
-                <input type="hidden" id="edit-user-id">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="edit-username" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
-                </div>
-                <div class="form-group">
-                    <label for="edit-role">角色</label>
-                    <select id="edit-role">
-                        <option value="employee">普通员工</option>
-                        <option value="manager">经理</option>
-                        <option value="director">总监</option>
-                        <option value="admin">系统管理员</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="edit-status">账号状态</label>
-                    <select id="edit-status">
-                        <option value="1">启用</option>
-                        <option value="0">禁用</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-action" onclick="closeModal('edit-modal')">取消</button>
-                    <button type="submit" class="btn-action btn-primary-action">保存修改</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Password Reset Modal -->
-    <div class="modal" id="password-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>重置用户密码</h2>
-            </div>
-            <form id="password-form">
-                <input type="hidden" id="password-user-id">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="password-username" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
-                </div>
-                <div class="form-group">
-                    <label for="password-new">新密码</label>
-                    <input type="password" id="password-new" required placeholder="请输入新密码，至少6位">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-action" onclick="closeModal('password-modal')">取消</button>
-                    <button type="submit" class="btn-action btn-primary-action">重置密码</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         const API_URL = window.location.origin;
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
 
-        // Security check
+        // Security check: Only administrator can access admin.html
         if (!token || role !== 'admin') {
-            alert('权限不足，请使用管理员账号登录。');
-            window.location.href = 'login.html';
+            alert('权限不足，仅系统管理员账号 (admin) 可访问管理后台。');
+            window.location.href = 'index.html';
+        }
+
+        // Tab Switcher
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content-pane').forEach(pane => pane.classList.remove('active'));
+            
+            const btn = document.getElementById(`tab-btn-${tabName}`);
+            const pane = document.getElementById(`tab-content-${tabName}`);
+            if (btn) btn.classList.add('active');
+            if (pane) pane.classList.add('active');
+
+            if (tabName === 'llm') {
+                fetchLLMProviders();
+            } else if (tabName === 'users') {
+                fetchUsers();
+            }
         }
 
         // Fetch headers helper
@@ -460,10 +814,16 @@
             return String(detail);
         }
 
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentPage = 1;
+        let pageSize = 20;
+        let totalPages = 1;
+
         // Load users on startup
         async function fetchUsers() {
             try {
-                const res = await fetch(`${API_URL}/api/admin/users`, {
+                const res = await fetch(`${API_URL}/api/admin/users?_t=${Date.now()}`, {
                     headers: getAuthHeaders()
                 });
                 
@@ -474,18 +834,123 @@
                     return;
                 }
                 
-                const data = await res.json();
-                renderUsers(data);
+                allUsers = await res.json();
+                populateDeptFilter(allUsers);
+                filterUsers();
             } catch (err) {
                 console.error(err);
                 alert('加载用户列表失败: ' + extractErrorMessage(err.message));
             }
         }
 
+        function populateDeptFilter(users) {
+            const deptSelect = document.getElementById('user-dept-filter');
+            const currentVal = deptSelect.value;
+            const depts = new Set();
+            users.forEach(u => {
+                if (u.dept1) depts.add(u.dept1);
+            });
+            deptSelect.innerHTML = '<option value="">全部1级部门</option>';
+            Array.from(depts).sort().forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                deptSelect.appendChild(opt);
+            });
+            deptSelect.value = currentVal;
+        }
+
+        function handleSearchInput() {
+            currentPage = 1;
+            filterUsers();
+        }
+
+        function handleFilterChange() {
+            currentPage = 1;
+            filterUsers();
+        }
+
+        function filterUsers() {
+            const query = (document.getElementById('user-search-input').value || '').trim().toLowerCase();
+            const deptFilter = document.getElementById('user-dept-filter').value;
+            const roleFilter = document.getElementById('user-role-filter').value;
+
+            filteredUsers = allUsers.filter(u => {
+                if (deptFilter && u.dept1 !== deptFilter) return false;
+                if (roleFilter && u.role !== roleFilter) return false;
+                if (!query) return true;
+
+                const searchTarget = [
+                    u.name, u.username, u.phone, u.dept1, u.dept2, u.dept3, u.employee_no, u.position
+                ].filter(Boolean).join(' ').toLowerCase();
+
+                return searchTarget.includes(query);
+            });
+
+            totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            renderCurrentPage();
+        }
+
+        function renderCurrentPage() {
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, filteredUsers.length);
+            const pageSlice = filteredUsers.slice(startIdx, endIdx);
+
+            renderUsers(pageSlice);
+
+            // Update badge & pagination display
+            const countBadge = document.getElementById('user-count-badge');
+            if (filteredUsers.length === allUsers.length) {
+                countBadge.innerText = `共 ${allUsers.length} 位用户`;
+            } else {
+                countBadge.innerText = `筛选出 ${filteredUsers.length} / 共 ${allUsers.length} 位用户`;
+            }
+
+            const pageInfo = document.getElementById('page-info-text');
+            if (filteredUsers.length === 0) {
+                pageInfo.innerText = `未找到匹配的用户记录`;
+            } else {
+                pageInfo.innerText = `显示第 ${startIdx + 1} - ${endIdx} 条，共 ${filteredUsers.length} 位用户`;
+            }
+
+            document.getElementById('page-num-display').innerText = `第 ${currentPage} / ${totalPages} 页`;
+            document.getElementById('btn-first-page').disabled = (currentPage === 1);
+            document.getElementById('btn-prev-page').disabled = (currentPage === 1);
+            document.getElementById('btn-next-page').disabled = (currentPage >= totalPages);
+            document.getElementById('btn-last-page').disabled = (currentPage >= totalPages);
+        }
+
+        function changePageSize(val) {
+            pageSize = parseInt(val) || 20;
+            currentPage = 1;
+            filterUsers();
+        }
+
+        function goToPage(page) {
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+            renderCurrentPage();
+            
+            // Scroll table container to top
+            const container = document.querySelector('#tab-content-users .table-scroll-container');
+            if (container) container.scrollTop = 0;
+        }
+
         function renderUsers(users) {
             const body = document.getElementById('user-list-body');
             body.innerHTML = '';
             
+            if (users.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="11" style="text-align: center; padding: 30px; color: #8a99ad;">未找到匹配的用户数据</td>`;
+                body.appendChild(tr);
+                return;
+            }
+
             users.forEach(user => {
                 const tr = document.createElement('tr');
                 
@@ -493,25 +958,212 @@
                 const statusClass = user.is_active ? 'status-active' : 'status-inactive';
                 
                 let roleCn = '普通员工';
-                if(user.role === 'admin') roleCn = '系统管理员';
-                else if(user.role === 'director') roleCn = '总监';
-                else if(user.role === 'manager') roleCn = '经理';
+                let roleBadgeClass = 'role-badge';
+                if(user.role === 'admin') {
+                    roleCn = '系统管理员';
+                    roleBadgeClass = 'role-badge role-badge-admin';
+                } else if(user.role === 'director') {
+                    roleCn = '总监';
+                    roleBadgeClass = 'role-badge role-badge-director';
+                } else if(user.role === 'manager') {
+                    roleCn = '经理 / 主管';
+                    roleBadgeClass = 'role-badge role-badge-manager';
+                }
+
+                const displayName = user.name || (user.username === 'admin' ? '系统管理员' : user.username);
+                const displayPhone = user.phone || user.username;
 
                 tr.innerHTML = `
-                    <td>${user.id}</td>
-                    <td><strong>${user.username}</strong></td>
-                    <td><span class="role-badge">${roleCn}</span></td>
+                    <td><strong>${escapeHtml(displayName)}</strong></td>
+                    <td>${escapeHtml(user.dept1 || '-')}</td>
+                    <td>${escapeHtml(user.dept2 || '-')}</td>
+                    <td>${escapeHtml(user.dept3 || '-')}</td>
+                    <td><code>${escapeHtml(user.employee_no || '-')}</code></td>
+                    <td>${escapeHtml(user.position || '-')}</td>
+                    <td><code>${escapeHtml(displayPhone)}</code></td>
+                    <td><span class="${roleBadgeClass}">${roleCn}</span></td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${user.created_at || '-'}</td>
-                    <td>${user.last_login || '-'}</td>
+                    <td style="color: #8a99ad; font-size: 12px;">${user.last_login || '-'}</td>
                     <td>
-                        <button class="btn-action" onclick="openEditModal(${user.id}, '${user.username}', '${user.role}', ${user.is_active})">权限配置</button>
-                        <button class="btn-action" onclick="openPasswordModal(${user.id}, '${user.username}')">密码重置</button>
-                        <button class="btn-action btn-danger-action" onclick="deleteUser(${user.id}, '${user.username}')">删除</button>
+                        <button class="btn-action" onclick="openEditModal(${user.id})">编辑权限</button>
+                        <button class="btn-action" onclick="openPasswordModal(${user.id}, '${escapeAttr(displayPhone)}')">重置密码</button>
+                        ${user.username !== 'admin' ? `<button class="btn-action btn-danger-action" onclick="deleteUser(${user.id}, '${escapeAttr(displayName)}')">删除</button>` : ''}
                     </td>
                 `;
                 body.appendChild(tr);
             });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function escapeAttr(str) {
+            if (!str) return '';
+            return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        async function syncPersonnelFromExcel() {
+            if (!confirm('确定从人员清单 (人员清单.xls) 同步所有人员信息与创建账号吗？')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/sync-excel`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || '同步失败');
+                alert(`人员同步成功！共处理 ${data.total || 0} 位人员 (新增 ${data.imported_count || 0} 位，更新 ${data.updated_count || 0} 位)`);
+                fetchUsers();
+            } catch (err) {
+                alert('同步失败: ' + err.message);
+            }
+        }
+
+        // User Modal Helpers
+        function openCreateModal() {
+            document.getElementById('create-form').reset();
+            document.getElementById('create-password').value = 'hkjj@12345';
+            document.getElementById('create-modal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const user = allUsers.find(u => u.id === id);
+            if (!user) return;
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('edit-name').value = user.name || (user.username === 'admin' ? '系统管理员' : '');
+            document.getElementById('edit-phone').value = user.phone || user.username;
+            document.getElementById('edit-dept1').value = user.dept1 || '';
+            document.getElementById('edit-dept2').value = user.dept2 || '';
+            document.getElementById('edit-dept3').value = user.dept3 || '';
+            document.getElementById('edit-employee-no').value = user.employee_no || '';
+            document.getElementById('edit-position').value = user.position || '';
+            document.getElementById('edit-role').value = user.role;
+            document.getElementById('edit-status').value = user.is_active ? "1" : "0";
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
+
+        function openPasswordModal(id, username) {
+            document.getElementById('password-user-id').value = id;
+            document.getElementById('password-username').value = username;
+            document.getElementById('password-new').value = 'hkjj@12345';
+            document.getElementById('password-modal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // User Submits
+        document.getElementById('create-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('create-name').value.trim();
+            const phone = document.getElementById('create-phone').value.trim();
+            const dept1 = document.getElementById('create-dept1').value.trim();
+            const dept2 = document.getElementById('create-dept2').value.trim();
+            const dept3 = document.getElementById('create-dept3').value.trim();
+            const employee_no = document.getElementById('create-employee-no').value.trim();
+            const position = document.getElementById('create-position').value.trim();
+            const role = document.getElementById('create-role').value;
+            const password = document.getElementById('create-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        username: phone,
+                        phone: phone,
+                        name: name,
+                        dept1: dept1,
+                        dept2: dept2,
+                        dept3: dept3,
+                        employee_no: employee_no,
+                        position: position,
+                        role: role,
+                        password: password
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '创建用户失败'));
+                alert(data.detail || '用户创建成功');
+                closeModal('create-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('edit-name').value.trim();
+            const dept1 = document.getElementById('edit-dept1').value.trim();
+            const dept2 = document.getElementById('edit-dept2').value.trim();
+            const dept3 = document.getElementById('edit-dept3').value.trim();
+            const employee_no = document.getElementById('edit-employee-no').value.trim();
+            const position = document.getElementById('edit-position').value.trim();
+            const role = document.getElementById('edit-role').value;
+            const is_active = document.getElementById('edit-status').value === "1";
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        name, dept1, dept2, dept3, employee_no, position, role, is_active
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '保存修改失败'));
+                alert(data.detail || '修改保存成功');
+                closeModal('edit-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('password-user-id').value;
+            const new_password = document.getElementById('password-new').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}/password`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ new_password })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '密码重置失败'));
+                alert(data.detail || '密码重置成功');
+                closeModal('password-modal');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function deleteUser(id, name) {
+            if (!confirm(`确定要彻底删除用户 "${name}" 吗？此操作无法撤销。`)) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '删除用户失败'));
+                alert(data.detail || '用户删除成功');
+                fetchUsers();
+            } catch (err) {
+                alert(err.message);
+            }
         }
 
         // LLM Provider Management Logic
@@ -519,21 +1171,44 @@
 
         async function fetchLLMProviders() {
             try {
-                const res = await fetch(`${API_URL}/api/admin/llm-providers`, {
+                const res = await fetch(`${API_URL}/api/admin/llm-providers?_t=${Date.now()}`, {
                     headers: getAuthHeaders()
                 });
                 if (res.ok) {
                     currentProviders = await res.json();
                     renderProviders(currentProviders);
+                    updateLLMStats(currentProviders);
                 }
             } catch (e) {
                 console.error('Failed to fetch LLM providers:', e);
             }
         }
 
+        function updateLLMStats(providers) {
+            const totalNodes = providers.length;
+            const activeNodes = providers.filter(p => p.is_active).length;
+            const totalCalls = providers.reduce((sum, p) => sum + (p.total_calls || 0), 0);
+            
+            const activeSorted = [...providers].filter(p => p.is_active).sort((a, b) => a.priority - b.priority);
+            const topProvider = activeSorted.length > 0 ? `P${activeSorted[0].priority} · ${activeSorted[0].name}` : '暂无启用节点';
+
+            document.getElementById('stat-total-nodes').innerText = totalNodes;
+            document.getElementById('stat-active-nodes').innerText = activeNodes;
+            document.getElementById('stat-total-calls').innerText = totalCalls;
+            document.getElementById('stat-top-provider').innerText = topProvider;
+        }
+
         function renderProviders(providers) {
             const body = document.getElementById('llm-provider-list-body');
             body.innerHTML = '';
+            
+            if (providers.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="10" style="text-align: center; padding: 30px; color: #8a99ad;">暂未配置大模型节点，点击右上角新增节点</td>`;
+                body.appendChild(tr);
+                return;
+            }
+
             providers.forEach(p => {
                 const tr = document.createElement('tr');
                 const statusText = p.is_active ? '已启用' : '已停用';
@@ -545,10 +1220,11 @@
 
                 tr.innerHTML = `
                     <td><strong style="color: #3b82f6;">P${p.priority}</strong></td>
-                    <td><code>${p.provider_id}</code></td>
-                    <td><strong>${p.name}</strong></td>
-                    <td style="font-size: 12px; color: #8a99ad; max-width: 260px; word-break: break-all;">${p.base_url}</td>
-                    <td><code>${p.model_name}</code></td>
+                    <td><code>${escapeHtml(p.provider_id)}</code></td>
+                    <td><strong>${escapeHtml(p.name)}</strong></td>
+                    <td style="font-size: 12px; color: #8a99ad; max-width: 260px; word-break: break-all;">${escapeHtml(p.base_url)}</td>
+                    <td><code>${escapeHtml(p.model_name)}</code></td>
+                    <td>${p.timeout_seconds || 8.0}s</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${p.total_calls || 0} 次 / ${p.total_failovers || 0} 降级</td>
                     <td>${Math.round(p.avg_latency_ms || 0)} ms</td>
@@ -675,117 +1351,8 @@
             }
         }
 
-        // Modal Helpers
-        function openCreateModal() {
-            document.getElementById('create-form').reset();
-            document.getElementById('create-modal').style.display = 'flex';
-        }
-
-        function openEditModal(id, username, role, isActive) {
-            document.getElementById('edit-user-id').value = id;
-            document.getElementById('edit-username').value = username;
-            document.getElementById('edit-role').value = role;
-            document.getElementById('edit-status').value = isActive ? "1" : "0";
-            document.getElementById('edit-modal').style.display = 'flex';
-        }
-
-        function openPasswordModal(id, username) {
-            document.getElementById('password-user-id').value = id;
-            document.getElementById('password-username').value = username;
-            document.getElementById('password-new').value = '';
-            document.getElementById('password-modal').style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        // User Submits
-        document.getElementById('create-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('create-username').value.trim();
-            const password = document.getElementById('create-password').value;
-            const role = document.getElementById('create-role').value;
-
-            try {
-                const res = await fetch(`${API_URL}/api/admin/users`, {
-                    method: 'POST',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ username, password, role })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '创建用户失败'));
-                alert(data.detail || '用户创建成功');
-                closeModal('create-modal');
-                fetchUsers();
-            } catch (err) {
-                alert(err.message);
-            }
-        });
-
-        document.getElementById('edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('edit-user-id').value;
-            const role = document.getElementById('edit-role').value;
-            const is_active = document.getElementById('edit-status').value === "1";
-
-            try {
-                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ role, is_active })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '保存修改失败'));
-                alert(data.detail || '修改保存成功');
-                closeModal('edit-modal');
-                fetchUsers();
-            } catch (err) {
-                alert(err.message);
-            }
-        });
-
-        document.getElementById('password-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('password-user-id').value;
-            const new_password = document.getElementById('password-new').value;
-
-            try {
-                const res = await fetch(`${API_URL}/api/admin/users/${id}/password`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders(),
-                    body: JSON.stringify({ new_password })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '密码重置失败'));
-                alert(data.detail || '密码重置成功');
-                closeModal('password-modal');
-                fetchUsers();
-            } catch (err) {
-                alert(err.message);
-            }
-        });
-
-        async function deleteUser(id, username) {
-            if (!confirm(`确定要彻底删除用户 "${username}" 吗？此操作无法撤销。`)) return;
-            
-            try {
-                const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '删除用户失败'));
-                alert(data.detail || '用户删除成功');
-                fetchUsers();
-            } catch (err) {
-                alert(err.message);
-            }
-        }
-
         // Initialize page
         fetchUsers();
-        fetchLLMProviders();
     </script>
 </body>
 </html>

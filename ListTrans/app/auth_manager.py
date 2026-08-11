@@ -36,7 +36,7 @@ def get_auth_connection():
     return conn
 
 def init_auth_db():
-    """Initialize authorization database tables and create initial administrator."""
+    """Initialize authorization database tables and create initial administrator and personnel accounts."""
     conn = get_auth_connection()
     cursor = conn.cursor()
     
@@ -46,6 +46,13 @@ def init_auth_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
+            name TEXT,
+            dept1 TEXT,
+            dept2 TEXT,
+            dept3 TEXT,
+            employee_no TEXT,
+            position TEXT,
+            phone TEXT,
             role TEXT NOT NULL DEFAULT 'employee',
             is_active INTEGER NOT NULL DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -53,6 +60,24 @@ def init_auth_db():
         )
     """)
     
+    # Migration: add new columns if they do not exist
+    user_cols = [r[1] for r in cursor.execute("PRAGMA table_info(users)").fetchall()]
+    new_cols = [
+        ("name", "TEXT"),
+        ("dept1", "TEXT"),
+        ("dept2", "TEXT"),
+        ("dept3", "TEXT"),
+        ("employee_no", "TEXT"),
+        ("position", "TEXT"),
+        ("phone", "TEXT")
+    ]
+    for col_name, col_type in new_cols:
+        if col_name not in user_cols:
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                security_logger.error(f"Failed to add column {col_name} to users table: {e}")
+
     # Create login_attempts table for security rate limiting
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS login_attempts (
@@ -75,7 +100,7 @@ def init_auth_db():
         
         try:
             cursor.execute(
-                "INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')",
+                "INSERT INTO users (username, password_hash, name, role) VALUES (?, ?, '系统管理员', 'admin')",
                 (admin_user, hashed_pass)
             )
             conn.commit()
@@ -90,6 +115,112 @@ def init_auth_db():
             security_logger.info(f"Existing account '{admin_user}' promoted to admin.")
             
     conn.close()
+    
+    # Auto import personnel from doc/人员清单.xls if users table only has 1 account
+    try:
+        import_users_from_excel()
+    except Exception as e:
+        security_logger.error(f"Auto importing personnel from Excel failed during init_auth_db: {e}")
+
+def import_users_from_excel(excel_path: Optional[str] = None, default_password: str = "hkjj@12345") -> Dict[str, Any]:
+    """Import and synchronize users from personnel Excel file."""
+    if not excel_path:
+        proj_dir = os.path.dirname(os.path.dirname(__file__))
+        excel_path = os.path.join(proj_dir, "doc", "人员清单.xls")
+        
+    if not os.path.exists(excel_path):
+        return {"success": False, "count": 0, "message": f"人员清单文件不存在: {excel_path}"}
+        
+    import xlrd
+    book = xlrd.open_workbook(excel_path)
+    sheet = book.sheet_by_index(0)
+    
+    headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
+    
+    # Map header names to indices
+    col_map = {}
+    for idx, h in enumerate(headers):
+        if "姓名" in h: col_map["name"] = idx
+        elif "1级" in h or "一级" in h: col_map["dept1"] = idx
+        elif "2级" in h or "二级" in h: col_map["dept2"] = idx
+        elif "3级" in h or "三级" in h: col_map["dept3"] = idx
+        elif "工号" in h: col_map["employee_no"] = idx
+        elif "职位" in h or "岗位" in h: col_map["position"] = idx
+        elif "手机" in h or "电话" in h: col_map["phone"] = idx
+        
+    if "phone" not in col_map or "name" not in col_map:
+        return {"success": False, "count": 0, "message": "Excel缺少必要列（姓名或手机号）"}
+        
+    default_hash = get_password_hash(default_password)
+    
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    
+    imported_count = 0
+    updated_count = 0
+    
+    for r in range(1, sheet.nrows):
+        def get_val(key):
+            if key not in col_map:
+                return ""
+            val = sheet.cell_value(r, col_map[key])
+            if isinstance(val, float) and val.is_integer():
+                return str(int(val))
+            elif isinstance(val, float):
+                return str(val)
+            return str(val).strip()
+            
+        name = get_val("name")
+        phone = get_val("phone")
+        dept1 = get_val("dept1")
+        dept2 = get_val("dept2")
+        dept3 = get_val("dept3")
+        employee_no = get_val("employee_no")
+        position = get_val("position")
+        
+        if not phone or not name:
+            continue
+            
+        # Role mapping based on position
+        if "总监" in position:
+            role = "director"
+        elif any(kw in position for kw in ["经理", "主管"]):
+            role = "manager"
+        else:
+            role = "employee"
+            
+        username = phone  # 手机号即为登录账号
+        
+        cursor.execute("SELECT id FROM users WHERE username = ? OR phone = ?", (username, phone))
+        existing = cursor.fetchone()
+        
+        if existing:
+            cursor.execute("""
+                UPDATE users SET 
+                    name = ?, dept1 = ?, dept2 = ?, dept3 = ?,
+                    employee_no = ?, position = ?, phone = ?, role = ?
+                WHERE id = ?
+            """, (name, dept1, dept2, dept3, employee_no, position, phone, role, existing["id"]))
+            updated_count += 1
+        else:
+            cursor.execute("""
+                INSERT INTO users (
+                    username, password_hash, name, dept1, dept2, dept3,
+                    employee_no, position, phone, role, is_active
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            """, (username, default_hash, name, dept1, dept2, dept3, employee_no, position, phone, role))
+            imported_count += 1
+            
+    conn.commit()
+    conn.close()
+    
+    security_logger.info(f"Personnel import completed: {imported_count} created, {updated_count} updated.")
+    return {
+        "success": True, 
+        "imported_count": imported_count, 
+        "updated_count": updated_count, 
+        "total": imported_count + updated_count
+    }
 
 # Password hashing and verification (direct bcrypt)
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -124,7 +255,8 @@ def verify_access_token(token: str) -> Optional[dict]:
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
     conn = get_auth_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username.strip(),))
+    u = username.strip()
+    cursor.execute("SELECT * FROM users WHERE username = ? OR phone = ?", (u, u))
     row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None

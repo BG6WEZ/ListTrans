@@ -32,6 +32,7 @@
                 <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全局物料明细库</button>
                 <button class="nav-item" id="nav-llm-rules" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
                 <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
+                <button class="nav-item" id="nav-guide" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-book-open"></i> 使用说明</button>
             </div>
             
             <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
@@ -819,6 +820,138 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Guide Dashboard (V0.0.8) -->
+            <div class="guide-dashboard" id="guide-dashboard" style="display: none; padding: 28px 36px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto;">
+                <!-- Header Banner -->
+                <div class="glass-card" style="padding: 24px 30px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">
+                                📖 华康洁净物料清单匹配系统 · 操作与使用指南
+                            </h2>
+                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.0.8 正式版</span>
+                        </div>
+                        <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.6;">
+                            基于 NLP 语义向量比对、30域特征结构化抽取与大模型优先调度的智能清单比对与规范化制表平台
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="document.getElementById('nav-workbench').click();" style="padding: 8px 16px; font-size: 13px;">
+                            <i class="fa-solid fa-play"></i> 进入智能工作台
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 Steps Quick Start Workflow Grid -->
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 600; color: #f1f5f9; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-rocket" style="color: #3b82f6;"></i> 标准作业全流程 (4 步快速上手)
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                        <!-- Step 1 -->
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 1</span>
+                                <i class="fa-solid fa-user-shield" style="color: #3b82f6; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">手机号安全登录</h4>
+                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                                使用员工企业<strong>手机号</strong>直接登录系统，全员初始密码统一为 <code>hkjj@12345</code>。登录后右上角自动展示您的<strong>岗位职称</strong>与<strong>真实姓名</strong>。
+                            </p>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 2</span>
+                                <i class="fa-solid fa-file-arrow-up" style="color: #c084fc; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">上传原始工程清单</h4>
+                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                                点击「上传原始清单」选择 <code>.xlsx / .xls</code> 文件。系统自适应解析表头，自动提取物料名称、型号、核心规格、风量功率、口径材质与单位。
+                            </p>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 3</span>
+                                <i class="fa-solid fa-sliders" style="color: #34d399; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">50/50 智能比对与复核</h4>
+                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                                左侧查看原始清单并高亮属性，右侧在 4.5万+ 物料库中智能匹配 Top-3 候选卡片。支持置信度判断、手动补充参数二次重匹、一键无弹窗解绑。
+                            </p>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 4</span>
+                                <i class="fa-solid fa-file-excel" style="color: #fbbf24; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">规范化回写与导出</h4>
+                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                                审核完毕后点击「导出标准格式」，系统将标准物料编码、标准名称型号精准回写，<strong>100% 保留原生 Excel 样式、公式、单元格合并与批注</strong>。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deep Feature Guide Details -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Card 1: Matcher Engine Details -->
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-microchip" style="color: #38bdf8;"></i> 核心算法与高精度决胜机制
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                            <li><strong>30 域结构化解析</strong>：覆盖风量、功率、口径 (DN/Φ)、材质、耐压、壁厚等核心工程特征。</li>
+                            <li><strong>多专业清洗优化</strong>：针对暖通、医气（脱氧紫铜管/流量）、配管（JDG/SC/壁厚优选）、线缆（阻燃截面 Hard Gate 封顶）定制清洗规则。</li>
+                            <li><strong>双路混合检索</strong>：全文检索 + 离线 Sentence-Transformers 384维语义向量空间比对。</li>
+                            <li><strong>离线模型加持</strong>：系统自带本地离线 NLP 向量引擎，无外网依赖，高并发毫秒级响应。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: Safe Save & History -->
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-clock-rotate-left" style="color: #a855f7;"></i> 任务暂存与多版本协同
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                            <li><strong>3分钟静默自动保存</strong>：工作过程中系统自动暂存草稿，意外刷新或断网重新打开时即刻提示一键恢复。</li>
+                            <li><strong>多版本命名备份</strong>：支持随时点击「暂存进度」自定义阶段名称（如“一阶段复核完成”）。</li>
+                            <li><strong>历史记录管理</strong>：点击「历史记录」可查看所有暂存节点并支持多版本快速切换或清理。</li>
+                            <li><strong>优雅任务结束</strong>：点击「结束任务」可选择安全暂存或清空当前工作区开始下一份清单。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: LLM Rule Studio -->
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #f59e0b;"></i> LLM 规则生成与模型调度
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                            <li><strong>自然语言规则生成</strong>：输入业务描述（如“当清单中出现紫铜管且未标壁厚时自动匹配1.0mm”），AI 自动生成结构化规则。</li>
+                            <li><strong>规则审核工作台</strong>：生成规则需经过人工/主管审核批准后上线生效，杜绝模型幻觉。</li>
+                            <li><strong>LLM Priority Router (管理员)</strong>：支持配置多厂家模型节点（通义千问、DeepSeek等），支持优先级队列与超时降级。</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 4: FAQ & Best Practices -->
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-circle-question" style="color: #10b981;"></i> 常见问题与操作技巧
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                            <li><strong>遇到冷门/非标物料匹配不准？</strong> 点击物料行上的「补充参数」输入额定风量或功率，系统将触发加权二次精确比对。</li>
+                            <li><strong>忘记密码如何处理？</strong> 请联系系统管理员在后台重置，或直接恢复默认密码 <code>hkjj@12345</code>。</li>
+                            <li><strong>如何查看物料库标准属性？</strong> 切换到顶部「全局物料明细库」可按专业品类检索 4.5万+ 标准物料属性画像。</li>
+                        </ul>
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   matcher-app:
-    image: material-matcher:v0.0.7
+    image: material-matcher:v0.0.8
     container_name: material-matcher
     ports:
       - "18080:18080"

@@ -15,21 +15,21 @@
     <div class="login-container">
         <div class="login-header">
             <img src="logo500.png" alt="Logo" class="logo">
-            <h1>华康物料清单匹配系统</h1>
+            <h1>华康物料清单匹配系统 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 6px;">V0.0.8</span></h1>
             <p>基于 NLP 与全文检索的洁净工程清单智能比对平台</p>
         </div>
         <form id="login-form">
             <div class="error-container" id="error-msg"></div>
             <div class="input-group">
-                <label for="username">用户名</label>
+                <label for="username">手机号 / 用户名</label>
                 <div class="input-wrapper">
-                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="请输入用户名">
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="请输入手机号或账号">
                 </div>
             </div>
             <div class="input-group">
                 <label for="password">密码</label>
                 <div class="input-wrapper">
-                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入密码">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入密码 (默认 hkjj@12345)">
                 </div>
             </div>
             <button type="submit" id="submit-btn" class="login-btn">
@@ -60,7 +60,7 @@
             errorMsg.style.display = 'none';
             submitBtn.classList.add('loading');
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
 
             try {
@@ -75,12 +75,14 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.detail || '登录失败，请检查用户名或密码。');
+                    throw new Error(data.detail || '登录失败，请检查手机号或密码。');
                 }
 
                 // Store Token and User info
                 localStorage.setItem('token', data.access_token);
                 localStorage.setItem('username', data.username);
+                localStorage.setItem('name', data.name || data.username);
+                localStorage.setItem('position', data.position || '');
                 localStorage.setItem('role', data.role);
                 
                 // Redirect

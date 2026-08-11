@@ -66,13 +66,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Security headers middleware
+# Security and Cache-Control headers middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
+    # Ensure fresh content is always loaded without aggressive browser 304 caching
+    if request.url.path.endswith((".html", ".js", ".css")) or request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
     return response
 
 # Include Auth and Session dependencies
@@ -137,13 +142,38 @@ async def api_login(req: LoginRequest, request: Request):
     log_login_attempt(username, ip, success=True)
     update_user_last_login(user["id"])
     
-    access_token = create_access_token(data={"sub": username, "role": user["role"]})
-    security_logger.info(f"User '{username}' logged in successfully from IP {ip}.")
+    access_token = create_access_token(data={"sub": user["username"], "role": user["role"]})
+    display_name = user.get("name") or ("系统管理员" if user["username"] == "admin" else user["username"])
+    position = user.get("position") or ("系统管理员" if user["username"] == "admin" else "员工")
+    security_logger.info(f"User '{user['username']}' ({display_name}, {position}) logged in successfully from IP {ip}.")
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "username": username,
+        "username": user["username"],
+        "name": display_name,
+        "position": position,
+        "dept1": user.get("dept1") or "",
+        "dept2": user.get("dept2") or "",
+        "dept3": user.get("dept3") or "",
+        "employee_no": user.get("employee_no") or "",
+        "phone": user.get("phone") or user["username"],
         "role": user["role"]
+    }
+
+@app.get("/api/auth/me")
+async def api_get_me(current_user: dict = Depends(get_current_user)):
+    display_name = current_user.get("name") or ("系统管理员" if current_user["username"] == "admin" else current_user["username"])
+    position = current_user.get("position") or ("系统管理员" if current_user["username"] == "admin" else "员工")
+    return {
+        "username": current_user["username"],
+        "name": display_name,
+        "position": position,
+        "dept1": current_user.get("dept1") or "",
+        "dept2": current_user.get("dept2") or "",
+        "dept3": current_user.get("dept3") or "",
+        "employee_no": current_user.get("employee_no") or "",
+        "phone": current_user.get("phone") or current_user["username"],
+        "role": current_user["role"]
     }
 
 @app.post("/api/session/draft")

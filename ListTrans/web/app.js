@@ -77,26 +77,57 @@ let configs = {
 const backendUrl = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:18080';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Process User profile info
+    // Process User profile info: show Position (岗位) and Real Name (姓名)
     const username = localStorage.getItem('username') || '-';
-    const role = localStorage.getItem('role') || 'employee';
+    let displayName = localStorage.getItem('name') || (username === 'admin' ? '系统管理员' : username);
+    let position = localStorage.getItem('position') || (username === 'admin' ? '系统管理员' : '');
+    let role = localStorage.getItem('role') || 'employee';
     
     const usernameLbl = document.getElementById('username-lbl');
     const roleLbl = document.getElementById('user-role-lbl');
     const adminLink = document.getElementById('admin-panel-link');
     const logoutBtn = document.getElementById('logout-btn');
     
-    if (usernameLbl) usernameLbl.innerText = username;
-    if (roleLbl) {
-        let roleCn = '普通员工';
-        if (role === 'admin') roleCn = '管理员';
-        else if (role === 'director') roleCn = '总监';
-        else if (role === 'manager') roleCn = '经理';
-        roleLbl.innerText = roleCn;
+    function updateUserUI() {
+        if (usernameLbl) usernameLbl.innerText = displayName;
+        if (roleLbl) {
+            let positionText = position;
+            if (!positionText) {
+                if (role === 'admin' || username === 'admin') positionText = '系统管理员';
+                else if (role === 'director') positionText = '总监';
+                else if (role === 'manager') positionText = '经理';
+                else positionText = '员工';
+            }
+            roleLbl.innerText = positionText;
+        }
+        if (role === 'admin' && adminLink) {
+            adminLink.style.display = 'inline-flex';
+        }
     }
-    
-    if (role === 'admin' && adminLink) {
-        adminLink.style.display = 'inline-flex';
+    updateUserUI();
+
+    // Async sync latest profile from /api/auth/me to automatically fill position and real name
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch(`${backendUrl}/api/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).then(r => r.ok ? r.json() : null).then(userData => {
+            if (userData) {
+                if (userData.name) {
+                    displayName = userData.name;
+                    localStorage.setItem('name', userData.name);
+                }
+                if (userData.position) {
+                    position = userData.position;
+                    localStorage.setItem('position', userData.position);
+                }
+                if (userData.role) {
+                    role = userData.role;
+                    localStorage.setItem('role', userData.role);
+                }
+                updateUserUI();
+            }
+        }).catch(err => console.log('Profile sync notice:', err));
     }
     
     if (logoutBtn) {
@@ -150,43 +181,47 @@ function setupNavigation() {
     const navMaterials = document.getElementById('nav-materials');
     const navLlmRules = document.getElementById('nav-llm-rules');
     const navConfig = document.getElementById('nav-config');
+    const navGuide = document.getElementById('nav-guide');
     
     const workbenchEl = document.getElementById('workbench');
     const materialsDashboardEl = document.getElementById('materials-dashboard');
     const llmRulesDashboardEl = document.getElementById('llm-rules-dashboard');
     const configDashboardEl = document.getElementById('config-dashboard');
+    const guideDashboardEl = document.getElementById('guide-dashboard');
     const welcomeSlate = document.getElementById('welcome-slate');
 
-    navWorkbench.addEventListener('click', () => {
-        navWorkbench.classList.add('active');
+    function resetAllNavActive() {
+        if (navWorkbench) navWorkbench.classList.remove('active');
         if (navMaterials) navMaterials.classList.remove('active');
         if (navLlmRules) navLlmRules.classList.remove('active');
-        navConfig.classList.remove('active');
-        
-        if (items.length > 0) {
-            workbenchEl.style.display = 'flex';
-            welcomeSlate.style.display = 'none';
-        } else {
-            welcomeSlate.style.display = 'flex';
-            workbenchEl.style.display = 'none';
-        }
+        if (navConfig) navConfig.classList.remove('active');
+        if (navGuide) navGuide.classList.remove('active');
+
+        if (workbenchEl) workbenchEl.style.display = 'none';
+        if (welcomeSlate) welcomeSlate.style.display = 'none';
         if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
         if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
-        configDashboardEl.style.display = 'none';
-    });
+        if (configDashboardEl) configDashboardEl.style.display = 'none';
+        if (guideDashboardEl) guideDashboardEl.style.display = 'none';
+    }
+
+    if (navWorkbench) {
+        navWorkbench.addEventListener('click', () => {
+            resetAllNavActive();
+            navWorkbench.classList.add('active');
+            if (items.length > 0) {
+                workbenchEl.style.display = 'flex';
+            } else {
+                welcomeSlate.style.display = 'flex';
+            }
+        });
+    }
 
     if (navMaterials) {
         navMaterials.addEventListener('click', () => {
+            resetAllNavActive();
             navMaterials.classList.add('active');
-            navWorkbench.classList.remove('active');
-            if (navLlmRules) navLlmRules.classList.remove('active');
-            navConfig.classList.remove('active');
-            
-            workbenchEl.style.display = 'none';
-            welcomeSlate.style.display = 'none';
-            configDashboardEl.style.display = 'none';
-            if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
-            if (materialsDashboardEl) materialsDashboardEl.style.display = 'flex';
+            materialsDashboardEl.style.display = 'flex';
             
             loadAndRenderDbMetadata();
             loadAndRenderDataPortrait();
@@ -196,36 +231,32 @@ function setupNavigation() {
 
     if (navLlmRules) {
         navLlmRules.addEventListener('click', () => {
+            resetAllNavActive();
             navLlmRules.classList.add('active');
-            navWorkbench.classList.remove('active');
-            if (navMaterials) navMaterials.classList.remove('active');
-            navConfig.classList.remove('active');
-
-            workbenchEl.style.display = 'none';
-            welcomeSlate.style.display = 'none';
-            configDashboardEl.style.display = 'none';
-            if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
-            if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'flex';
+            llmRulesDashboardEl.style.display = 'flex';
 
             loadRuleStats();
             fetchAndRenderPendingRules();
         });
     }
 
-    navConfig.addEventListener('click', () => {
-        navConfig.classList.add('active');
-        navWorkbench.classList.remove('active');
-        if (navMaterials) navMaterials.classList.remove('active');
-        if (navLlmRules) navLlmRules.classList.remove('active');
-        
-        workbenchEl.style.display = 'none';
-        welcomeSlate.style.display = 'none';
-        if (materialsDashboardEl) materialsDashboardEl.style.display = 'none';
-        if (llmRulesDashboardEl) llmRulesDashboardEl.style.display = 'none';
-        configDashboardEl.style.display = 'flex';
-        
-        loadAndRenderConfigs();
-    });
+    if (navConfig) {
+        navConfig.addEventListener('click', () => {
+            resetAllNavActive();
+            navConfig.classList.add('active');
+            configDashboardEl.style.display = 'flex';
+            
+            loadAndRenderConfigs();
+        });
+    }
+
+    if (navGuide) {
+        navGuide.addEventListener('click', () => {
+            resetAllNavActive();
+            navGuide.classList.add('active');
+            guideDashboardEl.style.display = 'flex';
+        });
+    }
 }
 
 function initEventListeners() {
