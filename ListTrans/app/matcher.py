@@ -915,14 +915,27 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     try:
         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
         active_rules = LLMRuleManager.get_active_rules()
-        cand_text = f"{c_name} {c_full_spec} {cand.get('category', '')}"
+        cand_text = f"{c_name} {c_full_spec} {candidate.get('category', '')} {candidate.get('code', '')}"
         q_category = query_info.get("category", "")
+        
+        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+            if not scope_tgt:
+                return True
+            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+            for c in candidate_names:
+                if not c:
+                    continue
+                c_low = str(c).lower()
+                if any(t in c_low or c_low in t for t in targets):
+                    return True
+            return False
+
         for r in active_rules:
             scope_lvl = r.get("scope_level", "category")
             scope_tgt = r.get("scope_target", "")
-            if scope_lvl == "discipline" and scope_tgt and scope_tgt not in [q_category, query_info.get("domain", ""), "给排水", "通用"]:
+            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [q_category, query_info.get("domain", ""), query_info.get("discipline", ""), "给排水", "通用"]):
                 continue
-            if scope_lvl == "category" and scope_tgt and scope_tgt not in [q_name, query_info.get("name", "")]:
+            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [q_name, query_info.get("name", ""), query_info.get("raw_name", "")]):
                 continue
             dsl = r.get("parsed_dsl", {})
             matching_rules = dsl.get("matching_rules", {})
@@ -938,8 +951,8 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                     reasons.extend(dyn_reasons)
                     if r.get("rule_id"):
                         RuleHitStatsTracker().record_hit(r["rule_id"])
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Error evaluating dynamic matching rules: {e}")
 
     # Bound to [0.0, 1.0] and convert to 100 points
     final_score = max(0.0, min(1.0, base_score)) * 100.0
@@ -993,7 +1006,7 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
     clean_keyword = re.sub(r'\(.*?\)|（.*?）|室外型|室内型', ' ', clean_keyword).strip()
     
     if clean_keyword:
-        fts_results = search_materials_keyword(clean_keyword, limit=1000)
+        fts_results = search_materials_keyword(clean_keyword, limit=150)
         for r in fts_results:
             if r["code"] not in candidates:
                 r["recall_source"] = "fts"
@@ -1004,7 +1017,7 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
     q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
     extracted_name = q_attrs.get("名称") or q_attrs.get("name")
     if extracted_name and len(str(extracted_name)) >= 2 and str(extracted_name) != clean_keyword:
-        fts_ext_results = search_materials_keyword(str(extracted_name), limit=1000)
+        fts_ext_results = search_materials_keyword(str(extracted_name), limit=150)
         for r in fts_ext_results:
             if r["code"] not in candidates:
                 r["recall_source"] = "fts_extracted_name"
@@ -1014,14 +1027,14 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
     # Also search by Chinese term without leading English prefix (e.g. AP-1 动力配电箱 -> 动力配电箱)
     zh_term = re.sub(r'^[a-zA-Z0-9\-_]+', '', q_name).strip()
     if zh_term and len(zh_term) >= 2 and zh_term != clean_keyword:
-        fts_zh_results = search_materials_keyword(zh_term, limit=500)
+        fts_zh_results = search_materials_keyword(zh_term, limit=100)
         for r in fts_zh_results:
             if r["code"] not in candidates:
                 r["recall_source"] = "fts_zh"
                 r["semantic_score"] = 0.0
                 candidates[r["code"]] = r
 
-    # 3. Path B: Vector search (Top 200)
+    # 3. Path B: Vector search (Top 50)
     from app.vector_index import index_manager
     if index_manager.is_enabled:
         q_vec = query_vector
@@ -1031,7 +1044,7 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
             q_vec = index_manager.encode_single_query(clean_q_text)
             
         if q_vec is not None:
-            vector_results = index_manager.search(q_vec, top_k=200)
+            vector_results = index_manager.search(q_vec, top_k=50)
             for m, score in vector_results:
                 code = m["code"]
                 if code not in candidates:
@@ -1078,8 +1091,8 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
     if candidates:
         codes = [c["code"] for c in candidates if c.get("code")]
         if codes:
-            from app.db_manager import get_db_connection
-            conn = get_db_connection()
+            from app.db_manager import get_thread_db_connection
+            conn = get_thread_db_connection()
             cursor = conn.cursor()
             placeholders = ",".join(["?"] * len(codes))
             cursor.execute(f"""
@@ -1088,7 +1101,6 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
                 WHERE code IN ({placeholders})
             """, codes)
             db_data = {row["code"]: dict(row) for row in cursor.fetchall()}
-            conn.close()
             
             for cand in candidates:
                 code = cand["code"]

@@ -19,23 +19,23 @@
     <div class="app-container">
         <!-- Sidebar / Header -->
         <header class="app-header">
-            <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
-                <img src="logo500.png" alt="Logo" class="logo-img" style="height: 38px; border-radius: 4px; background-color: white; padding: 2px;" />
+            <div class="logo-area">
+                <img src="logo500.png" alt="Logo" class="logo-img" style="height: 36px; border-radius: 4px; background-color: white; padding: 2px;" />
                 <div class="logo-text">
-                    <h1>华康洁净物料清单匹配工具</h1>
-                    <span style="font-size: 11px; color: var(--color-text-secondary); display: flex; align-items: center;">智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 6px;">V0.0.8</span></span>
+                    <h1>华康洁净物料匹配工具</h1>
+                    <span>智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.0.9</span></span>
                 </div>
             </div>
             
-            <div class="nav-links" style="display: flex; gap: 16px; margin-left: 30px; margin-right: auto;">
-                <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
-                <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全局物料明细库</button>
-                <button class="nav-item" id="nav-llm-rules" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
-                <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
-                <button class="nav-item" id="nav-guide" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-book-open"></i> 使用说明</button>
+            <div class="nav-links">
+                <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
+                <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全品物料明细库</button>
+                <button class="nav-item" id="nav-llm-rules" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
+                <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
+                <button class="nav-item" id="nav-guide" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-book-open"></i> 使用说明</button>
             </div>
             
-            <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+            <div class="header-actions">
                 <button class="btn btn-secondary" id="history-trigger">
                     <i class="fa-solid fa-history"></i> 历史记录
                 </button>
@@ -45,7 +45,7 @@
                 <button class="btn btn-warning" id="end-task-trigger" style="display: none; background-color: #d97706; border-color: #b45309; color: white;">
                     <i class="fa-solid fa-flag-checkered"></i> 结束任务
                 </button>
-                <div class="upload-btn-wrapper">
+                <div class="upload-btn-wrapper" style="display: inline-flex;">
                     <button class="btn btn-primary" id="upload-trigger">
                         <i class="fa-solid fa-cloud-arrow-up"></i> 上传原始清单
                     </button>
@@ -54,11 +54,11 @@
                 <button class="btn btn-success" id="export-btn" disabled>
                     <i class="fa-solid fa-file-excel"></i> 导出标准格式
                 </button>
-                <div class="user-profile-bar" style="display: flex; align-items: center; gap: 10px; margin-left: 12px; border-left: 1px solid var(--border-color); padding-left: 12px;">
-                    <span class="user-badge-role" id="user-role-lbl" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 600;">-</span>
-                    <span class="username-display" id="username-lbl" style="font-size: 13px; font-weight: 500;">-</span>
-                    <a href="admin.html" class="btn btn-primary" id="admin-panel-link" style="display: none; padding: 4px 8px; font-size: 11px; text-decoration: none; background-color: #475569; border-color: #475569;"><i class="fa-solid fa-cog"></i> 管理</a>
-                    <button class="btn btn-danger" id="logout-btn" style="padding: 4px 8px; font-size: 11px; background-color: #dc2626; border-color: #dc2626; color: white;"><i class="fa-solid fa-sign-out-alt"></i> 退出</button>
+                <div class="user-profile-bar" style="display: flex; align-items: center; gap: 8px; margin-left: 6px; border-left: 1px solid var(--border-color); padding-left: 10px;">
+                    <span class="user-badge-role" id="user-role-lbl" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap;">-</span>
+                    <span class="username-display" id="username-lbl" style="font-size: 12.5px; font-weight: 500; white-space: nowrap;">-</span>
+                    <a href="admin.html" class="btn btn-primary" id="admin-panel-link" style="display: none; padding: 0 8px; height: 30px; font-size: 11px; text-decoration: none; background-color: #475569; border-color: #475569;"><i class="fa-solid fa-cog"></i> 管理</a>
+                    <button class="btn btn-danger" id="logout-btn" style="padding: 0 8px; height: 30px; font-size: 11px; background-color: #dc2626; border-color: #dc2626; color: white;"><i class="fa-solid fa-sign-out-alt"></i> 退出</button>
                 </div>
             </div>
         </header>
@@ -640,15 +640,15 @@
                 </div>
             </div>
 
-            <!-- LLM Rules Dashboard (V0.0.8) -->
+            <!-- LLM Rules Dashboard (V0.0.9) -->
             <div class="llm-rules-dashboard" id="llm-rules-dashboard" style="display: none; padding: 24px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 20px;">
                 <!-- Top Action & View Bar -->
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 16px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <h2 style="margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; color: var(--color-text-primary);">
-                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> LLM 自然语言规则生成与审核工作台
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 14px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <h2 style="margin: 0; font-size: 17px; display: flex; align-items: center; gap: 10px; color: var(--color-text-primary); white-space: nowrap;">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> LLM 规则中心
                         </h2>
-                        <div class="sub-nav-tabs" style="display: flex; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 6px;">
+                        <div class="sub-nav-tabs" style="display: flex; gap: 6px; background: rgba(0,0,0,0.25); padding: 4px; border-radius: 6px; flex-wrap: wrap;">
                             <button class="sub-tab active" id="tab-rule-studio" style="padding: 6px 14px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 13px; font-weight: 500;">
                                 <i class="fa-solid fa-code"></i> 规则生成与调试 Studio
                             </button>
@@ -656,7 +656,7 @@
                                 <i class="fa-solid fa-clipboard-check"></i> 待审核工作台 <span class="badge" id="audit-pending-badge" style="background: #ef4444; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;">0</span>
                             </button>
                             <button class="sub-tab" id="tab-rule-leaderboard" style="padding: 6px 14px; border-radius: 4px; border: none; background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 13px; font-weight: 500;">
-                                <i class="fa-solid fa-chart-line"></i> 规则命中统计与排行榜
+                                <i class="fa-solid fa-list-check"></i> 已生效规则管理与统计
                             </button>
                         </div>
                     </div>
@@ -669,7 +669,10 @@
                 <div id="rule-studio-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <!-- Left: Prompt Generator Input -->
                     <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
-                        <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> 自然语言规则生成 Studio</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);"><i class="fa-solid fa-wand-magic-sparkles" style="color: #3b82f6;"></i> 自然语言规则生成 Studio</h3>
+                            <span id="studio-editing-badge" style="display: none; font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-weight: 600;">正在编辑规则: <span id="studio-editing-rule-id"></span></span>
+                        </div>
                         
                         <!-- 1. Raw Text Input (Top Priority) -->
                         <div>
@@ -737,14 +740,14 @@
                             <div id="rule-test-output-content" style="margin-top: 6px; color: var(--color-text-primary);"></div>
                         </div>
 
-                        <div style="display: flex; gap: 10px; margin-top: 4px;">
-                            <button class="btn btn-secondary" id="btn-test-rule" style="flex: 1; justify-content: center; padding: 8px;">
+                        <div style="display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" id="btn-test-rule" style="flex: 1; min-width: 120px; justify-content: center; padding: 8px;">
                                 <i class="fa-solid fa-flask"></i> 🧪 运行样本测试
                             </button>
-                            <button class="btn btn-info" id="btn-save-draft" style="flex: 1; justify-content: center; background: #0284c7; border: none; color: white; padding: 8px;">
-                                <i class="fa-solid fa-floppy-disk"></i> 💾 保存草稿
+                            <button class="btn btn-info" id="btn-save-draft" style="flex: 1; min-width: 120px; justify-content: center; background: #0284c7; border: none; color: white; padding: 8px;">
+                                <i class="fa-solid fa-floppy-disk"></i> 💾 保存草稿/更新
                             </button>
-                            <button class="btn btn-success" id="btn-submit-audit" style="flex: 1; justify-content: center; background: #16a34a; border: none; color: white; padding: 8px;">
+                            <button class="btn btn-success" id="btn-submit-audit" style="flex: 1; min-width: 120px; justify-content: center; background: #16a34a; border: none; color: white; padding: 8px;">
                                 <i class="fa-solid fa-paper-plane"></i> 📤 提交上级审核
                             </button>
                         </div>
@@ -779,32 +782,81 @@
                     </div>
                 </div>
 
-                <!-- Section 3: Hit Leaderboard Panel -->
-                <div id="rule-leaderboard-panel" style="display: none; flex-direction: column; gap: 16px;">
+                <!-- Section 3: Active Rules Management & Leaderboard Panel -->
+                <div id="rule-leaderboard-panel" style="display: none; flex-direction: column; gap: 20px;">
+                    <!-- Overview Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 12px; color: var(--color-text-secondary);">已在线生效规则数</span>
+                            <h2 id="stat-approved-count" style="margin: 8px 0 0 0; color: #3b82f6; font-size: 24px;">0</h2>
+                        </div>
+                        <div style="background: rgba(100, 116, 139, 0.1); border: 1px solid rgba(100, 116, 139, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 12px; color: var(--color-text-secondary);">已停用规则数</span>
+                            <h2 id="stat-disabled-count" style="margin: 8px 0 0 0; color: #94a3b8; font-size: 24px;">0</h2>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 12px; color: var(--color-text-secondary);">待审核规则数</span>
+                            <h2 id="stat-pending-count" style="margin: 8px 0 0 0; color: #f59e0b; font-size: 24px;">0</h2>
+                        </div>
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                            <span style="font-size: 12px; color: var(--color-text-secondary);">全系统累计命中次数</span>
+                            <h2 id="stat-total-hits" style="margin: 8px 0 0 0; color: #10b981; font-size: 24px;">0</h2>
+                        </div>
+                    </div>
+
+                    <!-- Active Rules Table & Operations -->
                     <div class="glass-card" style="padding: 20px;">
-                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);">
-                            <i class="fa-solid fa-trophy" style="color: #eab308;"></i> 已生效规则命中排行榜与效果统计
-                        </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
-                                <span style="font-size: 12px; color: var(--color-text-secondary);">已在线生效规则数</span>
-                                <h2 id="stat-approved-count" style="margin: 8px 0 0 0; color: #3b82f6; font-size: 24px;">0</h2>
-                            </div>
-                            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
-                                <span style="font-size: 12px; color: var(--color-text-secondary);">待审核规则数</span>
-                                <h2 id="stat-pending-count" style="margin: 8px 0 0 0; color: #f59e0b; font-size: 24px;">0</h2>
-                            </div>
-                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 16px; border-radius: 8px; text-align: center;">
-                                <span style="font-size: 12px; color: var(--color-text-secondary);">全系统累计命中次数</span>
-                                <h2 id="stat-total-hits" style="margin: 8px 0 0 0; color: #10b981; font-size: 24px;">0</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <h3 style="margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);">
+                                <i class="fa-solid fa-list-check" style="color: #3b82f6;"></i> 已生效规则库与运维管理（支持在线修改、停用/启用、删除）
+                            </h3>
+                            
+                            <!-- Search & Filter Controls -->
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <input type="text" id="active-rule-search" placeholder="搜索规则名称/编号/目标..." style="padding: 6px 12px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 12px; width: 200px;" />
+                                <select id="active-rule-status-filter" style="padding: 6px 10px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 12px;">
+                                    <option value="all">全部状态</option>
+                                    <option value="approved" selected>🟢 生效运行中</option>
+                                    <option value="disabled">⏸️ 已停用</option>
+                                </select>
+                                <button class="btn btn-secondary" id="active-rule-refresh-btn" style="padding: 4px 10px; font-size: 12px; height: 30px;"><i class="fa-solid fa-rotate"></i> 刷新</button>
                             </div>
                         </div>
-                        
+
                         <div class="table-responsive">
                             <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color); text-align: left; background: rgba(255,255,255,0.02);">
-                                        <th style="padding: 10px;">排名</th>
+                                        <th style="padding: 10px;">规则编号</th>
+                                        <th style="padding: 10px;">规则名称</th>
+                                        <th style="padding: 10px;">层级 / 目标</th>
+                                        <th style="padding: 10px;">所属专业</th>
+                                        <th style="padding: 10px; text-align: center;">运行状态</th>
+                                        <th style="padding: 10px; text-align: right;">累计命中</th>
+                                        <th style="padding: 10px;">创建人 / 审批人</th>
+                                        <th style="padding: 10px;">生效时间</th>
+                                        <th style="padding: 10px; text-align: center; min-width: 220px;">管理操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="active-rules-tbody">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; color: var(--color-text-muted); padding: 20px;">正在加载规则列表...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Hit Leaderboard Section -->
+                    <div class="glass-card" style="padding: 20px;">
+                        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--color-text-primary);">
+                            <i class="fa-solid fa-trophy" style="color: #eab308;"></i> 规则命中排行榜 Top 10
+                        </h3>
+                        <div class="table-responsive">
+                            <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--border-color); text-align: left; background: rgba(255,255,255,0.02);">
+                                        <th style="padding: 10px; width: 60px;">排名</th>
                                         <th style="padding: 10px;">规则编号</th>
                                         <th style="padding: 10px;">规则名称</th>
                                         <th style="padding: 10px;">作用目标</th>
@@ -824,7 +876,82 @@
                 </div>
             </div>
 
-            <!-- User Guide Dashboard (V0.0.8) -->
+            <!-- Modal: Edit Rule Dialog -->
+            <div id="rule-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+                <div class="glass-card" style="width: 720px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.3); display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: #3b82f6;"></i> 修改规则配置 (<span id="modal-rule-id-lbl"></span>)
+                        </h3>
+                        <button onclick="closeRuleEditModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">规则名称</label>
+                            <input type="text" id="modal-rule-name" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">优先级 (Priority)</label>
+                            <input type="number" id="modal-rule-priority" value="10" min="1" max="100" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用层级</label>
+                            <select id="modal-rule-scope-level" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;">
+                                <option value="category">物料类目 (category)</option>
+                                <option value="discipline">专业大类 (discipline)</option>
+                                <option value="universal">通用全域 (universal)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用目标</label>
+                            <input type="text" id="modal-rule-scope-target" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">所属专业</label>
+                            <input type="text" id="modal-rule-discipline" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">规则需求描述</label>
+                        <textarea id="modal-rule-desc" rows="2" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 12px; box-sizing: border-box;"></textarea>
+                    </div>
+
+                    <div>
+                        <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Rule DSL JSON 代码</label>
+                        <textarea id="modal-rule-json" rows="10" style="width: 100%; padding: 10px; border-radius: 6px; background: #020617; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+                        <button class="btn btn-secondary" onclick="closeRuleEditModal()">取消</button>
+                        <button class="btn btn-primary" onclick="submitModalRuleUpdate()"><i class="fa-solid fa-check"></i> 保存并生效修改</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: View DSL Code Dialog -->
+            <div id="rule-view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+                <div class="glass-card" style="width: 680px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.3); display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-code" style="color: #38bdf8;"></i> 规则 DSL 详情 (<span id="view-modal-rule-id"></span>)
+                        </h3>
+                        <button onclick="closeRuleViewModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div>
+                        <textarea id="view-modal-rule-json" readonly rows="16" style="width: 100%; padding: 10px; border-radius: 6px; background: #020617; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box;"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="closeRuleViewModal()">关闭</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Guide Dashboard (V0.0.9) -->
             <div class="guide-dashboard" id="guide-dashboard" style="display: none; padding: 28px 36px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto;">
                 <!-- Header Banner -->
                 <div class="glass-card" style="padding: 24px 30px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center;">
@@ -833,7 +960,7 @@
                             <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">
                                 📖 华康洁净物料清单匹配系统 · 操作与使用指南
                             </h2>
-                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.0.8 正式版</span>
+                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.0.9 正式版</span>
                         </div>
                         <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.6;">
                             基于 NLP 语义向量比对、30域特征结构化抽取与大模型优先调度的智能清单比对与规范化制表平台

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import sqlite3
@@ -246,4 +246,124 @@ async def delete_llm_provider(provider_id: str, current_user: dict = Depends(req
     """Delete an LLM provider configuration node."""
     manager = LLMProviderManager()
     return manager.delete_provider(provider_id)
+
+
+# ==========================================
+# 1. Server Health & High-Load Alert Endpoints
+# ==========================================
+
+from app.audit_manager import (
+    get_server_hardware_metrics, get_online_and_active_users,
+    get_alert_snapshots, check_and_capture_high_load_snapshot,
+    get_aggregated_statistics, get_audit_logs_paginated, log_audit_event
+)
+
+@router.get("/health")
+async def get_admin_health(current_user: dict = Depends(require_admin)):
+    """
+    Retrieve real-time hardware health (CPU, RAM, Disk), current online users,
+    and currently processing matching/cleaning rows.
+    """
+    hardware = get_server_hardware_metrics()
+    online_info = get_online_and_active_users()
+    
+    return {
+        "hardware": hardware,
+        "online_count": online_info["online_count"],
+        "active_count": online_info["active_count"],
+        "processing_rows_count": online_info["processing_rows_count"],
+        "active_tasks": online_info["active_tasks"],
+        "is_alert": hardware["is_alert"],
+        "alert_message": hardware["alert_message"]
+    }
+
+@router.get("/health/alerts")
+async def get_admin_health_alerts(limit: int = 50, current_user: dict = Depends(require_admin)):
+    """Retrieve history of high-load alert snapshots."""
+    return get_alert_snapshots(limit=limit)
+
+@router.post("/health/alerts/simulate")
+async def simulate_health_alert(current_user: dict = Depends(require_admin)):
+    """
+    Manually capture/simulate a high-load alert snapshot for demonstration.
+    """
+    hardware = get_server_hardware_metrics()
+    snapshot_id = check_and_capture_high_load_snapshot(
+        trigger_type=f"管理员手动触发/模拟负荷警戒 (CPU {max(hardware['cpu']['percent'], 91.5)}%)",
+        cpu_percent=max(hardware['cpu']['percent'], 91.5),
+        memory_percent=max(hardware['memory']['percent'], 90.2),
+        disk_percent=hardware['disk']['percent'],
+        force=True
+    )
+    log_audit_event(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="模拟负荷警戒快照",
+        details=f"管理员手动触发高负荷警戒快照 #{snapshot_id}"
+    )
+    return {"success": True, "snapshot_id": snapshot_id, "message": "高负荷警戒快照已成功捕获记录！"}
+
+
+# ==========================================
+# 2. System Aggregate Statistics Endpoints
+# ==========================================
+
+@router.get("/statistics")
+async def get_admin_statistics(current_user: dict = Depends(require_admin)):
+    """
+    Retrieve comprehensive system metrics:
+    - 总登录人次
+    - 使用人次
+    - 处理的总清单行数
+    - 输出的行数
+    - 系统总使用时长
+    - 专业分布与活跃排行
+    """
+    return get_aggregated_statistics()
+
+
+# ==========================================
+# 3. Online Users & Operation Audit Log Endpoints
+# ==========================================
+
+@router.get("/online-users")
+async def get_admin_online_users(current_user: dict = Depends(require_admin)):
+    """Retrieve list of currently online and active users."""
+    return get_online_and_active_users()
+
+@router.get("/audit-logs")
+async def get_admin_audit_logs(
+    username: Optional[str] = None,
+    action: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: dict = Depends(require_admin)
+):
+    """Retrieve operation audit records with multi-dimensional filtering and pagination."""
+    return get_audit_logs_paginated(
+        username=username,
+        action=action,
+        status=status,
+        search=search,
+        start_date=start_date,
+        end_date=end_date,
+        page=page,
+        page_size=page_size
+    )
+
+@router.get("/audit-actions")
+async def get_admin_audit_actions(current_user: dict = Depends(require_admin)):
+    """Retrieve all unique audit action types for frontend dropdown selection."""
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT action FROM audit_logs WHERE action IS NOT NULL ORDER BY action ASC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [r[0] for r in rows]
+
 

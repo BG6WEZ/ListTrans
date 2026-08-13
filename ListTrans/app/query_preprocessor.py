@@ -60,10 +60,6 @@ def is_valid_query_item(name: Any, spec: Any, unit: Any = "", code: Any = "", ro
     if any(k in name_str for k in ["编制依据", "图纸版本号", "图纸号", "计量依据", "设计说明"]):
         return False, "R4_PREFACE_NOTE_ROW"
 
-    # Rule 5: Outline chapter title row (no spec, unit, or quantity)
-    if (re.match(r'^[一二三四五六七八九十]+\s*[、\.]', name_str) or re.match(r'^\d+\.\d+\s+', name_str)) and not unit_str and not spec_str:
-        return False, "R5_OUTLINE_TITLE_ROW"
-
     # Rule 6: Single-cell paragraph description (length > 100 with no parameters)
     if len(name_str) > 100 and not unit_str and not spec_str:
         return False, "R6_LONG_TEXT_NOTE_ROW"
@@ -83,6 +79,16 @@ def is_valid_query_item(name: Any, spec: Any, unit: Any = "", code: Any = "", ro
     # Rule 10: Special table divider row
     if name_str.startswith("===") or spec_str.startswith("===") or name_str.startswith("---") or spec_str.startswith("---"):
         return False, "R10_DIVIDER_ROW"
+
+    # Rule 5: Outline chapter title row / Section header (no spec, unit, or code)
+    is_outline_pattern = bool(
+        re.match(r'^[一二三四五六七八九十百]+[、\.]', name_str) or 
+        re.match(r'^（[一二三四五六七八九十百]+）', name_str) or
+        re.match(r'^\(?[0-9\.]+\)?\s+', name_str) or
+        any(k in name_str for k in ["系统", "工程", "分部", "标段", "部分", "阶段"])
+    )
+    if not spec_str and (not unit_str or is_outline_pattern) and not code_str:
+        return False, "R5_OUTLINE_TITLE_ROW"
 
     return True, "VALID_ITEM"
 
@@ -603,12 +609,25 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
     try:
         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
         active_rules = LLMRuleManager.get_active_rules()
+        
+        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+            if not scope_tgt:
+                return True
+            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+            for c in candidate_names:
+                if not c:
+                    continue
+                c_low = str(c).lower()
+                if any(t in c_low or c_low in t for t in targets):
+                    return True
+            return False
+
         for r in active_rules:
             scope_lvl = r.get("scope_level", "category")
             scope_tgt = r.get("scope_target", "")
-            if scope_lvl == "discipline" and scope_tgt and scope_tgt not in [cat_clean, domain, "给排水", "通用"]:
+            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [cat_clean, domain, discipline, "给排水", "通用"]):
                 continue
-            if scope_lvl == "category" and scope_tgt and scope_tgt not in [name_clean, final_name]:
+            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [name_clean, final_name, combined_text]):
                 continue
             dsl = r.get("parsed_dsl", {})
             extraction_rules = dsl.get("extraction_rules", [])

@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
+import os
 from typing import List, Dict, Any, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.auth_manager import verify_access_token, get_user_by_username
+
+AUTH_DEV_MODE = os.getenv("AUTH_DEV_MODE", "false").lower() == "true"
 
 # Security scheme for Bearer token authorization
 security_scheme = HTTPBearer(auto_error=False)
@@ -10,8 +12,12 @@ security_scheme = HTTPBearer(auto_error=False)
 async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme)) -> Dict[str, Any]:
     """Dependency to retrieve and validate the authenticated user from JWT token."""
     if not credentials:
-        # Fallback default user for local single-user workspace execution
-        return {"username": "admin", "role": "admin", "is_active": True}
+        if AUTH_DEV_MODE:
+            return {"username": "admin", "role": "admin", "is_active": True}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="请先登录系统以获取访问权限。"
+        )
         
     token = credentials.credentials
     payload = verify_access_token(token)

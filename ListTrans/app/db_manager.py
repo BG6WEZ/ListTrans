@@ -1,12 +1,35 @@
-# -*- coding: utf-8 -*-
 import os
 import re
 import sqlite3
+import threading
 import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
 from functools import lru_cache
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "materials.db")
+
+# Thread-local SQLite connection pool
+_local_db = threading.local()
+
+def get_thread_db_connection():
+    """Retrieve thread-local SQLite connection to eliminate repeated open/close overhead."""
+    conn = getattr(_local_db, "conn", None)
+    if conn is not None:
+        try:
+            conn.execute("SELECT 1")
+            return conn
+        except Exception:
+            _local_db.conn = None
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
+    conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
+    _local_db.conn = conn
+    return conn
 
 # Prevent OpenBLAS/PyTorch thread conflicts or multi-threaded connection locks
 _HAS_FTS_CACHE: Optional[bool] = None
@@ -16,6 +39,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     try:
         conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
         conn.execute("PRAGMA synchronous=NORMAL;")
     except Exception:
         pass
@@ -117,11 +141,10 @@ def get_all_materials(limit=1000):
 
 @lru_cache(maxsize=50000)
 def query_by_code(code: str) -> Optional[Dict[str, Any]]:
-    conn = get_db_connection()
+    conn = get_thread_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM materials WHERE code = ?", (code.strip(),))
     row = cursor.fetchone()
-    conn.close()
     return dict(row) if row else None
 
 @lru_cache(maxsize=10000)
@@ -132,13 +155,12 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
     if not keyword:
         return []
         
-    conn = get_db_connection()
+    conn = get_thread_db_connection()
     cursor = conn.cursor()
     
     # Split keyword by space, comma, or semicolon delimiters
     raw_words = [w.strip() for w in re.split(r'[;；,，\s]+', keyword) if w.strip()]
     if not raw_words:
-        conn.close()
         return []
         
     global _HAS_FTS_CACHE
@@ -202,9 +224,8 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
                     LIMIT ?
                 """, (fts_query, fetch_limit))
                 results = cursor.fetchall()
-                conn.close()
                 return [dict(r) for r in results]
-            except sqlite3.OperationalError:
+            except (sqlite3.OperationalError, sqlite3.DatabaseError, sqlite3.Error):
                 pass
                 
     # Standard query fallback (LIKE '%token%')
@@ -227,7 +248,6 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
     """, params)
     
     results = cursor.fetchall()
-    conn.close()
     return [dict(r) for r in results]
 
 def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, Any]]:
@@ -416,17 +436,44 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # Check FTS support
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
-    has_fts = cursor.fetchone() is not None
-    
     if mode == "replace":
-        # Truncate tables
-        cursor.execute("DELETE FROM materials")
-        if has_fts:
-            cursor.execute("DELETE FROM materials_fts")
-        conn.commit()
-        
+        # Drop and recreate tables cleanly to avoid FTS5 shadow table corruption
+        cursor.execute("DROP TABLE IF EXISTS materials")
+        cursor.execute("DROP TABLE IF EXISTS materials_fts")
+        cursor.execute("""
+            CREATE TABLE materials (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE,
+                category TEXT,
+                name TEXT,
+                specification TEXT,
+                unit TEXT,
+                brand TEXT,
+                description TEXT,
+                search_tokens TEXT,
+                parsed_params TEXT,
+                parsed_schema_version INTEGER DEFAULT 2
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_code ON materials(code)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)")
+        cursor.execute("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS materials_fts USING fts5(
+                code UNINDEXED,
+                category,
+                name,
+                specification,
+                brand,
+                description,
+                tokenize = 'unicode61'
+            )
+        """)
+        has_fts = True
+    else:
+        # Append mode: check FTS table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
+        has_fts = cursor.fetchone() is not None
+
     # Write to SQL materials table
     records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
     records = [r + [2] for r in records]
@@ -456,6 +503,10 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
         """, fts_records)
         
     conn.commit()
+    try:
+        conn.execute("PRAGMA optimize;")
+    except Exception:
+        pass
     conn.close()
     
     # Compute aggregate stats

@@ -24,15 +24,26 @@ if not security_logger.handlers:
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), "auth.db")
 
 # JWT configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "941a8a25c1103f6f3a388f7c9e0d16eb222a1b32df511ef5e69dfad1f30a597a")
+# Security fix (P1-3): Remove predictable hardcoded default key; load from env or auto-generate a secure random 256-bit key
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    import secrets
+    SECRET_KEY = secrets.token_hex(32)
+    security_logger.warning("No SECRET_KEY set in environment. Generated secure session ephemeral key.")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
 # Password hashing (using native bcrypt)
 
 def get_auth_connection():
-    conn = sqlite3.connect(AUTH_DB_PATH)
+    conn = sqlite3.connect(AUTH_DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
     return conn
 
 def init_auth_db():
@@ -236,10 +247,11 @@ def get_password_hash(password: str) -> str:
 # JWT helpers
 def create_access_token(data: dict, expires_delta: Optional[datetime.timedelta] = None) -> str:
     to_encode = data.copy()
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
     if expires_delta:
-        expire = datetime.datetime.utcnow() + expires_delta
+        expire = now_utc + expires_delta
     else:
-        expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = now_utc + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

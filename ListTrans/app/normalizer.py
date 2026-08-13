@@ -2,7 +2,7 @@
 import os
 import re
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Tuple
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
 
@@ -79,12 +79,25 @@ def clean_text_standard(text: str, discipline: Optional[str] = None, category: O
     try:
         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
         active_rules = LLMRuleManager.get_active_rules()
+        
+        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+            if not scope_tgt:
+                return True
+            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+            for c in candidate_names:
+                if not c:
+                    continue
+                c_low = str(c).lower()
+                if any(t in c_low or c_low in t for t in targets):
+                    return True
+            return False
+
         for r in active_rules:
             scope_lvl = r.get("scope_level", "universal")
             scope_tgt = r.get("scope_target", "")
-            if scope_lvl == "discipline" and scope_tgt and discipline and scope_tgt != discipline:
+            if scope_lvl == "discipline" and scope_tgt and discipline and not scope_matches(scope_tgt, [discipline]):
                 continue
-            if scope_lvl == "category" and scope_tgt and category and scope_tgt != category:
+            if scope_lvl == "category" and scope_tgt and category and not scope_matches(scope_tgt, [category]):
                 continue
             dsl = r.get("parsed_dsl", {})
             cleaning_rules = dsl.get("cleaning_rules", [])

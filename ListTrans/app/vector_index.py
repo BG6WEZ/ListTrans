@@ -81,13 +81,13 @@ class VectorIndexManager:
                     self._initialize_model()
         return self.model is not None
 
-    def encode_queries(self, texts: List[str]) -> Optional[np.ndarray]:
+    def encode_queries(self, texts: List[str], batch_size: int = 128) -> Optional[np.ndarray]:
         """Encode a batch of query texts into normalized embeddings."""
         if not self.is_enabled or not texts:
             return None
         try:
             with self._lock:
-                embeddings = self.model.encode(texts, batch_size=64, show_progress_bar=False, convert_to_numpy=True)
+                embeddings = self.model.encode(texts, batch_size=batch_size, show_progress_bar=False, convert_to_numpy=True)
             # L2 normalize using pure Numpy (preventing FAISS C++ OpenMP deadlock on Windows)
             norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
             norms = np.where(norms == 0, 1.0, norms)
@@ -186,12 +186,12 @@ class VectorIndexManager:
         # Encode all texts in chunked batches to report progress
         self.numpy_embeddings = None
         embeddings_list = []
-        chunk_size = 500
+        chunk_size = 1000
         total_items = len(texts)
         
         for idx in range(0, total_items, chunk_size):
             chunk_texts = texts[idx : idx + chunk_size]
-            chunk_embs = self.encode_queries(chunk_texts)
+            chunk_embs = self.encode_queries(chunk_texts, batch_size=256)
             if chunk_embs is None:
                 print(f"Error: Failed to encode chunk starting at {idx}")
                 return

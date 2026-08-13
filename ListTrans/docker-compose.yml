@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   matcher-app:
-    image: material-matcher:v0.0.8
+    image: material-matcher:v0.0.9
     container_name: material-matcher
     ports:
       - "18080:18080"
@@ -17,6 +17,11 @@ services:
       - ./app/auth.db:/app/app/auth.db
       # 持久化向量索引缓存
       - ./app/vector_cache:/app/app/vector_cache
+      # 挂载前端与核心代码目录以确保运行最新版本
+      - ./web:/app/web
+      - ./app:/app/app
+      - ./config:/app/config
+      - ./model_offline:/app/model_offline
       # 持久化日志输出
       - ./logs:/app/logs
     restart: always

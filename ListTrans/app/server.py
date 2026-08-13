@@ -14,6 +14,8 @@ import shutil
 import uuid
 import pandas as pd
 import openpyxl
+import time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks, Query
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -22,6 +24,8 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor
 import json
+import threading
+import asyncio
 
 from app.db_manager import init_db, search_materials_keyword, query_by_code, DB_PATH, get_db_connection
 from app.preprocessor import extract_params, clean_text, reload_preprocessor_configs, extract_device_name, remove_construction_info
@@ -51,10 +55,40 @@ load_dotenv()
 ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:18080,http://localhost:18080").split(",")
 
+@asynccontextmanager
+async def lifespan(app_instance: FastAPI):
+    """Lifespan initialization of DB and vector index."""
+    logger.info("Server started. Initializing Auth, Session, Audit, SQLite DB and vector index mapping.")
+    from app.auth_manager import init_auth_db
+    from app.session_manager import init_session_db, clean_old_draft_sessions
+    from app.audit_manager import init_audit_tables
+    init_auth_db()
+    init_session_db()
+    init_audit_tables()
+    try:
+        clean_old_draft_sessions()
+    except Exception as e:
+        logger.error(f"Error cleaning old drafts on startup: {e}")
+
+    proj_dir = os.path.dirname(os.path.dirname(__file__))
+    xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
+    init_db(xlsx_path)
+    
+    logger.info("Initializing vector index mapping...")
+    try:
+        index_manager.check_db_timestamp_and_build(DB_PATH)
+        logger.info("Vector index initialization completed.")
+    except Exception as e:
+        logger.error(f"Error in vector index initialization: {e}")
+
+    logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
+    yield
+
 app = FastAPI(
     title="华康洁净物料清单匹配工具",
     docs_url="/docs" if ENABLE_DOCS else None,
-    redoc_url="/redoc" if ENABLE_DOCS else None
+    redoc_url="/redoc" if ENABLE_DOCS else None,
+    lifespan=lifespan
 )
 
 # Enable CORS
@@ -97,6 +131,10 @@ from app.session_manager import (
     save_draft_session, get_draft_session, clear_draft_session, save_named_session, list_saved_sessions,
     get_session_by_id, update_named_session, delete_session_by_id, clear_all_runtime_data
 )
+from app.audit_manager import (
+    init_audit_tables, log_audit_event, record_heartbeat, 
+    update_processing_task, increment_stat_counter
+)
 
 class LoginRequest(BaseModel):
     username: str
@@ -116,6 +154,25 @@ class NamedSaveRequest(BaseModel):
 class UpdateSessionRequest(BaseModel):
     items_json: str
 
+class HeartbeatRequest(BaseModel):
+    current_page: Optional[str] = "workbench"
+    state: Optional[str] = "active"
+
+@app.post("/api/auth/heartbeat")
+async def api_heartbeat(req: HeartbeatRequest, request: Request, current_user: dict = Depends(get_current_user)):
+    """Heartbeat endpoint for tracking real-time online users and session duration."""
+    ip = request.client.host if request.client else "127.0.0.1"
+    record_heartbeat(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        dept=current_user.get("dept1") or current_user.get("dept2") or "",
+        ip_address=ip,
+        current_page=req.current_page or "workbench",
+        state=req.state or "active"
+    )
+    return {"status": "ok"}
+
 @app.post("/api/auth/login")
 async def api_login(req: LoginRequest, request: Request):
     username = req.username.strip()
@@ -131,11 +188,13 @@ async def api_login(req: LoginRequest, request: Request):
     user = get_user_by_username(username)
     if not user or not verify_password(req.password, user["password_hash"]):
         log_login_attempt(username, ip, success=False)
+        log_audit_event(username=username, action="用户登录", details="密码验证失败", ip_address=ip, status="failed")
         security_logger.warning(f"Failed login attempt for username '{username}' from IP {ip}.")
         raise HTTPException(status_code=400, detail="用户名或密码错误。")
         
     if not user["is_active"]:
         log_login_attempt(username, ip, success=False)
+        log_audit_event(username=username, action="用户登录", details="账号已被停用", ip_address=ip, status="failed")
         security_logger.warning(f"Inactive username '{username}' tried to login from IP {ip}.")
         raise HTTPException(status_code=403, detail="该账号已被停用，请联系管理员。")
         
@@ -145,6 +204,27 @@ async def api_login(req: LoginRequest, request: Request):
     access_token = create_access_token(data={"sub": user["username"], "role": user["role"]})
     display_name = user.get("name") or ("系统管理员" if user["username"] == "admin" else user["username"])
     position = user.get("position") or ("系统管理员" if user["username"] == "admin" else "员工")
+    
+    # Record success login audit log and heartbeat
+    log_audit_event(
+        username=user["username"],
+        action="用户登录",
+        details=f"登录系统 ({position})",
+        ip_address=ip,
+        name=display_name,
+        role=user["role"],
+        user_id=user["id"]
+    )
+    record_heartbeat(
+        username=user["username"],
+        name=display_name,
+        role=user["role"],
+        dept=user.get("dept1") or "",
+        ip_address=ip,
+        current_page="workbench",
+        state="active"
+    )
+    
     security_logger.info(f"User '{user['username']}' ({display_name}, {position}) logged in successfully from IP {ip}.")
     return {
         "access_token": access_token,
@@ -179,6 +259,13 @@ async def api_get_me(current_user: dict = Depends(get_current_user)):
 @app.post("/api/session/draft")
 async def api_save_draft(req: DraftSaveRequest, current_user: dict = Depends(get_current_user)):
     save_draft_session(current_user["id"], req.original_filename, req.professional, req.items_json)
+    log_audit_event(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="暂存草稿",
+        details=f"保存自动草稿: {req.original_filename} ({req.professional})"
+    )
     return {"success": True}
 
 @app.get("/api/session/draft")
@@ -205,6 +292,13 @@ async def api_delete_draft(current_user: dict = Depends(get_current_user)):
 async def api_save_session(req: NamedSaveRequest, current_user: dict = Depends(get_current_user)):
     session_id = save_named_session(
         current_user["id"], req.session_name, req.original_filename, req.professional, req.items_json
+    )
+    log_audit_event(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="保存工作进度",
+        details=f"保存命名进度: {req.session_name} ({req.original_filename})"
     )
     return {"success": True, "session_id": session_id}
 
@@ -245,7 +339,7 @@ async def api_delete_session(session_id: str, current_user: dict = Depends(get_c
     delete_session_by_id(current_user["id"], session_id)
     return {"success": True}
 
-@app.get("/api/db/portrait")
+@app.get("/api/db/portrait", dependencies=[Depends(require_employee)])
 async def api_get_db_portrait():
     """Calculate and return live Data Portrait metrics for materials.db."""
     try:
@@ -344,8 +438,8 @@ async def api_get_db_portrait():
         raise HTTPException(status_code=500, detail=f"生成物料库数字画像失败: {str(e)}")
 
 @app.delete("/api/system/reset")
-async def api_system_reset(current_user: dict = Depends(get_current_user)):
-    """Reset system runtime data (clear sessions, uploads, and feedback log)."""
+async def api_system_reset(current_user: dict = Depends(require_admin)):
+    """Reset system runtime data (clear sessions, uploads, and feedback log). Only administrators are allowed."""
     try:
         # 1. Clear work_sessions database table
         clear_all_runtime_data()
@@ -368,13 +462,13 @@ async def api_system_reset(current_user: dict = Depends(get_current_user)):
             except Exception as e:
                 logger.error(f"Failed to reset binding feedback file: {e}")
                 
-        security_logger.info(f"System runtime data reset executed by user '{current_user.get('username')}'.")
+        security_logger.info(f"System runtime data reset executed by admin '{current_user.get('username')}'.")
         return {"success": True, "message": "系统运行数据（会话草稿、上传临时文件及反馈日志）已全面清理恢复干净状态！"}
     except Exception as e:
         logger.error(f"Error executing system reset: {e}")
         raise HTTPException(status_code=500, detail=f"清理系统数据失败: {str(e)}")
 
-@app.get("/api/db/materials")
+@app.get("/api/db/materials", dependencies=[Depends(require_employee)])
 async def api_get_db_materials(
     keyword: Optional[str] = None,
     category: Optional[str] = None,
@@ -476,36 +570,30 @@ def save_auto_binding_rules(rules: List[Dict[str, Any]]):
 # Thread Pool for concurrent matching (4 workers optimal for CPU throughput without thread thrashing)
 executor = ThreadPoolExecutor(max_workers=4)
 
-@app.on_event("startup")
-async def startup_event():
-    """Startup initialization of DB and vector index."""
-    logger.info("Server started. Initializing Auth, Session, SQLite DB and vector index mapping.")
-    
-    # Initialize Auth and Session databases
-    from app.auth_manager import init_auth_db
-    from app.session_manager import init_session_db, clean_old_draft_sessions
-    init_auth_db()
-    init_session_db()
-    try:
-        clean_old_draft_sessions()
-    except Exception as e:
-        logger.error(f"Error cleaning old drafts on startup: {e}")
+upload_tasks: Dict[str, Dict[str, Any]] = {}
 
-    proj_dir = os.path.dirname(os.path.dirname(__file__))
-    xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
-    
-    # Always call init_db to check schema and self-heal if necessary
-    init_db(xlsx_path)
-    
-    # Verify/load vector index on main thread
-    logger.info("Initializing vector index mapping...")
-    try:
-        index_manager.check_db_timestamp_and_build(DB_PATH)
-        logger.info("Vector index initialization completed.")
-    except Exception as e:
-        logger.error(f"Error in vector index initialization: {e}")
-
-    logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
+def clean_expired_upload_tasks(max_tasks: int = 50, max_age_seconds: int = 1800):
+    """Clean completed/failed tasks older than max_age_seconds or prune oldest if exceeding max_tasks."""
+    now = time.time()
+    # 1. Prune expired completed/failed tasks
+    expired = [
+        tid for tid, task in upload_tasks.items()
+        if task.get("status") in ("completed", "failed") and (now - task.get("created_time", now)) > max_age_seconds
+    ]
+    for tid in expired:
+        upload_tasks.pop(tid, None)
+        
+    # 2. If still exceeds max_tasks, prune oldest completed/failed
+    if len(upload_tasks) > max_tasks:
+        completed_or_failed = [
+            (tid, task.get("created_time", 0)) 
+            for tid, task in upload_tasks.items() 
+            if task.get("status") in ("completed", "failed")
+        ]
+        sorted_tasks = sorted(completed_or_failed, key=lambda x: x[1])
+        to_prune = len(upload_tasks) - max_tasks
+        for tid, _ in sorted_tasks[:to_prune]:
+            upload_tasks.pop(tid, None)
 
 class BindingModel(BaseModel):
     code: str
@@ -557,7 +645,7 @@ class FeedbackSubmitRequest(BaseModel):
 
 upload_tasks = {}
 
-def async_process_upload_task(task_id: str, temp_path: str):
+async def async_process_upload_task(task_id: str, temp_path: str):
     try:
         wb = openpyxl.load_workbook(temp_path, data_only=True)
         raw_rows = []
@@ -665,15 +753,17 @@ def async_process_upload_task(task_id: str, temp_path: str):
                 val_c = sheet.cell(r, spec_idx).value
                 val_b_str = str(val_b or "").strip()
                 val_c_str = str(val_c or "").strip()
-                unit_str = str(sheet.cell(r, unit_idx).value or "台").strip() if unit_idx else "台"
+                raw_unit = str(sheet.cell(r, unit_idx).value or "").strip() if unit_idx else ""
 
                 original_code = ""
                 if code_idx:
                     original_code = str(sheet.cell(r, code_idx).value or "").strip()
 
-                is_valid, _ = is_valid_query_item(val_b_str, val_c_str, unit_str, original_code, r)
+                is_valid, _ = is_valid_query_item(val_b_str, val_c_str, raw_unit, original_code, r)
                 if not is_valid:
                     continue
+
+                unit_str = raw_unit or "台"
 
                 qty_val = sheet.cell(r, qty_idx).value
                 try:
@@ -721,14 +811,38 @@ def async_process_upload_task(task_id: str, temp_path: str):
         upload_tasks[task_id]["structuring_progress"] = 100
         upload_tasks[task_id]["current_step"] = "Excel 清单数据解析完成，开始智能特征比对..."
         
-        # Batch match matching rows
-        parsed_rows = batch_match_rows(raw_rows, task_id=task_id)
+        # Track active matching in memory monitor and increment processed rows stat
+        update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=len(raw_rows), status="processing", current_step="正在智能清洗与特征比对...")
+        increment_stat_counter("total_processed_rows", len(raw_rows))
+        
+        # Batch match matching rows with dynamic timeout guard to support large lists (min 120s) (P0-4)
+        matching_timeout = max(120.0, len(raw_rows) * 1.5)
+        loop = asyncio.get_running_loop()
+        parsed_rows = await asyncio.wait_for(
+            loop.run_in_executor(executor, batch_match_rows, raw_rows, task_id),
+            timeout=matching_timeout
+        )
+        
+        update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="completed")
+        log_audit_event(username="system", action="智能比对完成", details=f"成功完成 {len(raw_rows)} 行清单特征清洗与智能匹配")
         
         upload_tasks[task_id]["status"] = "completed"
         upload_tasks[task_id]["result"] = parsed_rows
         upload_tasks[task_id]["current_step"] = "所有清单项目已智能比对匹配完成！"
         
+    except asyncio.TimeoutError:
+        update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+        logger.error(f"Async upload task {task_id} timed out after {matching_timeout:.1f}s.")
+        upload_tasks[task_id]["status"] = "failed"
+        upload_tasks[task_id]["error"] = f"清单处理超时（超过 {matching_timeout:.1f} 秒），已自动终止。"
+        upload_tasks[task_id]["current_step"] = f"处理超时: 超过 {matching_timeout:.1f} 秒"
     except Exception as e:
+        update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
         if os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
@@ -739,24 +853,27 @@ def async_process_upload_task(task_id: str, temp_path: str):
         upload_tasks[task_id]["error"] = str(e)
         upload_tasks[task_id]["current_step"] = f"处理出错: {str(e)}"
 
-@app.post("/api/upload", dependencies=[Depends(require_employee)])
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+@app.post("/api/upload")
+async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), current_user: dict = Depends(require_employee)):
     """
     Upload original list and start high performance batch matching background task.
     """
     if not file.filename.endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
         
-    logger.info(f"Received query list Excel upload: {file.filename}")
+    safe_filename = os.path.basename(file.filename)
+    logger.info(f"Received query list Excel upload: {safe_filename} by user {current_user.get('username')}")
     file_id = str(uuid.uuid4())
-    temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{file.filename}")
+    temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{safe_filename}")
     
     with open(temp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
+    clean_expired_upload_tasks()
     task_id = str(uuid.uuid4())
     upload_tasks[task_id] = {
         "status": "processing",
+        "created_time": time.time(),
         "structuring_progress": 0,
         "vectorization_progress": 0,
         "matching_progress": 0,
@@ -764,6 +881,14 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         "result": None,
         "error": None
     }
+    
+    log_audit_event(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="上传清单",
+        details=f"上传待匹配清单: {file.filename}"
+    )
     
     background_tasks.add_task(async_process_upload_task, task_id, temp_path)
     return JSONResponse(content={"task_id": task_id})
@@ -777,32 +902,27 @@ async def get_upload_status(task_id: str):
         raise HTTPException(status_code=404, detail="指定任务不存在")
     return JSONResponse(content=upload_tasks[task_id])
 
+ENABLE_SERIES_RERUN = os.getenv("ENABLE_SERIES_RERUN", "false").lower() == "true"
+
 def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Helper to perform batch encoding and threadpool matching in chunks of 500."""
     import time
     
-    def log_debug(msg: str):
-        try:
-            with open("c:/Users/wangd/project/ListTrans/ListTrans/logs/debug_match.log", "a", encoding="utf-8") as f:
-                f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - {msg}\n")
-        except Exception:
-            pass
-            
-    log_debug(f"batch_match_rows started for {len(raw_rows)} rows. task_id: {task_id}")
+    logger.debug(f"batch_match_rows started for {len(raw_rows)} rows. task_id: {task_id}")
     total_results = []
     total_items = len(raw_rows)
 
     # Load confirmed auto-binding rules
-    log_debug("Loading auto binding rules...")
+    logger.debug("Loading auto binding rules...")
     rules = load_auto_binding_rules()
     rules_map = {r["original_name"].strip(): r["bound_materials"] for r in rules if r.get("original_name")}
-    log_debug(f"Loaded {len(rules_map)} rules.")
+    logger.debug(f"Loaded {len(rules_map)} rules.")
 
     # Step 1: Pre-process all rows
     if task_id:
         upload_tasks[task_id]["current_step"] = "正在对清单特征参数进行清洗与解析..."
     
-    log_debug("Step 1: Preprocessing query parameters...")
+    logger.debug("Step 1: Preprocessing query parameters...")
     preprocessed_rows = []
     for idx, item in enumerate(raw_rows):
         raw_name = item["name"].strip()
@@ -822,14 +942,14 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
         
         if task_id and idx % 5 == 0:
             upload_tasks[task_id]["current_step"] = f"【解析特征】 {raw_name[:25]} ({idx}/{total_items})"
-    log_debug(f"Preprocessing completed for {len(preprocessed_rows)} rows.")
+    logger.debug(f"Preprocessing completed for {len(preprocessed_rows)} rows.")
 
     # Step 2: Batch Vectorization (Encoding)
     if task_id:
         upload_tasks[task_id]["current_step"] = "正在生成文本语义特征（向量化中）..."
         upload_tasks[task_id]["vectorization_progress"] = 0
 
-    log_debug("Step 2: Batch encoding...")
+    logger.debug("Step 2: Batch encoding...")
     from app.vector_index import index_manager
     embeddings_list = [None] * total_items
     
@@ -839,7 +959,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
             chunk = preprocessed_rows[idx : idx + chunk_size]
             chunk_texts = [f"{p['real_name']} {p['clean_spec']}".strip() for p in chunk]
             
-            log_debug(f"Encoding chunk {idx} to {idx + len(chunk)}...")
+            logger.debug(f"Encoding chunk {idx} to {idx + len(chunk)}...")
             # Batch encode
             chunk_embeddings = index_manager.encode_queries(chunk_texts)
             if chunk_embeddings is not None:
@@ -851,17 +971,17 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                 upload_tasks[task_id]["vectorization_progress"] = vect_progress
                 upload_tasks[task_id]["current_step"] = f"【特征提取】 {chunk[0]['real_name'][:25]} ({idx + len(chunk)}/{total_items})"
     else:
-        log_debug("Vector index not enabled. Skipping vector encoding.")
+        logger.debug("Vector index not enabled. Skipping vector encoding.")
         if task_id:
             upload_tasks[task_id]["vectorization_progress"] = 100
-    log_debug("Encoding completed.")
+    logger.debug("Encoding completed.")
 
     # Step 3: Fast Matching (Search & Score)
     if task_id:
         upload_tasks[task_id]["current_step"] = "正在与标准库进行高精匹配与重打分..."
         upload_tasks[task_id]["matching_progress"] = 0
 
-    log_debug("Step 3: Sequential matching...")
+    logger.debug("Step 3: Sequential matching...")
     # Process in chunks of 500 for matching and series rank boosting
     chunk_size = 500
     for idx in range(0, total_items, chunk_size):
@@ -883,7 +1003,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
             }
             match_jobs.append((query_info, q_vector, item))
             
-        log_debug(f"Matching jobs chunk {idx} to {idx + len(chunk)}...")
+        logger.debug(f"Matching jobs chunk {idx} to {idx + len(chunk)}...")
         # First pass sequential matching (using pre-computed vectors)
         first_pass_results = []
         for offset, (q_info, q_vector, item) in enumerate(match_jobs):
@@ -892,14 +1012,14 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                 upload_tasks[task_id]["current_step"] = f"【智能匹配】 {q_info['name'][:25]} ({current_idx}/{total_items})"
                 upload_tasks[task_id]["matching_progress"] = min(100, int((current_idx / total_items) * 100))
             
-            log_debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
+            logger.debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
             t_start_match = time.time()
             res = match_item(q_info, q_vector)
             t_elapsed_match = time.time() - t_start_match
-            log_debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
+            logger.debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
             first_pass_results.append(res)
         
-        log_debug(f"Determining confirmed series for chunk {idx}...")
+        logger.debug(f"Determining confirmed series for chunk {idx}...")
         # Determine confirmed series from exact matches (Score >= 85)
         confirmed_series = []
         for res in first_pass_results:
@@ -910,10 +1030,10 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                     prefix = model.split("-")[0].strip().lower()
                     if prefix not in confirmed_series:
                         confirmed_series.append(prefix)
-        log_debug(f"Confirmed series: {confirmed_series}")
+        logger.debug(f"Confirmed series: {confirmed_series}")
                         
         # Second pass: re-match non-exact matches using series clustering
-        log_debug(f"Second pass matching for chunk {idx}...")
+        logger.debug(f"Second pass matching for chunk {idx}...")
         final_chunk_results = []
         for i, (q_info, q_vector, item) in enumerate(match_jobs):
             res = first_pass_results[i]
@@ -957,18 +1077,22 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                     "bindings": bindings_list
                 })
             else:
-                # Fast in-memory series rank boost without re-running full recall/scoring
                 if not res["is_exact"] and confirmed_series and res.get("top_candidates"):
-                    for cand in res["top_candidates"]:
-                        c_spec = cand.get("specification", "")
-                        c_model = extract_params(c_spec).get("model", "")
-                        if c_model:
-                            c_prefix = c_model.split("-")[0].strip().lower()
-                            if c_prefix in confirmed_series:
-                                cand["score"] = min(100.0, cand["score"] + 5.0)
-                                if "系列优先" not in cand.get("match_reasons", []):
-                                    cand.setdefault("match_reasons", []).append("系列优先")
-                    res["top_candidates"].sort(key=lambda x: x["score"], reverse=True)
+                    if ENABLE_SERIES_RERUN:
+                        # Full second-pass rematch if explicitly enabled
+                        res = match_item(q_info, q_vector, confirmed_series)
+                    else:
+                        # Fast in-memory series rank boost without re-running full recall/scoring (default)
+                        for cand in res["top_candidates"]:
+                            c_spec = cand.get("specification", "")
+                            c_model = extract_params(c_spec).get("model", "")
+                            if c_model:
+                                c_prefix = c_model.split("-")[0].strip().lower()
+                                if c_prefix in confirmed_series:
+                                    cand["score"] = min(100.0, cand["score"] + 5.0)
+                                    if "系列优先" not in cand.get("match_reasons", []):
+                                        cand.setdefault("match_reasons", []).append("系列优先")
+                        res["top_candidates"].sort(key=lambda x: x["score"], reverse=True)
                     
                 top_cands = res["top_candidates"]
                 first_cand = top_cands[0] if top_cands else None
@@ -1014,7 +1138,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
             upload_tasks[task_id]["matching_progress"] = match_progress
             upload_tasks[task_id]["current_step"] = f"正在与企业标准库进行深度比对与打分... ({idx + len(chunk)}/{total_items})"
             
-    log_debug("batch_match_rows completed.")
+    logger.debug("batch_match_rows completed.")
     return total_results
 
 @app.post("/api/batch_match", dependencies=[Depends(require_employee)])
@@ -1063,8 +1187,8 @@ async def api_match_single(payload: Dict[str, Any]):
     res = match_item(query_info)
     return JSONResponse(content=res)
 
-@app.post("/api/rematch", dependencies=[Depends(require_employee)])
-async def api_rematch(req: RematchRequest):
+@app.post("/api/rematch")
+async def api_rematch(req: RematchRequest, current_user: dict = Depends(require_employee)):
     """Rematch item after manual parameters override."""
     fixed = req.fixed_params
     professional = req.professional or "暖通"
@@ -1104,6 +1228,14 @@ async def api_rematch(req: RematchRequest):
     }
     
     res = match_item(query_info)
+    
+    log_audit_event(
+        username=current_user["username"],
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="单条特征重算",
+        details=f"重算第 {req.row_id} 行: {req.text[:30]}"
+    )
     return JSONResponse(content=res)
 
 @app.post("/api/refresh_vector", dependencies=[Depends(require_employee)])
@@ -1266,8 +1398,8 @@ async def api_get_binding_suggestions():
         logger.error(f"Error in api_get_binding_suggestions: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/binding/rules/confirm", dependencies=[Depends(require_employee)])
-async def api_confirm_binding_rule(req: BindingRuleConfirmRequest):
+@app.post("/api/binding/rules/confirm")
+async def api_confirm_binding_rule(req: BindingRuleConfirmRequest, current_user: dict = Depends(require_employee)):
     """Confirm/Enable a learned auto-binding rule."""
     try:
         rules = load_auto_binding_rules()
@@ -1292,18 +1424,32 @@ async def api_confirm_binding_rule(req: BindingRuleConfirmRequest):
         rules.append(new_rule)
         
         save_auto_binding_rules(rules)
+        log_audit_event(
+            username=current_user["username"],
+            name=current_user.get("name"),
+            role=current_user.get("role"),
+            action="确认绑定规则",
+            details=f"启用物料绑定规则: {req.original_name} (关联 {len(req.bindings)} 项物料)"
+        )
         return {"code": 0, "msg": "规则已成功启用并保存"}
     except Exception as e:
         logger.error(f"Error in api_confirm_binding_rule: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/binding/rules/delete", dependencies=[Depends(require_employee)])
-async def api_delete_binding_rule(req: BindingRuleDeleteRequest):
+@app.post("/api/binding/rules/delete")
+async def api_delete_binding_rule(req: BindingRuleDeleteRequest, current_user: dict = Depends(require_employee)):
     """Delete a confirmed auto-binding rule."""
     try:
         rules = load_auto_binding_rules()
         rules = [r for r in rules if r.get("original_name", "").strip() != req.original_name.strip()]
         save_auto_binding_rules(rules)
+        log_audit_event(
+            username=current_user["username"],
+            name=current_user.get("name"),
+            role=current_user.get("role"),
+            action="删除绑定规则",
+            details=f"删除物料绑定规则: {req.original_name}"
+        )
         return {"code": 0, "msg": "规则已删除"}
     except Exception as e:
         logger.error(f"Error in api_delete_binding_rule: {e}")
@@ -1325,10 +1471,10 @@ async def search_materials(keyword: str = "", limit: int = 50):
     results = search_materials_keyword(keyword, limit=limit)
     return JSONResponse(content={"results": results})
 
-@app.post("/api/export", dependencies=[Depends(require_employee)])
-async def export_report(req: ExportRequest):
+@app.post("/api/export")
+async def export_report(req: ExportRequest, current_user: dict = Depends(require_employee)):
     """Export final verified matched items back to standard report template."""
-    logger.info(f"Exporting matched items list as standard Excel report: {len(req.items)} rows.")
+    logger.info(f"Exporting matched items list as standard Excel report: {len(req.items)} rows by {current_user.get('username')}.")
     proj_dir = os.path.dirname(os.path.dirname(__file__))
     template_path = os.path.join(proj_dir, "doc", "sample", "标准格式.xlsx")
     try:
@@ -1337,6 +1483,16 @@ async def export_report(req: ExportRequest):
         
         items_to_write = [it.dict() for it in req.items]
         generate_standard_report(items_to_write, template_path, output_path)
+        
+        # Increment total exported rows and log audit
+        increment_stat_counter("total_exported_rows", len(req.items))
+        log_audit_event(
+            username=current_user["username"],
+            name=current_user.get("name"),
+            role=current_user.get("role"),
+            action="导出报表",
+            details=f"导出标准物料清单: {output_filename} (共 {len(req.items)} 行)"
+        )
         
         logger.info(f"Standard Excel report generated successfully: {output_filename}")
         return FileResponse(
@@ -1395,6 +1551,8 @@ async def api_db_metadata():
         logger.error(f"Error querying db metadata: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+_db_import_lock = threading.Lock()
+
 def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str):
     try:
         logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}")
@@ -1435,6 +1593,10 @@ def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filena
         upload_tasks[task_id]["error"] = str(e)
         upload_tasks[task_id]["current_step"] = f"导入出错: {str(e)}"
     finally:
+        try:
+            _db_import_lock.release()
+        except Exception:
+            pass
         # Clean up temp file
         if os.path.exists(temp_path):
             try:
@@ -1452,7 +1614,11 @@ async def api_db_upload(
     if not file.filename.endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
         
-    temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{file.filename}")
+    if not _db_import_lock.acquire(blocking=False):
+        raise HTTPException(status_code=409, detail="当前已有物料库导入或索引重建任务正在运行中，请稍候再试。")
+        
+    safe_filename = os.path.basename(file.filename)
+    temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{safe_filename}")
     with open(temp_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
         
@@ -1544,8 +1710,6 @@ async def api_llm_toggle(req: LLMToggleRequest):
     except Exception as e:
         logger.error(f"Error toggling LLM integration: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
 # Mount web static directory
 web_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web")
 os.makedirs(web_dir, exist_ok=True)

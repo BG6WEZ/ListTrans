@@ -128,6 +128,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateUserUI();
             }
         }).catch(err => console.log('Profile sync notice:', err));
+
+        // Start heartbeat loop (every 20s) to keep online presence active
+        function sendHeartbeat() {
+            const t = localStorage.getItem('token');
+            if (!t) return;
+            const hasData = (typeof items !== 'undefined' && items && items.length > 0);
+            fetch(`${backendUrl}/api/auth/heartbeat`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    current_page: 'workbench',
+                    state: hasData ? 'active' : 'idle'
+                })
+            }).catch(() => {});
+        }
+        sendHeartbeat();
+        setInterval(sendHeartbeat, 20000);
     }
     
     if (logoutBtn) {
@@ -237,6 +254,7 @@ function setupNavigation() {
 
             loadRuleStats();
             fetchAndRenderPendingRules();
+            fetchAndRenderActiveRules();
         });
     }
 
@@ -759,7 +777,7 @@ function jumpToItem(item) {
 let loadingSafetyTimer = null;
 let loadingIntervalTimer = null;
 
-function showLoading(title, subtitle, timeoutMs = 180000) {
+function showLoading(title, subtitle, timeoutMs = 30000) {
     document.getElementById('loading-title').innerText = title || "处理中...";
     const subtitleEl = document.getElementById('loading-subtitle');
     const timerEl = document.getElementById('loading-timer');
@@ -787,11 +805,18 @@ function showLoading(title, subtitle, timeoutMs = 180000) {
     }, 1000);
 
     if (loadingSafetyTimer) clearTimeout(loadingSafetyTimer);
-    if (timeoutMs && timeoutMs > 0) {
+    if (timeoutMs === 0) {
+        // Explicit long background task with active progress polling.
+        // Lifecycle is fully driven by window.uploadPollInterval; no artificial timer popup.
+        loadingSafetyTimer = null;
+    } else {
+        // P0-3: Default 30s safety timeout for quick actions, clamp between 5s and 60s max
+        const requestedTimeout = (timeoutMs && timeoutMs > 0) ? timeoutMs : 30000;
+        const effectiveTimeout = Math.min(Math.max(requestedTimeout, 5000), 60000);
         loadingSafetyTimer = setTimeout(() => {
             hideLoading();
-            alert(`操作提示：后台处理超时（超过 ${timeoutMs / 1000} 秒），已自动中断界面挂起。请检查服务器连接或拆分超大型清单。`);
-        }, timeoutMs);
+            alert(`操作提示：后台处理超时（超过 ${effectiveTimeout / 1000} 秒），已自动中断界面挂起。请检查网络或刷新页面重试。`);
+        }, effectiveTimeout);
     }
 }
 
@@ -2396,6 +2421,7 @@ async function handleDbUploadAndImport() {
         const taskId = uploadRes.task_id;
         
         // Start polling status
+        let consecutivePollErrors = 0;
         if (window.uploadPollInterval) clearInterval(window.uploadPollInterval);
         window.uploadPollInterval = setInterval(async () => {
             try {
@@ -2411,6 +2437,7 @@ async function handleDbUploadAndImport() {
                 }
                 
                 const taskState = await statusRes.json();
+                consecutivePollErrors = 0; // Reset error counter on successful response
                 
                 document.getElementById('loading-subtitle').innerText = "系统正在进行物料解析与向量索引重建，请勿刷新页面...";
                 const currentItemEl = document.getElementById('progress-current-item');
@@ -2450,12 +2477,15 @@ async function handleDbUploadAndImport() {
                     startDbImportBtn.disabled = false;
                 }
             } catch (err) {
-                console.error("Error polling db import status:", err);
-                clearInterval(window.uploadPollInterval);
-                window.uploadPollInterval = null;
-                hideLoading();
-                alert(`轮询进度失败: ${err.message}`);
-                startDbImportBtn.disabled = false;
+                consecutivePollErrors += 1;
+                console.warn(`Polling error (${consecutivePollErrors}/10):`, err);
+                if (consecutivePollErrors >= 10) {
+                    clearInterval(window.uploadPollInterval);
+                    window.uploadPollInterval = null;
+                    hideLoading();
+                    alert(`轮询进度连续失败中断: ${err.message}`);
+                    startDbImportBtn.disabled = false;
+                }
             }
         }, 1000);
         
@@ -2987,6 +3017,7 @@ function setupLlmRulesModule() {
             panelLeaderboard.style.display = 'flex';
 
             loadRuleStats();
+            fetchAndRenderActiveRules();
         });
     }
 
@@ -3015,6 +3046,26 @@ function setupLlmRulesModule() {
         btnRefresh.addEventListener('click', () => {
             loadRuleStats();
             fetchAndRenderPendingRules();
+            fetchAndRenderActiveRules();
+        });
+    }
+
+    const activeRuleRefreshBtn = document.getElementById('active-rule-refresh-btn');
+    if (activeRuleRefreshBtn) {
+        activeRuleRefreshBtn.addEventListener('click', fetchAndRenderActiveRules);
+    }
+
+    const activeRuleSearch = document.getElementById('active-rule-search');
+    if (activeRuleSearch) {
+        activeRuleSearch.addEventListener('input', () => {
+            renderActiveRulesTable();
+        });
+    }
+
+    const activeRuleFilter = document.getElementById('active-rule-status-filter');
+    if (activeRuleFilter) {
+        activeRuleFilter.addEventListener('change', () => {
+            renderActiveRulesTable();
         });
     }
 }
@@ -3198,6 +3249,228 @@ async function handleSubmitAudit() {
     }
 }
 
+let cachedActiveRules = [];
+
+async function fetchAndRenderActiveRules() {
+    const tbody = document.getElementById('active-rules-tbody');
+    if (!tbody) return;
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules?status=all_active`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) return;
+
+        cachedActiveRules = await res.json();
+        renderActiveRulesTable();
+    } catch (e) {
+        console.error('Failed to fetch active rules:', e);
+    }
+}
+
+function renderActiveRulesTable() {
+    const tbody = document.getElementById('active-rules-tbody');
+    if (!tbody) return;
+
+    const query = (document.getElementById('active-rule-search')?.value || '').toLowerCase().trim();
+    const filter = document.getElementById('active-rule-status-filter')?.value || 'all';
+
+    let filtered = cachedActiveRules.filter(r => {
+        if (filter !== 'all' && r.status !== filter) return false;
+        if (!query) return true;
+        const matchName = (r.rule_name || '').toLowerCase().includes(query);
+        const matchId = (r.rule_id || '').toLowerCase().includes(query);
+        const matchTarget = (r.scope_target || '').toLowerCase().includes(query);
+        const matchAuthor = (r.author_name || '').toLowerCase().includes(query);
+        return matchName || matchId || matchTarget || matchAuthor;
+    });
+
+    tbody.innerHTML = '';
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--color-text-muted); padding: 24px;">暂无匹配的规则。可在“规则生成与调试 Studio”中生成并提交新规则。</td></tr>';
+        return;
+    }
+
+    filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        const isApproved = r.status === 'approved';
+        const statusBadge = isApproved 
+            ? '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> 生效运行中</span>'
+            : '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(148, 163, 184, 0.15); color: #94a3b8; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-pause"></i> 已停用</span>';
+
+        tr.innerHTML = `
+            <td><code>${r.rule_id}</code></td>
+            <td><strong style="color: var(--color-text-primary);">${r.rule_name}</strong></td>
+            <td><span style="font-size: 12px; color: #60a5fa;">[${r.scope_level}]</span> ${r.scope_target || '全域通用'}</td>
+            <td><span style="font-size: 12px; color: #a78bfa;">${r.discipline || '通用'}</span></td>
+            <td style="text-align: center;">${statusBadge}</td>
+            <td style="text-align: right;"><strong style="color: #10b981; font-size: 14px;">${r.hit_count || 0}</strong> 次</td>
+            <td><span style="font-size: 12px;">${r.author_name || '-'}</span> <span style="color: var(--color-text-muted); font-size: 11px;">/ ${r.approver_name || '-'}</span></td>
+            <td style="font-size: 12px; color: var(--color-text-secondary);">${r.approved_at || r.updated_at || '-'}</td>
+            <td style="text-align: center;">
+                <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="openRuleEditModal('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="修改规则配置"><i class="fa-solid fa-pen-to-square"></i> 修改</button>
+                    <button class="btn ${isApproved ? 'btn-warning' : 'btn-success'}" onclick="toggleActiveRule('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; ${isApproved ? 'background-color: #d97706; border-color: #d97706; color: white;' : ''}" title="${isApproved ? '停用此规则' : '启用此规则'}">
+                        ${isApproved ? '<i class="fa-solid fa-pause"></i> 停用' : '<i class="fa-solid fa-play"></i> 启用'}
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteActiveRule('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; background-color: #dc2626; border-color: #dc2626; color: white;" title="彻底删除此规则"><i class="fa-solid fa-trash"></i> 删除</button>
+                    <button class="btn" onclick="viewActiveRuleDsl('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; background: rgba(255,255,255,0.08); border-color: var(--border-color); color: #38bdf8;" title="查看DSL代码"><i class="fa-solid fa-code"></i> DSL</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+let editingRuleId = null;
+
+async function openRuleEditModal(ruleId) {
+    editingRuleId = ruleId;
+    document.getElementById('modal-rule-id-lbl').innerText = ruleId;
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) throw new Error('无法获取规则详情');
+
+        const r = await res.json();
+        document.getElementById('modal-rule-name').value = r.rule_name || '';
+        document.getElementById('modal-rule-priority').value = r.priority || 10;
+        document.getElementById('modal-rule-scope-level').value = r.scope_level || 'category';
+        document.getElementById('modal-rule-scope-target').value = r.scope_target || '';
+        document.getElementById('modal-rule-discipline').value = r.discipline || '';
+        document.getElementById('modal-rule-desc').value = r.description || '';
+        document.getElementById('modal-rule-json').value = JSON.stringify(r.parsed_dsl || {}, null, 2);
+
+        const modal = document.getElementById('rule-edit-modal');
+        if (modal) modal.style.display = 'flex';
+    } catch (err) {
+        alert(`打开编辑窗口失败: ${err.message}`);
+    }
+}
+
+function closeRuleEditModal() {
+    const modal = document.getElementById('rule-edit-modal');
+    if (modal) modal.style.display = 'none';
+    editingRuleId = null;
+}
+
+async function submitModalRuleUpdate() {
+    if (!editingRuleId) return;
+
+    const rule_name = document.getElementById('modal-rule-name').value.trim();
+    const priority = parseInt(document.getElementById('modal-rule-priority').value) || 10;
+    const scope_level = document.getElementById('modal-rule-scope-level').value;
+    const scope_target = document.getElementById('modal-rule-scope-target').value.trim();
+    const discipline = document.getElementById('modal-rule-discipline').value.trim();
+    const description = document.getElementById('modal-rule-desc').value.trim();
+    const rawJson = document.getElementById('modal-rule-json').value.trim();
+
+    if (!rule_name) {
+        alert('规则名称不能为空！');
+        return;
+    }
+
+    let parsed_dsl;
+    try {
+        parsed_dsl = JSON.parse(rawJson);
+    } catch (e) {
+        alert(`Rule DSL JSON 语法错误: ${e.message}`);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${editingRuleId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                rule_name,
+                priority,
+                scope_level,
+                scope_target,
+                discipline,
+                description,
+                parsed_dsl
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '保存规则修改失败');
+
+        alert(`规则 [${editingRuleId}] 修改成功并已即时生效！`);
+        closeRuleEditModal();
+        fetchAndRenderActiveRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`修改保存失败: ${err.message}`);
+    }
+}
+
+async function toggleActiveRule(ruleId) {
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/toggle`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '状态切换失败');
+
+        alert(data.detail || '操作成功！');
+        fetchAndRenderActiveRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`操作失败: ${err.message}`);
+    }
+}
+
+async function deleteActiveRule(ruleId) {
+    if (!confirm(`⚠️ 确定要彻底删除规则 [${ruleId}] 吗？\n\n删除后将无法恢复，且该规则将立即停止在所有物料匹配任务中生效。`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '删除失败');
+
+        alert(`规则 [${ruleId}] 已成功删除！`);
+        fetchAndRenderActiveRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`删除失败: ${err.message}`);
+    }
+}
+
+async function viewActiveRuleDsl(ruleId) {
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}`, {
+            headers: getAuthHeaders()
+        });
+        if (!res.ok) throw new Error('无法获取规则详情');
+
+        const r = await res.json();
+        document.getElementById('view-modal-rule-id').innerText = `${ruleId} - ${r.rule_name}`;
+        document.getElementById('view-modal-rule-json').value = JSON.stringify(r.parsed_dsl || {}, null, 2);
+
+        const modal = document.getElementById('rule-view-modal');
+        if (modal) modal.style.display = 'flex';
+    } catch (err) {
+        alert(`查看DSL失败: ${err.message}`);
+    }
+}
+
+function closeRuleViewModal() {
+    const modal = document.getElementById('rule-view-modal');
+    if (modal) modal.style.display = 'none';
+}
+
 async function fetchAndRenderPendingRules() {
     const tbody = document.getElementById('pending-rules-tbody');
     if (!tbody) return;
@@ -3253,6 +3526,7 @@ async function auditRule(ruleId, action) {
         if (!res.ok) throw new Error(data.detail || data.error || '审核操作失败');
         alert(data.detail);
         fetchAndRenderPendingRules();
+        fetchAndRenderActiveRules();
         loadRuleStats();
     } catch (err) {
         alert(`操作失败: ${err.message}`);
@@ -3267,9 +3541,21 @@ async function loadRuleStats() {
         if (!res.ok) return;
 
         const data = await res.json();
-        document.getElementById('stat-approved-count').innerText = data.approved_count || 0;
-        document.getElementById('stat-pending-count').innerText = data.pending_count || 0;
-        document.getElementById('stat-total-hits').innerText = data.total_hits || 0;
+        if (document.getElementById('stat-approved-count')) {
+            document.getElementById('stat-approved-count').innerText = data.approved_count || 0;
+        }
+        if (document.getElementById('stat-pending-count')) {
+            document.getElementById('stat-pending-count').innerText = data.pending_count || 0;
+        }
+        if (document.getElementById('stat-total-hits')) {
+            document.getElementById('stat-total-hits').innerText = data.total_hits || 0;
+        }
+
+        // Also count disabled
+        if (document.getElementById('stat-disabled-count')) {
+            const disabledCount = cachedActiveRules.filter(r => r.status === 'disabled').length;
+            document.getElementById('stat-disabled-count').innerText = disabledCount;
+        }
 
         const tbody = document.getElementById('leaderboard-tbody');
         if (tbody) {

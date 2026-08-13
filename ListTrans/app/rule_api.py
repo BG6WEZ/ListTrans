@@ -88,6 +88,38 @@ async def audit_rule(rule_id: str, req: RuleAuditRequest, current_user: dict = D
         raise HTTPException(status_code=400, detail=res.get("error", "审核失败。"))
     return res
 
+@router.get("/{rule_id}")
+async def get_rule(rule_id: str, current_user: dict = Depends(require_employee)):
+    """Retrieve single rule detail with parsed DSL."""
+    rule = LLMRuleManager.get_rule_by_id(rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="规则不存在。")
+    return rule
+
+@router.put("/{rule_id}")
+async def update_rule(rule_id: str, rule_data: Dict[str, Any], current_user: dict = Depends(require_employee)):
+    """Update an existing rule DSL, parameters, and configuration."""
+    res = LLMRuleManager.update_rule(rule_id, rule_data, current_user)
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("error", "修改失败。"))
+    return res
+
+@router.post("/{rule_id}/toggle")
+async def toggle_rule(rule_id: str, current_user: dict = Depends(require_employee)):
+    """Toggle rule active/disabled status (停用/启用)."""
+    res = LLMRuleManager.toggle_rule_status(rule_id, current_user)
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("error", "操作失败。"))
+    return res
+
+@router.delete("/{rule_id}")
+async def delete_rule(rule_id: str, current_user: dict = Depends(require_employee)):
+    """Delete a rule."""
+    res = LLMRuleManager.delete_rule(rule_id, current_user)
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("error", "删除失败。"))
+    return res
+
 @router.get("/stats")
 async def get_rule_stats(current_user: dict = Depends(require_employee)):
     """Retrieve rule hit statistics and leaderboard."""

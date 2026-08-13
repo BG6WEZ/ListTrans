@@ -26,6 +26,12 @@ DB_PATH = os.path.join(BASE_DIR, "app", "materials.db")
 def get_db_conn():
     conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
+    try:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+    except Exception:
+        pass
     return conn
 
 def init_rule_engine_db():
@@ -459,23 +465,33 @@ class DynamicRuleInterpreter:
         reasons = []
         # Check hard exclusion keywords
         for not_word in matching_rules.get("must_not_contain", []):
-            if not_word and not_word in candidate_text:
-                reasons.append(f"包含排除词 [{not_word}]")
-                return True, -999.0, reasons
+            if not_word and not_word.strip():
+                nw = not_word.strip()
+                # Check if candidate contains not_word, but ignore if it is preceded by negation (e.g. "不带POE", "非POE", "无POE")
+                if nw.lower() in candidate_text.lower():
+                    # Strip negated mentions
+                    filtered_cand = re.sub(r'(?:不带|非|无|不含|未配|无配|不具有)\s*' + re.escape(nw), '', candidate_text, flags=re.IGNORECASE)
+                    if nw.lower() in filtered_cand.lower():
+                        reasons.append(f"包含排除词 [{nw}]")
+                        return True, -999.0, reasons
                 
         # Check hard required keywords
         for must_word in matching_rules.get("must_contain", []):
-            if must_word and must_word not in candidate_text:
-                reasons.append(f"缺少必含词 [{must_word}]")
-                return True, -999.0, reasons
+            if must_word and must_word.strip():
+                mw = must_word.strip()
+                if mw.lower() not in candidate_text.lower():
+                    reasons.append(f"缺少必含词 [{mw}]")
+                    return True, -999.0, reasons
 
         # Calculate score boosts
         score_adj = 0.0
         boost_map = matching_rules.get("score_boost_keywords", {})
         for kw, boost in boost_map.items():
-            if kw and kw in candidate_text:
-                score_adj += float(boost)
-                reasons.append(f"命中加分词 [{kw}] (+{boost})")
+            if kw and str(kw).strip():
+                kw_str = str(kw).strip()
+                if kw_str.lower() in candidate_text.lower():
+                    score_adj += float(boost)
+                    reasons.append(f"命中加分词 [{kw_str}] (+{boost})")
 
         return False, score_adj, reasons
 
@@ -491,7 +507,7 @@ class RuleHitStatsTracker:
                 if not cls._instance:
                     cls._instance = super(RuleHitStatsTracker, cls).__new__(cls, *args, **kwargs)
                     cls._instance._buffer = {} # rule_id -> count
-                    cls._buffer_lock = threading.Lock()
+                    cls._buffer_lock = threading.RLock()
         return cls._instance
 
     def record_hit(self, rule_id: str):
@@ -800,14 +816,125 @@ class LLMRuleManager:
         return {"success": True, "detail": f"规则审核完成，当前状态: {new_status}"}
 
     @classmethod
+    def get_rule_by_id(cls, rule_id: str) -> Optional[Dict[str, Any]]:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM llm_rules WHERE rule_id = ?", (rule_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            return None
+        d = dict(row)
+        try:
+            d["parsed_dsl"] = json.loads(d["rule_json"])
+        except Exception:
+            d["parsed_dsl"] = {}
+        return d
+
+    @classmethod
+    def update_rule(cls, rule_id: str, update_data: Dict[str, Any], user_info: Dict[str, Any]) -> Dict[str, Any]:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM llm_rules WHERE rule_id = ?", (rule_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return {"success": False, "error": "规则不存在。"}
+
+        dsl = update_data.get("parsed_dsl") or update_data.get("dsl_json") or {}
+        dsl_str = json.dumps(dsl, ensure_ascii=False) if dsl else row["rule_json"]
+        rule_name = update_data.get("rule_name", row["rule_name"])
+        scope_level = update_data.get("scope_level", row["scope_level"])
+        scope_target = update_data.get("scope_target", row["scope_target"])
+        discipline = update_data.get("discipline", row["discipline"])
+        priority = int(update_data.get("priority", row["priority"]))
+        description = update_data.get("description", row["description"])
+        
+        cursor.execute("""
+            UPDATE llm_rules SET
+            rule_name = ?, scope_level = ?, scope_target = ?, discipline = ?,
+            priority = ?, description = ?, rule_json = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE rule_id = ?
+        """, (rule_name, scope_level, scope_target, discipline, priority, description, dsl_str, rule_id))
+
+        cursor.execute("""
+            INSERT INTO rule_audit_logs (rule_id, action, operator_id, operator_name, operator_role, comment)
+            VALUES (?, 'update', ?, ?, ?, ?)
+        """, (rule_id, user_info["id"], user_info["username"], user_info.get("role", "employee"), "修改规则内容与参数"))
+
+        conn.commit()
+        conn.close()
+
+        cls.clear_active_cache()
+        return {"success": True, "detail": "规则修改成功。"}
+
+    @classmethod
+    def toggle_rule_status(cls, rule_id: str, user_info: Dict[str, Any]) -> Dict[str, Any]:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT status FROM llm_rules WHERE rule_id = ?", (rule_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return {"success": False, "error": "规则不存在。"}
+
+        current_status = row["status"]
+        if current_status == "approved":
+            new_status = "disabled"
+            action_desc = "停用规则"
+        else:
+            new_status = "approved"
+            action_desc = "启用规则"
+
+        cursor.execute("""
+            UPDATE llm_rules SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE rule_id = ?
+        """, (new_status, rule_id))
+
+        cursor.execute("""
+            INSERT INTO rule_audit_logs (rule_id, action, operator_id, operator_name, operator_role, comment)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (rule_id, f"toggle_{new_status}", user_info["id"], user_info["username"], user_info.get("role", "employee"), action_desc))
+
+        conn.commit()
+        conn.close()
+
+        cls.clear_active_cache()
+        return {"success": True, "new_status": new_status, "detail": f"规则已成功{action_desc}！"}
+
+    @classmethod
+    def delete_rule(cls, rule_id: str, user_info: Dict[str, Any]) -> Dict[str, Any]:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM llm_rules WHERE rule_id = ?", (rule_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            return {"success": False, "error": "规则不存在。"}
+
+        cursor.execute("DELETE FROM llm_rules WHERE rule_id = ?", (rule_id,))
+        cursor.execute("""
+            INSERT INTO rule_audit_logs (rule_id, action, operator_id, operator_name, operator_role, comment)
+            VALUES (?, 'delete', ?, ?, ?, '删除规则')
+        """, (rule_id, user_info["id"], user_info["username"], user_info.get("role", "employee")))
+
+        conn.commit()
+        conn.close()
+
+        cls.clear_active_cache()
+        return {"success": True, "detail": "规则已成功删除。"}
+
+    @classmethod
     def list_rules(cls, status: Optional[str] = None, discipline: Optional[str] = None) -> List[Dict[str, Any]]:
         conn = get_db_conn()
         cursor = conn.cursor()
         sql = "SELECT * FROM llm_rules WHERE 1=1"
         params = []
         if status:
-            sql += " AND status = ?"
-            params.append(status)
+            if status == "all_active":
+                sql += " AND status IN ('approved', 'disabled')"
+            else:
+                sql += " AND status = ?"
+                params.append(status)
         if discipline:
             sql += " AND discipline = ?"
             params.append(discipline)
