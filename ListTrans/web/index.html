@@ -23,7 +23,7 @@
                 <img src="logo500.png" alt="Logo" class="logo-img" style="height: 36px; border-radius: 4px; background-color: white; padding: 2px;" />
                 <div class="logo-text">
                     <h1>华康洁净物料匹配工具</h1>
-                    <span>智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.0.9</span></span>
+                    <span>智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.1.0</span></span>
                 </div>
             </div>
             
@@ -163,52 +163,59 @@
 
                         <!-- Main Detail Editor -->
                         <div class="detail-editor" id="detail-editor" style="display: none;">
-                            <!-- Top: Original Item Info (Fixed) -->
+                            <!-- Top: Original Item Info (Fixed 3-Column Layout) -->
                             <div class="detail-fixed-top">
-                                <div class="glass-card section-card">
+                                <div class="glass-card section-card original-data-3col-card">
                                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span class="section-tag">原始清单数据</span>
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <button class="btn btn-primary" id="open-param-modal-btn" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-edit"></i> 补全参数</button>
+                                        <span class="section-tag"><i class="fa-solid fa-file-invoice"></i> 原始清单数据</span>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <button class="btn btn-primary" id="open-param-modal-btn" style="padding: 2px 8px; font-size: 11px; height: 24px;"><i class="fa-solid fa-edit"></i> 补全参数</button>
                                             <span class="row-badge">第 <span id="lbl-row-idx">0</span> 行</span>
                                         </div>
                                     </div>
-                                    <div class="original-info-grid">
-                                        <div class="info-item">
-                                            <span class="lbl">设备/材料名称</span>
-                                            <span class="val font-semibold text-primary" id="lbl-name">-</span>
+                                    <div class="original-data-3col-body">
+                                        <!-- Col 1: 基础信息 (左列) -->
+                                        <div class="col-basic-info">
+                                            <div class="info-item">
+                                                <span class="lbl">设备/材料名称</span>
+                                                <span class="val font-semibold text-primary" id="lbl-name" title="">-</span>
+                                            </div>
+                                            <div class="info-sub-row">
+                                                <div class="info-item">
+                                                    <span class="lbl">工程量 (数量)</span>
+                                                    <span class="val font-semibold" id="lbl-qty">-</span>
+                                                </div>
+                                                <div class="info-item">
+                                                    <span class="lbl">单位</span>
+                                                    <span class="val" id="lbl-unit">-</span>
+                                                </div>
+                                                <div class="info-item">
+                                                    <span class="lbl">甲供分类</span>
+                                                    <span class="val" id="lbl-category">-</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="info-item">
-                                            <span class="lbl">工程量 (数量)</span>
-                                            <span class="val font-semibold" id="lbl-qty">-</span>
+
+                                        <!-- Col 2: 规格型号/特征描述 (中间列，空间最大) -->
+                                        <div class="col-spec-info">
+                                            <span class="lbl col-title"><i class="fa-solid fa-list-check"></i> 规格型号 / 特征描述</span>
+                                            <pre class="spec-pre-3col" id="lbl-spec">-</pre>
                                         </div>
-                                        <div class="info-item">
-                                            <span class="lbl">单位</span>
-                                            <span class="val" id="lbl-unit">-</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="lbl">甲供分类</span>
-                                            <span class="val" id="lbl-category">-</span>
-                                        </div>
-                                    </div>
-                                    <div class="spec-block">
-                                        <span class="lbl">规格型号/特征描述</span>
-                                        <pre class="spec-pre" id="lbl-spec">-</pre>
-                                    </div>
-                                    <div class="parsed-params-block" id="parsed-params-block" style="margin-top: 16px; border-top: 1px dashed var(--border-color); padding-top: 12px; display: none;">
-                                        <span class="lbl" style="margin-bottom: 8px; display: block; font-size: 11px; color: var(--color-text-muted);">
-                                            识别特征维度（点击以启用/禁用匹配约束）：
-                                        </span>
-                                        <div class="params-chips-container" id="params-chips-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                            <!-- Dynamically loaded chips -->
-                                        </div>
-                                        <div class="params-actions" style="margin-top: 12px; display: flex; gap: 10px;">
-                                            <button class="btn btn-primary" id="rematch-selected-btn" style="padding: 4px 8px; font-size: 11px;">
-                                                <i class="fa-solid fa-arrows-rotate"></i> 重新匹配
-                                            </button>
-                                            <button class="btn" id="batch-apply-params-btn" style="padding: 4px 8px; font-size: 11px; background-color: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25);">
-                                                <i class="fa-solid fa-copy"></i> 批量应用到同类设备
-                                            </button>
+
+                                        <!-- Col 3: 识别特征维度卡片 (右列) -->
+                                        <div class="col-params-card" id="parsed-params-block">
+                                            <span class="lbl col-title"><i class="fa-solid fa-tags"></i> 识别特征维度</span>
+                                            <div class="params-chips-container" id="params-chips-container">
+                                                <!-- Dynamically loaded chips -->
+                                            </div>
+                                            <div class="params-actions">
+                                                <button class="btn btn-primary" id="rematch-selected-btn" style="padding: 2px 6px; font-size: 10.5px; height: 22px;">
+                                                    <i class="fa-solid fa-arrows-rotate"></i> 重新匹配
+                                                </button>
+                                                <button class="btn" id="batch-apply-params-btn" style="padding: 2px 6px; font-size: 10.5px; height: 22px; background-color: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25);">
+                                                    <i class="fa-solid fa-copy"></i> 批量应用
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -217,26 +224,15 @@
                             <!-- Bottom: Recommendations / Candidate Selector (Scrollable) -->
                             <div class="detail-scroll-bottom scroll-y">
                                 <!-- Bound Materials Section -->
-                                <div class="glass-card section-card bound-materials-card" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; margin-bottom: 16px;">
-                                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                                <div class="glass-card section-card bound-materials-card">
+                                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
                                         <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 已绑定物料 (<span id="bound-materials-count">0</span>)</span>
-                                        <button class="btn btn-success" id="confirm-match-finished-btn" style="padding: 4px 10px; font-size: 11.5px; font-weight: 600;">
+                                        <button class="btn btn-success" id="confirm-match-finished-btn" style="padding: 4px 12px; font-size: 11.5px; font-weight: 600; height: 28px;">
                                             <i class="fa-solid fa-circle-check"></i> 确认匹配完成
                                         </button>
                                     </div>
-                                    <div class="bound-materials-list" id="bound-materials-list" style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+                                    <div class="bound-materials-list" id="bound-materials-list">
                                         <!-- Loaded dynamically -->
-                                    </div>
-                                </div>
-
-                                <!-- Middle: Matching Decision Status -->
-                                <div class="match-status-card" id="match-status-card">
-                                    <div class="status-indicator-icon">
-                                        <i class="fa-solid fa-circle-check"></i>
-                                    </div>
-                                    <div class="status-info">
-                                        <h4 id="status-title">已完成 100% 精确匹配</h4>
-                                        <div id="status-desc">系统已在物料明细表中为您自动锁定了唯一的匹配物料。</div>
                                     </div>
                                 </div>
 
@@ -247,7 +243,7 @@
                                         <span class="sub">点击卡片即可直接套用并覆盖该物料</span>
                                     </div>
                                     
-                                    <div class="candidates-list" id="candidates-container" style="margin-top: 12px;">
+                                    <div class="candidates-list" id="candidates-container" style="margin-top: 10px;">
                                         <!-- Dynamically loaded -->
                                     </div>
                                 </div>
@@ -640,7 +636,7 @@
                 </div>
             </div>
 
-            <!-- LLM Rules Dashboard (V0.0.9) -->
+            <!-- LLM Rules Dashboard (V0.1.0) -->
             <div class="llm-rules-dashboard" id="llm-rules-dashboard" style="display: none; padding: 24px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 20px;">
                 <!-- Top Action & View Bar -->
                 <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 14px 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 12px;">
@@ -951,7 +947,7 @@
                 </div>
             </div>
 
-            <!-- User Guide Dashboard (V0.0.9) -->
+            <!-- User Guide Dashboard (V0.1.0) -->
             <div class="guide-dashboard" id="guide-dashboard" style="display: none; padding: 28px 36px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto;">
                 <!-- Header Banner -->
                 <div class="glass-card" style="padding: 24px 30px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center;">
@@ -960,7 +956,7 @@
                             <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">
                                 📖 华康洁净物料清单匹配系统 · 操作与使用指南
                             </h2>
-                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.0.9 正式版</span>
+                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.1.0 正式版</span>
                         </div>
                         <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.6;">
                             基于 NLP 语义向量比对、30域特征结构化抽取与大模型优先调度的智能清单比对与规范化制表平台

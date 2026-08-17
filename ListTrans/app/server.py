@@ -86,6 +86,7 @@ async def lifespan(app_instance: FastAPI):
 
 app = FastAPI(
     title="华康洁净物料清单匹配工具",
+    version="0.1.0",
     docs_url="/docs" if ENABLE_DOCS else None,
     redoc_url="/redoc" if ENABLE_DOCS else None,
     lifespan=lifespan

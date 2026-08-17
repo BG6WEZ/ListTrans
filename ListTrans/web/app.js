@@ -1257,54 +1257,6 @@ function selectRow(item) {
     // Render clickable parameter chips
     renderParamChips();
     
-    // Render decision status card
-    const statusCard = document.getElementById('match-status-card');
-    const statusTitle = document.getElementById('status-title');
-    const statusDesc = document.getElementById('status-desc');
-    
-    statusCard.className = 'match-status-card';
-    if (item.is_exact) {
-        statusCard.classList.add('exact');
-        statusTitle.innerText = "已完成精确匹配 / 人工确认";
-        statusDesc.innerHTML = `
-            <div style="margin-bottom: 6px;">当前已绑定以下物料的完整信息：</div>
-            <div class="matched-info-grid">
-                <div class="matched-info-item">
-                    <span class="matched-info-label">物料编码:</span>
-                    <span class="matched-info-value code-badge">${item.matched_code || '-'}</span>
-                </div>
-                <div class="matched-info-item">
-                    <span class="matched-info-label">物料名称:</span>
-                    <span class="matched-info-value">${item.matched_name || '-'}</span>
-                </div>
-                <div class="matched-info-item full-width">
-                    <span class="matched-info-label">规格型号:</span>
-                    <span class="matched-info-value">${item.matched_spec || '-'}</span>
-                </div>
-                <div class="matched-info-item">
-                    <span class="matched-info-label">品牌:</span>
-                    <span class="matched-info-value">${item.matched_brand || '-'}</span>
-                </div>
-                <div class="matched-info-item">
-                    <span class="matched-info-label">品类:</span>
-                    <span class="matched-info-value">${item.matched_category || '-'}</span>
-                </div>
-                <div class="matched-info-item">
-                    <span class="matched-info-label">单位:</span>
-                    <span class="matched-info-value">${item.matched_unit || '个'}</span>
-                </div>
-            </div>
-        `;
-    } else if (item.matched_code) {
-        statusCard.classList.add('fuzzy');
-        statusTitle.innerText = "自动匹配相似度低于阈值，请人工校准";
-        statusDesc.innerText = `系统分析了物理量与文本指标，推荐了相似度最高的前10个选项，请套用最符合标准的卡片。`;
-    } else {
-        statusCard.classList.add('unmatched');
-        statusTitle.innerText = "未在物料库中检索到相近设备";
-        statusDesc.innerText = `参数差异可能过大。请点击顶部“补全参数”补充完整物理量重试，或在下方手动全局模糊检索。`;
-    }
-    
     // Render recommendation cards
     renderCandidates();
     
@@ -1315,7 +1267,7 @@ function selectRow(item) {
     `;
 }
 
-// 3.5 Render Bound Materials List
+// 3.5 Render Bound Materials List (V0.1.0 Compact Cards)
 function renderBoundMaterials() {
     const container = document.getElementById('bound-materials-list');
     container.innerHTML = '';
@@ -1329,32 +1281,29 @@ function renderBoundMaterials() {
     document.getElementById('bound-materials-count').innerText = selectedItem.bindings.length;
     
     if (selectedItem.bindings.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--color-text-muted); font-size: 13px; padding: 15px; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">暂无绑定物料，请点击下方推荐卡片或检索套用以绑定</div>`;
+        container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--color-text-muted); font-size: 12px; padding: 10px; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">暂无绑定物料，请点击下方推荐卡片或检索套用以绑定</div>`;
         return;
     }
     
     selectedItem.bindings.forEach((b, idx) => {
         const div = document.createElement('div');
         div.className = 'bound-material-item';
-        div.style = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); gap: 16px;';
         
         div.innerHTML = `
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-weight: 600; font-size: 13.5px; color: var(--color-text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${b.name}</span>
-                    <span class="code-badge" style="font-family: monospace; font-size: 11px; padding: 1px 6px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); border-radius: 3px;">${b.code}</span>
-                </div>
-                <div style="font-size: 11px; color: var(--color-text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                    规格: ${b.specification || '无'} | 品牌: ${b.brand || '无'} | 分类: ${b.category || '无'}
-                </div>
+            <div class="bound-item-top">
+                <span class="bound-item-name" title="${b.name}">${b.name}</span>
+                <span class="bound-item-code">${b.code}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    <span style="font-size: 12px; color: var(--color-text-secondary);">工程量:</span>
-                    <input type="number" class="bound-qty-input" value="${b.qty !== undefined ? b.qty : selectedItem.original_qty}" style="width: 80px; padding: 4px 6px; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: 4px; color: var(--color-text-primary); font-size: 12.5px; font-weight: 500;" />
-                    <span style="font-size: 12px; color: var(--color-text-muted); min-width: 16px;">${b.unit || selectedItem.original_unit || '个'}</span>
+            <div class="bound-item-desc" title="规格: ${b.specification || '无'} | 品牌: ${b.brand || '无'}">
+                ${b.specification || '无规格'}
+            </div>
+            <div class="bound-item-bottom">
+                <div class="bound-item-qty-wrap">
+                    <span>数量:</span>
+                    <input type="number" class="bound-qty-input" value="${b.qty !== undefined ? b.qty : selectedItem.original_qty}" />
+                    <span style="font-size: 11px; color: var(--color-text-muted);">${b.unit || selectedItem.original_unit || '个'}</span>
                 </div>
-                <button class="btn btn-delete-binding" style="padding: 4px 8px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 13px;" title="删除绑定">
+                <button class="btn btn-delete-binding" style="padding: 2px 6px; height: 22px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 12px;" title="删除绑定">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
@@ -1421,16 +1370,21 @@ function renderCandidates() {
             });
         }
         
+        const boundBadge = isActive ? `<span style="font-size: 11px; font-weight: 700; color: var(--color-success); background: var(--color-success-bg); border: 1px solid var(--color-success-border); padding: 1px 6px; border-radius: 4px;"><i class="fa-solid fa-check"></i> 已绑定</span>` : '';
+        
         card.innerHTML = `
             <div class="candidate-header">
                 <div class="candidate-title">
-                    <span class="cand-name">${cand.name}</span>
+                    <span class="cand-name" title="${cand.name}">${cand.name}</span>
                     <span class="cand-code">${cand.code}</span>
                 </div>
-                <div class="match-percentage-badge">${cand.score}% 相似</div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    ${boundBadge}
+                    <div class="match-percentage-badge">${cand.score}% 相似</div>
+                </div>
             </div>
-            <div class="candidate-spec">${cand.specification || '无规格描述'}</div>
-            <div style="margin: 4px 0 8px 0;">${tagsHtml}</div>
+            <div class="candidate-spec" title="${cand.specification || '无规格描述'}">${cand.specification || '无规格描述'}</div>
+            ${tagsHtml ? `<div style="margin: 2px 0 4px 0; display: flex; flex-wrap: wrap; gap: 4px;">${tagsHtml}</div>` : ''}
             <div class="candidate-meta">
                 <span>品牌: <strong>${cand.brand || '未指定'}</strong></span>
                 <span>品类: <strong>${cand.category || '-'}</strong></span>
@@ -1648,11 +1602,11 @@ async function runParamRematch() {
 // 7.2 Render Structured Parameter Chips
 function renderParamChips() {
     const container = document.getElementById('params-chips-container');
-    const block = document.getElementById('parsed-params-block');
+    if (!container) return;
     container.innerHTML = '';
     
     if (!selectedItem || !selectedItem.parsed_spec) {
-        block.style.display = 'none';
+        container.innerHTML = `<span style="font-size: 11px; color: var(--color-text-muted); padding: 8px 0;">未提取到特征维度</span>`;
         return;
     }
     
@@ -1662,11 +1616,9 @@ function renderParamChips() {
     
     const hasParams = model || Object.keys(attrs).length > 0;
     if (!hasParams) {
-        block.style.display = 'none';
+        container.innerHTML = `<span style="font-size: 11px; color: var(--color-text-muted); padding: 8px 0;">未提取到特征维度</span>`;
         return;
     }
-    
-    block.style.display = 'block';
     
     // Initialize active_params if not present, and ensure all keys are initialized
     if (!selectedItem.active_params) {

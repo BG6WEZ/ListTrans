@@ -278,12 +278,13 @@ body {
 }
 
 .list-panel {
-    width: 48%;
+    width: 40%;
+    min-width: 320px;
     border-right: 1px solid var(--border-color);
 }
 
 .detail-panel {
-    width: 52%;
+    width: 60%;
     background-color: rgba(8, 11, 17, 0.5);
 }
 
@@ -547,112 +548,275 @@ body {
 }
 
 .detail-fixed-top {
-    flex: 1;
-    height: 50%;
-    overflow-y: auto;
-    padding: 20px 20px 10px 20px;
+    flex: 3;
+    height: 30%;
+    max-height: 30%;
+    overflow: hidden;
+    padding: 8px 16px;
     border-bottom: 1px solid var(--border-color);
 }
 
 .detail-scroll-bottom {
-    flex: 1;
-    height: 50%;
+    flex: 7;
+    height: 70%;
+    max-height: 70%;
     overflow-y: auto;
-    padding: 10px 20px 20px 20px;
+    padding: 8px 16px 20px 16px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
+    position: relative;
 }
 
 .section-card {
-    padding: 20px;
+    padding: 10px 14px;
 }
 
-.card-header {
+/* 3-Column Top Original Data Card (V0.1.0) */
+.original-data-3col-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+    flex-direction: column;
+    height: 100%;
+    padding: 8px 12px !important;
 }
 
-.section-tag {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--color-primary);
-}
-
-.row-badge {
-    font-size: 11px;
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 2px 8px;
-    border-radius: 4px;
-    color: var(--color-text-secondary);
-}
-
-.original-info-grid {
+.original-data-3col-body {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
+    grid-template-columns: 240px 1fr 280px;
+    gap: 10px;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
 }
 
-.info-item {
+/* Col 1: Basic Info */
+.col-basic-info {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    overflow-y: auto;
 }
 
-.info-item .lbl {
-    font-size: 11px;
-    color: var(--color-text-muted);
+.col-basic-info .info-sub-row {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 1fr;
+    gap: 4px;
 }
 
-.info-item .val {
-    font-size: 13.5px;
-    word-break: break-all;
-}
-
-.text-primary {
-    color: var(--color-primary);
-}
-
-.font-semibold {
-    font-weight: 600;
-}
-
-.spec-block {
+.col-basic-info .info-item {
     display: flex;
     flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.col-basic-info .info-item .lbl {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.col-basic-info .info-item .val {
+    font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Col 2: Specification Info (Largest) */
+.col-spec-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    min-height: 0;
+}
+
+.col-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.spec-pre-3col {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 5px 8px;
+    font-family: inherit;
+    font-size: 11.5px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-y: auto;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* Col 3: Parameters Card */
+.col-params-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    min-height: 0;
+}
+
+.col-params-card .params-chips-container {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+.col-params-card .params-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+/* Sticky Bound Materials Section (V0.1.0) */
+.bound-materials-card {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(16, 21, 36, 0.94);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    padding: 8px 12px !important;
+    margin-bottom: 2px !important;
+    gap: 4px !important;
+    border-radius: var(--radius-md);
+}
+
+.bound-materials-card .card-header {
+    margin-bottom: 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bound-materials-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.bound-material-item {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: var(--radius-sm);
+    gap: 3px;
+    transition: var(--transition-smooth);
+    min-width: 0;
+}
+
+.bound-material-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.bound-item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 6px;
 }
 
-.spec-block .lbl {
-    font-size: 11px;
-    color: var(--color-text-muted);
+.bound-item-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
 }
 
-.spec-pre {
-    background-color: rgba(0, 0, 0, 0.25);
+.bound-item-code {
+    font-family: monospace;
+    font-size: 10.5px;
+    padding: 1px 5px;
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-primary);
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.bound-item-desc {
+    font-size: 10.5px;
+    color: var(--color-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.3;
+}
+
+.bound-item-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 2px;
+    padding-top: 3px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.bound-item-qty-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bound-item-qty-wrap span {
+    font-size: 10.5px;
+    color: var(--color-text-secondary);
+}
+
+.bound-qty-input {
+    width: 60px;
+    padding: 1px 4px;
+    background: var(--bg-base);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    font-family: inherit;
-    font-size: 12px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 150px;
-    overflow-y: auto;
+    border-radius: 4px;
+    color: var(--color-text-primary);
+    font-size: 11px;
+    font-weight: 600;
+    text-align: right;
 }
 
 /* Match Status Banner Card */
 .match-status-card {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
-    padding: 16px;
+    gap: 14px;
+    padding: 12px 14px;
     border-radius: var(--radius-md);
     background-color: var(--color-success-bg);
     border: 1px solid var(--color-success-border);
@@ -764,20 +928,23 @@ body {
 
 /* Candidates Cards */
 .candidates-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
 }
 
 .candidate-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: 16px;
+    padding: 12px 14px;
     cursor: pointer;
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .candidate-card:hover {
