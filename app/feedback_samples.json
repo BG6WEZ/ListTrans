@@ -684,5 +684,12 @@
         "auto_code": "3.55.09.0251",
         "manual_code": "3.55.09.0251",
         "is_correct": true
+    },
+    {
+        "row_id": 39,
+        "raw_text": "1.名称、型号：6AP2-JH\n2.规格：带双电源切换、Pe=285.5kw\n3.安装方式：落地式\n4.工作内容：支架制作安装、本体安装、焊压接线端子、打标、接地",
+        "auto_code": "",
+        "manual_code": "2.30.89.0016",
+        "is_correct": false
     }
 ]

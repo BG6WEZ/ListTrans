@@ -5,7 +5,9 @@ import json
 import time
 
 # Ensure project root is in sys.path
-sys.path.append(r"c:\Users\wangd\project\ListTrans\ListTrans")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from app.matcher import match_item
 from app.preprocessor import extract_params
@@ -17,7 +19,7 @@ def run_regression():
     init_db()
     index_manager.load_cache()
     
-    fixtures_dir = r"c:\Users\wangd\project\ListTrans\ListTrans\tests\fixtures"
+    fixtures_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
     ground_truth_path = os.path.join(fixtures_dir, "ground_truth_500.json")
     if not os.path.exists(ground_truth_path):
         print(f"Error: Ground truth file not found at {ground_truth_path}")
@@ -111,7 +113,7 @@ def run_regression():
     print("=========================================================")
 
     # Write report to baseline_metrics_v0.0.5.md
-    report_path = r"c:\Users\wangd\project\ListTrans\ListTrans\doc\baseline_metrics_v0.0.5.md"
+    report_path = os.path.join(PROJECT_ROOT, "doc", "baseline_metrics_v0.0.5.md")
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(f"""# 华康洁净物料匹配系统 · 回归指标度量报告 (v0.0.5)
 

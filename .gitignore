@@ -1,34 +1,46 @@
-# Python dependencies and caches
+# Python virtualenv & package caches
+venv/
+.venv/
+ENV/
+env/
 __pycache__/
 *.py[cod]
 *$py.class
-.venv/
-venv/
-ENV/
-env/
-.env
 
-# Database and indexes (as requested: "不要包含任何测试数据和库")
-**/app/materials.db*
-**/app/vector_cache/
-**/app/uploads/
-**/logs/
-**/.system_generated/
+# Local database files
+app/*.db
+app/*.db-shm
+app/*.db-wal
+app/*.bak
+*.db
+*.db-shm
+*.db-wal
 *.bak
-*_out.txt
+app/vector_cache/
+app/uploads/
 
-# Excel test data and sample files (as requested: "不要包含任何测试数据和库")
+# Logs & temporary files
+logs/
+*.log
+*_out.txt
+.system_generated/
+
+# Local environment configs & IDE
+.env
+.DS_Store
+.idea/
+.vscode/
+.pytest_cache/
+
+# Large model offline directory & archives
+model_offline/
+python_local/
+*.tar
+*.tar.gz
+*.zip
+
+# Excel test data and sample files
 *.xlsx
 *.xls
 *.csv
-**/doc/sample/
-**/doc/*.xlsx
-
-# OS files
-**/.DS_Store
-.DS_Store
-
-# Large files
-*.tar
-*.zip
-**/model_offline/
+doc/sample/
