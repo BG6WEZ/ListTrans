@@ -28,7 +28,9 @@ except Exception:
     HAS_SENTENCE_TRANSFORMERS = False
 
 DB_DIR = os.path.dirname(__file__)
-MODEL_DIR = os.path.join(os.path.dirname(DB_DIR), "model_offline")
+PROJECT_ROOT = os.path.dirname(DB_DIR)
+MODEL_DIR = os.path.join(PROJECT_ROOT, "model_offline")
+CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
 CACHE_DIR = os.path.join(DB_DIR, "vector_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
@@ -42,13 +44,30 @@ class VectorIndexManager:
         self.faiss_index: Optional[Any] = None
 
         # Fallback Numpy structures
-        self.numpy_embeddings: Optional[np.ndarray] = None # Shape: (N, 384)
+        self.numpy_embeddings: Optional[np.ndarray] = None # Shape: (N, dim)
 
         # Shared mappings: index position -> material dict (code, name, spec, category)
         self.index_to_material: List[Dict[str, str]] = []
 
-        self.model_name_or_path = "paraphrase-multilingual-MiniLM-L12-v2"
-        # Lazy load model on demand to prevent PyTorch C++ threads deadlocking with Uvicorn asyncio loop on import
+        # Load model name from config or environment variable (Default to bge-small-zh-v1.5)
+        self.model_name_or_path = self._get_configured_model_name()
+        self.embedding_dim = 512 if "bge" in self.model_name_or_path.lower() else 384
+
+    def _get_configured_model_name(self) -> str:
+        """Read model name from env or config/model_config.json, fallback to bge-small-zh-v1.5."""
+        env_model = os.environ.get("EMBEDDING_MODEL")
+        if env_model:
+            return env_model.strip()
+
+        config_path = os.path.join(CONFIG_DIR, "model_config.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    return cfg.get("embedding_model", "bge-small-zh-v1.5")
+            except Exception as e:
+                print(f"Warning: Failed to load model_config.json: {e}")
+        return "bge-small-zh-v1.5"
 
     def _initialize_model(self):
         if not HAS_SENTENCE_TRANSFORMERS or self.model is not None:
@@ -68,7 +87,11 @@ class VectorIndexManager:
 
         try:
             self.model = SentenceTransformer(model_path)
-            print("SentenceTransformer model loaded successfully.")
+            try:
+                self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
+            except Exception:
+                pass
+            print(f"SentenceTransformer model [{self.model_name_or_path}] loaded successfully (dim={self.embedding_dim}).")
         except Exception as e:
             print(f"Warning: Local SentenceTransformer model load failed: {e}. Fallback to keyword FTS5 search.")
             self.model = None
@@ -105,13 +128,30 @@ class VectorIndexManager:
         return None
 
     def load_cache(self) -> bool:
-        """Load index and mapping cache from disk."""
+        """Load index and mapping cache from disk with metadata/dimension verification."""
         index_file = os.path.join(CACHE_DIR, "materials.index")
         npy_file = os.path.join(CACHE_DIR, "materials_embeddings.npy")
         mapping_file = os.path.join(CACHE_DIR, "index_to_material.json")
+        meta_file = os.path.join(CACHE_DIR, "cache_metadata.json")
         
-        if not os.path.exists(mapping_file):
+        if not os.path.exists(mapping_file) or not os.path.exists(npy_file):
             return False
+
+        # Verify cache metadata if available
+        if os.path.exists(meta_file):
+            try:
+                with open(meta_file, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                    cached_model = meta.get("model_name", "")
+                    cached_dim = meta.get("dimension", 0)
+                    if cached_model and cached_model != self.model_name_or_path:
+                        print(f"Cache model mismatch (cached={cached_model}, current={self.model_name_or_path}). Invalidating cache.")
+                        return False
+                    if cached_dim and cached_dim != self.embedding_dim:
+                        print(f"Cache dimension mismatch (cached={cached_dim}, current={self.embedding_dim}). Invalidating cache.")
+                        return False
+            except Exception as e:
+                print(f"Warning reading cache metadata: {e}")
             
         try:
             with open(mapping_file, "r", encoding="utf-8") as f:
@@ -120,32 +160,42 @@ class VectorIndexManager:
             print(f"Error loading index-to-material mapping: {e}")
             return False
 
+        # Load raw Numpy embeddings
+        if os.path.exists(npy_file):
+            try:
+                loaded_embs = np.load(npy_file)
+                if loaded_embs.ndim == 2 and loaded_embs.shape[1] == self.embedding_dim:
+                    self.numpy_embeddings = loaded_embs
+                    print(f"Loaded Numpy embeddings cache with shape {self.numpy_embeddings.shape} for model [{self.model_name_or_path}].")
+                else:
+                    print(f"Numpy embeddings dimension mismatch: got shape {loaded_embs.shape}, expected (*, {self.embedding_dim}). Need rebuild.")
+                    return False
+            except Exception as e:
+                print(f"Error loading Numpy embeddings: {e}")
+                return False
+
         # Load FAISS index if available and requested
         if self.use_faiss and os.path.exists(index_file):
             try:
                 self.faiss_index = faiss.read_index(index_file)
-                print(f"Loaded FAISS index from cache with {self.faiss_index.ntotal} items.")
-                return True
+                if self.faiss_index.d == self.embedding_dim:
+                    print(f"Loaded FAISS index from cache with {self.faiss_index.ntotal} items (dim={self.faiss_index.d}).")
+                    return True
+                else:
+                    print(f"FAISS index dim mismatch ({self.faiss_index.d} vs {self.embedding_dim}). Falling back to Numpy.")
+                    self.use_faiss = False
             except Exception as e:
                 print(f"Error loading FAISS index: {e}. Falling back to Numpy.")
                 self.use_faiss = False
 
-        # Fallback to loading raw Numpy embeddings
-        if os.path.exists(npy_file):
-            try:
-                self.numpy_embeddings = np.load(npy_file)
-                print(f"Loaded Numpy embeddings cache with shape {self.numpy_embeddings.shape}.")
-                return True
-            except Exception as e:
-                print(f"Error loading Numpy embeddings: {e}")
-                
-        return False
+        return self.numpy_embeddings is not None and len(self.index_to_material) == len(self.numpy_embeddings)
 
     def save_cache(self):
-        """Save index and mapping cache to disk."""
+        """Save index, mapping cache, and cache metadata to disk."""
         index_file = os.path.join(CACHE_DIR, "materials.index")
         npy_file = os.path.join(CACHE_DIR, "materials_embeddings.npy")
         mapping_file = os.path.join(CACHE_DIR, "index_to_material.json")
+        meta_file = os.path.join(CACHE_DIR, "cache_metadata.json")
         
         try:
             with open(mapping_file, "w", encoding="utf-8") as f:
@@ -156,7 +206,19 @@ class VectorIndexManager:
                 
             if self.numpy_embeddings is not None:
                 np.save(npy_file, self.numpy_embeddings)
-            print("Saved vector index and mapping cache.")
+
+            # Write cache metadata
+            metadata = {
+                "model_name": self.model_name_or_path,
+                "dimension": self.embedding_dim,
+                "item_count": len(self.index_to_material),
+                "timestamp": time.time(),
+                "time_str": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            with open(meta_file, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, ensure_ascii=False, indent=4)
+
+            print(f"Saved vector index and mapping cache for model [{self.model_name_or_path}] (dim={self.embedding_dim}).")
         except Exception as e:
             print(f"Error saving vector cache: {e}")
 
@@ -168,7 +230,7 @@ class VectorIndexManager:
         if not self.is_enabled:
             return
             
-        print(f"Building vector index for {len(materials)} materials...")
+        print(f"Building vector index for {len(materials)} materials with model [{self.model_name_or_path}] (dim={self.embedding_dim})...")
         start_time = time.time()
         
         self.index_to_material = []
@@ -216,8 +278,7 @@ class VectorIndexManager:
         
         if self.use_faiss:
             try:
-                # 384 dimensions for paraphrase-multilingual-MiniLM-L12-v2
-                self.faiss_index = faiss.IndexFlatIP(384)
+                self.faiss_index = faiss.IndexFlatIP(self.embedding_dim)
                 self.faiss_index.add(embeddings)
                 print(f"FAISS index built in {time.time() - start_time:.2f}s.")
             except Exception as e:

@@ -8,23 +8,30 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>华康洁净物料清单匹配工具</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=20260818_corp">
 </head>
 <body class="dark-mode">
     <div class="app-container">
         <!-- Sidebar / Header -->
         <header class="app-header">
             <div class="logo-area">
-                <img src="logo500.png" alt="Logo" class="logo-img" style="height: 36px; border-radius: 4px; background-color: white; padding: 2px;" />
+                <img src="logo.png" alt="Logo" class="logo-img" style="height: 38px; object-fit: contain;" />
                 <div class="logo-text">
-                    <h1>华康洁净物料匹配工具</h1>
-                    <span>智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.1.0</span></span>
+                    <h1>武汉华康世纪洁净科技股份有限公司</h1>
+                    <span>物料清单匹配系统 · 智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.1.2</span></span>
                 </div>
+            </div>
+            
+            <div class="mission-tag" style="display: flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.22); border-radius: 20px; padding: 4px 12px; color: #60a5fa; font-size: 12px; font-weight: 500; white-space: nowrap;">
+                <i class="fa-solid fa-sparkles" style="font-size: 11px;"></i> 使命：以洁净技术赋能产业升级。
             </div>
             
             <div class="nav-links">
@@ -507,6 +514,15 @@
                                     <input type="radio" name="db-import-mode" value="append" style="cursor: pointer;"> 增量追加 (Append)
                                 </label>
                             </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
+                                <span style="font-weight: 500;">禁用生效策略：</span>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;" title="根据名称/说明中注记的停用日期对比，仅停用已到期物料，未到期在用物料正常保留入库">
+                                    <input type="radio" name="db-disable-mode" value="on_expire" checked style="cursor: pointer;"> 到期生效 (推荐/按日期截止)
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;" title="凡含有禁用/停用/无效标记一律立即过滤删除">
+                                    <input type="radio" name="db-disable-mode" value="immediate" style="cursor: pointer;"> 立即生效 (严格封控)
+                                </label>
+                            </div>
                             <div style="display: flex; gap: 12px; align-items: center;">
                                 <input type="file" id="db-upload-input" style="display: none;" accept=".xlsx">
                                 <button class="btn btn-primary" id="btn-select-db-file" style="flex: 1; padding: 10px;"><i class="fa-solid fa-file-excel"></i> 选择物料 Excel 库</button>
@@ -954,9 +970,9 @@
                     <div>
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                             <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">
-                                📖 华康洁净物料清单匹配系统 · 操作与使用指南
+                                📖 武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统 · 操作与使用指南
                             </h2>
-                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.1.0 正式版</span>
+                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.1.2 正式版</span>
                         </div>
                         <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.6;">
                             基于 NLP 语义向量比对、30域特征结构化抽取与大模型优先调度的智能清单比对与规范化制表平台
@@ -1250,6 +1266,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=20260817_3col"></script>
 </body>
 </html>

@@ -2328,10 +2328,12 @@ async function handleDbUploadAndImport() {
     if (dbUploadInput.files.length === 0) return;
     const file = dbUploadInput.files[0];
     
-    const importMode = document.querySelector('input[name="db-import-mode"]:checked').value;
+    const importMode = document.querySelector('input[name="db-import-mode"]:checked')?.value || 'replace';
+    const disableMode = document.querySelector('input[name="db-disable-mode"]:checked')?.value || 'on_expire';
     const modeText = importMode === 'replace' ? '全量替换' : '增量追加';
+    const disableText = disableMode === 'on_expire' ? '到期生效（保留未到期物料）' : '立即生效（严格全部停用）';
     
-    if (!confirm(`确认要以【${modeText}】模式，将文件 "${file.name}" 导入到全局物料明细库中吗？\n警告: 此操作会重建匹配向量索引，耗时大约数秒至数十秒。`)) {
+    if (!confirm(`确认要以【${modeText}】模式、禁用策略【${disableText}】，将文件 "${file.name}" 导入到全局物料明细库中吗？\n警告: 此操作会重建匹配向量索引，耗时大约数秒至数十秒。`)) {
         return;
     }
     
@@ -2354,6 +2356,7 @@ async function handleDbUploadAndImport() {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('mode', importMode);
+    formData.append('disable_mode', disableMode);
 
     try {
         const response = await fetch(`${backendUrl}/api/db/upload`, {

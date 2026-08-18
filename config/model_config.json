@@ -1,0 +1,16 @@
+{
+  "version": "0.1.1",
+  "embedding_model": "bge-small-zh-v1.5",
+  "available_models": {
+    "bge-small-zh-v1.5": {
+      "dimension": 512,
+      "description": "BAAI BGE Small Chinese v1.5 (优选中文检索向量模型，512维)",
+      "offline_dir": "bge-small-zh-v1.5"
+    },
+    "paraphrase-multilingual-MiniLM-L12-v2": {
+      "dimension": 384,
+      "description": "MiniLM L12 v2 (通用多语言句向量模型，384维，回滚备用)",
+      "offline_dir": "paraphrase-multilingual-MiniLM-L12-v2"
+    }
+  }
+}

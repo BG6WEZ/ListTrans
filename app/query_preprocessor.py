@@ -15,23 +15,26 @@ NOISE_SECTION_KEYWORDS = [
 ]
 
 # HVAC Unit Type Rules (14 standard acronyms & Chinese keywords)
+# HVAC Unit Type Rules (standard acronyms & Chinese keywords)
 HVAC_UNIT_MAP = [
     ("全新风空气处理机组", ["MAU", "全新风空气处理机组", "全新风处理机组", "全新风机组", "100%全新风", "全新风"]),
     ("回风循环空气处理机组", ["RAU", "回风循环空气处理机组", "回风循环"]),
-    ("组合式空气处理机组", ["AHU", "组合式空气处理机组", "空气处理机组", "组合式空调", "AHU"]),
-    ("风机盘管机组", ["FCU", "风机盘管机组", "风机盘管", "FCU"]),
-    ("新风预处理机组", ["PAU", "新风预处理机组", "新风预处理", "预空调机组", "新风预冷", "预处理机组", "新风机组", "净化新风机组", "吊顶新风机组", "PAU"]),
-    ("循环空气处理机组", ["RCU", "循环空气处理机组", "循环机组", "净化循环机组", "RCU"]),
-    ("风机过滤单元", ["FFU", "风机过滤单元FFU", "风机过滤单元", "FFU"]),
-    ("热回收新风机组", ["HRV", "热回收新风机组", "热回收新风", "HRV"]),
-    ("全热回收新风机组", ["ERV", "全热回收新风机组", "全热回收", "ERV"]),
-    ("直膨式空气处理机组", ["DXU", "直膨式空气处理机组", "直膨式", "DXU"]),
-    ("洁净室专用机组", ["CRU", "洁净室专用机组", "洁净室专用", "CRU"]),
-    ("末端送风单元", ["TU", "末端送风单元", "TU"]),
-    ("变风量空调系统", ["VAV", "变风量空调系统", "变风量空调", "变风量", "VAV"]),
-    ("定风量空调系统", ["CAV", "定风量空调系统", "定风量", "CAV"]),
-    ("高效空气过滤器", ["HEPA", "高效空气过滤器", "高效过滤器", "HEPA"]),
-    ("新风风机单元", ["PAF", "新风风机单元", "新风风机", "PAF"])
+    ("组合式空气处理机组", ["AHU", "组合式空气处理机组", "空气处理机组", "组合式空调"]),
+    ("风机盘管机组", ["FCU", "风机盘管机组", "风机盘管", "卡式风机盘管", "卧式风机盘管"]),
+    ("新风预处理机组", ["PAU", "PAU-N", "PAU-MZ", "净化新风机组", "新风预处理机组", "新风预处理", "预处理机组", "新风机组", "吊顶新风机组"]),
+    ("净化循环机组", ["RCU", "净化循环机组", "循环空气处理机组", "循环机组", "自取新风机组", "AHU-J"]),
+    ("多联式空调室内机", ["多联机室内机", "多联式室内机", "多联机", "多联式空调室内机", "VRV室内机", "VRF室内机"]),
+    ("离心风机（箱）", ["静音型排风机", "静音排风机", "医用静音型排风机", "离心风机（箱）", "离心式风机", "离心排风机"]),
+    ("风机过滤单元", ["FFU", "风机过滤单元FFU", "风机过滤单元"]),
+    ("热回收新风机组", ["HRV", "热回收新风机组", "热回收新风"]),
+    ("全热回收新风机组", ["ERV", "全热回收新风机组", "全热回收"]),
+    ("直膨式空气处理机组", ["DXU", "直膨式空气处理机组", "直膨式"]),
+    ("洁净室专用机组", ["CRU", "洁净室专用机组", "洁净室专用"]),
+    ("末端送风单元", ["TU", "末端送风单元"]),
+    ("变风量空调系统", ["VAV", "变风量空调系统", "变风量空调", "变风量"]),
+    ("定风量空调系统", ["CAV", "定风量空调系统", "定风量"]),
+    ("高效空气过滤器", ["HEPA", "高效空气过滤器", "高效过滤器"]),
+    ("新风风机单元", ["PAF", "新风风机单元", "新风风机"])
 ]
 
 def is_valid_query_item(name: Any, spec: Any, unit: Any = "", code: Any = "", row_index: int = 0) -> Tuple[bool, str]:
@@ -230,9 +233,15 @@ def extract_from_name_spec_fallback(name: str, attrs: Dict[str, Any]) -> Dict[st
         if dim_3d:
             attrs["尺寸"] = f"{dim_3d.group(1)}*{dim_3d.group(2)}*{dim_3d.group(3)}"
             try:
-                attrs["长"] = float(dim_3d.group(1))
-                attrs["宽"] = float(dim_3d.group(2))
-                attrs["高"] = float(dim_3d.group(3))
+                l_v = float(dim_3d.group(1))
+                w_v = float(dim_3d.group(2))
+                h_v = float(dim_3d.group(3))
+                attrs["长"] = l_v
+                attrs["宽"] = w_v
+                attrs["高"] = h_v
+                attrs["长度"] = h_v
+                attrs["半周长"] = float(l_v + w_v)
+                attrs["面积"] = (l_v / 1000.0) * (w_v / 1000.0)
             except Exception:
                 pass
         else:
@@ -240,8 +249,12 @@ def extract_from_name_spec_fallback(name: str, attrs: Dict[str, Any]) -> Dict[st
             if dim_2d:
                 attrs["尺寸"] = f"{dim_2d.group(1)}*{dim_2d.group(2)}"
                 try:
-                    attrs["长"] = float(dim_2d.group(1))
-                    attrs["宽"] = float(dim_2d.group(2))
+                    l_v = float(dim_2d.group(1))
+                    w_v = float(dim_2d.group(2))
+                    attrs["长"] = l_v
+                    attrs["宽"] = w_v
+                    attrs["半周长"] = float(l_v + w_v)
+                    attrs["面积"] = (l_v / 1000.0) * (w_v / 1000.0)
                 except Exception:
                     pass
 
@@ -493,6 +506,113 @@ def extract_query_plenum_params(text: str, kv_dict: Dict[str, Any]) -> Dict[str,
 
     return attrs
 
+def extract_query_hvac_specific_params(combined_text: str, kv_dict: Dict[str, Any], attrs: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Specialized extraction and inference for HVAC equipment and components.
+    """
+    t_clean = to_half_width(combined_text)
+    hvac_attrs = dict(attrs)
+
+    # 1. Installation Type (吊装 vs 落地)
+    if any(k in t_clean for k in ["吊装", "吊顶安装", "吊顶"]):
+        hvac_attrs["安装形式"] = "吊装"
+        hvac_attrs["吊装"] = True
+    elif any(k in t_clean for k in ["落地安装", "落地", "地装", "座地"]):
+        hvac_attrs["安装形式"] = "落地"
+        hvac_attrs["落地"] = True
+
+    # 2. AHU / PAU Fresh Air & Self-taking Mode
+    sf_v = hvac_attrs.get("送风量") or hvac_attrs.get("风量")
+    xf_v = hvac_attrs.get("新风量")
+    if (sf_v and xf_v and abs(float(sf_v) - float(xf_v)) < 1.0) or "自取新风" in t_clean:
+        hvac_attrs["自取新风"] = True
+        if "机组" in t_clean or "AHU" in t_clean.upper() or "循环" in t_clean:
+            hvac_attrs["机组类型"] = "净化循环机组"
+            hvac_attrs["循环机组"] = True
+    
+    if "PAU" in t_clean.upper():
+        hvac_attrs.setdefault("机组类型", "新风预处理机组")
+
+    # 3. Fan Coil Unit (FCU) structure & accessories
+    if any(k in t_clean for k in ["卡式", "卡式四吹", "四面出风", "四方向"]):
+        hvac_attrs["结构形式"] = "卡式"
+        hvac_attrs["卡式"] = True
+    elif any(k in t_clean for k in ["卧式暗装", "卧式明装", "卧式", "暗装"]):
+        if not hvac_attrs.get("卡式"):
+            hvac_attrs["结构形式"] = "卧式暗装"
+            hvac_attrs["卧式"] = True
+
+    if any(k in t_clean for k in ["自带提升泵", "带提升泵", "提升泵", "冷凝水提升泵", "带冷凝水提升泵"]):
+        hvac_attrs["带冷凝水提升泵"] = "带冷凝水提升泵"
+        hvac_attrs["提升泵"] = True
+
+    # 4. Multi-split VRF indoor unit cooling capacity
+    if any(k in t_clean for k in ["多联机", "多联式", "VRV", "VRF"]):
+        hvac_attrs["多联机"] = True
+        cool_match = re.search(r'(?:额定制冷量|制冷量|冷量)[:：]?\s*(\d+(?:\.\d+)?)\s*(?:kw|KW)?', t_clean)
+        if cool_match:
+            try:
+                hvac_attrs["制冷量"] = float(cool_match.group(1))
+            except Exception:
+                pass
+
+    # 5. Fan explosion-proof & noise reduction
+    if any(k in t_clean for k in ["防爆", "防爆型", "防爆风机", "EX", "BT4", "CT4"]):
+        hvac_attrs["防爆"] = True
+    elif "非防爆" in t_clean:
+        hvac_attrs["防爆"] = False
+
+    if "静音" in t_clean or "消声" in t_clean:
+        hvac_attrs["静音"] = True
+
+    # 6. Fire damper control mode, temperature, shape
+    if any(k in t_clean for k in ["电动", "DV24V", "DC24V", "AC220V", "执行机构", "执行器", "24V"]):
+        hvac_attrs["控制方式"] = "电动"
+        hvac_attrs["电动"] = True
+    elif any(k in t_clean for k in ["常开", "常闭", "熔断", "70℃", "280℃", "70度", "280度", "防火阀"]):
+        if not hvac_attrs.get("电动"):
+            hvac_attrs["控制方式"] = "常开熔断"
+            hvac_attrs["电动"] = False
+
+    temp_match = re.search(r'(\d+)\s*[℃度c]', t_clean)
+    if temp_match:
+        try:
+            hvac_attrs["熔断温度"] = int(temp_match.group(1))
+        except Exception:
+            pass
+
+    # Shape detection for dampers & terminals
+    dim_2d = re.search(r'(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', t_clean)
+    phi_match = re.search(r'[φΦ直径DNdeDe]\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean)
+    if dim_2d:
+        hvac_attrs["形状"] = "矩形"
+        hvac_attrs["尺寸_2d"] = f"{dim_2d.group(1)}*{dim_2d.group(2)}"
+        hvac_attrs["is_circular"] = False
+    elif phi_match:
+        hvac_attrs["形状"] = "圆形"
+        hvac_attrs["is_circular"] = True
+        try:
+            hvac_attrs["外径"] = float(phi_match.group(1))
+        except Exception:
+            pass
+
+    # 7. Clean ductwork material and thickness
+    if any(k in t_clean for k in ["风管", "通风管", "风道"]):
+        th_match = re.search(r'(?:板材厚度|厚度|壁厚|δ)[:：]?\s*(\d+(?:\.\d+)?)\s*(?:mm|MM)?', t_clean)
+        if not th_match:
+            th_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mm|MM)?\s*厚', t_clean)
+        if th_match:
+            try:
+                hvac_attrs["厚度"] = float(th_match.group(1))
+                hvac_attrs["壁厚"] = float(th_match.group(1))
+                hvac_attrs["板材厚度"] = float(th_match.group(1))
+            except Exception:
+                pass
+        if "优质镀锌钢板" in t_clean or "镀锌钢板" in t_clean or "镀锌" in t_clean:
+            hvac_attrs["材质"] = "镀锌钢板"
+
+    return hvac_attrs
+
 def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) -> Dict[str, Any]:
     """
     Canonicalize extracted query attribute values to match standard material DB expectations.
@@ -601,7 +721,48 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
         duct_attrs = extract_query_ductwork_params(combined_text, kv_dict)
         attrs.update(duct_attrs)
 
-    # 7. Canonicalize & normalize units
+    # HVAC specific feature inferences (AHU, PAU, FCU, VRF, Fan, Damper)
+    hvac_extracted = extract_query_hvac_specific_params(combined_text, kv_dict, attrs)
+    attrs.update(hvac_extracted)
+
+    # 7. Canonicalize & normalize units and derive geometric features
+    if "长" in attrs and "宽" in attrs and "半周长" not in attrs:
+        try:
+            attrs["半周长"] = float(attrs["长"]) + float(attrs["宽"])
+        except Exception:
+            pass
+    if "高" in attrs and "长度" not in attrs:
+        try:
+            attrs["长度"] = float(attrs["高"])
+        except Exception:
+            pass
+    elif "尺寸" in attrs:
+        m_3d = re.search(r'(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', str(attrs["尺寸"]))
+        if m_3d:
+            try:
+                l_v = float(m_3d.group(1))
+                w_v = float(m_3d.group(2))
+                h_v = float(m_3d.group(3))
+                attrs["长"] = l_v
+                attrs["宽"] = w_v
+                attrs["高"] = h_v
+                attrs["长度"] = h_v
+                if "半周长" not in attrs:
+                    attrs["半周长"] = float(l_v + w_v)
+            except Exception:
+                pass
+        elif "半周长" not in attrs:
+            m_2d = re.search(r'(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', str(attrs["尺寸"]))
+            if m_2d:
+                try:
+                    l_v = float(m_2d.group(1))
+                    w_v = float(m_2d.group(2))
+                    attrs["长"] = l_v
+                    attrs["宽"] = w_v
+                    attrs["半周长"] = float(l_v + w_v)
+                except Exception:
+                    pass
+
     canonical_attrs = canonicalize_query_attrs(domain, attrs, combined_text)
     normalized_attrs = normalize_unit_scales(canonical_attrs)
 

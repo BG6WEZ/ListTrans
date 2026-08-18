@@ -85,17 +85,17 @@ async def lifespan(app_instance: FastAPI):
     yield
 
 app = FastAPI(
-    title="华康洁净物料清单匹配工具",
-    version="0.1.0",
+    title="武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统",
+    version="0.1.2",
     docs_url="/docs" if ENABLE_DOCS else None,
     redoc_url="/redoc" if ENABLE_DOCS else None,
     lifespan=lifespan
 )
 
-# Enable CORS
+# Enable CORS for Local and LAN access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -1554,15 +1554,15 @@ async def api_db_metadata():
 
 _db_import_lock = threading.Lock()
 
-def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str):
+def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str, disable_mode: str = "on_expire"):
     try:
-        logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}")
+        logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}, DisableMode: {disable_mode}")
         upload_tasks[task_id]["current_step"] = "正在解析并清洗物料数据..."
         upload_tasks[task_id]["structuring_progress"] = 10
         
         # Import to SQLite
         from app.db_manager import import_materials_from_excel, get_db_connection
-        meta = import_materials_from_excel(temp_path, mode, filename, task_id=task_id)
+        meta = import_materials_from_excel(temp_path, mode, filename, task_id=task_id, disable_mode=disable_mode)
         
         upload_tasks[task_id]["structuring_progress"] = 100
         upload_tasks[task_id]["current_step"] = "物料数据结构化完成，开始重建向量索引..."
@@ -1609,7 +1609,8 @@ def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filena
 async def api_db_upload(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    mode: str = Form("replace") # "replace" or "append"
+    mode: str = Form("replace"), # "replace" or "append"
+    disable_mode: str = Form("on_expire") # "on_expire" or "immediate"
 ):
     """Upload and import materials to the global database, then rebuild FAISS index asynchronously."""
     if not file.filename.endswith((".xlsx", ".xls")):
@@ -1634,7 +1635,7 @@ async def api_db_upload(
         "error": None
     }
     
-    background_tasks.add_task(async_process_db_upload_task, task_id, temp_path, mode, file.filename)
+    background_tasks.add_task(async_process_db_upload_task, task_id, temp_path, mode, file.filename, disable_mode)
     return JSONResponse(content={"task_id": task_id})
 
 from pydantic import BaseModel

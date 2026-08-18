@@ -158,8 +158,27 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
     conn = get_thread_db_connection()
     cursor = conn.cursor()
     
-    # Split keyword by space, comma, or semicolon delimiters
-    raw_words = [w.strip() for w in re.split(r'[;；,，\s]+', keyword) if w.strip()]
+    # Clean keyword of special punctuation and split by delimiters (space, comma, semicolon, *, x, ×, etc.)
+    kw_clean = keyword.replace('"', ' ').replace("'", ' ').replace('(', ' ').replace(')', ' ').replace('（', ' ').replace('）', ' ')
+    
+    # Query expansion for 2D rectangular dimensions (e.g. 630*400 -> derive half-perimeter 1030)
+    dim_match = re.search(r'(\d+)\s*[*x×]\s*(\d+)', kw_clean)
+    extra_words = []
+    if dim_match:
+        try:
+            d1 = int(dim_match.group(1))
+            d2 = int(dim_match.group(2))
+            hp_val = str(d1 + d2)
+            extra_words.append(hp_val)
+        except Exception:
+            pass
+
+    kw_clean = kw_clean.replace('*', ' ').replace('×', ' ').replace('x', ' ')
+    raw_words = [w.strip() for w in re.split(r'[;；,，\s]+', kw_clean) if w.strip()]
+    for ew in extra_words:
+        if ew not in raw_words:
+            raw_words.append(ew)
+
     if not raw_words:
         return []
         
@@ -178,7 +197,20 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
             "配电箱": ["配电箱", "配电柜"],
             "配电柜": ["配电箱", "配电柜"],
             "开关": ["开关", "功能件", "面板"],
-            "按钮": ["按钮", "呼叫", "开关"]
+            "按钮": ["按钮", "呼叫", "开关"],
+            "净化循环空气处理机组": ["净化循环机组", "循环机组", "净化循环"],
+            "新风预处理机组": ["净化新风机组", "吊顶新风机组", "新风机组"],
+            "吊顶新风预处理机组": ["吊顶新风机组", "吊顶新风"],
+            "净化新风预处理机组": ["净化新风机组", "净化新风"],
+            "风机盘管机组": ["风机盘管", "风机盘管配件"],
+            "离心式排风机(箱）": ["离心风机（箱）", "离心风机", "通风机"],
+            "离心式排风机": ["离心风机（箱）", "离心风机", "通风机"],
+            "静音型排风机": ["离心风机（箱）", "离心风机", "通风机"],
+            "洁净镀锌钢板通风管安装费": ["镀锌钢板风管", "风管"],
+            "洁净镀锌通风管": ["镀锌钢板风管", "风管"],
+            "通风管": ["镀锌钢板风管", "风管"],
+            "多联机室内机": ["多联式空调室内机", "多联机"],
+            "常开防火阀": ["防火阀"]
         }
         for rw in raw_words:
             # Check if this raw word has synonyms
@@ -333,12 +365,43 @@ def update_db_metadata(total_rows: int, imported_rows: int, disabled_rows: int, 
     conn.commit()
     conn.close()
 
-def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename: str = "materials.xlsx", task_id: Optional[str] = None) -> Dict[str, Any]:
+def parse_disable_annotation(text: str) -> Tuple[bool, Optional[Any], str]:
+    """
+    Parse whether text contains disable annotation and extract date if present.
+    Returns: (has_disable_keyword, stop_date_obj_or_None, matched_keyword_snippet)
+    """
+    import datetime
+    DISABLE_PATTERN = re.compile(r'(?:禁用|停用|无效)\s*(\d{6})?')
+    match = DISABLE_PATTERN.search(text)
+    if not match:
+        return False, None, ""
+    
+    dt_str = match.group(1)
+    if dt_str:
+        try:
+            y = 2000 + int(dt_str[0:2])
+            m = int(dt_str[2:4])
+            d = int(dt_str[4:6])
+            stop_date = datetime.date(y, m, d)
+            return True, stop_date, f"{match.group(0)}"
+        except Exception:
+            return True, None, f"{match.group(0)}"
+    return True, None, f"{match.group(0)}"
+
+def import_materials_from_excel(
+    xlsx_path: str, 
+    mode: str = "replace", 
+    filename: str = "materials.xlsx", 
+    task_id: Optional[str] = None,
+    disable_mode: str = "on_expire"
+) -> Dict[str, Any]:
     """
     Import materials from Excel file into SQLite database.
     mode: "replace" (full replacement) or "append" (incremental add).
+    disable_mode: "on_expire" (only disable if stop_date <= today or no date) or "immediate" (disable all marked).
     """
     import json
+    import datetime
     if not os.path.exists(xlsx_path):
         raise FileNotFoundError(f"Excel file not found: {xlsx_path}")
         
@@ -369,16 +432,66 @@ def import_materials_from_excel(xlsx_path: str, mode: str = "replace", filename:
     df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
     df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
     
-    # Filter out materials where code contains comments/annotations such as 禁用, 停用, 无效
-    disabled_mask = df_cleaned["code"].apply(lambda x: any(kw in str(x) for kw in ["禁用", "停用", "无效"]))
-    df_disabled = df_cleaned[disabled_mask]
-    df_imported = df_cleaned[~disabled_mask]
-    
+    # Date-aware full-field disabled scan across: code, name, category, specification, description
+    today = datetime.date.today()
+
+    def check_row_disabled(row: pd.Series) -> Tuple[bool, str, bool, str]:
+        fields = [
+            ("code", str(row.get("code", ""))),
+            ("name", str(row.get("name", ""))),
+            ("category", str(row.get("category", ""))),
+            ("specification", str(row.get("specification", ""))),
+            ("description", str(row.get("description", "")))
+        ]
+        for field_name, val in fields:
+            val_clean = val.strip()
+            has_kw, stop_date, snippet = parse_disable_annotation(val_clean)
+            if has_kw:
+                stop_date_str = stop_date.strftime("%Y-%m-%d") if stop_date else ""
+                if disable_mode == "immediate":
+                    return True, stop_date_str, True, f"字段[{field_name}]命中禁用标记({snippet})[立即生效模式]"
+                
+                # on_expire mode:
+                if stop_date is None:
+                    return True, "", True, f"字段[{field_name}]命中无日期禁用标记({snippet})[已即刻失效]"
+                elif stop_date <= today:
+                    return True, stop_date_str, True, f"字段[{field_name}]停用日期({stop_date_str})已到期(<= {today})"
+                else:
+                    return False, stop_date_str, False, f"字段[{field_name}]停用日期({stop_date_str})未到期(> {today})[正常在用]"
+        return False, "", False, ""
+
+    disabled_results = df_cleaned.apply(check_row_disabled, axis=1)
+    df_cleaned["is_disabled"] = [res[0] for res in disabled_results]
+    df_cleaned["stop_date"] = [res[1] for res in disabled_results]
+    df_cleaned["is_expired"] = [res[2] for res in disabled_results]
+    df_cleaned["disabled_reason"] = [res[3] for res in disabled_results]
+
+    df_disabled = df_cleaned[df_cleaned["is_disabled"]]
+    df_imported = df_cleaned[~df_cleaned["is_disabled"]]
+    df_audit = df_cleaned[df_cleaned["is_disabled"] | (df_cleaned["stop_date"] != "") | (df_cleaned["disabled_reason"] != "")]
+
     total_rows = len(df_cleaned)
     disabled_rows = len(df_disabled)
     imported_rows = len(df_imported)
-    
-    # Work with imported rows only
+
+    # Export disabled rows and annotated materials audit CSV for business verification
+    try:
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        os.makedirs(data_dir, exist_ok=True)
+        dt_str = datetime.datetime.now().strftime("%Y%m%d")
+        audit_path = os.path.join(data_dir, f"audit_disabled_materials_{dt_str}.csv")
+        df_audit.to_csv(audit_path, index=False, encoding="utf-8-sig")
+    except Exception as e:
+        print(f"Failed to export disabled audit CSV: {e}")
+
+    # Deduplicate duplicate codes in imported rows (preserve most complete record)
+    df_imported = df_imported.copy()
+    completeness = df_imported.apply(lambda r: len(f"{r['name']}{r['specification']}{r['description']}"), axis=1)
+    df_imported["_completeness"] = completeness
+    df_imported = df_imported.sort_values(by=["_completeness"], ascending=False).drop_duplicates(subset=["code"], keep="first")
+    df_imported = df_imported.drop(columns=["_completeness", "is_disabled", "stop_date", "is_expired", "disabled_reason"])
+
+    # Work with deduplicated imported rows
     df_cleaned = df_imported
     
     # Create search tokens and pre-parse parameters

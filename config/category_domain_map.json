@@ -231,13 +231,19 @@
         "其他地板": "decoration",
         "橡胶、塑胶地板": "decoration",
         "地毯": "decoration",
-        "踢脚线": "decoration"
+        "踢脚线": "decoration",
+        "调节阀": "damper",
+        "阀门调节阀": "damper",
+        "风管、风道": "damper",
+        "暖通设备": "ahu",
+        "空调配件": "ahu"
     },
     "high_risk_categories": [
         "调节阀",
         "静压箱",
         "冷热水机组",
-        "蝶阀"
+        "蝶阀",
+        "风管、风道"
     ],
     "overwrite_rules": [
         {
@@ -261,6 +267,24 @@
                 "控制面板"
             ],
             "override_domain": "weak_current"
+        },
+        {
+            "trigger_keywords": [
+                "风管",
+                "通风管",
+                "风道"
+            ],
+            "override_domain": "damper"
+        },
+        {
+            "trigger_keywords": [
+                "风机盘管",
+                "多联机",
+                "多联式",
+                "VRV",
+                "VRF"
+            ],
+            "override_domain": "ahu"
         }
     ]
 }

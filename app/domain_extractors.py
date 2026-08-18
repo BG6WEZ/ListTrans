@@ -173,6 +173,11 @@ class ConfigDrivenExtractor:
                             break
                 else:
                     attrs[key] = val_found
+            elif ftype == "enum" and options:
+                for opt in options:
+                    if opt.lower() in text.lower():
+                        attrs[key] = opt
+                        break
 
         # 2. Check for Boolean Flags
         for flag in self.flags:
@@ -208,6 +213,9 @@ class ConfigDrivenExtractor:
         if self.domain in ["cable_power", "cable_control", "wire"]:
             c_attrs = extract_cable_params(text)
             attrs.update(c_attrs)
+        elif self.domain == "fan" or "风机" in text or "排风机" in text:
+            fan_attrs = extract_fan_params(text)
+            attrs.update(fan_attrs)
         elif self.domain == "conduit":
             conduit_attrs = extract_conduit_params(text)
             attrs.update(conduit_attrs)
@@ -216,6 +224,59 @@ class ConfigDrivenExtractor:
             attrs.update(ups_attrs)
 
         return attrs
+
+def extract_fan_params(text: str) -> Dict[str, Any]:
+    """
+    Extract fan parameters:
+    Air volume intervals (e.g. 1~500m³/h), static pressure intervals, material, explosion-proof.
+    """
+    attrs = {}
+    if not text:
+        return attrs
+    t_clean = to_half_width(text)
+
+    # 1. Flow interval (风量：1~500m³/h)
+    m_flow = re.search(r'风量[:：]?\s*(\d+(?:\.\d+)?)\s*[-~—至到及或]\s*(\d+(?:\.\d+)?)', t_clean)
+    if m_flow:
+        attrs["风量_min"] = float(m_flow.group(1))
+        attrs["风量_max"] = float(m_flow.group(2))
+        attrs["风量"] = (attrs["风量_min"] + attrs["风量_max"]) / 2.0
+    else:
+        m_single = re.search(r'风量[:：]?\s*(\d+(?:\.\d+)?)', t_clean)
+        if m_single:
+            attrs["风量"] = float(m_single.group(1))
+
+    # 2. Pressure interval (机外余压≤500Pa)
+    if "≤500" in t_clean or "<=500" in t_clean:
+        attrs["机外余压_op"] = "<="
+        attrs["机外余压_base"] = 500.0
+    elif "500" in t_clean and ("2000" in t_clean or "＜" in t_clean or "<" in t_clean):
+        attrs["机外余压_op"] = "500-2000"
+        attrs["机外余压_min"] = 500.0
+        attrs["机外余压_max"] = 2000.0
+    elif "＞2000" in t_clean or ">2000" in t_clean:
+        attrs["机外余压_op"] = ">"
+        attrs["机外余压_base"] = 2000.0
+    else:
+        m_pres = re.search(r'(?:机外余压|余压)[:：]?\s*(\d+(?:\.\d+)?)', t_clean)
+        if m_pres:
+            attrs["机外余压"] = float(m_pres.group(1))
+
+    # 3. Material
+    if "镀锌钢板" in t_clean or "镀锌" in t_clean:
+        attrs["材质"] = "镀锌钢板"
+    elif "不锈钢" in t_clean:
+        attrs["材质"] = "不锈钢"
+    elif "玻璃钢" in t_clean:
+        attrs["材质"] = "玻璃钢"
+
+    # 4. Explosion proof
+    if "非防爆" in t_clean:
+        attrs["防爆"] = False
+    elif "防爆风机" in t_clean or "防爆" in t_clean:
+        attrs["防爆"] = True
+
+    return attrs
 
 def extract_cable_params(text: str) -> Dict[str, Any]:
     """
@@ -395,9 +456,9 @@ def extract_decoration_params(text: str) -> Dict[str, Any]:
                 
     # 2. Thickness (0.6mm, 0.8mm, 1.0mm, 1.2mm, 6mm, 8mm, 12mm, 14mm)
     if "厚度" not in attrs:
-        th_match = re.search(r'(\d+(?:\.\d+)?)\s*mm\s*(?:厚)?', t_clean, re.IGNORECASE)
+        th_match = re.search(r'(\d+(?:\.\d+)?)\s*mm\s*厚', t_clean, re.IGNORECASE)
         if not th_match:
-            th_match = re.search(r'(?:厚度|厚)\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean, re.IGNORECASE)
+            th_match = re.search(r'(?:厚度|板厚|壁厚)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(?:mm)?', t_clean, re.IGNORECASE)
         if th_match:
             try:
                 attrs["厚度"] = float(th_match.group(1))
@@ -627,10 +688,104 @@ def extract_switch_gang_control(text: str) -> Dict[str, Any]:
         
     return params
 
+def extract_half_perimeter_and_length(text: str) -> Dict[str, Any]:
+    """
+    Extract half-perimeter and length intervals (e.g. for dampers, silencers).
+    Supports full-width and half-width colons, e.g.:
+    "半周长：1001~1500mm" or "半周长: 3501~4000mm*长度: 1501~2000mm"
+    """
+    res = {}
+    if not text:
+        return res
+    t_clean = to_half_width(text).strip()
+    
+    # 1. Half-perimeter extraction
+    hp_m = re.search(r'半周长\s*[:：]?\s*(\d+)\s*[-~—至到及或]\s*(\d+)\s*(?:mm|m)?', t_clean, re.IGNORECASE)
+    if not hp_m:
+        hp_m = re.search(r'半周长\s*[:：]?\s*(\d+)\s*(?:mm|m)?', t_clean, re.IGNORECASE)
+        if hp_m:
+            val = float(hp_m.group(1))
+            res["半周长"] = val
+            res["半周长_min"] = val
+            res["半周长_max"] = val
+    else:
+        min_v = float(hp_m.group(1))
+        max_v = float(hp_m.group(2))
+        res["半周长_min"] = min_v
+        res["半周长_max"] = max_v
+        res["半周长"] = (min_v + max_v) / 2.0
+
+    # 2. Silencer length extraction (second dimension)
+    len_m = re.search(r'长度\s*[:：]?\s*(\d+)\s*[-~—至到及或]\s*(\d+)\s*(?:mm|m)?', t_clean, re.IGNORECASE)
+    if not len_m:
+        len_m = re.search(r'(?:^|[*x×,\s])L\s*[:：=]?\s*(\d+)\s*[-~—至到及或]\s*(\d+)\s*(?:mm|m)?', t_clean, re.IGNORECASE)
+    if len_m:
+        min_l = float(len_m.group(1))
+        max_l = float(len_m.group(2))
+        res["长度_min"] = min_l
+        res["长度_max"] = max_l
+        res["长"] = (min_l + max_l) / 2.0
+        res["长度"] = res["长"]
+    else:
+        single_len = re.search(r'长度\s*[:：]?\s*(\d+)\s*(?:mm|m)?', t_clean, re.IGNORECASE)
+        if single_len:
+            val_l = float(single_len.group(1))
+            res["长度"] = val_l
+            res["长"] = val_l
+            res["长度_min"] = val_l
+            res["长度_max"] = val_l
+
+    return res
+
+def extract_tolerance_3d_box(text: str) -> Optional[Dict[str, Any]]:
+    """
+    Parse 3D tolerance dimensions, e.g.:
+    （1500±150）*（1500±150）*（900±150）mm or 1500±150*1500±150*900±150
+    """
+    if not text:
+        return None
+    t_clean = to_half_width(text).strip()
+    pattern = r'[（\(]?\s*(\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)\s*[）\)]?\s*[*x×]\s*[（\(]?\s*(\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)\s*[）\)]?\s*[*x×]\s*[（\(]?\s*(\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)\s*[）\)]?'
+    m = re.search(pattern, t_clean)
+    if m:
+        l_b, l_t = float(m.group(1)), float(m.group(2))
+        w_b, w_t = float(m.group(3)), float(m.group(4))
+        h_b, h_t = float(m.group(5)), float(m.group(6))
+        return {
+            "长_base": l_b,
+            "长_min": l_b - l_t,
+            "长_max": l_b + l_t,
+            "宽_base": w_b,
+            "宽_min": w_b - w_t,
+            "宽_max": w_b + w_t,
+            "高_base": h_b,
+            "高_min": h_b - h_t,
+            "高_max": h_b + h_t,
+            "长": l_b,
+            "宽": w_b,
+            "高": h_b,
+            "尺寸": f"{int(l_b)}*{int(w_b)}*{int(h_b)}",
+            "尺寸_类型": "3d_tolerance_box"
+        }
+    return None
+
 def extract_parameters_by_domain(domain: str, text: str) -> Dict[str, Any]:
     """Wrapper function to perform config-driven extraction."""
     extractor = ConfigDrivenExtractor(domain)
-    return extractor.extract(text)
+    attrs = extractor.extract(text)
+    
+    # Check for half-perimeter and length
+    if domain in ["damper", "silencer", "plenum", "air_terminal"] or "半周长" in text or "长度" in text:
+        hp_attrs = extract_half_perimeter_and_length(text)
+        attrs.update(hp_attrs)
+        
+    # Check for 3D tolerance box
+    if "±" in text:
+        tol_attrs = extract_tolerance_3d_box(text)
+        if tol_attrs:
+            attrs.update(tol_attrs)
+            
+    return attrs
 
 def reload_extractor_configs():
     global domain_schema, unit_norm_data, unit_classes

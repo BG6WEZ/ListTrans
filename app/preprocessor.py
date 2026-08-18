@@ -213,6 +213,16 @@ def parse_sub_parameters(content: str) -> Dict[str, str]:
                 k_clean = re.sub(r'(?:m³/h|m3/h|kW|W|Pa|MPa|mm|mm2|mm²|m|t|A|V|P)$', '', k_clean, flags=re.IGNORECASE).strip()
                 if "材质" in k_clean:
                     k_clean = "材质"
+                elif "半周长" in k_clean:
+                    k_clean = "半周长"
+                elif "长度" in k_clean and "工作" not in k_clean:
+                    k_clean = "长度"
+                elif "风量" in k_clean:
+                    k_clean = "风量"
+                elif "余压" in k_clean or "静压" in k_clean:
+                    k_clean = "机外余压"
+                elif "功率" in k_clean:
+                    k_clean = "功率"
                 if k_clean:
                     sub_params[k_clean] = v
         else:
@@ -505,6 +515,23 @@ def extract_params(text: str, category_hint: str = "") -> Dict[str, Any]:
         "attrs": attrs
     }
 
+PARAM_LABEL_WORDS = [
+    r'半周长\s*[：:]?', r'周长\s*[：:]?', r'长度\s*[：:]?', r'宽度\s*[：:]?',
+    r'高度\s*[：:]?', r'风量\s*[：:]?', r'余压\s*[：:]?', r'静压\s*[：:]?',
+    r'面积\s*[：:]?', r'厚度\s*[：:]?', r'壁厚\s*[：:]?'
+]
+PARAM_LABEL_PATTERN = re.compile('|'.join(PARAM_LABEL_WORDS), re.IGNORECASE)
+
+def clean_extracted_device_name(name: str) -> str:
+    """Strip parameter label words, isolated symbols, and trailing delimiters from device name."""
+    if not name:
+        return ""
+    cleaned = PARAM_LABEL_PATTERN.sub('', name)
+    cleaned = re.sub(r'[0-9\.\s[:：]]', '', cleaned)
+    cleaned = re.sub(r'[A-Za-z0-9\-\(\)/~～±]', '', cleaned)
+    cleaned = re.sub(r'[\s~～\-—:：,\.，。/]+$', '', cleaned).strip()
+    return cleaned
+
 def extract_device_name(text: str, category_name: str = "") -> str:
     """Extract a clean Chinese device name from the text block."""
     if not text:
@@ -516,7 +543,8 @@ def extract_device_name(text: str, category_name: str = "") -> str:
         model = extract_model(text)
         if model:
             line = line.replace(model, "").strip()
-        line = re.sub(r'[\s\-:：,\.，。]+$', '', line).strip()
+        line = PARAM_LABEL_PATTERN.sub('', line)
+        line = re.sub(r'[\s\-:：,\.，。~～]+$', '', line).strip()
         return line if line else category_name
         
     spec_match = re.search(r'(?:材质、规格|材质规格|设备名称)\s*[:：]\s*([^\n\r，,；;]+)', text)
@@ -526,18 +554,18 @@ def extract_device_name(text: str, category_name: str = "") -> str:
         if model:
             line = line.replace(model, "").strip()
         line = re.sub(r'(?:DN\d+|de\d+|\d+寸|\d+mm|型|系列).*$', '', line, flags=re.IGNORECASE).strip()
-        line = re.sub(r'[\s\-:：,\.，。]+$', '', line).strip()
+        line = PARAM_LABEL_PATTERN.sub('', line)
+        line = re.sub(r'[\s\-:：,\.，。~～]+$', '', line).strip()
         if len(line) > 2:
             return line
             
     first_line = text.split('\n')[0].strip()
     first_segment = re.split(r'[,，;；]', first_line)[0].strip()
-    first_line_clean = re.sub(r'[0-9\.\s[:：]]', '', first_segment)
-    first_line_clean = re.sub(r'[A-Za-z0-9\-\(\)/]', '', first_line_clean).strip()
+    first_line_clean = clean_extracted_device_name(first_segment)
     
-    if len(first_line_clean) > 2:
+    if len(first_line_clean) >= 2:
         # Check if the extracted segment looks like a property description rather than a device name
-        exclude_property_words = ["风量", "流量", "扬程", "功率", "压力", "口径", "管径", "尺寸", "规格", "型号", "材质", "温度", "电压", "电流", "安装", "部位", "介质", "工作"]
+        exclude_property_words = ["风量", "流量", "扬程", "功率", "压力", "口径", "管径", "尺寸", "规格", "型号", "材质", "温度", "电压", "电流", "安装", "部位", "介质", "工作", "半周长", "周长", "长度", "宽度", "高度", "面积", "厚度"]
         if not any(w in first_line_clean for w in exclude_property_words):
             return first_line_clean
             

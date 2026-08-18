@@ -105,12 +105,21 @@ def route_domain(category: str, name: str, specification: str, professional_hint
             return DOMAIN_SCHEMA_MAP.get(target_domain, target_domain)
 
     # Strong spec/name markers
-    if "消声器" in name_clean or "消声弯头" in name_clean:
+    if any(kw in cat_clean or kw in name_clean or kw in full_text for kw in [
+        "调节风阀", "多叶调节", "防火阀", "排烟防火阀", "排烟阀", "止回风阀", "密闭风阀",
+        "常开防火阀", "常闭防火阀", "定风量阀", "变风量阀", "多叶排烟口", "风阀",
+        "对开多叶调节阀", "风量调节阀", "70℃", "280℃", "70度", "280度"
+    ]) and any(w in full_text for w in ["阀", "排烟口", "风口调节"]):
+        return "damper"
+    if any(kw in cat_clean or kw in name_clean for kw in ["消声器", "消声弯头", "消音器", "消声百叶"]):
         return "silencer"
-    if any(kw in name_clean for kw in ["静压箱", "消声静压箱", "集风箱", "稳压箱"]):
+    if any(kw in cat_clean or kw in name_clean for kw in ["静压箱", "消声静压箱", "集风箱", "稳压箱"]):
         return "plenum"
+    # Ductwork routing
+    if any(kw in cat_clean or kw in name_clean for kw in ["风管", "通风管", "洁净风管", "风道", "排烟风管", "排风管", "送风管", "镀锌钢板风管"]):
+        return "damper"
     # Medical/HVAC filter routing (with safe English boundaries)
-    if any(kw in name_clean for kw in ["高效过滤器", "中效过滤器", "高效空气过滤器"]):
+    if any(kw in name_clean or kw in cat_clean for kw in ["高效过滤器", "中效过滤器", "高效空气过滤器"]):
         return "filter_ffu"
     if any(re.search(r'(?<![a-zA-Z])' + re.escape(acronym) + r'(?![a-zA-Z])', full_upper) for acronym in ["H13", "H14", "HEPA", "FFU"]):
         return "filter_ffu"
@@ -119,11 +128,13 @@ def route_domain(category: str, name: str, specification: str, professional_hint
     hvac_cn_keywords = [
         "全新风空气处理机组", "回风循环空气处理机组", "组合式空气处理机组", "风机盘管机组", "新风预处理机组",
         "循环空气处理机组", "热回收新风机组", "全热回收新风机组", "直膨式空气处理机组", "洁净室专用机组",
-        "末端送风单元", "变风量空调系统", "定风量空调系统", "新风风机单元", "定风量空调", "热回收"
+        "末端送风单元", "变风量空调系统", "定风量空调系统", "新风风机单元", "定风量空调", "热回收",
+        "风机盘管", "卡式风机盘管", "多联机", "多联式", "VRV", "VRF", "净化循环机组", "净化新风机组",
+        "吊顶新风机组", "空调机组", "洁卫型空调机组", "多联式空调室内机"
     ]
     hvac_en_acronyms = [
         "MAU", "PAU", "RAU", "FAU", "FCU", "RCU", "DOAS", "VAV", "RTU", "HRU", "ERU", "HPU", "FPU", "AHU",
-        "HRV", "ERV", "DXU", "CRU", "TU", "CAV", "PAF"
+        "HRV", "ERV", "DXU", "CRU", "TU", "CAV", "PAF", "VRV", "VRF"
     ]
     if any(kw in full_upper for kw in hvac_cn_keywords):
         return "ahu"
@@ -184,7 +195,7 @@ def route_domain(category: str, name: str, specification: str, professional_hint
 
     # Valve subcategories
     if any(kw in cat_clean or kw in name_clean for kw in ["阀", "阀门", "调节阀"]):
-        if any(kw in full_text for kw in ["风", "防火", "排烟", "密闭", "调节"]):
+        if any(kw in full_text or kw in cat_clean for kw in ["风", "防火", "排烟", "密闭", "调节", "止回风", "半周长"]):
             return "damper"
         elif any(kw in full_text for kw in ["医气", "氧气", "负压", "吸引"]):
             return "valve_medical_gas"
@@ -242,8 +253,14 @@ def route_domain(category: str, name: str, specification: str, professional_hint
     hint_vec = compute_sheet_hint_vector(professional_hint or cat_clean)
 
     if hint_vec.get("hvac", 0.0) > 0.3:
-        if "风" in full_text:
-            return "fan" if "机" in full_text else "damper"
+        if any(kw in full_text for kw in ["风管", "通风管", "风道"]):
+            return "damper"
+        elif any(kw in full_text for kw in ["阀", "防火阀", "排烟口"]):
+            return "damper"
+        elif any(kw in full_text for kw in ["风机盘管", "多联机", "空调机组", "新风机组", "循环机组", "AHU", "PAU", "FCU", "MAU"]):
+            return "ahu"
+        elif "风机" in full_text or "排风" in full_text:
+            return "fan"
         elif "管" in full_text:
             return "pipe_steel"
         return "ahu"
