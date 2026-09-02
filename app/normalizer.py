@@ -4,7 +4,7 @@ import re
 import json
 from typing import Dict, Any, List, Optional, Tuple
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
 
 def load_json_config(filename: str, default_val: Any) -> Any:
     path = os.path.join(CONFIG_DIR, filename)
@@ -42,15 +42,22 @@ def compile_configs():
         rx = re.compile(pattern, re.IGNORECASE)
         return rx, lower_map
 
-    alias_rx, alias_map = _build_compiled_regex(alias_dict)
-    material_rx, material_map = _build_compiled_regex(material_dict)
-    connection_rx, connection_map = _build_compiled_regex(connection_dict)
-    flags_rx, flags_map = _build_compiled_regex(flags_dict)
+    new_alias_rx, new_alias_map = _build_compiled_regex(alias_dict)
+    new_material_rx, new_material_map = _build_compiled_regex(material_dict)
+    new_connection_rx, new_connection_map = _build_compiled_regex(connection_dict)
+    new_flags_rx, new_flags_map = _build_compiled_regex(flags_dict)
     
-    unit_rx_list = []
+    new_unit_rx_list = []
     for raw_unit, standard in unit_rules.items():
         pattern = re.compile(r'(?<=\d)\s*' + re.escape(raw_unit) + r'(?=\b|[^a-zA-Z]|$)', re.IGNORECASE)
-        unit_rx_list.append((pattern, standard))
+        new_unit_rx_list.append((pattern, standard))
+
+    # Atomic assignment
+    alias_rx, alias_map = new_alias_rx, new_alias_map
+    material_rx, material_map = new_material_rx, new_material_map
+    connection_rx, connection_map = new_connection_rx, new_connection_map
+    flags_rx, flags_map = new_flags_rx, new_flags_map
+    unit_rx_list = new_unit_rx_list
 
 # Build initial compiled regexes
 compile_configs()
@@ -137,7 +144,6 @@ def clean_text_standard(text: str, discipline: Optional[str] = None, category: O
     text = re.sub(header_unit_pattern, r'\1', text, flags=re.IGNORECASE)
 
     text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'^(?:医用|医气|医院专用)', '', text.strip())
 
     # 7. Apply dynamic LLM DSL cleaning rules (post-normalization pass)
     try:
@@ -163,7 +169,8 @@ def clean_text_standard(text: str, discipline: Optional[str] = None, category: O
     return text.strip()
 
 def reload_normalizer_configs():
-    global alias_dict, material_dict, connection_dict, flags_dict, unit_rules
+    global CONFIG_DIR, alias_dict, material_dict, connection_dict, flags_dict, unit_rules
+    CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
     alias_dict = load_json_config("alias_dict.json", {})
     material_dict = load_json_config("material_dict.json", {})
     connection_dict = load_json_config("connection_dict.json", {})

@@ -49,22 +49,48 @@ if not logger.handlers:
     logger.addHandler(fh)
 
 
+from datetime import datetime, timedelta
+
 from dotenv import load_dotenv
 load_dotenv()
 
 ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:18080,http://localhost:18080").split(",")
 
+async def _daily_flywheel_mining_loop():
+    """Background scheduler to trigger mining engine daily at 02:00."""
+    logger.info("Flywheel daily mining scheduler registered.")
+    while True:
+        try:
+            now = datetime.now()
+            next_run = now.replace(hour=2, minute=0, second=0, microsecond=0)
+            if next_run <= now:
+                next_run += timedelta(days=1)
+            sleep_secs = (next_run - now).total_seconds()
+            await asyncio.sleep(sleep_secs)
+            
+            logger.info("Executing scheduled daily 02:00 flywheel mining run...")
+            from app.feedback_miner import miner
+            res = miner.run_mining()
+            logger.info(f"Daily flywheel mining finished: {res}")
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error(f"Error in daily flywheel mining loop: {e}")
+            await asyncio.sleep(3600)
+
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI):
-    """Lifespan initialization of DB and vector index."""
-    logger.info("Server started. Initializing Auth, Session, Audit, SQLite DB and vector index mapping.")
+    """Lifespan initialization of DB, vector index, and Data Flywheel scheduler."""
+    logger.info("Server started. Initializing Auth, Session, Audit, SQLite DB, Flywheel tables and vector index mapping.")
     from app.auth_manager import init_auth_db
     from app.session_manager import init_session_db, clean_old_draft_sessions
     from app.audit_manager import init_audit_tables
+    from app.flywheel_db import init_flywheel_tables
     init_auth_db()
     init_session_db()
     init_audit_tables()
+    init_flywheel_tables()
     try:
         clean_old_draft_sessions()
     except Exception as e:
@@ -81,12 +107,16 @@ async def lifespan(app_instance: FastAPI):
     except Exception as e:
         logger.error(f"Error in vector index initialization: {e}")
 
+    # Launch daily 02:00 background mining scheduler
+    mining_bg_task = asyncio.create_task(_daily_flywheel_mining_loop())
+
     logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
     yield
+    mining_bg_task.cancel()
 
 app = FastAPI(
     title="武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统",
-    version="0.1.2",
+    version="0.1.3",
     docs_url="/docs" if ENABLE_DOCS else None,
     redoc_url="/redoc" if ENABLE_DOCS else None,
     lifespan=lifespan
@@ -387,25 +417,27 @@ async def api_get_db_portrait():
         rows = cursor.execute("SELECT parsed_params FROM materials").fetchall()
         model_extracted_count = 0
         structured_attr_count = 0
+        # 2. Disabled items
+        disabled_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE disabled = 1").fetchone()[0]
+        valid_materials = total_items - disabled_count
         
-        for r in rows:
-            p_json = r[0]
-            if p_json:
-                try:
-                    p = json.loads(p_json)
-                    if p.get("model"):
-                        model_extracted_count += 1
-                    attrs = p.get("attrs", {})
-                    if isinstance(attrs, dict) and len([k for k, v in attrs.items() if v]) >= 2:
-                        structured_attr_count += 1
-                except Exception:
-                    pass
-                    
+        # 3. Category coverage
+        category_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE category IS NOT NULL AND category != ''").fetchone()[0]
+        
+        # 4. Specification coverage
+        spec_nonempty_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE specification IS NOT NULL AND specification != ''").fetchone()[0]
+        spec_nonempty_rate = round((spec_nonempty_count / total_items) * 100, 1) if total_items > 0 else 0.0
+        
+        # 5. Model extraction rate
+        model_extracted_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE model_extracted IS NOT NULL AND model_extracted != ''").fetchone()[0]
         model_missing_count = total_items - model_extracted_count
-        model_extracted_rate = round((model_extracted_count / total_items) * 100, 2)
-        structured_attr_rate = round((structured_attr_count / total_items) * 100, 2)
+        model_extracted_rate = round((model_extracted_count / total_items) * 100, 1) if total_items > 0 else 0.0
         
-        # 6. Top 5 Categories
+        # 6. Structured Attributes rate
+        structured_attr_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE structured_params IS NOT NULL AND structured_params != '' AND structured_params != '{}'").fetchone()[0]
+        structured_attr_rate = round((structured_attr_count / total_items) * 100, 1) if total_items > 0 else 0.0
+        
+        # Top 5 categories
         top_cats = cursor.execute(
             "SELECT category, COUNT(*) as cnt FROM materials WHERE category IS NOT NULL AND category != '' GROUP BY category ORDER BY cnt DESC LIMIT 5"
         ).fetchall()
@@ -440,8 +472,9 @@ async def api_get_db_portrait():
 
 @app.delete("/api/system/reset")
 async def api_system_reset(current_user: dict = Depends(require_admin)):
-    """Reset system runtime data (clear sessions, uploads, and feedback log). Only administrators are allowed."""
+    """Reset system runtime data (clear sessions, uploads, feedback log, and flywheel tables). Only administrators are allowed."""
     try:
+        from app.db_manager import get_db_cursor
         # 1. Clear work_sessions database table
         clear_all_runtime_data()
         
@@ -462,9 +495,16 @@ async def api_system_reset(current_user: dict = Depends(require_admin)):
                     json.dump([], f)
             except Exception as e:
                 logger.error(f"Failed to reset binding feedback file: {e}")
+
+        # 4. Clean flywheel runtime data (P2-7)
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("DELETE FROM flywheel_records WHERE user_id != 'legacy_anonymous'")
+            cur.execute("DELETE FROM flywheel_rule_suggestions")
+            cur.execute("DELETE FROM flywheel_config_snapshots")
+            cur.execute("DELETE FROM flywheel_pattern_aggregates")
                 
         security_logger.info(f"System runtime data reset executed by admin '{current_user.get('username')}'.")
-        return {"success": True, "message": "系统运行数据（会话草稿、上传临时文件及反馈日志）已全面清理恢复干净状态！"}
+        return {"success": True, "message": "系统运行数据（会话草稿、上传临时文件、反馈日志及飞轮流水）已全面清理恢复干净状态！"}
     except Exception as e:
         logger.error(f"Error executing system reset: {e}")
         raise HTTPException(status_code=500, detail=f"清理系统数据失败: {str(e)}")
@@ -1248,6 +1288,61 @@ async def api_refresh_vector():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+_config_file_lock = threading.Lock()
+
+def atomic_write_json_config(filepath: str, data: Any):
+    """Atomically write JSON configuration using tempfile and os.replace with verification."""
+    import tempfile
+    with _config_file_lock:
+        dir_name = os.path.dirname(filepath)
+        os.makedirs(dir_name, exist_ok=True)
+        fd, temp_path = tempfile.mkstemp(dir=dir_name, prefix="cfg_tmp_", suffix=".json")
+        try:
+            with open(fd, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            # Verify file is valid JSON before replace
+            with open(temp_path, "r", encoding="utf-8") as f:
+                json.load(f)
+            os.replace(temp_path, filepath)
+        except Exception:
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except Exception:
+                    pass
+            raise
+
+def trigger_all_config_reloads():
+    """Trigger reload across all configuration consumers and clear caches."""
+    try:
+        reload_preprocessor_configs()
+    except Exception as e:
+        logger.warning(f"Error in reload_preprocessor_configs: {e}")
+    try:
+        reload_matcher_configs()
+    except Exception as e:
+        logger.warning(f"Error in reload_matcher_configs: {e}")
+    try:
+        from app.normalizer import reload_normalizer_configs
+        reload_normalizer_configs()
+    except Exception as e:
+        logger.warning(f"Error in reload_normalizer_configs: {e}")
+    try:
+        from app.domain_extractors import reload_extractor_configs
+        reload_extractor_configs()
+    except Exception as e:
+        logger.warning(f"Error in reload_extractor_configs: {e}")
+    try:
+        from app.domain_router import reload_router_configs
+        reload_router_configs()
+    except Exception as e:
+        logger.warning(f"Error in reload_router_configs: {e}")
+    try:
+        from app.llm_rule_engine import LLMRuleManager
+        LLMRuleManager.clear_active_cache()
+    except Exception as e:
+        logger.warning(f"Error in LLMRuleManager.clear_active_cache: {e}")
+
 @app.post("/api/config/save", dependencies=[Depends(require_admin)])
 async def api_save_config(req: ConfigSaveRequest):
     """Save user configuration panels variables to config json files."""
@@ -1264,16 +1359,435 @@ async def api_save_config(req: ConfigSaveRequest):
     if not filename:
         raise HTTPException(status_code=400, detail="Invalid config type")
         
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", filename)
+    config_dir = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
+    config_path = os.path.join(config_dir, filename)
     try:
-        with open(config_path, "w", encoding="utf-8") as f:
-            json.dump(req.data, f, ensure_ascii=False, indent=4)
-        # Trigger runtime reload
-        reload_preprocessor_configs()
-        reload_matcher_configs()
+        atomic_write_json_config(config_path, req.data)
+        trigger_all_config_reloads()
         return {"code": 0, "msg": "配置保存成功并实时生效"}
     except Exception as e:
+        logger.error(f"Error in api_save_config: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+class FlywheelRecordRequest(BaseModel):
+    client_event_id: str
+    session_id: str
+    row_idx: int
+    discipline: Optional[str] = "通用"
+    raw_name: str
+    raw_spec: Optional[str] = ""
+    raw_unit: Optional[str] = ""
+    raw_category: Optional[str] = ""
+    extracted_params: Optional[Dict[str, Any]] = None
+    auto_top1_code: Optional[str] = ""
+    auto_top1_score: Optional[float] = 0.0
+    auto_top1_name: Optional[str] = ""
+    auto_candidates: Optional[List[Dict[str, Any]]] = None
+    algo_version: Optional[str] = "v1.0"
+    config_version: Optional[str] = ""
+    action_type: str
+    final_targets: List[Dict[str, Any]]
+
+@app.post("/api/flywheel/record")
+async def api_flywheel_record(req: FlywheelRecordRequest, current_user: dict = Depends(require_employee)):
+    """Record user match action and calibration context into Data Flywheel with idempotency."""
+    from app.db_manager import get_db_cursor
+    from app.preprocessor import clean_text
+    try:
+        user_id = str(current_user.get("username") or current_user.get("id") or "anonymous")
+        user_name = str(current_user.get("name") or user_id)
+        raw_name_norm = clean_text(req.raw_name)
+        extracted_params_json = json.dumps(req.extracted_params or {}, ensure_ascii=False)
+        auto_candidates_json = json.dumps(req.auto_candidates[:3] if req.auto_candidates else [], ensure_ascii=False)
+        final_targets_json = json.dumps(req.final_targets or [], ensure_ascii=False)
+        
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+            INSERT OR IGNORE INTO flywheel_records (
+                client_event_id, session_id, row_idx, discipline,
+                raw_name, raw_name_norm, raw_spec, raw_unit, raw_category,
+                extracted_params, auto_top1_code, auto_top1_score, auto_top1_name,
+                auto_candidates_json, algo_version, config_version, action_type,
+                final_targets_json, user_id, user_name, superseded, is_processed
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
+            """, (
+                req.client_event_id, req.session_id, req.row_idx, req.discipline or "通用",
+                req.raw_name, raw_name_norm, req.raw_spec or "", req.raw_unit or "", req.raw_category or "",
+                extracted_params_json, req.auto_top1_code or "", float(req.auto_top1_score or 0.0), req.auto_top1_name or "",
+                auto_candidates_json, req.algo_version or "v1.0", req.config_version or "", req.action_type,
+                final_targets_json, user_id, user_name
+            ))
+            
+            if cur.rowcount == 1:
+                new_id = cur.lastrowid
+                cur.execute("""
+                UPDATE flywheel_records SET superseded = 1
+                WHERE session_id = ? AND row_idx = ? AND id < ? AND superseded = 0
+                """, (req.session_id, req.row_idx, new_id))
+                
+        return {"code": 0, "msg": "操作流水已成功记录"}
+    except Exception as e:
+        logger.error(f"Error in api_flywheel_record: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+class FlywheelEvalRequest(BaseModel):
+    suggestion_id: int
+
+class FlywheelAcceptRequest(BaseModel):
+    suggestion_id: int
+    edited_target_value: Optional[str] = None
+
+class FlywheelRejectRequest(BaseModel):
+    suggestion_id: int
+    reason: Optional[str] = ""
+
+class FlywheelRollbackRequest(BaseModel):
+    snapshot_version: Optional[str] = None
+
+@app.get("/api/flywheel/statistics", dependencies=[Depends(require_manager)])
+async def api_flywheel_statistics():
+    from app.db_manager import get_db_cursor
+    with get_db_cursor() as cur:
+        cur.execute("SELECT COUNT(*) as total FROM flywheel_records")
+        total_records = cur.fetchone()["total"]
+        
+        cur.execute("SELECT action_type, COUNT(*) as cnt FROM flywheel_records WHERE superseded = 0 GROUP BY action_type")
+        action_counts = {r["action_type"]: r["cnt"] for r in cur.fetchall()}
+        
+        cur.execute("SELECT COUNT(DISTINCT user_id) as users FROM flywheel_records WHERE user_id != 'legacy_anonymous'")
+        active_users = cur.fetchone()["users"]
+        
+        cur.execute("SELECT status, COUNT(*) as cnt FROM flywheel_rule_suggestions GROUP BY status")
+        suggestion_counts = {r["status"]: r["cnt"] for r in cur.fetchall()}
+        
+        cur.execute("SELECT COUNT(*) as snap_cnt FROM flywheel_config_snapshots WHERE is_active = 1")
+        active_snapshots = cur.fetchone()["snap_cnt"]
+        
+    return JSONResponse(content={
+        "total_records": total_records,
+        "action_counts": action_counts,
+        "active_users": active_users,
+        "suggestion_counts": suggestion_counts,
+        "active_snapshots": active_snapshots
+    })
+
+@app.get("/api/flywheel/suggestions", dependencies=[Depends(require_manager)])
+async def api_flywheel_suggestions(status: Optional[str] = None):
+    from app.db_manager import get_db_cursor
+    with get_db_cursor() as cur:
+        if status:
+            cur.execute("""
+            SELECT * FROM flywheel_rule_suggestions
+            WHERE status = ?
+            ORDER BY support_count DESC, consistency DESC, id DESC
+            """, (status,))
+        else:
+            cur.execute("""
+            SELECT * FROM flywheel_rule_suggestions
+            ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'observing' THEN 2 WHEN 'accepted' THEN 3 ELSE 4 END,
+                     support_count DESC, consistency DESC
+            """)
+        rows = [dict(r) for r in cur.fetchall()]
+    return JSONResponse(content={"suggestions": rows})
+
+@app.post("/api/flywheel/suggestions/eval", dependencies=[Depends(require_admin)])
+async def api_flywheel_eval_suggestion(req: FlywheelEvalRequest):
+    from app.db_manager import get_db_cursor
+    from app.flywheel_sandbox import start_sandbox_evaluation
+    with get_db_cursor() as cur:
+        cur.execute("SELECT * FROM flywheel_rule_suggestions WHERE id = ?", (req.suggestion_id,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Suggestion not found")
+        sug_dict = dict(row)
+        
+    task_id = start_sandbox_evaluation(sug_dict)
+    return {"code": 0, "task_id": task_id, "msg": "沙箱评测任务已启动"}
+
+@app.get("/api/flywheel/eval/{task_id}", dependencies=[Depends(require_admin)])
+async def api_flywheel_get_eval_status(task_id: str):
+    from app.flywheel_sandbox import get_eval_task_status
+    status = get_eval_task_status(task_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Eval task not found")
+    return JSONResponse(content=status)
+
+@app.post("/api/flywheel/suggestions/accept", dependencies=[Depends(require_admin)])
+async def api_flywheel_accept_suggestion(req: FlywheelAcceptRequest, current_user: dict = Depends(require_admin)):
+    """Accept a suggestion with two-phase atomic write, snapshot creation, and compensating rollback."""
+    from app.db_manager import get_db_cursor
+    operator_id = str(current_user.get("username") or "admin")
+    config_dir = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
+    snap_version = f"snap_{time.strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    
+    # 1. Fetch suggestion details
+    with get_db_cursor() as cur:
+        cur.execute("SELECT * FROM flywheel_rule_suggestions WHERE id = ?", (req.suggestion_id,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Suggestion not found")
+        sug = dict(row)
+        
+    target_value = req.edited_target_value if req.edited_target_value is not None else sug["target_value"]
+    target_type = sug["suggestion_type"]
+    source_pattern = sug["source_pattern"]
+    
+    if target_type == "ALIAS":
+        target_path = os.path.join(config_dir, "alias_dict.json")
+        before_data = {}
+        if os.path.exists(target_path):
+            with open(target_path, "r", encoding="utf-8") as f:
+                before_data = json.load(f)
+        after_data = dict(before_data)
+        after_data[source_pattern] = target_value
+        reason = f"采纳别名 '{source_pattern}' -> '{target_value}'" + (" (经人工编辑)" if req.edited_target_value else "")
+    elif target_type == "BINDING_RULE":
+        target_path = os.path.join(config_dir, "auto_binding_rules.json")
+        before_data = []
+        if os.path.exists(target_path):
+            with open(target_path, "r", encoding="utf-8") as f:
+                before_data = json.load(f)
+        after_data = list(before_data)
+        after_data.append({
+            "original_name": source_pattern,
+            "bound_materials": json.loads(target_value) if isinstance(target_value, str) else target_value
+        })
+        reason = f"采纳多物料绑定规则 '{source_pattern}'" + (" (经人工编辑)" if req.edited_target_value else "")
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported suggestion type: {target_type}")
+
+    # 2. Atomic write config file
+    try:
+        atomic_write_json_config(target_path, after_data)
+    except Exception as e:
+        logger.error(f"Failed to write config file {target_path}: {e}")
+        raise HTTPException(status_code=500, detail=f"配置文件写入失败: {str(e)}")
+
+    # 3. Update DB state in transaction (Snapshot + Suggestion status)
+    try:
+        with get_db_cursor(commit=True) as cur:
+            cur.execute("""
+            INSERT INTO flywheel_config_snapshots (
+                snapshot_version, target_type, config_before, config_after,
+                suggestion_id, reason, operator_id, is_active, targeted_eval_passed
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1)
+            """, (
+                snap_version, target_type,
+                json.dumps(before_data, ensure_ascii=False),
+                json.dumps(after_data, ensure_ascii=False),
+                req.suggestion_id,
+                reason,
+                operator_id
+            ))
+            
+            cur.execute("""
+            UPDATE flywheel_rule_suggestions
+            SET status = 'accepted', target_value = ?, reviewer_id = ?, reviewed_at = CURRENT_TIMESTAMP,
+                applied_rule_id = ?
+            WHERE id = ?
+            """, (target_value, operator_id, snap_version, req.suggestion_id))
+            
+            log_audit_event(
+                username=operator_id,
+                action="飞轮规则采纳",
+                details=f"采纳 {target_type} 建议: {source_pattern} -> {target_value} (快照: {snap_version})"
+            )
+    except Exception as e:
+        # Compensating rollback of the config file
+        logger.error(f"DB update failed during suggestion accept, performing compensating file rollback: {e}")
+        try:
+            atomic_write_json_config(target_path, before_data)
+        except Exception as ce:
+            logger.critical(f"Compensating rollback failed for {target_path}: {ce}")
+        raise HTTPException(status_code=500, detail=f"数据库更新失败，已安全复原配置文件: {str(e)}")
+
+    # 4. Trigger in-memory cache reload outside of DB transaction
+    try:
+        trigger_all_config_reloads()
+    except Exception as e:
+        logger.error(f"Error during trigger_all_config_reloads: {e}")
+
+    return {"code": 0, "msg": "规则已成功采纳并秒级生效", "snapshot_version": snap_version}
+
+@app.post("/api/flywheel/suggestions/reject", dependencies=[Depends(require_admin)])
+async def api_flywheel_reject_suggestion(req: FlywheelRejectRequest, current_user: dict = Depends(require_admin)):
+    from app.db_manager import get_db_cursor
+    operator_id = str(current_user.get("username") or "admin")
+    with get_db_cursor(commit=True) as cur:
+        cur.execute("""
+        UPDATE flywheel_rule_suggestions
+        SET status = 'rejected', reviewer_id = ?, reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """, (operator_id, req.suggestion_id))
+        
+        log_audit_event(
+            username=operator_id,
+            action="飞轮规则驳回",
+            details=f"驳回建议 ID: {req.suggestion_id}, 原因: {req.reason or '无'}"
+        )
+    return {"code": 0, "msg": "建议已标记为驳回"}
+
+@app.get("/api/flywheel/snapshots", dependencies=[Depends(require_admin)])
+async def api_flywheel_get_snapshots():
+    from app.db_manager import get_db_cursor
+    with get_db_cursor() as cur:
+        cur.execute("""
+        SELECT * FROM flywheel_config_snapshots
+        ORDER BY id DESC
+        LIMIT 50
+        """)
+        rows = [dict(r) for r in cur.fetchall()]
+    return JSONResponse(content={"snapshots": rows})
+
+@app.post("/api/flywheel/rollback", dependencies=[Depends(require_admin)])
+async def api_flywheel_rollback_snapshot(req: FlywheelRollbackRequest, current_user: dict = Depends(require_admin)):
+    """LIFO stack-based rollback to safely restore previous configuration."""
+    from app.db_manager import get_db_cursor
+    operator_id = str(current_user.get("username") or "admin")
+    config_dir = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
+    
+    # 1. Fetch snapshot info
+    with get_db_cursor() as cur:
+        if req.snapshot_version:
+            cur.execute("""
+            SELECT * FROM flywheel_config_snapshots
+            WHERE snapshot_version = ? AND is_active = 1
+            """, (req.snapshot_version,))
+        else:
+            cur.execute("""
+            SELECT * FROM flywheel_config_snapshots
+            WHERE is_active = 1
+            ORDER BY id DESC LIMIT 1
+            """)
+        snap = cur.fetchone()
+        if not snap:
+            raise HTTPException(status_code=400, detail="没有可回滚的有效快照")
+        snap = dict(snap)
+            
+    snap_id = snap["id"]
+    snap_ver = snap["snapshot_version"]
+    target_type = snap["target_type"]
+    config_before = json.loads(snap["config_before"])
+    config_after = json.loads(snap["config_after"])
+    suggestion_id = snap["suggestion_id"]
+    
+    if target_type == "ALIAS":
+        target_path = os.path.join(config_dir, "alias_dict.json")
+    elif target_type == "BINDING_RULE":
+        target_path = os.path.join(config_dir, "auto_binding_rules.json")
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported target type: {target_type}")
+        
+    # 2. Write config file first
+    try:
+        atomic_write_json_config(target_path, config_before)
+    except Exception as e:
+        logger.error(f"Failed to write config file {target_path} during rollback: {e}")
+        raise HTTPException(status_code=500, detail=f"配置文件回滚写入失败: {str(e)}")
+
+    # 3. Update DB state in transaction
+    try:
+        with get_db_cursor(commit=True) as cur:
+            if suggestion_id:
+                cur.execute("""
+                UPDATE flywheel_rule_suggestions
+                SET status = 'rolled_back', reviewed_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """, (suggestion_id,))
+                
+            cur.execute("UPDATE flywheel_config_snapshots SET is_active = 0 WHERE id = ?", (snap_id,))
+            
+            log_audit_event(
+                username=operator_id,
+                action="飞轮规则回滚",
+                details=f"回滚快照: {snap_ver} (目标: {target_type})"
+            )
+    except Exception as e:
+        # Compensating file restore
+        try:
+            atomic_write_json_config(target_path, config_after)
+        except Exception as ce:
+            logger.critical(f"Compensating file restore failed: {ce}")
+        raise HTTPException(status_code=500, detail=f"数据库回滚记录失败，已复原配置: {str(e)}")
+
+    # 4. Trigger reload outside DB transaction
+    try:
+        trigger_all_config_reloads()
+    except Exception as e:
+        logger.error(f"Error during trigger_all_config_reloads after rollback: {e}")
+        
+    return {"code": 0, "msg": f"快照 {snap_ver} 已成功回滚并恢复配置"}
+
+@app.post("/api/flywheel/miner/run", dependencies=[Depends(require_admin)])
+async def api_flywheel_run_miner():
+    """Trigger manual mining run."""
+    from app.feedback_miner import miner
+    res = miner.run_mining()
+    return {"code": 0, "result": res, "msg": "数据挖掘与规则聚类完成"}
+
+@app.get("/api/flywheel/export/benchmark", dependencies=[Depends(require_admin)])
+async def api_flywheel_export_benchmark():
+    """Export golden evaluation set with flywheel_auto isolated cases (excluding already matched aliases)."""
+    from app.db_manager import get_db_cursor
+    from app.normalizer import alias_dict
+    with get_db_cursor() as cur:
+        cur.execute("""
+        SELECT raw_name, raw_spec, final_targets_json, action_type
+        FROM flywheel_records
+        WHERE action_type IN ('CONFIRM_TOP1', 'MANUAL_REPLACE') AND superseded = 0
+        LIMIT 500
+        """)
+        rows = cur.fetchall()
+        
+    items = []
+    for r in rows:
+        targets = json.loads(r["final_targets_json"] or "[]")
+        t_code = targets[0].get("code", "") if targets else ""
+        t_name = targets[0].get("name", "") if targets else ""
+        
+        # P1-3: Prevent leakage: skip items where raw_name is already in alias_dict and action was CONFIRM_TOP1
+        if r["raw_name"] in alias_dict and r["action_type"] == "CONFIRM_TOP1":
+            continue
+            
+        items.append({
+            "id": f"FA-{len(items)+1:04d}",
+            "source": "flywheel_auto",
+            "name": r["raw_name"],
+            "raw_name": r["raw_name"],
+            "specification": r["raw_spec"],
+            "raw_spec": r["raw_spec"],
+            "target_codes": [t_code] if t_code else [],
+            "target_name": t_name,
+            "label_type": "1to1",
+            "professional": "通用",
+            "ambiguous": False
+        })
+    return JSONResponse(content={"items": items, "count": len(items)})
+
+@app.get("/api/flywheel/export/triplets", dependencies=[Depends(require_admin)])
+async def api_flywheel_export_triplets():
+    """Export BGE contrastive triplets (Anchor, Positive, Hard Negative)."""
+    from app.db_manager import get_db_cursor
+    with get_db_cursor() as cur:
+        cur.execute("""
+        SELECT raw_name, raw_spec, auto_top1_name, final_targets_json
+        FROM flywheel_records
+        WHERE action_type = 'MANUAL_REPLACE' AND auto_top1_name != '' AND superseded = 0
+        LIMIT 500
+        """)
+        rows = cur.fetchall()
+        
+    triplets = []
+    for r in rows:
+        targets = json.loads(r["final_targets_json"] or "[]")
+        t_name = targets[0].get("name", "") if targets else ""
+        if t_name and r["auto_top1_name"] and t_name != r["auto_top1_name"]:
+            triplets.append({
+                "anchor": f"{r['raw_name']} {r['raw_spec']}".strip(),
+                "positive": t_name,
+                "negative": r["auto_top1_name"]
+            })
+    return JSONResponse(content={"triplets": triplets, "count": len(triplets)})
 
 @app.post("/api/feedback/submit", dependencies=[Depends(require_employee)])
 async def api_submit_feedback(req: FeedbackSubmitRequest):

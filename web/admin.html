@@ -615,6 +615,9 @@
                 <button class="nav-tab-btn" id="tab-btn-llm" onclick="switchAdminTab('llm')">
                     🤖 大模型服务调度
                 </button>
+                <button class="nav-tab-btn" id="tab-btn-flywheel" onclick="switchAdminTab('flywheel')">
+                    🔄 数据飞轮与规则演化
+                </button>
             </div>
         </div>
 
@@ -969,7 +972,7 @@
         <div id="tab-content-users" class="tab-content-pane">
             <div class="admin-header">
                 <div>
-                    <h1>系统用户与权限管理 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">V0.1.2</span></h1>
+                    <h1>系统用户与权限管理 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">V0.1.3</span></h1>
                     <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">依据企业人员清单分配账号，支持手机号登录、部门职位管理与角色权限配置</p>
                 </div>
                 <div class="header-actions">
@@ -1097,6 +1100,166 @@
                         <!-- Dynamically loaded -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- ==================================================== -->
+        <!-- TAB 6: Data Flywheel & Rule Evolution Panel          -->
+        <!-- ==================================================== -->
+        <div id="tab-content-flywheel" class="tab-content-pane">
+            <div class="admin-header">
+                <div>
+                    <h1>数据飞轮与智能规则演化 (Data Flywheel & Rule Evolution)</h1>
+                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">全量沉淀一线工程师手动纠错、换选与多物料绑定先验知识，通过两阶段挖掘、子进程沙箱回归验证与 LIFO 栈式回滚实现规则闭环演进</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-action btn-primary-action" onclick="triggerFlywheelMining()"><i class="fa-solid fa-wand-magic-sparkles"></i> 🔄 执行增量挖掘</button>
+                    <button class="btn-action" onclick="exportFlywheelBenchmark()">📥 导出评测集</button>
+                    <button class="btn-action" onclick="exportFlywheelTriplets()">🧬 导出微调三元组</button>
+                    <button class="btn-action btn-warning-action" onclick="openSnapshotsModal()">📜 快照与回滚历史</button>
+                    <button class="btn-action btn-danger-action" onclick="rollbackFlywheelLatestSnapshot()">⏪ 一键回滚最新快照</button>
+                </div>
+            </div>
+
+            <!-- Metric Summary Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-title">累计采集交互流水</div>
+                    <div class="metric-value" id="stat-fw-total-records">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">独立贡献操作员</div>
+                    <div class="metric-value" id="stat-fw-active-users" style="color: #34d399;">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">待审核规则提议 (Pending)</div>
+                    <div class="metric-value" id="stat-fw-pending" style="color: #f59e0b;">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">当前有效配置快照</div>
+                    <div class="metric-value" id="stat-fw-snapshots" style="color: #38bdf8;">-</div>
+                </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div class="filter-toolbar">
+                <select id="fw-filter-status" class="filter-select" onchange="fetchFlywheelSuggestions()">
+                    <option value="">全部状态 (按推荐优先级)</option>
+                    <option value="pending" selected>待审核建议 (Pending)</option>
+                    <option value="observing">观察池长尾词 (Observing)</option>
+                    <option value="accepted">已采纳规则 (Accepted)</option>
+                    <option value="rejected">已驳回建议 (Rejected)</option>
+                    <option value="rolled_back">已回滚历史 (Rolled Back)</option>
+                </select>
+                <select id="fw-filter-type" class="filter-select" onchange="filterFlywheelTable()">
+                    <option value="">全部建议类型</option>
+                    <option value="ALIAS">别名与简称 (ALIAS)</option>
+                    <option value="BINDING_RULE">多物料绑定 (BINDING_RULE)</option>
+                </select>
+                <input type="text" id="fw-search-input" class="filter-input" placeholder="按触发词或目标值搜索..." oninput="filterFlywheelTable()">
+                <div class="record-counter" id="fw-counter">共 0 条建议</div>
+            </div>
+
+            <!-- Suggestions Table -->
+            <div class="table-scroll-container">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">类型</th>
+                            <th style="width: 180px;">触发模式 / 原始词</th>
+                            <th>建议目标映射 / 组合</th>
+                            <th style="width: 100px;">支持人次</th>
+                            <th style="width: 100px;">独立人数</th>
+                            <th style="width: 100px;">一致性</th>
+                            <th style="width: 100px;">状态</th>
+                            <th style="width: 260px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flywheel-suggestions-body">
+                        <!-- Dynamically loaded -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Flywheel Edit & Accept Modal -->
+        <div class="modal" id="fw-edit-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h2>编辑并采纳规则建议</h2>
+                </div>
+                <form id="fw-edit-form">
+                    <input type="hidden" id="fw-edit-id">
+                    <div class="form-group">
+                        <label>触发模式 / 原始词 (只读)</label>
+                        <input type="text" id="fw-edit-src" readonly style="opacity: 0.8;">
+                    </div>
+                    <div class="form-group">
+                        <label for="fw-edit-target">建议目标映射值 (支持人工微调纠正) *</label>
+                        <textarea id="fw-edit-target" rows="3" required></textarea>
+                    </div>
+                    <div style="background: rgba(59,130,246,0.1); border-left: 3px solid #3b82f6; padding: 10px; border-radius: 4px; font-size: 12px; color: #93c5fd; margin-bottom: 12px;">
+                        💡 采纳后将自动生成配置快照，原子写回配置文件并秒级热重载生效。
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-action" onclick="closeModal('fw-edit-modal')">取消</button>
+                        <button type="submit" class="btn-action btn-primary-action">确认采纳并生效</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Flywheel Sandbox Eval Task Modal -->
+        <div class="modal" id="fw-eval-modal">
+            <div class="modal-content" style="max-width: 650px;">
+                <div class="modal-header">
+                    <h2>🧪 沙箱黄金集回归评测监控</h2>
+                </div>
+                <div id="fw-eval-content" style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 18px; margin-bottom: 8px;" id="fw-eval-title">正在子进程沙箱中运行回归评测...</div>
+                        <div style="color: #8a99ad;" id="fw-eval-msg">正在克隆配置并执行 tests/eval_golden_set.py</div>
+                        <div style="width: 100%; background: rgba(255,255,255,0.08); border-radius: 8px; height: 12px; margin-top: 16px; overflow: hidden;">
+                            <div id="fw-eval-bar" style="width: 10%; height: 100%; background: #38bdf8; transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    <div id="fw-eval-report" style="display: none; margin-top: 14px; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 8px;">
+                        <!-- Injected report -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('fw-eval-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flywheel Snapshots History Modal -->
+        <div class="modal" id="fw-snapshots-modal">
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h2>📜 配置变更快照栈 (LIFO 栈式回滚)</h2>
+                </div>
+                <div class="table-scroll-container" style="max-height: 400px;">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>快照版本号</th>
+                                <th>目标类型</th>
+                                <th>变更原因</th>
+                                <th>操作人</th>
+                                <th>状态</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fw-snapshots-body">
+                            <!-- Injected -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action" onclick="closeModal('fw-snapshots-modal')">关闭</button>
+                    <button type="button" class="btn-action btn-danger-action" onclick="rollbackFlywheelLatestSnapshot()">⏪ 回滚栈顶最新快照</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1448,7 +1611,7 @@
         function switchAdminTab(tabName) {
             currentActiveTab = tabName;
             
-            ['health', 'stats', 'logs', 'users', 'llm'].forEach(t => {
+            ['health', 'stats', 'logs', 'users', 'llm', 'flywheel'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
                 const pane = document.getElementById(`tab-content-${t}`);
                 if (btn) btn.classList.toggle('active', t === tabName);
@@ -1466,6 +1629,9 @@
                 fetchUsers();
             } else if (tabName === 'llm') {
                 fetchLLMProviders();
+            } else if (tabName === 'flywheel') {
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
             }
         }
 
@@ -2459,6 +2625,391 @@
                 fetchLLMProviders();
             } catch (err) {
                 alert('删除失败: ' + err.message);
+            }
+        }
+
+        // ==========================================
+        // 6. Data Flywheel & Rule Evolution Logic
+        // ==========================================
+        let allFlywheelSuggestions = [];
+        let evalPollTimer = null;
+
+        async function fetchFlywheelDashboard() {
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/statistics`, {
+                    headers: getAuthHeaders()
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                document.getElementById('stat-fw-total-records').innerText = (data.total_records || 0) + ' 条';
+                document.getElementById('stat-fw-active-users').innerText = (data.active_users || 0) + ' 人';
+                
+                const pendingCnt = (data.suggestion_counts && data.suggestion_counts['pending']) || 0;
+                document.getElementById('stat-fw-pending').innerText = pendingCnt + ' 条';
+                
+                document.getElementById('stat-fw-snapshots').innerText = (data.active_snapshots || 0) + ' 个';
+            } catch (err) {
+                console.error('Error fetching flywheel stats:', err);
+            }
+        }
+
+        async function fetchFlywheelSuggestions() {
+            const status = document.getElementById('fw-filter-status').value;
+            const tbody = document.getElementById('flywheel-suggestions-body');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #8a99ad; padding: 20px;">正在加载智能提议规则...</td></tr>';
+            
+            try {
+                const url = status 
+                    ? `${API_URL}/api/flywheel/suggestions?status=${encodeURIComponent(status)}`
+                    : `${API_URL}/api/flywheel/suggestions`;
+                const res = await fetch(url, { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('获取规则建议失败');
+                const data = await res.json();
+                allFlywheelSuggestions = data.suggestions || [];
+                renderFlywheelSuggestionsTable(allFlywheelSuggestions);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">加载失败: ${err.message}</td></tr>`;
+            }
+        }
+
+        function filterFlywheelTable() {
+            const typeVal = document.getElementById('fw-filter-type').value;
+            const searchVal = document.getElementById('fw-search-input').value.trim().toLowerCase();
+            
+            const filtered = allFlywheelSuggestions.filter(s => {
+                if (typeVal && s.suggestion_type !== typeVal) return false;
+                if (searchVal) {
+                    const src = (s.source_pattern || '').toLowerCase();
+                    const tgt = (s.target_value || '').toLowerCase();
+                    if (!src.includes(searchVal) && !tgt.includes(searchVal)) return false;
+                }
+                return true;
+            });
+            renderFlywheelSuggestionsTable(filtered);
+        }
+
+        function renderFlywheelSuggestionsTable(suggestions) {
+            const tbody = document.getElementById('flywheel-suggestions-body');
+            tbody.innerHTML = '';
+            document.getElementById('fw-counter').innerText = `共 ${suggestions.length} 条建议`;
+            
+            if (suggestions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #8a99ad; padding: 30px;">暂无匹配的智能规则建议</td></tr>';
+                return;
+            }
+
+            suggestions.forEach(s => {
+                const tr = document.createElement('tr');
+                
+                // Status badge
+                let statusBadge = '';
+                if (s.status === 'pending') {
+                    statusBadge = '<span class="status-badge status-warning">待审核</span>';
+                } else if (s.status === 'observing') {
+                    statusBadge = '<span class="status-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">观察池</span>';
+                } else if (s.status === 'accepted') {
+                    statusBadge = '<span class="status-badge status-active">已采纳</span>';
+                } else if (s.status === 'rejected') {
+                    statusBadge = '<span class="status-badge status-inactive">已驳回</span>';
+                } else if (s.status === 'rolled_back') {
+                    statusBadge = '<span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">已回滚</span>';
+                } else {
+                    statusBadge = `<span class="status-badge">${s.status}</span>`;
+                }
+
+                // Type badge
+                const typeBadge = s.suggestion_type === 'ALIAS' 
+                    ? '<span style="font-size: 11px; background: rgba(59,130,246,0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: 600;">别名映射</span>'
+                    : '<span style="font-size: 11px; background: rgba(168,85,247,0.15); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-weight: 600;">1对N绑定</span>';
+
+                // Target formatting
+                let targetDisplay = escapeHtml(s.target_value);
+                if (s.suggestion_type === 'BINDING_RULE') {
+                    try {
+                        const parsed = JSON.parse(s.target_value);
+                        if (Array.isArray(parsed)) {
+                            targetDisplay = parsed.map(b => `<div style="font-size: 11.5px; color: #e2e8f0;">• <strong>${escapeHtml(b.code)}</strong> ${escapeHtml(b.name)} [${escapeHtml(b.specification || '')}] × ${b.qty_ratio || 1}</div>`).join('');
+                        }
+                    } catch (e) {}
+                }
+
+                // Consistency bar
+                const consPercent = Math.round((s.consistency || 0) * 100);
+                const consColor = consPercent >= 90 ? '#10b981' : consPercent >= 75 ? '#38bdf8' : '#f59e0b';
+                const consDisplay = `
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-weight: 600; color: ${consColor};">${consPercent}%</span>
+                        <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; min-width: 40px;">
+                            <div style="width: ${consPercent}%; height: 100%; background: ${consColor};"></div>
+                        </div>
+                    </div>
+                `;
+
+                // Actions
+                let actionsHtml = '';
+                if (s.status === 'pending' || s.status === 'observing') {
+                    actionsHtml = `
+                        <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="startFlywheelEval(${s.id})">🧪 沙箱回归</button>
+                        <button class="btn-action btn-primary-action" style="padding: 3px 8px; font-size: 11px;" onclick="acceptFlywheelSuggestionDirect(${s.id})">✓ 采纳</button>
+                        <button class="btn-action btn-warning-action" style="padding: 3px 8px; font-size: 11px;" onclick='openEditFlywheelModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️ 微调</button>
+                        <button class="btn-action btn-danger-action" style="padding: 3px 8px; font-size: 11px;" onclick="rejectFlywheelSuggestion(${s.id})">✕ 驳回</button>
+                    `;
+                } else if (s.status === 'accepted') {
+                    actionsHtml = `<span style="font-size: 12px; color: #10b981;">已生效 (${escapeHtml(s.applied_rule_id || '')})</span>`;
+                } else {
+                    actionsHtml = `<span style="font-size: 12px; color: #8a99ad;">-</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td>${typeBadge}</td>
+                    <td><strong style="color: #f1f5f9;">${escapeHtml(s.source_pattern)}</strong></td>
+                    <td>${targetDisplay}</td>
+                    <td><strong>${s.support_count}</strong> 次</td>
+                    <td><strong>${s.distinct_users}</strong> 人</td>
+                    <td>${consDisplay}</td>
+                    <td>${statusBadge}</td>
+                    <td><div style="display: flex; gap: 4px; flex-wrap: wrap;">${actionsHtml}</div></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function triggerFlywheelMining() {
+            if (!confirm('确定立即启动两阶段数据挖掘与规则聚合引擎吗？')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/miner/run`, {
+                    method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '挖掘失败'));
+                alert(`挖掘分析完成！\n已扫描增量记录: ${data.result.processed_records_count} 条\n聚合分析模式: ${data.result.analyzed_patterns_count} 组`);
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
+            } catch (err) {
+                alert('挖掘出错: ' + err.message);
+            }
+        }
+
+        async function startFlywheelEval(suggestionId) {
+            document.getElementById('fw-eval-title').innerText = '正在排队并启动隔离子进程沙箱评测...';
+            document.getElementById('fw-eval-msg').innerText = '正在克隆隔离环境并在独立进程执行定向黄金集验证...';
+            document.getElementById('fw-eval-bar').style.width = '15%';
+            document.getElementById('fw-eval-report').style.display = 'none';
+            document.getElementById('fw-eval-modal').style.display = 'flex';
+
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/suggestions/eval`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ suggestion_id: suggestionId })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '启动评测失败'));
+                
+                const taskId = data.task_id;
+                pollFlywheelEvalTask(taskId);
+            } catch (err) {
+                document.getElementById('fw-eval-title').innerText = '沙箱评测启动失败';
+                document.getElementById('fw-eval-msg').innerText = err.message;
+            }
+        }
+
+        function pollFlywheelEvalTask(taskId) {
+            if (evalPollTimer) clearInterval(evalPollTimer);
+            
+            evalPollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_URL}/api/flywheel/eval/${taskId}`, {
+                        headers: getAuthHeaders()
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    
+                    document.getElementById('fw-eval-bar').style.width = `${data.progress || 20}%`;
+                    document.getElementById('fw-eval-msg').innerText = data.message || '正在评测中...';
+                    
+                    if (data.status === 'completed' || data.status === 'failed') {
+                        clearInterval(evalPollTimer);
+                        evalPollTimer = null;
+                        
+                        if (data.status === 'completed') {
+                            document.getElementById('fw-eval-title').innerText = data.passed ? '✅ 沙箱评测通过 (可放心采纳)' : '⚠️ 评测未通过 (发现退化风险)';
+                            const rep = data.report || {};
+                            document.getElementById('fw-eval-report').innerHTML = `
+                                <div style="font-weight: 600; margin-bottom: 6px; color: ${data.passed ? '#34d399' : '#ef4444'};">
+                                    评测结论：${escapeHtml(rep.reason || '-')}
+                                </div>
+                                <div style="font-size: 12.5px; line-height: 1.8;">
+                                    • 定向用例覆盖量：<strong>${rep.targeted_count || 0}</strong> 条<br>
+                                    • 收益改善用例数：<strong style="color: #34d399;">+${rep.improved_count || 0}</strong><br>
+                                    • 恶化退化用例数：<strong style="color: #ef4444;">-${rep.degraded_count || 0}</strong>
+                                </div>
+                            `;
+                            document.getElementById('fw-eval-report').style.display = 'block';
+                        } else {
+                            document.getElementById('fw-eval-title').innerText = '❌ 沙箱评测执行失败';
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error polling eval task:', e);
+                }
+            }, 1000);
+        }
+
+        async function acceptFlywheelSuggestionDirect(suggestionId) {
+            if (!confirm('确定采纳此条规则建议并原子写回配置吗？系统将秒级热重载生效。')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/suggestions/accept`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ suggestion_id: suggestionId })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '采纳失败'));
+                alert(`规则采纳成功！已生成配置快照: ${data.snapshot_version}`);
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
+            } catch (err) {
+                alert('操作失败: ' + err.message);
+            }
+        }
+
+        function openEditFlywheelModal(s) {
+            document.getElementById('fw-edit-id').value = s.id;
+            document.getElementById('fw-edit-src').value = s.source_pattern;
+            document.getElementById('fw-edit-target').value = s.target_value;
+            document.getElementById('fw-edit-modal').style.display = 'flex';
+        }
+
+        document.getElementById('fw-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const suggestionId = parseInt(document.getElementById('fw-edit-id').value);
+            const editedTarget = document.getElementById('fw-edit-target').value.trim();
+            if (!editedTarget) {
+                alert('建议目标映射值不能为空');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/suggestions/accept`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        suggestion_id: suggestionId,
+                        edited_target_value: editedTarget
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '微调采纳失败'));
+                alert(`微调规则采纳成功！已生成配置快照: ${data.snapshot_version}`);
+                closeModal('fw-edit-modal');
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
+            } catch (err) {
+                alert('操作失败: ' + err.message);
+            }
+        });
+
+        async function rejectFlywheelSuggestion(suggestionId) {
+            const reason = prompt('请输入驳回原因 (可选):');
+            if (reason === null) return;
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/suggestions/reject`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ suggestion_id: suggestionId, reason })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '驳回失败'));
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
+            } catch (err) {
+                alert('操作失败: ' + err.message);
+            }
+        }
+
+        async function openSnapshotsModal() {
+            document.getElementById('fw-snapshots-modal').style.display = 'flex';
+            const tbody = document.getElementById('fw-snapshots-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #8a99ad; padding: 20px;">正在加载配置变更快照栈...</td></tr>';
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/snapshots`, { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('获取快照栈失败');
+                const data = await res.json();
+                const snaps = data.snapshots || [];
+                tbody.innerHTML = '';
+                if (snaps.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #8a99ad; padding: 20px;">暂无配置快照记录</td></tr>';
+                    return;
+                }
+                snaps.forEach(sp => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><code>${escapeHtml(sp.snapshot_version)}</code></td>
+                        <td><span style="font-size: 11px; background: rgba(59,130,246,0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px;">${sp.target_type}</span></td>
+                        <td>${escapeHtml(sp.reason || '-')}</td>
+                        <td><strong>${escapeHtml(sp.operator_id)}</strong></td>
+                        <td>${sp.is_active ? '<span class="status-badge status-active">栈内有效</span>' : '<span class="status-badge status-inactive">已回滚失效</span>'}</td>
+                        <td>${escapeHtml(sp.created_at)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 20px;">加载快照出错: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function rollbackFlywheelLatestSnapshot() {
+            if (!confirm('⚠️ 警告：确定执行 LIFO 栈式回滚，撤销最近一次采纳的配置变更并恢复旧版本吗？')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/rollback`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(extractErrorMessage(data.detail, '回滚失败'));
+                alert(data.msg || '快照已成功回滚！');
+                closeModal('fw-snapshots-modal');
+                fetchFlywheelDashboard();
+                fetchFlywheelSuggestions();
+            } catch (err) {
+                alert('回滚出错: ' + err.message);
+            }
+        }
+
+        async function exportFlywheelBenchmark() {
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/export/benchmark`, { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('导出评测集失败');
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `golden_eval_flywheel_${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('导出失败: ' + err.message);
+            }
+        }
+
+        async function exportFlywheelTriplets() {
+            try {
+                const res = await fetch(`${API_URL}/api/flywheel/export/triplets`, { headers: getAuthHeaders() });
+                if (!res.ok) throw new Error('导出三元组失败');
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `bge_triplets_${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('导出失败: ' + err.message);
             }
         }
 

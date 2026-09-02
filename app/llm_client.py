@@ -17,8 +17,7 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # Constants & Paths
 DB_PATH = os.path.join(BASE_DIR, "app", "materials.db")
-CONFIG_PATH = os.path.join(BASE_DIR, "config", "llm_config.json")
-PROMPTS_PATH = os.path.join(BASE_DIR, "config", "llm_prompts.json")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(BASE_DIR, "config"))
 
 class QwenLLMClient:
     _instance = None
@@ -56,8 +55,10 @@ class QwenLLMClient:
         self._initialized = True
 
     def load_config(self):
+        cfg_dir = os.getenv("CONFIG_DIR", os.path.join(BASE_DIR, "config"))
+        cfg_path = os.path.join(cfg_dir, "llm_config.json")
         try:
-            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            with open(cfg_path, "r", encoding="utf-8") as f:
                 self.config = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load LLM config: {e}")
@@ -73,8 +74,10 @@ class QwenLLMClient:
             }
 
     def load_prompts(self):
+        cfg_dir = os.getenv("CONFIG_DIR", os.path.join(BASE_DIR, "config"))
+        prompts_path = os.path.join(cfg_dir, "llm_prompts.json")
         try:
-            with open(PROMPTS_PATH, "r", encoding="utf-8") as f:
+            with open(prompts_path, "r", encoding="utf-8") as f:
                 self.prompts = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load LLM prompts: {e}")

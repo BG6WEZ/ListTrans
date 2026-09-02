@@ -20,6 +20,6 @@ if exist "%~dp0python_local\python.exe" (
 echo 正在为您打开网页浏览器...
 start http://127.0.0.1:18080
 
-:: 运行 Python 后端服务
-%PY_CMD% -m uvicorn app.server:app --host 0.0.0.0 --port 18080
+:: 运行 Python 后端服务（内存缓存、SQLite 写入和规则引擎状态依赖单进程，保持单 worker 运行）
+%PY_CMD% -m uvicorn app.server:app --host 0.0.0.0 --port 18080 --workers 1
 pause

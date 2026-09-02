@@ -171,27 +171,28 @@ class TestMatcher(unittest.TestCase):
 class TestDatabaseImport(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from app.db_manager import DB_PATH, init_db
-        import shutil
-        cls.db_backup = DB_PATH + ".bak"
-        if os.path.exists(DB_PATH):
-            shutil.copyfile(DB_PATH, cls.db_backup)
-        init_db()
+        import app.db_manager as dbm
+        import tempfile
+        cls.orig_db_path = dbm.DB_PATH
+        cls.temp_dir = tempfile.mkdtemp(prefix="test_db_import_")
+        cls.temp_db_path = os.path.join(cls.temp_dir, "test_materials.db")
+        dbm.DB_PATH = cls.temp_db_path
+        dbm.init_db()
 
     @classmethod
     def tearDownClass(cls):
-        from app.db_manager import DB_PATH
+        import app.db_manager as dbm
         import shutil
-        if hasattr(cls, "db_backup") and os.path.exists(cls.db_backup):
-            shutil.copyfile(cls.db_backup, DB_PATH)
-            os.remove(cls.db_backup)
-            
-            # Hot reload FAISS memory cache in running processes if index was modified
+        dbm.DB_PATH = cls.orig_db_path
+        # Reset thread-local connection
+        if hasattr(dbm._local_db, "conn") and dbm._local_db.conn:
             try:
-                from app.vector_index import index_manager
-                index_manager.load_cache()
+                dbm._local_db.conn.close()
             except Exception:
                 pass
+            dbm._local_db.conn = None
+        if hasattr(cls, "temp_dir") and os.path.exists(cls.temp_dir):
+            shutil.rmtree(cls.temp_dir, ignore_errors=True)
 
     def test_disabled_code_filtering(self):
         import pandas as pd
@@ -210,11 +211,11 @@ class TestDatabaseImport(unittest.TestCase):
         df = pd.DataFrame(data)
         
         # Write to temporary Excel file with a header offset (using startrow=1 to leave the first row empty)
-        temp_xlsx = os.path.join(os.path.dirname(DB_PATH), "temp_test_import.xlsx")
+        temp_xlsx = os.path.join(self.temp_dir, "temp_test_import.xlsx")
         df.to_excel(temp_xlsx, index=False, startrow=1)
         
         try:
-            # Import using "replace" mode
+            # Import using "replace" mode on the isolated temp database
             meta = import_materials_from_excel(temp_xlsx, mode="replace", filename="temp_test_import.xlsx")
             
             # Assert metadata values

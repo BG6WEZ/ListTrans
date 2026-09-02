@@ -30,7 +30,7 @@ except Exception:
 DB_DIR = os.path.dirname(__file__)
 PROJECT_ROOT = os.path.dirname(DB_DIR)
 MODEL_DIR = os.path.join(PROJECT_ROOT, "model_offline")
-CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(PROJECT_ROOT, "config"))
 CACHE_DIR = os.path.join(DB_DIR, "vector_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 

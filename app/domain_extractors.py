@@ -5,7 +5,7 @@ import re
 from typing import Dict, Any, List, Tuple, Optional
 from app.normalizer import clean_text_standard, load_json_config, to_half_width, convert_de_to_dn
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
 
 # Load schemas and unit conversion dictionaries
 domain_schema = load_json_config("domain_schema.json", {})

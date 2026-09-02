@@ -5,8 +5,9 @@ import threading
 import pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
 from functools import lru_cache
+from contextlib import contextmanager
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "materials.db")
+DB_PATH = os.getenv("MATERIALS_DB_PATH", os.path.join(os.path.dirname(__file__), "materials.db"))
 
 # Thread-local SQLite connection pool
 _local_db = threading.local()
@@ -14,12 +15,20 @@ _local_db = threading.local()
 def get_thread_db_connection():
     """Retrieve thread-local SQLite connection to eliminate repeated open/close overhead."""
     conn = getattr(_local_db, "conn", None)
-    if conn is not None:
+    conn_path = getattr(_local_db, "path", None)
+    if conn is not None and conn_path == DB_PATH:
         try:
             conn.execute("SELECT 1")
             return conn
         except Exception:
             _local_db.conn = None
+    elif conn is not None:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        _local_db.conn = None
+
     conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     try:
@@ -29,6 +38,7 @@ def get_thread_db_connection():
     except Exception:
         pass
     _local_db.conn = conn
+    _local_db.path = DB_PATH
     return conn
 
 # Prevent OpenBLAS/PyTorch thread conflicts or multi-threaded connection locks
@@ -44,6 +54,23 @@ def get_db_connection():
     except Exception:
         pass
     return conn
+
+@contextmanager
+def get_db_cursor(commit: bool = True):
+    """Context manager for SQLite database cursor with automatic transaction handling."""
+    conn = get_thread_db_connection()
+    cur = conn.cursor()
+    try:
+        yield cur
+        if commit:
+            conn.commit()
+    except Exception:
+        if commit:
+            conn.rollback()
+        raise
+    finally:
+        cur.close()
+
 
 def init_db(xlsx_path=None, force_reload=False):
     """
@@ -203,9 +230,12 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
             "吊顶新风预处理机组": ["吊顶新风机组", "吊顶新风"],
             "净化新风预处理机组": ["净化新风机组", "净化新风"],
             "风机盘管机组": ["风机盘管", "风机盘管配件"],
-            "离心式排风机(箱）": ["离心风机（箱）", "离心风机", "通风机"],
-            "离心式排风机": ["离心风机（箱）", "离心风机", "通风机"],
-            "静音型排风机": ["离心风机（箱）", "离心风机", "通风机"],
+            "医用离心式排风机(箱）": ["医用离心式排风机(箱）", "医用离心式排风机", "离心风机（箱）", "离心风机", "通风机"],
+            "医用离心式排风机": ["医用离心式排风机(箱）", "医用离心式排风机", "离心风机（箱）", "离心风机", "通风机"],
+            "医用静音型排风机": ["医用离心式排风机(箱）", "医用离心式排风机", "离心风机（箱）", "离心风机", "通风机"],
+            "离心式排风机(箱）": ["医用离心式排风机(箱）", "离心风机（箱）", "离心风机", "通风机"],
+            "离心式排风机": ["医用离心式排风机(箱）", "离心风机（箱）", "离心风机", "通风机"],
+            "静音型排风机": ["医用离心式排风机(箱）", "离心风机（箱）", "离心风机", "通风机"],
             "洁净镀锌钢板通风管安装费": ["镀锌钢板风管", "风管"],
             "洁净镀锌通风管": ["镀锌钢板风管", "风管"],
             "通风管": ["镀锌钢板风管", "风管"],
@@ -240,6 +270,8 @@ def _search_materials_keyword_cached(keyword: str, fetch_limit: int = 150) -> Li
                             query_parts.append('("线" OR "缆")')
                         elif t in ["箱", "柜"]:
                             query_parts.append('("箱" OR "柜")')
+                        elif t.isdigit():
+                            query_parts.append(f'"{t}"*')
                         else:
                             query_parts.append(f'"{t}"')
                     fts_clauses.append(" AND ".join(query_parts))
@@ -402,6 +434,18 @@ def import_materials_from_excel(
     """
     import json
     import datetime
+    
+    # Critical Production Protection Guardrail
+    is_testing = "PYTEST_CURRENT_TEST" in os.environ or os.getenv("TESTING") == "1"
+    prod_db_canonical = os.path.abspath(os.path.join(os.path.dirname(__file__), "materials.db"))
+    current_db_canonical = os.path.abspath(DB_PATH)
+    if is_testing and mode == "replace" and current_db_canonical == prod_db_canonical:
+        raise RuntimeError(
+            "CRITICAL SAFETY GUARD: Refusing to execute import_materials_from_excel(mode='replace') "
+            f"on production database ({prod_db_canonical}) during automated testing! "
+            "Tests MUST use an isolated temporary database via DB_PATH monkeypatching or MATERIALS_DB_PATH."
+        )
+
     if not os.path.exists(xlsx_path):
         raise FileNotFoundError(f"Excel file not found: {xlsx_path}")
         

@@ -5,7 +5,7 @@ import json
 from typing import Dict, Any, List, Optional
 from functools import lru_cache
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
 # Helper function to load json configuration
@@ -60,7 +60,8 @@ stop_words = load_config("stop_words.json", DEFAULT_STOP_WORDS)
 
 def reload_preprocessor_configs():
     """Reload configurations from file at runtime."""
-    global alias_dict, unit_rules, stop_words
+    global CONFIG_DIR, alias_dict, unit_rules, stop_words
+    CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
     alias_dict = load_config("alias_dict.json", DEFAULT_ALIAS)
     unit_rules = load_config("unit_rules.json", DEFAULT_UNITS)
     stop_words = load_config("stop_words.json", DEFAULT_STOP_WORDS)
@@ -208,23 +209,28 @@ def parse_sub_parameters(content: str) -> Dict[str, str]:
             v = colon_match.group(2).strip()
             if k and len(k) < 15 and not k.isdigit():
                 # Clean unit suffix and section numbers from key (e.g. 3.材质、规格 -> 材质)
-                k_clean = re.sub(r'^\d+[\.．、\s]*', '', k)
-                k_clean = re.sub(r'\(.*?\)|（.*?）|\[.*?\]|［.*?］', '', k_clean)
-                k_clean = re.sub(r'(?:m³/h|m3/h|kW|W|Pa|MPa|mm|mm2|mm²|m|t|A|V|P)$', '', k_clean, flags=re.IGNORECASE).strip()
+                k_clean = re.sub(r'^\d+[\.．、\s]*', '', k).strip()
+                k_clean = re.sub(r'\(.*?\)|（.*?）|\[.*?\]|［.*?］', '', k_clean).strip()
+                k_clean = re.sub(r'(?:m³/h|m3/h|kW|kw|W|w|Pa|pa|MPa|kPa|mm|mm2|mm²|m|t|A|V|P)$', '', k_clean, flags=re.IGNORECASE).strip()
+                
+                k_label = k_clean
                 if "材质" in k_clean:
                     k_clean = "材质"
                 elif "半周长" in k_clean:
                     k_clean = "半周长"
                 elif "长度" in k_clean and "工作" not in k_clean:
                     k_clean = "长度"
-                elif "风量" in k_clean:
-                    k_clean = "风量"
-                elif "余压" in k_clean or "静压" in k_clean:
+                elif k_clean in ["机外余压", "机外静压", "全压", "风压", "余压", "静压"]:
                     k_clean = "机外余压"
+                elif k_clean in ["风量", "处理风量"]:
+                    k_clean = "风量"
                 elif "功率" in k_clean:
                     k_clean = "功率"
+
                 if k_clean:
                     sub_params[k_clean] = v
+                if k_label and k_label != k_clean:
+                    sub_params[k_label] = v
         else:
             # Check if it looks like a concatenated KeyValue without a colon, e.g. "机外余压1100pa" or "DN100"
             concat_match = re.search(r'^([^\d]+)\s*(\d+(?:\.\d+)?\s*(?:Pa|kPa|MPa|m³/h|m3/h|kW|kw|W|w|mm|m|V|A|HP|db|dB|l/s|CFM)?)$', part, re.IGNORECASE)

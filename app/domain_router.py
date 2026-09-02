@@ -4,7 +4,7 @@ import json
 import re
 from typing import Dict, Any, List
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config")
+CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
 
 def load_json_config(filename: str, default_val: Any) -> Any:
     path = os.path.join(CONFIG_DIR, filename)

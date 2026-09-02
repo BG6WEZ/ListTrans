@@ -678,7 +678,7 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
     """
     # 1. Decouple name and spec if spec is embedded in name
     effective_name, effective_spec = decouple_name_and_spec(name, specification)
-    name_clean = (effective_name or "").strip()
+    name_clean = clean_text_standard(effective_name or "").strip()
     spec_raw = (effective_spec or "").strip()
     cat_clean = (category or "").strip()
 

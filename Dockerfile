@@ -27,4 +27,6 @@ COPY . /app/
 EXPOSE 18080
 
 # Command to run the application binding to all interfaces
-CMD ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "18080"]
+# NOTE: System uses in-memory SQLite connection caches and dynamic rule engine states.
+# Must maintain single worker (--workers 1 / default 1 worker) to prevent SQLite lock contention and cache divergence.
+CMD ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "18080", "--workers", "1"]

@@ -514,7 +514,29 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             # 2. Inequality logic evaluation
             elif f"{attr}_op" in q_attrs:
                 op = q_attrs[f"{attr}_op"]
-                base_val = q_attrs[f"{attr}_base"]
+                # Guard: _base may not exist when op encodes an interval (e.g. "500-2000")
+                # In that case fall through to range-overlap logic using _min/_max.
+                base_val = q_attrs.get(f"{attr}_base")
+                if base_val is None:
+                    # op is an interval descriptor — use q _min/_max vs c _min/_max overlap
+                    q_min = q_attrs.get(f"{attr}_min")
+                    q_max = q_attrs.get(f"{attr}_max")
+                    if q_min is not None and q_max is not None:
+                        try:
+                            if f"{attr}_min" in c_attrs:
+                                c_min = float(c_attrs[f"{attr}_min"])
+                                c_max = float(c_attrs[f"{attr}_max"])
+                            else:
+                                c_v = float(c_val)
+                                c_min, c_max = c_v, c_v
+                            overlap = max(0.0, min(float(q_max), c_max) - max(float(q_min), c_min))
+                            union = max(float(q_max), c_max) - min(float(q_min), c_min)
+                            score = overlap / union if union > 0 else 0.0
+                            attr_scores[attr] = score
+                            attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
+                        except Exception:
+                            pass
+                    continue
                 satisfied = False
                 try:
                     if f"{attr}_min" in c_attrs:
@@ -532,7 +554,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                         elif op == "<": satisfied = (c_v < base_val)
                 except Exception:
                     pass
-                
+
                 attr_scores[attr] = 1.0 if satisfied else 0.0
                 attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
                 continue
@@ -998,6 +1020,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     c_is_ex = False
     c_is_non_ex = False
     q_fan_press = None
+    q_fan_vol = None
     is_q_fan = False
 
     if "两管制" in q_spec_text and "四管制" in c_full_spec or "四管制" in q_spec_text and "两管制" in c_full_spec:
@@ -1421,6 +1444,9 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             name_sim = calculate_text_similarity(q_name, c_name)
             tiebreak = (spec_sim * 0.6 + name_sim * 0.4) * 1.5
             
+            if "参数超限偏离" in reasons:
+                tiebreak -= 0.5
+            
             # Domain bonus for specialized configurations
             if "提升泵" in c_full_spec:
                 tiebreak += 0.3
@@ -1435,6 +1461,20 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                     tiebreak += 0.6
                 if q_fan_press is not None and float(q_fan_press) <= 500 and ("≤500Pa" in c_full_spec or "≤500pa" in c_full_spec):
                     tiebreak += 0.4
+                if q_fan_vol is not None and c_attrs.get("风量") is not None:
+                    try:
+                        c_fv = float(c_attrs["风量"])
+                        vol_diff = abs(float(q_fan_vol) - c_fv) / max(float(q_fan_vol), c_fv, 1e-5)
+                        tiebreak -= vol_diff * 2.0
+                    except Exception:
+                        pass
+                if q_fan_press is not None and (c_attrs.get("机外余压") is not None or c_attrs.get("余压") is not None):
+                    try:
+                        c_fp = float(c_attrs.get("机外余压") or c_attrs.get("余压"))
+                        press_diff = abs(float(q_fan_press) - c_fp) / max(float(q_fan_press), c_fp, 1e-5)
+                        tiebreak -= press_diff * 2.0
+                    except Exception:
+                        pass
 
             final_score = 98.0 + tiebreak
     else:
@@ -1546,8 +1586,14 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
 
     # 4. Fans
     if any(k in q_name for k in ["排风机", "送风机", "风机", "静音型排风机", "离心风机"]):
+        hvac_recall_terms.append("医用离心式排风机(箱）")
+        hvac_recall_terms.append("医用离心式排风机")
         hvac_recall_terms.append("离心风机（箱）")
         hvac_recall_terms.append("离心风机")
+        if q_attrs.get("风量"):
+            vol_int = int(q_attrs["风量"])
+            hvac_recall_terms.append(f"医用离心式排风机 {vol_int}")
+            hvac_recall_terms.append(f"离心风机 {vol_int}")
         if q_attrs.get("防爆"):
             hvac_recall_terms.append("离心风机 镀锌 防爆")
             hvac_recall_terms.append("离心风机 防爆")
@@ -1726,7 +1772,7 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             "brand": cand["brand"],
             "description": cand["description"],
             "score": score,
-            "match_reasons": reasons[:2],
+            "match_reasons": reasons,
             "c_thickness": c_thickness,
             "c_od": c_od
         })
@@ -1792,9 +1838,10 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             return -diffs
         return -999.0
 
-    # Sort by score descending, with exact text match, diameter closeness, thickness tie-breaker, and dimension closeness
+    # Sort by score descending, with parameter deviations penalty, exact text match, diameter closeness, thickness tie-breaker, and dimension closeness
     scored_candidates.sort(key=lambda x: (
         x["score"],
+        -1.0 if "参数超限偏离" in x.get("match_reasons", []) else 0.0,
         1.0 if "名称与规格完全一致" in x.get("match_reasons", []) else (0.5 if "规格型号完全一致" in x.get("match_reasons", []) else 0.0),
         get_od_closeness(x),
         get_thickness_tiebreaker(x),
@@ -1820,9 +1867,15 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             is_exact = True
             matched_code = top_one["code"]
             
+    res_candidates = []
+    for c in scored_candidates[:10]:
+        c_copy = dict(c)
+        c_copy["match_reasons"] = c_copy.get("match_reasons", [])[:2]
+        res_candidates.append(c_copy)
+
     return {
         "is_exact": is_exact,
         "matched_code": matched_code,
-        "top_candidates": scored_candidates[:10] # Output Top 10 for detailed view
+        "top_candidates": res_candidates # Output Top 10 for detailed view
     }
 

@@ -6,6 +6,7 @@ services:
     container_name: material-matcher
     ports:
       - "18080:18080"
+    # 生产部署约束：内存向量缓存、动态规则状态及 SQLite 独占写入依赖单进程模式，容器内默认保持单 worker 运行
     env_file:
       - .env
     volumes:

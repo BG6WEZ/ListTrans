@@ -72,8 +72,8 @@ def evaluate(items, chunk_size=200):
         for it in chunk:
             prof = it["professional"]
             parsed = extract_query_params(it["name"], it["specification"], prof)
-            real_name = parsed.get("name") or it["name"]
-            clean_spec = parsed.get("spec") or it["specification"]
+            real_name = parsed.get("name") or (parsed.get("attrs", {}).get("名称") if isinstance(parsed, dict) else None) or it["name"]
+            clean_spec = parsed.get("clean_text") or parsed.get("spec") or it["specification"]
             sup = (it.get("supply_category") or "").strip()
             if sup in ("无", "/", "-"):
                 sup = ""
@@ -138,7 +138,15 @@ def evaluate(items, chunk_size=200):
 def metrics(rows):
     n = len(rows)
     if n == 0:
-        return {}
+        return {
+            "total": 0,
+            "hit@1": 0.0,
+            "recall@3": 0.0,
+            "recall@5": 0.0,
+            "recall@10": 0.0,
+            "mrr": 0.0,
+            "miss@10": 0.0,
+        }
     hit1 = sum(1 for r in rows if r["rank"] == 1)
     r3 = sum(1 for r in rows if 1 <= r["rank"] <= 3)
     r5 = sum(1 for r in rows if 1 <= r["rank"] <= 5)
@@ -169,6 +177,10 @@ def main():
     ap.add_argument("--include-ambiguous", action="store_true")
     ap.add_argument("--include-qc-suspect", action="store_true")
     ap.add_argument("--professional", default="")
+    ap.add_argument("--exclude-source", default="", help="排除指定 source 评测用例 (如 flywheel_auto)")
+    ap.add_argument("--filter-keyword", default="", help="按原始名称/规格关键词过滤评测用例")
+    ap.add_argument("--case-ids", default="", help="按逗号分隔的 case id 列表过滤")
+    ap.add_argument("--output-json", default="", help="将评测结果与明细输出为指定 JSON 文件")
     ap.add_argument("--chunk-size", type=int, default=200,
                     help="分块大小，内存紧张时减小（默认 200）")
     ap.add_argument("--baseline", action="store_true", help="将本次结果写为基线")
@@ -183,6 +195,9 @@ def main():
     del data
     gc.collect()
 
+    if args.exclude_source:
+        exc = set(s.strip() for s in args.exclude_source.split(",") if s.strip())
+        items = [x for x in items if x.get("source") not in exc]
     if not args.include_1ton:
         items = [x for x in items if x["label_type"] == "1to1"]
     if not args.include_ambiguous:
@@ -191,6 +206,20 @@ def main():
         items = [x for x in items if not x.get("qc_suspect")]
     if args.professional:
         items = [x for x in items if x["professional"] == args.professional]
+    if args.filter_keyword:
+        kw = args.filter_keyword.strip().lower()
+        items = [
+            x for x in items
+            if kw in x.get("name", "").lower()
+            or kw in x.get("specification", "").lower()
+            or kw in x.get("target_name", "").lower()
+            or any(kw in ref.get("db_name", "").lower() for ref in x.get("target_ref", []))
+            or kw in x.get("raw_name", "").lower()
+            or kw in x.get("raw_spec", "").lower()
+        ]
+    if args.case_ids:
+        cids = set(c.strip() for c in args.case_ids.split(",") if c.strip())
+        items = [x for x in items if str(x.get("id", "")) in cids or str(x.get("idx", "")) in cids]
     if args.limit and args.limit < len(items):
         # 测试集按专业排序存放，直接切片会造成抽样偏差，此处按专业比例分层抽样
         buckets = collections.OrderedDict()
@@ -272,6 +301,11 @@ def main():
             json.dump(r, f, ensure_ascii=False)
         f.write("\n]}\n")
     print(f"\n明细已写入: {DETAIL_PATH}")
+
+    if args.output_json:
+        with open(args.output_json, "w", encoding="utf-8") as f:
+            json.dump({"summary": result, "rows": rows}, f, ensure_ascii=False, indent=2)
+        print(f"指定结果文件已写入: {args.output_json}")
 
     if args.baseline:
         with open(BASELINE_PATH, "w", encoding="utf-8") as f:

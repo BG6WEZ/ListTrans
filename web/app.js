@@ -587,6 +587,12 @@ function initEventListeners() {
             
             if (!response.ok) throw new Error("提交绑定日志失败");
             
+            // Report to Data Flywheel
+            const actionType = (selectedItem.bindings && selectedItem.bindings.length > 1) 
+                ? 'BIND_MULTI' 
+                : 'CONFIRM_TOP1';
+            reportFlywheelAction(selectedItem, actionType);
+
             selectedItem.is_exact = true;
             
             // Find next unconfirmed item for auto flow (Task 4)
@@ -1393,15 +1399,15 @@ function renderCandidates() {
         `;
         
         card.addEventListener('click', () => {
-            applyMatchCandidate(cand);
+            applyMatchCandidate(cand, 'PICK_CANDIDATE');
         });
         
         container.appendChild(card);
     });
 }
 
-// 5. Apply selected candidate to matched item & submit feedback
-async function applyMatchCandidate(cand) {
+// 5. Apply selected candidate to matched item & submit feedback + flywheel record
+async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
     if (!selectedItem) return;
     
     if (!selectedItem.bindings) {
@@ -1430,8 +1436,7 @@ async function applyMatchCandidate(cand) {
         submitFeedbackSample(selectedItem.original_row_idx, selectedItem.original_spec, selectedItem.initial_auto_code, cand.code, true);
     }
     
-    // Push new bound material
-    selectedItem.bindings.push({
+    const newBound = {
         code: cand.code,
         name: cand.name,
         specification: cand.specification || "",
@@ -1439,7 +1444,13 @@ async function applyMatchCandidate(cand) {
         brand: cand.brand || "",
         category: cand.category || "",
         qty: selectedItem.original_qty
-    });
+    };
+    
+    // Push new bound material
+    selectedItem.bindings.push(newBound);
+    
+    // Report action to Data Flywheel
+    reportFlywheelAction(selectedItem, actionType, [newBound]);
     
     // Update matched_code to be comma-separated list of bound codes
     selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
@@ -1449,6 +1460,63 @@ async function applyMatchCandidate(cand) {
     renderCandidates();
     renderTable();
     updateProgress();
+}
+
+// Helper to submit Data Flywheel action logs asynchronously with keepalive
+async function reportFlywheelAction(item, actionType, customFinalTargets = null) {
+    if (!item) return;
+    try {
+        const clientEventId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+            ? crypto.randomUUID() 
+            : ('fwevent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
+            
+        const targets = customFinalTargets || (item.bindings || []).map(b => ({
+            code: b.code,
+            name: b.name,
+            spec: b.specification || '',
+            unit: b.unit || '',
+            brand: b.brand || '',
+            category: b.category || '',
+            qty_ratio: (item.original_qty && Number(item.original_qty) > 0) ? (Number(b.qty) / Number(item.original_qty)) : 1.0
+        }));
+
+        const candidates = (item.candidates || item.top_candidates || []).slice(0, 3).map(c => ({
+            code: c.code,
+            name: c.name,
+            score: c.score || 0.0
+        }));
+
+        const top1 = candidates && candidates.length > 0 ? candidates[0] : null;
+
+        const payload = {
+            client_event_id: clientEventId,
+            session_id: (typeof currentSessionId !== 'undefined' && currentSessionId) ? String(currentSessionId) : 'default_session',
+            row_idx: item.original_row_idx || 0,
+            discipline: item.discipline || '通用',
+            raw_name: item.original_name || item.raw_name || item.name || '',
+            raw_spec: item.original_spec || item.spec || '',
+            raw_unit: item.original_unit || item.unit || '',
+            raw_category: item.original_category || item.category || '',
+            extracted_params: item.extracted_params || {},
+            auto_top1_code: top1 ? top1.code : (item.initial_auto_code || ''),
+            auto_top1_score: top1 ? top1.score : 0.0,
+            auto_top1_name: top1 ? top1.name : '',
+            auto_candidates: candidates,
+            algo_version: 'v1.0',
+            config_version: 'snap_v1',
+            action_type: actionType,
+            final_targets: targets
+        };
+
+        fetch(`${backendUrl}/api/flywheel/record`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true
+        }).catch(err => console.warn('Flywheel record silent error:', err));
+    } catch (e) {
+        console.warn('Failed to dispatch flywheel action:', e);
+    }
 }
 
 // Helper to submit feedback logs
@@ -1516,7 +1584,7 @@ async function runManualSearch() {
                     specification: res.specification,
                     unit: res.unit,
                     brand: res.brand
-                });
+                }, 'MANUAL_REPLACE');
             });
             
             tbody.appendChild(tr);
@@ -1588,6 +1656,15 @@ async function runParamRematch() {
             }
         }
         
+        // Report param adjust to Flywheel
+        selectedItem.extracted_params = {
+            model: model || null,
+            air_volume: volume,
+            power: power,
+            dn: dn
+        };
+        reportFlywheelAction(selectedItem, 'PARAM_ADJUST');
+
         selectRow(selectedItem);
         renderTable();
         updateProgress();
