@@ -19,7 +19,7 @@ class UserCreate(BaseModel):
     dept1: Optional[str] = ""
     dept2: Optional[str] = ""
     dept3: Optional[str] = ""
-    employee_no: Optional[str] = ""
+    employee_no: str = Field(..., min_length=1, max_length=50, description="工号（必填且唯一，创建后不可修改）")
     position: Optional[str] = ""
     phone: Optional[str] = ""
     role: str = Field("employee", pattern="^(employee|manager|director|admin)$")
@@ -56,13 +56,21 @@ async def list_users(current_user: dict = Depends(require_admin)):
 async def create_user(user_data: UserCreate, current_user: dict = Depends(require_admin)):
     """Create a new user account with role assignment and personnel profile."""
     username = user_data.username.strip()
-    if get_user_by_username(username):
-        raise HTTPException(status_code=400, detail="该用户名或手机号已被占用。")
+    employee_no = user_data.employee_no.strip()
+    if not employee_no:
+        raise HTTPException(status_code=400, detail="工号不能为空。")
+        
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    
+    # Check username / employee_no conflict
+    cursor.execute("SELECT id FROM users WHERE username = ? OR employee_no = ?", (username, employee_no))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=400, detail="该用户名或工号已被占用。")
         
     phone = (user_data.phone or username).strip()
     hashed_pass = get_password_hash(user_data.password)
-    conn = get_auth_connection()
-    cursor = conn.cursor()
     try:
         cursor.execute("""
             INSERT INTO users (
@@ -71,11 +79,11 @@ async def create_user(user_data: UserCreate, current_user: dict = Depends(requir
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             username, hashed_pass, user_data.name, user_data.dept1, 
-            user_data.dept2, user_data.dept3, user_data.employee_no, 
+            user_data.dept2, user_data.dept3, employee_no, 
             user_data.position, phone, user_data.role
         ))
         conn.commit()
-        security_logger.info(f"User '{username}' ({user_data.name}) created by admin '{current_user['username']}' with role '{user_data.role}'.")
+        security_logger.info(f"User '{username}' ({user_data.name}, emp_no: {employee_no}) created by admin '{current_user['username']}' with role '{user_data.role}'.")
         return {"success": True, "detail": f"用户 {username} ({user_data.name or ''}) 创建成功。"}
     except Exception as e:
         conn.rollback()
@@ -117,8 +125,14 @@ async def update_user(user_id: int, user_data: UserUpdate, current_user: dict = 
         updates.append("dept3 = ?")
         params.append(user_data.dept3)
     if user_data.employee_no is not None:
-        updates.append("employee_no = ?")
-        params.append(user_data.employee_no)
+        new_emp = user_data.employee_no.strip()
+        existing_emp = (target_user.get("employee_no") or "").strip()
+        if existing_emp and new_emp != existing_emp:
+            raise HTTPException(status_code=400, detail="工号为账号全局唯一不可变标识，创建后不可修改。")
+        elif not existing_emp and new_emp:
+            # Allow initial binding for historical accounts with empty employee_no
+            updates.append("employee_no = ?")
+            params.append(new_emp)
     if user_data.position is not None:
         updates.append("position = ?")
         params.append(user_data.position)

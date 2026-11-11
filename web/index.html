@@ -2,6 +2,17 @@
 <html lang="zh-CN">
 <head>
     <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('listtrans_theme');
+                if (!theme) {
+                    theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
         if (!localStorage.getItem('token')) {
             window.location.href = 'login.html';
         }
@@ -18,34 +29,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="index.css?v=20260818_corp">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <!-- Sidebar / Header -->
         <header class="app-header">
             <div class="logo-area">
-                <img src="logo.png" alt="Logo" class="logo-img" style="height: 38px; object-fit: contain;" />
+                <img src="logo.png" alt="Logo" class="logo-img" style="height: 34px; object-fit: contain;" />
                 <div class="logo-text">
                     <h1>武汉华康世纪洁净科技股份有限公司</h1>
-                    <span>物料清单匹配系统 · 智慧信息化事业部制作 <span class="version-tag" style="background-color: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.1.3</span></span>
+                    <span class="logo-subtext">物料清单匹配系统<span class="dept-suffix"> · 智慧信息化事业部制作</span> <span class="version-tag" style="background-color: var(--color-primary-glow); color: var(--color-primary); padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: 700; margin-left: 4px;">V0.1.4</span></span>
                 </div>
             </div>
             
             <div class="nav-links">
-                <button class="nav-item active" id="nav-workbench" style="background: none; border: none; color: var(--color-text-primary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
-                <button class="nav-item" id="nav-materials" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-boxes-stacked"></i> 全品物料明细库</button>
-                <button class="nav-item" id="nav-llm-rules" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
-                <button class="nav-item" id="nav-config" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
-                <button class="nav-item" id="nav-guide" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: var(--transition-smooth);"><i class="fa-solid fa-book-open"></i> 使用说明</button>
+                <button class="nav-item active" id="nav-workbench"><i class="fa-solid fa-desktop"></i> 智能工作台</button>
+                <button class="nav-item" id="nav-materials"><i class="fa-solid fa-boxes-stacked"></i> 全品物料明细库</button>
+                <button class="nav-item" id="nav-llm-rules"><i class="fa-solid fa-wand-magic-sparkles"></i> LLM 规则生成</button>
+                <button class="nav-item" id="nav-config"><i class="fa-solid fa-sliders"></i> 系统参数配置</button>
+                <button class="nav-item" id="nav-guide"><i class="fa-solid fa-book-open"></i> 使用说明</button>
             </div>
             
             <div class="header-actions">
                 <button class="btn btn-secondary" id="history-trigger">
                     <i class="fa-solid fa-history"></i> 历史记录
                 </button>
-                <button class="btn btn-info" id="save-trigger" style="display: none; background-color: #0284c7; border-color: #0284c7; color: white;">
+                <button class="btn btn-info" id="save-trigger" style="display: none; background-color: var(--color-info); border-color: var(--color-info); color: white;">
                     <i class="fa-solid fa-floppy-disk"></i> 暂存进度
                 </button>
-                <button class="btn btn-warning" id="end-task-trigger" style="display: none; background-color: #d97706; border-color: #b45309; color: white;">
+                <button class="btn btn-warning" id="end-task-trigger" style="display: none; background-color: var(--color-warning); border-color: var(--color-warning); color: white;">
                     <i class="fa-solid fa-flag-checkered"></i> 结束任务
                 </button>
                 <div class="upload-btn-wrapper" style="display: inline-flex;">
@@ -57,11 +68,14 @@
                 <button class="btn btn-success" id="export-btn" disabled>
                     <i class="fa-solid fa-file-excel"></i> 导出标准格式
                 </button>
-                <div class="user-profile-bar" style="display: flex; align-items: center; gap: 8px; margin-left: 6px; border-left: 1px solid var(--border-color); padding-left: 10px;">
+                <div class="user-profile-bar">
                     <span class="user-badge-role" id="user-role-lbl" style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary); padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap;">-</span>
+                    <span class="user-emp-no" id="user-emp-no-lbl" style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: var(--color-success); padding: 2px 6px; border-radius: 4px; font-weight: 600; white-space: nowrap; font-family: monospace;" title="工号（账号唯一标识）">-</span>
                     <span class="username-display" id="username-lbl" style="font-size: 12.5px; font-weight: 500; white-space: nowrap;">-</span>
-                    <a href="admin.html" class="btn btn-primary" id="admin-panel-link" style="display: none; padding: 0 8px; height: 30px; font-size: 11px; text-decoration: none; background-color: #475569; border-color: #475569;"><i class="fa-solid fa-cog"></i> 管理</a>
-                    <button class="btn btn-danger" id="logout-btn" style="padding: 0 8px; height: 30px; font-size: 11px; background-color: #dc2626; border-color: #dc2626; color: white;"><i class="fa-solid fa-sign-out-alt"></i> 退出</button>
+                    <button class="btn btn-secondary" id="themeToggleBtn" style="padding: 0 8px; height: 30px; font-size: 12px;" title="切换深色/浅色主题"><i class="fa-solid fa-moon" id="themeToggleIcon"></i></button>
+                    <button class="btn btn-secondary" id="btn-account-settings" style="padding: 0 8px; height: 30px; font-size: 11.5px;" title="账号安全设置（修改登录名与密码）"><i class="fa-solid fa-user-gear"></i> 设置</button>
+                    <a href="admin.html" class="btn btn-primary" id="admin-panel-link" style="display: none; padding: 0 8px; height: 30px; font-size: 11.5px; text-decoration: none; background-color: #475569; border-color: #475569;"><i class="fa-solid fa-cog"></i> 管理</a>
+                    <button class="btn btn-danger" id="logout-btn" onclick="handleUserLogout()" style="padding: 0 9px; height: 30px; font-size: 11.5px; font-weight: 600; background-color: var(--color-danger); border-color: var(--color-danger); color: white;"><i class="fa-solid fa-sign-out-alt"></i> 退出</button>
                 </div>
             </div>
         </header>
@@ -464,7 +478,7 @@
                                 <button class="btn btn-primary" id="btn-refresh-logs" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-arrows-rotate"></i> 刷新日志</button>
                             </div>
                         </div>
-                        <pre id="log-console" style="margin: 0; background: #05070c; color: #a3b8cc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; text-align: left;"></pre>
+                        <pre id="log-console" style="margin: 0; background: var(--bg-input); color: var(--color-text-secondary); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; text-align: left;"></pre>
                     </div>
                 </div>
             </div>
@@ -472,7 +486,7 @@
             <!-- Global Materials Dashboard (Dedicated Page) -->
             <div class="workbench" id="materials-dashboard" style="display: none; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; flex-direction: column; gap: 24px; overflow-y: auto;">
                 <!-- Header Banner -->
-                <div class="glass-card" style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <div class="glass-card portrait-banner-card" style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: var(--radius-md);">
                     <div>
                         <h2 style="font-size: 20px; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 10px;">
                             <i class="fa-solid fa-boxes-stacked text-primary"></i> 全局标准物料明细库与数字画像
@@ -482,7 +496,7 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <button class="btn btn-secondary" id="btn-refresh-portrait" style="background: rgba(59, 130, 246, 0.15); border-color: var(--color-primary); color: var(--color-primary);">
+                        <button class="btn btn-secondary" id="btn-refresh-portrait" style="background: var(--color-primary-glow); border-color: var(--color-primary); color: var(--color-primary);">
                             <i class="fa-solid fa-arrows-rotate"></i> 刷新数字画像
                         </button>
                         <button class="btn btn-danger" id="btn-system-reset" style="background-color: #dc2626; border-color: #dc2626; color: white;">
@@ -493,25 +507,25 @@
 
                 <!-- Top Metric Cards Grid -->
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
-                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="glass-card portrait-metric-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
                         <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">物料库总行数</span>
-                        <div style="font-size: 26px; font-weight: 700; color: #3b82f6;" id="portrait-total-items">-</div>
-                        <div style="font-size: 11px; color: var(--color-text-secondary);">有效物料量: <strong id="portrait-valid-items" style="color: #4ade80;">-</strong></div>
+                        <div style="font-size: 26px; font-weight: 700; color: #2563eb;" id="portrait-total-items">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">有效物料量: <strong id="portrait-valid-items" style="color: #059669;">-</strong></div>
                     </div>
-                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="glass-card portrait-metric-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
                         <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">专业分类总数</span>
-                        <div style="font-size: 26px; font-weight: 700; color: #a855f7;" id="portrait-cat-count">-</div>
+                        <div style="font-size: 26px; font-weight: 700; color: #7c3aed;" id="portrait-cat-count">-</div>
                         <div style="font-size: 11px; color: var(--color-text-secondary);">涵盖暖通、强电、给排水等</div>
                     </div>
-                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="glass-card portrait-metric-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
                         <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">原始规格非空率</span>
-                        <div style="font-size: 26px; font-weight: 700; color: #f59e0b;" id="portrait-spec-rate">-</div>
-                        <div style="font-size: 11px; color: var(--color-text-secondary);">Excel 规格列非空数: <span id="portrait-spec-count">-</span></div>
+                        <div style="font-size: 26px; font-weight: 700; color: #d97706;" id="portrait-spec-rate">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">Excel 规格列非空数: <span id="portrait-spec-count" style="font-weight: 600; color: var(--color-text-primary);">-</span></div>
                     </div>
-                    <div class="glass-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="glass-card portrait-metric-card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
                         <span style="font-size: 12px; color: var(--color-text-muted); font-weight: 500;">标准型号 (Model) 提取率</span>
-                        <div style="font-size: 26px; font-weight: 700; color: #ef4444;" id="portrait-model-rate">-</div>
-                        <div style="font-size: 11px; color: var(--color-text-secondary);">缺失型号数: <strong id="portrait-model-missing" style="color: #f87171;">-</strong> (大模型治理主战场)</div>
+                        <div style="font-size: 26px; font-weight: 700; color: #dc2626;" id="portrait-model-rate">-</div>
+                        <div style="font-size: 11px; color: var(--color-text-secondary);">缺失型号数: <strong id="portrait-model-missing" style="color: #dc2626;">-</strong> (大模型治理主战场)</div>
                     </div>
                 </div>
 
@@ -522,7 +536,7 @@
                         <h3 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
                             <i class="fa-solid fa-cloud-arrow-up text-primary"></i> 物料明细库在线导入与更新
                         </h3>
-                        <div class="db-meta-info" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--color-text-secondary); background: rgba(255,255,255,0.02); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div class="db-meta-info" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--color-text-secondary); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
                             <div><strong>物料库当前总行数：</strong><span id="db-meta-total-count" style="color: var(--color-text-primary); font-weight: 600;">-</span> 行</div>
                             <div><strong>有效入库行数：</strong><span id="db-meta-imported-count" style="color: #4ade80; font-weight: 600;">-</span> 行</div>
                             <div><strong>禁用/停用行数：</strong><span id="db-meta-disabled-count" style="color: #f87171; font-weight: 600;">-</span> 行</div>
@@ -569,7 +583,7 @@
                                     <span>Excel 原始【规格/型号】列非空率</span>
                                     <strong style="color: #f59e0b;" id="bar-raw-spec-text">99.96%</strong>
                                 </div>
-                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                <div style="height: 10px; background: var(--bg-hover); border-radius: 5px; overflow: hidden;">
                                     <div id="bar-raw-spec" style="width: 99.96%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 5px;"></div>
                                 </div>
                                 <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">单元格未空着，但大多填的是非标段落文本</span>
@@ -580,7 +594,7 @@
                                     <span>结构化标准型号 (Model) 提取率</span>
                                     <strong style="color: #ef4444;" id="bar-model-text">10.85%</strong>
                                 </div>
-                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                <div style="height: 10px; background: var(--bg-hover); border-radius: 5px; overflow: hidden;">
                                     <div id="bar-model" style="width: 10.85%; height: 100%; background: linear-gradient(90deg, #ef4444, #f87171); border-radius: 5px;"></div>
                                 </div>
                                 <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">传统正则无法从段落提取标准型号，需大模型批处理治理</span>
@@ -589,9 +603,9 @@
                             <div>
                                 <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
                                     <span>多属性物理参数结构化率 (≥2 项)</span>
-                                    <strong style="color: #4ade80;" id="bar-attr-text">85.32%</strong>
+                                    <strong style="color: #10b981;" id="bar-attr-text">85.32%</strong>
                                 </div>
-                                <div style="height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden;">
+                                <div style="height: 10px; background: var(--bg-hover); border-radius: 5px; overflow: hidden;">
                                     <div id="bar-attr" style="width: 85.32%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 5px;"></div>
                                 </div>
                                 <span style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px; display: block;">已提取风量、管径、功率、材质等有效技术参数</span>
@@ -768,7 +782,7 @@
 
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">编译得到的 Rule DSL JSON（支持手工微调）</label>
-                            <textarea id="rule-json-editor" rows="9" style="width: 100%; padding: 10px; border-radius: 6px; background: #0f172a; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; resize: vertical; box-sizing: border-box;"></textarea>
+                            <textarea id="rule-json-editor" rows="9" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-accent-text); font-family: monospace; font-size: 12px; line-height: 1.4; resize: vertical; box-sizing: border-box;"></textarea>
                         </div>
 
                         <!-- Test Result Display Box -->
@@ -914,30 +928,30 @@
             </div>
 
             <!-- Modal: Edit Rule Dialog -->
-            <div id="rule-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
-                <div class="glass-card" style="width: 720px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.3); display: flex; flex-direction: column; gap: 16px;">
+            <div id="rule-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+                <div class="glass-card" style="width: 720px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-elevated); display: flex; flex-direction: column; gap: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-pen-to-square" style="color: #3b82f6;"></i> 修改规则配置 (<span id="modal-rule-id-lbl"></span>)
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: var(--color-primary);"></i> 修改规则配置 (<span id="modal-rule-id-lbl"></span>)
                         </h3>
-                        <button onclick="closeRuleEditModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="closeRuleEditModal()" style="background: none; border: none; color: var(--color-text-muted); font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">规则名称</label>
-                            <input type="text" id="modal-rule-name" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                            <input type="text" id="modal-rule-name" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
                         </div>
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">优先级 (Priority)</label>
-                            <input type="number" id="modal-rule-priority" value="10" min="1" max="100" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                            <input type="number" id="modal-rule-priority" value="10" min="1" max="100" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用层级</label>
-                            <select id="modal-rule-scope-level" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;">
+                            <select id="modal-rule-scope-level" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;">
                                 <option value="category">物料类目 (category)</option>
                                 <option value="discipline">专业大类 (discipline)</option>
                                 <option value="universal">通用全域 (universal)</option>
@@ -945,22 +959,22 @@
                         </div>
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">作用目标</label>
-                            <input type="text" id="modal-rule-scope-target" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                            <input type="text" id="modal-rule-scope-target" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
                         </div>
                         <div>
                             <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">所属专业</label>
-                            <input type="text" id="modal-rule-discipline" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
+                            <input type="text" id="modal-rule-discipline" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 13px;" />
                         </div>
                     </div>
 
                     <div>
                         <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">规则需求描述</label>
-                        <textarea id="modal-rule-desc" rows="2" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-base); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 12px; box-sizing: border-box;"></textarea>
+                        <textarea id="modal-rule-desc" rows="2" style="width: 100%; padding: 8px; border-radius: 4px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-text-primary); font-size: 12px; box-sizing: border-box;"></textarea>
                     </div>
 
                     <div>
                         <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 4px;">Rule DSL JSON 代码</label>
-                        <textarea id="modal-rule-json" rows="10" style="width: 100%; padding: 10px; border-radius: 6px; background: #020617; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box; resize: vertical;"></textarea>
+                        <textarea id="modal-rule-json" rows="10" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-accent-text); font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box; resize: vertical;"></textarea>
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 14px;">
@@ -971,16 +985,16 @@
             </div>
 
             <!-- Modal: View DSL Code Dialog -->
-            <div id="rule-view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
-                <div class="glass-card" style="width: 680px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: #0f172a; border: 1px solid rgba(59, 130, 246, 0.3); display: flex; flex-direction: column; gap: 16px;">
+            <div id="rule-view-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(8px); align-items: center; justify-content: center;">
+                <div class="glass-card" style="width: 680px; max-width: 90vw; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: var(--radius-lg); background: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-elevated); display: flex; flex-direction: column; gap: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-code" style="color: #38bdf8;"></i> 规则 DSL 详情 (<span id="view-modal-rule-id"></span>)
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-code" style="color: var(--color-info);"></i> 规则 DSL 详情 (<span id="view-modal-rule-id"></span>)
                         </h3>
-                        <button onclick="closeRuleViewModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="closeRuleViewModal()" style="background: none; border: none; color: var(--color-text-muted); font-size: 18px; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div>
-                        <textarea id="view-modal-rule-json" readonly rows="16" style="width: 100%; padding: 10px; border-radius: 6px; background: #020617; border: 1px solid var(--border-color); color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box;"></textarea>
+                        <textarea id="view-modal-rule-json" readonly rows="16" style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--color-accent-text); font-family: monospace; font-size: 12px; line-height: 1.4; box-sizing: border-box;"></textarea>
                     </div>
                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
                         <button class="btn btn-secondary" onclick="closeRuleViewModal()">关闭</button>
@@ -991,15 +1005,15 @@
             <!-- User Guide Dashboard (V0.1.0) -->
             <div class="guide-dashboard" id="guide-dashboard" style="display: none; padding: 28px 36px; width: 100%; height: calc(100vh - 64px); overflow-y: auto; box-sizing: border-box; flex-direction: column; gap: 24px; max-width: 1400px; margin: 0 auto;">
                 <!-- Header Banner -->
-                <div class="glass-card" style="padding: 24px 30px; border-radius: var(--radius-lg); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; justify-content: space-between; align-items: center;">
+                <div class="glass-card" style="padding: 24px 30px; border-radius: var(--radius-lg); background: var(--bg-surface-glass); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
-                            <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">
+                            <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--color-text-primary); font-family: 'Outfit', sans-serif;">
                                 📖 武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统 · 操作与使用指南
                             </h2>
-                            <span class="version-tag" style="background: rgba(59, 130, 246, 0.2); color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.1.3 正式版</span>
+                            <span class="version-tag" style="background: var(--color-primary-glow); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">V0.1.4 正式版</span>
                         </div>
-                        <p style="margin: 0; color: #94a3b8; font-size: 13px; line-height: 1.6;">
+                        <p style="margin: 0; color: var(--color-text-secondary); font-size: 13px; line-height: 1.6;">
                             基于 NLP 语义向量比对、30域特征结构化抽取与大模型优先调度的智能清单比对与规范化制表平台
                         </p>
                     </div>
@@ -1012,54 +1026,54 @@
 
                 <!-- 4 Steps Quick Start Workflow Grid -->
                 <div>
-                    <h3 style="font-size: 16px; font-weight: 600; color: #f1f5f9; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-rocket" style="color: #3b82f6;"></i> 标准作业全流程 (4 步快速上手)
+                    <h3 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-rocket" style="color: var(--color-primary);"></i> 标准作业全流程 (4 步快速上手)
                     </h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
                         <!-- Step 1 -->
-                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <span style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 1</span>
                                 <i class="fa-solid fa-user-shield" style="color: #3b82f6; font-size: 18px;"></i>
                             </div>
-                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">手机号安全登录</h4>
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);">手机号安全登录</h4>
+                            <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">
                                 使用员工企业<strong>手机号</strong>直接登录系统，全员初始密码统一为 <code>hkjj@12345</code>。登录后右上角自动展示您的<strong>岗位职称</strong>与<strong>真实姓名</strong>。
                             </p>
                         </div>
 
                         <!-- Step 2 -->
-                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <span style="background: rgba(168, 85, 247, 0.15); color: #c084fc; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 2</span>
                                 <i class="fa-solid fa-file-arrow-up" style="color: #c084fc; font-size: 18px;"></i>
                             </div>
-                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">上传原始工程清单</h4>
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);">上传原始工程清单</h4>
+                            <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">
                                 点击「上传原始清单」选择 <code>.xlsx / .xls</code> 文件。系统自适应解析表头，自动提取物料名称、型号、核心规格、风量功率、口径材质与单位。
                             </p>
                         </div>
 
                         <!-- Step 3 -->
-                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 3</span>
                                 <i class="fa-solid fa-sliders" style="color: #34d399; font-size: 18px;"></i>
                             </div>
-                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">50/50 智能比对与复核</h4>
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);">50/50 智能比对与复核</h4>
+                            <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">
                                 左侧查看原始清单并高亮属性，右侧在 4.5万+ 物料库中智能匹配 Top-3 候选卡片。支持置信度判断、手动补充参数二次重匹、一键无弹窗解绑。
                             </p>
                         </div>
 
                         <!-- Step 4 -->
-                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 10px;">
+                        <div class="glass-card" style="padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
                                 <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">STEP 4</span>
                                 <i class="fa-solid fa-file-excel" style="color: #fbbf24; font-size: 18px;"></i>
                             </div>
-                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #fff;">规范化回写与导出</h4>
-                            <p style="margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);">规范化回写与导出</h4>
+                            <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">
                                 审核完毕后点击「导出标准格式」，系统将标准物料编码、标准名称型号精准回写，<strong>100% 保留原生 Excel 样式、公式、单元格合并与批注</strong>。
                             </p>
                         </div>
@@ -1069,11 +1083,11 @@
                 <!-- Deep Feature Guide Details -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <!-- Card 1: Matcher Engine Details -->
-                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
-                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-microchip" style="color: #38bdf8;"></i> 核心算法与高精度决胜机制
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-microchip" style="color: var(--color-info);"></i> 核心算法与高精度决胜机制
                         </h4>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.8;">
                             <li><strong>30 域结构化解析</strong>：覆盖风量、功率、口径 (DN/Φ)、材质、耐压、壁厚等核心工程特征。</li>
                             <li><strong>多专业清洗优化</strong>：针对暖通、医气（脱氧紫铜管/流量）、配管（JDG/SC/壁厚优选）、线缆（阻燃截面 Hard Gate 封顶）定制清洗规则。</li>
                             <li><strong>双路混合检索</strong>：全文检索 + 离线 Sentence-Transformers 384维语义向量空间比对。</li>
@@ -1082,11 +1096,11 @@
                     </div>
 
                     <!-- Card 2: Safe Save & History -->
-                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
-                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-clock-rotate-left" style="color: #a855f7;"></i> 任务暂存与多版本协同
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-clock-rotate-left" style="color: var(--color-chart-ram);"></i> 任务暂存与多版本协同
                         </h4>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.8;">
                             <li><strong>3分钟静默自动保存</strong>：工作过程中系统自动暂存草稿，意外刷新或断网重新打开时即刻提示一键恢复。</li>
                             <li><strong>多版本命名备份</strong>：支持随时点击「暂存进度」自定义阶段名称（如“一阶段复核完成”）。</li>
                             <li><strong>历史记录管理</strong>：点击「历史记录」可查看所有暂存节点并支持多版本快速切换或清理。</li>
@@ -1095,11 +1109,11 @@
                     </div>
 
                     <!-- Card 3: LLM Rule Studio -->
-                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
-                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #f59e0b;"></i> LLM 规则生成与模型调度
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--color-warning);"></i> LLM 规则生成与模型调度
                         </h4>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.8;">
                             <li><strong>自然语言规则生成</strong>：输入业务描述（如“当清单中出现紫铜管且未标壁厚时自动匹配1.0mm”），AI 自动生成结构化规则。</li>
                             <li><strong>规则审核工作台</strong>：生成规则需经过人工/主管审核批准后上线生效，杜绝模型幻觉。</li>
                             <li><strong>LLM Priority Router (管理员)</strong>：支持配置多厂家模型节点（通义千问、DeepSeek等），支持优先级队列与超时降级。</li>
@@ -1107,11 +1121,11 @@
                     </div>
 
                     <!-- Card 4: FAQ & Best Practices -->
-                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
-                        <h4 style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-circle-question" style="color: #10b981;"></i> 常见问题与操作技巧
+                    <div class="glass-card" style="padding: 22px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <h4 style="font-size: 15px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-circle-question" style="color: var(--color-success);"></i> 常见问题与操作技巧
                         </h4>
-                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #94a3b8; line-height: 1.8;">
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.8;">
                             <li><strong>遇到冷门/非标物料匹配不准？</strong> 点击物料行上的「补充参数」输入额定风量或功率，系统将触发加权二次精确比对。</li>
                             <li><strong>忘记密码如何处理？</strong> 请联系系统管理员在后台重置，或直接恢复默认密码 <code>hkjj@12345</code>。</li>
                             <li><strong>如何查看物料库标准属性？</strong> 切换到顶部「全局物料明细库」可按专业品类检索 4.5万+ 标准物料属性画像。</li>
@@ -1288,6 +1302,76 @@
                     正在启动匹配系统...
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Account Settings Modal (Phase 2) -->
+    <div class="modal" id="account-settings-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); width: 440px; max-width: 92vw; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.02);">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-user-shield" style="color: var(--color-primary);"></i> 账号安全设置
+                </h3>
+                <button id="close-account-modal-btn" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 16px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="account-settings-form" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+                <!-- Immutable info card -->
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--color-text-secondary);">员工工号:</span>
+                        <span style="display: inline-flex; align-items: center; gap: 6px;">
+                            <strong id="modal-emp-no" style="font-family: monospace; color: var(--color-success); font-size: 13px;">-</strong>
+                            <span style="font-size: 10px; background: rgba(239,68,68,0.15); color: #ef4444; padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(239,68,68,0.3);"><i class="fa-solid fa-lock"></i> 唯一且不可修改</span>
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-text-secondary);">员工姓名:</span>
+                        <strong id="modal-emp-name" style="color: var(--color-text-primary);">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-text-secondary);">所属部门 / 岗位:</span>
+                        <span id="modal-emp-dept" style="color: var(--color-text-secondary); font-size: 12px;">-</span>
+                    </div>
+                </div>
+
+                <!-- Editable fields -->
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 500; margin-bottom: 5px; color: var(--color-text-secondary);">
+                        登录名 (可修改，用于日常登录)
+                    </label>
+                    <input type="text" id="setting-username" required minlength="3" maxlength="50" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.6); color: var(--color-text-primary); font-size: 13px;" />
+                    <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 3px;">支持输入登录名、工号或手机号直接登录系统。</div>
+                </div>
+
+                <div style="border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                    <label style="display: block; font-size: 12.5px; font-weight: 500; margin-bottom: 5px; color: var(--color-text-secondary);">
+                        当前密码 <span style="color: #ef4444;">*</span> <span style="font-size: 11px; color: var(--color-text-muted); font-weight: normal;">(修改登录名或密码均须验证)</span>
+                    </label>
+                    <input type="password" id="setting-old-password" required placeholder="请输入您当前的登录密码" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.6); color: var(--color-text-primary); font-size: 13px;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 500; margin-bottom: 5px; color: var(--color-text-secondary);">
+                        新密码 <span style="font-size: 11px; color: var(--color-text-muted); font-weight: normal;">(如不修改密码请留空)</span>
+                    </label>
+                    <input type="password" id="setting-new-password" minlength="6" placeholder="若需修改请设置至少 6 位新密码" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.6); color: var(--color-text-primary); font-size: 13px;" />
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 12.5px; font-weight: 500; margin-bottom: 5px; color: var(--color-text-secondary);">
+                        确认新密码
+                    </label>
+                    <input type="password" id="setting-confirm-password" minlength="6" placeholder="请再次输入新密码" style="width: 100%; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.6); color: var(--color-text-primary); font-size: 13px;" />
+                </div>
+
+                <div id="account-settings-msg" style="display: none; padding: 8px 12px; border-radius: 4px; font-size: 12px;"></div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+                    <button type="button" class="btn btn-secondary" id="cancel-account-modal-btn">取消</button>
+                    <button type="submit" class="btn btn-primary" id="save-account-settings-btn"><i class="fa-solid fa-check"></i> 保存设置</button>
+                </div>
+            </form>
         </div>
     </div>
 

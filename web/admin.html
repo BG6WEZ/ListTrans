@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('listtrans_theme');
+                if (!theme) {
+                    theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -25,10 +38,10 @@
         }
         .admin-nav-tabs {
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-subtle);
             padding: 4px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
             gap: 4px;
             flex-wrap: wrap;
         }
@@ -40,21 +53,21 @@
             cursor: pointer;
             background: transparent;
             border: none;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .nav-tab-btn:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
+            color: var(--color-text-primary);
+            background: var(--bg-hover);
         }
         .nav-tab-btn.active {
-            background: #2d82ff;
+            background: var(--color-primary);
             color: #ffffff;
             font-weight: 600;
-            box-shadow: 0 2px 12px rgba(45, 130, 255, 0.4);
+            box-shadow: 0 2px 12px var(--color-primary-glow);
         }
         .tab-content-pane {
             display: none;
@@ -73,7 +86,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 18px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 16px;
             flex-wrap: wrap;
             gap: 12px;
@@ -81,9 +94,7 @@
         .admin-header h1 {
             font-size: 22px;
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #fff 0%, #8a99ad 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--color-text-primary);
             margin: 0;
         }
         .header-actions {
@@ -101,18 +112,18 @@
             margin-bottom: 22px;
         }
         .metric-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 14px;
             padding: 18px 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            box-shadow: var(--shadow-card);
             position: relative;
             overflow: hidden;
             transition: transform 0.2s, border-color 0.2s;
         }
         .metric-card:hover {
             transform: translateY(-2px);
-            border-color: rgba(45, 130, 255, 0.4);
+            border-color: var(--color-primary);
         }
         .metric-card-header {
             display: flex;
@@ -122,7 +133,7 @@
         }
         .metric-title {
             font-size: 13px;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             font-weight: 500;
         }
         .metric-icon {
@@ -136,16 +147,16 @@
         .metric-num {
             font-size: 28px;
             font-weight: 700;
-            color: #ffffff;
+            color: var(--color-text-primary);
             font-family: 'Outfit', sans-serif;
         }
         .metric-unit {
             font-size: 13px;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
         }
         .metric-sub {
             font-size: 12px;
-            color: #64748b;
+            color: var(--color-text-muted);
             margin-top: 6px;
             display: flex;
             align-items: center;
@@ -153,7 +164,7 @@
         }
         .metric-bar-bg {
             height: 6px;
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--bg-subtle);
             border-radius: 3px;
             margin-top: 10px;
             overflow: hidden;
@@ -176,19 +187,19 @@
             transition: all 0.3s;
         }
         .alert-banner-normal {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            color: #10b981;
+            background: var(--color-success-bg);
+            border: 1px solid var(--color-success-border);
+            color: var(--color-success);
         }
         .alert-banner-warning {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            color: #f59e0b;
+            background: var(--color-warning-bg);
+            border: 1px solid var(--color-warning-border);
+            color: var(--color-warning);
         }
         .alert-banner-danger {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            color: #ef4444;
+            background: var(--color-danger-bg);
+            border: 1px solid var(--color-danger-border);
+            color: var(--color-danger);
             animation: pulseBanner 2s infinite;
         }
         @keyframes pulseBanner {
@@ -198,11 +209,12 @@
 
         /* Snapshots Section */
         .section-card {
-            background: rgba(20, 29, 47, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 14px;
             padding: 22px;
             margin-bottom: 24px;
+            box-shadow: var(--shadow-card);
             backdrop-filter: blur(10px);
         }
         .section-title-bar {
@@ -214,7 +226,7 @@
         .section-title {
             font-size: 16px;
             font-weight: 600;
-            color: #fff;
+            color: var(--color-text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -222,9 +234,9 @@
 
         /* Buttons & Actions */
         .btn-action {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            color: var(--color-text-primary);
             padding: 7px 14px;
             border-radius: 8px;
             font-size: 13px;
@@ -235,31 +247,34 @@
             gap: 6px;
         }
         .btn-action:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: var(--bg-hover);
+            border-color: var(--border-color-hover);
         }
         .btn-primary-action {
-            background: #2d82ff;
-            border-color: #2d82ff;
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #ffffff;
         }
         .btn-primary-action:hover {
-            background: #1c6fe8;
+            background: var(--color-primary-hover);
         }
         .btn-danger-action {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
+            background: var(--color-danger-bg);
+            border-color: var(--color-danger-border);
+            color: var(--color-danger);
         }
         .btn-danger-action:hover {
-            background: rgba(239, 68, 68, 0.3);
+            background: var(--color-danger);
+            color: #ffffff;
         }
         .btn-warning-action {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
+            background: var(--color-warning-bg);
+            border-color: var(--color-warning-border);
+            color: var(--color-warning);
         }
         .btn-warning-action:hover {
-            background: rgba(245, 158, 11, 0.25);
+            background: var(--color-warning);
+            color: #ffffff;
         }
 
         /* Search & Filter Controls */
@@ -271,9 +286,9 @@
             align-items: center;
         }
         .filter-input {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--color-text-primary);
             padding: 8px 14px;
             border-radius: 8px;
             font-size: 13px;
@@ -281,23 +296,23 @@
         }
         .filter-input:focus {
             outline: none;
-            border-color: #2d82ff;
+            border-color: var(--color-primary);
         }
         .filter-select {
-            background: #0f172a;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--color-text-primary);
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 13px;
         }
         .filter-select:focus {
             outline: none;
-            border-color: #2d82ff;
+            border-color: var(--color-primary);
         }
         .record-counter {
             font-size: 13px;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             margin-left: auto;
             font-weight: 500;
         }
@@ -308,10 +323,10 @@
             max-height: 600px;
             overflow-x: auto;
             overflow-y: auto;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-card);
         }
         .user-table {
             width: 100%;
@@ -323,71 +338,63 @@
         .user-table th, .user-table td {
             padding: 12px 16px;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
         }
         .user-table th {
             position: sticky;
             top: 0;
-            background: #0f172a;
+            background: var(--bg-surface-elevated);
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--color-text-secondary);
             font-size: 12px;
             letter-spacing: 0.5px;
             z-index: 10;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border-color);
         }
         .user-table tr:hover td {
-            background: rgba(45, 130, 255, 0.05);
+            background: var(--bg-hover);
         }
         .status-badge {
-            color: #2d82ff;
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: nowrap;
+            text-align: center;
         }
-        .role-badge-admin { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .role-badge-director { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
-        .role-badge-manager { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
-
-        /* Action Buttons */
-        .btn-action {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #f1f3f9;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+        .status-badge.status-active {
+            background: var(--color-success-bg);
+            color: var(--color-success);
+            border: 1px solid var(--color-success-border);
         }
-        .btn-action:hover {
-            background: rgba(255,255,255,0.12);
+        .status-badge.status-warning {
+            background: var(--color-warning-bg);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning-border);
         }
-        .btn-danger-action {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.2);
+        .status-badge.status-inactive,
+        .status-badge.status-danger,
+        .status-badge.status-failed {
+            background: var(--color-danger-bg);
+            color: var(--color-danger);
+            border: 1px solid var(--color-danger-border);
         }
-        .btn-danger-action:hover {
-            background: rgba(239, 68, 68, 0.2);
+        .status-badge.status-observing {
+            background: var(--bg-subtle);
+            color: var(--color-text-secondary);
+            border: 1px solid var(--border-color);
         }
-        .btn-primary-action {
-            background: #2d82ff;
-            border-color: #2d82ff;
-            color: white;
+        [data-theme="light"] .status-badge.status-observing {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
         }
-        .btn-primary-action:hover {
-            background: #1e62c9;
-        }
-        .btn-warning-action {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: #f59e0b;
-        }
-        .btn-warning-action:hover {
-            background: rgba(245, 158, 11, 0.25);
-        }
+        .role-badge-admin { background: var(--color-warning-bg); color: var(--color-warning); }
+        .role-badge-director { background: rgba(168, 85, 247, 0.15); color: var(--color-chart-ram); }
+        .role-badge-manager { background: var(--color-info-bg); color: var(--color-info); }
 
         /* Pagination Bar */
         .pagination-bar {
@@ -397,11 +404,11 @@
             margin-top: 14px;
             margin-bottom: 20px;
             padding: 10px 16px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -413,9 +420,9 @@
         .pagination-controls button {
             padding: 4px 10px;
             border-radius: 4px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #f1f3f9;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--color-text-primary);
             font-size: 12px;
             cursor: pointer;
         }
@@ -425,10 +432,10 @@
         }
         .pagination-controls select {
             padding: 4px 8px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
-            color: #f1f3f9;
+            color: var(--color-text-primary);
             font-size: 12px;
         }
 
@@ -443,15 +450,16 @@
             .stats-two-col { grid-template-columns: 1fr; }
         }
         .panel-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 18px;
+            box-shadow: var(--shadow-card);
         }
         .panel-title {
             font-size: 15px;
             font-weight: 600;
-            color: #ffffff;
+            color: var(--color-text-primary);
             margin-bottom: 14px;
             display: flex;
             align-items: center;
@@ -466,8 +474,8 @@
             margin-bottom: 18px;
         }
         .online-user-card {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 12px 14px;
             display: flex;
@@ -478,7 +486,7 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-info));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -492,8 +500,8 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #10b981;
-            border: 2px solid #0f172a;
+            background: var(--color-success);
+            border: 2px solid var(--bg-surface);
             position: absolute;
             bottom: 0;
             right: 0;
@@ -507,22 +515,23 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(5px);
             z-index: 999;
             align-items: center;
             justify-content: center;
         }
         .modal-content {
-            background: #0f172a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
             border-radius: 14px;
             width: 90%;
             max-width: 650px;
             padding: 24px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            box-shadow: var(--shadow-elevated);
+            color: var(--color-text-primary);
         }
         .modal-header {
             margin-bottom: 16px;
@@ -533,6 +542,7 @@
         .modal-header h2 {
             font-size: 18px;
             font-weight: 600;
+            color: var(--color-text-primary);
             margin: 0;
         }
         .form-row {
@@ -548,22 +558,22 @@
         .form-group label {
             display: block;
             font-size: 12px;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             margin-bottom: 5px;
         }
         .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 9px 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            color: white;
+            color: var(--color-text-primary);
             font-size: 13px;
             box-sizing: border-box;
         }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #2d82ff;
+            border-color: var(--color-primary);
         }
         .modal-footer {
             display: flex;
@@ -574,29 +584,35 @@
         .nav-back {
             display: inline-flex;
             align-items: center;
-            color: #8a99ad;
+            color: var(--color-text-secondary);
             text-decoration: none;
             font-size: 14px;
             transition: color 0.2s;
         }
         .nav-back:hover {
-            color: #2d82ff;
+            color: var(--color-primary);
         }
     </style>
 </head>
-<body class="dark-theme">
+<body>
     <div class="admin-container">
         <!-- Top Bar with Back Link and Mode Switcher Tabs -->
         <div class="top-navbar-bar">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <img src="logo.png" alt="Logo" style="height: 34px; object-fit: contain;" />
                 <div>
-                    <div style="font-weight: 700; font-size: 15px; color: #fff; font-family: 'Outfit', sans-serif;">武汉华康世纪洁净科技股份有限公司</div>
-                    <div style="font-size: 11.5px; color: #60a5fa; font-weight: 500;">使命：以洁净技术赋能产业升级 · 系统管理后台</div>
+                    <div style="font-weight: 700; font-size: 15px; color: var(--color-text-primary); font-family: 'Outfit', sans-serif;">武汉华康世纪洁净科技股份有限公司</div>
+                    <div style="font-size: 11.5px; color: var(--color-accent-text); font-weight: 500;">使命：以洁净技术赋能产业升级 · 系统管理后台</div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="btn-action" id="adminThemeToggleBtn" onclick="toggleAdminTheme()" title="切换深色/浅色主题" style="border-radius: 20px; padding: 6px 14px;">
+                    <span id="adminThemeIcon">🌙</span> <span id="adminThemeText">深色</span>
+                </button>
                 <a href="index.html" class="nav-back">← 返回智能工作台</a>
+                <button class="btn-action btn-danger-action" onclick="handleAdminLogout()" title="退出系统" style="padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                    <i class="fa-solid fa-sign-out-alt"></i> 退出
+                </button>
             </div>
             
             <div class="admin-nav-tabs">
@@ -628,10 +644,10 @@
             <div class="admin-header">
                 <div>
                     <h1>服务器健康度与负荷警戒大盘 <span style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">LIVE</span></h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">实时监控磁盘容量、CPU与内存负载；当系统负荷达 90% 警戒线时自动捕获在线用户与匹配任务快照</p>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">实时监控磁盘容量、CPU与内存负载；当系统负荷达 90% 警戒线时自动捕获在线用户与匹配任务快照</p>
                 </div>
                 <div class="header-actions">
-                    <select id="health-autorefresh-select" onchange="changeHealthRefreshInterval(this.value)" style="padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 12px;">
+                    <select id="health-autorefresh-select" onchange="changeHealthRefreshInterval(this.value)" style="padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; color: var(--color-text-primary); font-size: 12px;">
                         <option value="5000">自动刷新：每 5 秒</option>
                         <option value="10000" selected>自动刷新：每 10 秒</option>
                         <option value="30000">自动刷新：每 30 秒</option>
@@ -727,7 +743,7 @@
             <div class="panel-card" style="margin-bottom: 20px;">
                 <div class="panel-title">
                     <span>⚠️ 负荷警戒历史快照 (CPU 或 内存到达 90% 时的系统状态)</span>
-                    <span style="font-size: 12px; color: #8a99ad; font-weight: normal;">自动快照记录：触发时在线人数、清单清洗行数、活跃作业清单</span>
+                    <span style="font-size: 12px; color: var(--color-text-secondary); font-weight: normal;">自动快照记录：触发时在线人数、清单清洗行数、活跃作业清单</span>
                 </div>
                 <div class="table-scroll-container" style="max-height: 360px;">
                     <table class="user-table">
@@ -758,7 +774,7 @@
             <div class="admin-header">
                 <div>
                     <h1>数据统计与系统使用大盘</h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">展示全系统总登录人次、使用人次、处理清单总行数、导出标准化行数与累计使用时长</p>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">展示全系统总登录人次、使用人次、处理清单总行数、导出标准化行数与累计使用时长</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-action" onclick="fetchStatistics()">🔄 刷新统计</button>
@@ -819,7 +835,7 @@
                 <div class="panel-card">
                     <div class="panel-title">
                         <span>🏗️ 各专业工程清单处理分布</span>
-                        <span style="font-size: 12px; color: #8a99ad;">暖通 / 装饰 / 强电 / 弱电 / 给排水 / 医气</span>
+                        <span style="font-size: 12px; color: var(--color-text-secondary);">暖通 / 装饰 / 强电 / 弱电 / 给排水 / 医气</span>
                     </div>
                     <div id="prof-stats-container" style="display: flex; flex-direction: column; gap: 12px; padding: 6px 0;">
                         <!-- Profession bars injected here -->
@@ -830,7 +846,7 @@
                 <div class="panel-card">
                     <div class="panel-title">
                         <span>🏆 用户活跃度与作业排行 (Top 10)</span>
-                        <span style="font-size: 12px; color: #8a99ad;">按操作与作业频次排序</span>
+                        <span style="font-size: 12px; color: var(--color-text-secondary);">按操作与作业频次排序</span>
                     </div>
                     <div class="table-scroll-container" style="max-height: 280px;">
                         <table class="user-table" style="min-width: 100%;">
@@ -860,7 +876,7 @@
             <div class="admin-header">
                 <div>
                     <h1>实时在线监控与账号操作审计</h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">查看实时在线与使用人数，追溯各账号登录、上传、智能匹配、重算与导出操作日志</p>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">查看实时在线与使用人数，追溯各账号登录、上传、智能匹配、重算与导出操作日志</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-action" onclick="fetchOnlineAndLogs()">🔄 刷新日志</button>
@@ -920,7 +936,7 @@
                     <option value="failed">失败 (Failed)</option>
                 </select>
                 <input type="date" id="log-start-date" onchange="handleLogFilterChange()" style="color-scheme: dark;">
-                <span style="color: #8a99ad;">至</span>
+                <span style="color: var(--color-text-secondary);">至</span>
                 <input type="date" id="log-end-date" onchange="handleLogFilterChange()" style="color-scheme: dark;">
                 <button class="btn-action" onclick="resetLogFilters()">重置筛选</button>
                 <span class="count-tag" id="log-count-badge">加载中...</span>
@@ -959,7 +975,7 @@
                     </select>
                     <button id="btn-log-first" onclick="goToLogPage(1)">首页</button>
                     <button id="btn-log-prev" onclick="goToLogPage(currentLogPage - 1)">上一页</button>
-                    <span id="log-page-num-display" style="color: #fff; font-weight: 500;">第 1 / 1 页</span>
+                    <span id="log-page-num-display" style="color: var(--color-text-primary); font-weight: 500;">第 1 / 1 页</span>
                     <button id="btn-log-next" onclick="goToLogPage(currentLogPage + 1)">下一页</button>
                     <button id="btn-log-last" onclick="goToLogPage(totalLogPages)">末页</button>
                 </div>
@@ -972,8 +988,8 @@
         <div id="tab-content-users" class="tab-content-pane">
             <div class="admin-header">
                 <div>
-                    <h1>系统用户与权限管理 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">V0.1.3</span></h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">依据企业人员清单分配账号，支持手机号登录、部门职位管理与角色权限配置</p>
+                    <h1>系统用户与权限管理 <span style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 2px 6px; border-radius: 4px; font-weight: 700; vertical-align: middle; margin-left: 8px;">V0.1.4</span></h1>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">依据企业人员清单分配账号，支持手机号登录、部门职位管理与角色权限配置</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-action" onclick="syncPersonnelFromExcel()">🔄 一键同步人员清单</button>
@@ -1039,7 +1055,7 @@
                     </select>
                     <button id="btn-first-page" onclick="goToPage(1)">首页</button>
                     <button id="btn-prev-page" onclick="goToPage(currentPage - 1)">上一页</button>
-                    <span id="page-num-display" style="color: #fff; font-weight: 500;">第 1 / 1 页</span>
+                    <span id="page-num-display" style="color: var(--color-text-primary); font-weight: 500;">第 1 / 1 页</span>
                     <button id="btn-next-page" onclick="goToPage(currentPage + 1)">下一页</button>
                     <button id="btn-last-page" onclick="goToPage(totalPages)">末页</button>
                 </div>
@@ -1053,7 +1069,7 @@
             <div class="admin-header">
                 <div>
                     <h1>大模型服务与优先调度配置 (LLM Priority Router)</h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">配置阿里云通义千问、DeepSeek 等多厂家大模型节点，实现优先队列自动调度与超时降级容灾</p>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">配置阿里云通义千问、DeepSeek 等多厂家大模型节点，实现优先队列自动调度与超时降级容灾</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-action btn-primary-action" onclick="openCreateProviderModal()">＋ 新增模型节点</button>
@@ -1110,7 +1126,7 @@
             <div class="admin-header">
                 <div>
                     <h1>数据飞轮与智能规则演化 (Data Flywheel & Rule Evolution)</h1>
-                    <p style="color: #8a99ad; font-size: 14px; margin-top: 4px;">全量沉淀一线工程师手动纠错、换选与多物料绑定先验知识，通过两阶段挖掘、子进程沙箱回归验证与 LIFO 栈式回滚实现规则闭环演进</p>
+                    <p style="color: var(--color-text-secondary); font-size: 14px; margin-top: 4px;">全量沉淀一线工程师手动纠错、换选与多物料绑定先验知识，通过两阶段挖掘、子进程沙箱回归验证与 LIFO 栈式回滚实现规则闭环演进</p>
                 </div>
                 <div class="header-actions">
                     <button class="btn-action btn-primary-action" onclick="triggerFlywheelMining()"><i class="fa-solid fa-wand-magic-sparkles"></i> 🔄 执行增量挖掘</button>
@@ -1215,10 +1231,10 @@
                 <div class="modal-header">
                     <h2>🧪 沙箱黄金集回归评测监控</h2>
                 </div>
-                <div id="fw-eval-content" style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+                <div id="fw-eval-content" style="font-size: 13px; color: var(--color-text-primary); line-height: 1.6;">
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 18px; margin-bottom: 8px;" id="fw-eval-title">正在子进程沙箱中运行回归评测...</div>
-                        <div style="color: #8a99ad;" id="fw-eval-msg">正在克隆配置并执行 tests/eval_golden_set.py</div>
+                        <div style="color: var(--color-text-secondary);" id="fw-eval-msg">正在克隆配置并执行 tests/eval_golden_set.py</div>
                         <div style="width: 100%; background: rgba(255,255,255,0.08); border-radius: 8px; height: 12px; margin-top: 16px; overflow: hidden;">
                             <div id="fw-eval-bar" style="width: 10%; height: 100%; background: #38bdf8; transition: width 0.3s ease;"></div>
                         </div>
@@ -1270,7 +1286,7 @@
             <div class="modal-header">
                 <h2>⚠️ 负荷警戒快照详情</h2>
             </div>
-            <div id="alert-detail-content" style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+            <div id="alert-detail-content" style="font-size: 13px; color: var(--color-text-primary); line-height: 1.6;">
                 <!-- Injected dynamically -->
             </div>
             <div class="modal-footer">
@@ -1314,8 +1330,8 @@
                         <input type="text" id="create-dept3" placeholder="如：成本一所">
                     </div>
                     <div class="form-group">
-                        <label for="create-employee-no">工号</label>
-                        <input type="text" id="create-employee-no" placeholder="如：15434">
+                        <label for="create-employee-no">工号 <span style="color: #ef4444;">* (唯一且创建后不可修改)</span></label>
+                        <input type="text" id="create-employee-no" required placeholder="如：15434 或 SYS_ADMIN">
                     </div>
                 </div>
 
@@ -1363,7 +1379,7 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-phone">手机号 (登录账号)</label>
-                        <input type="text" id="edit-phone" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                        <input type="text" id="edit-phone" readonly style="background: rgba(255,255,255,0.03); color: var(--color-text-secondary);">
                     </div>
                 </div>
 
@@ -1384,8 +1400,8 @@
                         <input type="text" id="edit-dept3">
                     </div>
                     <div class="form-group">
-                        <label for="edit-employee-no">工号</label>
-                        <input type="text" id="edit-employee-no">
+                        <label for="edit-employee-no">工号 <span style="font-size: 11px; color: var(--color-text-secondary);">(🔒 唯一不可变标识，禁止修改)</span></label>
+                        <input type="text" id="edit-employee-no" readonly disabled style="background: rgba(255,255,255,0.05); color: var(--color-text-secondary); cursor: not-allowed;">
                     </div>
                 </div>
 
@@ -1505,7 +1521,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="edit-p-id-display">节点 ID</label>
-                        <input type="text" id="edit-p-id-display" readonly style="background: rgba(255,255,255,0.03); color: #8a99ad;">
+                        <input type="text" id="edit-p-id-display" readonly style="background: rgba(255,255,255,0.03); color: var(--color-text-secondary);">
                     </div>
                     <div class="form-group">
                         <label for="edit-p-name">显示名称 *</label>
@@ -1603,6 +1619,40 @@
             const m = document.getElementById(id);
             if (m) m.style.display = 'none';
         }
+
+        // Theme Management for Admin Panel
+        function updateAdminThemeUI(theme) {
+            const icon = document.getElementById('adminThemeIcon');
+            const text = document.getElementById('adminThemeText');
+            if (icon && text) {
+                if (theme === 'light') {
+                    icon.textContent = '☀️';
+                    text.textContent = '浅色';
+                } else {
+                    icon.textContent = '🌙';
+                    text.textContent = '深色';
+                }
+            }
+        }
+
+        function toggleAdminTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('listtrans_theme', next);
+            updateAdminThemeUI(next);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+            updateAdminThemeUI(theme);
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'listtrans_theme' && e.newValue) {
+                    document.documentElement.setAttribute('data-theme', e.newValue);
+                    updateAdminThemeUI(e.newValue);
+                }
+            });
+        });
 
         // Tab Switching
         let currentActiveTab = 'health';
@@ -1751,7 +1801,7 @@
             tbody.innerHTML = '';
 
             if (!snapshots || snapshots.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: #8a99ad;">暂无高负荷警戒历史快照记录 (系统运行平稳，未超过 90% 负荷)</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: var(--color-text-secondary);">暂无高负荷警戒历史快照记录 (系统运行平稳，未超过 90% 负荷)</td></tr>`;
                 return;
             }
 
@@ -1760,15 +1810,16 @@
                 tr.innerHTML = `
                     <td><code>${escapeHtml(s.timestamp)}</code></td>
                     <td><strong style="color: #f59e0b;">${escapeHtml(s.trigger_type)}</strong></td>
-                    <td><span class="status-badge ${s.cpu_percent >= 90 ? 'status-failed' : 'status-warning'}">${s.cpu_percent}%</span></td>
-                    <td><span class="status-badge ${s.memory_percent >= 90 ? 'status-failed' : 'status-warning'}">${s.memory_percent}%</span></td>
-                    <td>${s.disk_percent}%</td>
-                    <td><strong>${s.online_users_count}</strong> 人 (其中 ${s.active_users_count || 0} 人作业)</td>
-                    <td><strong style="color: #38bdf8;">${s.processing_rows_count}</strong> 行</td>
+                    <td><span class="status-badge ${s.cpu_percent >= 90 ? 'status-failed' : 'status-warning'}">${escapeHtml(s.cpu_percent)}%</span></td>
+                    <td><span class="status-badge ${s.memory_percent >= 90 ? 'status-failed' : 'status-warning'}">${escapeHtml(s.memory_percent)}%</span></td>
+                    <td>${escapeHtml(s.disk_percent)}%</td>
+                    <td><strong>${escapeHtml(s.online_users_count)}</strong> 人 (其中 ${escapeHtml(s.active_users_count || 0)} 人作业)</td>
+                    <td><strong style="color: #38bdf8;">${escapeHtml(s.processing_rows_count)}</strong> 行</td>
                     <td>
-                        <button class="btn-action" onclick='viewAlertDetailModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>查看快照明细</button>
+                        <button class="btn-action btn-snapshot-view">查看快照明细</button>
                     </td>
                 `;
+                tr.querySelector('.btn-snapshot-view').addEventListener('click', () => viewAlertDetailModal(s));
                 tbody.appendChild(tr);
             });
         }
@@ -1776,7 +1827,7 @@
         function viewAlertDetailModal(snapshot) {
             const content = document.getElementById('alert-detail-content');
             
-            let usersHtml = '<div style="color: #8a99ad; margin-top: 4px;">暂无在线人员明细</div>';
+            let usersHtml = '<div style="color: var(--color-text-secondary); margin-top: 4px;">暂无在线人员明细</div>';
             if (snapshot.active_users_detail && snapshot.active_users_detail.length > 0) {
                 usersHtml = `
                     <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px;">
@@ -1790,7 +1841,7 @@
                 `;
             }
 
-            let tasksHtml = '<div style="color: #8a99ad; margin-top: 4px;">无正在执行中的清洗匹配任务</div>';
+            let tasksHtml = '<div style="color: var(--color-text-secondary); margin-top: 4px;">无正在执行中的清洗匹配任务</div>';
             if (snapshot.active_tasks_detail && snapshot.active_tasks_detail.length > 0) {
                 tasksHtml = `
                     <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 6px;">
@@ -1818,12 +1869,12 @@
                 </div>
 
                 <div style="margin-bottom: 14px;">
-                    <h3 style="font-size: 14px; margin-bottom: 6px; color: #fff;">👥 当时在线与使用人员明细 (${snapshot.online_users_count} 人)：</h3>
+                    <h3 style="font-size: 14px; margin-bottom: 6px; color: var(--color-text-primary);">👥 当时在线与使用人员明细 (${snapshot.online_users_count} 人)：</h3>
                     ${usersHtml}
                 </div>
 
                 <div>
-                    <h3 style="font-size: 14px; margin-bottom: 6px; color: #fff;">📑 当时实施清洗匹配任务明细 (${snapshot.processing_rows_count} 行)：</h3>
+                    <h3 style="font-size: 14px; margin-bottom: 6px; color: var(--color-text-primary);">📑 当时实施清洗匹配任务明细 (${snapshot.processing_rows_count} 行)：</h3>
                     ${tasksHtml}
                 </div>
             `;
@@ -1887,7 +1938,7 @@
                 const totalProfCount = profs.reduce((sum, p) => sum + p.count, 0) || 1;
 
                 if (profs.length === 0) {
-                    profContainer.innerHTML = `<div style="color: #8a99ad; padding: 10px 0;">暂无专业清单作业记录</div>`;
+                    profContainer.innerHTML = `<div style="color: var(--color-text-secondary); padding: 10px 0;">暂无专业清单作业记录</div>`;
                 } else {
                     profs.forEach(p => {
                         const pct = Math.round((p.count / totalProfCount) * 100);
@@ -1895,7 +1946,7 @@
                         row.innerHTML = `
                             <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
                                 <span><strong>${escapeHtml(p.professional)}</strong> 专业</span>
-                                <span style="color: #8a99ad;">${p.count} 次作业 (${pct}%)</span>
+                                <span style="color: var(--color-text-secondary);">${p.count} 次作业 (${pct}%)</span>
                             </div>
                             <div class="progress-track" style="margin-top: 0; margin-bottom: 8px;">
                                 <div class="progress-bar-fill fill-primary" style="width: ${pct}%;"></div>
@@ -1911,7 +1962,7 @@
                 const ranking = data.user_ranking || [];
 
                 if (ranking.length === 0) {
-                    rankTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #8a99ad; padding: 20px;">暂无用户活跃记录</td></tr>`;
+                    rankTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: 20px;">暂无用户活跃记录</td></tr>`;
                 } else {
                     ranking.forEach((u, idx) => {
                         const tr = document.createElement('tr');
@@ -1920,9 +1971,9 @@
                             <td><strong>${rankBadge}</strong></td>
                             <td><strong>${escapeHtml(u.name || u.username)}</strong></td>
                             <td><code>${escapeHtml(u.username)}</code></td>
-                            <td><span class="role-badge role-badge-${u.role}">${u.role}</span></td>
-                            <td><strong style="color: #38bdf8;">${u.op_count}</strong> 次</td>
-                            <td style="font-size: 12px; color: #8a99ad;">${escapeHtml(u.last_op || '-')}</td>
+                            <td><span class="role-badge role-badge-${escapeHtml(u.role)}">${escapeHtml(u.role)}</span></td>
+                            <td><strong style="color: #38bdf8;">${escapeHtml(u.op_count)}</strong> 次</td>
+                            <td style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(u.last_op || '-')}</td>
                         `;
                         rankTbody.appendChild(tr);
                     });
@@ -1966,7 +2017,7 @@
                 container.innerHTML = '';
 
                 if (!data.online_users || data.online_users.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1 / -1; color: #8a99ad; padding: 12px; text-align: center;">当前暂无在线用户</div>`;
+                    container.innerHTML = `<div style="grid-column: 1 / -1; color: var(--color-text-secondary); padding: 12px; text-align: center;">当前暂无在线用户</div>`;
                     return;
                 }
 
@@ -1985,7 +2036,7 @@
                                 <strong style="font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(u.name || u.username)}</strong>
                                 <span class="status-badge ${isWorking ? 'status-active' : 'status-inactive'}" style="font-size: 11px;">${isWorking ? '作业中' : '在线'}</span>
                             </div>
-                            <div style="font-size: 12px; color: #8a99ad; margin-top: 2px;">
+                            <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">
                                 ${escapeHtml(u.username)} · ${escapeHtml(u.dept || u.role)}
                             </div>
                             <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
@@ -2063,7 +2114,7 @@
             tbody.innerHTML = '';
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: #8a99ad;">未找到符合条件的操作记录</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: var(--color-text-secondary);">未找到符合条件的操作记录</td></tr>`;
                 return;
             }
 
@@ -2077,8 +2128,8 @@
                     <td><strong>${escapeHtml(log.username)}</strong></td>
                     <td>${escapeHtml(log.name || '-')}</td>
                     <td><span class="role-badge role-badge-${log.role}">${log.role || 'employee'}</span></td>
-                    <td><strong style="color: #38bdf8;">${escapeHtml(log.action)}</strong></td>
-                    <td style="max-width: 420px; white-space: normal; word-break: break-all; color: #cbd5e1; font-size: 12.5px;">${escapeHtml(log.details || '-')}</td>
+                    <td><strong style="color: var(--color-info);">${escapeHtml(log.action)}</strong></td>
+                    <td style="max-width: 420px; white-space: normal; word-break: break-all; color: var(--color-text-primary); font-size: 12.5px;">${escapeHtml(log.details || '-')}</td>
                     <td><code>${escapeHtml(log.ip_address || '-')}</code></td>
                     <td>${statusTag}</td>
                 `;
@@ -2244,7 +2295,7 @@
             const pageUsers = filteredUsers.slice(startIdx, startIdx + pageSize);
 
             if (pageUsers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: #8a99ad;">未找到匹配的用户数据</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">未找到匹配的用户数据</td></tr>`;
             } else {
                 pageUsers.forEach(u => {
                     const tr = document.createElement('tr');
@@ -2258,9 +2309,6 @@
                                      u.role === 'director' ? '总监' :
                                      u.role === 'manager' ? '经理/主管' : '普通员工';
 
-                    const safeUserJson = JSON.stringify(u).replace(/'/g, "&#39;");
-                    const safeName = (u.name || u.username).replace(/'/g, "\\'");
-
                     tr.innerHTML = `
                         <td><strong>${escapeHtml(u.name || '-')}</strong></td>
                         <td>${escapeHtml(u.dept1 || '-')}</td>
@@ -2271,13 +2319,16 @@
                         <td><strong>${escapeHtml(u.phone || u.username)}</strong></td>
                         <td><span class="role-badge ${roleBadgeClass}">${roleText}</span></td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td style="font-size: 12px; color: #8a99ad;">${escapeHtml(u.last_login || '从未登录')}</td>
+                        <td style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(u.last_login || '从未登录')}</td>
                         <td>
-                            <button class="btn-action" onclick='openEditModal(${safeUserJson})'>编辑</button>
-                            <button class="btn-action" onclick="openPwdModal(${u.id}, '${safeName}')">重置密码</button>
-                            <button class="btn-action btn-danger-action" onclick="deleteUser(${u.id}, '${safeName}')">删除</button>
+                            <button class="btn-action btn-user-edit">编辑</button>
+                            <button class="btn-action btn-user-pwd">重置密码</button>
+                            <button class="btn-action btn-danger-action btn-user-del">删除</button>
                         </td>
                     `;
+                    tr.querySelector('.btn-user-edit').addEventListener('click', () => openEditModal(u));
+                    tr.querySelector('.btn-user-pwd').addEventListener('click', () => openPwdModal(u.id, u.name || u.username));
+                    tr.querySelector('.btn-user-del').addEventListener('click', () => deleteUser(u.id, u.name || u.username));
                     tbody.appendChild(tr);
                 });
             }
@@ -2323,6 +2374,10 @@
             const dept2 = document.getElementById('create-dept2').value.trim();
             const dept3 = document.getElementById('create-dept3').value.trim();
             const employee_no = document.getElementById('create-employee-no').value.trim();
+            if (!employee_no) {
+                alert('请填写工号，工号为账号全局唯一不可变标识。');
+                return;
+            }
             const position = document.getElementById('create-position').value.trim();
             const role = document.getElementById('create-role').value;
             const password = document.getElementById('create-password').value;
@@ -2375,7 +2430,6 @@
             const dept1 = document.getElementById('edit-dept1').value.trim();
             const dept2 = document.getElementById('edit-dept2').value.trim();
             const dept3 = document.getElementById('edit-dept3').value.trim();
-            const employee_no = document.getElementById('edit-employee-no').value.trim();
             const position = document.getElementById('edit-position').value.trim();
             const role = document.getElementById('edit-role').value;
             const is_active = document.getElementById('edit-status').value === '1';
@@ -2384,7 +2438,7 @@
                 const res = await fetch(`${API_URL}/api/admin/users/${id}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ name, dept1, dept2, dept3, employee_no, position, role, is_active })
+                    body: JSON.stringify({ name, dept1, dept2, dept3, position, role, is_active })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '修改用户信息失败'));
@@ -2481,7 +2535,7 @@
             
             if (providers.length === 0) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="10" style="text-align: center; padding: 30px; color: #8a99ad;">暂未配置大模型节点，点击右上角新增节点</td>`;
+                tr.innerHTML = `<td colspan="10" style="text-align: center; padding: 30px; color: var(--color-text-secondary);">暂未配置大模型节点，点击右上角新增节点</td>`;
                 body.appendChild(tr);
                 return;
             }
@@ -2499,18 +2553,21 @@
                     <td><strong style="color: #3b82f6;">P${p.priority}</strong></td>
                     <td><code>${escapeHtml(p.provider_id)}</code></td>
                     <td><strong>${escapeHtml(p.name)}</strong></td>
-                    <td style="font-size: 12px; color: #8a99ad; max-width: 260px; word-break: break-all;">${escapeHtml(p.base_url)}</td>
+                    <td style="font-size: 12px; color: var(--color-text-secondary); max-width: 260px; word-break: break-all;">${escapeHtml(p.base_url)}</td>
                     <td><code>${escapeHtml(p.model_name)}</code></td>
                     <td>${p.timeout_seconds || 8.0}s</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>${p.total_calls || 0} 次 / ${p.total_failovers || 0} 降级</td>
                     <td>${Math.round(p.avg_latency_ms || 0)} ms</td>
                     <td>
-                        <button class="btn-action" onclick="openEditProviderModal('${p.provider_id}', '${safeName}', '${safeBaseUrl}', '${safeModelName}', ${p.priority}, ${p.timeout_seconds})">修改配置</button>
-                        <button class="btn-action" onclick="toggleProviderActive('${p.provider_id}', ${!p.is_active})">${p.is_active ? '停用' : '启用'}</button>
-                        <button class="btn-action btn-danger-action" onclick="deleteProvider('${p.provider_id}')">删除</button>
+                        <button class="btn-action btn-prov-edit">修改配置</button>
+                        <button class="btn-action btn-prov-toggle">${p.is_active ? '停用' : '启用'}</button>
+                        <button class="btn-action btn-danger-action btn-prov-del">删除</button>
                     </td>
                 `;
+                tr.querySelector('.btn-prov-edit').addEventListener('click', () => openEditProviderModal(p.provider_id, p.name, p.base_url, p.model_name, p.priority, p.timeout_seconds));
+                tr.querySelector('.btn-prov-toggle').addEventListener('click', () => toggleProviderActive(p.provider_id, !p.is_active));
+                tr.querySelector('.btn-prov-del').addEventListener('click', () => deleteProvider(p.provider_id));
                 body.appendChild(tr);
             });
         }
@@ -2657,7 +2714,7 @@
         async function fetchFlywheelSuggestions() {
             const status = document.getElementById('fw-filter-status').value;
             const tbody = document.getElementById('flywheel-suggestions-body');
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #8a99ad; padding: 20px;">正在加载智能提议规则...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--color-text-secondary); padding: 20px;">正在加载智能提议规则...</td></tr>';
             
             try {
                 const url = status 
@@ -2695,7 +2752,7 @@
             document.getElementById('fw-counter').innerText = `共 ${suggestions.length} 条建议`;
             
             if (suggestions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #8a99ad; padding: 30px;">暂无匹配的智能规则建议</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--color-text-secondary); padding: 30px;">暂无匹配的智能规则建议</td></tr>';
                 return;
             }
 
@@ -2707,15 +2764,15 @@
                 if (s.status === 'pending') {
                     statusBadge = '<span class="status-badge status-warning">待审核</span>';
                 } else if (s.status === 'observing') {
-                    statusBadge = '<span class="status-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;">观察池</span>';
+                    statusBadge = '<span class="status-badge status-observing">观察池</span>';
                 } else if (s.status === 'accepted') {
                     statusBadge = '<span class="status-badge status-active">已采纳</span>';
                 } else if (s.status === 'rejected') {
                     statusBadge = '<span class="status-badge status-inactive">已驳回</span>';
                 } else if (s.status === 'rolled_back') {
-                    statusBadge = '<span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">已回滚</span>';
+                    statusBadge = '<span class="status-badge status-danger">已回滚</span>';
                 } else {
-                    statusBadge = `<span class="status-badge">${s.status}</span>`;
+                    statusBadge = `<span class="status-badge">${escapeHtml(s.status)}</span>`;
                 }
 
                 // Type badge
@@ -2729,7 +2786,7 @@
                     try {
                         const parsed = JSON.parse(s.target_value);
                         if (Array.isArray(parsed)) {
-                            targetDisplay = parsed.map(b => `<div style="font-size: 11.5px; color: #e2e8f0;">• <strong>${escapeHtml(b.code)}</strong> ${escapeHtml(b.name)} [${escapeHtml(b.specification || '')}] × ${b.qty_ratio || 1}</div>`).join('');
+                            targetDisplay = parsed.map(b => `<div style="font-size: 11.5px; color: var(--color-text-primary);">• <strong>${escapeHtml(b.code)}</strong> ${escapeHtml(b.name)} [${escapeHtml(b.specification || '')}] × ${b.qty_ratio || 1}</div>`).join('');
                         }
                     } catch (e) {}
                 }
@@ -2750,27 +2807,34 @@
                 let actionsHtml = '';
                 if (s.status === 'pending' || s.status === 'observing') {
                     actionsHtml = `
-                        <button class="btn-action" style="padding: 3px 8px; font-size: 11px;" onclick="startFlywheelEval(${s.id})">🧪 沙箱回归</button>
-                        <button class="btn-action btn-primary-action" style="padding: 3px 8px; font-size: 11px;" onclick="acceptFlywheelSuggestionDirect(${s.id})">✓ 采纳</button>
-                        <button class="btn-action btn-warning-action" style="padding: 3px 8px; font-size: 11px;" onclick='openEditFlywheelModal(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️ 微调</button>
-                        <button class="btn-action btn-danger-action" style="padding: 3px 8px; font-size: 11px;" onclick="rejectFlywheelSuggestion(${s.id})">✕ 驳回</button>
+                        <button class="btn-action btn-fw-eval" style="padding: 3px 8px; font-size: 11px;">🧪 沙箱回归</button>
+                        <button class="btn-action btn-primary-action btn-fw-accept" style="padding: 3px 8px; font-size: 11px;">✓ 采纳</button>
+                        <button class="btn-action btn-warning-action btn-fw-edit" style="padding: 3px 8px; font-size: 11px;">✏️ 微调</button>
+                        <button class="btn-action btn-danger-action btn-fw-reject" style="padding: 3px 8px; font-size: 11px;">✕ 驳回</button>
                     `;
                 } else if (s.status === 'accepted') {
                     actionsHtml = `<span style="font-size: 12px; color: #10b981;">已生效 (${escapeHtml(s.applied_rule_id || '')})</span>`;
                 } else {
-                    actionsHtml = `<span style="font-size: 12px; color: #8a99ad;">-</span>`;
+                    actionsHtml = `<span style="font-size: 12px; color: var(--color-text-secondary);">-</span>`;
                 }
 
                 tr.innerHTML = `
                     <td>${typeBadge}</td>
-                    <td><strong style="color: #f1f5f9;">${escapeHtml(s.source_pattern)}</strong></td>
+                    <td><strong style="color: var(--color-text-primary);">${escapeHtml(s.source_pattern)}</strong></td>
                     <td>${targetDisplay}</td>
-                    <td><strong>${s.support_count}</strong> 次</td>
-                    <td><strong>${s.distinct_users}</strong> 人</td>
+                    <td><strong>${escapeHtml(s.support_count)}</strong> 次</td>
+                    <td><strong>${escapeHtml(s.distinct_users)}</strong> 人</td>
                     <td>${consDisplay}</td>
                     <td>${statusBadge}</td>
-                    <td><div style="display: flex; gap: 4px; flex-wrap: wrap;">${actionsHtml}</div></td>
+                    <td><div class="fw-actions-wrap" style="display: flex; gap: 4px; flex-wrap: wrap;">${actionsHtml}</div></td>
                 `;
+                if (s.status === 'pending' || s.status === 'observing') {
+                    const wrap = tr.querySelector('.fw-actions-wrap');
+                    wrap.querySelector('.btn-fw-eval')?.addEventListener('click', () => startFlywheelEval(s.id));
+                    wrap.querySelector('.btn-fw-accept')?.addEventListener('click', () => acceptFlywheelSuggestionDirect(s.id));
+                    wrap.querySelector('.btn-fw-edit')?.addEventListener('click', () => openEditFlywheelModal(s));
+                    wrap.querySelector('.btn-fw-reject')?.addEventListener('click', () => rejectFlywheelSuggestion(s.id));
+                }
                 tbody.appendChild(tr);
             });
         }
@@ -2932,7 +2996,7 @@
         async function openSnapshotsModal() {
             document.getElementById('fw-snapshots-modal').style.display = 'flex';
             const tbody = document.getElementById('fw-snapshots-body');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #8a99ad; padding: 20px;">正在加载配置变更快照栈...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: 20px;">正在加载配置变更快照栈...</td></tr>';
             try {
                 const res = await fetch(`${API_URL}/api/flywheel/snapshots`, { headers: getAuthHeaders() });
                 if (!res.ok) throw new Error('获取快照栈失败');
@@ -2940,14 +3004,14 @@
                 const snaps = data.snapshots || [];
                 tbody.innerHTML = '';
                 if (snaps.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #8a99ad; padding: 20px;">暂无配置快照记录</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--color-text-secondary); padding: 20px;">暂无配置快照记录</td></tr>';
                     return;
                 }
                 snaps.forEach(sp => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><code>${escapeHtml(sp.snapshot_version)}</code></td>
-                        <td><span style="font-size: 11px; background: rgba(59,130,246,0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px;">${sp.target_type}</span></td>
+                        <td><span style="font-size: 11px; background: rgba(59,130,246,0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px;">${escapeHtml(sp.target_type)}</span></td>
                         <td>${escapeHtml(sp.reason || '-')}</td>
                         <td><strong>${escapeHtml(sp.operator_id)}</strong></td>
                         <td>${sp.is_active ? '<span class="status-badge status-active">栈内有效</span>' : '<span class="status-badge status-inactive">已回滚失效</span>'}</td>
@@ -2956,7 +3020,7 @@
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 20px;">加载快照出错: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 20px;">加载快照出错: ${escapeHtml(err.message)}</td></tr>`;
             }
         }
 
@@ -3014,8 +3078,35 @@
         }
 
         // ==========================================
-        // Page Initialization
+        // Page Initialization & Logout
         // ==========================================
+        async function handleAdminLogout() {
+            if (!confirm('确定要退出登录当前账号吗？')) return;
+            try {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    await fetch(`${API_URL}/api/auth/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }).catch(() => {});
+                }
+            } catch (e) {
+                console.warn('Logout notice:', e);
+            } finally {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                localStorage.removeItem('name');
+                localStorage.removeItem('position');
+                localStorage.removeItem('role');
+                localStorage.removeItem('employee_no');
+                localStorage.removeItem('dept1');
+                window.location.href = 'login.html';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             switchAdminTab('health');
             changeHealthRefreshInterval(10000); // 10s default

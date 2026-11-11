@@ -1,3 +1,17 @@
+// Safe HTML escaping utility
+function escapeHtml(val) {
+    if (val === null || val === undefined) return '';
+    return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+let _isHandling401 = false;
+const AUTH_STORAGE_KEYS = ['token', 'username', 'name', 'position', 'role'];
+
 // Intercept all fetch requests to inject authentication headers and handle token expiration
 const originalFetch = window.fetch;
 window.fetch = async function (url, options) {
@@ -29,9 +43,12 @@ window.fetch = async function (url, options) {
     try {
         const response = await originalFetch(url, options);
         if (response.status === 401) {
-            alert("您的登录会话已失效，请重新登录。");
-            localStorage.clear();
-            window.location.href = "login.html";
+            if (!_isHandling401) {
+                _isHandling401 = true;
+                AUTH_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+                alert("您的登录会话已失效，请重新登录。");
+                window.location.href = "login.html";
+            }
         }
         return response;
     } catch (error) {
@@ -76,20 +93,116 @@ let configs = {
 
 const backendUrl = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:18080';
 
+// ==========================================
+// Theme Management System (Phase 4)
+// ==========================================
+function getSystemTheme() {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+}
+
+function getCurrentTheme() {
+    return localStorage.getItem('listtrans_theme') || getSystemTheme();
+}
+
+function updateThemeToggleUI(theme) {
+    const icon = document.getElementById('themeToggleIcon');
+    if (icon) {
+        if (theme === 'light') {
+            icon.className = 'fa-solid fa-sun';
+            icon.title = '当前为浅色主题，点击切换为深色';
+        } else {
+            icon.className = 'fa-solid fa-moon';
+            icon.title = '当前为深色主题，点击切换为浅色';
+        }
+    }
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('listtrans_theme', theme);
+    updateThemeToggleUI(theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || getCurrentTheme();
+    const next = (current === 'light') ? 'dark' : 'light';
+    applyTheme(next);
+}
+
+function initTheme() {
+    const theme = document.documentElement.getAttribute('data-theme') || getCurrentTheme();
+    updateThemeToggleUI(theme);
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+        btn.addEventListener('click', toggleTheme);
+    }
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'listtrans_theme' && e.newValue) {
+            applyTheme(e.newValue);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     // Process User profile info: show Position (岗位) and Real Name (姓名)
     const username = localStorage.getItem('username') || '-';
     let displayName = localStorage.getItem('name') || (username === 'admin' ? '系统管理员' : username);
     let position = localStorage.getItem('position') || (username === 'admin' ? '系统管理员' : '');
     let role = localStorage.getItem('role') || 'employee';
+    let employeeNo = localStorage.getItem('employee_no') || '-';
+    let currentDept = localStorage.getItem('dept1') || '';
     
     const usernameLbl = document.getElementById('username-lbl');
     const roleLbl = document.getElementById('user-role-lbl');
+    const empNoLbl = document.getElementById('user-emp-no-lbl');
     const adminLink = document.getElementById('admin-panel-link');
     const logoutBtn = document.getElementById('logout-btn');
+    const btnAccountSettings = document.getElementById('btn-account-settings');
+    
+    // User logout logic
+    async function performUserLogout() {
+        if (!confirm('确定要退出登录当前账号吗？')) {
+            return;
+        }
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                await fetch(`${backendUrl}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(() => {});
+            }
+        } catch (e) {
+            console.warn('Logout notice:', e);
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('name');
+            localStorage.removeItem('position');
+            localStorage.removeItem('role');
+            localStorage.removeItem('employee_no');
+            localStorage.removeItem('dept1');
+            window.location.href = 'login.html';
+        }
+    }
+    window.handleUserLogout = performUserLogout;
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', performUserLogout);
+    }
     
     function updateUserUI() {
-        if (usernameLbl) usernameLbl.innerText = displayName;
+        if (usernameLbl) {
+            usernameLbl.innerText = displayName;
+            usernameLbl.title = `姓名: ${displayName} | 账号: ${username}`;
+        }
+        if (empNoLbl) {
+            empNoLbl.innerText = employeeNo;
+            empNoLbl.title = `工号: ${employeeNo}`;
+        }
         if (roleLbl) {
             let positionText = position;
             if (!positionText) {
@@ -99,6 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 else positionText = '员工';
             }
             roleLbl.innerText = positionText;
+            roleLbl.title = `角色职位: ${positionText}`;
+            if (empNoLbl) empNoLbl.title = `工号: ${employeeNo} (${positionText})`;
         }
         if (role === 'admin' && adminLink) {
             adminLink.style.display = 'inline-flex';
@@ -113,6 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.ok ? r.json() : null).then(userData => {
             if (userData) {
+                if (userData.username) {
+                    localStorage.setItem('username', userData.username);
+                }
                 if (userData.name) {
                     displayName = userData.name;
                     localStorage.setItem('name', userData.name);
@@ -120,6 +238,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (userData.position) {
                     position = userData.position;
                     localStorage.setItem('position', userData.position);
+                }
+                if (userData.employee_no) {
+                    employeeNo = userData.employee_no;
+                    localStorage.setItem('employee_no', userData.employee_no);
+                }
+                if (userData.dept1) {
+                    currentDept = userData.dept1;
+                    localStorage.setItem('dept1', userData.dept1);
                 }
                 if (userData.role) {
                     role = userData.role;
@@ -147,11 +273,105 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(sendHeartbeat, 20000);
     }
     
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            if (confirm('确认退出系统吗？')) {
-                localStorage.clear();
-                window.location.href = 'login.html';
+    // Account Settings Modal (Phase 2)
+    const accountModal = document.getElementById('account-settings-modal');
+    const closeAccountModalBtn = document.getElementById('close-account-modal-btn');
+    const cancelAccountModalBtn = document.getElementById('cancel-account-modal-btn');
+    const accountForm = document.getElementById('account-settings-form');
+    const accountMsg = document.getElementById('account-settings-msg');
+
+    function openAccountSettingsModal() {
+        if (!accountModal) return;
+        document.getElementById('modal-emp-no').innerText = employeeNo || '-';
+        document.getElementById('modal-emp-name').innerText = displayName || '-';
+        document.getElementById('modal-emp-dept').innerText = `${currentDept || '未分配部门'} / ${position || '员工'}`;
+        document.getElementById('setting-username').value = localStorage.getItem('username') || '';
+        document.getElementById('setting-old-password').value = '';
+        document.getElementById('setting-new-password').value = '';
+        document.getElementById('setting-confirm-password').value = '';
+        if (accountMsg) accountMsg.style.display = 'none';
+        accountModal.style.display = 'flex';
+    }
+
+    function closeAccountSettingsModal() {
+        if (accountModal) accountModal.style.display = 'none';
+    }
+
+    if (btnAccountSettings) {
+        btnAccountSettings.addEventListener('click', openAccountSettingsModal);
+    }
+    if (closeAccountModalBtn) {
+        closeAccountModalBtn.addEventListener('click', closeAccountSettingsModal);
+    }
+    if (cancelAccountModalBtn) {
+        cancelAccountModalBtn.addEventListener('click', closeAccountSettingsModal);
+    }
+
+    if (accountForm) {
+        accountForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newUsername = document.getElementById('setting-username').value.trim();
+            const oldPassword = document.getElementById('setting-old-password').value;
+            const newPassword = document.getElementById('setting-new-password').value;
+            const confirmPassword = document.getElementById('setting-confirm-password').value;
+
+            if (newPassword && newPassword !== confirmPassword) {
+                accountMsg.style.display = 'block';
+                accountMsg.style.background = 'var(--color-danger-bg)';
+                accountMsg.style.color = 'var(--color-danger)';
+                accountMsg.innerText = '两次输入的新密码不一致，请核对。';
+                return;
+            }
+
+            const btnSave = document.getElementById('save-account-settings-btn');
+            btnSave.disabled = true;
+            btnSave.innerText = '正在保存...';
+
+            try {
+                const res = await fetch(`${backendUrl}/api/auth/profile`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        new_username: newUsername,
+                        old_password: oldPassword,
+                        new_password: newPassword || null
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || '修改失败');
+                }
+
+                // Update local storage with refreshed access token and updated profile
+                if (data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                }
+                if (data.username) {
+                    localStorage.setItem('username', data.username);
+                }
+                if (data.name) {
+                    displayName = data.name;
+                    localStorage.setItem('name', data.name);
+                }
+                updateUserUI();
+
+                accountMsg.style.display = 'block';
+                accountMsg.style.background = 'var(--color-success-bg)';
+                accountMsg.style.color = 'var(--color-success)';
+                accountMsg.innerText = data.detail || '保存成功！';
+
+                setTimeout(() => {
+                    closeAccountSettingsModal();
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = '<i class="fa-solid fa-check"></i> 保存设置';
+                }, 1200);
+            } catch (err) {
+                accountMsg.style.display = 'block';
+                accountMsg.style.background = 'var(--color-danger-bg)';
+                accountMsg.style.color = 'var(--color-danger)';
+                accountMsg.innerText = err.message || '更新账号失败';
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fa-solid fa-check"></i> 保存设置';
             }
         });
     }
@@ -1180,14 +1400,14 @@ function renderTable() {
         }
 
         tr.innerHTML = `
-            <td>${item.original_row_idx}</td>
+            <td>${escapeHtml(item.original_row_idx)}</td>
             <td>
-                <div style="font-weight: 500;">${item.original_name}</div>
+                <div style="font-weight: 500;">${escapeHtml(item.original_name)}</div>
                 <div style="font-size: 11px; color: var(--color-text-muted); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${item.original_spec.replace(/\n/g, ' ')}
+                    ${escapeHtml((item.original_spec || '').replace(/\n/g, ' '))}
                 </div>
             </td>
-            <td><code class="row-code-lbl">${codeDisplay}</code></td>
+            <td><code class="row-code-lbl">${escapeHtml(codeDisplay)}</code></td>
             <td>${statusHtml}</td>
         `;
         
@@ -1297,17 +1517,17 @@ function renderBoundMaterials() {
         
         div.innerHTML = `
             <div class="bound-item-top">
-                <span class="bound-item-name" title="${b.name}">${b.name}</span>
-                <span class="bound-item-code">${b.code}</span>
+                <span class="bound-item-name" title="${escapeHtml(b.name)}">${escapeHtml(b.name)}</span>
+                <span class="bound-item-code">${escapeHtml(b.code)}</span>
             </div>
-            <div class="bound-item-desc" title="规格: ${b.specification || '无'} | 品牌: ${b.brand || '无'}">
-                ${b.specification || '无规格'}
+            <div class="bound-item-desc" title="规格: ${escapeHtml(b.specification || '无')} | 品牌: ${escapeHtml(b.brand || '无')}">
+                ${escapeHtml(b.specification || '无规格')}
             </div>
             <div class="bound-item-bottom">
                 <div class="bound-item-qty-wrap">
                     <span>数量:</span>
-                    <input type="number" class="bound-qty-input" value="${b.qty !== undefined ? b.qty : selectedItem.original_qty}" />
-                    <span style="font-size: 11px; color: var(--color-text-muted);">${b.unit || selectedItem.original_unit || '个'}</span>
+                    <input type="number" class="bound-qty-input" value="${escapeHtml(b.qty !== undefined ? b.qty : selectedItem.original_qty)}" />
+                    <span style="font-size: 11px; color: var(--color-text-muted);">${escapeHtml(b.unit || selectedItem.original_unit || '个')}</span>
                 </div>
                 <button class="btn btn-delete-binding" style="padding: 2px 6px; height: 22px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 12px;" title="删除绑定">
                     <i class="fa-solid fa-trash-can"></i>
@@ -1381,20 +1601,20 @@ function renderCandidates() {
         card.innerHTML = `
             <div class="candidate-header">
                 <div class="candidate-title">
-                    <span class="cand-name" title="${cand.name}">${cand.name}</span>
-                    <span class="cand-code">${cand.code}</span>
+                    <span class="cand-name" title="${escapeHtml(cand.name)}">${escapeHtml(cand.name)}</span>
+                    <span class="cand-code">${escapeHtml(cand.code)}</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
                     ${boundBadge}
-                    <div class="match-percentage-badge">${cand.score}% 相似</div>
+                    <div class="match-percentage-badge">${escapeHtml(cand.score)}% 相似</div>
                 </div>
             </div>
-            <div class="candidate-spec" title="${cand.specification || '无规格描述'}">${cand.specification || '无规格描述'}</div>
+            <div class="candidate-spec" title="${escapeHtml(cand.specification || '无规格描述')}">${escapeHtml(cand.specification || '无规格描述')}</div>
             ${tagsHtml ? `<div style="margin: 2px 0 4px 0; display: flex; flex-wrap: wrap; gap: 4px;">${tagsHtml}</div>` : ''}
             <div class="candidate-meta">
-                <span>品牌: <strong>${cand.brand || '未指定'}</strong></span>
-                <span>品类: <strong>${cand.category || '-'}</strong></span>
-                <span>单位: <strong>${cand.unit || '个'}</strong></span>
+                <span>品牌: <strong>${escapeHtml(cand.brand || '未指定')}</strong></span>
+                <span>品类: <strong>${escapeHtml(cand.category || '-')}</strong></span>
+                <span>单位: <strong>${escapeHtml(cand.unit || '个')}</strong></span>
             </div>
         `;
         
@@ -1568,10 +1788,10 @@ async function runManualSearch() {
         results.forEach(res => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><code>${res.code}</code></td>
-                <td><strong>${res.name}</strong></td>
-                <td><div style="font-size: 11.5px; max-width: 250px; max-height: 80px; overflow-y: auto; white-space: pre-wrap;">${res.specification || ''}</div></td>
-                <td>${res.unit || '个'}</td>
+                <td><code>${escapeHtml(res.code)}</code></td>
+                <td><strong>${escapeHtml(res.name)}</strong></td>
+                <td><div style="font-size: 11.5px; max-width: 250px; max-height: 80px; overflow-y: auto; white-space: pre-wrap;">${escapeHtml(res.specification || '')}</div></td>
+                <td>${escapeHtml(res.unit || '个')}</td>
                 <td><button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;">套用</button></td>
             `;
             
@@ -1590,7 +1810,7 @@ async function runManualSearch() {
             tbody.appendChild(tr);
         });
     } catch (error) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-search" style="color: var(--color-danger);">搜索出错: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-search" style="color: var(--color-danger);">搜索出错: ${escapeHtml(error.message)}</td></tr>`;
     }
 }
 
@@ -1715,7 +1935,7 @@ function renderParamChips() {
         const chip = document.createElement('div');
         const isActive = selectedItem.active_params['model'];
         chip.className = `param-chip ${isActive ? 'active' : 'inactive'}`;
-        chip.innerHTML = `<i class="fa-solid ${isActive ? 'fa-check' : 'fa-xmark'}"></i> 型号: ${model}`;
+        chip.innerHTML = `<i class="fa-solid ${isActive ? 'fa-check' : 'fa-xmark'}"></i> 型号: ${escapeHtml(model)}`;
         chip.addEventListener('click', () => {
             selectedItem.active_params['model'] = !selectedItem.active_params['model'];
             renderParamChips();
@@ -1734,7 +1954,7 @@ function renderParamChips() {
         const chip = document.createElement('div');
         const isActive = selectedItem.active_params[k];
         chip.className = `param-chip ${isActive ? 'active' : 'inactive'}`;
-        chip.innerHTML = `<i class="fa-solid ${isActive ? 'fa-check' : 'fa-xmark'}"></i> ${k}: ${valStr}`;
+        chip.innerHTML = `<i class="fa-solid ${isActive ? 'fa-check' : 'fa-xmark'}"></i> ${escapeHtml(k)}: ${escapeHtml(valStr)}`;
         chip.addEventListener('click', () => {
             selectedItem.active_params[k] = !selectedItem.active_params[k];
             renderParamChips();
@@ -2198,12 +2418,12 @@ async function loadAndRenderBindingSuggestionsAndRules() {
                 suggestions.forEach(s => {
                     const tr = document.createElement('tr');
                     
-                    const boundListHtml = s.bindings.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${b.code}</code> <strong>${b.name}</strong> (比例: ${b.qty_ratio.toFixed(2)})</div>`).join('');
+                    const boundListHtml = s.bindings.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${escapeHtml(b.code)}</code> <strong>${escapeHtml(b.name)}</strong> (比例: ${escapeHtml(b.qty_ratio.toFixed(2))})</div>`).join('');
                     
                     tr.innerHTML = `
-                        <td><strong>${s.original_name}</strong></td>
+                        <td><strong>${escapeHtml(s.original_name)}</strong></td>
                         <td><div style="display: flex; flex-direction: column; gap: 4px;">${boundListHtml}</div></td>
-                        <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px; font-size: 11px;">${s.confidence_count} 次</span></td>
+                        <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px; font-size: 11px;">${escapeHtml(s.confidence_count)} 次</span></td>
                         <td><button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳规则</button></td>
                     `;
                     
@@ -2241,10 +2461,10 @@ async function loadAndRenderBindingSuggestionsAndRules() {
                 rules.forEach(r => {
                     const tr = document.createElement('tr');
                     
-                    const boundListHtml = r.bound_materials.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${b.code}</code> <strong>${b.name}</strong> (比例: ${b.qty_ratio.toFixed(2)})</div>`).join('');
+                    const boundListHtml = r.bound_materials.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${escapeHtml(b.code)}</code> <strong>${escapeHtml(b.name)}</strong> (比例: ${escapeHtml(b.qty_ratio.toFixed(2))})</div>`).join('');
                     
                     tr.innerHTML = `
-                        <td><strong>${r.original_name}</strong></td>
+                        <td><strong>${escapeHtml(r.original_name)}</strong></td>
                         <td><div style="display: flex; flex-direction: column; gap: 4px;">${boundListHtml}</div></td>
                         <td><button class="btn btn-secondary" style="padding: 4px 8px; color: var(--color-danger); border-color: var(--color-danger-border); font-size: 11px;"><i class="fa-solid fa-trash"></i> 删除</button></td>
                     `;
@@ -2588,7 +2808,7 @@ async function loadAndRenderDataPortrait() {
                         <span><strong style="color: var(--color-primary); font-family: monospace;">Top ${idx+1}.</strong> ${c.category}</span>
                         <span style="color: var(--color-text-secondary);">${c.count.toLocaleString()} 行 (${c.percent}%)</span>
                     </div>
-                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+                    <div style="height: 6px; background: var(--bg-subtle); border-radius: 3px; overflow: hidden;">
                         <div style="width: ${c.percent}%; height: 100%; background: var(--color-primary); border-radius: 3px;"></div>
                     </div>
                 `;
@@ -2605,11 +2825,11 @@ async function loadAndRenderDataPortrait() {
                 item.style.cssText = 'display: flex; flex-direction: column; gap: 4px; font-size: 13px;';
                 item.innerHTML = `
                     <div style="display: flex; justify-content: space-between;">
-                        <span><strong style="color: #a855f7; font-family: monospace;">Top ${idx+1}.</strong> ${u.unit}</span>
+                        <span><strong style="color: var(--color-chart-ram); font-family: monospace;">Top ${idx+1}.</strong> ${escapeHtml(u.unit)}</span>
                         <span style="color: var(--color-text-secondary);">${u.count.toLocaleString()} 行 (${u.percent}%)</span>
                     </div>
-                    <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
-                        <div style="width: ${u.percent}%; height: 100%; background: #a855f7; border-radius: 3px;"></div>
+                    <div style="height: 6px; background: var(--bg-subtle); border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${u.percent}%; height: 100%; background: var(--color-chart-ram); border-radius: 3px;"></div>
                     </div>
                 `;
                 unitContainer.appendChild(item);
@@ -2717,17 +2937,17 @@ async function loadAndRenderMaterialTable(page = 1) {
         data.items.forEach(item => {
             const tr = document.createElement('tr');
             const modelTag = item.model 
-                ? `<span style="background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; font-weight: 500;">${item.model}</span>` 
+                ? `<span style="background: var(--color-success-bg); color: var(--color-success); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; font-weight: 500;">${escapeHtml(item.model)}</span>` 
                 : `<span style="color: var(--color-text-muted); font-size: 11px;">未提取</span>`;
                 
             tr.innerHTML = `
-                <td style="font-family: monospace; color: var(--color-text-secondary); font-size: 12px;">${item.code}</td>
-                <td style="font-weight: 500; color: var(--color-text-primary);">${item.name}</td>
-                <td style="color: var(--color-text-secondary); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.specification}">${item.specification || '-'}</td>
+                <td style="font-family: monospace; color: var(--color-text-secondary); font-size: 12px;">${escapeHtml(item.code)}</td>
+                <td style="font-weight: 500; color: var(--color-text-primary);">${escapeHtml(item.name)}</td>
+                <td style="color: var(--color-text-secondary); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(item.specification)}">${escapeHtml(item.specification || '-')}</td>
                 <td>${modelTag}</td>
-                <td><span style="background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 12px;">${item.category || '未分类'}</span></td>
-                <td>${item.unit || '-'}</td>
-                <td style="color: var(--color-text-secondary);">${item.brand || '-'}</td>
+                <td><span style="background: var(--color-primary-glow); color: var(--color-primary); padding: 2px 8px; border-radius: 4px; font-size: 12px;">${escapeHtml(item.category || '未分类')}</span></td>
+                <td>${escapeHtml(item.unit || '-')}</td>
+                <td style="color: var(--color-text-secondary);">${escapeHtml(item.brand || '-')}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -2735,7 +2955,7 @@ async function loadAndRenderMaterialTable(page = 1) {
     } catch (e) {
         console.error("Error loading material table:", e);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171; padding: 25px;">加载失败: ${e.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-danger); padding: 25px;">加载失败: ${escapeHtml(e.message)}</td></tr>`;
         }
     }
 }
@@ -2882,20 +3102,22 @@ async function fetchAndRenderHistorySessions() {
         tbody.innerHTML = '';
         sessions.forEach(sess => {
             const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.style.borderBottom = '1px solid var(--border-color)';
             tr.innerHTML = `
-                <td style="padding: 10px;"><strong>${sess.session_name}</strong></td>
-                <td style="padding: 10px; color: var(--color-text-secondary);">${sess.original_filename}</td>
-                <td style="padding: 10px; color: var(--color-text-muted); font-size: 12px;">${sess.updated_at}</td>
+                <td style="padding: 10px;"><strong>${escapeHtml(sess.session_name)}</strong></td>
+                <td style="padding: 10px; color: var(--color-text-secondary);">${escapeHtml(sess.original_filename)}</td>
+                <td style="padding: 10px; color: var(--color-text-muted); font-size: 12px;">${escapeHtml(sess.updated_at)}</td>
                 <td style="padding: 10px;">
-                    <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px; margin-right: 4px;" onclick="loadSession('${sess.id}')">恢复</button>
-                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px; background-color: #dc2626; border-color: #dc2626;" onclick="deleteSession('${sess.id}', '${sess.session_name}')">删除</button>
+                    <button class="btn btn-primary btn-restore-sess" style="padding: 4px 8px; font-size: 11px; margin-right: 4px;" data-id="${escapeHtml(sess.id)}">恢复</button>
+                    <button class="btn btn-danger btn-delete-sess" style="padding: 4px 8px; font-size: 11px; background-color: var(--color-danger); border-color: var(--color-danger);" data-id="${escapeHtml(sess.id)}" data-name="${escapeHtml(sess.session_name)}">删除</button>
                 </td>
             `;
+            tr.querySelector('.btn-restore-sess').addEventListener('click', () => loadSession(sess.id));
+            tr.querySelector('.btn-delete-sess').addEventListener('click', () => deleteSession(sess.id, sess.session_name));
             tbody.appendChild(tr);
         });
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-danger);">${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--color-danger);">${escapeHtml(err.message)}</td></tr>`;
     }
 }
 
@@ -3009,7 +3231,7 @@ function setupLlmRulesModule() {
 
     if (tabStudio && tabAudit && tabLeaderboard) {
         tabStudio.addEventListener('click', () => {
-            tabStudio.style.background = '#3b82f6';
+            tabStudio.style.background = 'var(--color-primary)';
             tabStudio.style.color = 'white';
             tabAudit.style.background = 'transparent';
             tabAudit.style.color = 'var(--color-text-secondary)';
@@ -3022,7 +3244,7 @@ function setupLlmRulesModule() {
         });
 
         tabAudit.addEventListener('click', () => {
-            tabAudit.style.background = '#3b82f6';
+            tabAudit.style.background = 'var(--color-primary)';
             tabAudit.style.color = 'white';
             tabStudio.style.background = 'transparent';
             tabStudio.style.color = 'var(--color-text-secondary)';
@@ -3037,7 +3259,7 @@ function setupLlmRulesModule() {
         });
 
         tabLeaderboard.addEventListener('click', () => {
-            tabLeaderboard.style.background = '#3b82f6';
+            tabLeaderboard.style.background = 'var(--color-primary)';
             tabLeaderboard.style.color = 'white';
             tabStudio.style.background = 'transparent';
             tabStudio.style.color = 'var(--color-text-secondary)';
@@ -3118,8 +3340,8 @@ async function handleGenerateRule() {
     const statusBadge = document.getElementById('rule-compiler-status');
     if (statusBadge) {
         statusBadge.innerText = '正在调用大模型...';
-        statusBadge.style.background = 'rgba(59, 130, 246, 0.2)';
-        statusBadge.style.color = '#3b82f6';
+        statusBadge.style.background = 'var(--color-primary-glow)';
+        statusBadge.style.color = 'var(--color-primary)';
     }
 
     showLoading("大模型智能编译中...", "系统正在通过优先容灾多模型路由器解析自然语言并生成 DSL 规则...");
@@ -3148,8 +3370,8 @@ async function handleGenerateRule() {
 
         if (statusBadge) {
             statusBadge.innerText = `编译成功 (${data.provider_name || 'LLM'}, ${data.latency_ms || 0}ms)`;
-            statusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
-            statusBadge.style.color = '#10b981';
+            statusBadge.style.background = 'var(--color-success-bg)';
+            statusBadge.style.color = 'var(--color-success)';
         }
 
         if (sample_text) {
@@ -3159,8 +3381,8 @@ async function handleGenerateRule() {
         alert(`编译失败: ${err.message}`);
         if (statusBadge) {
             statusBadge.innerText = '编译失败';
-            statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
-            statusBadge.style.color = '#ef4444';
+            statusBadge.style.background = 'var(--color-danger-bg)';
+            statusBadge.style.color = 'var(--color-danger)';
         }
     } finally {
         hideLoading();
@@ -3206,10 +3428,10 @@ async function handleTestRule() {
         if (box && content) {
             box.style.display = 'block';
             content.innerHTML = `
-                <div><strong>清洗前：</strong> <code>${data.original_text}</code></div>
-                <div><strong>清洗后：</strong> <code style="color: #38bdf8;">${data.cleaned_text}</code></div>
-                <div><strong>提取属性：</strong> <code style="color: #f59e0b;">${JSON.stringify(data.extracted_params)}</code></div>
-                <div><strong>清洗规则应用：</strong> ${data.cleaning_logs.length ? data.cleaning_logs.join('; ') : '无修改'}</div>
+                <div><strong>清洗前：</strong> <code>${escapeHtml(data.original_text)}</code></div>
+                <div><strong>清洗后：</strong> <code style="color: var(--color-info);">${escapeHtml(data.cleaned_text)}</code></div>
+                <div><strong>提取属性：</strong> <code style="color: var(--color-warning);">${escapeHtml(JSON.stringify(data.extracted_params))}</code></div>
+                <div><strong>清洗规则应用：</strong> ${escapeHtml(data.cleaning_logs.length ? data.cleaning_logs.join('; ') : '无修改')}</div>
             `;
         }
     } catch (err) {
@@ -3328,29 +3550,33 @@ function renderActiveRulesTable() {
         const tr = document.createElement('tr');
         const isApproved = r.status === 'approved';
         const statusBadge = isApproved 
-            ? '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> 生效运行中</span>'
-            : '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(148, 163, 184, 0.15); color: #94a3b8; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-pause"></i> 已停用</span>';
+            ? '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--color-success-bg); color: var(--color-success); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> 生效运行中</span>'
+            : '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--bg-subtle); color: var(--color-text-muted); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-pause"></i> 已停用</span>';
 
         tr.innerHTML = `
-            <td><code>${r.rule_id}</code></td>
-            <td><strong style="color: var(--color-text-primary);">${r.rule_name}</strong></td>
-            <td><span style="font-size: 12px; color: #60a5fa;">[${r.scope_level}]</span> ${r.scope_target || '全域通用'}</td>
-            <td><span style="font-size: 12px; color: #a78bfa;">${r.discipline || '通用'}</span></td>
+            <td><code>${escapeHtml(r.rule_id)}</code></td>
+            <td><strong style="color: var(--color-text-primary);">${escapeHtml(r.rule_name)}</strong></td>
+            <td><span style="font-size: 12px; color: var(--color-accent-text);">[${escapeHtml(r.scope_level)}]</span> ${escapeHtml(r.scope_target || '全域通用')}</td>
+            <td><span style="font-size: 12px; color: var(--color-chart-ram);">${escapeHtml(r.discipline || '通用')}</span></td>
             <td style="text-align: center;">${statusBadge}</td>
-            <td style="text-align: right;"><strong style="color: #10b981; font-size: 14px;">${r.hit_count || 0}</strong> 次</td>
-            <td><span style="font-size: 12px;">${r.author_name || '-'}</span> <span style="color: var(--color-text-muted); font-size: 11px;">/ ${r.approver_name || '-'}</span></td>
-            <td style="font-size: 12px; color: var(--color-text-secondary);">${r.approved_at || r.updated_at || '-'}</td>
+            <td style="text-align: right;"><strong style="color: var(--color-success); font-size: 14px;">${escapeHtml(r.hit_count || 0)}</strong> 次</td>
+            <td><span style="font-size: 12px;">${escapeHtml(r.author_name || '-')}</span> <span style="color: var(--color-text-muted); font-size: 11px;">/ ${escapeHtml(r.approver_name || '-')}</span></td>
+            <td style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(r.approved_at || r.updated_at || '-')}</td>
             <td style="text-align: center;">
                 <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
-                    <button class="btn btn-secondary" onclick="openRuleEditModal('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="修改规则配置"><i class="fa-solid fa-pen-to-square"></i> 修改</button>
-                    <button class="btn ${isApproved ? 'btn-warning' : 'btn-success'}" onclick="toggleActiveRule('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; ${isApproved ? 'background-color: #d97706; border-color: #d97706; color: white;' : ''}" title="${isApproved ? '停用此规则' : '启用此规则'}">
+                    <button class="btn btn-secondary btn-rule-edit" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="修改规则配置"><i class="fa-solid fa-pen-to-square"></i> 修改</button>
+                    <button class="btn ${isApproved ? 'btn-warning' : 'btn-success'} btn-rule-toggle" style="padding: 3px 8px; font-size: 11px; height: 26px; ${isApproved ? 'background-color: var(--color-warning); border-color: var(--color-warning); color: white;' : ''}" title="${isApproved ? '停用此规则' : '启用此规则'}">
                         ${isApproved ? '<i class="fa-solid fa-pause"></i> 停用' : '<i class="fa-solid fa-play"></i> 启用'}
                     </button>
-                    <button class="btn btn-danger" onclick="deleteActiveRule('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; background-color: #dc2626; border-color: #dc2626; color: white;" title="彻底删除此规则"><i class="fa-solid fa-trash"></i> 删除</button>
-                    <button class="btn" onclick="viewActiveRuleDsl('${r.rule_id}')" style="padding: 3px 8px; font-size: 11px; height: 26px; background: rgba(255,255,255,0.08); border-color: var(--border-color); color: #38bdf8;" title="查看DSL代码"><i class="fa-solid fa-code"></i> DSL</button>
+                    <button class="btn btn-danger btn-rule-del" style="padding: 3px 8px; font-size: 11px; height: 26px; background-color: var(--color-danger); border-color: var(--color-danger); color: white;" title="彻底删除此规则"><i class="fa-solid fa-trash"></i> 删除</button>
+                    <button class="btn btn-rule-dsl" style="padding: 3px 8px; font-size: 11px; height: 26px; background: var(--bg-subtle); border-color: var(--border-color); color: var(--color-info);" title="查看DSL代码"><i class="fa-solid fa-code"></i> DSL</button>
                 </div>
             </td>
         `;
+        tr.querySelector('.btn-rule-edit').addEventListener('click', () => openRuleEditModal(r.rule_id));
+        tr.querySelector('.btn-rule-toggle').addEventListener('click', () => toggleActiveRule(r.rule_id));
+        tr.querySelector('.btn-rule-del').addEventListener('click', () => deleteActiveRule(r.rule_id));
+        tr.querySelector('.btn-rule-dsl').addEventListener('click', () => viewActiveRuleDsl(r.rule_id));
         tbody.appendChild(tr);
     });
 }
@@ -3527,16 +3753,18 @@ async function fetchAndRenderPendingRules() {
         rules.forEach(r => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><code>${r.rule_id}</code></td>
-                <td><strong>${r.rule_name}</strong></td>
-                <td>${r.scope_target || r.scope_level}</td>
-                <td>${r.author_name}</td>
-                <td>${r.created_at || '-'}</td>
+                <td><code>${escapeHtml(r.rule_id)}</code></td>
+                <td><strong>${escapeHtml(r.rule_name)}</strong></td>
+                <td>${escapeHtml(r.scope_target || r.scope_level)}</td>
+                <td>${escapeHtml(r.author_name)}</td>
+                <td>${escapeHtml(r.created_at || '-')}</td>
                 <td style="text-align: center;">
-                    <button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;" onclick="auditRule('${r.rule_id}', 'approve')"><i class="fa-solid fa-check"></i> 批准上线</button>
-                    <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px; background: #dc2626; border-color: #dc2626; color: white;" onclick="auditRule('${r.rule_id}', 'reject')"><i class="fa-solid fa-xmark"></i> 驳回</button>
+                    <button class="btn btn-success btn-audit-approve" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 批准上线</button>
+                    <button class="btn btn-danger btn-audit-reject" style="padding: 4px 8px; font-size: 11px; background: var(--color-danger); border-color: var(--color-danger); color: white;"><i class="fa-solid fa-xmark"></i> 驳回</button>
                 </td>
             `;
+            tr.querySelector('.btn-audit-approve').addEventListener('click', () => auditRule(r.rule_id, 'approve'));
+            tr.querySelector('.btn-audit-reject').addEventListener('click', () => auditRule(r.rule_id, 'reject'));
             tbody.appendChild(tr);
         });
     } catch (e) {
@@ -3600,13 +3828,13 @@ async function loadRuleStats() {
             data.top_rules.forEach((r, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><strong style="color: #eab308;">#${index + 1}</strong></td>
-                    <td><code>${r.rule_id}</code></td>
-                    <td><strong>${r.rule_name}</strong></td>
-                    <td>${r.scope_target || '通用'}</td>
-                    <td>${r.author_name}</td>
-                    <td>${r.approved_at || '-'}</td>
-                    <td style="text-align: right;"><strong style="color: #10b981; font-size: 15px;">${r.hit_count}</strong> 次</td>
+                    <td><strong style="color: var(--color-warning);">#${index + 1}</strong></td>
+                    <td><code>${escapeHtml(r.rule_id)}</code></td>
+                    <td><strong>${escapeHtml(r.rule_name)}</strong></td>
+                    <td>${escapeHtml(r.scope_target || '通用')}</td>
+                    <td>${escapeHtml(r.author_name)}</td>
+                    <td>${escapeHtml(r.approved_at || '-')}</td>
+                    <td style="text-align: right;"><strong style="color: var(--color-success); font-size: 15px;">${escapeHtml(r.hit_count)}</strong> 次</td>
                 `;
                 tbody.appendChild(tr);
             });

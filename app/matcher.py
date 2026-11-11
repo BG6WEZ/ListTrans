@@ -265,125 +265,230 @@ def get_professional_category(category_name: str, spec_text: str = "") -> str:
         return "装饰"
     return "其它"
 
-def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], semantic_score: float = 0.0) -> Tuple[float, List[str]]:
-    """
-    Score a candidate against the query info using V0.0.2 scoring system.
-    Returns: (float_score, list_of_match_reasons)
-    """
-    reasons = []
+from dataclasses import dataclass, field
+from typing import Set
+
+@dataclass
+class ScoringContext:
+    """Encapsulates scoring state, inputs, intermediate weights, and reasons for candidate matching."""
+    query_info: Dict[str, Any]
+    candidate: Dict[str, Any]
+    semantic_score: float = 0.0
     
-    q_name = query_info.get("name", "")
-    q_spec_text = query_info.get("specification", "")
-    q_category = query_info.get("category", "")
+    # Query extracted fields
+    q_name: str = ""
+    q_spec_text: str = ""
+    q_category: str = ""
+    q_prof: str = ""
+    q_parsed: Dict[str, Any] = field(default_factory=dict)
+    q_attrs: Dict[str, Any] = field(default_factory=dict)
+    q_model: str = ""
+    q_brand: Any = None
+    q_unit: Any = None
     
-    q_parsed = query_info.get("parsed_spec") or extract_query_params(q_name, q_spec_text, query_info.get("professional", q_category))
-    q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
-    q_model = q_parsed.get("model", "") or q_attrs.get("型号", "") or ""
+    # Candidate extracted fields
+    c_name: str = ""
+    c_spec_text: str = ""
+    c_category: str = ""
+    c_desc: str = ""
+    c_full_spec: str = ""
+    c_prof: str = ""
+    c_brand: Any = None
+    c_unit: Any = None
+    c_parsed: Dict[str, Any] = field(default_factory=dict)
+    c_attrs: Dict[str, Any] = field(default_factory=dict)
+    c_model: str = ""
     
-    c_name = candidate.get("name", "").strip()
-    c_spec_text = candidate.get("specification", "")
-    c_category = candidate.get("category", "")
-    c_desc = candidate.get("description", "")
-    c_full_spec = f"{c_spec_text} {c_desc}".strip()
+    # Scoring components
+    model_score: float = 0.0
+    model_matched_exact: bool = False
+    model_conflict: bool = False
+    
+    text_score: float = 0.0
+    cat_sim: float = 0.0
+    name_matched: bool = False
+    
+    # Schema & Attributes
+    domain: str = "generic"
+    domain_config: Dict[str, Any] = field(default_factory=dict)
+    must_keys: List[str] = field(default_factory=list)
+    should_keys: List[str] = field(default_factory=list)
+    processed_keys: Set[str] = field(default_factory=set)
+    flags_list: List[str] = field(default_factory=list)
+    is_interval_dim: bool = False
+    has_any_attr: bool = False
+    all_attrs_in_tolerance: bool = True
+    missing_penalty: float = 0.0
+    attr_scores: Dict[str, float] = field(default_factory=dict)
+    attr_weights: Dict[str, float] = field(default_factory=dict)
+    attr_score: float = 0.0
+    
+    scene: str = "scene_c"
+    base_score: float = 0.0
+    
+    # Normalized text cache
+    q_norm_full: str = ""
+    c_norm_full: str = ""
+    q_norm_spec: str = ""
+    c_norm_spec: str = ""
+    
+    # HVAC context tags
+    q_is_ex: bool = False
+    c_is_ex: bool = False
+    c_is_non_ex: bool = False
+    q_fan_press: Any = None
+    q_fan_vol: Any = None
+    is_q_fan: bool = False
+    
+    # Output reasons and hard gate blocked flag
+    reasons: List[str] = field(default_factory=list)
+    blocked: bool = False
+
+
+def _check_initial_hard_conflicts(ctx: ScoringContext) -> bool:
+    """Pre-parse query and candidate metadata, and evaluate hard blocking gates (Professional, Brand, Unit)."""
+    q_info = ctx.query_info
+    cand = ctx.candidate
+    
+    ctx.q_name = q_info.get("name", "")
+    ctx.q_spec_text = q_info.get("specification", "")
+    ctx.q_category = q_info.get("category", "")
+    
+    ctx.q_parsed = q_info.get("parsed_spec") or extract_query_params(ctx.q_name, ctx.q_spec_text, q_info.get("professional", ctx.q_category))
+    ctx.q_attrs = ctx.q_parsed.get("attrs", {}) if isinstance(ctx.q_parsed, dict) else {}
+    ctx.q_model = ctx.q_parsed.get("model", "") or ctx.q_attrs.get("型号", "") or ""
+    
+    ctx.c_name = cand.get("name", "").strip()
+    ctx.c_spec_text = cand.get("specification", "")
+    ctx.c_category = cand.get("category", "")
+    ctx.c_desc = cand.get("description", "")
+    ctx.c_full_spec = f"{ctx.c_spec_text} {ctx.c_desc}".strip()
     
     # Refine generic or short candidate names using specification text
-    if len(c_name) <= 3 or any(kw in c_name for kw in ["柜", "线", "管", "阀", "箱", "板", "机", "按钮"]):
-        c_name = extract_device_name(c_full_spec, c_name)
+    if len(ctx.c_name) <= 3 or any(kw in ctx.c_name for kw in ["柜", "线", "管", "阀", "箱", "板", "机", "按钮"]):
+        ctx.c_name = extract_device_name(ctx.c_full_spec, ctx.c_name)
     
     # 1. Professional category conflict check
-    q_prof = query_info.get("professional", "")
+    q_prof = q_info.get("professional", "")
     if q_prof:
         q_prof = re.sub(r'^\d+[\.．\s]*', '', str(q_prof)).strip()
+    ctx.q_prof = q_prof
     if q_prof and q_prof != "全部" and q_prof != "其它":
-        c_prof = get_professional_category(c_category, c_full_spec)
+        c_prof = get_professional_category(ctx.c_category, ctx.c_full_spec)
+        ctx.c_prof = c_prof
         if c_prof != "其它" and q_prof != c_prof:
-            return 0.0, ["专业冲突阻断"]
+            ctx.reasons = ["专业冲突阻断"]
+            ctx.blocked = True
+            return True
             
     # 2. Brand conflict check
-    q_attrs = query_info.get("attrs") or q_parsed.get("attrs", {})
+    q_attrs = q_info.get("attrs") or ctx.q_parsed.get("attrs", {})
     if isinstance(q_attrs, dict) and "attrs" in q_attrs and isinstance(q_attrs["attrs"], dict):
         q_attrs = {**q_attrs, **q_attrs["attrs"]}
-    q_brand = query_info.get("brand") or q_attrs.get("品牌")
-    c_brand = candidate.get("brand") or candidate.get("brand_tag") or (candidate.get("parsed_params") and "品牌" in candidate["parsed_params"])
-    if not c_brand and "parsed_params" in candidate and candidate["parsed_params"]:
-        import json
+    ctx.q_attrs = q_attrs
+    
+    q_brand = q_info.get("brand") or q_attrs.get("品牌")
+    c_brand = cand.get("brand") or cand.get("brand_tag") or (cand.get("parsed_params") and "品牌" in cand["parsed_params"])
+    if not c_brand and "parsed_params" in cand and cand["parsed_params"]:
         try:
-            c_p = json.loads(candidate["parsed_params"])
+            import json
+            c_p = json.loads(cand["parsed_params"]) if isinstance(cand["parsed_params"], str) else cand["parsed_params"]
             c_brand = c_p.get("attrs", {}).get("品牌", "")
         except Exception:
             pass
+    ctx.q_brand = q_brand
+    ctx.c_brand = c_brand
     if q_brand and c_brand:
         q_brand_std = standardize_brand(str(q_brand))
         c_brand_std = standardize_brand(str(c_brand))
         if q_brand_std and c_brand_std and q_brand_std != c_brand_std:
-            return 0.0, ["品牌冲突阻断"]
+            ctx.reasons = ["品牌冲突阻断"]
+            ctx.blocked = True
+            return True
             
     # 3. Unit incompatibility check
-    q_unit = query_info.get("unit") or query_info.get("original_unit")
-    c_unit = candidate.get("unit")
+    q_unit = q_info.get("unit") or q_info.get("original_unit")
+    c_unit = cand.get("unit")
+    ctx.q_unit = q_unit
+    ctx.c_unit = c_unit
     if q_unit and c_unit and not check_unit_compatibility(str(q_unit), str(c_unit)):
-        return 0.0, ["单位不可换算阻断"]
-    
+        ctx.reasons = ["单位不可换算阻断"]
+        ctx.blocked = True
+        return True
 
-    
-    # Load pre-computed parsed parameters if present to avoid extremely slow dynamic extraction on every match candidate
+    return False
+
+
+def _extract_candidate_specs(ctx: ScoringContext):
+    """Load or extract structured parameters for the candidate."""
+    cand = ctx.candidate
     c_parsed = None
-    if "parsed_params" in candidate and candidate["parsed_params"]:
-        import json
+    if "parsed_params" in cand and cand["parsed_params"]:
         try:
-            if isinstance(candidate["parsed_params"], str):
-                c_parsed = json.loads(candidate["parsed_params"])
-            elif isinstance(candidate["parsed_params"], dict):
-                c_parsed = candidate["parsed_params"]
+            import json
+            if isinstance(cand["parsed_params"], str):
+                c_parsed = json.loads(cand["parsed_params"])
+            elif isinstance(cand["parsed_params"], dict):
+                c_parsed = cand["parsed_params"]
         except Exception:
             pass
     if not c_parsed:
-        c_parsed = extract_params(f"{c_name} {c_full_spec}", c_category)
+        c_parsed = extract_params(f"{ctx.c_name} {ctx.c_full_spec}", ctx.c_category)
         
-    c_attrs = c_parsed.get("attrs", {}) if isinstance(c_parsed, dict) else {}
-    c_model = c_parsed.get("model", "") or c_attrs.get("型号", "") or ""
-    
-    # 1. Model similarity score
-    model_score = 0.0
-    model_matched_exact = False
-    model_conflict = False
+    ctx.c_parsed = c_parsed
+    ctx.c_attrs = c_parsed.get("attrs", {}) if isinstance(c_parsed, dict) else {}
+    ctx.c_model = c_parsed.get("model", "") or ctx.c_attrs.get("型号", "") or ""
+
+
+def _score_model_similarity(ctx: ScoringContext):
+    """Calculate model similarity and check model conflict."""
+    q_model = ctx.q_model
+    c_model = ctx.c_model
     
     # Check if q_model is a box prefix or alias (AP, AL, ALE, AT, ACP, ACP-P, AX, ATD, AFC)
-    from app.domain_extractors import BOX_PREFIX_RULES
-    box_matched = False
-    if q_model:
-        q_model_clean = re.sub(r'[-_]\d+$', '', q_model.upper().strip())
-        for prefix, syns in BOX_PREFIX_RULES:
-            if q_model_clean == prefix or q_model_clean in [s.upper() for s in syns]:
-                if any(s in f"{c_name} {c_full_spec}" for s in syns):
-                    model_score = 1.0
-                    model_matched_exact = True
-                    box_matched = True
-                    reasons.append(f"配电箱型匹配({prefix})")
-                    break
+    BOX_PREFIXES = ["AP", "AL", "ALE", "AT", "ACP", "ACP-P", "AX", "ATD", "AFC"]
+    is_box_type = False
+    if q_model.upper() in BOX_PREFIXES:
+        is_box_type = True
+    elif "-" in q_model:
+        prefix = q_model.split("-")[0].upper()
+        if prefix in BOX_PREFIXES:
+            is_box_type = True
 
-    if q_model and not box_matched:
-        if c_model:
-            if q_model.lower() == c_model.lower() or q_model.lower() in c_full_spec.lower() or q_model.lower() in c_name.lower():
-                model_score = 1.0
-                model_matched_exact = True
-                reasons.append("型号完全吻合")
-            elif check_series_match(q_model, c_model):
-                model_score = 0.7
-                reasons.append("型号系列相近")
-            elif re.search(r'\d+[HhWwDd]', c_model) or re.search(r'\d+\s*[*x×X]\s*\d+', c_model):
-                # Candidate model is just a dimension string (Height x Width x Depth) -> Not a model conflict
-                model_score = 0.0
-            else:
-                model_score = 0.0
-                model_conflict = True
-                reasons.append("型号冲突")
+    if q_model and c_model and not is_box_type:
+        if q_model.lower() == c_model.lower():
+            ctx.model_score = 1.0
+            ctx.model_matched_exact = True
+            ctx.reasons.append("型号完全匹配")
         else:
-            # Candidate has no model (generic catalog item)
-            model_score = 0.0
-                
-    # 2. Text/Category similarity score
-    # Calculate name similarity with synonym awareness
+            q_clean = re.sub(r'[^a-zA-Z0-9]', '', q_model).lower()
+            c_clean = re.sub(r'[^a-zA-Z0-9]', '', c_model).lower()
+            if q_clean == c_clean:
+                ctx.model_score = 0.95
+                ctx.model_matched_exact = True
+                ctx.reasons.append("型号忽略符号匹配")
+            elif q_clean in c_clean or c_clean in q_clean:
+                ctx.model_score = 0.8
+                ctx.reasons.append("型号包含匹配")
+            else:
+                sim = calculate_text_similarity(q_model, c_model)
+                if sim >= 0.7:
+                    ctx.model_score = sim
+                    ctx.reasons.append("型号高度相似")
+                else:
+                    ctx.model_score = 0.0
+                    ctx.model_conflict = True
+    elif q_model and is_box_type:
+        ctx.model_score = 0.0
+
+
+def _score_text_and_category(ctx: ScoringContext):
+    """Calculate name similarity with synonym awareness and category similarity."""
+    q_name = ctx.q_name
+    c_name = ctx.c_name
+    q_category = ctx.q_category
+    c_category = ctx.c_category
+    
     weak_cable_syns = ["网线", "双绞线", "对线", "网络线"]
     is_syn = any(s in q_name for s in weak_cable_syns) and any(s in c_name for s in weak_cable_syns)
     if is_syn:
@@ -392,36 +497,49 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         name_sim = calculate_text_similarity(q_name, c_name)
         
     cat_sim = calculate_text_similarity(q_category, c_category)
-    text_score = max(name_sim, cat_sim)
-    if text_score > 0.8:
-        reasons.append("品类名称一致")
-        
-    # 3. Attribute comparison score
+    ctx.cat_sim = cat_sim
+    ctx.text_score = max(name_sim, cat_sim)
+    if ctx.text_score > 0.8:
+        ctx.reasons.append("品类名称一致")
+
+
+def _score_attributes(ctx: ScoringContext):
+    """Match domain schema must/should attributes, numerical tolerances, and 2d/3d intervals."""
     from app.domain_router import route_domain
     from app.domain_extractors import domain_schema
     
+    c_category = ctx.c_category
+    c_name = ctx.c_name
+    c_full_spec = ctx.c_full_spec
+    q_prof = ctx.q_prof
+    q_attrs = ctx.q_attrs
+    c_attrs = ctx.c_attrs
+    
     domain = route_domain(c_category, c_name, c_full_spec, q_prof or "")
+    ctx.domain = domain
     domain_config = domain_schema.get(domain, {})
+    ctx.domain_config = domain_config
     must_keys = [f["key"] for f in domain_config.get("must", [])]
     should_keys = [f["key"] for f in domain_config.get("should", [])]
+    ctx.must_keys = must_keys
+    ctx.should_keys = should_keys
 
-    # We will accumulate individual attribute scores and their weights
     attr_scores = {}
     attr_weights = {}
-    
     all_attrs_in_tolerance = True
     has_any_attr = False
     missing_penalty = 0.0
 
-    # Filter out range/inequality suffix subfields from top-level loop keys
     processed_keys = set()
     for attr in q_attrs.keys():
         if attr.endswith("_min") or attr.endswith("_max") or attr.endswith("_op") or attr.endswith("_base"):
             continue
         processed_keys.add(attr)
+    ctx.processed_keys = processed_keys
 
     # A. Match standard flags group if defined in schema
     flags_list = domain_config.get("flags", [])
+    ctx.flags_list = flags_list
     if flags_list:
         q_flags = [f for f in flags_list if q_attrs.get(f) is True]
         c_flags = [f for f in flags_list if c_attrs.get(f) is True]
@@ -473,9 +591,10 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         except Exception:
             pass
 
+    ctx.is_interval_dim = is_interval_dim
+
     # B. Match Must & Should attributes
     for attr in processed_keys:
-        # Skip flags which are handled as a group above
         if flags_list and attr in flags_list:
             continue
         if is_interval_dim and attr in ["尺寸", "半周长", "长", "宽", "高", "长度"]:
@@ -490,7 +609,6 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         has_any_attr = True
 
         if c_val is not None or (f"{attr}_min" in c_attrs and f"{attr}_max" in c_attrs):
-            # Candidate has the value. Compare it!
             # 1. Range overlap ratio logic
             if f"{attr}_min" in q_attrs and f"{attr}_min" in c_attrs:
                 q_min = q_attrs[f"{attr}_min"]
@@ -504,7 +622,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 attr_weights[attr] = domain_config.get("weights", {}).get(attr, 0.1)
                 continue
 
-            # 1b. Point vs Range interval scoring (single value against candidate interval)
+            # 1b. Point vs Range interval scoring
             elif isinstance(q_val, (int, float)) and f"{attr}_min" in c_attrs and f"{attr}_max" in c_attrs:
                 score = score_point_vs_interval(float(q_val), float(c_attrs[f"{attr}_min"]), float(c_attrs[f"{attr}_max"]))
                 attr_scores[attr] = score
@@ -514,11 +632,8 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             # 2. Inequality logic evaluation
             elif f"{attr}_op" in q_attrs:
                 op = q_attrs[f"{attr}_op"]
-                # Guard: _base may not exist when op encodes an interval (e.g. "500-2000")
-                # In that case fall through to range-overlap logic using _min/_max.
                 base_val = q_attrs.get(f"{attr}_base")
                 if base_val is None:
-                    # op is an interval descriptor — use q _min/_max vs c _min/_max overlap
                     q_min = q_attrs.get(f"{attr}_min")
                     q_max = q_attrs.get(f"{attr}_max")
                     if q_min is not None and q_max is not None:
@@ -618,12 +733,10 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         else:
             # Single-direction missing penalty: only when Query specifies Must field but Candidate lacks it
             if attr in ["尺寸", "半周长"] and (is_interval_dim or f"半周长_min" in c_attrs or f"长_min" in c_attrs or c_attrs.get("尺寸_类型") == "3d_tolerance_box"):
-                # Candidate has interval or tolerance dimensions, not missing
                 pass
             elif attr in must_keys:
                 missing_penalty += 0.15
-                reasons.append(f"必填属性缺失处罚: {attr}")
-            # Should fields follow "reward if present, do not penalize if missing" strategy
+                ctx.reasons.append(f"必填属性缺失处罚: {attr}")
 
     # Calculate weighted average attributes score
     if attr_scores:
@@ -635,112 +748,140 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             if (k in tolerance_rules or k in must_keys or k in ["尺寸", "半周长", "材质", "控制方式", "芯数", "截面积"]) and s < 0.8:
                 all_attrs_in_tolerance = False
         if all_attrs_in_tolerance:
-            reasons.append("核心参数在公差范围内")
+            ctx.reasons.append("核心参数在公差范围内")
     else:
-        # Fallback to specification text similarity if no common numerical attributes
-        attr_score = calculate_text_similarity(q_spec_text, c_full_spec)
+        attr_score = calculate_text_similarity(ctx.q_spec_text, ctx.c_full_spec)
         all_attrs_in_tolerance = False
 
-    # Determine Scenario and weights
+    ctx.has_any_attr = has_any_attr
+    ctx.attr_scores = attr_scores
+    ctx.attr_weights = attr_weights
+    ctx.attr_score = attr_score
+    ctx.all_attrs_in_tolerance = all_attrs_in_tolerance
+    ctx.missing_penalty = missing_penalty
+
+
+def _calculate_base_score_and_positive_boosts(ctx: ScoringContext):
+    """Determine matching scenario, compute base score, and apply positive boosts."""
+    q_model = ctx.q_model
+    c_model = ctx.c_model
+    has_any_attr = ctx.has_any_attr
+    domain = ctx.domain
+    
     if q_model and c_model:
         scene = "scene_a"
     elif has_any_attr and domain != "generic":
         scene = "scene_b"
     else:
         scene = "scene_c"
+    ctx.scene = scene
         
     weights = weight_rules.get(scene, DEFAULT_WEIGHTS[scene])
     
-    # Calculate base score
     base_score = (
-        weights.get("model", 0.0) * model_score +
-        weights.get("attrs", 0.0) * attr_score +
-        weights.get("text", 0.0) * text_score
-    ) - missing_penalty
+        weights.get("model", 0.0) * ctx.model_score +
+        weights.get("attrs", 0.0) * ctx.attr_score +
+        weights.get("text", 0.0) * ctx.text_score
+    ) - ctx.missing_penalty
     
-    # Add semantic vector contribution (weight is positive boost)
-    if semantic_score > 0.0:
+    # Add semantic vector contribution
+    if ctx.semantic_score > 0.0:
         vector_boost = weights.get("vector_boost", 0.20)
-        base_score += semantic_score * vector_boost
-        if semantic_score > 0.75:
-            reasons.append("语义高度相近")
+        base_score += ctx.semantic_score * vector_boost
+        if ctx.semantic_score > 0.75:
+            ctx.reasons.append("语义高度相近")
             
     # Apply Positive Boosts
     pos_rules = boost_rules.get("positive", DEFAULT_BOOSTS["positive"])
-    if model_matched_exact:
+    if ctx.model_matched_exact:
         base_score += pos_rules.get("model_exact", 0.15)
         
     # Exact or synonym name match boost
     name_matched = False
-    if q_name == c_name:
+    if ctx.q_name == ctx.c_name:
         name_matched = True
     else:
         weak_cable_syns = ["网线", "双绞线", "对线", "网络线"]
-        if any(s in q_name for s in weak_cable_syns) and any(s in c_name for s in weak_cable_syns):
+        if any(s in ctx.q_name for s in weak_cable_syns) and any(s in ctx.c_name for s in weak_cable_syns):
             name_matched = True
+    ctx.name_matched = name_matched
     if name_matched:
         base_score += 0.12
-    if attr_scores and all_attrs_in_tolerance:
+    if ctx.attr_scores and ctx.all_attrs_in_tolerance:
         base_score += pos_rules.get("attrs_exact", 0.10)
-        # Additional confidence boost if names/categories are also reasonably similar
-        if text_score >= 0.5:
+        if ctx.text_score >= 0.5:
             base_score += 0.08
-    if cat_sim > 0.9:
+    if ctx.cat_sim > 0.9:
         base_score += pos_rules.get("category_match", 0.08)
-        if q_category and c_category and q_category.strip() == c_category.strip():
+        if ctx.q_category and ctx.c_category and ctx.q_category.strip() == ctx.c_category.strip():
             base_score += 0.12
-            reasons.append("分类精准匹配")
-        elif q_category and c_category and q_category.strip() != c_category.strip():
+            ctx.reasons.append("分类精准匹配")
+        elif ctx.q_category and ctx.c_category and ctx.q_category.strip() != ctx.c_category.strip():
             base_score -= 0.20
-            reasons.append("物理分类不符")
+            ctx.reasons.append("物理分类不符")
     if check_series_match(q_model, c_model):
         base_score += pos_rules.get("series_match", 0.05)
-        reasons.append("属同系列产品")
-    if query_info.get("brand") and query_info["brand"].lower() == candidate.get("brand", "").lower():
+        ctx.reasons.append("属同系列产品")
+    if ctx.query_info.get("brand") and ctx.query_info["brand"].lower() == ctx.candidate.get("brand", "").lower():
         base_score += pos_rules.get("brand_match", 0.05)
-        reasons.append("品牌一致")
+        ctx.reasons.append("品牌一致")
 
     # Hard cap for candidates with out-of-tolerance core attributes
-    if not all_attrs_in_tolerance and has_any_attr:
+    if not ctx.all_attrs_in_tolerance and has_any_attr:
         base_score = min(base_score, 0.85)
         
     # Check exact string matches using clean_text_standard
     from app.normalizer import clean_text_standard
-    q_norm_full = clean_text_standard(f"{q_name} {q_spec_text}")
-    c_norm_full = clean_text_standard(f"{c_name} {c_full_spec}")
-    q_norm_spec = clean_text_standard(q_spec_text)
-    c_norm_spec = clean_text_standard(c_full_spec)
+    q_norm_full = clean_text_standard(f"{ctx.q_name} {ctx.q_spec_text}")
+    c_norm_full = clean_text_standard(f"{ctx.c_name} {ctx.c_full_spec}")
+    q_norm_spec = clean_text_standard(ctx.q_spec_text)
+    c_norm_spec = clean_text_standard(ctx.c_full_spec)
+    ctx.q_norm_full = q_norm_full
+    ctx.c_norm_full = c_norm_full
+    ctx.q_norm_spec = q_norm_spec
+    ctx.c_norm_spec = c_norm_spec
 
     if q_norm_full and c_norm_full and q_norm_full == c_norm_full:
         base_score += 0.30
-        reasons.append("名称与规格完全一致")
+        ctx.reasons.append("名称与规格完全一致")
     elif q_norm_spec and c_norm_spec and q_norm_spec == c_norm_spec:
         base_score += 0.20
-        reasons.append("规格型号完全一致")
-        
-        
-    # Apply Negative Boosts
+        ctx.reasons.append("规格型号完全一致")
+
+    ctx.base_score = base_score
+
+
+def _apply_conduit_cable_and_electrical_gates(ctx: ScoringContext):
+    """Apply negative boosts and electrical/cable domain rules (Conduit, Boxes, Gangs, Conductor)."""
+    base_score = ctx.base_score
+    q_name = ctx.q_name
+    q_spec_text = ctx.q_spec_text
+    c_name = ctx.c_name
+    c_full_spec = ctx.c_full_spec
+    q_attrs = ctx.q_attrs
+    c_attrs = ctx.c_attrs
+    
     neg_rules = boost_rules.get("negative", DEFAULT_BOOSTS["negative"])
-    if check_category_conflict(q_category, c_category):
+    if check_category_conflict(ctx.q_category, ctx.c_category):
         base_score += neg_rules.get("category_conflict", -0.30)
-        reasons.append("品类冲突(偏置)")
+        ctx.reasons.append("品类冲突(偏置)")
     if "冷水" in q_spec_text and "热水" in c_full_spec or "热水" in q_spec_text and "冷水" in c_full_spec:
         base_score += neg_rules.get("medium_conflict", -0.20)
-        reasons.append("温水介质冲突")
+        ctx.reasons.append("温水介质冲突")
 
-    # 1. Conduit vs Cable Tray (线管 vs 桥架) Discrimination
+    # 1. Conduit vs Cable Tray Discrimination
     q_is_conduit = any(k in f"{q_name} {q_spec_text}".lower() for k in ["线管", "导管", "穿线管", "套管", "jdg", "kbg"])
     c_is_conduit = any(k in f"{c_name} {c_full_spec}".lower() for k in ["线管", "导管", "穿线管", "套管", "jdg", "kbg"])
     c_is_tray = any(k in f"{c_name} {c_full_spec}".lower() for k in ["桥架", "托盘", "梯架"])
     
     if q_is_conduit and c_is_tray and not c_is_conduit:
         base_score -= 0.35
-        reasons.append("物料类型冲突(线管/桥架)")
+        ctx.reasons.append("物料类型冲突(线管/桥架)")
     elif q_is_conduit and c_is_conduit:
         base_score += 0.15
-        reasons.append("线管品类匹配")
+        ctx.reasons.append("线管品类匹配")
 
-    # 2. Line Pipe (JDG/KBG/SC/PVC/PC) Model and Diameter matching
+    # 2. Line Pipe Model and Diameter matching
     CONDUIT_MODELS = ["JDG", "KBG", "SC", "PVC", "PVC-U", "KJG", "TC", "PC"]
     q_cond_m = q_attrs.get("model")
     c_text_upper = f"{c_name} {c_full_spec}".upper()
@@ -754,20 +895,20 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if q_cond_m and q_cond_m in CONDUIT_MODELS:
         if c_cond_m == q_cond_m:
             base_score += 0.20
-            reasons.append(f"线管型号匹配({q_cond_m})")
+            ctx.reasons.append(f"线管型号匹配({q_cond_m})")
         elif c_cond_m and c_cond_m != q_cond_m and c_cond_m in CONDUIT_MODELS:
             base_score -= 0.30
-            reasons.append("线管型号冲突")
+            ctx.reasons.append("线管型号冲突")
             
     if q_attrs.get("dn") and c_attrs.get("dn"):
         if abs(q_attrs["dn"] - c_attrs["dn"]) < 0.1:
             base_score += 0.25
-            reasons.append("管径精确匹配")
+            ctx.reasons.append("管径精确匹配")
         elif abs(q_attrs["dn"] - c_attrs["dn"]) > 0.5 and q_is_conduit:
             base_score -= 0.35
-            reasons.append("管径冲突拦截")
+            ctx.reasons.append("管径冲突拦截")
 
-    # 3. Electrical Distribution Box & Control Cabinet Prefix matching (AP, AL, ALE, AT, ACP, ACP-P, AX, ATD, AFC)
+    # 3. Electrical Distribution Box & Control Cabinet Prefix matching
     from app.domain_extractors import extract_switchgear_params
     q_box = q_attrs.get("box_type") or extract_switchgear_params(f"{q_name} {q_spec_text}").get("box_type")
     c_box = c_attrs.get("box_type") or extract_switchgear_params(f"{c_name} {c_full_spec}").get("box_type")
@@ -775,12 +916,12 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if q_box:
         if c_box and q_box == c_box:
             base_score += 0.25
-            reasons.append(f"配电箱型匹配({q_box})")
+            ctx.reasons.append(f"配电箱型匹配({q_box})")
         elif c_box and q_box != c_box:
             base_score -= 0.30
-            reasons.append("配电箱型冲突")
+            ctx.reasons.append("配电箱型冲突")
 
-    # 4. Power Range Matching for Distribution Boxes (e.g. 10~50KW vs 50~100KW or Pe=71kW)
+    # 4. Power Range Matching for Distribution Boxes
     from app.domain_extractors import extract_power_range
     c_pw = extract_power_range(f"{c_name} {c_full_spec}")
     q_pw = extract_power_range(f"{q_name} {q_spec_text}")
@@ -793,47 +934,47 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if q_pmin is not None and c_pmin is not None:
         if abs(q_pmin - c_pmin) < 0.1 and abs(q_pmax - c_pmax) < 0.1:
             base_score += 0.30
-            reasons.append(f"功率段对齐({int(q_pmin)}~{int(q_pmax)}KW)")
+            ctx.reasons.append(f"功率段对齐({int(q_pmin)}~{int(q_pmax)}KW)")
         else:
             base_score = min(base_score, 0.45)
-            reasons.append("功率段不匹配扣分")
+            ctx.reasons.append("功率段不匹配扣分")
     elif q_power is not None and c_pmin is not None and c_pmax is not None:
         if c_pmin <= q_power <= c_pmax:
             base_score += 0.30
-            reasons.append(f"功率符合功率段({int(c_pmin)}~{int(c_pmax)}KW)")
+            ctx.reasons.append(f"功率符合功率段({int(c_pmin)}~{int(c_pmax)}KW)")
         else:
             base_score = min(base_score, 0.45)
-            reasons.append("功率超出候选功率段")
+            ctx.reasons.append("功率超出候选功率段")
 
-    # 5. Switch Gangs & Control Matching (单联/双联/三联/四联 & 单控/双控)
+    # 5. Switch Gangs & Control Matching
     from app.domain_extractors import extract_switch_gang_control
     q_sw = extract_switch_gang_control(f"{q_name} {q_spec_text}")
     c_sw = extract_switch_gang_control(f"{c_name} {c_full_spec}")
     if q_sw.get("gangs") and c_sw.get("gangs"):
         if q_sw["gangs"] == c_sw["gangs"]:
             base_score += 0.20
-            reasons.append("开关联数一致")
+            ctx.reasons.append("开关联数一致")
         else:
             base_score -= 0.35
-            reasons.append("开关联数冲突")
+            ctx.reasons.append("开关联数冲突")
     if q_sw.get("control") and c_sw.get("control"):
         if q_sw["control"] == c_sw["control"]:
             base_score += 0.20
-            reasons.append("开关控数一致")
+            ctx.reasons.append("开关控数一致")
         else:
             base_score -= 0.35
-            reasons.append("开关控数冲突")
+            ctx.reasons.append("开关控数冲突")
 
-    # 6. Cable Conductor Material (Copper vs Aluminum / 铜芯 vs 铝芯)
+    # 6. Cable Conductor Material
     q_is_copper = any(k in f"{q_name} {q_spec_text}".upper() for k in ["YJY", "BYJ", "BVR", "BV", "YJV", "NH-YJV", "WDZ"])
     c_is_alum = any(k in f"{c_name} {c_full_spec}".upper() for k in ["YJLV", "BLV", "BLVY", "铝芯"])
     if q_is_copper and c_is_alum:
         base_score -= 0.40
-        reasons.append("导体材质冲突(铜/铝)")
+        ctx.reasons.append("导体材质冲突(铜/铝)")
 
     # Out of 2x tolerance check
     has_large_deviation = False
-    for attr in processed_keys:
+    for attr in ctx.processed_keys:
         q_val = q_attrs.get(attr)
         c_val = c_attrs.get(attr)
         if attr == "风量" and isinstance(q_val, (int, float)):
@@ -850,13 +991,22 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 
     if has_large_deviation:
         base_score += neg_rules.get("attrs_deviation_2x", -0.15)
-        reasons.append("参数超限偏离")
+        ctx.reasons.append("参数超限偏离")
         
-    if model_conflict:
+    if ctx.model_conflict:
         base_score += neg_rules.get("model_conflict", -0.25)
-        reasons.append("型号冲突扣分")
-        
-    # === Configuration-driven Hard Gates ===
+        ctx.reasons.append("型号冲突扣分")
+
+    ctx.base_score = base_score
+
+
+def _apply_config_hard_gates(ctx: ScoringContext):
+    """Apply domain schema configuration hard gates (conflict caps, deviation caps, ratio penalties)."""
+    base_score = ctx.base_score
+    domain_config = ctx.domain_config
+    q_attrs = ctx.q_attrs
+    c_attrs = ctx.c_attrs
+
     # 1. Conflict Caps
     conflict_caps = domain_config.get("hard_gates", {}).get("conflict_caps", {})
     for attr_name, cap_val in conflict_caps.items():
@@ -865,7 +1015,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if q_val is not None and c_val is not None:
             if has_conflict(attr_name, q_val, c_val):
                 base_score = min(base_score, cap_val / 100.0)
-                reasons.append(f"{attr_name}冲突拦截")
+                ctx.reasons.append(f"{attr_name}冲突拦截")
 
     # 2. Deviation Caps
     deviation_caps = domain_config.get("hard_gates", {}).get("deviation_caps", {})
@@ -896,7 +1046,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 
             if diff_ratio > ratio and (limit is None or abs_diff > limit):
                 base_score = min(base_score, cap_val)
-                reasons.append(f"{attr_name}偏差过大拦截")
+                ctx.reasons.append(f"{attr_name}偏差过大拦截")
 
     # 3. Ratio Penalties
     ratio_penalties = domain_config.get("hard_gates", {}).get("ratio_penalties", {})
@@ -906,9 +1056,17 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if q_val is not None and c_val is not None:
             if has_conflict(attr_name, q_val, c_val):
                 base_score = base_score * penalty_ratio
-                reasons.append(f"{attr_name}冲突惩罚")
+                ctx.reasons.append(f"{attr_name}冲突惩罚")
 
-    # === Domain-Specific Hard Conflict Penalties ===
+    ctx.base_score = base_score
+
+
+def _apply_domain_cable_and_pipe_penalties(ctx: ScoringContext):
+    """Apply domain-specific penalties for Cable, Pipe, and Decoration items."""
+    base_score = ctx.base_score
+    q_attrs = ctx.q_attrs
+    c_attrs = ctx.c_attrs
+
     # A. Cable Parameter Conflict Penalties
     q_main_cores = q_attrs.get("主芯数")
     c_main_cores = c_attrs.get("主芯数")
@@ -918,14 +1076,14 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         try:
             if int(q_main_cores) != int(c_main_cores):
                 base_score -= 0.45
-                reasons.append("线缆芯数冲突")
+                ctx.reasons.append("线缆芯数冲突")
         except (ValueError, TypeError):
             if str(q_cores) != str(c_cores):
                 base_score -= 0.45
-                reasons.append("线缆芯数冲突")
+                ctx.reasons.append("线缆芯数冲突")
     elif q_cores and c_cores and str(q_cores) != str(c_cores):
         base_score -= 0.45
-        reasons.append("线缆芯数冲突")
+        ctx.reasons.append("线缆芯数冲突")
 
     q_main_sec = q_attrs.get("主截面")
     c_main_sec = c_attrs.get("主截面")
@@ -935,34 +1093,34 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         try:
             if abs(float(q_main_sec) - float(c_main_sec)) > 0.05:
                 base_score -= 0.45
-                reasons.append("线缆截面冲突")
+                ctx.reasons.append("线缆截面冲突")
         except (ValueError, TypeError):
             if str(q_sec) != str(c_sec):
                 base_score -= 0.45
-                reasons.append("线缆截面冲突")
+                ctx.reasons.append("线缆截面冲突")
     elif q_sec and c_sec and str(q_sec) != str(c_sec):
         base_score -= 0.45
-        reasons.append("线缆截面冲突")
+        ctx.reasons.append("线缆截面冲突")
 
     q_cable_m = q_attrs.get("型号")
     c_cable_m = c_attrs.get("型号")
     if q_cable_m and c_cable_m and q_cable_m != c_cable_m:
         base_score -= 0.30
-        reasons.append("线缆型号冲突")
+        ctx.reasons.append("线缆型号冲突")
 
     # B. Pipe Parameter Conflict Penalties
     q_dn = q_attrs.get("管径") or q_attrs.get("dn_val")
     c_dn = c_attrs.get("管径") or c_attrs.get("dn_val")
     if q_dn and c_dn and str(q_dn) != str(c_dn):
         base_score -= 0.45
-        reasons.append("管径口径冲突")
+        ctx.reasons.append("管径口径冲突")
 
     q_wall = q_attrs.get("壁厚")
     c_wall = c_attrs.get("壁厚")
     if q_wall and c_wall and isinstance(q_wall, (int, float)) and isinstance(c_wall, (int, float)):
         if abs(q_wall - c_wall) > 0.05:
             base_score -= 0.35
-            reasons.append("管材壁厚冲突")
+            ctx.reasons.append("管材壁厚冲突")
 
     q_mat = q_attrs.get("材质")
     c_mat = c_attrs.get("材质")
@@ -985,10 +1143,10 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         elif (any(s in q_mat_str for s in ss_syns)) and (any(s in c_mat_str for s in ss_syns)):
             if ("304" in q_mat_str and "316" in c_mat_str) or ("316" in q_mat_str and "304" in c_mat_str):
                 base_score -= 0.40
-                reasons.append("不锈钢牌号冲突(304/316)")
+                ctx.reasons.append("不锈钢牌号冲突(304/316)")
         elif q_mat_str != c_mat_str:
             base_score -= 0.40
-            reasons.append("材质规格冲突")
+            ctx.reasons.append("材质规格冲突")
 
     q_od = q_attrs.get("外径")
     c_od = c_attrs.get("外径")
@@ -996,7 +1154,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         try:
             if abs(float(q_od) - float(c_od)) / max(float(q_od), float(c_od), 1e-5) > 0.10:
                 base_score -= 0.45
-                reasons.append("管材外径冲突")
+                ctx.reasons.append("管材外径冲突")
         except (ValueError, TypeError):
             pass
 
@@ -1006,46 +1164,51 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
     if q_dim and c_dim:
         if check_dimension_conflict(q_dim, c_dim, max_deviation=0.15):
             base_score -= 0.40
-            reasons.append("尺寸规格冲突")
+            ctx.reasons.append("尺寸规格冲突")
 
     q_th = q_attrs.get("厚度")
     c_th = c_attrs.get("厚度")
     if q_th and c_th and isinstance(q_th, (int, float)) and isinstance(c_th, (int, float)):
         if abs(q_th - c_th) > 0.05:
             base_score -= 0.35
-            reasons.append("厚度规格冲突")
+            ctx.reasons.append("厚度规格冲突")
 
-    # D. HVAC & Equipment Controls
-    q_is_ex = False
-    c_is_ex = False
-    c_is_non_ex = False
-    q_fan_press = None
-    q_fan_vol = None
-    is_q_fan = False
+    ctx.base_score = base_score
+
+
+def _apply_hvac_gates(ctx: ScoringContext):
+    """Apply HVAC domain gates (Dampers, AHU/PAU, FCU, VRF, Fans, Ductwork)."""
+    base_score = ctx.base_score
+    q_name = ctx.q_name
+    q_spec_text = ctx.q_spec_text
+    c_name = ctx.c_name
+    c_full_spec = ctx.c_full_spec
+    q_attrs = ctx.q_attrs
+    c_attrs = ctx.c_attrs
+    candidate = ctx.candidate
+    c_code_val = str(candidate.get("code", ""))
 
     if "两管制" in q_spec_text and "四管制" in c_full_spec or "四管制" in q_spec_text and "两管制" in c_full_spec:
         base_score -= 0.35
-        reasons.append("管制模式冲突")
+        ctx.reasons.append("管制模式冲突")
 
     if "变频电机" in q_spec_text and ("EC风机" in c_full_spec or "直流" in c_full_spec):
         base_score -= 0.25
-        reasons.append("电机类型冲突")
+        ctx.reasons.append("电机类型冲突")
 
     if "底漆" in q_spec_text and "面漆" in c_full_spec or "面漆" in q_spec_text and "底漆" in c_full_spec:
         base_score -= 0.35
-        reasons.append("涂膜类型冲突")
+        ctx.reasons.append("涂膜类型冲突")
 
     if "手工" in q_spec_text and "机制" in c_full_spec or "机制" in q_spec_text and "手工" in c_full_spec:
         base_score -= 0.35
 
-    # 1. Fire Damper Controls & Hard Gates (方圆硬隔离 & 电动/熔断硬隔离)
+    # 1. Fire Damper Controls & Hard Gates
     is_q_fire_damper = any(k in f"{q_name} {q_spec_text}" for k in ["防火阀", "排烟防火阀", "常开防火阀", "常闭防火阀", "70℃", "280℃", "70度", "280度"])
-    is_c_fire_damper = any(k in f"{c_name} {c_full_spec}" for k in ["防火阀", "排烟防火阀", "电动防火阀"]) or str(candidate.get("code", "")).startswith("2.22.53.") or str(candidate.get("code", "")).startswith("2.22.54.")
+    is_c_fire_damper = any(k in f"{c_name} {c_full_spec}" for k in ["防火阀", "排烟防火阀", "电动防火阀"]) or c_code_val.startswith("2.22.53.") or c_code_val.startswith("2.22.54.")
 
     if is_q_fire_damper and is_c_fire_damper:
-        # a. Shape Hard Gate: Rectangular vs Circular
         q_is_circular = q_attrs.get("is_circular") is True or "φ" in f"{q_name} {q_spec_text}" or "直径" in f"{q_name} {q_spec_text}" or "DN" in f"{q_name} {q_spec_text}"
-        c_code_val = str(candidate.get("code", ""))
         c_is_circular = c_attrs.get("外径") is not None or "φ" in c_full_spec or "直径" in c_full_spec or "半周长" in c_full_spec or c_code_val == "2.22.53.7729"
         
         q_dim_2d = q_attrs.get("尺寸_2d") or q_attrs.get("尺寸")
@@ -1057,7 +1220,7 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if q_dim_2d and not q_is_circular:
             if c_is_circular:
                 base_score = min(base_score, 0.15)
-                reasons.append("截面形状冲突(矩形/圆形硬隔离)")
+                ctx.reasons.append("截面形状冲突(矩形/圆形硬隔离)")
             else:
                 c_dim_2d = c_attrs.get("尺寸_2d") or c_attrs.get("尺寸")
                 if not c_dim_2d:
@@ -1069,29 +1232,29 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                     c_d = sorted([float(x) for x in re.findall(r'\d+', str(c_dim_2d))])
                     if q_d == c_d and len(q_d) == 2:
                         base_score += 0.40
-                        reasons.append(f"防火阀尺寸精确匹配({q_dim_2d})")
+                        ctx.reasons.append(f"防火阀尺寸精确匹配({q_dim_2d})")
                     else:
                         base_score -= 0.45
-                        reasons.append("防火阀尺寸不一致")
+                        ctx.reasons.append("防火阀尺寸不一致")
         elif q_is_circular and not c_is_circular:
             base_score = min(base_score, 0.15)
-            reasons.append("截面形状冲突(圆形/矩形硬隔离)")
+            ctx.reasons.append("截面形状冲突(圆形/矩形硬隔离)")
 
-        # b. Electric vs Normal Fusible Hard Gate
+        # Electric vs Normal Fusible Hard Gate
         q_is_electric = q_attrs.get("电动") is True or any(k in f"{q_name} {q_spec_text}".upper() for k in ["电动", "DV24V", "DC24V", "AC220V", "执行器", "执行机构", "24V"])
         c_is_electric = "电动" in c_name or "DV24V" in c_full_spec or "DC24V" in c_full_spec or "24V" in c_full_spec or c_code_val.startswith("2.22.54.")
 
         if not q_is_electric and c_is_electric:
             base_score = min(base_score, 0.15)
-            reasons.append("控制方式冲突(常开熔断/电动硬隔离)")
+            ctx.reasons.append("控制方式冲突(常开熔断/电动硬隔离)")
         elif q_is_electric and not c_is_electric:
             base_score = min(base_score, 0.15)
-            reasons.append("控制方式冲突(电动/手动硬隔离)")
+            ctx.reasons.append("控制方式冲突(电动/手动硬隔离)")
         elif not q_is_electric and not c_is_electric:
             base_score += 0.20
-            reasons.append("常开防火阀类型匹配")
+            ctx.reasons.append("常开防火阀类型匹配")
 
-        # c. Fusible Temperature (70℃ vs 280℃)
+        # Fusible Temperature
         q_temp = q_attrs.get("熔断温度")
         if not q_temp:
             if "70" in f"{q_name} {q_spec_text}":
@@ -1101,27 +1264,25 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if q_temp:
             if f"{q_temp}℃" in c_full_spec or f"{q_temp}度" in c_full_spec:
                 base_score += 0.20
-                reasons.append(f"熔断温度匹配({q_temp}℃)")
+                ctx.reasons.append(f"熔断温度匹配({q_temp}℃)")
             elif (q_temp == 70 and "280" in c_full_spec) or (q_temp == 280 and "70" in c_full_spec):
                 base_score -= 0.50
-                reasons.append("熔断温度冲突(70℃/280℃)")
+                ctx.reasons.append("熔断温度冲突(70℃/280℃)")
 
-        # d. Damper Material (镀锌钢板 vs 不锈钢)
+        # Damper Material
         if "镀锌" in f"{q_name} {q_spec_text}" or "镀锌" in str(q_attrs.get("材质", "")):
             if "镀锌钢板" in c_full_spec and "内衬" not in c_full_spec:
                 base_score += 0.15
-                reasons.append("镀锌钢板材质匹配")
+                ctx.reasons.append("镀锌钢板材质匹配")
             elif "不锈钢" in c_full_spec or "内衬" in c_full_spec:
                 base_score -= 0.35
-                reasons.append("阀门材质冲突")
+                ctx.reasons.append("阀门材质冲突")
 
     # 2. AHU / PAU Air Handling Unit Matching
-    c_code_val = str(candidate.get("code", ""))
     is_q_ahu = "AHU" in q_name.upper() or "组合式" in q_name or "医用洁卫型空调机组AHU" in q_name
     is_q_pau = "PAU" in q_name.upper() or "新风机组" in q_name or "医用洁卫型空调机组PAU" in q_name
 
     if is_q_ahu or is_q_pau or c_code_val.startswith("3.60.21."):
-        # a. Installation Type (吊顶 vs 落地)
         q_is_ceiling = q_attrs.get("吊装") is True or "吊装" in f"{q_name} {q_spec_text}" or "吊顶" in f"{q_name} {q_spec_text}"
         q_is_floor = q_attrs.get("落地") is True or "落地" in f"{q_name} {q_spec_text}"
         
@@ -1132,19 +1293,18 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             if q_is_ceiling:
                 if c_is_ceiling:
                     base_score += 0.40
-                    reasons.append("吊顶新风机组匹配")
+                    ctx.reasons.append("吊顶新风机组匹配")
                 elif c_is_floor:
                     base_score -= 0.45
-                    reasons.append("吊顶/落地机组冲突")
+                    ctx.reasons.append("吊顶/落地机组冲突")
             elif q_is_floor:
                 if "净化新风机组" in c_name:
                     base_score += 0.40
-                    reasons.append("落地净化新风机组匹配")
+                    ctx.reasons.append("落地净化新风机组匹配")
                 elif c_is_ceiling:
                     base_score -= 0.45
-                    reasons.append("落地/吊顶机组冲突")
+                    ctx.reasons.append("落地/吊顶机组冲突")
 
-        # b. Self-taking Fresh Air (自取新风 / 净化循环机组)
         q_is_self_fresh = q_attrs.get("自取新风") is True or "自取新风" in f"{q_name} {q_spec_text}"
         if not q_is_self_fresh and is_q_ahu:
             sf_v = q_attrs.get("送风量") or q_attrs.get("风量")
@@ -1155,18 +1315,16 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if is_q_ahu and q_is_self_fresh:
             if "净化循环机组（自取新风）" in c_name or "自取新风" in c_name:
                 base_score += 0.40
-                reasons.append("净化循环机组(自取新风)匹配")
+                ctx.reasons.append("净化循环机组(自取新风)匹配")
             elif "净化新风机组" in c_name or "吊顶新风机组" in c_name:
                 base_score -= 0.35
-                reasons.append("循环/新风机组类型冲突")
+                ctx.reasons.append("循环/新风机组类型冲突")
 
-        # Motor type preference (变频电机优选)
         if "变频" in f"{q_name} {q_spec_text}" or "变频" in c_full_spec:
             if "变频电机" in c_full_spec:
                 base_score += 0.15
-                reasons.append("变频电机配置优选")
+                ctx.reasons.append("变频电机配置优选")
 
-        # c. Air Volume & Two-pipe & VFD matching
         q_vol = q_attrs.get("风量") or q_attrs.get("送风量")
         if q_vol is not None:
             c_spec_clean = re.sub(r'm3/h|m³/h|m3|m³', '', c_full_spec, flags=re.I)
@@ -1175,42 +1333,42 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 c_vols = [float(x) for x in re.findall(r'(\d+)', c_spec_clean)]
             if any(abs(float(q_vol) - cv) < 5.0 for cv in c_vols):
                 base_score += 0.30
-                reasons.append(f"机组风量精确匹配({int(q_vol)})")
+                ctx.reasons.append(f"机组风量精确匹配({int(q_vol)})")
             elif c_vols and not any(abs(float(q_vol) - cv) / max(float(q_vol), 1e-5) < 0.15 for cv in c_vols):
                 base_score -= 0.40
-                reasons.append("机组风量偏差过大")
+                ctx.reasons.append("机组风量偏差过大")
 
-    # 3. Fan Coil Unit (FCU / 风机盘管)
+    # 3. Fan Coil Unit (FCU)
     is_q_fcu = "风机盘管" in q_name or q_attrs.get("卡式") or "KFP" in q_name.upper() or "FCU" in q_name.upper()
     is_c_fcu = "风机盘管" in c_name or c_code_val.startswith("3.50.43.")
 
     if is_q_fcu and is_c_fcu:
         base_score += 0.25
-        reasons.append("风机盘管品类匹配")
+        ctx.reasons.append("风机盘管品类匹配")
 
         q_is_cassette = q_attrs.get("卡式") is True or any(k in f"{q_name} {q_spec_text}" for k in ["卡式", "四吹", "四面出风", "四方向"])
         c_is_cassette = "卡式" in c_full_spec or "卡式" in c_name
-        c_is_horizontal = "卧式" in c_full_spec or "暗装" in c_full_spec
+        c_is_horizontal = "卧式" in c_full_spec or "暗装" in c_name
 
         if q_is_cassette:
             if c_is_cassette:
                 base_score += 0.35
-                reasons.append("卡式风机盘管匹配")
+                ctx.reasons.append("卡式风机盘管匹配")
             elif c_is_horizontal:
                 base_score -= 0.40
-                reasons.append("卡式/卧式暗装结构冲突")
+                ctx.reasons.append("卡式/卧式暗装结构冲突")
         elif not q_is_cassette and "卧式" in f"{q_name} {q_spec_text}":
             if c_is_horizontal:
                 base_score += 0.25
-                reasons.append("卧式暗装结构匹配")
+                ctx.reasons.append("卧式暗装结构匹配")
             elif c_is_cassette:
                 base_score -= 0.35
-                reasons.append("卧式/卡式结构冲突")
+                ctx.reasons.append("卧式/卡式结构冲突")
 
         if any(k in f"{q_name} {q_spec_text}" for k in ["提升泵", "自带提升泵", "带提升泵", "冷凝水提升泵"]):
             if "提升泵" in c_full_spec:
                 base_score += 0.20
-                reasons.append("冷凝水提升泵匹配")
+                ctx.reasons.append("冷凝水提升泵匹配")
 
         q_fcu_vol = q_attrs.get("风量") or q_attrs.get("送风量")
         if q_fcu_vol:
@@ -1220,23 +1378,22 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 c_fcu_vols = [float(x) for x in re.findall(r'(\d+)', c_fcu_clean)]
             if any(abs(float(q_fcu_vol) - v) < 5.0 for v in c_fcu_vols):
                 base_score += 0.35
-                reasons.append(f"风盘风量精确匹配({int(q_fcu_vol)})")
+                ctx.reasons.append(f"风盘风量精确匹配({int(q_fcu_vol)})")
             elif c_fcu_vols and not any(abs(float(q_fcu_vol) - v) / max(float(q_fcu_vol), 1e-5) < 0.10 for v in c_fcu_vols):
                 base_score -= 0.50
-                reasons.append("风盘风量偏差过大")
+                ctx.reasons.append("风盘风量偏差过大")
 
-    # 4. Multi-Split VRF Indoor Unit (多联式空调室内机)
+    # 4. Multi-Split VRF Indoor Unit
     is_q_vrf = "多联机" in q_name or "多联式" in q_name or "VRV" in q_name.upper() or "VRF" in q_name.upper() or q_attrs.get("多联机")
     is_c_vrf = "多联式空调室内机" in c_name or "多联机" in c_name or c_code_val.startswith("3.50.03.")
 
     if is_q_vrf and is_c_vrf:
         base_score += 0.30
-        reasons.append("多联机室内机品类匹配")
+        ctx.reasons.append("多联机室内机品类匹配")
 
-        # Two-way cassette with drain pump preference for medical clean room
         if "两方向" in c_full_spec and "提升泵" in c_full_spec:
             base_score += 0.25
-            reasons.append("两方向带提升泵机型匹配")
+            ctx.reasons.append("两方向带提升泵机型匹配")
 
         q_cool = q_attrs.get("制冷量")
         if not q_cool:
@@ -1250,29 +1407,30 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 c_cool_val = float(c_cool_matches[0])
                 if abs(float(q_cool) - c_cool_val) < 0.05:
                     base_score += 0.40
-                    reasons.append(f"多联机制冷量精确匹配({q_cool}kW)")
+                    ctx.reasons.append(f"多联机制冷量精确匹配({q_cool}kW)")
                 else:
                     base_score -= 0.45
-                    reasons.append("多联机制冷量冲突")
+                    ctx.reasons.append("多联机制冷量冲突")
 
-    # 5. Fan Interval Matching & Default Preferences (离心风机区间匹配与缺省优选)
-    is_q_fan = (domain == "fan" or any(k in q_name for k in ["排风机", "送风机", "静音型排风机", "离心风机", "轴流风机", "通风机"]) or ("风机" in q_name and "风机盘管" not in q_name and "FCU" not in q_name.upper()))
+    # 5. Fan Interval Matching & Default Preferences
+    is_q_fan = (ctx.domain == "fan" or any(k in q_name for k in ["排风机", "送风机", "静音型排风机", "离心风机", "轴流风机", "通风机"]) or ("风机" in q_name and "风机盘管" not in q_name and "FCU" not in q_name.upper()))
     is_c_fan = "离心风机" in c_name or "通风机" in candidate.get("category", "") or c_code_val.startswith("3.50.29.")
+    ctx.is_q_fan = is_q_fan
 
     if is_q_fcu and is_c_fan:
         base_score = min(base_score, 0.15)
-        reasons.append("风机盘管/通风机品类冲突")
+        ctx.reasons.append("风机盘管/通风机品类冲突")
 
     if is_q_fan and is_c_fcu:
         base_score = min(base_score, 0.15)
-        reasons.append("通风机/风机盘管品类冲突")
+        ctx.reasons.append("通风机/风机盘管品类冲突")
 
     if is_q_fan and is_c_fan:
         base_score += 0.20
-        reasons.append("通风机品类匹配")
+        ctx.reasons.append("通风机品类匹配")
 
-        # a. Air volume interval matching (风量：1~500m³/h)
         q_fan_vol = q_attrs.get("风量")
+        ctx.q_fan_vol = q_fan_vol
         if q_fan_vol is not None:
             q_fv = float(q_fan_vol)
             c_min = c_attrs.get("风量_min")
@@ -1286,37 +1444,36 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
             if c_min is not None and c_max is not None:
                 if c_min <= q_fv <= c_max:
                     base_score += 0.40
-                    reasons.append(f"风量落在区间内({int(c_min)}~{int(c_max)}m³/h)")
+                    ctx.reasons.append(f"风量落在区间内({int(c_min)}~{int(c_max)}m³/h)")
                 else:
                     base_score -= 0.50
-                    reasons.append("风量超出候选区间")
+                    ctx.reasons.append("风量超出候选区间")
 
-        # b. External static pressure interval matching (机外余压≤500Pa)
         q_fan_press = q_attrs.get("机外余压") or q_attrs.get("余压")
+        ctx.q_fan_press = q_fan_press
         if q_fan_press is not None:
             q_fp = float(q_fan_press)
             if "≤500Pa" in c_full_spec or "≤500pa" in c_full_spec:
                 if q_fp <= 500.0:
                     base_score += 0.30
-                    reasons.append("余压满足≤500Pa要求")
+                    ctx.reasons.append("余压满足≤500Pa要求")
                 else:
                     base_score -= 0.50
-                    reasons.append("余压超出≤500Pa")
+                    ctx.reasons.append("余压超出≤500Pa")
             elif "500Pa＜机外余压≤2000Pa" in c_full_spec:
                 if 500.0 < q_fp <= 2000.0:
                     base_score += 0.30
-                    reasons.append("余压满足500~2000Pa要求")
+                    ctx.reasons.append("余压满足500~2000Pa要求")
                 elif q_fp <= 500.0:
                     base_score -= 0.50
-                    reasons.append("余压低于候选高压区间")
+                    ctx.reasons.append("余压低于候选高压区间")
             elif "＞2000Pa" in c_full_spec or ">2000Pa" in c_full_spec:
                 if q_fp > 2000.0:
                     base_score += 0.30
                 else:
                     base_score -= 0.60
-                    reasons.append("余压远低于超高压区间")
+                    ctx.reasons.append("余压远低于超高压区间")
 
-        # c. Default Material Preference (镀锌钢板 vs 不锈钢/玻璃钢)
         q_has_ss = "不锈钢" in f"{q_name} {q_spec_text}"
         q_has_frp = "玻璃钢" in f"{q_name} {q_spec_text}"
         c_has_galv = "镀锌" in c_full_spec
@@ -1326,51 +1483,52 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         if not q_has_ss and not q_has_frp:
             if c_has_galv:
                 base_score += 0.20
-                reasons.append("默认标准镀锌钢板优选")
+                ctx.reasons.append("默认标准镀锌钢板优选")
             elif c_has_ss or c_has_frp:
                 base_score -= 0.40
-                reasons.append("非默认材质降权")
+                ctx.reasons.append("非默认材质降权")
         elif q_has_ss:
             if c_has_ss:
                 base_score += 0.30
-                reasons.append("不锈钢材质匹配")
+                ctx.reasons.append("不锈钢材质匹配")
             elif c_has_galv:
                 base_score -= 0.45
-                reasons.append("不锈钢/镀锌材质冲突")
+                ctx.reasons.append("不锈钢/镀锌材质冲突")
 
-        # d. Default Explosion-proof Preference (非防爆 vs 防爆风机)
         q_is_ex = q_attrs.get("防爆") is True or any(k in f"{q_name} {q_spec_text}" for k in ["防爆", "防爆型", "防爆风机", "EX"])
         c_is_ex = "防爆风机" in c_full_spec or ("防爆" in c_full_spec and "非防爆" not in c_full_spec)
         c_is_non_ex = "非防爆" in c_full_spec
+        ctx.q_is_ex = q_is_ex
+        ctx.c_is_ex = c_is_ex
+        ctx.c_is_non_ex = c_is_non_ex
 
         if q_is_ex:
             if c_is_ex:
                 base_score += 0.35
-                reasons.append("防爆风机要求匹配")
+                ctx.reasons.append("防爆风机要求匹配")
             elif c_is_non_ex:
                 base_score -= 0.60
-                reasons.append("非防爆风机拦截")
+                ctx.reasons.append("非防爆风机拦截")
         else:
             if c_is_non_ex:
                 base_score += 0.25
-                reasons.append("默认非防爆风机优选")
+                ctx.reasons.append("默认非防爆风机优选")
             elif c_is_ex:
                 base_score -= 0.60
-                reasons.append("无需防爆降权")
+                ctx.reasons.append("无需防爆降权")
 
-    # 6. Ductwork Matching (镀锌钢板风管厚度匹配)
+    # 6. Ductwork Matching
     is_q_duct = any(k in q_name for k in ["风管", "通风管", "洁净风管", "风道"]) or q_attrs.get("板材厚度")
     is_c_duct = "风管" in c_name or c_code_val.startswith("2.22.45.")
 
     if is_q_duct:
         if is_c_duct:
             base_score += 0.30
-            reasons.append("风管品类匹配")
+            ctx.reasons.append("风管品类匹配")
 
-            # Penalize fittings (管件) when query is a straight duct
             if "管件" in c_name and "管件" not in q_name:
                 base_score -= 0.40
-                reasons.append("风管/管件形态冲突")
+                ctx.reasons.append("风管/管件形态冲突")
 
             q_thick = q_attrs.get("厚度") or q_attrs.get("板材厚度") or q_attrs.get("壁厚")
             if q_thick is not None:
@@ -1382,19 +1540,25 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
                 if c_thick is not None:
                     if abs(float(q_thick) - float(c_thick)) < 0.05:
                         base_score += 0.40
-                        reasons.append(f"风管厚度精确匹配({q_thick}mm)")
+                        ctx.reasons.append(f"风管厚度精确匹配({q_thick}mm)")
                     else:
                         base_score -= 0.45
-                        reasons.append("风管厚度冲突")
+                        ctx.reasons.append("风管厚度冲突")
         else:
             base_score -= 0.50
-            reasons.append("非风管品类冲突")
-    # E. Dynamic LLM Matching Rules (must_contain, must_not_contain, score_boost_keywords)
+            ctx.reasons.append("非风管品类冲突")
+
+    ctx.base_score = base_score
+
+
+def _apply_dynamic_rules(ctx: ScoringContext):
+    """Evaluate LLM-generated active matching rules."""
+    base_score = ctx.base_score
     try:
         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
         active_rules = LLMRuleManager.get_active_rules()
-        cand_text = f"{c_name} {c_full_spec} {candidate.get('category', '')} {candidate.get('code', '')}"
-        q_category = query_info.get("category", "")
+        cand_text = f"{ctx.c_name} {ctx.c_full_spec} {ctx.candidate.get('category', '')} {ctx.candidate.get('code', '')}"
+        q_category = ctx.query_info.get("category", "")
         
         def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
             if not scope_tgt:
@@ -1411,67 +1575,73 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
         for r in active_rules:
             scope_lvl = r.get("scope_level", "category")
             scope_tgt = r.get("scope_target", "")
-            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [q_category, query_info.get("domain", ""), query_info.get("discipline", ""), "给排水", "通用"]):
+            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [q_category, ctx.query_info.get("domain", ""), ctx.query_info.get("discipline", ""), "给排水", "通用"]):
                 continue
-            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [q_name, query_info.get("name", ""), query_info.get("raw_name", "")]):
+            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [ctx.q_name, ctx.query_info.get("name", ""), ctx.query_info.get("raw_name", "")]):
                 continue
             dsl = r.get("parsed_dsl", {})
             matching_rules = dsl.get("matching_rules", {})
             if matching_rules:
                 is_excl, boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
-                    q_spec_text, cand_text, matching_rules
+                    ctx.q_spec_text, cand_text, matching_rules
                 )
                 if is_excl:
                     base_score = max(0.0, base_score - 0.60)
-                    reasons.extend(dyn_reasons)
+                    ctx.reasons.extend(dyn_reasons)
                 elif boost_val != 0:
                     base_score = min(1.0, max(0.0, base_score + (boost_val / 100.0)))
-                    reasons.extend(dyn_reasons)
+                    ctx.reasons.extend(dyn_reasons)
                     if r.get("rule_id"):
                         RuleHitStatsTracker().record_hit(r["rule_id"])
     except Exception as e:
         logger.error(f"Error evaluating dynamic matching rules: {e}")
 
-    # Bound to [0.0, 1.0] and apply fine-grained tie-breaking if saturated
+    ctx.base_score = base_score
+
+
+def _finalize_candidate_score(ctx: ScoringContext) -> Tuple[float, List[str]]:
+    """Apply saturation tie-breakers, bound score to [0, 100], and deduplicate reasons."""
+    base_score = ctx.base_score
+    c_attrs = ctx.c_attrs
+    c_full_spec = ctx.c_full_spec
+    
     if base_score >= 0.999:
-        if q_norm_full and c_norm_full and q_norm_full == c_norm_full:
+        if ctx.q_norm_full and ctx.c_norm_full and ctx.q_norm_full == ctx.c_norm_full:
             final_score = 100.0
-        elif model_matched_exact:
+        elif ctx.model_matched_exact:
             final_score = 99.8
         else:
-            # Fine-grained tiebreaker based on text edit similarity
-            spec_sim = calculate_text_similarity(q_spec_text, c_full_spec)
-            name_sim = calculate_text_similarity(q_name, c_name)
+            spec_sim = calculate_text_similarity(ctx.q_spec_text, c_full_spec)
+            name_sim = calculate_text_similarity(ctx.q_name, ctx.c_name)
             tiebreak = (spec_sim * 0.6 + name_sim * 0.4) * 1.5
             
-            if "参数超限偏离" in reasons:
+            if "参数超限偏离" in ctx.reasons:
                 tiebreak -= 0.5
             
-            # Domain bonus for specialized configurations
             if "提升泵" in c_full_spec:
                 tiebreak += 0.3
             if "两方向" in c_full_spec:
                 tiebreak += 0.2
             if "变频电机" in c_full_spec:
                 tiebreak += 0.4
-            if is_q_fan:
-                if q_is_ex and c_is_ex:
+            if ctx.is_q_fan:
+                if ctx.q_is_ex and ctx.c_is_ex:
                     tiebreak += 0.6
-                elif not q_is_ex and c_is_non_ex:
+                elif not ctx.q_is_ex and ctx.c_is_non_ex:
                     tiebreak += 0.6
-                if q_fan_press is not None and float(q_fan_press) <= 500 and ("≤500Pa" in c_full_spec or "≤500pa" in c_full_spec):
+                if ctx.q_fan_press is not None and float(ctx.q_fan_press) <= 500 and ("≤500Pa" in c_full_spec or "≤500pa" in c_full_spec):
                     tiebreak += 0.4
-                if q_fan_vol is not None and c_attrs.get("风量") is not None:
+                if ctx.q_fan_vol is not None and c_attrs.get("风量") is not None:
                     try:
                         c_fv = float(c_attrs["风量"])
-                        vol_diff = abs(float(q_fan_vol) - c_fv) / max(float(q_fan_vol), c_fv, 1e-5)
+                        vol_diff = abs(float(ctx.q_fan_vol) - c_fv) / max(float(ctx.q_fan_vol), c_fv, 1e-5)
                         tiebreak -= vol_diff * 2.0
                     except Exception:
                         pass
-                if q_fan_press is not None and (c_attrs.get("机外余压") is not None or c_attrs.get("余压") is not None):
+                if ctx.q_fan_press is not None and (c_attrs.get("机外余压") is not None or c_attrs.get("余压") is not None):
                     try:
                         c_fp = float(c_attrs.get("机外余压") or c_attrs.get("余压"))
-                        press_diff = abs(float(q_fan_press) - c_fp) / max(float(q_fan_press), c_fp, 1e-5)
+                        press_diff = abs(float(ctx.q_fan_press) - c_fp) / max(float(ctx.q_fan_press), c_fp, 1e-5)
                         tiebreak -= press_diff * 2.0
                     except Exception:
                         pass
@@ -1482,13 +1652,57 @@ def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], seman
 
     final_score = min(100.0, max(0.0, final_score))
     
-    # Deduplicate match reasons
     unique_reasons = []
-    for r in reasons:
+    for r in ctx.reasons:
         if r not in unique_reasons:
             unique_reasons.append(r)
             
     return round(final_score, 1), unique_reasons
+
+
+def score_candidate(query_info: Dict[str, Any], candidate: Dict[str, Any], semantic_score: float = 0.0) -> Tuple[float, List[str]]:
+    """
+    Score a candidate against the query info using modular pipeline (M4 refactoring).
+    Returns: (float_score, list_of_match_reasons)
+    """
+    ctx = ScoringContext(query_info=query_info, candidate=candidate, semantic_score=semantic_score)
+    
+    # 1. Initial metadata and hard blocking gates
+    if _check_initial_hard_conflicts(ctx):
+        return 0.0, ctx.reasons
+        
+    # 2. Candidate parameter extraction
+    _extract_candidate_specs(ctx)
+    
+    # 3. Model similarity score
+    _score_model_similarity(ctx)
+    
+    # 4. Text & Category similarity score
+    _score_text_and_category(ctx)
+    
+    # 5. Domain Schema & Attribute scoring
+    _score_attributes(ctx)
+    
+    # 6. Scenario base score & positive boosts
+    _calculate_base_score_and_positive_boosts(ctx)
+    
+    # 7. Conduit, Cable and Electrical gates
+    _apply_conduit_cable_and_electrical_gates(ctx)
+    
+    # 8. Schema configuration-driven hard gates
+    _apply_config_hard_gates(ctx)
+    
+    # 9. Cable, Pipe and Decoration penalties
+    _apply_domain_cable_and_pipe_penalties(ctx)
+    
+    # 10. HVAC domain gates (Dampers, AHU/PAU, FCU, VRF, Fans, Ductwork)
+    _apply_hvac_gates(ctx)
+    
+    # 11. Dynamic LLM matching rules
+    _apply_dynamic_rules(ctx)
+    
+    # 12. Final bounding, tie-breaking and formatting
+    return _finalize_candidate_score(ctx)
 
 def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None) -> List[Dict[str, Any]]:
     """
@@ -1692,10 +1906,12 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
 
     return list(candidates.values())
 
-def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: List[str] = []) -> Dict[str, Any]:
+def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None) -> Dict[str, Any]:
     """
     Main entry point for matching a single query item.
     """
+    if batch_confirmed_series is None:
+        batch_confirmed_series = []
     q_name = query_info.get("name", "")
     q_spec_text = query_info.get("specification", "")
     q_category = query_info.get("category", "")

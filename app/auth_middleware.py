@@ -5,6 +5,15 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.auth_manager import verify_access_token, get_user_by_username
 
 AUTH_DEV_MODE = os.getenv("AUTH_DEV_MODE", "false").lower() == "true"
+APP_ENV = os.getenv("APP_ENV", "production").lower()
+
+# Security assertion: Never allow AUTH_DEV_MODE in production or testing environments
+if AUTH_DEV_MODE:
+    if APP_ENV not in ("development", "dev", "local"):
+        raise RuntimeError(
+            "FATAL SECURITY VIOLATION: AUTH_DEV_MODE is enabled but APP_ENV is not 'development'. "
+            "To prevent unauthorized admin access, the application refused to start."
+        )
 
 # Security scheme for Bearer token authorization
 security_scheme = HTTPBearer(auto_error=False)
@@ -34,7 +43,13 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             detail="Token 格式错误：缺少主体信息。"
         )
         
-    user = get_user_by_username(username)
+    uid = payload.get("uid")
+    user = None
+    if uid:
+        from app.auth_manager import get_user_by_id
+        user = get_user_by_id(uid)
+    if not user:
+        user = get_user_by_username(username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

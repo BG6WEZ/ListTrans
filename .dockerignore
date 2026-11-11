@@ -13,6 +13,10 @@ python_local/
 int_out.txt
 reg_out.txt
 
+model_offline/
+doc/
+scratch/
+
 # Local runtime data / caches
 app/uploads/*
 app/vector_cache/*

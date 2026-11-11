@@ -28,7 +28,7 @@ def get_db_conn():
     conn.row_factory = sqlite3.Row
     try:
         conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA busy_timeout=30000;")
         conn.execute("PRAGMA synchronous=NORMAL;")
     except Exception:
         pass
@@ -37,118 +37,123 @@ def get_db_conn():
 def init_rule_engine_db():
     """Ensure llm_providers, llm_rules, and rule_audit_logs tables exist in materials.db."""
     conn = get_db_conn()
-    cursor = conn.cursor()
-    
-    # 1. Multi-vendor providers table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS llm_providers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            provider_id TEXT UNIQUE NOT NULL,
-            name TEXT NOT NULL,
-            base_url TEXT NOT NULL,
-            model_name TEXT NOT NULL,
-            api_key_enc TEXT NOT NULL,
-            priority INTEGER NOT NULL DEFAULT 10,
-            timeout_seconds REAL DEFAULT 8.0,
-            is_active INTEGER DEFAULT 1,
-            total_calls INTEGER DEFAULT 0,
-            total_successes INTEGER DEFAULT 0,
-            total_failovers INTEGER DEFAULT 0,
-            avg_latency_ms REAL DEFAULT 0.0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    
-    # 2. LLM rules definition table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS llm_rules (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            rule_id TEXT UNIQUE NOT NULL,
-            rule_name TEXT NOT NULL,
-            scope_level TEXT NOT NULL DEFAULT 'category',
-            scope_target TEXT,
-            discipline TEXT,
-            priority INTEGER DEFAULT 10,
-            description TEXT,
-            rule_json TEXT NOT NULL,
-            author_id INTEGER NOT NULL,
-            author_name TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'draft',
-            hit_count INTEGER DEFAULT 0,
-            last_hit_at DATETIME,
-            approver_id INTEGER,
-            approver_name TEXT,
-            approval_comment TEXT,
-            approved_at DATETIME,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    
-    # 3. Rule audit logs table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS rule_audit_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            rule_id TEXT NOT NULL,
-            action TEXT NOT NULL,
-            operator_id INTEGER NOT NULL,
-            operator_name TEXT NOT NULL,
-            operator_role TEXT NOT NULL,
-            comment TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    conn.commit()
-    
-    # Seed default LLM providers if table is empty
-    cursor.execute("SELECT COUNT(*) FROM llm_providers")
-    if cursor.fetchone()[0] == 0:
-        dashscope_key = os.getenv("DASHSCOPE_API_KEY", "")
+    try:
+        cursor = conn.cursor()
+        
+        # 1. Multi-vendor providers table
         cursor.execute("""
-            INSERT INTO llm_providers 
-            (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "qwen-max-default",
-            "阿里云 DashScope (Qwen-Max)",
-            "https://dashscope.aliyuncs.com/compatible-mode/v1",
-            "qwen-max",
-            dashscope_key,
-            1,
-            10.0,
-            1 if dashscope_key else 0
-        ))
+            CREATE TABLE IF NOT EXISTS llm_providers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider_id TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                base_url TEXT NOT NULL,
+                model_name TEXT NOT NULL,
+                api_key_enc TEXT NOT NULL,
+                priority INTEGER NOT NULL DEFAULT 10,
+                timeout_seconds REAL DEFAULT 8.0,
+                is_active INTEGER DEFAULT 1,
+                total_calls INTEGER DEFAULT 0,
+                total_successes INTEGER DEFAULT 0,
+                total_failovers INTEGER DEFAULT 0,
+                avg_latency_ms REAL DEFAULT 0.0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # 2. LLM rules definition table
         cursor.execute("""
-            INSERT INTO llm_providers 
-            (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "qwen-plus-fallback",
-            "阿里云 DashScope (Qwen-Plus)",
-            "https://dashscope.aliyuncs.com/compatible-mode/v1",
-            "qwen-plus",
-            dashscope_key,
-            2,
-            8.0,
-            1 if dashscope_key else 0
-        ))
+            CREATE TABLE IF NOT EXISTS llm_rules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rule_id TEXT UNIQUE NOT NULL,
+                rule_name TEXT NOT NULL,
+                scope_level TEXT NOT NULL DEFAULT 'category',
+                scope_target TEXT,
+                discipline TEXT,
+                priority INTEGER DEFAULT 10,
+                description TEXT,
+                rule_json TEXT NOT NULL,
+                author_id INTEGER NOT NULL,
+                author_name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'draft',
+                hit_count INTEGER DEFAULT 0,
+                last_hit_at DATETIME,
+                approver_id INTEGER,
+                approver_name TEXT,
+                approval_comment TEXT,
+                approved_at DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # 3. Rule audit logs table
         cursor.execute("""
-            INSERT INTO llm_providers 
-            (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            "deepseek-v3-fallback",
-            "DeepSeek API (DeepSeek-V3)",
-            "https://api.deepseek.com/v1",
-            "deepseek-chat",
-            os.getenv("DEEPSEEK_API_KEY", ""),
-            3,
-            10.0,
-            1 if os.getenv("DEEPSEEK_API_KEY") else 0
-        ))
+            CREATE TABLE IF NOT EXISTS rule_audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rule_id TEXT NOT NULL,
+                action TEXT NOT NULL,
+                operator_id INTEGER NOT NULL,
+                operator_name TEXT NOT NULL,
+                operator_role TEXT NOT NULL,
+                comment TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         conn.commit()
-    conn.close()
+        
+        # Seed default LLM providers if table is empty
+        cursor.execute("SELECT COUNT(*) FROM llm_providers")
+        if cursor.fetchone()[0] == 0:
+            dashscope_key = os.getenv("DASHSCOPE_API_KEY", "")
+            cursor.execute("""
+                INSERT INTO llm_providers 
+                (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "qwen-max-default",
+                "阿里云 DashScope (Qwen-Max)",
+                "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                "qwen-max",
+                dashscope_key,
+                1,
+                10.0,
+                1 if dashscope_key else 0
+            ))
+            cursor.execute("""
+                INSERT INTO llm_providers 
+                (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "qwen-plus-fallback",
+                "阿里云 DashScope (Qwen-Plus)",
+                "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                "qwen-plus",
+                dashscope_key,
+                2,
+                8.0,
+                1 if dashscope_key else 0
+            ))
+            cursor.execute("""
+                INSERT INTO llm_providers 
+                (provider_id, name, base_url, model_name, api_key_enc, priority, timeout_seconds, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "deepseek-v3-fallback",
+                "DeepSeek API (DeepSeek-V3)",
+                "https://api.deepseek.com/v1",
+                "deepseek-chat",
+                os.getenv("DEEPSEEK_API_KEY", ""),
+                3,
+                10.0,
+                1 if os.getenv("DEEPSEEK_API_KEY") else 0
+            ))
+            conn.commit()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 # Initialize DB on module import
 try:
@@ -818,10 +823,15 @@ class LLMRuleManager:
     @classmethod
     def get_rule_by_id(cls, rule_id: str) -> Optional[Dict[str, Any]]:
         conn = get_db_conn()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM llm_rules WHERE rule_id = ?", (rule_id,))
-        row = cursor.fetchone()
-        conn.close()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM llm_rules WHERE rule_id = ?", (rule_id,))
+            row = cursor.fetchone()
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
         if not row:
             return None
         d = dict(row)
@@ -955,21 +965,26 @@ class LLMRuleManager:
     @classmethod
     def get_rule_stats(cls) -> Dict[str, Any]:
         conn = get_db_conn()
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM llm_rules WHERE status = 'approved'")
-        approved_count = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM llm_rules WHERE status = 'pending_approval'")
-        pending_count = cursor.fetchone()[0]
-        cursor.execute("SELECT SUM(hit_count) FROM llm_rules")
-        total_hits = cursor.fetchone()[0] or 0
-        
-        cursor.execute("SELECT rule_id, rule_name, discipline, scope_target, hit_count, author_name, approved_at FROM llm_rules WHERE status = 'approved' ORDER BY hit_count DESC LIMIT 10")
-        top_rules = [dict(r) for r in cursor.fetchall()]
-        
-        conn.close()
-        return {
-            "approved_count": approved_count,
-            "pending_count": pending_count,
-            "total_hits": total_hits,
-            "top_rules": top_rules
-        }
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM llm_rules WHERE status = 'approved'")
+            approved_count = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM llm_rules WHERE status = 'pending_approval'")
+            pending_count = cursor.fetchone()[0]
+            cursor.execute("SELECT SUM(hit_count) FROM llm_rules")
+            total_hits = cursor.fetchone()[0] or 0
+            
+            cursor.execute("SELECT rule_id, rule_name, discipline, scope_target, hit_count, author_name, approved_at FROM llm_rules WHERE status = 'approved' ORDER BY hit_count DESC LIMIT 10")
+            top_rules = [dict(r) for r in cursor.fetchall()]
+            
+            return {
+                "approved_count": approved_count,
+                "pending_count": pending_count,
+                "total_hits": total_hits,
+                "top_rules": top_rules
+            }
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass

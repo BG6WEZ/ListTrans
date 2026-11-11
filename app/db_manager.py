@@ -33,7 +33,7 @@ def get_thread_db_connection():
     conn.row_factory = sqlite3.Row
     try:
         conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA busy_timeout=30000;")
         conn.execute("PRAGMA synchronous=NORMAL;")
     except Exception:
         pass
@@ -49,7 +49,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     try:
         conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=5000;")
+        conn.execute("PRAGMA busy_timeout=30000;")
         conn.execute("PRAGMA synchronous=NORMAL;")
     except Exception:
         pass
@@ -323,79 +323,89 @@ def search_materials_keyword(keyword: str, limit: int = 50) -> List[Dict[str, An
 def get_db_metadata() -> Dict[str, Any]:
     """Retrieve database row counts and last upload timestamps."""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Ensure metadata table exists
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS materials_metadata (
-            key TEXT PRIMARY KEY,
-            value TEXT
-        )
-    """)
-    conn.commit()
-    
-    # Get row count from materials table
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials'")
-    has_materials = cursor.fetchone() is not None
-    row_count = 0
-    if has_materials:
-        cursor.execute("SELECT COUNT(*) FROM materials")
-        row_count = cursor.fetchone()[0]
-    
-    # Get last upload date
-    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'last_upload_date'")
-    row = cursor.fetchone()
-    last_upload_date = row[0] if row else "未知"
-    
-    # Get filename
-    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'filename'")
-    row = cursor.fetchone()
-    filename = row[0] if row else "未知"
+    try:
+        cursor = conn.cursor()
+        
+        # Ensure metadata table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS materials_metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        conn.commit()
+        
+        # Get row count from materials table
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials'")
+        has_materials = cursor.fetchone() is not None
+        row_count = 0
+        if has_materials:
+            cursor.execute("SELECT COUNT(*) FROM materials")
+            row_count = cursor.fetchone()[0]
+        
+        # Get last upload date
+        cursor.execute("SELECT value FROM materials_metadata WHERE key = 'last_upload_date'")
+        row = cursor.fetchone()
+        last_upload_date = row[0] if row else "未知"
+        
+        # Get filename
+        cursor.execute("SELECT value FROM materials_metadata WHERE key = 'filename'")
+        row = cursor.fetchone()
+        filename = row[0] if row else "未知"
 
-    # Get total_rows
-    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'total_rows'")
-    row = cursor.fetchone()
-    total_rows = int(row[0]) if row else row_count
+        # Get total_rows
+        cursor.execute("SELECT value FROM materials_metadata WHERE key = 'total_rows'")
+        row = cursor.fetchone()
+        total_rows = int(row[0]) if row else row_count
 
-    # Get imported_rows
-    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'imported_rows'")
-    row = cursor.fetchone()
-    imported_rows = int(row[0]) if row else row_count
+        # Get imported_rows
+        cursor.execute("SELECT value FROM materials_metadata WHERE key = 'imported_rows'")
+        row = cursor.fetchone()
+        imported_rows = int(row[0]) if row else row_count
 
-    # Get disabled_rows
-    cursor.execute("SELECT value FROM materials_metadata WHERE key = 'disabled_rows'")
-    row = cursor.fetchone()
-    disabled_rows = int(row[0]) if row else 0
-    
-    conn.close()
-    return {
-        "row_count": row_count,
-        "last_upload_date": last_upload_date,
-        "filename": filename,
-        "total_rows": total_rows,
-        "imported_rows": imported_rows,
-        "disabled_rows": disabled_rows
-    }
+        # Get disabled_rows
+        cursor.execute("SELECT value FROM materials_metadata WHERE key = 'disabled_rows'")
+        row = cursor.fetchone()
+        disabled_rows = int(row[0]) if row else 0
+        
+        return {
+            "row_count": row_count,
+            "last_upload_date": last_upload_date,
+            "filename": filename,
+            "total_rows": total_rows,
+            "imported_rows": imported_rows,
+            "disabled_rows": disabled_rows
+        }
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 def update_db_metadata(total_rows: int, imported_rows: int, disabled_rows: int, filename: str):
     """Save upload logs and timestamp details to SQLite."""
     import datetime
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS materials_metadata (
-            key TEXT PRIMARY KEY,
-            value TEXT
-        )
-    """)
-    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('last_upload_date', ?)", (now_str,))
-    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('filename', ?)", (filename,))
-    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('total_rows', ?)", (str(total_rows),))
-    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('imported_rows', ?)", (str(imported_rows),))
-    cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('disabled_rows', ?)", (str(disabled_rows),))
-    conn.commit()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS materials_metadata (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('last_upload_date', ?)", (now_str,))
+        cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('filename', ?)", (filename,))
+        cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('total_rows', ?)", (str(total_rows),))
+        cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('imported_rows', ?)", (str(imported_rows),))
+        cursor.execute("INSERT OR REPLACE INTO materials_metadata (key, value) VALUES ('disabled_rows', ?)", (str(disabled_rows),))
+        conn.commit()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 def parse_disable_annotation(text: str) -> Tuple[bool, Optional[Any], str]:
     """
@@ -591,80 +601,85 @@ def import_materials_from_excel(
     df_cleaned["parsed_params"] = parsed_params_list
     
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    if mode == "replace":
-        # Drop and recreate tables cleanly to avoid FTS5 shadow table corruption
-        cursor.execute("DROP TABLE IF EXISTS materials")
-        cursor.execute("DROP TABLE IF EXISTS materials_fts")
-        cursor.execute("""
-            CREATE TABLE materials (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                code TEXT UNIQUE,
-                category TEXT,
-                name TEXT,
-                specification TEXT,
-                unit TEXT,
-                brand TEXT,
-                description TEXT,
-                search_tokens TEXT,
-                parsed_params TEXT,
-                parsed_schema_version INTEGER DEFAULT 2
-            )
-        """)
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_code ON materials(code)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)")
-        cursor.execute("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS materials_fts USING fts5(
-                code UNINDEXED,
-                category,
-                name,
-                specification,
-                brand,
-                description,
-                tokenize = 'unicode61'
-            )
-        """)
-        has_fts = True
-    else:
-        # Append mode: check FTS table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
-        has_fts = cursor.fetchone() is not None
-
-    # Write to SQL materials table
-    records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
-    records = [r + [2] for r in records]
-    cursor.executemany("""
-        INSERT OR REPLACE INTO materials 
-        (code, category, name, specification, unit, brand, description, search_tokens, parsed_params, parsed_schema_version)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, records)
-    
-    # Write to FTS virtual table
-    if has_fts:
-        from app.preprocessor import fts_tokenize
-        fts_records = []
-        for _, row in df_cleaned.iterrows():
-            fts_records.append([
-                row["code"],
-                fts_tokenize(row["category"]),
-                fts_tokenize(row["name"]),
-                fts_tokenize(row["specification"]),
-                fts_tokenize(row["brand"]),
-                fts_tokenize(row["description"])
-            ])
-        cursor.executemany("""
-            INSERT OR REPLACE INTO materials_fts 
-            (code, category, name, specification, brand, description)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, fts_records)
-        
-    conn.commit()
     try:
-        conn.execute("PRAGMA optimize;")
-    except Exception:
-        pass
-    conn.close()
+        cursor = conn.cursor()
+        
+        if mode == "replace":
+            # Drop and recreate tables cleanly to avoid FTS5 shadow table corruption
+            cursor.execute("DROP TABLE IF EXISTS materials")
+            cursor.execute("DROP TABLE IF EXISTS materials_fts")
+            cursor.execute("""
+                CREATE TABLE materials (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    code TEXT UNIQUE,
+                    category TEXT,
+                    name TEXT,
+                    specification TEXT,
+                    unit TEXT,
+                    brand TEXT,
+                    description TEXT,
+                    search_tokens TEXT,
+                    parsed_params TEXT,
+                    parsed_schema_version INTEGER DEFAULT 2
+                )
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_code ON materials(code)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)")
+            cursor.execute("""
+                CREATE VIRTUAL TABLE IF NOT EXISTS materials_fts USING fts5(
+                    code UNINDEXED,
+                    category,
+                    name,
+                    specification,
+                    brand,
+                    description,
+                    tokenize = 'unicode61'
+                )
+            """)
+            has_fts = True
+        else:
+            # Append mode: check FTS table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
+            has_fts = cursor.fetchone() is not None
+
+        # Write to SQL materials table
+        records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
+        records = [r + [2] for r in records]
+        cursor.executemany("""
+            INSERT OR REPLACE INTO materials 
+            (code, category, name, specification, unit, brand, description, search_tokens, parsed_params, parsed_schema_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, records)
+        
+        # Write to FTS virtual table
+        if has_fts:
+            from app.preprocessor import fts_tokenize
+            fts_records = []
+            for _, row in df_cleaned.iterrows():
+                fts_records.append([
+                    row["code"],
+                    fts_tokenize(row["category"]),
+                    fts_tokenize(row["name"]),
+                    fts_tokenize(row["specification"]),
+                    fts_tokenize(row["brand"]),
+                    fts_tokenize(row["description"])
+                ])
+            cursor.executemany("""
+                INSERT OR REPLACE INTO materials_fts 
+                (code, category, name, specification, brand, description)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, fts_records)
+            
+        conn.commit()
+        try:
+            conn.execute("PRAGMA optimize;")
+        except Exception:
+            pass
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
     
     # Compute aggregate stats
     old_meta = get_db_metadata()
@@ -863,10 +878,15 @@ def get_db_schema_stats() -> Dict[str, Any]:
     from app.domain_extractors import domain_schema
     
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT category, name, specification, parsed_params FROM materials")
-    rows = cursor.fetchall()
-    conn.close()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT category, name, specification, parsed_params FROM materials")
+        rows = cursor.fetchall()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
     
     domain_counts = {}
     domain_structured = {}

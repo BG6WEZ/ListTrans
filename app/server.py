@@ -20,7 +20,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Req
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any, Tuple
 from concurrent.futures import ThreadPoolExecutor
 import json
@@ -54,7 +54,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
-ENABLE_DOCS = os.getenv("ENABLE_DOCS", "true").lower() == "true"
+ENABLE_DOCS = os.getenv("ENABLE_DOCS", "false").lower() == "true"
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:18080,http://localhost:18080").split(",")
 
 async def _daily_flywheel_mining_loop():
@@ -71,7 +71,8 @@ async def _daily_flywheel_mining_loop():
             
             logger.info("Executing scheduled daily 02:00 flywheel mining run...")
             from app.feedback_miner import miner
-            res = miner.run_mining()
+            loop = asyncio.get_running_loop()
+            res = await loop.run_in_executor(executor, miner.run_mining)
             logger.info(f"Daily flywheel mining finished: {res}")
         except asyncio.CancelledError:
             break
@@ -116,18 +117,19 @@ async def lifespan(app_instance: FastAPI):
 
 app = FastAPI(
     title="武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统",
-    version="0.1.3",
+    version="0.1.4",
     docs_url="/docs" if ENABLE_DOCS else None,
     redoc_url="/redoc" if ENABLE_DOCS else None,
     lifespan=lifespan
 )
 
-# Enable CORS for Local and LAN access
+# Enable CORS: strictly use ALLOWED_ORIGINS whitelist instead of wildcard regex
+origins_list = [origin.strip() for origin in ALLOWED_ORIGINS if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://.*",
+    allow_origins=origins_list if origins_list else ["http://127.0.0.1:18080", "http://localhost:18080"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -170,6 +172,11 @@ from app.audit_manager import (
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class ProfileUpdateRequest(BaseModel):
+    new_username: Optional[str] = Field(None, min_length=3, max_length=50, description="新登录名（如不修改可留空）")
+    old_password: str = Field(..., min_length=1, description="当前密码（必填，用于安全核验）")
+    new_password: Optional[str] = Field(None, min_length=6, description="新密码（选填，最少6位）")
 
 class DraftSaveRequest(BaseModel):
     original_filename: str
@@ -232,7 +239,12 @@ async def api_login(req: LoginRequest, request: Request):
     log_login_attempt(username, ip, success=True)
     update_user_last_login(user["id"])
     
-    access_token = create_access_token(data={"sub": user["username"], "role": user["role"]})
+    access_token = create_access_token(data={
+        "sub": user["username"],
+        "uid": user["id"],
+        "emp_no": user.get("employee_no") or "",
+        "role": user["role"]
+    })
     display_name = user.get("name") or ("系统管理员" if user["username"] == "admin" else user["username"])
     position = user.get("position") or ("系统管理员" if user["username"] == "admin" else "员工")
     
@@ -271,11 +283,30 @@ async def api_login(req: LoginRequest, request: Request):
         "role": user["role"]
     }
 
+@app.post("/api/auth/logout")
+async def api_logout(request: Request, current_user: dict = Depends(get_current_user)):
+    """User logout endpoint to record audit event and clear session."""
+    ip = request.client.host if request.client else "127.0.0.1"
+    try:
+        log_audit_event(
+            username=current_user["username"],
+            action="用户登出",
+            details="主动退出系统",
+            ip_address=ip,
+            name=current_user.get("name"),
+            role=current_user.get("role"),
+            user_id=current_user.get("id")
+        )
+    except Exception as e:
+        security_logger.warning(f"Error logging logout event: {e}")
+    return {"status": "ok", "message": "已成功退出"}
+
 @app.get("/api/auth/me")
 async def api_get_me(current_user: dict = Depends(get_current_user)):
     display_name = current_user.get("name") or ("系统管理员" if current_user["username"] == "admin" else current_user["username"])
     position = current_user.get("position") or ("系统管理员" if current_user["username"] == "admin" else "员工")
     return {
+        "id": current_user["id"],
         "username": current_user["username"],
         "name": display_name,
         "position": position,
@@ -283,7 +314,128 @@ async def api_get_me(current_user: dict = Depends(get_current_user)):
         "dept2": current_user.get("dept2") or "",
         "dept3": current_user.get("dept3") or "",
         "employee_no": current_user.get("employee_no") or "",
+        "need_emp_no_setup": bool(current_user.get("need_emp_no_setup")),
         "phone": current_user.get("phone") or current_user["username"],
+        "role": current_user["role"]
+    }
+
+@app.put("/api/auth/profile")
+async def api_update_profile(req: ProfileUpdateRequest, request: Request, current_user: dict = Depends(get_current_user)):
+    """Self-service profile and password update endpoint."""
+    user_id = current_user["id"]
+    ip = request.client.host if request.client else "unknown"
+    
+    # 1. Verify old_password
+    if not verify_password(req.old_password, current_user["password_hash"]):
+        log_audit_event(
+            username=current_user["username"],
+            name=current_user.get("name"),
+            role=current_user.get("role"),
+            action="修改账号设置",
+            details="验证当前密码失败",
+            ip_address=ip,
+            status="failed",
+            user_id=user_id
+        )
+        raise HTTPException(status_code=400, detail="当前密码输入错误，请核实后重试。")
+        
+    conn = get_auth_connection()
+    cursor = conn.cursor()
+    
+    updates = []
+    params = []
+    old_username = current_user["username"]
+    new_username = (req.new_username or "").strip()
+    username_changed = False
+    
+    # 2. Check username change
+    if new_username and new_username != old_username:
+        # Cross-field unique validation: must not collide with other users' username, employee_no or phone
+        cursor.execute("""
+            SELECT id FROM users 
+            WHERE (username = ? OR employee_no = ? OR phone = ?) AND id != ?
+        """, (new_username, new_username, new_username, user_id))
+        if cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=400, detail="该登录名已被占用或与已有工号/手机号冲突，请更换。")
+            
+        updates.append("username = ?")
+        params.append(new_username)
+        username_changed = True
+    else:
+        new_username = old_username
+        
+    # 3. Check password change
+    password_changed = False
+    if req.new_password:
+        new_pwd = req.new_password.strip()
+        if len(new_pwd) < 6:
+            conn.close()
+            raise HTTPException(status_code=400, detail="新密码长度不能少于 6 位。")
+        if verify_password(new_pwd, current_user["password_hash"]):
+            conn.close()
+            raise HTTPException(status_code=400, detail="新密码不能与当前密码完全相同。")
+            
+        new_hash = get_password_hash(new_pwd)
+        updates.append("password_hash = ?")
+        params.append(new_hash)
+        password_changed = True
+        
+    if not updates:
+        conn.close()
+        return {"success": True, "detail": "没有检测到任何需要更新的项。"}
+        
+    try:
+        params.append(user_id)
+        cursor.execute(f"UPDATE users SET {', '.join(updates)} WHERE id = ?", params)
+        
+        # Cascade update active_heartbeats table if username changed
+        if username_changed:
+            cursor.execute("UPDATE active_heartbeats SET username = ? WHERE username = ?", (new_username, old_username))
+            
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        security_logger.error(f"Failed to update profile for user {old_username}: {e}")
+        raise HTTPException(status_code=500, detail=f"保存失败: {str(e)}")
+    finally:
+        conn.close()
+        
+    # Issue a refreshed access token so the user stays authenticated seamlessly
+    refreshed_token = create_access_token(data={
+        "sub": new_username,
+        "uid": user_id,
+        "emp_no": current_user.get("employee_no") or "",
+        "role": current_user["role"]
+    })
+    
+    audit_detail = f"工号 [{current_user.get('employee_no')}] 自助更新账号: "
+    changes = []
+    if username_changed: changes.append(f"登录名由 '{old_username}' 改为 '{new_username}'")
+    if password_changed: changes.append("密码已修改")
+    audit_detail += "; ".join(changes)
+    
+    log_audit_event(
+        username=new_username,
+        name=current_user.get("name"),
+        role=current_user.get("role"),
+        action="修改账号设置",
+        details=audit_detail,
+        ip_address=ip,
+        status="success",
+        user_id=user_id
+    )
+    security_logger.info(audit_detail)
+    
+    return {
+        "success": True,
+        "detail": "账号信息更新成功！",
+        "access_token": refreshed_token,
+        "token_type": "bearer",
+        "username": new_username,
+        "name": current_user.get("name") or new_username,
+        "position": current_user.get("position") or "员工",
+        "employee_no": current_user.get("employee_no") or "",
         "role": current_user["role"]
     }
 
@@ -373,6 +525,7 @@ async def api_delete_session(session_id: str, current_user: dict = Depends(get_c
 @app.get("/api/db/portrait", dependencies=[Depends(require_employee)])
 async def api_get_db_portrait():
     """Calculate and return live Data Portrait metrics for materials.db."""
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -381,7 +534,6 @@ async def api_get_db_portrait():
         total_items = cursor.execute("SELECT COUNT(*) FROM materials").fetchone()[0]
         
         if total_items == 0:
-            conn.close()
             return {
                 "total_items": 0,
                 "valid_materials": 0,
@@ -417,26 +569,25 @@ async def api_get_db_portrait():
         rows = cursor.execute("SELECT parsed_params FROM materials").fetchall()
         model_extracted_count = 0
         structured_attr_count = 0
-        # 2. Disabled items
-        disabled_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE disabled = 1").fetchone()[0]
-        valid_materials = total_items - disabled_count
+        for (p_str,) in rows:
+            if not p_str:
+                continue
+            try:
+                p_obj = json.loads(p_str)
+                if isinstance(p_obj, dict):
+                    m = p_obj.get("model")
+                    if m and str(m).strip():
+                        model_extracted_count += 1
+                    attrs = p_obj.get("attrs")
+                    if attrs and isinstance(attrs, dict) and len(attrs) >= 2:
+                        structured_attr_count += 1
+            except Exception:
+                pass
         
-        # 3. Category coverage
-        category_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE category IS NOT NULL AND category != ''").fetchone()[0]
-        
-        # 4. Specification coverage
-        spec_nonempty_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE specification IS NOT NULL AND specification != ''").fetchone()[0]
-        spec_nonempty_rate = round((spec_nonempty_count / total_items) * 100, 1) if total_items > 0 else 0.0
-        
-        # 5. Model extraction rate
-        model_extracted_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE model_extracted IS NOT NULL AND model_extracted != ''").fetchone()[0]
-        model_missing_count = total_items - model_extracted_count
-        model_extracted_rate = round((model_extracted_count / total_items) * 100, 1) if total_items > 0 else 0.0
-        
-        # 6. Structured Attributes rate
-        structured_attr_count = cursor.execute("SELECT COUNT(*) FROM materials WHERE structured_params IS NOT NULL AND structured_params != '' AND structured_params != '{}'").fetchone()[0]
-        structured_attr_rate = round((structured_attr_count / total_items) * 100, 1) if total_items > 0 else 0.0
-        
+        model_missing_count = max(0, total_items - model_extracted_count)
+        model_extracted_rate = round((model_extracted_count / total_items) * 100, 2) if total_items > 0 else 0.0
+        structured_attr_rate = round((structured_attr_count / total_items) * 100, 2) if total_items > 0 else 0.0
+
         # Top 5 categories
         top_cats = cursor.execute(
             "SELECT category, COUNT(*) as cnt FROM materials WHERE category IS NOT NULL AND category != '' GROUP BY category ORDER BY cnt DESC LIMIT 5"
@@ -448,8 +599,6 @@ async def api_get_db_portrait():
             "SELECT unit, COUNT(*) as cnt FROM materials WHERE unit IS NOT NULL AND unit != '' GROUP BY unit ORDER BY cnt DESC LIMIT 5"
         ).fetchall()
         top_units = [{"unit": row[0], "count": row[1], "percent": round((row[1]/total_items)*100, 1)} for row in top_u]
-        
-        conn.close()
         
         return {
             "total_items": total_items,
@@ -469,6 +618,12 @@ async def api_get_db_portrait():
     except Exception as e:
         logger.error(f"Error computing data portrait: {e}")
         raise HTTPException(status_code=500, detail=f"生成物料库数字画像失败: {str(e)}")
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 @app.delete("/api/system/reset")
 async def api_system_reset(current_user: dict = Depends(require_admin)):
@@ -517,6 +672,7 @@ async def api_get_db_materials(
     page_size: int = Query(20, ge=1, le=100)
 ):
     """Query and search master materials with pagination."""
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -563,14 +719,9 @@ async def api_get_db_materials(
                 "model": parsed.get("model", ""),
                 "attrs": parsed.get("attrs", {})
             })
-            
-        conn.close()
         
-        # Get list of unique categories for frontend dropdown filter
-        conn_cat = get_db_connection()
-        cat_rows = conn_cat.cursor().execute("SELECT DISTINCT category FROM materials WHERE category IS NOT NULL AND category != '' ORDER BY category ASC").fetchall()
-        all_categories = [c[0] for c in cat_rows]
-        conn_cat.close()
+        # Get list of unique categories from cache
+        all_categories = get_cached_categories()
         
         return {
             "total": total_count,
@@ -583,6 +734,12 @@ async def api_get_db_materials(
     except Exception as e:
         logger.error(f"Error querying materials: {e}")
         raise HTTPException(status_code=500, detail=f"查询物料表失败: {str(e)}")
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -611,30 +768,73 @@ def save_auto_binding_rules(rules: List[Dict[str, Any]]):
 # Thread Pool for concurrent matching (4 workers optimal for CPU throughput without thread thrashing)
 executor = ThreadPoolExecutor(max_workers=4)
 
+_upload_tasks_lock = threading.Lock()
 upload_tasks: Dict[str, Dict[str, Any]] = {}
+
+def update_task_progress(task_id: str, **kwargs):
+    """Thread-safe update for upload / import task progress."""
+    if not task_id:
+        return
+    with _upload_tasks_lock:
+        if task_id in upload_tasks:
+            upload_tasks[task_id].update(kwargs)
+
+def get_task_status(task_id: str) -> Optional[Dict[str, Any]]:
+    """Thread-safe retrieval of a task copy."""
+    with _upload_tasks_lock:
+        task = upload_tasks.get(task_id)
+        return dict(task) if task else None
+
+def set_task_initial(task_id: str, data: Dict[str, Any]):
+    """Thread-safe initialization of a task."""
+    with _upload_tasks_lock:
+        upload_tasks[task_id] = data
 
 def clean_expired_upload_tasks(max_tasks: int = 50, max_age_seconds: int = 1800):
     """Clean completed/failed tasks older than max_age_seconds or prune oldest if exceeding max_tasks."""
     now = time.time()
-    # 1. Prune expired completed/failed tasks
-    expired = [
-        tid for tid, task in upload_tasks.items()
-        if task.get("status") in ("completed", "failed") and (now - task.get("created_time", now)) > max_age_seconds
-    ]
-    for tid in expired:
-        upload_tasks.pop(tid, None)
-        
-    # 2. If still exceeds max_tasks, prune oldest completed/failed
-    if len(upload_tasks) > max_tasks:
-        completed_or_failed = [
-            (tid, task.get("created_time", 0)) 
-            for tid, task in upload_tasks.items() 
-            if task.get("status") in ("completed", "failed")
+    with _upload_tasks_lock:
+        # 1. Prune expired completed/failed tasks
+        expired = [
+            tid for tid, task in upload_tasks.items()
+            if task.get("status") in ("completed", "failed") and (now - task.get("created_time", now)) > max_age_seconds
         ]
-        sorted_tasks = sorted(completed_or_failed, key=lambda x: x[1])
-        to_prune = len(upload_tasks) - max_tasks
-        for tid, _ in sorted_tasks[:to_prune]:
+        for tid in expired:
             upload_tasks.pop(tid, None)
+            
+        # 2. If still exceeds max_tasks, prune oldest completed/failed
+        if len(upload_tasks) > max_tasks:
+            completed_or_failed = [
+                (tid, task.get("created_time", 0)) 
+                for tid, task in upload_tasks.items() 
+                if task.get("status") in ("completed", "failed")
+            ]
+            sorted_tasks = sorted(completed_or_failed, key=lambda x: x[1])
+            to_prune = len(upload_tasks) - max_tasks
+            for tid, _ in sorted_tasks[:to_prune]:
+                upload_tasks.pop(tid, None)
+
+_categories_cache: Optional[List[str]] = None
+_categories_cache_lock = threading.Lock()
+
+def get_cached_categories() -> List[str]:
+    """Get unique materials categories with in-memory caching."""
+    global _categories_cache
+    with _categories_cache_lock:
+        if _categories_cache is None:
+            conn = get_db_connection()
+            try:
+                cat_rows = conn.cursor().execute("SELECT DISTINCT category FROM materials WHERE category IS NOT NULL AND category != '' ORDER BY category ASC").fetchall()
+                _categories_cache = [c[0] for c in cat_rows]
+            finally:
+                conn.close()
+        return list(_categories_cache)
+
+def invalidate_categories_cache():
+    """Invalidate categories cache when materials table changes."""
+    global _categories_cache
+    with _categories_cache_lock:
+        _categories_cache = None
 
 class BindingModel(BaseModel):
     code: str
@@ -684,181 +884,148 @@ class FeedbackSubmitRequest(BaseModel):
     manual_code: str
     is_correct: bool
 
-upload_tasks = {}
+def _parse_and_prepare_upload_excel(task_id: str, temp_path: str) -> List[Dict[str, Any]]:
+    """CPU-bound Excel extraction running in executor (M1 unblocking)."""
+    wb = openpyxl.load_workbook(temp_path, data_only=True)
+    raw_rows = []
+    
+    def get_professional_by_sheet(sheet_name: str) -> str:
+        name_lower = sheet_name.lower()
+        if any(kw in name_lower for kw in ["装饰", "地材", "卷材", "橡胶", "pvc", "门", "手术室", "无影灯", "打胶", "自动门"]):
+            return "装饰"
+        if any(kw in name_lower for kw in ["强电", "动力", "照明", "变配电", "配电"]):
+            return "强电"
+        if any(kw in name_lower for kw in ["弱电", "智能化", "自控", "监控", "消防", "网络", "通信"]):
+            return "弱电"
+        if any(kw in name_lower for kw in ["给排水", "给水", "排水", "消火栓", "喷淋"]):
+            return "给排水"
+        if any(kw in name_lower for kw in ["暖通", "多联机", "空调", "通风"]):
+            return "暖通"
+        if any(kw in name_lower for kw in ["医气", "气体", "氧气", "吸引"]):
+            return "医气"
+        if any(kw in name_lower for kw in ["纯水", "水处理"]):
+            return "纯水"
+        return "暖通"
+        
+    exclude_kws = ["说明", "汇总", "商务部", "备用"]
+    update_task_progress(task_id, current_step="正在读取并解析 Excel 工作表...", structuring_progress=5)
+    
+    global_row_counter = 1
+    total_sheets = len(wb.sheetnames)
+    for s_idx, sheet_name in enumerate(wb.sheetnames):
+        if any(kw in sheet_name for kw in exclude_kws):
+            continue
+            
+        sheet = wb[sheet_name]
+        professional = get_professional_by_sheet(sheet_name)
+        
+        header_row = None
+        for r in range(1, 11):
+            if r > sheet.max_row:
+                break
+            row_vals = [sheet.cell(r, c).value for c in range(1, sheet.max_column + 1)]
+            row_strs = [str(x).strip() for x in row_vals if x is not None]
+            if any(x in ["*编码", "项目编码", "编码", "项目名称", "*名称", "名称"] for x in row_strs) and any("规格" in x or "特征" in x for x in row_strs):
+                header_row = r
+                break
+        
+        if not header_row:
+            code_idx, name_idx, spec_idx, unit_idx, qty_idx = 1, 2, 3, 4, 5
+            loss_idx, category_idx, brand_idx = None, None, None
+            start_r = 1
+        else:
+            start_r = header_row + 1
+            headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
+            code_idx = name_idx = spec_idx = unit_idx = qty_idx = loss_idx = category_idx = brand_idx = None
+            
+            for idx, h in enumerate(headers):
+                if not h: continue
+                h_str = str(h).strip()
+                if "编码" in h_str and code_idx is None: code_idx = idx + 1
+                elif "名称" in h_str and name_idx is None: name_idx = idx + 1
+                elif ("规格" in h_str or "特征" in h_str) and spec_idx is None: spec_idx = idx + 1
+                elif "单位" in h_str and unit_idx is None: unit_idx = idx + 1
+                elif h_str in ["*数量", "数量", "工程量"] and qty_idx is None: qty_idx = idx + 1
+                elif "损耗" in h_str and loss_idx is None: loss_idx = idx + 1
+                elif h_str in ["甲供材品类", "品类", "分类"] and category_idx is None: category_idx = idx + 1
+                elif "品牌" in h_str and brand_idx is None: brand_idx = idx + 1
+
+            if code_idx is None: code_idx = 1
+            if name_idx is None: name_idx = 2
+            if spec_idx is None: spec_idx = 3
+            if unit_idx is None: unit_idx = 4
+            if qty_idx is None: qty_idx = 5
+        
+        total_r = sheet.max_row
+        for r in range(start_r, total_r + 1):
+            val_b = sheet.cell(r, name_idx).value
+            val_c = sheet.cell(r, spec_idx).value
+            val_b_str = str(val_b or "").strip()
+            val_c_str = str(val_c or "").strip()
+            raw_unit = str(sheet.cell(r, unit_idx).value or "").strip() if unit_idx else ""
+            original_code = str(sheet.cell(r, code_idx).value or "").strip() if code_idx else ""
+
+            is_valid, _ = is_valid_query_item(val_b_str, val_c_str, raw_unit, original_code, r)
+            if not is_valid:
+                continue
+
+            unit_str = raw_unit or "台"
+            qty_val = sheet.cell(r, qty_idx).value
+            try: qty = float(qty_val) if qty_val is not None else 0.0
+            except ValueError: qty = 0.0
+
+            loss = 1.0
+            if loss_idx:
+                loss_val = sheet.cell(r, loss_idx).value
+                try: loss = float(loss_val) if loss_val is not None else 1.0
+                except ValueError: loss = 1.0
+
+            category = str(sheet.cell(r, category_idx).value or "").strip() if category_idx else ""
+            brand = str(sheet.cell(r, brand_idx).value or "").strip() if brand_idx else ""
+
+            raw_rows.append({
+                "row_idx": global_row_counter,
+                "code": original_code,
+                "name": val_b_str,
+                "specification": val_c_str,
+                "unit": unit_str,
+                "qty": qty,
+                "loss": loss,
+                "category": category,
+                "brand": brand,
+                "professional": professional
+            })
+            global_row_counter += 1
+
+        sheet_prog = min(95, int(5 + ((s_idx + 1) / total_sheets) * 90))
+        update_task_progress(task_id, structuring_progress=sheet_prog)
+
+    wb.close()
+    return raw_rows
 
 async def async_process_upload_task(task_id: str, temp_path: str):
+    matching_timeout = 120.0
     try:
-        wb = openpyxl.load_workbook(temp_path, data_only=True)
-        raw_rows = []
+        loop = asyncio.get_running_loop()
+        # M1: Offload CPU-bound openpyxl parsing to executor
+        raw_rows = await loop.run_in_executor(executor, _parse_and_prepare_upload_excel, task_id, temp_path)
         
-        # Helper to classify professional by sheet name
-        def get_professional_by_sheet(sheet_name: str) -> str:
-            name_lower = sheet_name.lower()
-            if any(kw in name_lower for kw in ["装饰", "地材", "卷材", "橡胶", "pvc", "门", "手术室", "无影灯", "打胶", "自动门"]):
-                return "装饰"
-            if any(kw in name_lower for kw in ["强电", "动力", "照明", "变配电", "配电"]):
-                return "强电"
-            if any(kw in name_lower for kw in ["弱电", "智能化", "自控", "监控", "消防", "网络", "通信"]):
-                return "弱电"
-            if any(kw in name_lower for kw in ["给排水", "给水", "排水", "消火栓", "喷淋"]):
-                return "给排水"
-            if any(kw in name_lower for kw in ["暖通", "多联机", "空调", "通风"]):
-                return "暖通"
-            if any(kw in name_lower for kw in ["医气", "气体", "氧气", "吸引"]):
-                return "医气"
-            if any(kw in name_lower for kw in ["纯水", "水处理"]):
-                return "纯水"
-            return "暖通" # Fallback
-            
-        exclude_kws = ["说明", "汇总", "商务部", "备用"]
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
         
-        # Phase 1: Structuring
-        upload_tasks[task_id]["current_step"] = "正在读取并解析 Excel 工作表..."
-        upload_tasks[task_id]["structuring_progress"] = 5
+        update_task_progress(
+            task_id,
+            structuring_progress=100,
+            current_step="Excel 清单数据解析完成，开始智能特征比对..."
+        )
         
-        global_row_counter = 1
-        total_sheets = len(wb.sheetnames)
-        for s_idx, sheet_name in enumerate(wb.sheetnames):
-            # Check sheet exclusion
-            if any(kw in sheet_name for kw in exclude_kws):
-                continue
-                
-            sheet = wb[sheet_name]
-            professional = get_professional_by_sheet(sheet_name)
-            
-            # Find the header row in first 10 rows
-            header_row = None
-            for r in range(1, 11):
-                if r > sheet.max_row:
-                    break
-                row_vals = [sheet.cell(r, c).value for c in range(1, sheet.max_column + 1)]
-                row_strs = [str(x).strip() for x in row_vals if x is not None]
-                if any(x in ["*编码", "项目编码", "编码", "项目名称", "*名称", "名称"] for x in row_strs) and any("规格" in x or "特征" in x for x in row_strs):
-                    header_row = r
-                    break
-            
-            if not header_row:
-                code_idx = 1
-                name_idx = 2
-                spec_idx = 3
-                unit_idx = 4
-                qty_idx = 5
-                loss_idx = None
-                category_idx = None
-                brand_idx = None
-                start_r = 1
-            else:
-                start_r = header_row + 1
-                headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
-                
-                code_idx = None
-                name_idx = None
-                spec_idx = None
-                unit_idx = None
-                qty_idx = None
-                loss_idx = None
-                category_idx = None
-                brand_idx = None
-                
-                for idx, h in enumerate(headers):
-                    if not h:
-                        continue
-                    h_str = str(h).strip()
-                    if "编码" in h_str and code_idx is None:
-                        code_idx = idx + 1
-                    elif "名称" in h_str and name_idx is None:
-                        name_idx = idx + 1
-                    elif ("规格" in h_str or "特征" in h_str) and spec_idx is None:
-                        spec_idx = idx + 1
-                    elif "单位" in h_str and unit_idx is None:
-                        unit_idx = idx + 1
-                    elif h_str in ["*数量", "数量", "工程量"] and qty_idx is None:
-                        qty_idx = idx + 1
-                    elif "损耗" in h_str and loss_idx is None:
-                        loss_idx = idx + 1
-                    elif h_str in ["甲供材品类", "品类", "分类"] and category_idx is None:
-                        category_idx = idx + 1
-                    elif "品牌" in h_str and brand_idx is None:
-                        brand_idx = idx + 1
-
-                if code_idx is None: code_idx = 1
-                if name_idx is None: name_idx = 2
-                if spec_idx is None: spec_idx = 3
-                if unit_idx is None: unit_idx = 4
-                if qty_idx is None: qty_idx = 5
-            
-            # Extract data rows
-            total_r = sheet.max_row
-            for r in range(start_r, total_r + 1):
-                val_b = sheet.cell(r, name_idx).value
-                val_c = sheet.cell(r, spec_idx).value
-                val_b_str = str(val_b or "").strip()
-                val_c_str = str(val_c or "").strip()
-                raw_unit = str(sheet.cell(r, unit_idx).value or "").strip() if unit_idx else ""
-
-                original_code = ""
-                if code_idx:
-                    original_code = str(sheet.cell(r, code_idx).value or "").strip()
-
-                is_valid, _ = is_valid_query_item(val_b_str, val_c_str, raw_unit, original_code, r)
-                if not is_valid:
-                    continue
-
-                unit_str = raw_unit or "台"
-
-                qty_val = sheet.cell(r, qty_idx).value
-                try:
-                    qty = float(qty_val) if qty_val is not None else 0.0
-                except ValueError:
-                    qty = 0.0
-
-                loss = 1.0
-                if loss_idx:
-                    loss_val = sheet.cell(r, loss_idx).value
-                    try:
-                        loss = float(loss_val) if loss_val is not None else 1.0
-                    except ValueError:
-                        loss = 1.0
-
-                category = ""
-                if category_idx:
-                    category = str(sheet.cell(r, category_idx).value or "").strip()
-
-                brand = ""
-                if brand_idx:
-                    brand = str(sheet.cell(r, brand_idx).value or "").strip()
-
-                raw_rows.append({
-                    "row_idx": global_row_counter,
-                    "code": original_code,
-                    "name": val_b_str,
-                    "specification": val_c_str,
-                    "unit": unit_str,
-                    "qty": qty,
-                    "loss": loss,
-                    "category": category,
-                    "brand": brand,
-                    "professional": professional
-                })
-                global_row_counter += 1
-
-            # Update sheet level progress
-            sheet_prog = min(95, int(5 + ((s_idx + 1) / total_sheets) * 90))
-            upload_tasks[task_id]["structuring_progress"] = sheet_prog
-
-        wb.close()
-        os.remove(temp_path)
-        
-        upload_tasks[task_id]["structuring_progress"] = 100
-        upload_tasks[task_id]["current_step"] = "Excel 清单数据解析完成，开始智能特征比对..."
-        
-        # Track active matching in memory monitor and increment processed rows stat
         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=len(raw_rows), status="processing", current_step="正在智能清洗与特征比对...")
         increment_stat_counter("total_processed_rows", len(raw_rows))
         
-        # Batch match matching rows with dynamic timeout guard to support large lists (min 120s) (P0-4)
         matching_timeout = max(120.0, len(raw_rows) * 1.5)
-        loop = asyncio.get_running_loop()
         parsed_rows = await asyncio.wait_for(
             loop.run_in_executor(executor, batch_match_rows, raw_rows, task_id),
             timeout=matching_timeout
@@ -867,52 +1034,72 @@ async def async_process_upload_task(task_id: str, temp_path: str):
         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="completed")
         log_audit_event(username="system", action="智能比对完成", details=f"成功完成 {len(raw_rows)} 行清单特征清洗与智能匹配")
         
-        upload_tasks[task_id]["status"] = "completed"
-        upload_tasks[task_id]["result"] = parsed_rows
-        upload_tasks[task_id]["current_step"] = "所有清单项目已智能比对匹配完成！"
+        update_task_progress(
+            task_id,
+            status="completed",
+            result=parsed_rows,
+            current_step="所有清单项目已智能比对匹配完成！"
+        )
         
     except asyncio.TimeoutError:
         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
         if os.path.exists(temp_path):
-            try:
-                os.remove(temp_path)
-            except Exception:
-                pass
+            try: os.remove(temp_path)
+            except Exception: pass
         logger.error(f"Async upload task {task_id} timed out after {matching_timeout:.1f}s.")
-        upload_tasks[task_id]["status"] = "failed"
-        upload_tasks[task_id]["error"] = f"清单处理超时（超过 {matching_timeout:.1f} 秒），已自动终止。"
-        upload_tasks[task_id]["current_step"] = f"处理超时: 超过 {matching_timeout:.1f} 秒"
+        update_task_progress(
+            task_id,
+            status="failed",
+            error=f"清单处理超时（超过 {matching_timeout:.1f} 秒），已自动终止。",
+            current_step=f"处理超时: 超过 {matching_timeout:.1f} 秒"
+        )
     except Exception as e:
         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
         if os.path.exists(temp_path):
-            try:
-                os.remove(temp_path)
-            except Exception:
-                pass
+            try: os.remove(temp_path)
+            except Exception: pass
         logger.error(f"Error during async process upload task: {e}")
-        upload_tasks[task_id]["status"] = "failed"
-        upload_tasks[task_id]["error"] = str(e)
-        upload_tasks[task_id]["current_step"] = f"处理出错: {str(e)}"
+        update_task_progress(
+            task_id,
+            status="failed",
+            error=str(e),
+            current_step=f"处理出错: {str(e)}"
+        )
+
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB limit
 
 @app.post("/api/upload")
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), current_user: dict = Depends(require_employee)):
+async def upload_file(request: Request, background_tasks: BackgroundTasks, file: UploadFile = File(...), current_user: dict = Depends(require_employee)):
     """
     Upload original list and start high performance batch matching background task.
     """
     if not file.filename.endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
         
+    # Check Content-Length header first if present
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="文件大小超出限制（最大允许 50MB）。")
+        
     safe_filename = os.path.basename(file.filename)
     logger.info(f"Received query list Excel upload: {safe_filename} by user {current_user.get('username')}")
     file_id = str(uuid.uuid4())
     temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{safe_filename}")
     
+    total_written = 0
     with open(temp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+            total_written += len(chunk)
+            if total_written > MAX_UPLOAD_SIZE:
+                buffer.close()
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                raise HTTPException(status_code=413, detail="文件大小超出限制（最大允许 50MB）。")
+            buffer.write(chunk)
         
     clean_expired_upload_tasks()
     task_id = str(uuid.uuid4())
-    upload_tasks[task_id] = {
+    set_task_initial(task_id, {
         "status": "processing",
         "created_time": time.time(),
         "structuring_progress": 0,
@@ -921,7 +1108,7 @@ async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File
         "current_step": "正在初始化后台比对任务...",
         "result": None,
         "error": None
-    }
+    })
     
     log_audit_event(
         username=current_user["username"],
@@ -939,9 +1126,10 @@ async def get_upload_status(task_id: str):
     """
     Query current upload process progress status.
     """
-    if task_id not in upload_tasks:
+    task = get_task_status(task_id)
+    if not task:
         raise HTTPException(status_code=404, detail="指定任务不存在")
-    return JSONResponse(content=upload_tasks[task_id])
+    return JSONResponse(content=task)
 
 ENABLE_SERIES_RERUN = os.getenv("ENABLE_SERIES_RERUN", "false").lower() == "true"
 
@@ -961,7 +1149,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
 
     # Step 1: Pre-process all rows
     if task_id:
-        upload_tasks[task_id]["current_step"] = "正在对清单特征参数进行清洗与解析..."
+        update_task_progress(task_id, current_step="正在对清单特征参数进行清洗与解析...")
     
     logger.debug("Step 1: Preprocessing query parameters...")
     preprocessed_rows = []
@@ -982,13 +1170,12 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
         })
         
         if task_id and idx % 5 == 0:
-            upload_tasks[task_id]["current_step"] = f"【解析特征】 {raw_name[:25]} ({idx}/{total_items})"
+            update_task_progress(task_id, current_step=f"【解析特征】 {raw_name[:25]} ({idx}/{total_items})")
     logger.debug(f"Preprocessing completed for {len(preprocessed_rows)} rows.")
 
     # Step 2: Batch Vectorization (Encoding)
     if task_id:
-        upload_tasks[task_id]["current_step"] = "正在生成文本语义特征（向量化中）..."
-        upload_tasks[task_id]["vectorization_progress"] = 0
+        update_task_progress(task_id, current_step="正在生成文本语义特征（向量化中）...", vectorization_progress=0)
 
     logger.debug("Step 2: Batch encoding...")
     from app.vector_index import index_manager
@@ -1009,18 +1196,16 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
             
             if task_id:
                 vect_progress = min(100, int(((idx + len(chunk)) / total_items) * 100))
-                upload_tasks[task_id]["vectorization_progress"] = vect_progress
-                upload_tasks[task_id]["current_step"] = f"【特征提取】 {chunk[0]['real_name'][:25]} ({idx + len(chunk)}/{total_items})"
+                update_task_progress(task_id, vectorization_progress=vect_progress, current_step=f"【特征提取】 {chunk[0]['real_name'][:25]} ({idx + len(chunk)}/{total_items})")
     else:
         logger.debug("Vector index not enabled. Skipping vector encoding.")
         if task_id:
-            upload_tasks[task_id]["vectorization_progress"] = 100
+            update_task_progress(task_id, vectorization_progress=100)
     logger.debug("Encoding completed.")
 
     # Step 3: Fast Matching (Search & Score)
     if task_id:
-        upload_tasks[task_id]["current_step"] = "正在与标准库进行高精匹配与重打分..."
-        upload_tasks[task_id]["matching_progress"] = 0
+        update_task_progress(task_id, current_step="正在与标准库进行高精匹配与重打分...", matching_progress=0)
 
     logger.debug("Step 3: Sequential matching...")
     # Process in chunks of 500 for matching and series rank boosting
@@ -1050,8 +1235,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
         for offset, (q_info, q_vector, item) in enumerate(match_jobs):
             current_idx = idx + offset + 1
             if task_id:
-                upload_tasks[task_id]["current_step"] = f"【智能匹配】 {q_info['name'][:25]} ({current_idx}/{total_items})"
-                upload_tasks[task_id]["matching_progress"] = min(100, int((current_idx / total_items) * 100))
+                update_task_progress(task_id, current_step=f"【智能匹配】 {q_info['name'][:25]} ({current_idx}/{total_items})", matching_progress=min(100, int((current_idx / total_items) * 100)))
             
             logger.debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
             t_start_match = time.time()
@@ -1176,8 +1360,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
         
         if task_id:
             match_progress = min(100, int(((idx + len(chunk)) / total_items) * 100))
-            upload_tasks[task_id]["matching_progress"] = match_progress
-            upload_tasks[task_id]["current_step"] = f"正在与企业标准库进行深度比对与打分... ({idx + len(chunk)}/{total_items})"
+            update_task_progress(task_id, matching_progress=match_progress, current_step=f"正在与企业标准库进行深度比对与打分... ({idx + len(chunk)}/{total_items})")
             
     logger.debug("batch_match_rows completed.")
     return total_results
@@ -1203,7 +1386,8 @@ async def api_batch_match(payload: Dict[str, Any]):
             "brand": ""
         })
         
-    results = batch_match_rows(raw_rows)
+    loop = asyncio.get_running_loop()
+    results = await loop.run_in_executor(executor, batch_match_rows, raw_rows)
     return JSONResponse(content={"results": results})
 
 @app.post("/api/match", dependencies=[Depends(require_employee)])
@@ -1225,7 +1409,8 @@ async def api_match_single(payload: Dict[str, Any]):
     if "parsed_spec" in payload:
         query_info["parsed_spec"] = payload["parsed_spec"]
         
-    res = match_item(query_info)
+    loop = asyncio.get_running_loop()
+    res = await loop.run_in_executor(executor, match_item, query_info)
     return JSONResponse(content=res)
 
 @app.post("/api/rematch")
@@ -1268,7 +1453,8 @@ async def api_rematch(req: RematchRequest, current_user: dict = Depends(require_
         "parsed_spec": parsed
     }
     
-    res = match_item(query_info)
+    loop = asyncio.get_running_loop()
+    res = await loop.run_in_executor(executor, match_item, query_info)
     
     log_audit_event(
         username=current_user["username"],
@@ -2071,42 +2257,39 @@ _db_import_lock = threading.Lock()
 def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str, disable_mode: str = "on_expire"):
     try:
         logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}, DisableMode: {disable_mode}")
-        upload_tasks[task_id]["current_step"] = "正在解析并清洗物料数据..."
-        upload_tasks[task_id]["structuring_progress"] = 10
+        invalidate_categories_cache()
+        update_task_progress(task_id, current_step="正在解析并清洗物料数据...", structuring_progress=10)
         
         # Import to SQLite
         from app.db_manager import import_materials_from_excel, get_db_connection
         meta = import_materials_from_excel(temp_path, mode, filename, task_id=task_id, disable_mode=disable_mode)
         
-        upload_tasks[task_id]["structuring_progress"] = 100
-        upload_tasks[task_id]["current_step"] = "物料数据结构化完成，开始重建向量索引..."
-        upload_tasks[task_id]["vectorization_progress"] = 10
+        update_task_progress(task_id, structuring_progress=100, current_step="物料数据结构化完成，开始重建向量索引...", vectorization_progress=10)
         
         # Reload vector index mapping & index from sqlite
         conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT code, name, specification, category FROM materials")
-        materials = [dict(row) for row in cursor.fetchall()]
-        conn.close()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT code, name, specification, category FROM materials")
+            materials = [dict(row) for row in cursor.fetchall()]
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
         
-        upload_tasks[task_id]["current_step"] = f"正在为 {len(materials)} 项物料生成向量特征并重建索引..."
-        upload_tasks[task_id]["vectorization_progress"] = 30
+        update_task_progress(task_id, current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...", vectorization_progress=30)
         
         # Rebuild vector index
         index_manager.build_index(materials, task_id=task_id)
         index_manager.save_cache()
+        invalidate_categories_cache()
         logger.info("Vector index rebuilt and saved successfully.")
         
-        upload_tasks[task_id]["vectorization_progress"] = 100
-        upload_tasks[task_id]["matching_progress"] = 100
-        upload_tasks[task_id]["status"] = "completed"
-        upload_tasks[task_id]["result"] = meta
-        upload_tasks[task_id]["current_step"] = "标准物料数据库导入及向量索引重建全部完成！"
+        update_task_progress(task_id, vectorization_progress=100, matching_progress=100, status="completed", result=meta, current_step="标准物料数据库导入及向量索引重建全部完成！")
     except Exception as e:
         logger.error(f"Error during async process db upload task: {e}")
-        upload_tasks[task_id]["status"] = "failed"
-        upload_tasks[task_id]["error"] = str(e)
-        upload_tasks[task_id]["current_step"] = f"导入出错: {str(e)}"
+        update_task_progress(task_id, status="failed", error=str(e), current_step=f"导入出错: {str(e)}")
     finally:
         try:
             _db_import_lock.release()
@@ -2139,7 +2322,7 @@ async def api_db_upload(
         shutil.copyfileobj(file.file, f)
         
     task_id = str(uuid.uuid4())
-    upload_tasks[task_id] = {
+    set_task_initial(task_id, {
         "status": "processing",
         "structuring_progress": 0,
         "vectorization_progress": 0,
@@ -2147,12 +2330,12 @@ async def api_db_upload(
         "current_step": "正在初始化后台物料库导入任务...",
         "result": None,
         "error": None
-    }
+    })
     
     background_tasks.add_task(async_process_db_upload_task, task_id, temp_path, mode, file.filename, disable_mode)
     return JSONResponse(content={"task_id": task_id})
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class ReparseRequest(BaseModel):
@@ -2194,6 +2377,7 @@ async def api_db_reparse(background_tasks: BackgroundTasks, req: Optional[Repars
             # Hot reload FAISS memory cache in current running server process
             logger.info("Hot reloading vector index in running process...")
             index_manager.load_cache()
+            invalidate_categories_cache()
             logger.info("Hot reload completed successfully.")
         except Exception as e:
             logger.error(f"Error during background database reparse: {e}")

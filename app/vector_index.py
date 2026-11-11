@@ -197,34 +197,42 @@ class VectorIndexManager:
         mapping_file = os.path.join(CACHE_DIR, "index_to_material.json")
         meta_file = os.path.join(CACHE_DIR, "cache_metadata.json")
         
+        with self._lock:
+            cur_materials = list(self.index_to_material)
+            cur_embeddings = self.numpy_embeddings.copy() if self.numpy_embeddings is not None else None
+            cur_faiss = self.faiss_index
+            cur_use_faiss = self.use_faiss
+            cur_model_name = self.model_name_or_path
+            cur_dim = self.embedding_dim
+
         try:
             with open(mapping_file, "w", encoding="utf-8") as f:
-                json.dump(self.index_to_material, f, ensure_ascii=False, indent=4)
+                json.dump(cur_materials, f, ensure_ascii=False, indent=4)
                 
-            if self.use_faiss and self.faiss_index is not None:
-                faiss.write_index(self.faiss_index, index_file)
+            if cur_use_faiss and cur_faiss is not None:
+                faiss.write_index(cur_faiss, index_file)
                 
-            if self.numpy_embeddings is not None:
-                np.save(npy_file, self.numpy_embeddings)
+            if cur_embeddings is not None:
+                np.save(npy_file, cur_embeddings)
 
             # Write cache metadata
             metadata = {
-                "model_name": self.model_name_or_path,
-                "dimension": self.embedding_dim,
-                "item_count": len(self.index_to_material),
+                "model_name": cur_model_name,
+                "dimension": cur_dim,
+                "item_count": len(cur_materials),
                 "timestamp": time.time(),
                 "time_str": time.strftime("%Y-%m-%d %H:%M:%S")
             }
             with open(meta_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, ensure_ascii=False, indent=4)
 
-            print(f"Saved vector index and mapping cache for model [{self.model_name_or_path}] (dim={self.embedding_dim}).")
+            print(f"Saved vector index and mapping cache for model [{cur_model_name}] (dim={cur_dim}).")
         except Exception as e:
             print(f"Error saving vector cache: {e}")
 
     def build_index(self, materials: List[Dict[str, Any]], task_id: Optional[str] = None):
         """
-        Build index from scratch.
+        Build index from scratch using shadow swap (R1 Concurrency safe).
         materials: List of Dict containing 'code', 'name', 'specification', 'category'
         """
         if not self.is_enabled:
@@ -233,10 +241,11 @@ class VectorIndexManager:
         print(f"Building vector index for {len(materials)} materials with model [{self.model_name_or_path}] (dim={self.embedding_dim})...")
         start_time = time.time()
         
-        self.index_to_material = []
+        # Build new mappings and texts without mutating current active index
+        new_index_to_material = []
         texts = []
         for m in materials:
-            self.index_to_material.append({
+            new_index_to_material.append({
                 "code": m["code"],
                 "name": m["name"],
                 "specification": m["specification"],
@@ -246,7 +255,6 @@ class VectorIndexManager:
             texts.append(f"{m['name']} {m['specification']}".strip())
 
         # Encode all texts in chunked batches to report progress
-        self.numpy_embeddings = None
         embeddings_list = []
         chunk_size = 1000
         total_items = len(texts)
@@ -261,31 +269,38 @@ class VectorIndexManager:
             
             if task_id:
                 try:
-                    from app.server import upload_tasks
-                    if task_id in upload_tasks:
-                        prog = min(95, int(10 + ((idx + len(chunk_texts)) / total_items) * 85))
-                        upload_tasks[task_id]["vectorization_progress"] = prog
-                        upload_tasks[task_id]["current_step"] = f"正在重建向量特征: ({idx + len(chunk_texts)}/{total_items})"
+                    from app.server import update_task_progress
+                    prog = min(95, int(10 + ((idx + len(chunk_texts)) / total_items) * 85))
+                    update_task_progress(task_id, vectorization_progress=prog, current_step=f"正在重建向量特征: ({idx + len(chunk_texts)}/{total_items})")
                 except Exception as e:
                     print(f"Error updating task progress in build_index: {e}")
 
         if embeddings_list:
-            embeddings = np.vstack(embeddings_list)
-            self.numpy_embeddings = embeddings
+            new_numpy_embeddings = np.vstack(embeddings_list)
         else:
             print("Error: No embeddings generated. Index not built.")
             return
         
-        if self.use_faiss:
+        new_faiss_index = None
+        new_use_faiss = False
+        if HAS_FAISS:
             try:
-                self.faiss_index = faiss.IndexFlatIP(self.embedding_dim)
-                self.faiss_index.add(embeddings)
+                new_faiss_index = faiss.IndexFlatIP(self.embedding_dim)
+                new_faiss_index.add(new_numpy_embeddings)
+                new_use_faiss = True
                 print(f"FAISS index built in {time.time() - start_time:.2f}s.")
             except Exception as e:
                 print(f"Error building FAISS index: {e}. Falling back to Numpy.")
-                self.use_faiss = False
+                new_use_faiss = False
         else:
             print(f"Numpy index built in {time.time() - start_time:.2f}s.")
+
+        # Shadow Index Atomic Swap (R1)
+        with self._lock:
+            self.index_to_material = new_index_to_material
+            self.numpy_embeddings = new_numpy_embeddings
+            self.faiss_index = new_faiss_index
+            self.use_faiss = new_use_faiss
 
         self.save_cache()
 
@@ -295,36 +310,34 @@ class VectorIndexManager:
             return
             
         code = material["code"]
-        # Check if already exists, if so, we can skip or replace.
-        # For simplicity, we append it.
         text = f"{material['name']} {material['specification']}".strip()
-        vector = self.encode_single_query(text)
+        vector = self.encode_text(text)
         if vector is None:
             return
 
-        # Append to mapping
-        self.index_to_material.append({
-            "code": code,
-            "name": material["name"],
-            "specification": material["specification"],
-            "category": material["category"]
-        })
-
         vector_expanded = np.expand_dims(vector, axis=0)
 
-        # Update FAISS
-        if self.use_faiss and self.faiss_index is not None:
-            try:
-                self.faiss_index.add(vector_expanded)
-            except Exception as e:
-                print(f"Error adding to FAISS index: {e}. Disabling FAISS.")
-                self.use_faiss = False
+        with self._lock:
+            self.index_to_material.append({
+                "code": material["code"],
+                "name": material["name"],
+                "specification": material["specification"],
+                "category": material.get("category", "")
+            })
 
-        # Update Numpy array
-        if self.numpy_embeddings is not None:
-            self.numpy_embeddings = np.vstack([self.numpy_embeddings, vector_expanded])
-        else:
-            self.numpy_embeddings = vector_expanded
+            # Update FAISS
+            if self.use_faiss and self.faiss_index is not None:
+                try:
+                    self.faiss_index.add(vector_expanded)
+                except Exception as e:
+                    print(f"Error adding to FAISS index: {e}. Disabling FAISS.")
+                    self.use_faiss = False
+
+            # Update Numpy array
+            if self.numpy_embeddings is not None:
+                self.numpy_embeddings = np.vstack([self.numpy_embeddings, vector_expanded])
+            else:
+                self.numpy_embeddings = vector_expanded
 
         self.save_cache()
 
@@ -334,57 +347,47 @@ class VectorIndexManager:
         query_vector: normalized 1D embedding array.
         Returns: List of (material_dict, similarity_score)
         """
-        import time
-        def log_vector_debug(msg: str):
-            try:
-                with open("c:/Users/wangd/project/ListTrans/ListTrans/logs/debug_match.log", "a", encoding="utf-8") as f:
-                    f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - VECTOR: {msg}\n")
-            except Exception:
-                pass
-
         if query_vector is None:
             return []
             
+        with self._lock:
+            use_faiss = self.use_faiss
+            faiss_idx = self.faiss_index
+            numpy_embs = self.numpy_embeddings
+            materials = self.index_to_material
+
         results = []
-        
         # Ensure query_vector is 2D for search
         q_vec = np.expand_dims(query_vector, axis=0) if query_vector.ndim == 1 else query_vector
 
-        if self.use_faiss and self.faiss_index is not None:
+        if use_faiss and faiss_idx is not None:
             try:
-                scores, indices = self.faiss_index.search(q_vec, min(top_k, self.faiss_index.ntotal))
+                scores, indices = faiss_idx.search(q_vec, min(top_k, faiss_idx.ntotal))
                 for score, idx in zip(scores[0], indices[0]):
-                    if idx < 0 or idx >= len(self.index_to_material):
+                    if idx < 0 or idx >= len(materials):
                         continue
-                    results.append((self.index_to_material[idx], float(score)))
+                    results.append((materials[idx], float(score)))
                 return results
             except Exception as e:
-                log_vector_debug(f"Error during FAISS search: {e}. Falling back to Numpy.")
-                self.use_faiss = False
+                # Fallback to Numpy if FAISS fails
+                pass
 
-        if self.numpy_embeddings is not None:
+        if numpy_embs is not None:
             try:
-                # Compute dot product (since vectors are normalized, this is cosine similarity)
-                # numpy_embeddings shape: (N, 384), query_vector shape: (384,)
+                # Compute dot product (cosine similarity since normalized)
                 q_vec_1d = query_vector.squeeze()
-                
-                log_vector_debug(f"Starting np.einsum computation with shape {self.numpy_embeddings.shape}...")
-                t0 = time.time()
-                # Use np.einsum to avoid OpenBLAS/MKL thread pool deadlocks in background threads while keeping 6x speedup over element-wise sum
-                scores = np.einsum('ij,j->i', self.numpy_embeddings, q_vec_1d)
-                log_vector_debug(f"np.einsum computation completed in {time.time() - t0:.4f}s.")
+                scores = np.einsum('ij,j->i', numpy_embs, q_vec_1d)
                 
                 # Get top_k indices sorted descending
-                top_k = min(top_k, len(scores))
-                top_indices = np.argpartition(scores, -top_k)[-top_k:]
-                # Sort the partition
+                k = min(top_k, len(scores))
+                top_indices = np.argpartition(scores, -k)[-k:]
                 top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
                 
                 for idx in top_indices:
-                    results.append((self.index_to_material[idx], float(scores[idx])))
+                    results.append((materials[idx], float(scores[idx])))
                 return results
             except Exception as e:
-                log_vector_debug(f"Error during Numpy search: {e}")
+                pass
                 
         return []
 

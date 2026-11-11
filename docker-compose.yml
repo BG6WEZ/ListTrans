@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   matcher-app:
-    image: material-matcher:v0.0.9
+    build: .
+    image: material-matcher:v0.1.4
     container_name: material-matcher
     ports:
       - "18080:18080"
@@ -10,17 +9,9 @@ services:
     env_file:
       - .env
     volumes:
-      # 持久化上传目录
-      - ./app/uploads:/app/app/uploads
-      # 持久化物料基础数据库
-      - ./app/materials.db:/app/app/materials.db
-      # 持久化用户及系统配置数据库
-      - ./app/auth.db:/app/app/auth.db
-      # 持久化向量索引缓存
-      - ./app/vector_cache:/app/app/vector_cache
-      # 挂载前端与核心代码目录以确保运行最新版本
-      - ./web:/app/web
+      # 挂载核心应用及持久化数据目录（包含 uploads, materials.db, auth.db, vector_cache）
       - ./app:/app/app
+      - ./web:/app/web
       - ./config:/app/config
       - ./model_offline:/app/model_offline
       # 持久化日志输出

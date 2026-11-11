@@ -26,10 +26,13 @@ AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), "auth.db")
 # JWT configuration
 # Security fix (P1-3): Remove predictable hardcoded default key; load from env or auto-generate a secure random 256-bit key
 SECRET_KEY = os.getenv("SECRET_KEY")
+APP_ENV = os.getenv("APP_ENV", "production").lower()
 if not SECRET_KEY:
+    if APP_ENV in ("production", "prod"):
+        security_logger.warning("No SECRET_KEY set in production environment. A persistent SECRET_KEY should be set in .env to prevent session invalidation on restart.")
     import secrets
     SECRET_KEY = secrets.token_hex(32)
-    security_logger.warning("No SECRET_KEY set in environment. Generated secure session ephemeral key.")
+    security_logger.info("Generated secure session ephemeral key for authentication.")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
@@ -80,14 +83,49 @@ def init_auth_db():
         ("dept3", "TEXT"),
         ("employee_no", "TEXT"),
         ("position", "TEXT"),
-        ("phone", "TEXT")
+        ("phone", "TEXT"),
+        ("need_emp_no_setup", "INTEGER DEFAULT 0")
     ]
-    for col_name, col_type in new_cols:
+    for col_info in new_cols:
+        col_name = col_info[0]
+        col_type = col_info[1]
         if col_name not in user_cols:
             try:
                 cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 security_logger.error(f"Failed to add column {col_name} to users table: {e}")
+
+    # =========================================================================
+    # Phase 2: Schema Migration & Data Backfill for Immutable employee_no
+    # =========================================================================
+    try:
+        # 1. Backfill admin employee_no with fixed SYS_ADMIN
+        cursor.execute("""
+            UPDATE users SET employee_no = 'SYS_ADMIN'
+            WHERE username = 'admin' AND (employee_no IS NULL OR TRIM(employee_no) = '')
+        """)
+
+        # 2. Backfill empty employee_no with EMP_xxxx and mark need_emp_no_setup=1 (R4)
+        empty_rows = cursor.execute("""
+            SELECT id FROM users WHERE employee_no IS NULL OR TRIM(employee_no) = '' ORDER BY id ASC
+        """).fetchall()
+        for row in empty_rows:
+            uid = row["id"]
+            emp_val = f"EMP_{uid:04d}"
+            cursor.execute("UPDATE users SET employee_no = ?, need_emp_no_setup = 1 WHERE id = ?", (emp_val, uid))
+
+        # 3. Create unique index on employee_no to enforce immutability & uniqueness at DB level
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_employee_no ON users(employee_no)")
+        
+        # 4. Create unique index on username
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)")
+        
+        # 5. Create partial unique index on phone (allowing null/empty without conflict)
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_phone ON users(phone) WHERE phone IS NOT NULL AND phone != ''")
+        conn.commit()
+    except Exception as e:
+        security_logger.error(f"Failed during employee_no schema migration: {e}")
+        raise RuntimeError(f"FATAL: Database employee_no unique schema migration failed: {e}")
 
     # Create login_attempts table for security rate limiting
     cursor.execute("""
@@ -102,11 +140,22 @@ def init_auth_db():
     conn.commit()
     
     # Check and insert default admin account
-    cursor.execute("SELECT id FROM users WHERE role = 'admin' LIMIT 1")
-    admin_exists = cursor.fetchone() is not None
-    if not admin_exists:
+    cursor.execute("SELECT id, password_hash FROM users WHERE role = 'admin' LIMIT 1")
+    admin_row = cursor.fetchone()
+    if admin_row is None:
         admin_user = os.getenv("ADMIN_USERNAME", "admin")
-        admin_pass = os.getenv("ADMIN_PASSWORD", "admin")
+        admin_pass = os.getenv("ADMIN_PASSWORD")
+        if not admin_pass:
+            if APP_ENV in ("production", "prod"):
+                security_logger.error("ADMIN_PASSWORD not set in production. Generating secure random initialization password.")
+                import secrets
+                admin_pass = secrets.token_urlsafe(16)
+                security_logger.warning(f"===========================================================")
+                security_logger.warning(f"  INITIAL ADMIN CREATED: username='{admin_user}'")
+                security_logger.warning(f"  INITIAL ADMIN ONE-TIME PASSWORD: '{admin_pass}'")
+                security_logger.warning(f"===========================================================")
+            else:
+                admin_pass = "admin"
         hashed_pass = get_password_hash(admin_pass)
         
         try:
@@ -117,13 +166,19 @@ def init_auth_db():
             conn.commit()
             security_logger.info(f"Default admin account '{admin_user}' initialized successfully.")
         except sqlite3.IntegrityError:
-            # If the user 'admin' exists but doesn't have admin role, promote them
             cursor.execute(
                 "UPDATE users SET role = 'admin', password_hash = ? WHERE username = ?",
                 (hashed_pass, admin_user)
             )
             conn.commit()
             security_logger.info(f"Existing account '{admin_user}' promoted to admin.")
+    else:
+        # R2 Safety check: warn if admin is still using default weak password
+        try:
+            if verify_password("admin", admin_row["password_hash"]):
+                security_logger.warning("SECURITY ALERT: Admin account is still using default weak password 'admin'. Please change it immediately via profile settings.")
+        except Exception:
+            pass
             
     conn.close()
     
@@ -202,24 +257,40 @@ def import_users_from_excel(excel_path: Optional[str] = None, default_password: 
             
         username = phone  # 手机号即为登录账号
         
-        cursor.execute("SELECT id FROM users WHERE username = ? OR phone = ?", (username, phone))
-        existing = cursor.fetchone()
+        # Phase 2: In personnel Excel import, employee_no is the PRIMARY UNIQUE KEY
+        # If employee_no is provided, match by employee_no first, then phone
+        existing = None
+        if employee_no:
+            cursor.execute("SELECT id, username FROM users WHERE employee_no = ?", (employee_no,))
+            existing = cursor.fetchone()
+            
+        if not existing and phone:
+            cursor.execute("SELECT id, username FROM users WHERE phone = ?", (phone,))
+            existing = cursor.fetchone()
         
         if existing:
+            # When updating existing user from Excel, NEVER overwrite customized username or password_hash!
+            # If employee_no was missing, update it; otherwise preserve existing employee_no
             cursor.execute("""
                 UPDATE users SET 
                     name = ?, dept1 = ?, dept2 = ?, dept3 = ?,
-                    employee_no = ?, position = ?, phone = ?, role = ?
+                    position = ?, phone = ?, role = ?
                 WHERE id = ?
-            """, (name, dept1, dept2, dept3, employee_no, position, phone, role, existing["id"]))
+            """, (name, dept1, dept2, dept3, position, phone, role, existing["id"]))
             updated_count += 1
         else:
+            # Generate default employee_no if empty in Excel
+            emp_to_insert = employee_no
+            need_setup = 0
+            if not emp_to_insert:
+                emp_to_insert = f"EMP_TEMP_{phone}"
+                need_setup = 1
             cursor.execute("""
                 INSERT INTO users (
                     username, password_hash, name, dept1, dept2, dept3,
-                    employee_no, position, phone, role, is_active
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-            """, (username, default_hash, name, dept1, dept2, dept3, employee_no, position, phone, role))
+                    employee_no, position, phone, role, is_active, need_emp_no_setup
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+            """, (username, default_hash, name, dept1, dept2, dept3, emp_to_insert, position, phone, role, need_setup))
             imported_count += 1
             
     conn.commit()
@@ -265,11 +336,21 @@ def verify_access_token(token: str) -> Optional[dict]:
 
 # User functions
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    """Retrieve user by username, employee_no, or phone (multi-credential lookup)."""
     conn = get_auth_connection()
     cursor = conn.cursor()
     u = username.strip()
-    cursor.execute("SELECT * FROM users WHERE username = ? OR phone = ?", (u, u))
+    # 1. Match by exact username
+    cursor.execute("SELECT * FROM users WHERE username = ?", (u,))
     row = cursor.fetchone()
+    if not row:
+        # 2. Match by exact employee_no
+        cursor.execute("SELECT * FROM users WHERE employee_no = ?", (u,))
+        row = cursor.fetchone()
+    if not row:
+        # 3. Match by exact phone
+        cursor.execute("SELECT * FROM users WHERE phone = ?", (u,))
+        row = cursor.fetchone()
     conn.close()
     return dict(row) if row else None
 
