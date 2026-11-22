@@ -1,0 +1,744 @@
+--- R03/app/binding_decisions.py
++++ R04/app/binding_decisions.py
+@@ -16,6 +16,7 @@
+ """
+ import hashlib
+ import json
++import math
+ import re
+ from typing import Any, Dict, List, Optional
+ 
+@@ -356,6 +357,148 @@
+     return None
+ 
+ 
++UNIT_EVIDENCE_VERSION = "r04-v1"
++UNIT_EVIDENCE_SOURCE = "server_live_material"
++_AUTHORITATIVE_UNIT_EVIDENCE_KEYS = (
++    "confirmed_unit",
++    "confirmed_orig_unit",
++    "confirmed_orig_qty",
++    "confirmed_unit_mult",
++    "confirmed_unit_source",
++    "confirmed_unit_version",
++)
++
++
++def _to_strict_positive_float(value: Any) -> Optional[float]:
++    """仅接受严格有限正数值（拒绝 bool/字符串/集合/NaN/<=0）。"""
++    if isinstance(value, bool) or not isinstance(value, (int, float)):
++        return None
++    f = float(value)
++    if not math.isfinite(f) or f <= 0:
++        return None
++    return f
++
++
++def _validate_saved_binding_unit_evidence(
++    row: Dict[str, Any],
++    sb: Optional[Dict[str, Any]],
++    live_unit: str,
++    req_unit: str,
++    require_saved_unit_evidence: bool,
++) -> Optional[str]:
++    """V015-M3 R04：严格区分客户端 unit 与服务端权威确认单位证据来源。"""
++    q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
++    raw_row_qty = row.get("original_qty")
++    if raw_row_qty is None:
++        raw_row_qty = row.get("qty")
++    row_orig_qty = (
++        None if isinstance(raw_row_qty, bool) else _to_finite_float(raw_row_qty)
++    )
++    if row_orig_qty is not None and row_orig_qty <= 0:
++        row_orig_qty = None
++
++    if require_saved_unit_evidence:
++        # 强证据模式：绝不允许将历史或客户端 unit 降级/伪升格为 confirmed_unit
++        if not isinstance(sb, dict):
++            return "确认记录缺少权威目标单位证据阻断"
++
++        raw_confirmed_unit = sb.get("confirmed_unit")
++        if not isinstance(raw_confirmed_unit, str) or not raw_confirmed_unit.strip():
++            return "确认记录缺少权威目标单位证据阻断"
++        saved_unit = raw_confirmed_unit.strip()
++
++        raw_orig_unit = sb.get("confirmed_orig_unit")
++        if not isinstance(raw_orig_unit, str) or not raw_orig_unit.strip():
++            return "确认记录缺少权威目标单位证据阻断"
++        saved_orig_unit = raw_orig_unit.strip()
++
++        prev_mult = _to_strict_positive_float(sb.get("confirmed_unit_mult"))
++        if prev_mult is None:
++            return "确认记录缺少权威目标单位证据阻断"
++
++        if (
++            "confirmed_unit_source" in sb
++            and sb.get("confirmed_unit_source") != UNIT_EVIDENCE_SOURCE
++        ):
++            return "确认记录缺少权威目标单位证据阻断"
++        if (
++            "confirmed_unit_version" in sb
++            and sb.get("confirmed_unit_version") != UNIT_EVIDENCE_VERSION
++        ):
++            return "确认记录缺少权威目标单位证据阻断"
++        if "confirmed_orig_qty" in sb:
++            saved_orig_qty = _to_strict_positive_float(sb.get("confirmed_orig_qty"))
++            if saved_orig_qty is None:
++                return "确认记录缺少权威目标单位证据阻断"
++            if (
++                row_orig_qty is not None
++                and abs(saved_orig_qty - row_orig_qty) > 1e-6 * max(1.0, abs(row_orig_qty))
++            ):
++                return "确认后单位换算上下文发生漂移阻断"
++
++        saved_pair_mult = get_unit_multiplier(saved_orig_unit, saved_unit)
++        if (
++            saved_pair_mult is None
++            or abs(saved_pair_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
++        ):
++            return "确认后单位换算上下文发生漂移阻断"
++
++        if not q_unit:
++            return "确认记录缺少权威目标单位证据阻断"
++        orig_eq_mult = get_unit_multiplier(saved_orig_unit, q_unit)
++        if orig_eq_mult is None or abs(orig_eq_mult - 1.0) > 1e-6:
++            return "确认后单位换算上下文发生漂移阻断"
++
++        if not live_unit:
++            return "确认后物料目标单位发生漂移阻断"
++        s_mult = get_unit_multiplier(saved_unit, live_unit)
++        if s_mult is None or abs(s_mult - 1.0) > 1e-6:
++            return "确认后物料目标单位发生漂移阻断"
++
++        curr_mult = get_unit_multiplier(q_unit, live_unit)
++        if (
++            curr_mult is None
++            or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
++        ):
++            return "确认后单位换算上下文发生漂移阻断"
++
++        if not req_unit:
++            return "绑定目标单位缺失或与确认记录不一致阻断"
++        u_mult = get_unit_multiplier(req_unit, saved_unit)
++        if u_mult is None or abs(u_mult - 1.0) > 1e-6:
++            return "绑定目标单位与确认记录不一致阻断"
++        return None
++
++    # 非强证据模式（如 /api/binding/submit 初次校验或带显式 saved_bindings 的兼容单元测试）
++    saved_unit = str(
++        (sb or {}).get("confirmed_unit") or (sb or {}).get("unit") or ""
++    ).strip()
++    if not saved_unit:
++        return None
++    if not live_unit:
++        return "确认后物料目标单位发生漂移阻断"
++    s_mult = get_unit_multiplier(saved_unit, live_unit)
++    if s_mult is None or abs(s_mult - 1.0) > 1e-6:
++        return "确认后物料目标单位发生漂移阻断"
++    if sb is not None and sb.get("confirmed_unit_mult") is not None:
++        prev_mult = _to_strict_positive_float(sb.get("confirmed_unit_mult"))
++        if prev_mult is None:
++            return "确认后单位换算上下文发生漂移阻断"
++        if q_unit and live_unit:
++            curr_mult = get_unit_multiplier(q_unit, live_unit)
++            if (
++                curr_mult is None
++                or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
++            ):
++                return "确认后单位换算上下文发生漂移阻断"
++    if not req_unit:
++        return "绑定目标单位缺失或与确认记录不一致阻断"
++    u_mult = get_unit_multiplier(req_unit, saved_unit)
++    if u_mult is None or abs(u_mult - 1.0) > 1e-6:
++        return "绑定目标单位与确认记录不一致阻断"
++    return None
++
++
+ def validate_bindings_against_row(
+     row: Dict[str, Any],
+     bindings: List[Dict[str, Any]],
+@@ -376,8 +519,6 @@
+         if sc and sc not in saved_by_code:
+             saved_by_code[sc] = sb
+ 
+-    q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
+-
+     for b in (bindings or []):
+         code = str(b.get("code", "")).strip()
+         if not code or code in invalid_codes:
+@@ -388,44 +529,15 @@
+         if not reason:
+             sb = saved_by_code.get(code)
+             live_unit = str(live[code].get("unit", "") or "").strip()
+-            req_unit = str(b.get("unit", "") or "").strip()
+-            b_ratio = _to_finite_float(b.get("qty_ratio"))
+-            has_non_one_ratio = b_ratio is not None and abs(b_ratio - 1.0) > 1e-6
+-            saved_unit = str(
+-                (sb or {}).get("confirmed_unit") or (sb or {}).get("unit") or ""
+-            ).strip()
+-
+-            if require_saved_unit_evidence and (
+-                sb is None or (not saved_unit and (live_unit or q_unit or has_non_one_ratio))
+-            ):
+-                reason = "确认记录缺少权威目标单位证据阻断"
+-            elif saved_unit:
+-                if not live_unit:
+-                    reason = "确认后物料目标单位发生漂移阻断"
+-                else:
+-                    s_mult = get_unit_multiplier(saved_unit, live_unit)
+-                    if s_mult is None or abs(s_mult - 1.0) > 1e-6:
+-                        reason = "确认后物料目标单位发生漂移阻断"
+-                if (
+-                    not reason
+-                    and sb is not None
+-                    and sb.get("confirmed_unit_mult") is not None
+-                ):
+-                    prev_mult = _to_finite_float(sb.get("confirmed_unit_mult"))
+-                    if prev_mult is not None and q_unit and live_unit:
+-                        curr_mult = get_unit_multiplier(q_unit, live_unit)
+-                        if (
+-                            curr_mult is None
+-                            or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
+-                        ):
+-                            reason = "确认后单位换算上下文发生漂移阻断"
+-                if not reason:
+-                    if not req_unit:
+-                        reason = "绑定目标单位缺失或与确认记录不一致阻断"
+-                    else:
+-                        u_mult = get_unit_multiplier(req_unit, saved_unit)
+-                        if u_mult is None or abs(u_mult - 1.0) > 1e-6:
+-                            reason = "绑定目标单位与确认记录不一致阻断"
++            raw_req_unit = b.get("unit")
++            req_unit = raw_req_unit.strip() if isinstance(raw_req_unit, str) else ""
++            reason = _validate_saved_binding_unit_evidence(
++                row,
++                sb=sb,
++                live_unit=live_unit,
++                req_unit=req_unit,
++                require_saved_unit_evidence=require_saved_unit_evidence,
++            )
+         if reason:
+             conflicts.append({"code": code, "reason": reason})
+     return {
+@@ -445,30 +557,39 @@
+ def _enrich_saved_bindings(
+     row: Dict[str, Any], bindings: List[Dict[str, Any]]
+ ) -> List[Dict[str, Any]]:
+-    """V015-M3 R03：落盘前固化实时物料权威目标单位及换算上下文，供恢复/导出校验漂移与遗留证据。"""
++    """V015-M3 R04：落盘前剔除伪造证据并仅从实时物料固化权威目标单位与换算上下文。"""
+     live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
+     q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
+-    orig_qty = _to_finite_float(row.get("original_qty"))
+-    if orig_qty is None:
+-        orig_qty = _to_finite_float(row.get("qty"))
++    raw_orig_qty = row.get("original_qty")
++    if raw_orig_qty is None:
++        raw_orig_qty = row.get("qty")
++    orig_qty = (
++        None if isinstance(raw_orig_qty, bool) else _to_finite_float(raw_orig_qty)
++    )
++    if orig_qty is not None and orig_qty <= 0:
++        orig_qty = None
+ 
+     enriched_list: List[Dict[str, Any]] = []
+     for b in (bindings or []):
+         item = dict(b)
++        for key in _AUTHORITATIVE_UNIT_EVIDENCE_KEYS:
++            item.pop(key, None)
+         code = str(item.get("code", "") or "").strip()
+         mat = live.get(code)
+         live_unit = str((mat or {}).get("unit", "") or "").strip()
+         req_unit = str(item.get("unit", "") or "").strip()
+-        confirmed_unit = live_unit or req_unit
+-        if confirmed_unit and not req_unit:
+-            item["unit"] = confirmed_unit
+-        item["confirmed_unit"] = confirmed_unit
+-        item["confirmed_orig_unit"] = q_unit
+-        if orig_qty is not None:
+-            item["confirmed_orig_qty"] = orig_qty
+-        unit_mult = get_unit_multiplier(q_unit, live_unit) if (q_unit and live_unit) else None
+-        if unit_mult is not None:
+-            item["confirmed_unit_mult"] = unit_mult
++        if mat is not None and live_unit:
++            if not req_unit:
++                item["unit"] = live_unit
++            item["confirmed_unit"] = live_unit
++            item["confirmed_orig_unit"] = q_unit
++            if orig_qty is not None:
++                item["confirmed_orig_qty"] = float(orig_qty)
++            unit_mult = get_unit_multiplier(q_unit, live_unit) if q_unit else None
++            if unit_mult is not None and unit_mult > 0:
++                item["confirmed_unit_mult"] = float(unit_mult)
++                item["confirmed_unit_source"] = UNIT_EVIDENCE_SOURCE
++                item["confirmed_unit_version"] = UNIT_EVIDENCE_VERSION
+         enriched_list.append(item)
+     return enriched_list
+ 
+--- R03/tests/test_m3_hard_constraints.py
++++ R04/tests/test_m3_hard_constraints.py
+@@ -1388,3 +1388,232 @@
+             LLMRuleManager._active_rules_cache = [univ_rule]
+             self.assertTrue(evaluate_dynamic_exclusions(hvac_row, hvac_cand), univ_rule["rule_id"])
+             self.assertTrue(evaluate_dynamic_exclusions(plumb_row, plumb_cand), univ_rule["rule_id"])
++
++
++# ---------------------------------------------------------------------------
++# V015-M3 R04：A-M3-01 区分单位值与权威来源证据（强证据门单测）
++# ---------------------------------------------------------------------------
++
++class TestM3R04LegacyUnitEvidenceUnit(unittest.TestCase):
++    """V015-M3 R04：遗留非空 unit / 缺漏/残缺/类型异常 confirmed_* 一律不升格为权威证据。"""
++
++    def test_r04_legacy_nonempty_unit_without_confirmed_fields_blocked(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN100",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++            original_category="暖通",
++        )
++        live_m = {
++            "CONC-M": _material(
++                code="CONC-M", name="镀锌钢管", specification="DN100", unit="m", category="暖通"
++            )
++        }
++        live_km = {
++            "CONC-M": _material(
++                code="CONC-M", name="镀锌钢管", specification="DN100", unit="km", category="暖通"
++            )
++        }
++        legacy_nonempty_saved = [
++            {"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km"}
++        ]
++        legacy_empty_saved = [
++            {"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": ""}
++        ]
++        legacy_missing_saved = [
++            {"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0}
++        ]
++        req_variants = (
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km"}],
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}],
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0}],
++            [{
++                "code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km",
++                "confirmed_unit": "km", "confirmed_orig_unit": "km",
++                "confirmed_unit_mult": 1.0, "confirmed_unit_version": "r04-v1",
++            }],
++        )
++        with patch("app.binding_decisions.validate_binding_codes", return_value=[]):
++            for live_map in (live_m, live_km):
++                with patch("app.binding_decisions.fetch_live_material_map", return_value=live_map):
++                    for saved_binds in (legacy_nonempty_saved, legacy_empty_saved, legacy_missing_saved):
++                        for req_binds in req_variants:
++                            res = validate_bindings_against_row(
++                                row,
++                                req_binds,
++                                saved_bindings=saved_binds,
++                                require_saved_unit_evidence=True,
++                            )
++                            self.assertFalse(res["ok"], (live_map, saved_binds, req_binds, res))
++                            self.assertTrue(res["conflicts"], res)
++
++    def test_r04_partial_malformed_and_inconsistent_confirmed_fields_rejected(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN100",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++            original_category="暖通",
++        )
++        live_m = {
++            "CONC-M": _material(
++                code="CONC-M", name="镀锌钢管", specification="DN100", unit="m", category="暖通"
++            )
++        }
++        req_m = [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}]
++
++        bad_saved_cases = [
++            # 仅部分 confirmed_* 字段
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m"}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km"}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_unit_mult": 1000.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0}],
++            # 类型异常 / bool / NaN / <=0
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": 123, "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": True, "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": 999, "confirmed_unit_mult": 1000.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": "1000.0"}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": True}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": -1000.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 0.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": float("nan")}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_orig_qty": True}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_orig_qty": "10"}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_orig_qty": 0.0}],
++            # 非法/不可信来源及版本标识
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_unit_source": "client_legacy"}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_unit_version": "legacy-v0"}],
++            # 自相矛盾与上下文漂移（orig_qty 变化 / mult 与 km->m 矛盾 / orig_unit 不符）
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "m", "confirmed_unit_mult": 1.0}],
++            [{"code": "CONC-M", "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_orig_qty": 5.0}],
++        ]
++
++        with patch("app.binding_decisions.validate_binding_codes", return_value=[]), patch(
++            "app.binding_decisions.fetch_live_material_map", return_value=live_m
++        ):
++            for saved_binds in bad_saved_cases:
++                res = validate_bindings_against_row(
++                    row,
++                    req_m,
++                    saved_bindings=saved_binds,
++                    require_saved_unit_evidence=True,
++                )
++                self.assertFalse(res["ok"], f"must reject {saved_binds}, got {res}")
++
++            # 完整权威证据与上下文一致时放行
++            res_ok = validate_bindings_against_row(
++                row,
++                req_m,
++                saved_bindings=[{
++                    "code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m",
++                    "confirmed_unit": "m", "confirmed_orig_unit": "km",
++                    "confirmed_orig_qty": 10.0, "confirmed_unit_mult": 1000.0,
++                    "confirmed_unit_source": "server_live_material",
++                    "confirmed_unit_version": "r04-v1",
++                }],
++                require_saved_unit_evidence=True,
++            )
++            self.assertTrue(res_ok["ok"], res_ok)
++
++    def test_r04_record_decision_strips_forged_evidence_and_derives_from_live_material(self):
++        from app.auth_manager import init_auth_db
++        from app.db_manager import init_db, get_db_connection
++        from app.binding_decisions import (
++            STATUS_MANUAL_CONFIRMED,
++            SOURCE_MANUAL,
++            clear_binding_decisions,
++            extract_saved_bindings,
++            get_decision,
++            init_binding_decision_db,
++            record_decision,
++            UNIT_EVIDENCE_SOURCE,
++            UNIT_EVIDENCE_VERSION,
++        )
++
++        init_auth_db()
++        init_db()
++        init_binding_decision_db()
++        mconn = get_db_connection()
++        try:
++            mconn.execute("DELETE FROM materials WHERE code IN ('R04-CONC-M', 'R04-EMPTY-U')")
++            mconn.execute(
++                "INSERT INTO materials (code, name, specification, unit, category) VALUES (?, ?, ?, ?, ?)",
++                ("R04-CONC-M", "镀锌钢管", "DN100", "m", "暖通"),
++            )
++            mconn.execute(
++                "INSERT INTO materials (code, name, specification, unit, category) VALUES (?, ?, ?, ?, ?)",
++                ("R04-EMPTY-U", "无单位衬套", "DN100", "", "暖通"),
++            )
++            mconn.commit()
++        finally:
++            mconn.close()
++
++        try:
++            row = _row(
++                original_name="镀锌钢管", original_spec="DN100",
++                original_qty=10, original_unit="km", professional="暖通",
++            )
++            forged_binds = [{
++                "code": "R04-CONC-M",
++                "qty": 10000.0,
++                "qty_ratio": 1000.0,
++                "unit": "m",
++                "confirmed_unit": "km",
++                "confirmed_orig_unit": "m",
++                "confirmed_orig_qty": 999.0,
++                "confirmed_unit_mult": 1.0,
++                "confirmed_unit_source": "client_fake",
++                "confirmed_unit_version": "fake-v9",
++            }]
++            record_decision(
++                user_id=1, scope_key="r04_u.xlsx|暖通", row=row, bindings=forged_binds,
++                decision=STATUS_MANUAL_CONFIRMED, source=SOURCE_MANUAL, reason="test",
++            )
++            rec = get_decision(user_id=1, scope_key="r04_u.xlsx|暖通", row=row, bindings=forged_binds)
++            saved = extract_saved_bindings(rec)
++            self.assertEqual(len(saved), 1)
++            self.assertEqual(saved[0]["confirmed_unit"], "m")
++            self.assertEqual(saved[0]["confirmed_orig_unit"], "km")
++            self.assertEqual(saved[0]["confirmed_orig_qty"], 10.0)
++            self.assertEqual(saved[0]["confirmed_unit_mult"], 1000.0)
++            self.assertEqual(saved[0]["confirmed_unit_source"], UNIT_EVIDENCE_SOURCE)
++            self.assertEqual(saved[0]["confirmed_unit_version"], UNIT_EVIDENCE_VERSION)
++
++            # 空单位物料不得借客户端 unit/伪造 confirmed_* 洗白出权威证据
++            row_e = _row(
++                original_name="无单位衬套", original_spec="DN100",
++                original_qty=10, original_unit="km", professional="暖通",
++            )
++            forged_empty = [{
++                "code": "R04-EMPTY-U",
++                "qty": 10.0,
++                "qty_ratio": 1.0,
++                "unit": "km",
++                "confirmed_unit": "km",
++                "confirmed_unit_mult": 1.0,
++                "confirmed_unit_version": UNIT_EVIDENCE_VERSION,
++            }]
++            record_decision(
++                user_id=1, scope_key="r04_e.xlsx|暖通", row=row_e, bindings=forged_empty,
++                decision=STATUS_MANUAL_CONFIRMED, source=SOURCE_MANUAL, reason="test",
++            )
++            rec_e = get_decision(user_id=1, scope_key="r04_e.xlsx|暖通", row=row_e, bindings=forged_empty)
++            saved_e = extract_saved_bindings(rec_e)
++            self.assertNotIn("confirmed_unit", saved_e[0])
++            self.assertNotIn("confirmed_unit_version", saved_e[0])
++            res_e = validate_bindings_against_row(
++                row_e, forged_empty, saved_bindings=saved_e, require_saved_unit_evidence=True
++            )
++            self.assertFalse(res_e["ok"], res_e)
++        finally:
++            clear_binding_decisions()
++            mconn = get_db_connection()
++            try:
++                mconn.execute("DELETE FROM materials WHERE code IN ('R04-CONC-M', 'R04-EMPTY-U')")
++                mconn.commit()
++            finally:
++                mconn.close()
+--- R03/tests/test_m3_hard_constraints_http.py
++++ R04/tests/test_m3_hard_constraints_http.py
+@@ -1478,3 +1478,230 @@
+             self.assertEqual(exp_hvac_univ.status_code, 422, exp_hvac_univ.text)
+         finally:
+             self._clear_llm_rules()
++
++
++# ---------------------------------------------------------------------------
++# 7. V015-M3 R04：A-M3-01 历史非空客户端单位/残缺/伪造证据端到端 HTTP 闭环验证
++# ---------------------------------------------------------------------------
++
++class TestM3R04LegacyUnitEvidenceHttp(M3HttpBase):
++    """复现并封闭历史仅带客户端 unit（无服务端权威 confirmed_* 上下文）绕过恢复与导出的 P1 链路。"""
++
++    def _insert_raw_confirmed_decision(self, scope_name: str, row: dict, saved_bindings: list, codes: str = "CONC-M"):
++        from app.auth_manager import get_auth_connection
++        from app.binding_decisions import row_content_fingerprint, binding_fingerprint, make_scope_key
++
++        scope_key = make_scope_key(scope_name, row.get("professional") or "暖通")
++        row_fp = row_content_fingerprint(row)
++        bind_fp = binding_fingerprint(saved_bindings)
++        payload = json.dumps({"row": row, "bindings": saved_bindings}, ensure_ascii=False)
++        aconn = get_auth_connection()
++        try:
++            aconn.execute(
++                "DELETE FROM binding_decisions WHERE user_id = 1 AND scope_key = ? AND row_fingerprint = ?",
++                (scope_key, row_fp),
++            )
++            aconn.execute(
++                """
++                INSERT INTO binding_decisions (
++                    user_id, scope_key, row_fingerprint, binding_fingerprint,
++                    decision, source, reason, matched_codes, payload_json
++                ) VALUES (1, ?, ?, ?, 'manual_confirmed', 'manual', 'legacy_or_partial', ?, ?)
++                """,
++                (scope_key, row_fp, bind_fp, codes, payload),
++            )
++            aconn.commit()
++        finally:
++            aconn.close()
++
++    def test_r04_legacy_nonempty_client_unit_and_partial_evidence_blocked_until_reconfirmed(self):
++        import io
++        import openpyxl
++
++        self._seed("CONC-M", "镀锌钢管", "DN100", "m", "暖通")
++        row = self._row(
++            name="镀锌钢管", specification="DN100", qty=10, unit="km",
++            professional="暖通", category="暖通",
++        )
++        scope = "r04_legacy_nonempty.xlsx"
++
++        # 1) 构造 R01 风格历史确认记录：仅有客户端 unit="km"，无任何 confirmed_* 来源证据
++        legacy_nonempty_bind = {
++            "code": "CONC-M", "name": "镀锌钢管", "specification": "DN100",
++            "unit": "km", "category": "暖通", "qty": 10000.0, "qty_ratio": 1000.0,
++        }
++        self._insert_raw_confirmed_decision(scope, row, [legacy_nonempty_bind])
++
++        # 在目标单位为 "m"（漂移前）与漂移成 "km"（与历史客户端 unit 同名）两种条件下均不得放行；
++        # 请求中篡改 unit 或伪造 confirmed_* 亦不可救活旧确认。
++        req_attack_variants = (
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km"}],
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}],
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": ""}],
++            [{
++                "code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km",
++                "confirmed_unit": "km", "confirmed_orig_unit": "km",
++                "confirmed_orig_qty": 10.0, "confirmed_unit_mult": 1.0,
++                "confirmed_unit_source": "server_live_material", "confirmed_unit_version": "r04-v1",
++            }],
++        )
++        for live_db_unit in ("m", "km"):
++            conn = get_db_connection()
++            try:
++                conn.execute("UPDATE materials SET unit=? WHERE code='CONC-M'", (live_db_unit,))
++                conn.commit()
++            finally:
++                conn.close()
++
++            for req_binds in req_attack_variants:
++                item = self._export_item(row, req_binds, status="manual_confirmed")
++                rest = self.client.post(
++                    "/api/session/annotate",
++                    json={"items": [item], "scope_filename": scope},
++                    headers=self.auth,
++                )
++                self.assertEqual(rest.status_code, 200, rest.text)
++                self.assertEqual(rest.json()["items"][0]["decision_status"], "recommended", (live_db_unit, req_binds, rest.text))
++                self.assertGreaterEqual(rest.json()["downgraded"], 1)
++
++                exp = self.client.post(
++                    "/api/export",
++                    json={"items": [item], "scope_filename": scope},
++                    headers=self.auth,
++                )
++                self.assertEqual(exp.status_code, 422, (live_db_unit, req_binds, exp.text))
++
++        # 2) 历史空/缺 unit 以及“仅部分 confirmed_* / 伪造 version”数据库记录也一律阻断
++        conn = get_db_connection()
++        try:
++            conn.execute("UPDATE materials SET unit='m' WHERE code='CONC-M'")
++            conn.commit()
++        finally:
++            conn.close()
++
++        for case_scope, bad_saved in (
++            ("r04_empty.xlsx", [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": ""}]),
++            ("r04_partial1.xlsx", [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m", "confirmed_unit": "m"}]),
++            ("r04_partial2.xlsx", [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km"}]),
++            ("r04_badver.xlsx", [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m", "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0, "confirmed_unit_version": "fake-v0"}]),
++        ):
++            self._insert_raw_confirmed_decision(case_scope, row, bad_saved)
++            req_good_item = self._export_item(
++                row,
++                [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}],
++                status="manual_confirmed",
++            )
++            rest_bad = self.client.post(
++                "/api/session/annotate",
++                json={"items": [req_good_item], "scope_filename": case_scope},
++                headers=self.auth,
++            )
++            self.assertEqual(rest_bad.json()["items"][0]["decision_status"], "recommended", (case_scope, rest_bad.text))
++            self.assertGreaterEqual(rest_bad.json()["downgraded"], 1)
++            exp_bad = self.client.post(
++                "/api/export",
++                json={"items": [req_good_item], "scope_filename": case_scope},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_bad.status_code, 422, (case_scope, exp_bad.text))
++
++        # 3) 对原历史记录按当前实时物料显式重新确认 -> 持久化权威上下文，恢复保持确认并可导出正确 XLSX
++        good_bind = self._bind(
++            "CONC-M", name="镀锌钢管", specification="DN100",
++            unit="m", category="暖通", qty=10000.0, qty_ratio=1000.0,
++        )
++        sub_ok = self.client.post(
++            "/api/binding/submit",
++            json=self._confirm_payload(row, [good_bind], scope=scope),
++            headers=self.auth,
++        )
++        self.assertEqual(sub_ok.status_code, 200, sub_ok.text)
++
++        valid_item = self._export_item(row, [good_bind], status="manual_confirmed")
++        rest_ok = self.client.post(
++            "/api/session/annotate",
++            json={"items": [valid_item], "scope_filename": scope},
++            headers=self.auth,
++        )
++        self.assertEqual(rest_ok.status_code, 200, rest_ok.text)
++        self.assertEqual(rest_ok.json()["items"][0]["decision_status"], "manual_confirmed")
++        self.assertEqual(rest_ok.json()["downgraded"], 0)
++
++        exp_ok = self.client.post(
++            "/api/export",
++            json={"items": [valid_item], "scope_filename": scope},
++            headers=self.auth,
++        )
++        self.assertEqual(exp_ok.status_code, 200, exp_ok.text)
++        wb = openpyxl.load_workbook(io.BytesIO(exp_ok.content), data_only=True)
++        try:
++            ws_rows = list(wb.active.iter_rows(values_only=True))
++            self.assertEqual(ws_rows[3][7], "km")
++            self.assertEqual(float(ws_rows[3][8]), 10.0)
++            self.assertEqual(ws_rows[4][4], "CONC-M")
++            self.assertEqual(ws_rows[4][7], "m")
++            self.assertEqual(float(ws_rows[4][8]), 10000.0)
++        finally:
++            wb.close()
++
++        # 4) 重新确认后再次发生目标单位漂移 (m -> km) -> 恢复降级且导出 422
++        conn = get_db_connection()
++        try:
++            conn.execute("UPDATE materials SET unit='km' WHERE code='CONC-M'")
++            conn.commit()
++        finally:
++            conn.close()
++        rest_drift = self.client.post(
++            "/api/session/annotate",
++            json={"items": [valid_item], "scope_filename": scope},
++            headers=self.auth,
++        )
++        self.assertEqual(rest_drift.json()["items"][0]["decision_status"], "recommended", rest_drift.text)
++        self.assertGreaterEqual(rest_drift.json()["downgraded"], 1)
++        exp_drift = self.client.post(
++            "/api/export",
++            json={"items": [valid_item], "scope_filename": scope},
++            headers=self.auth,
++        )
++        self.assertEqual(exp_drift.status_code, 422, exp_drift.text)
++
++        # 5) 合法 1 倍率一对多系数正例对照 (200 米 -> 300 m, qty_ratio=1.5) -> 正常导出与 XLSX 重读
++        self._seed("CONC-ONE", "镀锌钢管", "DN100", "m", "暖通")
++        row_one = self._row(
++            name="镀锌钢管", specification="DN100", qty=200, unit="米",
++            professional="暖通", category="暖通",
++        )
++        one_bind = self._bind(
++            "CONC-ONE", name="镀锌钢管", specification="DN100",
++            unit="m", category="暖通", qty=300.0, qty_ratio=1.5,
++        )
++        sub_one = self.client.post(
++            "/api/binding/submit",
++            json=self._confirm_payload(row_one, [one_bind], scope="r04_one.xlsx"),
++            headers=self.auth,
++        )
++        self.assertEqual(sub_one.status_code, 200, sub_one.text)
++        one_item = self._export_item(row_one, [one_bind], status="manual_confirmed")
++        rest_one = self.client.post(
++            "/api/session/annotate",
++            json={"items": [one_item], "scope_filename": "r04_one.xlsx"},
++            headers=self.auth,
++        )
++        self.assertEqual(rest_one.json()["items"][0]["decision_status"], "manual_confirmed")
++        self.assertEqual(rest_one.json()["downgraded"], 0)
++        exp_one = self.client.post(
++            "/api/export",
++            json={"items": [one_item], "scope_filename": "r04_one.xlsx"},
++            headers=self.auth,
++        )
++        self.assertEqual(exp_one.status_code, 200, exp_one.text)
++        wb_one = openpyxl.load_workbook(io.BytesIO(exp_one.content), data_only=True)
++        try:
++            ws_one = list(wb_one.active.iter_rows(values_only=True))
++            self.assertEqual(ws_one[3][7], "米")
++            self.assertEqual(float(ws_one[3][8]), 200.0)
++            self.assertEqual(ws_one[4][4], "CONC-ONE")
++            self.assertEqual(ws_one[4][7], "m")
++            self.assertEqual(float(ws_one[4][8]), 300.0)
++        finally:
++            wb_one.close()

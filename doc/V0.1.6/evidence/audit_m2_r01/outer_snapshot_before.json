@@ -1,0 +1,10 @@
+{
+  "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+  "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+  "config/domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+  "config/alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+  "config/category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+  "config/weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803",
+  "config/boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+  "config/tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b"
+}

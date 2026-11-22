@@ -1,0 +1,20 @@
+{
+  "primary_release_page": "https://pypi.org/project/ecdsa/0.19.2/",
+  "metadata_url": "https://pypi.org/pypi/ecdsa/0.19.2/json",
+  "filename": "ecdsa-0.19.2-py2.py3-none-any.whl",
+  "public_wheel_sha256": "840f5dc5e375c68f36c1a7a5b9caad28f95daa65185c9253c0c08dd952bb7399",
+  "source_checks": [
+    {
+      "source": "ecdsa/test_ecdh.py",
+      "public_wheel_source_sha256": "db44c463219c9f29c03d2f6796bfe4d9e77a4bb949d59d1b6e884d53ea4419ca",
+      "matches_image_source": true
+    },
+    {
+      "source": "ecdsa/test_keys.py",
+      "public_wheel_source_sha256": "ade4362ad7ceb0035ae7d0aabef4568d99be49a59fb1c259549684f511722fde",
+      "matches_image_source": true
+    }
+  ],
+  "verdict": "PASS",
+  "operation": "download public wheel into memory only; no installation; no key content persisted"
+}

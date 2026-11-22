@@ -1,0 +1,143 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T14:58:31.880936+08:00",
+  "role": "coordinator",
+  "task": "V019-M1/R01",
+  "decision": "RELEASED_PACKAGE_WITH_EXPERIMENTAL_RERANK_OFF",
+  "next_dispatch": "V019-M2/R01",
+  "v019_final_review": false,
+  "v020_approved": false,
+  "production_release_authorized": false,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_check": {
+    "total": 175,
+    "matched": 174,
+    "changed": {
+      "app/matcher.py": {
+        "m1_dispatch_baseline": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+        "current": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2"
+      }
+    }
+  },
+  "delivery_manifest_check": {
+    "total": 42,
+    "matched": 41,
+    "changed": {
+      "doc/V0.1.9/02_任务台账.md": {
+        "delivery_frozen": "e76a215fc5cb86d345c1e2facfeb302790b1cae3442629dea81344d09130b331",
+        "current": "354f7530a1e0c7044f288ab1934dd9bb0fbe9d028b20a3ef711b43250452efa2"
+      }
+    },
+    "note": "doc/V0.1.9/02_任务台账.md updated by audit AI upon recording R01 review verdict and OBS-A-M1-01..03; all 41 other delivery files exact match."
+  },
+  "audit_summary_sha256": "af511076917b6e469e56eccf91dfad851365ca0ecdd4d4c73e415ebc789b668d",
+  "rollback_archive_check": {
+    "path": ".local-archive/v018_final_v019_m0_source_baseline.zip",
+    "archive_sha256_matched": true,
+    "entries_checked": 88,
+    "mismatches": [],
+    "m0_matcher_restore_verified_by_asset_guard": true
+  },
+  "frozen_assets_check": {
+    "catalog_matched": true,
+    "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "legacy_vector_cache_all_matched": true,
+    "legacy_vector_cache_candidates_dir_exists": false,
+    "cross_encoder_status": "not_run_no_offline_weights"
+  },
+  "default_switches_probe": {
+    "v019_m0_scoring_default": "legacy",
+    "v019_m1_rerank_env_default": "off",
+    "v019_m1_options_invalid_returns_none": true,
+    "v018_m0_recall_default": false
+  },
+  "five_gates_check": {
+    "legacy_groups": 18,
+    "legacy_nonzero_diffs": 0,
+    "experimental_arms": {
+      "linear-20": {
+        "exit_code": 0,
+        "all_5_safety_unchanged": true,
+        "probes_ok": true
+      },
+      "linear-50": {
+        "exit_code": 0,
+        "all_5_safety_unchanged": true,
+        "probes_ok": true
+      },
+      "blend-20": {
+        "exit_code": 0,
+        "all_5_safety_unchanged": true,
+        "probes_ok": true
+      },
+      "blend-50": {
+        "exit_code": 0,
+        "all_5_safety_unchanged": true,
+        "probes_ok": true
+      }
+    }
+  },
+  "coord_spot_check_pytest": {
+    "modules": [
+      "tests/test_v019_m1_rerank.py",
+      "tests/test_v019_m0_ranking.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_v018_m0_structured_recall.py",
+      "tests/test_v018_m1_sparse_recall.py",
+      "tests/test_v018_m2_vector_fusion.py",
+      "tests/test_v018_m3_selection_degradation.py",
+      "tests/test_v017_m2_catalog_revision.py",
+      "tests/test_v016_m2_publish_gate.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_auto_binding.py"
+    ],
+    "passed": 90,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_s": 96.76,
+    "isolated_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_m1_coord_cc41b32985f34861842394d9656d5b5a",
+    "independent_audit_full_suite": {
+      "passed": 454,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "duration_s": 785.63,
+      "source": "doc/V0.1.9/rounds/V019-M1_R01_审核小结.md"
+    }
+  },
+  "isolation_and_snapshot_check": {
+    "coord_before_verdict": "PASS",
+    "coord_after_verdict": "PASS",
+    "business_snapshot_slots": 35,
+    "diffs_coord_before_vs_m0_start": [],
+    "diffs_coord_after_vs_m0_start": []
+  },
+  "observations_rulings": {
+    "OBS-A-M1-01": {
+      "severity": "P3",
+      "status": "open_tracked",
+      "ruling": "Do not relax signed budgets. Keyword blend-50 single-request P95 (311.878ms > 300ms) and BGE blend-20 50-row upload P50 (6008.746ms > 6000ms) exceed V0.1.7 signed budgets and are disqualified from default enablement. Reranking stays default OFF so default path is unaffected. Carries into V019-M3 performance final verification.",
+      "owner_package": "V019-M3"
+    },
+    "OBS-A-M1-02": {
+      "severity": "P3",
+      "status": "open_tracked",
+      "ruling": "Endorse keeping all four rerank profiles default OFF. Budget-passing arms still fall below V0.1.7 same-slice baselines in signed domains (keyword decoration Hit@1 21/111 < 23/111; BGE medical-gas 21/112 < 22/112), and plumbing has 0 answerable rows in Train/Dev (to be verified on full/Test holdout in V019-M3). Consistent with OBS-A-M0-03 non-adoption redline.",
+      "owner_package": "V019-M3"
+    },
+    "OBS-A-M1-03": {
+      "severity": "P3",
+      "status": "accepted_boundary_recorded",
+      "ruling": "Accept explicit non-execution of optional Cross-Encoder branch due to absence of pre-provisioned offline Cross-Encoder weights and prohibition on network downloads. Logged as not_run_no_offline_weights; not claimed as passed.",
+      "owner_package": "V019-M1 (boundary closed; future offline package requires separate dispatch)"
+    }
+  },
+  "m2_effective_source_updates_sha256": {
+    "app/matcher.py": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2",
+    "app/candidate_reranker.py": "1a4f9b1efb43be0e55bebadcc60db900a94f02a5391f946cdce18acd50aca09f",
+    "app/rerank_candidates/v019_m1_linear.json": "1448c1497902fc5f89552a1b91935fca0953c163cc3df4364721ea038a5d0437",
+    "tests/test_v019_m1_rerank.py": "18622b0c0e0c2b50db70b01c96f96d016afb5c3416f6fd63d4d922faad1aad43"
+  },
+  "m2_effective_baseline_count": 178
+}

@@ -1,0 +1,24 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.7\\evidence\\m0_r01_benchmark.py",
+    "--mode",
+    "keyword",
+    "--root",
+    "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_keyword_kgm6sk4x\\benchmark",
+    "--out",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.7\\evidence\\m0_r01_validation_keyword.json"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "dotenv_disabled": true,
+  "exit_code": 0,
+  "explicit_test_root": null,
+  "llm": false,
+  "native_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_keyword_kgm6sk4x",
+  "seconds": 189.063,
+  "started_at": "2026-11-18T22:24:11.227417+08:00"
+}

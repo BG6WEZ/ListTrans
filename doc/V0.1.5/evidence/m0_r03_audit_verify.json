@@ -1,0 +1,107 @@
+{
+  "task": "V015-M0",
+  "round": "R03",
+  "role": "reviewer",
+  "audited_at": "2026-11-13 10:12:00",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": {
+    "manifest": "doc/V0.1.5/evidence/m0_r03_delivery_hashes.md",
+    "matched": 28,
+    "total": 28,
+    "mismatches": 0
+  },
+  "system_python": {
+    "python": "3.12.10",
+    "verify_isolation": {
+      "command": "python tests/verify_isolation.py --out doc/V0.1.5/evidence/m0_r03_audit_sys_verify.json",
+      "exit_code": 2,
+      "verdict": "PENDING",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [
+        "app.db_manager",
+        "app.auth_manager",
+        "app.llm_client"
+      ],
+      "hard_errors": [],
+      "out": "doc/V0.1.5/evidence/m0_r03_audit_sys_verify.json"
+    },
+    "pytest_regression_and_smoke": {
+      "command": "python -m pytest tests/test_m0_guardrail_regression.py tests/test_m0_isolation.py -v",
+      "exit_code": 0,
+      "summary": "18 passed in 4.03s"
+    },
+    "pytest_full": {
+      "command": "python -m pytest tests/ -q",
+      "exit_code": 0,
+      "summary": "54 passed, 4 skipped in 4.17s"
+    },
+    "coordinator_probe_rerun": {
+      "source": "doc/V0.1.5/evidence/m0_r02_coordinator_probe.py",
+      "out": "doc/V0.1.5/evidence/m0_r03_audit_probe_rerun.json",
+      "negative_probes_reproduced": false,
+      "business_hash_unchanged": true,
+      "business_snapshot_matches_r02_audit": true
+    }
+  },
+  "venv_python": {
+    "executable": "venv/Scripts/python.exe",
+    "import_side_effect_check": {
+      "modules": [
+        "app.db_manager",
+        "app.auth_manager",
+        "app.vector_index",
+        "app.llm_rule_engine",
+        "app.llm_client",
+        "app.feedback_train",
+        "app.flywheel_sandbox"
+      ],
+      "exit_code": 0,
+      "snapshot_diff": []
+    },
+    "verify_isolation": {
+      "command": "venv/Scripts/python.exe tests/verify_isolation.py --out doc/V0.1.5/evidence/m0_r03_audit_venv_verify.json",
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": [],
+      "missing_deps": [],
+      "out": "doc/V0.1.5/evidence/m0_r03_audit_venv_verify.json",
+      "snapshot_diff": []
+    },
+    "pytest_regression": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_m0_guardrail_regression.py -q",
+      "exit_code": 0,
+      "summary": "13 passed in 11.02s"
+    },
+    "pytest_m0_isolation_standalone": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_m0_isolation.py -q",
+      "exit_code": 0,
+      "summary": "5 passed in 7.58s"
+    },
+    "pytest_full": {
+      "command": "venv/Scripts/python.exe -m pytest tests/ -q --tb=short",
+      "exit_code": 1,
+      "summary": "7 failed, 68 passed, 1 skipped, 1 warning, 2 errors in 99.63s",
+      "failed": [
+        "tests/test_admin_dashboard.py::test_audit_manager_direct",
+        "tests/test_auth_security_fix.py::test_rbac_system_reset_permission",
+        "tests/test_auto_binding.py::TestAutoBindingAndLearning::test_auto_binding_rules_matching",
+        "tests/test_feedback_miner.py::test_mining_multi_tier_gating",
+        "tests/test_flywheel_sandbox.py::test_sandbox_harmful_rule_rejected",
+        "tests/test_m0_isolation.py::test_isolated_sqlite_create_and_write",
+        "tests/test_m0_isolation.py::test_isolated_auth_db_write"
+      ],
+      "errors": [
+        "tests/test_admin_dashboard.py::test_admin_api_endpoints",
+        "tests/test_admin_dashboard.py::test_heartbeat_endpoint"
+      ],
+      "skipped": [
+        "tests/test_auto_binding.py:156 (missing doc/sample/标准格式.xlsx)"
+      ]
+    },
+    "outer_snapshot_diff_after_all_venv_runs": []
+  }
+}

@@ -1628,3 +1628,60 @@ body {
     }
 }
 
+.review-filters {
+    flex-wrap: wrap;
+}
+
+.review-filters .filter-tab {
+    white-space: nowrap;
+}
+
+.review-evidence {
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    font-size: 12px;
+}
+
+.review-heading, .review-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-heading {
+    justify-content: space-between;
+}
+
+.review-heading h4 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 13px;
+}
+
+#review-reason {
+    margin: 6px 0;
+}
+
+#review-differences {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 10px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+#review-differences dt { font-weight: 600; }
+#review-differences dd { margin: 0; }
+.review-actions .btn { min-height: 32px; }
+.review-actions .review-reject { color: var(--color-danger); }
+
+.row-status-pill[data-state="auto_accepted"] { color: #16754e; background: #e8faf2; }
+.row-status-pill[data-state="manual_confirmed"] { color: #18549e; background: #eaf3ff; }
+.row-status-pill[data-state="recommended"] { color: #69500c; background: #fff6d8; }
+.row-status-pill[data-state="needs_parameters"] { color: #864219; background: #fff0e1; }
+.row-status-pill[data-state="rejected"] { color: #a52333; background: #ffebed; }
+

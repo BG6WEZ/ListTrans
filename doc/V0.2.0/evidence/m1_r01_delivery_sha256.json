@@ -1,0 +1,169 @@
+{
+  "date": "2026-11-21",
+  "dispatch_baseline_sha256": "6af313336b06f992caf77bd5e1ce5cd505ee2e84c8eac76e8735d9f16203cbd6",
+  "effective_baseline_count": 194,
+  "experimental_switches": {
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "LISTTRANS_V020_M0_RANKER": "off"
+  },
+  "files": {
+    "app/binding_decisions.py": {
+      "bytes": 33056,
+      "sha256": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef"
+    },
+    "app/bom.py": {
+      "bytes": 8208,
+      "sha256": "8f8e24a02e8a3e88fe8b51359f003ee14c9e9f8966ae8b37837c2c77a53fe5c0"
+    },
+    "app/feedback_contract.py": {
+      "bytes": 71632,
+      "sha256": "9a978a054aa5ae598a46f2cc35e748f315f226b2b5424f8ba42d1c43de6f3af6"
+    },
+    "app/flywheel_sandbox.py": {
+      "bytes": 55275,
+      "sha256": "9891ad646cb1eaa03c775181d115e983cb10a2e2e038f8c3f67e48c6a5ffe868"
+    },
+    "app/rule_governance.py": {
+      "bytes": 31406,
+      "sha256": "8920d3a56d8abaa9070f8c405839163bf1598204294453ead5e2450e6f14cb68"
+    },
+    "app/sandbox_evaluator.py": {
+      "bytes": 38035,
+      "sha256": "03769aeb839709a92fa51476ba2c4098d9fa06e5e6ab01f83d3b704781463776"
+    },
+    "app/server.py": {
+      "bytes": 243218,
+      "sha256": "9fe33469164ba58bc9e661971429d848de74b4ff35d67fe8327dd7072c9e624f"
+    },
+    "doc/V0.2.0/02_任务台账.md": {
+      "bytes": 3381,
+      "sha256": "10ae530af1d8d8e5396dd595297a73c1fd90b521effa31af2489efa7198177d6"
+    },
+    "doc/V0.2.0/evidence/m1_r01_asset_guard.json": {
+      "bytes": 2111,
+      "sha256": "d3709ff2b4fd0a26a79c18c85505a82727f3c534e7d91e380614d05ed9fe60d9"
+    },
+    "doc/V0.2.0/evidence/m1_r01_bom_contract.md": {
+      "bytes": 3819,
+      "sha256": "ef824edab429f7c5ef0d881803a86869b18b2cb0ac6f7c4f71ddda07b1d6350d"
+    },
+    "doc/V0.2.0/evidence/m1_r01_catalog_evidence.json": {
+      "bytes": 1378,
+      "sha256": "5213ca95f1f640d710bda114ef2abcefab09f4fc9114008fa243f4be2fc9fb0c"
+    },
+    "doc/V0.2.0/evidence/m1_r01_execution.jsonl": {
+      "bytes": 653,
+      "sha256": "230cc46ed3edec183c0456119aa78033a852c4b21144085be241fb8b21345d08"
+    },
+    "doc/V0.2.0/evidence/m1_r01_governed_replay.json": {
+      "bytes": 507,
+      "sha256": "97b83cd64fdf4d2ccb2eedf84bba56db8e031545c9c03350a4510e49ebf7136c"
+    },
+    "doc/V0.2.0/evidence/m1_r01_governed_replay.log": {
+      "bytes": 469,
+      "sha256": "630f95ec20b8d21e488ab3e36404b032398655c812a170f9aad36a646150d8e2"
+    },
+    "doc/V0.2.0/evidence/m1_r01_governed_replay.py": {
+      "bytes": 7284,
+      "sha256": "6ba820465a279af830649a2867ebe66c4468d2e46b30a6b2b9ca96919755ade7"
+    },
+    "doc/V0.2.0/evidence/m1_r01_guard.py": {
+      "bytes": 6606,
+      "sha256": "aa5abb286f295df4d18c5e585156d05a853db6afecbd84682cba4ba0a6d65582"
+    },
+    "doc/V0.2.0/evidence/m1_r01_isolation_after.json": {
+      "bytes": 12684,
+      "sha256": "9d24a48dc549fb1362a2a6a970b2f80e3ee7cf10dae2ef207ea67c51f7e5e2d9"
+    },
+    "doc/V0.2.0/evidence/m1_r01_isolation_before.json": {
+      "bytes": 14524,
+      "sha256": "82d39e7d0fcf5a0872101305fc0d447ec0af62a6b44bc55c0b3dfec38dea6f03"
+    },
+    "doc/V0.2.0/evidence/m1_r01_isolation_pre_governed.json": {
+      "bytes": 12684,
+      "sha256": "2c608c9165a533f97fe7aadc4ede9ceaadbf730d62cae78e0a1344dbdc4c6a91"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_full.log": {
+      "bytes": 57028,
+      "sha256": "f21b669af95054f7340a6560fb53501c120ef8badd12bbf544c9e956ac1815f6"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_full_pre_context_guard.log": {
+      "bytes": 4734,
+      "sha256": "7cfff3ec46dac08062316da2fbcfec403e05220a33855ebcff6907002cd9701a"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_targeted.log": {
+      "bytes": 22833,
+      "sha256": "67c24c272ab36ca1eabf1909cc4354ec32382e057ecc5b805871ae024d3e992d"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_targeted_initial.log": {
+      "bytes": 32307,
+      "sha256": "bff45b260ccac8957ae443e79a5c67f0f97d6eaad9baa642a505f3a7af78e16d"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_targeted_pre_context_guard.log": {
+      "bytes": 22833,
+      "sha256": "1757d09aec8a641b3c31f0f10357b8f7648da8d8f715ecded44b069a6f9e9d83"
+    },
+    "doc/V0.2.0/evidence/m1_r01_pytest_targeted_workbook_check.log": {
+      "bytes": 28069,
+      "sha256": "8f84b22327d75f5723d6b82cde2072728b2d8af3a0228a899322cba4cb76417a"
+    },
+    "doc/V0.2.0/evidence/m1_r01_reproduce.md": {
+      "bytes": 3064,
+      "sha256": "4c794336973240ae3a8f7d55be5c60c714c66b57fc0840391c498881ad0fc020"
+    },
+    "doc/V0.2.0/evidence/m1_r01_rollback.patch": {
+      "bytes": 60542,
+      "sha256": "34af0950b72db0229af1284c8df110187953f027425b69781a691c456e351a74"
+    },
+    "doc/V0.2.0/evidence/m1_r01_rule_gate.json": {
+      "bytes": 4238,
+      "sha256": "27e4010583e32e1f123170a4481f12b94794255c8f415bc4d4807f70187f94db"
+    },
+    "doc/V0.2.0/evidence/m1_r01_rule_gate.log": {
+      "bytes": 660,
+      "sha256": "ab8916474aa58c6df82a83287072bba4ada6efc6c6c754c1fdab35fa61ac6dbd"
+    },
+    "doc/V0.2.0/evidence/m1_r01_rule_gate_pre_context_guard.json": {
+      "bytes": 4238,
+      "sha256": "0a463b66b4025592d19bca584ed82c47fe63893269fb78d5ffd40fd58182b8f1"
+    },
+    "doc/V0.2.0/evidence/m1_r01_rule_gate_pre_context_guard.log": {
+      "bytes": 660,
+      "sha256": "d92a9250f62ed6ac11d2c3454af7d156b0755de2538049d0288ddddbc602bb0c"
+    },
+    "doc/V0.2.0/rounds/V020-M1_R01_开发小结.md": {
+      "bytes": 3570,
+      "sha256": "d99ddbee2fd3201432eafb2848bfd537055966aa0f2e8d35a0403b631589e51c"
+    },
+    "tests/test_v020_m1_bom.py": {
+      "bytes": 13976,
+      "sha256": "0ae326c87b2eb239d341a8fcd505ea21a52a3b560c5a0020fe1c37a977edeea6"
+    }
+  },
+  "gate": {
+    "historical_groups_zero_diff": 18,
+    "protected_probes_equal_to_m0": 3
+  },
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "status": "development_self_verified_pending_independent_review",
+  "task": "V020-M1/R01",
+  "tests": {
+    "full": {
+      "exit_code": 0,
+      "failed": 0,
+      "passed": 486,
+      "seconds": 612.68,
+      "skipped": 0
+    },
+    "targeted": {
+      "exit_code": 0,
+      "passed": 182
+    }
+  }
+}

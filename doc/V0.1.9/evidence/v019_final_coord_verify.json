@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T20:42:52.016916+08:00",
+  "role": "coordinator",
+  "task": "V019-M3/R01 & V0.1.9 Final Review",
+  "m3_decision": "RELEASED_PACKAGE_WITH_ALL_EXPERIMENTAL_SWITCHES_OFF",
+  "v019_final_review_decision": "APPROVED_IMPLEMENTED_AND_EVALUATED_SCOPE_EXPERIMENTS_OFF",
+  "v019_algorithm_enablement_accepted": false,
+  "v020_approved": false,
+  "production_release_authorized": false,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "delivery_manifest_check": {
+    "total": 48,
+    "matched": 47,
+    "changed": {
+      "doc/V0.1.9/02_任务台账.md": {
+        "delivery_frozen": "bebb30c9d6a11e549bc5d1376f70d810a114a4f8357fbe2d84fa22b53709d773",
+        "current": "5140b0652e50875d2341102ef1cb1a386c94ce4f6bc3e67091e6c73f97c8d6c9"
+      }
+    },
+    "note": "Only doc/V0.1.9/02_任务台账.md changed by audit AI upon recording R01 verdict and OBS-A-M3-01..03; 47/48 exact match."
+  },
+  "audit_summary_sha256": "25ae786fa1dcbd0ee725f529bbdc590bf26ddbe3e83a3b726b00883bc7873f11",
+  "effective_baseline_check": {
+    "effective_baseline_count": 191,
+    "changed_files": [
+      "app/binding_decisions.py",
+      "app/report_generator.py",
+      "app/server.py",
+      "web/app.js",
+      "web/index.css",
+      "web/index.html"
+    ],
+    "dockerfile_matched": true,
+    "dockerfile_sha256": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466"
+  },
+  "pre_holdout_freeze_chain": {
+    "freeze_file_sha256": "b2d347fe210e4f7341fbc68aa395a2a16f99bd9985559eabf6b91494b49c8564",
+    "delivery_matches_freeze": true,
+    "comparison_matches_freeze": true,
+    "final_keyword_matches_freeze": true,
+    "final_vector_matches_freeze": true,
+    "frozen_files_checked_on_disk": 197,
+    "frozen_files_mismatches": []
+  },
+  "rollback_verification": {
+    "patch_file": "doc/V0.1.9/evidence/m3_r01_rollback.patch",
+    "patch_sha256": "1e248079a392c442de13836b55118af0b0f7b3dc13c951158a0560c08bcac0a2",
+    "patch_sha256_matches_asset_guard": true,
+    "git_apply_rc": 0,
+    "six_files_byte_exact_m2": true,
+    "per_file": {
+      "app/binding_decisions.py": true,
+      "app/report_generator.py": true,
+      "app/server.py": true,
+      "web/app.js": true,
+      "web/index.css": true,
+      "web/index.html": true
+    },
+    "v018_final_archive_zip": ".local-archive/v018_final_v019_m0_source_baseline.zip",
+    "v018_final_archive_sha256": "238595cf17ecfb8ae934e2dadcda31cb5c6cccc759f691dd55cb8546cb3eead5",
+    "v018_final_archive_entries": 88
+  },
+  "frozen_assets_check": {
+    "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "catalog_matched": true,
+    "dockerfile_matched": true
+  },
+  "default_switches_probe": {
+    "v018_m0_recall_default": false,
+    "v018_m1_recall_default": false,
+    "v018_m2_recall_default": false,
+    "v019_m0_scoring_default": "legacy",
+    "v019_m1_rerank_default": "off",
+    "v019_m2_active_policy_default_is_none": true,
+    "v019_m2_on_threshold": null,
+    "v019_m2_on_min_margin": 10.0,
+    "v019_m2_on_reject_below": 40.0,
+    "enable_series_rerun_default": false
+  },
+  "gates_evidence_summary": {
+    "off_exit_code": 0,
+    "on_exit_code": 0
+  },
+  "coord_spot_check_pytest": {
+    "modules": [
+      "tests/test_v019_m3_review.py",
+      "tests/test_v019_m2_calibration.py",
+      "tests/test_v019_m1_rerank.py",
+      "tests/test_v019_m0_ranking.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_auto_binding.py",
+      "tests/test_flywheel_sandbox.py",
+      "tests/test_v016_m2_publish_gate.py",
+      "tests/test_m3_hard_constraints_http.py",
+      "tests/test_v017_m2_catalog_revision.py"
+    ],
+    "passed": 147,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_s": 326.78,
+    "summary_line": "147 passed in 325.06s (0:05:25)",
+    "isolated_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_final_coord_sj8qfoi5\\pytest_suite",
+    "independent_audit_full_suite": {
+      "passed": 470,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "source": "doc/V0.1.9/rounds/V019-M3_R01_审核小结.md"
+    }
+  },
+  "isolation_and_snapshot_check": {
+    "coord_before_rc": 0,
+    "coord_before_verdict": "PASS",
+    "coord_after_rc": 0,
+    "coord_after_verdict": "PASS",
+    "business_snapshot_slots": 0,
+    "diffs_before_vs_after": [],
+    "diffs_after_vs_m0_start": []
+  }
+}

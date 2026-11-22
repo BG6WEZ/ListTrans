@@ -1,0 +1,1719 @@
+--- r01/app/excel_boundary.py
++++ r02/app/excel_boundary.py
+@@ -247,7 +247,31 @@
+         return f.read(size)
+ 
+ 
+-def _validate_xlsx_container(file_path: str, budget: ExcelParseBudget) -> None:
++def _enforce_file_byte_budget(
++    file_path: str,
++    budget: ExcelParseBudget,
++    context_label: str,
++) -> None:
++    """R02 A-M5-03: every shared-reader entry path must honor the unified file-size budget."""
++    if not os.path.isfile(file_path):
++        raise ExcelBoundaryError(f"文件不存在: {file_path}", status_code=400, code="file_not_found")
++    file_size = os.path.getsize(file_path)
++    if file_size == 0:
++        raise ExcelBoundaryError("Excel 文件为空（0 字节）", status_code=400, code="empty_file")
++    if file_size > budget.max_upload_bytes:
++        raise UploadTooLargeError(
++            f"{context_label}文件大小 ({file_size} 字节) 超出安全预算上限 "
++            f"({budget.max_upload_bytes} 字节)，已拒绝解析"
++        )
++
++
++def _validate_xlsx_container(
++    file_path: str,
++    budget: ExcelParseBudget,
++    cancel_event: Optional[threading.Event] = None,
++    started_at: Optional[float] = None,
++) -> None:
++    t0 = started_at if started_at is not None else time.monotonic()
+     magic = _read_magic_bytes(file_path, 8)
+     if magic.startswith(OLE2_CFB_MAGIC):
+         raise ExcelBoundaryError(
+@@ -297,6 +321,7 @@
+                 )
+ 
+             # Stream-verify actual decompressed bytes to defeat forged zip headers.
++            # R02 A-M5-03: the extraction loop itself must observe cancellation and the monotonic deadline.
+             actual_uncompressed = 0
+             for info in infos:
+                 if info.is_dir():
+@@ -313,6 +338,7 @@
+                                 status_code=400,
+                                 code="zip_actual_size_exceeded",
+                             )
++                        _check_budget_and_cancel(t0, budget, cancel_event)
+     except ExcelBoundaryError:
+         raise
+     except (zipfile.BadZipFile, RuntimeError, ValueError, OSError) as exc:
+@@ -353,12 +379,19 @@
+     original_filename: Optional[str] = None,
+     budget: Optional[ExcelParseBudget] = None,
+     context_label: str = "Excel 导入",
++    cancel_event: Optional[threading.Event] = None,
++    started_at: Optional[float] = None,
+ ) -> str:
+     """Validate filename/path extension and binary magic/container without loading entire workbook."""
+     active_budget = budget or get_default_budget()
+     ext = validate_extension(original_filename or file_path, allowed_exts, context_label=context_label)
+     if ext == ".xlsx":
+-        _validate_xlsx_container(file_path, active_budget)
++        _validate_xlsx_container(
++            file_path,
++            active_budget,
++            cancel_event=cancel_event,
++            started_at=started_at,
++        )
+     elif ext == ".xls":
+         _validate_xls_container(file_path)
+     return ext
+@@ -385,14 +418,17 @@
+     started_at: Optional[float] = None,
+ ) -> List[Tuple[str, List[Tuple[Any, ...]]]]:
+     t0 = started_at if started_at is not None else time.monotonic()
+-    _validate_xlsx_container(file_path, budget)
++    _validate_xlsx_container(file_path, budget, cancel_event=cancel_event, started_at=t0)
+     wb = None
+     sheets_out: List[Tuple[str, List[Tuple[Any, ...]]]] = []
+     total_cells = 0
+     fast_poll = budget.parse_timeout_seconds <= 5.0
+ 
+     try:
++        _check_budget_and_cancel(t0, budget, cancel_event)
+         wb = openpyxl.load_workbook(file_path, read_only=True, data_only=True)
++        # R02 A-M5-03: re-check after the blocking workbook open before any row is published.
++        _check_budget_and_cancel(t0, budget, cancel_event)
+         sheetnames = list(wb.sheetnames or [])
+         if not sheetnames:
+             raise ExcelBoundaryError("Excel 工作簿不包含任何工作表", status_code=400, code="no_sheets")
+@@ -451,6 +487,8 @@
+             except Exception:
+                 pass
+ 
++    # R02 A-M5-03: final re-check before returning parsed rows to callers.
++    _check_budget_and_cancel(t0, budget, cancel_event)
+     return sheets_out
+ 
+ 
+@@ -503,7 +541,9 @@
+ 
+     try:
+         if mock_mode:
++            _check_budget_and_cancel(t0, budget, cancel_event)
+             book = xlrd_mod.open_workbook(file_path)
++            _check_budget_and_cancel(t0, budget, cancel_event)
+             sheet = book.sheet_by_index(0)
+             nrows = int(getattr(sheet, "nrows", 0))
+             if nrows > budget.max_rows_per_sheet:
+@@ -535,9 +575,13 @@
+                     )
+                 rows.append(vals)
+             sheets_out.append((getattr(sheet, "name", "Sheet1"), rows))
++            _check_budget_and_cancel(t0, budget, cancel_event)
+             return sheets_out
+ 
++        _check_budget_and_cancel(t0, budget, cancel_event)
+         book = xlrd_mod.open_workbook(file_path, on_demand=True)
++        # R02 A-M5-03: re-check after the blocking workbook open before any sheet is published.
++        _check_budget_and_cancel(t0, budget, cancel_event)
+         nsheets = int(getattr(book, "nsheets", 0))
+         if nsheets <= 0:
+             raise ExcelBoundaryError("Excel 工作簿不包含任何工作表", status_code=400, code="no_sheets")
+@@ -609,6 +653,8 @@
+             except Exception:
+                 pass
+ 
++    # R02 A-M5-03: final re-check before returning parsed rows to callers.
++    _check_budget_and_cancel(t0, budget, cancel_event)
+     return sheets_out
+ 
+ 
+@@ -628,6 +674,9 @@
+     active_budget = budget or get_default_budget()
+     started_at = time.monotonic()
+     ext = validate_extension(original_filename or file_path, allowed_exts, context_label=context_label)
++    # R02 A-M5-03: unified file-size budget at the shared entry so every caller
++    # (DB upload, pre-check/prepare pipeline, personnel import, dataframe adapter) is covered.
++    _enforce_file_byte_budget(file_path, active_budget, context_label)
+ 
+     if ext == ".xlsx":
+         return _load_xlsx_sheets(
+
+--- r01/app/db_manager.py
++++ r02/app/db_manager.py
+@@ -43,6 +43,12 @@
+ 
+ # Prevent OpenBLAS/PyTorch thread conflicts or multi-threaded connection locks
+ _HAS_FTS_CACHE: Optional[bool] = None
++
++# R02 A-M5-01: replace imports populate these isolated stage tables first; the live
++# materials/materials_fts tables are only touched by the exclusive RENAME swap.
++# Names intentionally contain "_stage" so residue checks can assert zero leftovers.
++STAGE_MATERIALS_TABLE = "materials_stage"
++STAGE_FTS_TABLE = "materials_fts_stage"
+ 
+ def get_db_connection():
+     conn = sqlite3.connect(DB_PATH, timeout=30.0)
+@@ -436,6 +442,165 @@
+     return s_obj.where(pd.notna(s_obj), "").astype(str).str.strip()
+ 
+ 
++def _cleanup_staged_tables() -> None:
++    """Drop any leftover stage tables (and their indexes/FTS shadow tables). Idempotent."""
++    conn = get_db_connection()
++    try:
++        cur = conn.cursor()
++        cur.execute(f"DROP TABLE IF EXISTS {STAGE_FTS_TABLE}")
++        cur.execute(f"DROP TABLE IF EXISTS {STAGE_MATERIALS_TABLE}")
++        conn.commit()
++    finally:
++        try:
++            conn.close()
++        except Exception:
++            pass
++
++
++def cleanup_staged_materials_import() -> None:
++    """Public failure-path hook: discard staged replace-import artifacts without touching live tables."""
++    _cleanup_staged_tables()
++
++
++def get_staged_materials() -> List[Dict[str, Any]]:
++    """Read the staged material rows (vector build input) before the live tables are swapped."""
++    conn = get_db_connection()
++    try:
++        cursor = conn.cursor()
++        cursor.execute(
++            f"SELECT code, name, specification, category FROM {STAGE_MATERIALS_TABLE}"
++        )
++        return [dict(row) for row in cursor.fetchall()]
++    finally:
++        try:
++            conn.close()
++        except Exception:
++            pass
++
++
++def _swap_materials_tables_exclusive(
++    handle: Dict[str, Any],
++    cancel_event: Optional[threading.Event] = None,
++) -> Dict[str, Any]:
++    """Publish staged tables via BEGIN EXCLUSIVE + atomic RENAME; metadata is written in the
++    same transaction. Any failure rolls back, leaving the full pre-state visible, and the
++    leftover stage tables are cleaned up afterwards."""
++    import datetime
++    from app.excel_boundary import ParseCancelledError
++
++    conn = sqlite3.connect(DB_PATH, isolation_level="EXCLUSIVE")
++    cursor = conn.cursor()
++    try:
++        cursor.execute("BEGIN EXCLUSIVE TRANSACTION")
++        # In-transaction arbitration: a cancellation arriving between the caller's
++        # pre-check and the first destructive DDL still aborts inside this transaction,
++        # so no late/timed-out worker can publish a partially checked-out state.
++        if cancel_event is not None and cancel_event.is_set():
++            raise ParseCancelledError("物料库导入在原子交换事务内被取消，已回滚并清理暂存表")
++
++        cursor.execute(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
++            (STAGE_MATERIALS_TABLE,),
++        )
++        if cursor.fetchone() is None:
++            raise RuntimeError("暂存物料表不存在，无法执行原子交换（materials_stage missing）")
++        cursor.execute(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
++            (STAGE_FTS_TABLE,),
++        )
++        has_stage_fts = cursor.fetchone() is not None
++
++        cursor.execute(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='materials'"
++        )
++        has_live = cursor.fetchone() is not None
++        cursor.execute(
++            "SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'"
++        )
++        has_live_fts = cursor.fetchone() is not None
++
++        if has_live:
++            # Index names are global in SQLite: drop the old live indexes before renaming so
++            # the published table can recreate them under their production names.
++            cursor.execute("DROP INDEX IF EXISTS idx_materials_code")
++            cursor.execute("DROP INDEX IF EXISTS idx_materials_category")
++            cursor.execute("DROP TABLE IF EXISTS materials_old")
++            cursor.execute("ALTER TABLE materials RENAME TO materials_old")
++        cursor.execute(f"ALTER TABLE {STAGE_MATERIALS_TABLE} RENAME TO materials")
++
++        # SQLite preserves index names across ALTER TABLE ... RENAME, so the stage
++        # indexes are now attached to the live table. Drop the '*_stage*' names before
++        # recreating the production-named indexes (zero staged names may remain).
++        cursor.execute("DROP INDEX IF EXISTS idx_materials_stage_code")
++        cursor.execute("DROP INDEX IF EXISTS idx_materials_stage_category")
++
++        if has_stage_fts:
++            if has_live_fts:
++                cursor.execute("DROP TABLE IF EXISTS materials_fts_old")
++                cursor.execute("ALTER TABLE materials_fts RENAME TO materials_fts_old")
++            cursor.execute(f"ALTER TABLE {STAGE_FTS_TABLE} RENAME TO materials_fts")
++
++        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_code ON materials(code)")
++        cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)")
++
++        # Metadata is part of the same atomic transaction.
++        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
++        cursor.execute(
++            "CREATE TABLE IF NOT EXISTS materials_metadata (key TEXT PRIMARY KEY, value TEXT)"
++        )
++        metadata_pairs = [
++            ("last_upload_date", now_str),
++            ("filename", handle["filename"]),
++            ("total_rows", str(handle["total_rows"])),
++            ("imported_rows", str(handle["imported_rows"])),
++            ("disabled_rows", str(handle["disabled_rows"])),
++        ]
++        cursor.executemany(
++            "INSERT OR REPLACE INTO materials_metadata (key, value) VALUES (?, ?)",
++            metadata_pairs,
++        )
++
++        if has_live:
++            cursor.execute("DROP TABLE IF EXISTS materials_old")
++        if has_live_fts:
++            cursor.execute("DROP TABLE IF EXISTS materials_fts_old")
++
++        conn.commit()
++    except Exception:
++        try:
++            conn.rollback()
++        except Exception:
++            pass
++        try:
++            conn.close()
++        except Exception:
++            pass
++        _cleanup_staged_tables()
++        raise
++    else:
++        try:
++            conn.close()
++        except Exception:
++            pass
++
++    return get_db_metadata()
++
++
++def commit_staged_materials_import(
++    handle: Dict[str, Any],
++    cancel_event: Optional[threading.Event] = None,
++) -> Dict[str, Any]:
++    """Commit a stage_only replace import: exclusive atomic swap + same-transaction metadata."""
++    from app.excel_boundary import ParseCancelledError
++
++    if not isinstance(handle, dict) or not handle.get("stage_only"):
++        raise ValueError("无效的暂存导入句柄：commit_staged_materials_import 需要 stage_only 句柄")
++    if cancel_event is not None and cancel_event.is_set():
++        _cleanup_staged_tables()
++        raise ParseCancelledError("物料库导入在原子交换前被取消，已清理暂存表并保留原库")
++    return _swap_materials_tables_exclusive(handle, cancel_event=cancel_event)
++
++
+ def import_materials_from_excel(
+     xlsx_path: str, 
+     mode: str = "replace", 
+@@ -443,11 +608,16 @@
+     task_id: Optional[str] = None,
+     disable_mode: str = "on_expire",
+     cancel_event: Optional[threading.Event] = None,
+-) -> Dict[str, Any]:
++    stage_only: bool = False,
++) -> Any:
+     """
+     Import materials from Excel file into SQLite database.
+     mode: "replace" (full replacement) or "append" (incremental add).
+     disable_mode: "on_expire" (only disable if stop_date <= today or no date) or "immediate" (disable all marked).
++    stage_only: replace mode only — populate the *_stage tables and return a handle without
++                swapping the live tables. The caller commits the swap via
++                commit_staged_materials_import() after downstream vector/cache staging succeeds,
++                so failures there leave the full database pre-state intact.
+     """
+     import json
+     import datetime
+@@ -645,13 +815,16 @@
+     conn = get_db_connection()
+     try:
+         cursor = conn.cursor()
+-        
++
+         if mode == "replace":
+-            # Drop and recreate tables cleanly to avoid FTS5 shadow table corruption
+-            cursor.execute("DROP TABLE IF EXISTS materials")
+-            cursor.execute("DROP TABLE IF EXISTS materials_fts")
+-            cursor.execute("""
+-                CREATE TABLE materials (
++            # Populate isolated *_stage tables first. The live materials/materials_fts
++            # tables are never touched here: the exclusive RENAME swap (or the caller's
++            # commit_staged_materials_import) is the single publication point, so any
++            # cancellation/failure leaves the full pre-state intact and visible.
++            cursor.execute(f"DROP TABLE IF EXISTS {STAGE_FTS_TABLE}")
++            cursor.execute(f"DROP TABLE IF EXISTS {STAGE_MATERIALS_TABLE}")
++            cursor.execute(f"""
++                CREATE TABLE {STAGE_MATERIALS_TABLE} (
+                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     code TEXT UNIQUE,
+                     category TEXT,
+@@ -665,10 +838,16 @@
+                     parsed_schema_version INTEGER DEFAULT 2
+                 )
+             """)
+-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_code ON materials(code)")
+-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)")
+-            cursor.execute("""
+-                CREATE VIRTUAL TABLE IF NOT EXISTS materials_fts USING fts5(
++            cursor.execute(
++                f"CREATE INDEX IF NOT EXISTS idx_materials_stage_code "
++                f"ON {STAGE_MATERIALS_TABLE}(code)"
++            )
++            cursor.execute(
++                f"CREATE INDEX IF NOT EXISTS idx_materials_stage_category "
++                f"ON {STAGE_MATERIALS_TABLE}(category)"
++            )
++            cursor.execute(f"""
++                CREATE VIRTUAL TABLE {STAGE_FTS_TABLE} USING fts5(
+                     code UNINDEXED,
+                     category,
+                     name,
+@@ -678,21 +857,25 @@
+                     tokenize = 'unicode61'
+                 )
+             """)
++            target_table = STAGE_MATERIALS_TABLE
++            target_fts = STAGE_FTS_TABLE
+             has_fts = True
+         else:
+             # Append mode: check FTS table exists
+             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='materials_fts'")
+             has_fts = cursor.fetchone() is not None
++            target_table = "materials"
++            target_fts = "materials_fts"
+ 
+         # Write to SQL materials table
+         records = df_cleaned[["code", "category", "name", "specification", "unit", "brand", "description", "search_tokens", "parsed_params"]].values.tolist()
+         records = [r + [2] for r in records]
+-        cursor.executemany("""
+-            INSERT OR REPLACE INTO materials 
++        cursor.executemany(f"""
++            INSERT OR REPLACE INTO {target_table}
+             (code, category, name, specification, unit, brand, description, search_tokens, parsed_params, parsed_schema_version)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         """, records)
+-        
++
+         # Write to FTS virtual table
+         if has_fts:
+             from app.preprocessor import fts_tokenize
+@@ -708,8 +891,8 @@
+                     fts_tokenize(row["brand"]),
+                     fts_tokenize(row["description"])
+                 ])
+-            cursor.executemany("""
+-                INSERT OR REPLACE INTO materials_fts 
++            cursor.executemany(f"""
++                INSERT OR REPLACE INTO {target_fts}
+                 (code, category, name, specification, brand, description)
+                 VALUES (?, ?, ?, ?, ?, ?)
+             """, fts_records)
+@@ -727,31 +910,49 @@
+             conn.rollback()
+         except Exception:
+             pass
++        if mode == "replace":
++            # Defensive zero-residue guarantee on top of transaction rollback.
++            try:
++                conn.execute(f"DROP TABLE IF EXISTS {STAGE_FTS_TABLE}")
++                conn.execute(f"DROP TABLE IF EXISTS {STAGE_MATERIALS_TABLE}")
++                conn.commit()
++            except Exception:
++                pass
+         raise
+     finally:
+         try:
+             conn.close()
+         except Exception:
+             pass
+-    
+-    # Compute aggregate stats
+-    old_meta = get_db_metadata()
+-    if mode == "append":
++
++    if mode == "replace":
++        stage_handle: Dict[str, Any] = {
++            "stage_only": True,
++            "filename": filename,
++            "total_rows": total_rows,
++            "imported_rows": imported_rows,
++            "disabled_rows": disabled_rows,
++        }
++        if stage_only:
++            # Caller publishes via commit_staged_materials_import() once downstream
++            # vector/cache staging has succeeded.
++            return stage_handle
++        # Self-contained default path: stage then immediately run the atomic swap.
++        meta = commit_staged_materials_import(stage_handle, cancel_event=cancel_event)
++    else:
++        # Append mode: metadata update after the single import transaction committed.
++        old_meta = get_db_metadata()
+         new_total = old_meta.get("total_rows", 0) + total_rows
+         new_imported = old_meta.get("imported_rows", 0) + imported_rows
+         new_disabled = old_meta.get("disabled_rows", 0) + disabled_rows
+-    else:
+-        new_total = total_rows
+-        new_imported = imported_rows
+-        new_disabled = disabled_rows
+-        
+-    update_db_metadata(new_total, new_imported, new_disabled, filename)
+-    
++        update_db_metadata(new_total, new_imported, new_disabled, filename)
++        meta = get_db_metadata()
++
+     if llm_enabled and pending_tasks:
+         process_llm_extraction_async(pending_tasks)
+-    
++
+     # Return fresh metadata
+-    return get_db_metadata()
++    return meta
+ 
+ def reparse_materials_db_asymmetric() -> Dict[str, Any]:
+     """
+
+--- r01/app/vector_index.py
++++ r02/app/vector_index.py
+@@ -1,6 +1,7 @@
+ import os
+ import time
+ import json
++import shutil
+ import threading
+ 
+ # Prevent OpenBLAS/PyTorch OpenMP thread thrashing and HuggingFace Tokenizers deadlock
+@@ -34,6 +35,41 @@
+ # Test isolation: VECTOR_CACHE_DIR redirects embedding/index cache away from the business cache
+ CACHE_DIR = os.getenv("VECTOR_CACHE_DIR", os.path.join(DB_DIR, "vector_cache"))
+ os.makedirs(CACHE_DIR, exist_ok=True)
++
++
++def get_cache_dir() -> str:
++    """Runtime cache directory.
++
++    CACHE_DIR is captured from VECTOR_CACHE_DIR at import time, but per-test isolation
++    injects a new VECTOR_CACHE_DIR afterwards (monkeypatch.setenv); cache staging must
++    resolve the variable at call time so writes land inside the active isolation root.
++    """
++    return os.getenv("VECTOR_CACHE_DIR", CACHE_DIR)
++
++
++class IndexCandidate:
++    """Immutable shadow index snapshot built off the live index.
++
++    Construction never mutates VectorIndexManager state; publish_candidate() performs
++    the single in-lock swap, and write/commit_candidate_cache handle disk staging.
++    """
++
++    def __init__(
++        self,
++        materials: List[Dict[str, str]],
++        embeddings: Optional[np.ndarray],
++        faiss_index: Optional[Any],
++        use_faiss: bool,
++        model_name: str,
++        dimension: int,
++    ):
++        self.materials = materials
++        self.embeddings = embeddings
++        self.faiss_index = faiss_index
++        self.use_faiss = use_faiss
++        self.model_name = model_name
++        self.dimension = dimension
++
+ 
+ class VectorIndexManager:
+     def __init__(self):
+@@ -235,27 +271,23 @@
+         except Exception as e:
+             print(f"Error saving vector cache: {e}")
+ 
+-    def build_index(
++    def build_index_candidate(
+         self,
+         materials: List[Dict[str, Any]],
+         task_id: Optional[str] = None,
+         cancel_event: Optional[threading.Event] = None,
+-    ):
+-        """
+-        Build index from scratch using shadow swap (R1 Concurrency safe).
++    ) -> Optional[IndexCandidate]:
++        """
++        Build an immutable shadow index candidate from materials without touching
++        the live index or disk cache. Publication happens later via publish_candidate().
+         materials: List of Dict containing 'code', 'name', 'specification', 'category'
+         """
++        from app.excel_boundary import ParseCancelledError
++
+         if cancel_event is not None and cancel_event.is_set():
+-            from app.excel_boundary import ParseCancelledError
+-            raise ParseCancelledError("向量索引构建已在开始前取消")
+-
+-        if not self.is_enabled:
+-            return
+-            
+-        print(f"Building vector index for {len(materials)} materials with model [{self.model_name_or_path}] (dim={self.embedding_dim})...")
+-        start_time = time.time()
+-        
+-        # Build new mappings and texts without mutating current active index
++            raise ParseCancelledError("向量索引候选构建已在开始前取消")
++
++        # Build new mappings and texts without mutating the current active index
+         new_index_to_material = []
+         texts = []
+         for m in materials:
+@@ -268,36 +300,52 @@
+             # Build search text (name + spec)
+             texts.append(f"{m['name']} {m['specification']}".strip())
+ 
++        # Model unavailable: still return a mapping-only candidate so the DB/cache can
++        # publish a consistent (embedding-less) new state; search falls back to FTS.
++        if not self.is_enabled:
++            return IndexCandidate(
++                new_index_to_material, None, None, False,
++                self.model_name_or_path, self.embedding_dim,
++            )
++
++        print(f"Building vector index candidate for {len(materials)} materials with model [{self.model_name_or_path}] (dim={self.embedding_dim})...")
++        start_time = time.time()
++
+         # Encode all texts in chunked batches to report progress
+         embeddings_list = []
+         chunk_size = 1000
+         total_items = len(texts)
+-        
++
+         for idx in range(0, total_items, chunk_size):
+             if cancel_event is not None and cancel_event.is_set():
+-                from app.excel_boundary import ParseCancelledError
+-                raise ParseCancelledError("向量索引构建已超时取消，保留原有索引")
++                raise ParseCancelledError("向量索引候选构建已超时取消，保留原有索引")
+             chunk_texts = texts[idx : idx + chunk_size]
+             chunk_embs = self.encode_queries(chunk_texts, batch_size=256)
+             if chunk_embs is None:
+                 print(f"Error: Failed to encode chunk starting at {idx}")
+-                return
++                return IndexCandidate(
++                    new_index_to_material, None, None, False,
++                    self.model_name_or_path, self.embedding_dim,
++                )
+             embeddings_list.append(chunk_embs)
+-            
++
+             if task_id:
+                 try:
+                     from app.server import update_task_progress
+-                    prog = min(95, int(10 + ((idx + len(chunk_texts)) / total_items) * 85))
++                    prog = min(95, int(10 + ((idx + len(chunk_texts)) / max(1, total_items)) * 85))
+                     update_task_progress(task_id, vectorization_progress=prog, current_step=f"正在重建向量特征: ({idx + len(chunk_texts)}/{total_items})")
+                 except Exception as e:
+-                    print(f"Error updating task progress in build_index: {e}")
+-
+-        if embeddings_list:
+-            new_numpy_embeddings = np.vstack(embeddings_list)
+-        else:
+-            print("Error: No embeddings generated. Index not built.")
+-            return
+-        
++                    print(f"Error updating task progress in build_index_candidate: {e}")
++
++        if not embeddings_list:
++            print("Error: No embeddings generated. Returning mapping-only candidate.")
++            return IndexCandidate(
++                new_index_to_material, None, None, False,
++                self.model_name_or_path, self.embedding_dim,
++            )
++
++        new_numpy_embeddings = np.vstack(embeddings_list)
++
+         new_faiss_index = None
+         new_use_faiss = False
+         if HAS_FAISS:
+@@ -305,24 +353,112 @@
+                 new_faiss_index = faiss.IndexFlatIP(self.embedding_dim)
+                 new_faiss_index.add(new_numpy_embeddings)
+                 new_use_faiss = True
+-                print(f"FAISS index built in {time.time() - start_time:.2f}s.")
++                print(f"FAISS candidate built in {time.time() - start_time:.2f}s.")
+             except Exception as e:
+                 print(f"Error building FAISS index: {e}. Falling back to Numpy.")
+                 new_use_faiss = False
+         else:
+-            print(f"Numpy index built in {time.time() - start_time:.2f}s.")
+-
+-        # Pre-commit check before swapping active vector index
++            print(f"Numpy candidate built in {time.time() - start_time:.2f}s.")
++
++        return IndexCandidate(
++            new_index_to_material,
++            new_numpy_embeddings,
++            new_faiss_index,
++            new_use_faiss,
++            self.model_name_or_path,
++            self.embedding_dim,
++        )
++
++    def publish_candidate(
++        self,
++        candidate: Optional[IndexCandidate],
++        cancel_event: Optional[threading.Event] = None,
++    ) -> None:
++        """Atomically swap the live in-memory index to the candidate.
++
++        Cancellation is re-checked inside self._lock so the check and the swap are one
++        atomic operation (closes the check-then-swap TOCTOU window).
++        """
++        from app.excel_boundary import ParseCancelledError
++
++        if candidate is None:
++            return
++        with self._lock:
++            if cancel_event is not None and cancel_event.is_set():
++                raise ParseCancelledError("向量索引发布已取消，保留原有索引")
++            self.index_to_material = candidate.materials
++            self.numpy_embeddings = candidate.embeddings
++            self.faiss_index = candidate.faiss_index
++            self.use_faiss = candidate.use_faiss
++
++    def write_candidate_cache_to_dir(self, target_dir: str, candidate: IndexCandidate) -> None:
++        """Write candidate cache files into target_dir (a '.stage_*' directory in the
++        runtime cache root). No live cache file is touched; the caller promotes the
++        directory via commit_candidate_cache() after the DB swap succeeds."""
++        os.makedirs(target_dir, exist_ok=True)
++        index_file = os.path.join(target_dir, "materials.index")
++        npy_file = os.path.join(target_dir, "materials_embeddings.npy")
++        mapping_file = os.path.join(target_dir, "index_to_material.json")
++        meta_file = os.path.join(target_dir, "cache_metadata.json")
++
++        with open(mapping_file, "w", encoding="utf-8") as f:
++            json.dump(candidate.materials, f, ensure_ascii=False, indent=4)
++
++        if candidate.use_faiss and candidate.faiss_index is not None:
++            faiss.write_index(candidate.faiss_index, index_file)
++
++        # Always persist embeddings when the candidate carries them (unlike save_cache,
++        # this path must not silently skip the .npy sidecar).
++        if candidate.embeddings is not None:
++            np.save(npy_file, candidate.embeddings)
++
++        metadata = {
++            "model_name": candidate.model_name,
++            "dimension": candidate.dimension,
++            "item_count": len(candidate.materials),
++            "timestamp": time.time(),
++            "time_str": time.strftime("%Y-%m-%d %H:%M:%S")
++        }
++        with open(meta_file, "w", encoding="utf-8") as f:
++            json.dump(metadata, f, ensure_ascii=False, indent=4)
++
++    def commit_candidate_cache(self, stage_dir: str, target_dir: Optional[str] = None) -> None:
++        """Promote staged cache files with os.replace (per-file atomic) and remove the
++        '.stage_*' directory. Called only after the DB swap and memory publish succeed."""
++        if target_dir is None:
++            target_dir = get_cache_dir()
++        os.makedirs(target_dir, exist_ok=True)
++        for name in os.listdir(stage_dir):
++            os.replace(os.path.join(stage_dir, name), os.path.join(target_dir, name))
++        shutil.rmtree(stage_dir, ignore_errors=True)
++
++    def build_index(
++        self,
++        materials: List[Dict[str, Any]],
++        task_id: Optional[str] = None,
++        cancel_event: Optional[threading.Event] = None,
++    ):
++        """
++        Build index from scratch via the shadow candidate/publish split.
++        Kept as the compatibility entry point for check_db_timestamp_and_build() and
++        other legacy callers; the server upload flow uses the candidate APIs directly.
++        """
++        from app.excel_boundary import ParseCancelledError
++
+         if cancel_event is not None and cancel_event.is_set():
+-            from app.excel_boundary import ParseCancelledError
+-            raise ParseCancelledError("向量索引构建在切换前超时取消，已放弃写入")
+-
+-        # Shadow Index Atomic Swap (R1)
+-        with self._lock:
+-            self.index_to_material = new_index_to_material
+-            self.numpy_embeddings = new_numpy_embeddings
+-            self.faiss_index = new_faiss_index
+-            self.use_faiss = new_use_faiss
++            raise ParseCancelledError("向量索引构建已在开始前取消")
++
++        if not self.is_enabled:
++            return
++
++        candidate = self.build_index_candidate(
++            materials, task_id=task_id, cancel_event=cancel_event
++        )
++        # Parity with the legacy behavior: encoding failures must not mutate the live index.
++        if candidate is None or candidate.embeddings is None:
++            return
++
++        self.publish_candidate(candidate, cancel_event=cancel_event)
+ 
+         if cancel_event is not None and cancel_event.is_set():
+             return
+
+--- r01/app/server.py
++++ r02/app/server.py
+@@ -3014,63 +3014,150 @@
+ 
+     def _run_worker():
+         nonlocal worker_result, worker_error
++        # R02 A-M5-01: replace mode stages every artifact (DB tables, vector cache) in
++        # isolated *_stage / '.stage_*' destinations. Nothing live is touched until the
++        # exclusive DB swap (step 5), so any earlier failure leaves a verifiable pre-state.
++        stage_cache_dir: Optional[str] = None
+         try:
+             logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}, DisableMode: {disable_mode}")
+             invalidate_categories_cache()
+             if not cancel_event.is_set():
+                 update_task_progress(task_id, current_step="正在解析并清洗物料数据...", structuring_progress=10)
+ 
+-            from app.db_manager import import_materials_from_excel, get_db_connection
+-            meta = import_materials_from_excel(
+-                temp_path,
+-                mode,
+-                filename,
+-                task_id=task_id,
+-                disable_mode=disable_mode,
+-                cancel_event=cancel_event,
++            from app.db_manager import (
++                import_materials_from_excel,
++                get_db_connection,
++                commit_staged_materials_import,
++                get_staged_materials,
+             )
+-            if cancel_event.is_set():
+-                raise ParseCancelledError("物料库导入任务在向量索引阶段前被取消或超时")
+-
+-            update_task_progress(
+-                task_id,
+-                structuring_progress=100,
+-                current_step="物料数据结构化完成，开始重建向量索引...",
+-                vectorization_progress=10,
+-            )
+-
+-            conn = get_db_connection()
+-            try:
+-                cursor = conn.cursor()
+-                cursor.execute("SELECT code, name, specification, category FROM materials")
+-                materials = [dict(row) for row in cursor.fetchall()]
+-            finally:
++            from app.vector_index import get_cache_dir
++
++            if mode == "replace":
++                # Step 1: parse and persist into materials_stage/materials_fts_stage only.
++                stage_handle = import_materials_from_excel(
++                    temp_path,
++                    mode,
++                    filename,
++                    task_id=task_id,
++                    disable_mode=disable_mode,
++                    cancel_event=cancel_event,
++                    stage_only=True,
++                )
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在向量索引阶段前被取消或超时")
++
++                # Step 2: read staged rows as the vector build input (live tables untouched).
++                materials = get_staged_materials()
++
++                update_task_progress(
++                    task_id,
++                    structuring_progress=100,
++                    current_step="物料数据结构化完成，开始重建向量索引...",
++                    vectorization_progress=10,
++                )
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在读取暂存物料后被取消或超时")
++
++                update_task_progress(
++                    task_id,
++                    current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...",
++                    vectorization_progress=30,
++                )
++
++                # Step 3: shadow candidate build — no live-index or disk mutation.
++                candidate = index_manager.build_index_candidate(
++                    materials, task_id=task_id, cancel_event=cancel_event
++                )
++
++                # Step 4: write candidate cache files into an isolated '.stage_*' directory.
++                stage_cache_dir = os.path.join(
++                    get_cache_dir(),
++                    f".stage_{task_id}_{os.getpid()}_{threading.get_ident()}",
++                )
++                index_manager.write_candidate_cache_to_dir(stage_cache_dir, candidate)
++
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在原子交换前被取消或超时")
++
++                # Step 5: DB exclusive atomic swap (DDL + FTS + metadata in one transaction).
++                meta = commit_staged_materials_import(stage_handle, cancel_event=cancel_event)
++
++                # Step 6: publish the in-memory index (cancel re-checked inside the RLock).
++                index_manager.publish_candidate(candidate, cancel_event=cancel_event)
++
++                # Step 7: promote staged cache files (per-file os.replace) and drop stage dir.
++                index_manager.commit_candidate_cache(stage_cache_dir)
++                stage_cache_dir = None
++
++                invalidate_categories_cache()
++                logger.info("Vector index rebuilt and saved successfully.")
++                worker_result = meta
++            else:
++                # Append mode: legacy single-transaction import plus in-place index rebuild.
++                meta = import_materials_from_excel(
++                    temp_path,
++                    mode,
++                    filename,
++                    task_id=task_id,
++                    disable_mode=disable_mode,
++                    cancel_event=cancel_event,
++                )
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在向量索引阶段前被取消或超时")
++
++                update_task_progress(
++                    task_id,
++                    structuring_progress=100,
++                    current_step="物料数据结构化完成，开始重建向量索引...",
++                    vectorization_progress=10,
++                )
++
++                conn = get_db_connection()
+                 try:
+-                    conn.close()
+-                except Exception:
+-                    pass
+-
+-            if cancel_event.is_set():
+-                raise ParseCancelledError("物料库导入任务在读取物料表后被取消或超时")
+-
+-            update_task_progress(
+-                task_id,
+-                current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...",
+-                vectorization_progress=30,
+-            )
+-
+-            index_manager.build_index(materials, task_id=task_id, cancel_event=cancel_event)
+-            if cancel_event.is_set():
+-                raise ParseCancelledError("物料库导入任务在向量保存前被取消或超时")
+-
+-            index_manager.save_cache()
+-            invalidate_categories_cache()
+-            logger.info("Vector index rebuilt and saved successfully.")
+-            worker_result = meta
++                    cursor = conn.cursor()
++                    cursor.execute("SELECT code, name, specification, category FROM materials")
++                    materials = [dict(row) for row in cursor.fetchall()]
++                finally:
++                    try:
++                        conn.close()
++                    except Exception:
++                        pass
++
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在读取物料表后被取消或超时")
++
++                update_task_progress(
++                    task_id,
++                    current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...",
++                    vectorization_progress=30,
++                )
++
++                index_manager.build_index(materials, task_id=task_id, cancel_event=cancel_event)
++                if cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入任务在向量保存前被取消或超时")
++
++                index_manager.save_cache()
++                invalidate_categories_cache()
++                logger.info("Vector index rebuilt and saved successfully.")
++                worker_result = meta
+         except BaseException as exc:
+             worker_error = exc
++            # Failure backstop: discard staged DB tables and any pending stage cache dir so
++            # no partial artifact survives; live tables/cache remain at their verified pre-state.
++            try:
++                from app.db_manager import cleanup_staged_materials_import
++
++                cleanup_staged_materials_import()
++            except Exception as cleanup_exc:
++                logger.warning(f"Cleanup of staged materials tables failed: {cleanup_exc}")
++            if stage_cache_dir is not None:
++                shutil.rmtree(stage_cache_dir, ignore_errors=True)
+         finally:
+             remove_file_quietly(temp_path)
++            # A-M5-02: the owner token is released only when the worker actually exits,
++            # so a timed-out but still-running thread keeps the mutex and a second import
++            # stays rejected until cancellation and cleanup have fully completed.
++            _release_db_lock_if_held(lock_token)
+ 
+     worker_thread = threading.Thread(
+         target=_run_worker,
+@@ -3085,13 +3172,17 @@
+         if worker_thread.is_alive():
+             cancel_event.set()
+             logger.error(
+-                f"Background db upload task {task_id} timed out after {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s; cancelling and releasing lock."
++                f"Background db upload task {task_id} timed out after {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s; "
++                f"cancel signalled, import mutex stays owned until the worker thread exits."
+             )
+             update_task_progress(
+                 task_id,
+                 status="failed",
+-                error=f"物料库导入及向量重建超时（超过 {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f} 秒），已安全中止并释放导入锁。",
+-                current_step=f"导入超时（>{_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s），已中止并释放锁",
++                error=(
++                    f"物料库导入及向量重建超时（超过 {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f} 秒），已发出取消信号；"
++                    "后台线程实际退出前导入锁保持占用，线程退出后自动释放。"
++                ),
++                current_step=f"导入超时（>{_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s），等待后台线程退出后释放锁",
+             )
+             return
+ 
+@@ -3127,7 +3218,15 @@
+         logger.error(f"Unexpected supervisor error in async_process_db_upload_task: {e}")
+         update_task_progress(task_id, status="failed", error=str(e), current_step=f"导入出错: {str(e)}")
+     finally:
+-        _release_db_lock_if_held(lock_token)
++        if worker_thread.is_alive():
++            # A-M5-02: the timed-out worker still owns the mutex; its own finally block
++            # releases the owner token once cancellation and cleanup actually finish.
++            logger.info(
++                f"Supervisor of db upload task {task_id} exits while the worker is still alive; "
++                "lock release deferred to the worker's own exit."
++            )
++        else:
++            _release_db_lock_if_held(lock_token)
+         if not worker_thread.is_alive():
+             remove_file_quietly(temp_path)
+ 
+
+--- r01/tests/test_m5_file_boundary_and_compat.py
++++ r02/tests/test_m5_file_boundary_and_compat.py
+@@ -709,9 +709,14 @@
+         assert started.is_set()
+         st5 = client.get(f"/api/upload/status?task_id={r_f5.json()['task_id']}", headers=headers).json()
+         assert st5["status"] == "failed" and "超时" in st5["error"]
++        # A-M5-02 (R02 ruling-authorized correction of the old unsafe expectation): the
++        # timed-out worker thread is still alive here, so the write mutex must stay owned
++        # instead of being released before the worker actually exits or isolates itself.
++        assert server._db_import_lock.locked()
++        time.sleep(0.4)
++        # Slow thread exited cleanly without late overwrite and released the owner token
++        # exactly once; task status remains failed.
+         assert not server._db_import_lock.locked()
+-        time.sleep(0.4)
+-        # Slow thread exited cleanly without late overwrite; task status remains failed
+         assert late_write_attempted == []
+         assert client.get(f"/api/upload/status?task_id={r_f5.json()['task_id']}", headers=headers).json()["status"] == "failed"
+ 
+@@ -1023,3 +1028,687 @@
+         },
+     )
+     assert r_ok.status_code == 200
++
++
++# ---------------------------------------------------------------------------
++# V015-M5 R02 / A-M5-03: unified file-size budget on the shared reader,
++# cancellation/deadline coverage in ZIP extraction and workbook open.
++# ---------------------------------------------------------------------------
++
++
++def test_r02_am5_03_locked_default_budget_constants():
++    """R02 must not silently lower any R01 locked budget constant."""
++    assert excel_boundary.DEFAULT_MAX_UPLOAD_BYTES == 50 * 1024 * 1024
++    assert excel_boundary.DEFAULT_STREAM_CHUNK_BYTES == 1024 * 1024
++    assert excel_boundary.DEFAULT_MAX_ZIP_ENTRIES == 4096
++    assert excel_boundary.DEFAULT_MAX_ZIP_UNCOMPRESSED_BYTES == 200 * 1024 * 1024
++    assert excel_boundary.DEFAULT_MAX_SHEETS == 32
++    assert excel_boundary.DEFAULT_MAX_ROWS_PER_SHEET == 100_000
++    assert excel_boundary.DEFAULT_MAX_COLS_PER_SHEET == 256
++    assert excel_boundary.DEFAULT_MAX_TOTAL_CELLS == 5_000_000
++    assert excel_boundary.DEFAULT_PARSE_TIMEOUT_SECONDS == 60.0
++
++
++def test_r02_am5_03_shared_entry_rejects_oversized_xlsx_and_xls(tmp_path: Path):
++    """1-byte budget must reject real workbooks through the shared reader (audit reverse case)."""
++    rows = [["物料编码", "物料名称"], ["R02-X1", "测试阀门"]]
++    xlsx_path = tmp_path / "oversize.xlsx"
++    xlsx_path.write_bytes(_make_xlsx_bytes({"S1": rows}))
++    xls_path = tmp_path / "oversize.xls"
++    xls_path.write_bytes(_make_biff8_xls_bytes(rows))
++    assert xlsx_path.stat().st_size > 1 and xls_path.stat().st_size > 1
++
++    tight_budget = excel_boundary.ExcelParseBudget(max_upload_bytes=1)
++    for path, ext in ((xlsx_path, ".xlsx"), (xls_path, ".xls")):
++        with pytest.raises(excel_boundary.UploadTooLargeError) as exc:
++            excel_boundary.load_validated_excel_sheets(
++                str(path),
++                allowed_exts=frozenset({".xlsx", ".xls"}),
++                budget=tight_budget,
++                context_label="R02 大小预算",
++            )
++        assert exc.value.status_code == 413
++
++    # Same real files parse successfully under the default budget: no regression of the 50 MiB gate.
++    xlsx_sheets = excel_boundary.load_validated_excel_sheets(str(xlsx_path), allowed_exts=frozenset({".xlsx", ".xls"}))
++    assert len(xlsx_sheets[0][1]) == 2
++    xls_sheets = excel_boundary.load_validated_excel_sheets(str(xls_path), allowed_exts=frozenset({".xlsx", ".xls"}))
++    assert len(xls_sheets[0][1]) == 2
++
++
++def test_r02_am5_03_personnel_path_denies_oversized_via_default_budget(isolated_env, tmp_path: Path):
++    """Personnel import calls the shared reader directly; the default-budget override must close that bypass."""
++    rows = [
++        ["姓名", "1级部门", "工号", "职位", "手机"],
++        ["赵超限", "工程中心", "EMP-R02-1", "工程师", "13900002233"],
++    ]
++    xlsx_path = tmp_path / "users_big.xlsx"
++    xlsx_path.write_bytes(_make_xlsx_bytes({"人员": rows}))
++    xls_path = tmp_path / "users_big.xls"
++    xls_path.write_bytes(_make_biff8_xls_bytes(rows))
++
++    tight = excel_boundary.ExcelParseBudget(max_upload_bytes=1)
++    # Dedicated MonkeyPatch so undo() reverts only the budget override, not the isolated_env patches.
++    budget_patch = pytest.MonkeyPatch()
++    budget_patch.setattr(excel_boundary, "get_default_budget", lambda: tight)
++
++    res_xlsx = auth_manager.import_users_from_excel(str(xlsx_path))
++    assert res_xlsx["success"] is False
++    res_xls = auth_manager.import_users_from_excel(str(xls_path))
++    assert res_xls["success"] is False
++    # Rejected before any account write.
++    assert auth_manager.get_user_by_username("13900002233") is None
++
++    budget_patch.undo()
++    res_ok = auth_manager.import_users_from_excel(str(xlsx_path))
++    assert res_ok["success"] is True and res_ok["imported_count"] == 1
++
++
++def test_r02_am5_03_pre_cancelled_shared_entry_xlsx_and_xls(tmp_path: Path):
++    rows = [["物料编码", "物料名称"], ["R02-C1", "测试管道"]]
++    xlsx_path = tmp_path / "pre_cancel.xlsx"
++    xlsx_path.write_bytes(_make_xlsx_bytes({"S1": rows}))
++    xls_path = tmp_path / "pre_cancel.xls"
++    xls_path.write_bytes(_make_biff8_xls_bytes(rows))
++
++    cancel = threading.Event()
++    cancel.set()
++    for path in (xlsx_path, xls_path):
++        with pytest.raises(excel_boundary.ParseCancelledError):
++            excel_boundary.load_validated_excel_sheets(
++                str(path),
++                allowed_exts=frozenset({".xlsx", ".xls"}),
++                cancel_event=cancel,
++            )
++
++
++def test_r02_am5_03_zip_extraction_loop_observes_deadline_and_cancel(tmp_path: Path, monkeypatch):
++    xlsx_path = tmp_path / "loop.xlsx"
++    xlsx_path.write_bytes(
++        _make_xlsx_bytes({"S1": [["物料编码", "物料名称"], ["R02-Z1", "测试风机"], ["R02-Z2", "测试水泵"]]})
++    )
++
++    # Deadline: negative monotonic budget must trip inside the streaming ZIP extraction loop.
++    deadline_budget = excel_boundary.ExcelParseBudget(parse_timeout_seconds=-0.01)
++    with pytest.raises(excel_boundary.ParseTimeoutError):
++        excel_boundary.validate_excel_container(
++            str(xlsx_path), frozenset({".xlsx"}), budget=deadline_budget
++        )
++
++    # Cancellation armed on the first real decompression read must abort the extraction loop.
++    cancel = threading.Event()
++    real_zef_read = zipfile.ZipExtFile.read
++
++    def _arm_on_read(self, n=-1):
++        cancel.set()
++        return real_zef_read(self, n)
++
++    monkeypatch.setattr(zipfile.ZipExtFile, "read", _arm_on_read)
++    with pytest.raises(excel_boundary.ParseCancelledError):
++        excel_boundary.validate_excel_container(
++            str(xlsx_path),
++            frozenset({".xlsx"}),
++            budget=excel_boundary.get_default_budget(),
++            cancel_event=cancel,
++        )
++
++
++def test_r02_am5_03_workbook_open_rechecks_cancel_and_deadline(tmp_path: Path, monkeypatch):
++    rows = [["物料编码", "物料名称"], ["R02-W1", "测试桥架"]]
++    xlsx_path = tmp_path / "recheck.xlsx"
++    xlsx_path.write_bytes(_make_xlsx_bytes({"S1": rows}))
++    xls_path = tmp_path / "recheck.xls"
++    xls_path.write_bytes(_make_biff8_xls_bytes(rows))
++
++    # xlsx: cancel armed while load_workbook returns; post-open recheck must refuse to publish rows.
++    cancel_x = threading.Event()
++    real_load_workbook = openpyxl.load_workbook
++
++    def _arm_xlsx(*a, **k):
++        wb = real_load_workbook(*a, **k)
++        cancel_x.set()
++        return wb
++
++    monkeypatch.setattr(openpyxl, "load_workbook", _arm_xlsx)
++    with pytest.raises(excel_boundary.ParseCancelledError):
++        excel_boundary.load_validated_excel_sheets(
++            str(xlsx_path), allowed_exts=frozenset({".xlsx"}), cancel_event=cancel_x
++        )
++    monkeypatch.undo()
++
++    # xls: cancel armed while xlrd.open_workbook returns; post-open recheck must refuse as well.
++    import xlrd
++
++    cancel_l = threading.Event()
++    real_xlrd_open = xlrd.open_workbook
++
++    def _arm_xls(*a, **k):
++        book = real_xlrd_open(*a, **k)
++        cancel_l.set()
++        return book
++
++    monkeypatch.setattr(xlrd, "open_workbook", _arm_xls)
++    with pytest.raises(excel_boundary.ParseCancelledError):
++        excel_boundary.load_validated_excel_sheets(
++            str(xls_path), allowed_exts=frozenset({".xlsx", ".xls"}), cancel_event=cancel_l
++        )
++
++
++# ---------------------------------------------------------------------------
++# R02 A-M5-01: replace import staging + atomic swap; failure keeps the full
++# pre-state (materials / FTS / metadata / in-memory vector index / disk cache),
++# success publishes one unified new state. All data is synthetic and isolated.
++# ---------------------------------------------------------------------------
++
++
++def _r02_seed_old_material():
++    """Seed one synthetic OLD row into materials, materials_fts and metadata."""
++    conn = db_manager.get_db_connection()
++    try:
++        cur = conn.cursor()
++        cur.execute("DELETE FROM materials")
++        cur.execute("DELETE FROM materials_fts")
++        cur.execute(
++            "INSERT INTO materials(code, category, name, specification, unit, brand, description, "
++            "search_tokens, parsed_params, parsed_schema_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 2)",
++            ("R02-OLD-1", "阀门", "旧阀门", "DN15", "台", "旧牌", "前态物料", "old valve", "{}"),
++        )
++        cur.execute(
++            "INSERT INTO materials_fts(code, category, name, specification, brand, description) "
++            "VALUES (?, ?, ?, ?, ?, ?)",
++            ("R02-OLD-1", "阀门", "旧阀门", "DN15", "旧牌", "前态物料"),
++        )
++        conn.commit()
++    finally:
++        conn.close()
++    db_manager.update_db_metadata(1, 1, 0, "r02_old_seed.xlsx")
++
++
++def _r02_new_materials_xlsx() -> bytes:
++    return _make_xlsx_bytes(
++        {
++            "物料表": [
++                ["标准物料库导入模板"],
++                ["物料分类", "物料编码", "物料名称", "规格/型号", "计量单位", "常用品牌", "描述"],
++                ["风管", "R02-NEW-1", "新风管", "1000x500", "m2", "新牌", "后态物料甲"],
++                ["阀门", "R02-NEW-2", "新调节阀", "DN100 PN16", "台", None, None],
++            ]
++        }
++    )
++
++
++def _r02_material_codes() -> List[str]:
++    conn = db_manager.get_db_connection()
++    try:
++        return [r[0] for r in conn.execute("SELECT code FROM materials ORDER BY code")]
++    finally:
++        conn.close()
++
++
++def _r02_fts_codes() -> List[str]:
++    conn = db_manager.get_db_connection()
++    try:
++        return [r[0] for r in conn.execute("SELECT code FROM materials_fts ORDER BY code")]
++    finally:
++        conn.close()
++
++
++def _r02_stage_residue() -> List[str]:
++    conn = db_manager.get_db_connection()
++    try:
++        rows = conn.execute(
++            "SELECT name FROM sqlite_master WHERE name LIKE '%r02_stage%' OR name LIKE '%_stage%'"
++        ).fetchall()
++        return [r[0] for r in rows]
++    finally:
++        conn.close()
++
++
++def _r02_poll_final_status(client: TestClient, task_id: str, headers: Dict[str, str]) -> Dict[str, Any]:
++    last: Dict[str, Any] = {}
++    for _ in range(200):
++        last = client.get(f"/api/upload/status?task_id={task_id}", headers=headers).json()
++        if last.get("status") in ("completed", "failed"):
++            return last
++        time.sleep(0.05)
++    return last
++
++
++def test_r02_am5_01_cancel_during_fts_keeps_old_db_fts_metadata(isolated_env, tmp_path: Path, monkeypatch):
++    from app import preprocessor
++
++    _r02_seed_old_material()
++    xlsx_path = tmp_path / "cancel_fts.xlsx"
++    xlsx_path.write_bytes(_r02_new_materials_xlsx())
++
++    real_tokenize = preprocessor.fts_tokenize
++    cancel = threading.Event()
++
++    def _arm_cancel(text):
++        cancel.set()
++        return real_tokenize(text)
++
++    monkeypatch.setattr(preprocessor, "fts_tokenize", _arm_cancel)
++    with pytest.raises(excel_boundary.ParseCancelledError):
++        db_manager.import_materials_from_excel(
++            str(xlsx_path), mode="replace", filename=xlsx_path.name, cancel_event=cancel
++        )
++
++    # Pre-state fully verifiable: old table/FTS row survives, new codes never published.
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    meta = db_manager.get_db_metadata()
++    assert meta["filename"] == "r02_old_seed.xlsx" and meta["total_rows"] == 1
++    assert _r02_stage_residue() == []
++
++
++def test_r02_am5_01_swap_failure_rolls_back_and_cleans_stage(isolated_env, tmp_path: Path, monkeypatch):
++    _r02_seed_old_material()
++    xlsx_path = tmp_path / "swap_boom.xlsx"
++    xlsx_path.write_bytes(_r02_new_materials_xlsx())
++
++    real_connect = db_manager.sqlite3.connect
++
++    class _BoomCursor:
++        def __init__(self, real_cursor):
++            self._real = real_cursor
++
++        def __getattr__(self, item):
++            return getattr(self._real, item)
++
++        def execute(self, sql, params=()):
++            if "RENAME TO materials" in sql:
++                raise RuntimeError("SYNTHETIC_SWAP_BOOM")
++            return self._real.execute(sql, params)
++
++    class _ExclusiveConnProxy:
++        # sqlite3.Connection is a C type whose instance attributes are read-only, so
++        # cursor interception is injected through a proxy instead of assigning .cursor.
++        def __init__(self, real_conn):
++            self._real = real_conn
++            self._real_cursor = real_conn.cursor
++
++        def cursor(self, *a, **k):
++            return _BoomCursor(self._real_cursor(*a, **k))
++
++        def __getattr__(self, item):
++            return getattr(self._real, item)
++
++    def _connect_wrapper(*args, **kwargs):
++        conn = real_connect(*args, **kwargs)
++        if kwargs.get("isolation_level") == "EXCLUSIVE":
++            return _ExclusiveConnProxy(conn)
++        return conn
++
++    monkeypatch.setattr(db_manager.sqlite3, "connect", _connect_wrapper)
++    with pytest.raises(RuntimeError, match="SYNTHETIC_SWAP_BOOM"):
++        db_manager.import_materials_from_excel(str(xlsx_path), mode="replace", filename=xlsx_path.name)
++
++    # The exclusive transaction rolled back: destructive DDL never became visible.
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert _r02_stage_residue() == []
++
++
++def test_r02_am5_01_replace_success_unifies_tables_fts_metadata(isolated_env, tmp_path: Path):
++    _r02_seed_old_material()
++    xlsx_path = tmp_path / "replace_ok.xlsx"
++    xlsx_path.write_bytes(_r02_new_materials_xlsx())
++
++    meta = db_manager.import_materials_from_excel(str(xlsx_path), mode="replace", filename=xlsx_path.name)
++
++    assert meta["filename"] == xlsx_path.name and meta["total_rows"] == 2 and meta["imported_rows"] == 2
++    assert _r02_material_codes() == ["R02-NEW-1", "R02-NEW-2"]
++    assert _r02_fts_codes() == ["R02-NEW-1", "R02-NEW-2"]
++    assert _r02_stage_residue() == []
++    # Indexes keep their production names after the staged rename.
++    conn = db_manager.get_db_connection()
++    try:
++        idx_names = {
++            r[0]
++            for r in conn.execute(
++                "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='materials'"
++            )
++        }
++    finally:
++        conn.close()
++    assert {"idx_materials_code", "idx_materials_category"}.issubset(idx_names)
++
++
++def test_r02_am5_01_append_failure_rolls_back_without_losing_rows(isolated_env, tmp_path: Path, monkeypatch):
++    from app import preprocessor
++
++    _r02_seed_old_material()
++    xlsx_path = tmp_path / "append_boom.xlsx"
++    xlsx_path.write_bytes(_r02_new_materials_xlsx())
++
++    def _boom_tokenize(text):
++        raise RuntimeError("SYNTHETIC_FTS_BOOM")
++
++    monkeypatch.setattr(preprocessor, "fts_tokenize", _boom_tokenize)
++    with pytest.raises(RuntimeError, match="SYNTHETIC_FTS_BOOM"):
++        db_manager.import_materials_from_excel(str(xlsx_path), mode="append", filename=xlsx_path.name)
++
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++
++
++def _r02_seed_vector_pre_state(isolated_env, monkeypatch):
++    """Seed in-memory index and disk cache with the OLD synthetic material."""
++    import numpy as np
++
++    old_mapping = [{"code": "R02-OLD-1", "name": "旧阀门", "specification": "DN15", "category": "阀门"}]
++    monkeypatch.setattr(server.index_manager, "index_to_material", old_mapping)
++    monkeypatch.setattr(
++        server.index_manager, "numpy_embeddings", np.zeros((1, 512), dtype=np.float32)
++    )
++    vec_dir = isolated_env["root"] / "vector_cache"
++    mapping_file = vec_dir / "index_to_material.json"
++    mapping_file.write_text(json.dumps(old_mapping, ensure_ascii=False), encoding="utf-8")
++    (vec_dir / "cache_metadata.json").write_text(
++        json.dumps({"model_name": "r02-old", "dimension": 512, "item_count": 1}), encoding="utf-8"
++    )
++    return mapping_file
++
++
++def test_r02_am5_01_server_index_failure_keeps_full_pre_state(isolated_env, monkeypatch):
++    import hashlib
++
++    client: TestClient = isolated_env["client"]
++    headers = isolated_env["director"]["headers"]
++    upload_dir: Path = isolated_env["upload_dir"]
++    _r02_seed_old_material()
++    mapping_file = _r02_seed_vector_pre_state(isolated_env, monkeypatch)
++    cache_hash_before = hashlib.sha256(mapping_file.read_bytes()).hexdigest()
++
++    def _boom_candidate(*a, **k):
++        raise RuntimeError("SYNTHETIC_INDEX_FAILURE")
++
++    monkeypatch.setattr(server.index_manager, "build_index_candidate", _boom_candidate)
++
++    resp = client.post(
++        "/api/db/upload",
++        headers=headers,
++        files={"file": ("idx_fail.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++    )
++    assert resp.status_code == 200
++    state = _r02_poll_final_status(client, resp.json()["task_id"], headers)
++    assert state["status"] == "failed" and "SYNTHETIC_INDEX_FAILURE" in state["error"]
++
++    # Every layer stays at its verified pre-state.
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert server.index_manager.index_to_material[0]["code"] == "R02-OLD-1"
++    assert hashlib.sha256(mapping_file.read_bytes()).hexdigest() == cache_hash_before
++    assert _r02_stage_residue() == []
++    assert not list((isolated_env["root"] / "vector_cache").glob(".stage_*"))
++    assert os.listdir(upload_dir) == []
++
++
++def test_r02_am5_01_server_cache_stage_failure_keeps_full_pre_state(isolated_env, monkeypatch):
++    import hashlib
++
++    client: TestClient = isolated_env["client"]
++    headers = isolated_env["director"]["headers"]
++    upload_dir: Path = isolated_env["upload_dir"]
++    _r02_seed_old_material()
++    mapping_file = _r02_seed_vector_pre_state(isolated_env, monkeypatch)
++    cache_hash_before = hashlib.sha256(mapping_file.read_bytes()).hexdigest()
++
++    def _boom_cache_write(*a, **k):
++        raise RuntimeError("SYNTHETIC_CACHE_STAGE_FAILURE")
++
++    monkeypatch.setattr(server.index_manager, "write_candidate_cache_to_dir", _boom_cache_write)
++
++    resp = client.post(
++        "/api/db/upload",
++        headers=headers,
++        files={"file": ("cache_fail.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++    )
++    assert resp.status_code == 200
++    state = _r02_poll_final_status(client, resp.json()["task_id"], headers)
++    assert state["status"] == "failed" and "SYNTHETIC_CACHE_STAGE_FAILURE" in state["error"]
++
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert server.index_manager.index_to_material[0]["code"] == "R02-OLD-1"
++    assert hashlib.sha256(mapping_file.read_bytes()).hexdigest() == cache_hash_before
++    assert _r02_stage_residue() == []
++    assert not list((isolated_env["root"] / "vector_cache").glob(".stage_*"))
++    assert os.listdir(upload_dir) == []
++
++
++def test_r02_am5_01_server_success_unifies_db_fts_memory_cache(isolated_env, monkeypatch):
++    client: TestClient = isolated_env["client"]
++    headers = isolated_env["director"]["headers"]
++    _r02_seed_old_material()
++    _r02_seed_vector_pre_state(isolated_env, monkeypatch)
++    if not server.index_manager.is_enabled:
++        pytest.skip("Offline embedding model unavailable in this environment")
++
++    resp = client.post(
++        "/api/db/upload",
++        headers=headers,
++        files={"file": ("unified_ok.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++    )
++    assert resp.status_code == 200
++    state = _r02_poll_final_status(client, resp.json()["task_id"], headers)
++    assert state["status"] == "completed", state
++
++    new_codes = {"R02-NEW-1", "R02-NEW-2"}
++    assert set(_r02_material_codes()) == new_codes
++    assert set(_r02_fts_codes()) == new_codes
++    assert db_manager.get_db_metadata()["filename"] == "unified_ok.xlsx"
++    assert {m["code"] for m in server.index_manager.index_to_material} == new_codes
++
++    vec_dir = isolated_env["root"] / "vector_cache"
++    mapping_file = vec_dir / "index_to_material.json"
++    npy_file = vec_dir / "materials_embeddings.npy"
++    assert mapping_file.exists() and npy_file.exists()
++    cached_mapping = json.loads(mapping_file.read_text(encoding="utf-8"))
++    assert {m["code"] for m in cached_mapping} == new_codes
++    assert _r02_stage_residue() == []
++    assert not list(vec_dir.glob(".stage_*"))
++
++
++def test_r02_am5_01_vector_candidate_publish_contract_and_cancel(isolated_env, monkeypatch):
++    import numpy as np
++
++    from app import vector_index
++
++    mgr = vector_index.VectorIndexManager()
++    mgr.model = object()
++    mgr.embedding_dim = 2
++    mgr.index_to_material = [
++        {"code": "R02-OLD-1", "name": "旧阀门", "specification": "DN15", "category": "阀门"}
++    ]
++    mgr.numpy_embeddings = np.array([[0.0, 1.0]], dtype=np.float32)
++    mgr.encode_queries = lambda texts, **kw: np.zeros((len(texts), 2), dtype=np.float32)
++    mgr.save_cache = lambda: None
++
++    with monkeypatch.context() as mp:
++        mp.setattr(vector_index, "HAS_FAISS", False)
++        candidate = mgr.build_index_candidate(
++            [{"code": "R02-NEW-1", "name": "新风管", "specification": "1000x500", "category": "风管"}]
++        )
++        assert candidate is not None
++        # Candidate construction never mutates the live index.
++        assert mgr.index_to_material[0]["code"] == "R02-OLD-1"
++
++        mgr.publish_candidate(candidate)
++        assert mgr.index_to_material[0]["code"] == "R02-NEW-1"
++        assert mgr.numpy_embeddings.shape == (1, 2)
++
++        cancelled = threading.Event()
++        cancelled.set()
++        with pytest.raises(excel_boundary.ParseCancelledError):
++            mgr.publish_candidate(candidate, cancel_event=cancelled)
++        # In-lock cancellation backstop: live index remains the published one.
++        assert mgr.index_to_material[0]["code"] == "R02-NEW-1"
++
++
++# ---------------------------------------------------------------------------
++# R02 A-M5-02: deterministic mutex-lifecycle and swap-cancellation arbitration
++# ---------------------------------------------------------------------------
++
++
++def test_r02_am5_02_alive_worker_holds_mutex_second_import_409_then_recovers(isolated_env, monkeypatch):
++    # Ruling scenario 1: while the timed-out worker thread is still alive the write
++    # mutex stays owned, so a second import is rejected with 409 and cannot release
++    # the owner's token. A new import succeeds only after the worker actually exits.
++    client: TestClient = isolated_env["client"]
++    headers = isolated_env["director"]["headers"]
++    upload_dir: Path = isolated_env["upload_dir"]
++    _r02_seed_old_material()
++
++    real_import = db_manager.import_materials_from_excel
++    started = threading.Event()
++    gate = threading.Event()
++
++    def _parking_import(*args, cancel_event=None, **kwargs):
++        started.set()
++        # Park the worker after mutex acquisition; the supervisor times out while we wait.
++        gate.wait(timeout=10.0)
++        if cancel_event is not None and cancel_event.is_set():
++            raise excel_boundary.ParseCancelledError("parked worker cancelled after supervisor timeout")
++        return real_import(*args, **kwargs)
++
++    with monkeypatch.context() as mp:
++        mp.setattr(server, "_DB_IMPORT_TASK_TIMEOUT_SECONDS", 0.1)
++        mp.setattr(db_manager, "import_materials_from_excel", _parking_import)
++
++        r1 = client.post(
++            "/api/db/upload",
++            headers=headers,
++            files={"file": ("parked.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++        )
++        assert r1.status_code == 200
++        assert started.is_set()
++        task1_id = r1.json()["task_id"]
++        st1 = client.get(f"/api/upload/status?task_id={task1_id}", headers=headers).json()
++        assert st1["status"] == "failed" and "超时" in st1["error"]
++
++        # The parked worker is still alive: the mutex remains owned by its owner token.
++        assert server._db_import_lock.locked()
++
++        # A second import is deterministically rejected (409 before streaming) and the
++        # rejected request's None-token cleanup cannot release the owner's mutex.
++        r2 = client.post(
++            "/api/db/upload",
++            headers=headers,
++            files={"file": ("rejected.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++        )
++        assert r2.status_code == 409
++        assert server._db_import_lock.locked()
++
++        # Unpark the worker: the supervisor's cancellation makes it abort without
++        # publishing anything; its own finally block releases the owner token once.
++        gate.set()
++        for _ in range(250):
++            if not server._db_import_lock.locked():
++                break
++            time.sleep(0.02)
++        assert not server._db_import_lock.locked()
++
++    # The timed-out task never overwrote the verified pre-state and its temp file is gone.
++    assert client.get(f"/api/upload/status?task_id={task1_id}", headers=headers).json()["status"] == "failed"
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert _r02_stage_residue() == []
++    assert os.listdir(upload_dir) == []
++
++    # After the worker has exited, a fresh import is accepted and completes end-to-end.
++    r3 = client.post(
++        "/api/db/upload",
++        headers=headers,
++        files={"file": ("recover.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++    )
++    assert r3.status_code == 200
++    st3 = _r02_poll_final_status(client, r3.json()["task_id"], headers)
++    assert st3["status"] == "completed", st3
++    assert set(_r02_material_codes()) == {"R02-NEW-1", "R02-NEW-2"}
++    assert not server._db_import_lock.locked()
++
++
++def test_r02_am5_02_cancel_arbitration_before_and_inside_swap(isolated_env, tmp_path: Path):
++    # Ruling scenario 2 (deterministic, no timing): cancellation is honored both at the
++    # pre-swap public gate and inside the BEGIN EXCLUSIVE transaction before any
++    # destructive DDL. Every abort rolls back / cleans up with the live pre-state intact.
++    _r02_seed_old_material()
++    xlsx_path = tmp_path / "cancel_swap.xlsx"
++    xlsx_path.write_bytes(_r02_new_materials_xlsx())
++
++    # Phase A: pre-swap arbitration in the public commit entry point.
++    handle = db_manager.import_materials_from_excel(
++        str(xlsx_path), mode="replace", filename=xlsx_path.name, stage_only=True
++    )
++    assert handle["stage_only"] is True
++    assert _r02_stage_residue()  # stage tables exist before arbitration
++
++    cancelled = threading.Event()
++    cancelled.set()
++    with pytest.raises(excel_boundary.ParseCancelledError, match="原子交换前"):
++        db_manager.commit_staged_materials_import(handle, cancel_event=cancelled)
++
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert _r02_stage_residue() == []
++
++    # Phase B: in-transaction arbitration after BEGIN EXCLUSIVE, before the first DDL.
++    handle_b = db_manager.import_materials_from_excel(
++        str(xlsx_path), mode="replace", filename=xlsx_path.name, stage_only=True
++    )
++    assert handle_b["stage_only"] is True
++    with pytest.raises(excel_boundary.ParseCancelledError, match="事务内"):
++        db_manager._swap_materials_tables_exclusive(handle_b, cancel_event=cancelled)
++
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert _r02_stage_residue() == []
++
++
++def test_r02_am5_02_server_cancel_before_swap_keeps_full_pre_state(isolated_env, monkeypatch):
++    # End-to-end counterpart of audit probe 'cancel_before_swap_still_publishes_index':
++    # arm the worker's own cancel_event exactly at the swap boundary. The staged import
++    # must abort before publication and every layer must remain at its verified pre-state.
++    import hashlib
++
++    client: TestClient = isolated_env["client"]
++    headers = isolated_env["director"]["headers"]
++    upload_dir: Path = isolated_env["upload_dir"]
++    _r02_seed_old_material()
++    mapping_file = _r02_seed_vector_pre_state(isolated_env, monkeypatch)
++    cache_hash_before = hashlib.sha256(mapping_file.read_bytes()).hexdigest()
++
++    real_commit = db_manager.commit_staged_materials_import
++
++    def _arm_cancel_then_commit(handle, cancel_event=None, **kwargs):
++        if cancel_event is not None:
++            cancel_event.set()
++        return real_commit(handle, cancel_event=cancel_event, **kwargs)
++
++    monkeypatch.setattr(db_manager, "commit_staged_materials_import", _arm_cancel_then_commit)
++
++    resp = client.post(
++        "/api/db/upload",
++        headers=headers,
++        files={"file": ("cancel_at_swap.xlsx", _r02_new_materials_xlsx(), "application/octet-stream")},
++    )
++    assert resp.status_code == 200
++    state = _r02_poll_final_status(client, resp.json()["task_id"], headers)
++    assert state["status"] == "failed" and "取消" in state["error"]
++
++    assert _r02_material_codes() == ["R02-OLD-1"]
++    assert _r02_fts_codes() == ["R02-OLD-1"]
++    assert db_manager.get_db_metadata()["filename"] == "r02_old_seed.xlsx"
++    assert server.index_manager.index_to_material[0]["code"] == "R02-OLD-1"
++    assert hashlib.sha256(mapping_file.read_bytes()).hexdigest() == cache_hash_before
++    assert _r02_stage_residue() == []
++    assert not list((isolated_env["root"] / "vector_cache").glob(".stage_*"))
++    assert os.listdir(upload_dir) == []

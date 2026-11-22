@@ -1,0 +1,33 @@
+{
+  "after_schema": {
+    "distribution": {
+      "2": 26813,
+      "3": 50
+    },
+    "metadata_schema_version": null
+  },
+  "all_v3": false,
+  "before_schema": {
+    "distribution": {
+      "2": 26863
+    },
+    "metadata_schema_version": null
+  },
+  "catalog_after_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "catalog_before_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "catalog_unchanged": true,
+  "config_unchanged": true,
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\m1_reparse_v3_k66kslc5",
+  "legacy_v2_compat_read_ok": true,
+  "reparse_result": {
+    "reparsed_rows": 50,
+    "status": "success"
+  },
+  "rollback_distribution": {
+    "distribution": {
+      "2": 26863
+    },
+    "metadata_schema_version": null
+  },
+  "rollback_ok": true
+}

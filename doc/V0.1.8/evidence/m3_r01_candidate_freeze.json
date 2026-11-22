@@ -1,0 +1,58 @@
+{
+  "package": "V018-M3/R01",
+  "stage": "PRE_HOLDOUT_CANDIDATE_FREEZE",
+  "frozen_at": "2026-11-19T23:43:27.830000+08:00",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "holdout_touched_before_freeze": false,
+  "dev_selection_evidence": {
+    "path": "doc/V0.1.8/evidence/m3_r01_dev_selection_summary.json",
+    "sha256": "36644ef65e2eb5cfd6096111dcb0851113509fd69f2dcd8b44e4688f345fd57b",
+    "split_policy": "Train+Dev only (1,060 rows: Train 842 / 529 core ans; Dev 218 / 122 core ans; Test 160 strictly excluded)"
+  },
+  "adoption_decision": "DO_NOT_ADOPT_EXPERIMENTAL_TOGGLES_KEEP_ALL_OFF",
+  "rationale_summary": "On frozen Train+Dev (651 core answerable / 115 core negative; Dev 122 / 38) under V0.1.7 signed gates (Recall@100/200, Hit@1/3, MRR, negative rejection, wrong proposed binding, per-domain floors, and 5 resource budgets with frozen ranking weights), NO experimental M0/M1/M2 toggle combination passes all gates simultaneously: (1) Recall-expanding configs (M0, M1, M0+M1, A1, A2, A4, A5, C1, C2) substantially raise Candidate Recall (+17 to +186), but under frozen V0.1.7 scoring weights every one degrades Hit@1 (-5 to -23), Hit@3 (-3 to -19), and MRR@10, and M1_KW / M0M1_KW / A4 / A5 / C1 / C2 also exceed signed P50 latency or working-set (M0M1_KW 770.61 > 768 MiB) ceilings; (2) A3 passes all 5 resource budgets (P50 58.9 ms, P95 176.4 ms) but suffers net Recall@200 regression of -9 (573->564, all 9 in 强电 where RRF+cap=200 evicts single-channel model_match/fts hits) plus Hit@3 -4 and MRR@10 drop; (3) Canonical text (A6/A7) and Keyword RRF (KW) remain disabled per M2 ruling. Therefore, all experimental recall switches remain default OFF (M0=0, M1=0, M2=0) as the sole frozen submission path, with two bounded safety/resource guards landed: OBS-COORD-M2-02 (skip M2 RRF/cap when semantic recall produces zero hits) and OBS-A-M1-01 (bound _fts_raw_rows LRU cache to 512). High-recall experimental configs (M1/C2) remain available behind explicit OFF-by-default toggles for joint ranking+recall evaluation in V0.1.9 upon coordinator approval.",
+  "frozen_submission_config": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V018_M2_TEXT_MODE": "legacy",
+    "LISTTRANS_V018_M2_VECTOR_TOPK": "50",
+    "LISTTRANS_V018_M2_FUSION_MODE": "union",
+    "LISTTRANS_V018_M2_RRF_K": "60",
+    "LISTTRANS_V018_M2_CANDIDATE_CAP": "0",
+    "vector_text_schema": "legacy-v1",
+    "canonical_text_enabled": false,
+    "keyword_rrf_enabled": false
+  },
+  "predetermined_holdout_plan": {
+    "executions_allowed": 1,
+    "rule": "Run ONCE after freeze; zero tuning or re-selection permitted from holdout outputs.",
+    "evaluated_path": "Frozen V0.1.8 All-OFF (M0=0, M1=0, M2=0) in both Keyword and Offline BGE Vector modes on full 1,220 rows (reporting Test 160 holdout split AND full 1,220 governed portfolio + 1,220 single HTTP + 24x50-row upload HTTP + peak working set).",
+    "predetermined_control": "V0.1.7 signed baseline (doc/V0.1.7/evidence/m3_r01_metrics.json & v017_final_coord_verify.json).",
+    "gt_0003_0155_policy": "Keep original labels and scoring untouched; report 73/75 structured routing divergence separately."
+  },
+  "frozen_code_and_test_sha256": {
+    "app/matcher.py": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac",
+    "app/db_manager.py": "fa792357e25843b591ceb55c32acda62f01216f9e6d2e42c4a9df4940c9b543f",
+    "app/structured_recall.py": "627a77a3a84c8e5d5a8630c4784839d55fa8d97539293d264c8e750da510dd04",
+    "app/sparse_recall.py": "7aeb4a121b922df35f279f51655e9e5dfe6f4eb4cc2a8b6ab531d039f7fcaa1c",
+    "app/vector_fusion.py": "30335e011151067662e342331e8951e9d16f4a8b9075d52ee9fa66abdc0181c9",
+    "app/vector_index.py": "a025dea272fafea5a03d8e0dd2fc748c3a3e952c3bf74502d13f7634f8e1c684",
+    "app/domain_router.py": "487dec64afec08eea9e949f4cc2dc72158205f0c634534ed521abaa9ed6e4848",
+    "app/domain_extractors.py": "ef9a40f2b93d665a1ee4bf71c437480cae7c72a56404cfffd24e18353ba68ad9",
+    "app/preprocessor.py": "0a1b005947e90025665bde4234a0a0a2b7387d7be717d7652684275c04f2f7c2",
+    "app/query_preprocessor.py": "cf100e82527500bae9ba7f3777886f9b4810f132be9d95278bf071987dc4f2e5",
+    "app/recall_candidates/v018_m1_aliases.json": "9c69c06ba5d245b44192c5f572f78ed18d003a79d103065db0e32f5c413055f0",
+    "tests/test_v018_m3_selection_degradation.py": "14d7f652c628a8ebc09eede7f016b70eb66966e86c29d2af5d2fbf7a90aa4a69"
+  },
+  "v017_rollback_boundary_check": {
+    "catalog_db_matches_v017": true,
+    "golden_set_matches_v017": true,
+    "governance_matches_v017": true,
+    "config_16_files_match_v017": true,
+    "legacy_vector_cache_5_files_match_v017": true,
+    "legacy_vector_cache_has_no_candidates_dir": true,
+    "switch_off_returns_to_v018_all_off": true,
+    "full_v017_source_rollback_gap": "Git HEAD is e964fb16 (V0.1.4); V0.1.5~V0.1.7 were uncommitted workspace evolutions. While all 16 config files, app/materials.db, offline models, and 5 legacy-v1 vector cache files are 100% byte-identical to V0.1.7, there is NO committed git tree or .local-archive backup of the 7 V0.1.7-final Python source files modified during V018-M0/M1/M2 (app/domain_extractors.py, app/domain_router.py, app/preprocessor.py, app/query_preprocessor.py, app/db_manager.py, app/vector_index.py, app/matcher.py; latest local pre-backup is v016_m4_r01_pre_backup). Per M3 dispatch, V0.1.8 All-OFF is NOT claimed as full V0.1.7 source rollback; this gap is formally reported to coordinator."
+  }
+}

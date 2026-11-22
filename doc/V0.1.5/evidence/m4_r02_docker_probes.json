@@ -1,0 +1,157 @@
+{
+  "production_dockerfile_sha256": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+  "dockerignore_sha256": "4c40a6755581f7b0feb276d27dc25c8b9118304f55df7c47e2edc0f86dd243e1",
+  "canary_probes": {
+    "context": {
+      "build_exit": 0,
+      "tag": "listtrans:m4-r02-context-1794739878",
+      "save_exit": 0,
+      "files_in_layers": [
+        "context/.dockerignore",
+        "context/Dockerfile",
+        "context/app/main.py",
+        "context/config/alias_dict.json",
+        "context/requirements.txt",
+        "context/web/index.html"
+      ],
+      "sensitive_canaries_present": {
+        ".env": false,
+        ".env.production": false,
+        "app/auth.db": false,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": false,
+        "data/audit_disabled_materials.csv": false,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": false
+      },
+      "safe_files_present": {
+        "app/main.py": true,
+        "web/index.html": true,
+        "config/alias_dict.json": true,
+        "requirements.txt": true
+      },
+      "all_canaries_excluded": true,
+      "all_safe_retained": true
+    },
+    "copy_patterns": {
+      "build_exit": 0,
+      "tag": "listtrans:m4-r02-copy-patterns-1794739878",
+      "save_exit": 0,
+      "files_in_layers": [
+        "app/app/main.py",
+        "app/config/alias_dict.json",
+        "app/requirements.txt",
+        "app/web/index.html"
+      ],
+      "sensitive_canaries_present": {
+        ".env": false,
+        ".env.production": false,
+        "app/auth.db": false,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": false,
+        "data/audit_disabled_materials.csv": false,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": false
+      },
+      "safe_files_present": {
+        "app/main.py": true,
+        "web/index.html": true,
+        "config/alias_dict.json": true,
+        "requirements.txt": true
+      },
+      "all_canaries_excluded": true,
+      "all_safe_retained": true
+    }
+  },
+  "v_m4_01": {
+    "production_dockerfile_offline": {
+      "build_exit": 1,
+      "full_build_completed": false,
+      "status": "BLOCKED_BY_OFFLINE_PIP_NETWORK_PENDING_VERIFY",
+      "output_tail": "dor.urllib3.connection.HTTPSConnection object at 0x74c62b954050>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution')': /whl/cpu/torch/\n16.95 ERROR: Could not find a version that satisfies the requirement torch (from versions: none)\n16.95 ERROR: No matching distribution found for torch\n------\nDockerfile:14\n--------------------\n  13 |     COPY requirements.txt /app/\n  14 | >>> RUN pip install --no-cache-dir --upgrade pip --default-timeout=120 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com && \\\n  15 | >>>     pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --default-timeout=120 && \\\n  16 | >>>     pip install --no-cache-dir -r requirements.txt --default-timeout=120 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com\n  17 |     \n--------------------\nERROR: failed to build: failed to solve: process \"/bin/sh -c pip install --no-cache-dir --upgrade pip --default-timeout=120 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com &&     pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --default-timeout=120 &&     pip install --no-cache-dir -r requirements.txt --default-timeout=120 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com\" did not complete successfully: exit code: 1\n\nView build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/ds35b6yo9bfw07pzl478226jv\n"
+    },
+    "runtime_overlay_check": {
+      "build_exit": 0,
+      "base_image": "material-matcher:v0.1.4",
+      "save_exit": 0,
+      "top_layers_canaries_present": {
+        ".env": false,
+        ".env.production": false,
+        "app/auth.db": false,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": false,
+        "data/audit_disabled_materials.csv": false,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": false
+      },
+      "all_layers_synthetic_canaries_present": {
+        ".env": true,
+        ".env.production": false,
+        "app/auth.db": true,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": false,
+        "data/audit_disabled_materials.csv": false,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": false
+      },
+      "top_layers_all_canaries_excluded": true,
+      "top_layers_config_files": [
+        "app/config/alias_dict.json",
+        "app/config/auto_binding_rules.json",
+        "app/config/boost_rules.json",
+        "app/config/category_domain_map.json",
+        "app/config/connection_dict.json",
+        "app/config/domain_schema.json",
+        "app/config/flags_dict.json",
+        "app/config/llm_config.json",
+        "app/config/llm_prompts.json",
+        "app/config/material_dict.json",
+        "app/config/model_config.json",
+        "app/config/stop_words.json",
+        "app/config/tolerance_rules.json",
+        "app/config/unit_norm.json",
+        "app/config/unit_rules.json",
+        "app/config/weight_rules.json"
+      ],
+      "container_fail_closed_no_secret": {
+        "exit_code": 3,
+        "rejected_cleanly": true
+      },
+      "container_isolated_startup": {
+        "start_exit": 0,
+        "port": 50155,
+        "login_html_status": 200,
+        "unauth_me_status": 401,
+        "login_api_status": 200,
+        "auth_me_status": 200,
+        "container_config_files": [
+          "alias_dict.json",
+          "auto_binding_rules.json",
+          "boost_rules.json",
+          "category_domain_map.json",
+          "connection_dict.json",
+          "domain_schema.json",
+          "flags_dict.json",
+          "llm_config.json",
+          "llm_prompts.json",
+          "material_dict.json",
+          "model_config.json",
+          "stop_words.json",
+          "tolerance_rules.json",
+          "unit_norm.json",
+          "unit_rules.json",
+          "weight_rules.json"
+        ],
+        "uvicorn_cmdlines": [
+          "/usr/local/bin/python3.11 /usr/local/bin/uvicorn app.server:app --host 0.0.0.0 --port 18080 --workers 1"
+        ],
+        "workers_1_cmd_present": true,
+        "uvicorn_process_count": 1
+      }
+    }
+  }
+}

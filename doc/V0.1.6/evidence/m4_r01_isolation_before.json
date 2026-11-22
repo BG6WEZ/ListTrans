@@ -1,0 +1,249 @@
+{
+  "task": "V015-M0",
+  "started_at": "2026-11-18 19:10:56",
+  "python": "3.12.10",
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc",
+  "env_layout": {
+    "root": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc",
+    "materials_db": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\materials.db",
+    "auth_db": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\auth.db",
+    "config_dir": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\config",
+    "vector_cache_dir": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\vector_cache",
+    "upload_dir": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\uploads",
+    "output_dir": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\output",
+    "log_dir": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\logs",
+    "binding_feedback_file": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\runtime\\binding_feedback.json",
+    "feedback_samples_file": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\runtime\\feedback_samples.json",
+    "golden_detail_file": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\runtime\\golden_last_run.json"
+  },
+  "isolated_db_write": {
+    "materials": {
+      "rows": 1,
+      "path": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\materials.db",
+      "size": 12288
+    },
+    "auth": {
+      "rows": 1,
+      "path": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\auth.db",
+      "size": 12288
+    }
+  },
+  "isolated_files": [
+    "config/alias_dict.json",
+    "config/auto_binding_rules.json",
+    "config/boost_rules.json",
+    "config/category_domain_map.json",
+    "config/connection_dict.json",
+    "config/domain_schema.json",
+    "config/flags_dict.json",
+    "config/llm_config.json",
+    "config/llm_prompts.json",
+    "config/material_dict.json",
+    "config/model_config.json",
+    "config/stop_words.json",
+    "config/tolerance_rules.json",
+    "config/unit_norm.json",
+    "config/unit_rules.json",
+    "config/weight_rules.json",
+    "db/auth.db",
+    "db/materials.db",
+    "logs/security.log"
+  ],
+  "dependency_probe": {
+    "available": {
+      "pandas": true,
+      "openpyxl": true,
+      "fastapi": true,
+      "jose": true,
+      "bcrypt": true,
+      "dotenv": true,
+      "numpy": true,
+      "faiss": true,
+      "sentence_transformers": true,
+      "pytest": true
+    },
+    "module_path_checks": [
+      {
+        "module": "app.db_manager",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\materials.db",
+        "inside_isolation": true,
+        "status": "ok"
+      },
+      {
+        "module": "app.auth_manager",
+        "attr": "AUTH_DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\auth.db",
+        "inside_isolation": true,
+        "status": "ok"
+      },
+      {
+        "module": "app.vector_index",
+        "attr": "CACHE_DIR",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\vector_cache",
+        "inside_isolation": true,
+        "status": "ok"
+      },
+      {
+        "module": "app.llm_rule_engine",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\materials.db",
+        "inside_isolation": true,
+        "status": "ok"
+      },
+      {
+        "module": "app.llm_client",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\db\\materials.db",
+        "inside_isolation": true,
+        "status": "ok"
+      },
+      {
+        "module": "app.feedback_train",
+        "attr": "FEEDBACK_FILE",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{615ec2e1-9fdb-4e72-aeaf-9e48d7fb8e18}\\Temp\\listtrans_m0_verify_6ljop6rc\\runtime\\feedback_samples.json",
+        "inside_isolation": true,
+        "status": "ok"
+      }
+    ],
+    "pending": [],
+    "hard_errors": [],
+    "errors": []
+  },
+  "pending_modules": [],
+  "hard_errors": [],
+  "business_hash_unchanged": true,
+  "business_changes": [],
+  "business_snapshot_before": {
+    "files": {
+      "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "app/materials.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/materials.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "app/auth.db": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "app/auth.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/auth.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_snapshot_after": {
+    "files": {
+      "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "app/materials.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/materials.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "app/auth.db": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "app/auth.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/auth.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "verdict": "PASS",
+  "exit_code": 0
+}

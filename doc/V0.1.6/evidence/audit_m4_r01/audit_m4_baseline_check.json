@@ -1,0 +1,306 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "backup_check": [
+    {
+      "path": "app/matcher.py",
+      "exists": true,
+      "expected": "e67d49f3daafe1fee642be031f65c15bc3126009336c1cfadb7b86f54415ea08",
+      "actual": "e67d49f3daafe1fee642be031f65c15bc3126009336c1cfadb7b86f54415ea08",
+      "ok": true
+    },
+    {
+      "path": "app/sandbox_evaluator.py",
+      "exists": true,
+      "expected": "c145ad9ab15bfc5d2b679c8a7aa79028dade415a6a092ddd48bc7a9fa64d1d2c",
+      "actual": "c145ad9ab15bfc5d2b679c8a7aa79028dade415a6a092ddd48bc7a9fa64d1d2c",
+      "ok": true
+    },
+    {
+      "path": "app/flywheel_sandbox.py",
+      "exists": true,
+      "expected": "90b5a32b6e1ccc01c0395e6a0f70e63c67cecb1f6373f12f70d600c1e324be4a",
+      "actual": "90b5a32b6e1ccc01c0395e6a0f70e63c67cecb1f6373f12f70d600c1e324be4a",
+      "ok": true
+    },
+    {
+      "path": "app/server.py",
+      "exists": true,
+      "expected": "372b7689a25b4066423b744766c8b77af8352f4fe9ba0b002eaeb22314cf848d",
+      "actual": "372b7689a25b4066423b744766c8b77af8352f4fe9ba0b002eaeb22314cf848d",
+      "ok": true
+    },
+    {
+      "path": "tests/test_v0_0_8_llm_rules.py",
+      "exists": true,
+      "expected": "a4594e3381f0162c65561a45556b0631d21fc99f8d5be7b20c5d8a9bfa56482d",
+      "actual": "a4594e3381f0162c65561a45556b0631d21fc99f8d5be7b20c5d8a9bfa56482d",
+      "ok": true
+    },
+    {
+      "path": "doc/V0.1.6/02_任务台账.md",
+      "exists": true,
+      "expected": "f2708d19c9a476bc0332c0923407498622005fc2a122db0cc656b42ed5d5c7eb",
+      "actual": "f2708d19c9a476bc0332c0923407498622005fc2a122db0cc656b42ed5d5c7eb",
+      "ok": true
+    }
+  ],
+  "business_check": [
+    {
+      "path": "app/materials.db",
+      "exists": true,
+      "expected": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "actual": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "ok": true
+    },
+    {
+      "path": "app/materials.db-wal",
+      "exists": true,
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ok": true
+    },
+    {
+      "path": "app/materials.db-shm",
+      "exists": true,
+      "expected": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "actual": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "ok": true
+    },
+    {
+      "path": "app/auth.db",
+      "exists": true,
+      "expected": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "actual": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "ok": true
+    },
+    {
+      "path": "app/auth.db-wal",
+      "exists": true,
+      "expected": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "actual": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ok": true
+    },
+    {
+      "path": "app/auth.db-shm",
+      "exists": true,
+      "expected": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "actual": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "ok": true
+    },
+    {
+      "path": "app/binding_feedback.json",
+      "exists": true,
+      "expected": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "actual": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "ok": true
+    },
+    {
+      "path": "app/feedback_samples.json",
+      "exists": true,
+      "expected": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944",
+      "actual": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944",
+      "ok": true
+    }
+  ],
+  "tree_check": [
+    {
+      "path": "config/alias_dict.json",
+      "exists": true,
+      "expected": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "actual": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "ok": true
+    },
+    {
+      "path": "config/auto_binding_rules.json",
+      "exists": true,
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "ok": true
+    },
+    {
+      "path": "config/boost_rules.json",
+      "exists": true,
+      "expected": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "actual": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "ok": true
+    },
+    {
+      "path": "config/category_domain_map.json",
+      "exists": true,
+      "expected": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "actual": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "ok": true
+    },
+    {
+      "path": "config/connection_dict.json",
+      "exists": true,
+      "expected": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "actual": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "ok": true
+    },
+    {
+      "path": "config/domain_schema.json",
+      "exists": true,
+      "expected": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "actual": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "ok": true
+    },
+    {
+      "path": "config/flags_dict.json",
+      "exists": true,
+      "expected": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "actual": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "ok": true
+    },
+    {
+      "path": "config/llm_config.json",
+      "exists": true,
+      "expected": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "actual": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "ok": true
+    },
+    {
+      "path": "config/llm_prompts.json",
+      "exists": true,
+      "expected": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "actual": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "ok": true
+    },
+    {
+      "path": "config/material_dict.json",
+      "exists": true,
+      "expected": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "actual": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "ok": true
+    },
+    {
+      "path": "config/model_config.json",
+      "exists": true,
+      "expected": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "actual": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "ok": true
+    },
+    {
+      "path": "config/stop_words.json",
+      "exists": true,
+      "expected": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "actual": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "ok": true
+    },
+    {
+      "path": "config/tolerance_rules.json",
+      "exists": true,
+      "expected": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "actual": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "ok": true
+    },
+    {
+      "path": "config/unit_norm.json",
+      "exists": true,
+      "expected": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "actual": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "ok": true
+    },
+    {
+      "path": "config/unit_rules.json",
+      "exists": true,
+      "expected": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "actual": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "ok": true
+    },
+    {
+      "path": "config/weight_rules.json",
+      "exists": true,
+      "expected": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803",
+      "actual": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803",
+      "ok": true
+    },
+    {
+      "path": "app/vector_cache/cache_metadata.json",
+      "exists": true,
+      "expected": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+      "actual": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+      "ok": true
+    },
+    {
+      "path": "app/vector_cache/db_timestamp.txt",
+      "exists": true,
+      "expected": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+      "actual": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+      "ok": true
+    },
+    {
+      "path": "app/vector_cache/index_to_material.json",
+      "exists": true,
+      "expected": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+      "actual": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+      "ok": true
+    },
+    {
+      "path": "app/vector_cache/materials.index",
+      "exists": true,
+      "expected": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+      "actual": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+      "ok": true
+    },
+    {
+      "path": "app/vector_cache/materials_embeddings.npy",
+      "exists": true,
+      "expected": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb",
+      "actual": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb",
+      "ok": true
+    },
+    {
+      "path": "logs/app_runtime.log",
+      "exists": true,
+      "expected": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+      "actual": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+      "ok": true
+    },
+    {
+      "path": "logs/security.log",
+      "exists": true,
+      "expected": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340",
+      "actual": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340",
+      "ok": true
+    },
+    {
+      "path": "data/audit_disabled_materials_20260818.csv",
+      "exists": true,
+      "expected": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+      "actual": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+      "ok": true
+    },
+    {
+      "path": "data/audit_disabled_materials_20260820.csv",
+      "exists": true,
+      "expected": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+      "actual": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+      "ok": true
+    },
+    {
+      "path": "data/audit_disabled_materials_20260824.csv",
+      "exists": true,
+      "expected": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+      "actual": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+      "ok": true
+    },
+    {
+      "path": "data/audit_disabled_materials_20260902.csv",
+      "exists": true,
+      "expected": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+      "actual": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+      "ok": true
+    }
+  ],
+  "backup_all_ok": true,
+  "business_summary": {
+    "ok": 8,
+    "total": 8
+  },
+  "tree_summary": {
+    "ok": 27,
+    "total": 27
+  },
+  "business_all_ok": true
+}

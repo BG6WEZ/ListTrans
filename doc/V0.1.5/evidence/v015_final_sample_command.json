@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/test_m5_r04_recovery_isolation.py",
+    "tests/test_m0_guardrail_regression.py",
+    "tests/test_query_contract.py",
+    "tests/test_binding_decisions.py",
+    "tests/test_m4_permissions_and_tasks.py",
+    "tests/test_m3_hard_constraints_http.py",
+    "-q",
+    "-o",
+    "faulthandler_timeout=60"
+  ],
+  "exit_code": 0,
+  "wall_seconds": 34.406
+}

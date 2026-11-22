@@ -1,0 +1,3630 @@
+{
+  "base_image": "sha256:9517cc2a941cf9eebb662f2c833cdf88046709131a98380410b3b8b7a877e1b3",
+  "command": [
+    "docker",
+    "run",
+    "--pull=never",
+    "--rm",
+    "--init",
+    "--network",
+    "none",
+    "-i",
+    "--mount",
+    "type=bind,source=C:\\Users\\tlyer\\project\\ListTrans\\app\\rule_governance.py,target=/app/app/rule_governance.py,readonly",
+    "sha256:9517cc2a941cf9eebb662f2c833cdf88046709131a98380410b3b8b7a877e1b3",
+    "python",
+    "-u",
+    "-"
+  ],
+  "exit_code": 0,
+  "mode": "keyword",
+  "mounted_source_sha256": "c0a0057f25b8104f5fcf70264491f39c18637cf209e7982a2d8f13171ebb616c",
+  "reuse_smoke_sha256": "dc2f3a3352cbd2f1768c5d03ad1ba871ad938458db37a3bbee61450adfb91b5e",
+  "seconds": 41.53100000000086,
+  "smoke": {
+    "calls": [
+      [
+        "GET",
+        "/api/llm-rules/stats",
+        401
+      ],
+      [
+        "POST",
+        "/api/auth/login",
+        200
+      ],
+      [
+        "POST",
+        "/api/auth/login",
+        200
+      ],
+      [
+        "POST",
+        "/api/auth/login",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/miner/run",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/miner/run",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/suggestions/eval",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/suggestions/accept",
+        200
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/suggestions/eval",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/suggestions/accept",
+        200
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/record",
+        200
+      ],
+      [
+        "GET",
+        "/api/flywheel/export/benchmark",
+        200
+      ],
+      [
+        "GET",
+        "/api/flywheel/export/triplets",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/rollback",
+        409
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/rollback",
+        200
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/flywheel/rollback",
+        200
+      ],
+      [
+        "POST",
+        "/api/match",
+        200
+      ],
+      [
+        "POST",
+        "/api/upload",
+        200
+      ],
+      [
+        "GET",
+        "/api/upload/status",
+        200
+      ],
+      [
+        "POST",
+        "/api/binding/submit",
+        200
+      ],
+      [
+        "POST",
+        "/api/export",
+        200
+      ]
+    ],
+    "catalog_rows": 8,
+    "database_states": {
+      "after_alias_rollback": {
+        "snapshots": [
+          {
+            "benefit_class": "neutral",
+            "config_after": "{\"暖通\": {\"M4FAN\": \"排风机\"}}",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": false, \"content\": {}}",
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "eval_id": "eval_b87303d976c2",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 1,
+            "is_active": 0,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域别名 [暖通] 'M4FAN' -> '排风机'",
+            "rule_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "snapshot_version": "snap_20261118_142825_fc6aae",
+            "suggestion_id": 1,
+            "target_type": "SCOPED_ALIAS",
+            "targeted_eval_passed": 1
+          },
+          {
+            "benefit_class": "improved",
+            "config_after": "[{\"original_name\": \"防火阀\", \"original_spec\": \"70℃\", \"professional\": \"暖通\", \"bound_materials\": [{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}], \"eval_id\": \"eval_c6a093c78182\", \"rule_digest\": \"f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562\", \"benefit_class\": \"improved\", \"governance_provenance\": \"verified\"}]",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": true, \"content\": []}",
+            "created_at": "2026-11-18 14:28:35",
+            "discipline": "暖通",
+            "eval_id": "eval_c6a093c78182",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 2,
+            "is_active": 0,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域绑定规则 [暖通] '防火阀'",
+            "rule_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "snapshot_version": "snap_20261118_142835_974e87",
+            "suggestion_id": 2,
+            "target_type": "BINDING_RULE",
+            "targeted_eval_passed": 1
+          }
+        ],
+        "suggestions": [
+          {
+            "applied_rule_id": "snap_20261118_142825_fc6aae",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:14",
+            "discipline": "暖通",
+            "distinct_users": 2,
+            "governance_provenance": "verified",
+            "id": 1,
+            "last_eval_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "last_eval_id": "eval_b87303d976c2",
+            "migration_version": "",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "reviewed_at": "2026-11-18 14:28:36",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{\"professional\": \"暖通\", \"raw_professional\": \"暖通\", \"material_category\": \"\", \"domain\": \"\", \"name\": \"M4FAN\", \"stage\": \"mining\"}",
+            "sample_ids_json": "[1, 2, 3]",
+            "source_origin": "trusted_miner",
+            "source_pattern": "M4FAN",
+            "status": "rolled_back",
+            "suggestion_type": "ALIAS",
+            "support_count": 3,
+            "target_value": "排风机",
+            "updated_at": "2026-11-18 14:28:14"
+          },
+          {
+            "applied_rule_id": "snap_20261118_142835_974e87",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "distinct_users": 1,
+            "governance_provenance": "verified",
+            "id": 2,
+            "last_eval_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "last_eval_id": "eval_c6a093c78182",
+            "migration_version": "",
+            "neutral_reason": "",
+            "reviewed_at": "2026-11-18 14:28:36",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{}",
+            "sample_ids_json": "[]",
+            "source_origin": "synthetic_m4",
+            "source_pattern": "防火阀",
+            "status": "rolled_back",
+            "suggestion_type": "BINDING_RULE",
+            "support_count": 1,
+            "target_value": "[{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}]",
+            "updated_at": "2026-11-18 14:28:25"
+          }
+        ]
+      },
+      "after_binding_rollback": {
+        "snapshots": [
+          {
+            "benefit_class": "neutral",
+            "config_after": "{\"暖通\": {\"M4FAN\": \"排风机\"}}",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": false, \"content\": {}}",
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "eval_id": "eval_b87303d976c2",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 1,
+            "is_active": 1,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域别名 [暖通] 'M4FAN' -> '排风机'",
+            "rule_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "snapshot_version": "snap_20261118_142825_fc6aae",
+            "suggestion_id": 1,
+            "target_type": "SCOPED_ALIAS",
+            "targeted_eval_passed": 1
+          },
+          {
+            "benefit_class": "improved",
+            "config_after": "[{\"original_name\": \"防火阀\", \"original_spec\": \"70℃\", \"professional\": \"暖通\", \"bound_materials\": [{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}], \"eval_id\": \"eval_c6a093c78182\", \"rule_digest\": \"f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562\", \"benefit_class\": \"improved\", \"governance_provenance\": \"verified\"}]",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": true, \"content\": []}",
+            "created_at": "2026-11-18 14:28:35",
+            "discipline": "暖通",
+            "eval_id": "eval_c6a093c78182",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 2,
+            "is_active": 0,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域绑定规则 [暖通] '防火阀'",
+            "rule_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "snapshot_version": "snap_20261118_142835_974e87",
+            "suggestion_id": 2,
+            "target_type": "BINDING_RULE",
+            "targeted_eval_passed": 1
+          }
+        ],
+        "suggestions": [
+          {
+            "applied_rule_id": "snap_20261118_142825_fc6aae",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:14",
+            "discipline": "暖通",
+            "distinct_users": 2,
+            "governance_provenance": "verified",
+            "id": 1,
+            "last_eval_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "last_eval_id": "eval_b87303d976c2",
+            "migration_version": "",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "reviewed_at": "2026-11-18 14:28:25",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{\"professional\": \"暖通\", \"raw_professional\": \"暖通\", \"material_category\": \"\", \"domain\": \"\", \"name\": \"M4FAN\", \"stage\": \"mining\"}",
+            "sample_ids_json": "[1, 2, 3]",
+            "source_origin": "trusted_miner",
+            "source_pattern": "M4FAN",
+            "status": "accepted",
+            "suggestion_type": "ALIAS",
+            "support_count": 3,
+            "target_value": "排风机",
+            "updated_at": "2026-11-18 14:28:14"
+          },
+          {
+            "applied_rule_id": "snap_20261118_142835_974e87",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "distinct_users": 1,
+            "governance_provenance": "verified",
+            "id": 2,
+            "last_eval_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "last_eval_id": "eval_c6a093c78182",
+            "migration_version": "",
+            "neutral_reason": "",
+            "reviewed_at": "2026-11-18 14:28:36",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{}",
+            "sample_ids_json": "[]",
+            "source_origin": "synthetic_m4",
+            "source_pattern": "防火阀",
+            "status": "rolled_back",
+            "suggestion_type": "BINDING_RULE",
+            "support_count": 1,
+            "target_value": "[{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}]",
+            "updated_at": "2026-11-18 14:28:25"
+          }
+        ]
+      },
+      "after_rejected_rollback": {
+        "snapshots": [
+          {
+            "benefit_class": "neutral",
+            "config_after": "{\"暖通\": {\"M4FAN\": \"排风机\"}}",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": false, \"content\": {}}",
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "eval_id": "eval_b87303d976c2",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 1,
+            "is_active": 1,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域别名 [暖通] 'M4FAN' -> '排风机'",
+            "rule_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "snapshot_version": "snap_20261118_142825_fc6aae",
+            "suggestion_id": 1,
+            "target_type": "SCOPED_ALIAS",
+            "targeted_eval_passed": 1
+          },
+          {
+            "benefit_class": "improved",
+            "config_after": "[{\"original_name\": \"防火阀\", \"original_spec\": \"70℃\", \"professional\": \"暖通\", \"bound_materials\": [{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}], \"eval_id\": \"eval_c6a093c78182\", \"rule_digest\": \"f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562\", \"benefit_class\": \"improved\", \"governance_provenance\": \"verified\"}]",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": true, \"content\": []}",
+            "created_at": "2026-11-18 14:28:35",
+            "discipline": "暖通",
+            "eval_id": "eval_c6a093c78182",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 2,
+            "is_active": 1,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域绑定规则 [暖通] '防火阀'",
+            "rule_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "snapshot_version": "snap_20261118_142835_974e87",
+            "suggestion_id": 2,
+            "target_type": "BINDING_RULE",
+            "targeted_eval_passed": 1
+          }
+        ],
+        "suggestions": [
+          {
+            "applied_rule_id": "snap_20261118_142825_fc6aae",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:14",
+            "discipline": "暖通",
+            "distinct_users": 2,
+            "governance_provenance": "verified",
+            "id": 1,
+            "last_eval_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "last_eval_id": "eval_b87303d976c2",
+            "migration_version": "",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "reviewed_at": "2026-11-18 14:28:25",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{\"professional\": \"暖通\", \"raw_professional\": \"暖通\", \"material_category\": \"\", \"domain\": \"\", \"name\": \"M4FAN\", \"stage\": \"mining\"}",
+            "sample_ids_json": "[1, 2, 3]",
+            "source_origin": "trusted_miner",
+            "source_pattern": "M4FAN",
+            "status": "accepted",
+            "suggestion_type": "ALIAS",
+            "support_count": 3,
+            "target_value": "排风机",
+            "updated_at": "2026-11-18 14:28:14"
+          },
+          {
+            "applied_rule_id": "snap_20261118_142835_974e87",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "distinct_users": 1,
+            "governance_provenance": "verified",
+            "id": 2,
+            "last_eval_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "last_eval_id": "eval_c6a093c78182",
+            "migration_version": "",
+            "neutral_reason": "",
+            "reviewed_at": "2026-11-18 14:28:35",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{}",
+            "sample_ids_json": "[]",
+            "source_origin": "synthetic_m4",
+            "source_pattern": "防火阀",
+            "status": "accepted",
+            "suggestion_type": "BINDING_RULE",
+            "support_count": 1,
+            "target_value": "[{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}]",
+            "updated_at": "2026-11-18 14:28:25"
+          }
+        ]
+      },
+      "before_rejected_rollback": {
+        "snapshots": [
+          {
+            "benefit_class": "neutral",
+            "config_after": "{\"暖通\": {\"M4FAN\": \"排风机\"}}",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": false, \"content\": {}}",
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "eval_id": "eval_b87303d976c2",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 1,
+            "is_active": 1,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域别名 [暖通] 'M4FAN' -> '排风机'",
+            "rule_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "snapshot_version": "snap_20261118_142825_fc6aae",
+            "suggestion_id": 1,
+            "target_type": "SCOPED_ALIAS",
+            "targeted_eval_passed": 1
+          },
+          {
+            "benefit_class": "improved",
+            "config_after": "[{\"original_name\": \"防火阀\", \"original_spec\": \"70℃\", \"professional\": \"暖通\", \"bound_materials\": [{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}], \"eval_id\": \"eval_c6a093c78182\", \"rule_digest\": \"f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562\", \"benefit_class\": \"improved\", \"governance_provenance\": \"verified\"}]",
+            "config_before": "{\"snapshot_format\": \"v016-m4-file-v1\", \"existed\": true, \"content\": []}",
+            "created_at": "2026-11-18 14:28:35",
+            "discipline": "暖通",
+            "eval_id": "eval_c6a093c78182",
+            "golden_eval_delta": 0.0,
+            "golden_eval_score": 0.0,
+            "governance_provenance": "verified",
+            "id": 2,
+            "is_active": 1,
+            "migration_version": "v0.16-m2-v1",
+            "neutral_reason": "",
+            "operator_id": "m4_admin",
+            "reason": "采纳专业作用域绑定规则 [暖通] '防火阀'",
+            "rule_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "snapshot_version": "snap_20261118_142835_974e87",
+            "suggestion_id": 2,
+            "target_type": "BINDING_RULE",
+            "targeted_eval_passed": 1
+          }
+        ],
+        "suggestions": [
+          {
+            "applied_rule_id": "snap_20261118_142825_fc6aae",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:14",
+            "discipline": "暖通",
+            "distinct_users": 2,
+            "governance_provenance": "verified",
+            "id": 1,
+            "last_eval_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+            "last_eval_id": "eval_b87303d976c2",
+            "migration_version": "",
+            "neutral_reason": "M4 合成闭环人工核验稳态",
+            "reviewed_at": "2026-11-18 14:28:25",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{\"professional\": \"暖通\", \"raw_professional\": \"暖通\", \"material_category\": \"\", \"domain\": \"\", \"name\": \"M4FAN\", \"stage\": \"mining\"}",
+            "sample_ids_json": "[1, 2, 3]",
+            "source_origin": "trusted_miner",
+            "source_pattern": "M4FAN",
+            "status": "accepted",
+            "suggestion_type": "ALIAS",
+            "support_count": 3,
+            "target_value": "排风机",
+            "updated_at": "2026-11-18 14:28:14"
+          },
+          {
+            "applied_rule_id": "snap_20261118_142835_974e87",
+            "consistency": 1.0,
+            "created_at": "2026-11-18 14:28:25",
+            "discipline": "暖通",
+            "distinct_users": 1,
+            "governance_provenance": "verified",
+            "id": 2,
+            "last_eval_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+            "last_eval_id": "eval_c6a093c78182",
+            "migration_version": "",
+            "neutral_reason": "",
+            "reviewed_at": "2026-11-18 14:28:35",
+            "reviewer_id": "m4_admin",
+            "rule_context_json": "{}",
+            "sample_ids_json": "[]",
+            "source_origin": "synthetic_m4",
+            "source_pattern": "防火阀",
+            "status": "accepted",
+            "suggestion_type": "BINDING_RULE",
+            "support_count": 1,
+            "target_value": "[{\"code\": \"M3-DEMO-02\", \"name\": \"防火阀\", \"specification\": \"500×400 70℃\", \"unit\": \"个\", \"brand\": \"\", \"category\": \"\", \"qty_ratio\": 1.0}]",
+            "updated_at": "2026-11-18 14:28:25"
+          }
+        ]
+      }
+    },
+    "evaluations": {
+      "1": {
+        "benefit": "neutral",
+        "eval_id": "eval_b87303d976c2",
+        "message": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条，逐例得分/间隔零退化）",
+        "owner_account_epoch": "7c932c51a7d39ee9235edbb8",
+        "owner_user_id": 1,
+        "passed": true,
+        "payload_digest": "d33faa0e9383f8de2d198b9d148cdebdc0e3cf752b903e53160e4fe1817df65c",
+        "progress": 100,
+        "report": {
+          "baseline_guard_metrics": {
+            "candidate_recall": 62.5,
+            "candidate_recall_denominator": 8,
+            "candidate_recall_numerator": 5,
+            "channel_contributions": {
+              "fts": 5,
+              "fts_hvac_1000": 1,
+              "fts_hvac_500 400": 1,
+              "fts_hvac_500 400 70": 1,
+              "fts_hvac_医用离心式排风机": 1,
+              "fts_hvac_医用离心式排风机 1000": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_防火阀 500 400": 1,
+              "model_match": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 62.5,
+            "miss@10": 37.5,
+            "mrr": 0.625,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 3,
+            "ranked_gt10_count": 0,
+            "recall@10": 62.5,
+            "recall@3": 62.5,
+            "recall@5": 62.5,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 5,
+            "total": 8
+          },
+          "baseline_metrics": {
+            "candidate_recall": 100.0,
+            "candidate_recall_denominator": 1,
+            "candidate_recall_numerator": 1,
+            "channel_contributions": {
+              "fts_hvac_1000": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 100.0,
+            "miss@10": 0.0,
+            "mrr": 1.0,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 0,
+            "ranked_gt10_count": 0,
+            "recall@10": 100.0,
+            "recall@3": 100.0,
+            "recall@5": 100.0,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 1,
+            "total": 1
+          },
+          "benefit": "neutral",
+          "binding_checks_count": 9,
+          "binding_degraded_count": 0,
+          "binding_improved_count": 0,
+          "binding_violations": [],
+          "cache_reused_files": [],
+          "candidate_diagnostics": [
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-01",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "score": 100.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "名称": "排风机",
+                    "风量": 1000.0
+                  },
+                  "clean_text": "风量1000m³/h",
+                  "domain": "fan",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "排风机",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "fan",
+                      "material_category": "",
+                      "name": "排风机",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "fan",
+                        "material_category": "",
+                        "name": "排风机",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "风量1000m³/h"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 100.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-01",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 100.0,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M4-ALIAS",
+              "scope": "rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-07",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 0.85,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "score": 85.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 15.0,
+                    "is_circular": true,
+                    "名称": "紫铜",
+                    "外径": 15.0,
+                    "形状": "圆形",
+                    "材质": "紫铜",
+                    "管径": "DN15"
+                  },
+                  "clean_text": "DN15",
+                  "domain": "pipe_copper",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "紫铜",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "pipe_copper",
+                      "material_category": "",
+                      "name": "紫铜",
+                      "professional": "医气",
+                      "raw_professional": "医气",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "pipe_copper",
+                        "material_category": "",
+                        "name": "紫铜",
+                        "professional": "医气",
+                        "raw_professional": "医气",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN15"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 85.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-07",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 85.0,
+                    "max_score": 0.85,
+                    "reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-07",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-05",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "型号完全匹配",
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "属同系列产品"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "model_match",
+                      "fts"
+                    ],
+                    "score": 99.8
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "主截面": 16.0,
+                    "主芯数": 3,
+                    "半周长": 19.0,
+                    "名称": "电缆",
+                    "型号": "YJV",
+                    "型号族": "YJV",
+                    "宽": 16.0,
+                    "尺寸": "3*16",
+                    "尺寸_2d": "3*16",
+                    "形状": "矩形",
+                    "截面积": "16",
+                    "芯数": "3",
+                    "长": 3.0
+                  },
+                  "clean_text": "YJV 3*16",
+                  "domain": "cable_power",
+                  "kv_dict": {},
+                  "model": "YJV",
+                  "name": "电缆",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "cable_power",
+                      "material_category": "",
+                      "name": "电缆",
+                      "professional": "强电",
+                      "raw_professional": "强电",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "cable_power",
+                        "material_category": "",
+                        "name": "电缆",
+                        "professional": "强电",
+                        "raw_professional": "强电",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "YJV 3*16"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 99.8,
+                    "W": 0.0,
+                    "code": "M3-DEMO-05",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 99.8,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "型号完全匹配",
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "属同系列产品"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "model_match",
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-05",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-01",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "score": 100.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "名称": "排风机",
+                    "风量": 1000.0
+                  },
+                  "clean_text": "风量1000m³/h",
+                  "domain": "fan",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "排风机",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "fan",
+                      "material_category": "",
+                      "name": "排风机",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "fan",
+                        "material_category": "",
+                        "name": "排风机",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "风量1000m³/h"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 100.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-01",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 100.0,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-01",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 25.0,
+                    "is_circular": true,
+                    "名称": "医用不锈钢球阀",
+                    "形状": "圆形",
+                    "材质": "不锈钢304",
+                    "管径": "DN25",
+                    "阀型": "球阀"
+                  },
+                  "clean_text": "DN25 304",
+                  "domain": "valve_water",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "医用不锈钢球阀",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "valve_water",
+                      "material_category": "",
+                      "name": "医用不锈钢球阀",
+                      "professional": "给排水",
+                      "raw_professional": "给排水",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "valve_water",
+                        "material_category": "",
+                        "name": "医用不锈钢球阀",
+                        "professional": "给排水",
+                        "raw_professional": "给排水",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN25 304"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-03",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-03",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "介质": "氧气",
+                    "名称": "医用氧气快速终端"
+                  },
+                  "clean_text": "墙式",
+                  "domain": "medical_gas",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "医用氧气快速终端",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "medical_gas",
+                      "material_category": "",
+                      "name": "医用氧气快速终端",
+                      "professional": "医气",
+                      "raw_professional": "医气",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "medical_gas",
+                        "material_category": "",
+                        "name": "医用氧气快速终端",
+                        "professional": "医气",
+                        "raw_professional": "医气",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "墙式"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-08",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-08",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "半周长": 1100.0,
+                    "名称": "常规配电箱",
+                    "宽": 500.0,
+                    "尺寸": "600*500*200",
+                    "尺寸_2d": "600*500",
+                    "形状": "矩形",
+                    "类型": "配电箱",
+                    "长": 600.0,
+                    "长度": 200.0,
+                    "高": 200.0
+                  },
+                  "clean_text": "600*500*200",
+                  "domain": "switchgear",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "常规配电箱",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "switchgear",
+                      "material_category": "",
+                      "name": "常规配电箱",
+                      "professional": "强电",
+                      "raw_professional": "强电",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "switchgear",
+                        "material_category": "",
+                        "name": "常规配电箱",
+                        "professional": "强电",
+                        "raw_professional": "强电",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "600*500*200"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-06",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-06",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-02",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_防火阀",
+                      "fts_hvac_防火阀 500 400",
+                      "fts_hvac_500 400 70",
+                      "fts_hvac_500 400"
+                    ],
+                    "score": 98.8
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "半周长": 900.0,
+                    "名称": "防火阀",
+                    "宽": 400.0,
+                    "尺寸": "500*400",
+                    "尺寸_2d": "500*400",
+                    "形状": "矩形",
+                    "控制方式": "常开熔断",
+                    "熔断温度": 70,
+                    "电动": false,
+                    "长": 500.0,
+                    "防火": true
+                  },
+                  "clean_text": "500*400 70℃",
+                  "domain": "damper",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "防火阀",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "damper",
+                      "material_category": "",
+                      "name": "防火阀",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "damper",
+                        "material_category": "",
+                        "name": "防火阀",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "500*400 70℃"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 98.8,
+                    "W": 0.0,
+                    "code": "M3-DEMO-02",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 98.8,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_防火阀",
+                      "fts_hvac_防火阀 500 400",
+                      "fts_hvac_500 400 70",
+                      "fts_hvac_500 400"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-02",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-04",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致",
+                      "管径冲突拦截"
+                    ],
+                    "max_score": 0.3,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "score": 30.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 50.0,
+                    "is_circular": true,
+                    "名称": "镀锌钢管",
+                    "形状": "圆形",
+                    "材质": "镀锌钢板",
+                    "管径": "DN50"
+                  },
+                  "clean_text": "DN50",
+                  "domain": "pipe_steel",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "镀锌钢管",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "pipe_steel",
+                      "material_category": "",
+                      "name": "镀锌钢管",
+                      "professional": "给排水",
+                      "raw_professional": "给排水",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "pipe_steel",
+                        "material_category": "",
+                        "name": "镀锌钢管",
+                        "professional": "给排水",
+                        "raw_professional": "给排水",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN50"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 30.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-04",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 30.0,
+                    "max_score": 0.3,
+                    "reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致",
+                      "管径冲突拦截"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-04",
+              "scope": "guard_rows"
+            }
+          ],
+          "candidate_guard_metrics": {
+            "candidate_recall": 62.5,
+            "candidate_recall_denominator": 8,
+            "candidate_recall_numerator": 5,
+            "channel_contributions": {
+              "fts": 5,
+              "fts_hvac_1000": 1,
+              "fts_hvac_500 400": 1,
+              "fts_hvac_500 400 70": 1,
+              "fts_hvac_医用离心式排风机": 1,
+              "fts_hvac_医用离心式排风机 1000": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_防火阀 500 400": 1,
+              "model_match": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 62.5,
+            "miss@10": 37.5,
+            "mrr": 0.625,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 3,
+            "ranked_gt10_count": 0,
+            "recall@10": 62.5,
+            "recall@3": 62.5,
+            "recall@5": 62.5,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 5,
+            "total": 8
+          },
+          "candidate_metrics": {
+            "candidate_recall": 100.0,
+            "candidate_recall_denominator": 1,
+            "candidate_recall_numerator": 1,
+            "channel_contributions": {
+              "fts": 1,
+              "fts_hvac_1000": 1,
+              "fts_hvac_医用离心式排风机": 1,
+              "fts_hvac_医用离心式排风机 1000": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 100.0,
+            "miss@10": 0.0,
+            "mrr": 1.0,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 0,
+            "ranked_gt10_count": 0,
+            "recall@10": 100.0,
+            "recall@3": 100.0,
+            "recall@5": 100.0,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 1,
+            "total": 1
+          },
+          "degraded_count": 0,
+          "degraded_from_top1": 0,
+          "details": [
+            {
+              "absolute_epsilon": 1e-06,
+              "baseline": {
+                "T": 98.9,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-01"
+                ]
+              },
+              "candidate": {
+                "T": 100.0,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-01"
+                ]
+              },
+              "id": "M4-ALIAS",
+              "score_precision": {
+                "baseline": "raw",
+                "candidate": "raw"
+              },
+              "type": "score_protection"
+            }
+          ],
+          "failed_samples_count": 0,
+          "guard_count": 8,
+          "guard_degraded_count": 0,
+          "guard_passed": true,
+          "guard_violations": [],
+          "improved_count": 0,
+          "integrity_errors": [],
+          "passed": true,
+          "reason": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条，逐例得分/间隔零退化）",
+          "rule_execution_hits": 4,
+          "safety_passed": true,
+          "score_comparisons": [
+            {
+              "absolute_epsilon": 1e-06,
+              "baseline": {
+                "T": 98.9,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-01"
+                ]
+              },
+              "candidate": {
+                "T": 100.0,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-01"
+                ]
+              },
+              "id": "M4-ALIAS",
+              "score_precision": {
+                "baseline": "raw",
+                "candidate": "raw"
+              },
+              "type": "score_protection"
+            }
+          ],
+          "skipped_samples": [],
+          "skipped_samples_count": 0,
+          "snapshot": {
+            "baseline": {
+              "budget": {
+                "chunk_size": 50,
+                "top_k": 10
+              },
+              "golden_set_item_count": 1,
+              "golden_set_sha256": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+              "materials_db_sha256": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+              "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+              "vector_channel": {
+                "active_material_codes": [],
+                "cache_embeddings_sha256": "",
+                "dim": null,
+                "enabled": false,
+                "model": "bge-small-zh-v1.5",
+                "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+              }
+            },
+            "candidate": {
+              "budget": {
+                "chunk_size": 50,
+                "top_k": 10
+              },
+              "golden_set_item_count": 1,
+              "golden_set_sha256": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+              "materials_db_sha256": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+              "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+              "vector_channel": {
+                "active_material_codes": [],
+                "cache_embeddings_sha256": "",
+                "dim": null,
+                "enabled": false,
+                "model": "bge-small-zh-v1.5",
+                "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+              }
+            },
+            "errors": []
+          },
+          "targeted_count": 1,
+          "violations": []
+        },
+        "rule_key": "suggestion:1",
+        "rule_revision": 1,
+        "rule_source": "flywheel_alias",
+        "safety_passed": true,
+        "status": "completed",
+        "task_id": "eval_b87303d976c2"
+      },
+      "2": {
+        "benefit": "improved",
+        "eval_id": "eval_c6a093c78182",
+        "message": "门禁通过（有效改善）：match改善 0 例，绑定改善 1 例，命中 1 次，全局保护 8 例零退化",
+        "owner_account_epoch": "7c932c51a7d39ee9235edbb8",
+        "owner_user_id": 1,
+        "passed": true,
+        "payload_digest": "f861fab9be6ab2ece93b2b64e604be89c131c18b09581ee2c22e503a3a2a5562",
+        "progress": 100,
+        "report": {
+          "baseline_guard_metrics": {
+            "candidate_recall": 62.5,
+            "candidate_recall_denominator": 8,
+            "candidate_recall_numerator": 5,
+            "channel_contributions": {
+              "fts": 5,
+              "fts_hvac_1000": 2,
+              "fts_hvac_医用离心式排风机": 2,
+              "fts_hvac_医用离心式排风机 1000": 2,
+              "model_match": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 62.5,
+            "miss@10": 37.5,
+            "mrr": 0.625,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 3,
+            "ranked_gt10_count": 0,
+            "recall@10": 62.5,
+            "recall@3": 62.5,
+            "recall@5": 62.5,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 5,
+            "total": 8
+          },
+          "baseline_metrics": {
+            "candidate_recall": 100.0,
+            "candidate_recall_denominator": 1,
+            "candidate_recall_numerator": 1,
+            "channel_contributions": {
+              "fts": 1,
+              "fts_hvac_500 400": 1,
+              "fts_hvac_500 400 70": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_防火阀 500 400": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 100.0,
+            "miss@10": 0.0,
+            "mrr": 1.0,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 0,
+            "ranked_gt10_count": 0,
+            "recall@10": 100.0,
+            "recall@3": 100.0,
+            "recall@5": 100.0,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 1,
+            "total": 1
+          },
+          "benefit": "improved",
+          "binding_checks_count": 9,
+          "binding_degraded_count": 0,
+          "binding_improved_count": 1,
+          "binding_violations": [],
+          "cache_reused_files": [],
+          "candidate_diagnostics": [
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-02",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_防火阀",
+                      "fts_hvac_防火阀 500 400",
+                      "fts_hvac_500 400 70",
+                      "fts_hvac_500 400"
+                    ],
+                    "score": 98.8
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+                  "decision_source": "auto_binding_rule",
+                  "decision_status": "auto_accepted",
+                  "export_eligible": true
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "半周长": 900.0,
+                    "名称": "防火阀",
+                    "宽": 400.0,
+                    "尺寸": "500*400",
+                    "尺寸_2d": "500*400",
+                    "形状": "矩形",
+                    "控制方式": "常开熔断",
+                    "熔断温度": 70,
+                    "电动": false,
+                    "长": 500.0,
+                    "防火": true
+                  },
+                  "clean_text": "500*400 70℃",
+                  "domain": "damper",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "防火阀",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "damper",
+                      "material_category": "",
+                      "name": "防火阀",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "damper",
+                        "material_category": "",
+                        "name": "防火阀",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "500*400 70℃"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 98.8,
+                    "W": 0.0,
+                    "code": "M3-DEMO-02",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 98.8,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_防火阀",
+                      "fts_hvac_防火阀 500 400",
+                      "fts_hvac_500 400 70",
+                      "fts_hvac_500 400"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-02",
+              "scope": "rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-07",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 0.85,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "score": 85.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 15.0,
+                    "is_circular": true,
+                    "名称": "紫铜",
+                    "外径": 15.0,
+                    "形状": "圆形",
+                    "材质": "紫铜",
+                    "管径": "DN15"
+                  },
+                  "clean_text": "DN15",
+                  "domain": "pipe_copper",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "紫铜",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "pipe_copper",
+                      "material_category": "",
+                      "name": "紫铜",
+                      "professional": "医气",
+                      "raw_professional": "医气",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "pipe_copper",
+                        "material_category": "",
+                        "name": "紫铜",
+                        "professional": "医气",
+                        "raw_professional": "医气",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN15"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 85.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-07",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 85.0,
+                    "max_score": 0.85,
+                    "reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-07",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-05",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "型号完全匹配",
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "属同系列产品"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "model_match",
+                      "fts"
+                    ],
+                    "score": 99.8
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "主截面": 16.0,
+                    "主芯数": 3,
+                    "半周长": 19.0,
+                    "名称": "电缆",
+                    "型号": "YJV",
+                    "型号族": "YJV",
+                    "宽": 16.0,
+                    "尺寸": "3*16",
+                    "尺寸_2d": "3*16",
+                    "形状": "矩形",
+                    "截面积": "16",
+                    "芯数": "3",
+                    "长": 3.0
+                  },
+                  "clean_text": "YJV 3*16",
+                  "domain": "cable_power",
+                  "kv_dict": {},
+                  "model": "YJV",
+                  "name": "电缆",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "cable_power",
+                      "material_category": "",
+                      "name": "电缆",
+                      "professional": "强电",
+                      "raw_professional": "强电",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "cable_power",
+                        "material_category": "",
+                        "name": "电缆",
+                        "professional": "强电",
+                        "raw_professional": "强电",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "YJV 3*16"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 99.8,
+                    "W": 0.0,
+                    "code": "M3-DEMO-05",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 99.8,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "型号完全匹配",
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "属同系列产品"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "model_match",
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-05",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-01",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "score": 100.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "名称": "排风机",
+                    "风量": 1000.0
+                  },
+                  "clean_text": "风量1000m³/h",
+                  "domain": "fan",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "排风机",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "fan",
+                      "material_category": "",
+                      "name": "排风机",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "fan",
+                        "material_category": "",
+                        "name": "排风机",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "风量1000m³/h"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 100.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-01",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 100.0,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-01",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 25.0,
+                    "is_circular": true,
+                    "名称": "医用不锈钢球阀",
+                    "形状": "圆形",
+                    "材质": "不锈钢304",
+                    "管径": "DN25",
+                    "阀型": "球阀"
+                  },
+                  "clean_text": "DN25 304",
+                  "domain": "valve_water",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "医用不锈钢球阀",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "valve_water",
+                      "material_category": "",
+                      "name": "医用不锈钢球阀",
+                      "professional": "给排水",
+                      "raw_professional": "给排水",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "valve_water",
+                        "material_category": "",
+                        "name": "医用不锈钢球阀",
+                        "professional": "给排水",
+                        "raw_professional": "给排水",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN25 304"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-03",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-03",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "介质": "氧气",
+                    "名称": "医用氧气快速终端"
+                  },
+                  "clean_text": "墙式",
+                  "domain": "medical_gas",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "医用氧气快速终端",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "medical_gas",
+                      "material_category": "",
+                      "name": "医用氧气快速终端",
+                      "professional": "医气",
+                      "raw_professional": "医气",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "medical_gas",
+                        "material_category": "",
+                        "name": "医用氧气快速终端",
+                        "professional": "医气",
+                        "raw_professional": "医气",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "墙式"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-08",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-08",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [],
+                "decision": {
+                  "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "is_circular": false,
+                    "半周长": 1100.0,
+                    "名称": "常规配电箱",
+                    "宽": 500.0,
+                    "尺寸": "600*500*200",
+                    "尺寸_2d": "600*500",
+                    "形状": "矩形",
+                    "类型": "配电箱",
+                    "长": 600.0,
+                    "长度": 200.0,
+                    "高": 200.0
+                  },
+                  "clean_text": "600*500*200",
+                  "domain": "switchgear",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "常规配电箱",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "switchgear",
+                      "material_category": "",
+                      "name": "常规配电箱",
+                      "professional": "强电",
+                      "raw_professional": "强电",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "switchgear",
+                        "material_category": "",
+                        "name": "常规配电箱",
+                        "professional": "强电",
+                        "raw_professional": "强电",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "600*500*200"
+                },
+                "recall_pool_size": 0,
+                "targets": [
+                  {
+                    "T": null,
+                    "W": 0.0,
+                    "code": "M3-DEMO-06",
+                    "full_rank": null,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": null,
+                    "max_score": null,
+                    "reasons": [],
+                    "recall_pool_size": 0,
+                    "recall_sources": [],
+                    "recalled": false,
+                    "state": "not_recalled",
+                    "top10": false
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-06",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-01",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "max_score": 1.0,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "score": 100.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "名称": "排风机",
+                    "风量": 1000.0
+                  },
+                  "clean_text": "风量1000m³/h",
+                  "domain": "fan",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "排风机",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "fan",
+                      "material_category": "",
+                      "name": "排风机",
+                      "professional": "暖通",
+                      "raw_professional": "暖通",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "fan",
+                        "material_category": "",
+                        "name": "排风机",
+                        "professional": "暖通",
+                        "raw_professional": "暖通",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "风量1000m³/h"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 100.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-01",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 100.0,
+                    "max_score": 1.0,
+                    "reasons": [
+                      "品类名称一致",
+                      "核心参数在公差范围内",
+                      "分类精准匹配",
+                      "名称与规格完全一致"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts",
+                      "fts_hvac_医用离心式排风机",
+                      "fts_hvac_医用离心式排风机 1000",
+                      "fts_hvac_1000"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M4-ALIAS",
+              "scope": "guard_rows"
+            },
+            {
+              "diagnostics": {
+                "candidates": [
+                  {
+                    "code": "M3-DEMO-04",
+                    "hard_blocked": false,
+                    "match_reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致",
+                      "管径冲突拦截"
+                    ],
+                    "max_score": 0.3,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "score": 30.0
+                  }
+                ],
+                "decision": {
+                  "decision_reason": "matcher 算法推荐，需人工确认",
+                  "decision_source": "matcher",
+                  "decision_status": "recommended",
+                  "export_eligible": false
+                },
+                "query_parsed_spec": {
+                  "attrs": {
+                    "dn_val": 50.0,
+                    "is_circular": true,
+                    "名称": "镀锌钢管",
+                    "形状": "圆形",
+                    "材质": "镀锌钢板",
+                    "管径": "DN50"
+                  },
+                  "clean_text": "DN50",
+                  "domain": "pipe_steel",
+                  "kv_dict": {},
+                  "model": "",
+                  "name": "镀锌钢管",
+                  "noise_text": "",
+                  "rule_diagnostics": {
+                    "cleaning": {
+                      "applied_rules": [],
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": []
+                    },
+                    "context": {
+                      "domain": "pipe_steel",
+                      "material_category": "",
+                      "name": "镀锌钢管",
+                      "professional": "给排水",
+                      "raw_professional": "给排水",
+                      "stage": "extraction"
+                    },
+                    "degraded": false,
+                    "errors": [],
+                    "extraction": {
+                      "applied_rules": [],
+                      "context": {
+                        "domain": "pipe_steel",
+                        "material_category": "",
+                        "name": "镀锌钢管",
+                        "professional": "给排水",
+                        "raw_professional": "给排水",
+                        "stage": "extraction"
+                      },
+                      "degraded": false,
+                      "errors": [],
+                      "skipped_rules": [],
+                      "stage": "extraction"
+                    }
+                  },
+                  "spec": "DN50"
+                },
+                "recall_pool_size": 1,
+                "targets": [
+                  {
+                    "T": 30.0,
+                    "W": 0.0,
+                    "code": "M3-DEMO-04",
+                    "full_rank": 1,
+                    "hard_blocked": false,
+                    "in_catalog": true,
+                    "margin": 30.0,
+                    "max_score": 0.3,
+                    "reasons": [
+                      "品类名称一致",
+                      "分类精准匹配",
+                      "名称与规格完全一致",
+                      "管径冲突拦截"
+                    ],
+                    "recall_pool_size": 1,
+                    "recall_sources": [
+                      "fts"
+                    ],
+                    "recalled": true,
+                    "state": "top10_hit",
+                    "top10": true
+                  }
+                ]
+              },
+              "id": "M3-RUNTIME-04",
+              "scope": "guard_rows"
+            }
+          ],
+          "candidate_guard_metrics": {
+            "candidate_recall": 62.5,
+            "candidate_recall_denominator": 8,
+            "candidate_recall_numerator": 5,
+            "channel_contributions": {
+              "fts": 5,
+              "fts_hvac_1000": 2,
+              "fts_hvac_医用离心式排风机": 2,
+              "fts_hvac_医用离心式排风机 1000": 2,
+              "model_match": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 62.5,
+            "miss@10": 37.5,
+            "mrr": 0.625,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 3,
+            "ranked_gt10_count": 0,
+            "recall@10": 62.5,
+            "recall@3": 62.5,
+            "recall@5": 62.5,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 5,
+            "total": 8
+          },
+          "candidate_metrics": {
+            "candidate_recall": 100.0,
+            "candidate_recall_denominator": 1,
+            "candidate_recall_numerator": 1,
+            "channel_contributions": {
+              "fts": 1,
+              "fts_hvac_500 400": 1,
+              "fts_hvac_500 400 70": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_防火阀 500 400": 1
+            },
+            "diagnostic_failed_targets_count": 0,
+            "failed_samples_count": 0,
+            "hard_blocked_count": 0,
+            "hit@1": 100.0,
+            "miss@10": 0.0,
+            "mrr": 1.0,
+            "not_in_catalog_count": 0,
+            "not_recalled_count": 0,
+            "ranked_gt10_count": 0,
+            "recall@10": 100.0,
+            "recall@3": 100.0,
+            "recall@5": 100.0,
+            "skipped_samples_count": 0,
+            "top10_hit_count": 1,
+            "total": 1
+          },
+          "degraded_count": 0,
+          "degraded_from_top1": 0,
+          "details": [
+            {
+              "absolute_epsilon": 1e-06,
+              "baseline": {
+                "T": 98.8,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-02"
+                ]
+              },
+              "candidate": {
+                "T": 98.8,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-02"
+                ]
+              },
+              "id": "M3-RUNTIME-02",
+              "score_precision": {
+                "baseline": "raw",
+                "candidate": "raw"
+              },
+              "type": "score_protection"
+            }
+          ],
+          "failed_samples_count": 0,
+          "guard_count": 8,
+          "guard_degraded_count": 0,
+          "guard_passed": true,
+          "guard_violations": [],
+          "improved_count": 0,
+          "integrity_errors": [],
+          "passed": true,
+          "reason": "门禁通过（有效改善）：match改善 0 例，绑定改善 1 例，命中 1 次，全局保护 8 例零退化",
+          "rule_execution_hits": 1,
+          "safety_passed": true,
+          "score_comparisons": [
+            {
+              "absolute_epsilon": 1e-06,
+              "baseline": {
+                "T": 98.8,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-02"
+                ]
+              },
+              "candidate": {
+                "T": 98.8,
+                "W": null,
+                "margin": null,
+                "target_codes": [
+                  "M3-DEMO-02"
+                ]
+              },
+              "id": "M3-RUNTIME-02",
+              "score_precision": {
+                "baseline": "raw",
+                "candidate": "raw"
+              },
+              "type": "score_protection"
+            }
+          ],
+          "skipped_samples": [],
+          "skipped_samples_count": 0,
+          "snapshot": {
+            "baseline": {
+              "budget": {
+                "chunk_size": 50,
+                "top_k": 10
+              },
+              "golden_set_item_count": 1,
+              "golden_set_sha256": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+              "materials_db_sha256": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+              "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+              "vector_channel": {
+                "active_material_codes": [],
+                "cache_embeddings_sha256": "",
+                "dim": null,
+                "enabled": false,
+                "model": "bge-small-zh-v1.5",
+                "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+              }
+            },
+            "candidate": {
+              "budget": {
+                "chunk_size": 50,
+                "top_k": 10
+              },
+              "golden_set_item_count": 1,
+              "golden_set_sha256": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+              "materials_db_sha256": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+              "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+              "vector_channel": {
+                "active_material_codes": [],
+                "cache_embeddings_sha256": "",
+                "dim": null,
+                "enabled": false,
+                "model": "bge-small-zh-v1.5",
+                "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+              }
+            },
+            "errors": []
+          },
+          "targeted_count": 1,
+          "violations": []
+        },
+        "rule_key": "suggestion:2",
+        "rule_revision": 1,
+        "rule_source": "flywheel_binding",
+        "safety_passed": true,
+        "status": "completed",
+        "task_id": "eval_c6a093c78182"
+      }
+    },
+    "exports": {
+      "benchmark_count": 5,
+      "triplet_count": 1
+    },
+    "fingerprints": {
+      "alias": {
+        "algo_version": "listtrans-0.1.6-m0|9a1e6b18746d",
+        "baseline_release_version": "9338e8efc157c9a732bbd3ef72683ff94b9461a8a3e1ce27935fd456a1af0582",
+        "config_digest": "a1bc1f0824e22d7f64a1417172e4e8cbccd7ebe1ad4ec317717c672c51e92bf5",
+        "eval_assets_digest": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+        "evaluator_version": "v016-m3-eval-v1:3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "guard_assets_digest": "39c3ae25e75171e53182b54d00ac90982b55d581df2808d0693ff3ae794676f9",
+        "materials_revision": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+        "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+      },
+      "before": {
+        "algo_version": "listtrans-0.1.6-m0|9a1e6b18746d",
+        "baseline_release_version": "35d7d22364623b2183467da7c4705ccb2eebf25e664bb6a8389be76cc2acf294",
+        "config_digest": "7afda7e61fbade03e77949ebb262eda2b5421ae9ee795ae2fcf9cd387cdf11b7",
+        "eval_assets_digest": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+        "evaluator_version": "v016-m3-eval-v1:3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "guard_assets_digest": "39c3ae25e75171e53182b54d00ac90982b55d581df2808d0693ff3ae794676f9",
+        "materials_revision": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+        "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+      },
+      "binding": {
+        "algo_version": "listtrans-0.1.6-m0|9a1e6b18746d",
+        "baseline_release_version": "108f7e97adcdd6e0b673d834bca4124bf30a73c53a843cd11611746ce5a5fdc1",
+        "config_digest": "bd8acfcb903ab6abe32e6fc533dcb42408d005d0ac22df69f4f3977058dfa9e8",
+        "eval_assets_digest": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+        "evaluator_version": "v016-m3-eval-v1:3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "guard_assets_digest": "39c3ae25e75171e53182b54d00ac90982b55d581df2808d0693ff3ae794676f9",
+        "materials_revision": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+        "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+      },
+      "rollback_alias": {
+        "algo_version": "listtrans-0.1.6-m0|9a1e6b18746d",
+        "baseline_release_version": "35d7d22364623b2183467da7c4705ccb2eebf25e664bb6a8389be76cc2acf294",
+        "config_digest": "7afda7e61fbade03e77949ebb262eda2b5421ae9ee795ae2fcf9cd387cdf11b7",
+        "eval_assets_digest": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+        "evaluator_version": "v016-m3-eval-v1:3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "guard_assets_digest": "39c3ae25e75171e53182b54d00ac90982b55d581df2808d0693ff3ae794676f9",
+        "materials_revision": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+        "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+      },
+      "rollback_binding": {
+        "algo_version": "listtrans-0.1.6-m0|9a1e6b18746d",
+        "baseline_release_version": "9338e8efc157c9a732bbd3ef72683ff94b9461a8a3e1ce27935fd456a1af0582",
+        "config_digest": "a1bc1f0824e22d7f64a1417172e4e8cbccd7ebe1ad4ec317717c672c51e92bf5",
+        "eval_assets_digest": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+        "evaluator_version": "v016-m3-eval-v1:3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "guard_assets_digest": "39c3ae25e75171e53182b54d00ac90982b55d581df2808d0693ff3ae794676f9",
+        "materials_revision": "8:61604c453cd84bc3289252e164a82e8e922aaea83f327e27f60a54dbbc3a7fa7",
+        "model_version": "bge-small-zh-v1.5|unavailable:keyword_only"
+      }
+    },
+    "golden_sha256": "cc676f58a1354b0b3a12345b66987e91c926e6d74313e00f13b5502ca66384b5",
+    "lifo_409": true,
+    "match_alias": [
+      {
+        "bindings": null,
+        "decision_reason": null,
+        "decision_source": null,
+        "decision_status": null,
+        "matched_code": "M3-DEMO-01",
+        "parsed_spec": {
+          "attrs": {
+            "名称": "排风机",
+            "风量": 1000.0
+          },
+          "clean_text": "风量1000m³/h",
+          "domain": "fan",
+          "kv_dict": {},
+          "model": "",
+          "name": "排风机",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "fan",
+              "material_category": "",
+              "name": "排风机",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "fan",
+                "material_category": "",
+                "name": "排风机",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "风量1000m³/h"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-01",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "排风机",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"排风机 风量\": \"1000m³/h\", \"风量\": 1000.0}}",
+            "recall_source": "fts",
+            "recall_sources": [
+              "fts",
+              "fts_hvac_医用离心式排风机",
+              "fts_hvac_医用离心式排风机 1000",
+              "fts_hvac_1000"
+            ],
+            "score": 100.0,
+            "specification": "风量1000m³/h",
+            "unit": "台"
+          }
+        ]
+      },
+      {
+        "bindings": [
+          {
+            "brand": "",
+            "category": "暖通",
+            "code": "M3-DEMO-02",
+            "name": "防火阀",
+            "qty": 1.0,
+            "qty_ratio": 1.0,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ],
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "decision_source": "matcher",
+        "decision_status": "recommended",
+        "matched_code": "M3-DEMO-02",
+        "parsed_spec": {
+          "attrs": {
+            "is_circular": false,
+            "半周长": 900.0,
+            "名称": "防火阀",
+            "宽": 400.0,
+            "尺寸": "500*400",
+            "尺寸_2d": "500*400",
+            "形状": "矩形",
+            "控制方式": "常开熔断",
+            "熔断温度": 70,
+            "电动": false,
+            "长": 500.0,
+            "防火": true
+          },
+          "clean_text": "500*400 70℃",
+          "domain": "damper",
+          "kv_dict": {},
+          "model": "",
+          "name": "防火阀",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "damper",
+              "material_category": "",
+              "name": "防火阀",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "damper",
+                "material_category": "",
+                "name": "防火阀",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "500*400 70℃"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-02",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "防火阀",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"尺寸\": \"500*400\", \"熔断温度\": 70, \"防火\": true}}",
+            "recall_source": "fts",
+            "recall_sources": [
+              "fts",
+              "fts_hvac_防火阀",
+              "fts_hvac_防火阀 500 400",
+              "fts_hvac_500 400 70",
+              "fts_hvac_500 400"
+            ],
+            "score": 98.8,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ]
+      }
+    ],
+    "match_before": [
+      {
+        "bindings": null,
+        "decision_reason": null,
+        "decision_source": null,
+        "decision_status": null,
+        "matched_code": "M3-DEMO-01",
+        "parsed_spec": {
+          "attrs": {
+            "名称": "M4FAN",
+            "风量": 1000.0
+          },
+          "clean_text": "风量1000m³/h",
+          "domain": "ahu",
+          "kv_dict": {},
+          "model": "",
+          "name": "M4FAN",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "ahu",
+              "material_category": "",
+              "name": "M4FAN",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "ahu",
+                "material_category": "",
+                "name": "M4FAN",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "风量1000m³/h"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-01",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "排风机",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"排风机 风量\": \"1000m³/h\", \"风量\": 1000.0}}",
+            "recall_source": "fts_hvac_1000",
+            "recall_sources": [
+              "fts_hvac_1000"
+            ],
+            "score": 98.9,
+            "specification": "风量1000m³/h",
+            "unit": "台"
+          }
+        ]
+      },
+      {
+        "bindings": [
+          {
+            "brand": "",
+            "category": "暖通",
+            "code": "M3-DEMO-02",
+            "name": "防火阀",
+            "qty": 1.0,
+            "qty_ratio": 1.0,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ],
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "decision_source": "matcher",
+        "decision_status": "recommended",
+        "matched_code": "M3-DEMO-02",
+        "parsed_spec": {
+          "attrs": {
+            "is_circular": false,
+            "半周长": 900.0,
+            "名称": "防火阀",
+            "宽": 400.0,
+            "尺寸": "500*400",
+            "尺寸_2d": "500*400",
+            "形状": "矩形",
+            "控制方式": "常开熔断",
+            "熔断温度": 70,
+            "电动": false,
+            "长": 500.0,
+            "防火": true
+          },
+          "clean_text": "500*400 70℃",
+          "domain": "damper",
+          "kv_dict": {},
+          "model": "",
+          "name": "防火阀",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "damper",
+              "material_category": "",
+              "name": "防火阀",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "damper",
+                "material_category": "",
+                "name": "防火阀",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "500*400 70℃"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-02",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "防火阀",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"尺寸\": \"500*400\", \"熔断温度\": 70, \"防火\": true}}",
+            "recall_source": "fts",
+            "recall_sources": [
+              "fts",
+              "fts_hvac_防火阀",
+              "fts_hvac_防火阀 500 400",
+              "fts_hvac_500 400 70",
+              "fts_hvac_500 400"
+            ],
+            "score": 98.8,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ]
+      }
+    ],
+    "match_binding": [
+      {
+        "bindings": null,
+        "decision_reason": null,
+        "decision_source": null,
+        "decision_status": null,
+        "matched_code": "M3-DEMO-01",
+        "parsed_spec": {
+          "attrs": {
+            "名称": "排风机",
+            "风量": 1000.0
+          },
+          "clean_text": "风量1000m³/h",
+          "domain": "fan",
+          "kv_dict": {},
+          "model": "",
+          "name": "排风机",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "fan",
+              "material_category": "",
+              "name": "排风机",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "fan",
+                "material_category": "",
+                "name": "排风机",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "风量1000m³/h"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-01",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "排风机",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"排风机 风量\": \"1000m³/h\", \"风量\": 1000.0}}",
+            "recall_source": "fts",
+            "recall_sources": [
+              "fts",
+              "fts_hvac_医用离心式排风机",
+              "fts_hvac_医用离心式排风机 1000",
+              "fts_hvac_1000"
+            ],
+            "score": 100.0,
+            "specification": "风量1000m³/h",
+            "unit": "台"
+          }
+        ]
+      },
+      {
+        "bindings": [
+          {
+            "brand": "",
+            "category": "",
+            "code": "M3-DEMO-02",
+            "name": "防火阀",
+            "qty": 1.0,
+            "qty_ratio": 1.0,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ],
+        "decision_reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+        "decision_source": "auto_binding_rule",
+        "decision_status": "auto_accepted",
+        "matched_code": "M3-DEMO-02",
+        "parsed_spec": {
+          "attrs": {
+            "is_circular": false,
+            "半周长": 900.0,
+            "名称": "防火阀",
+            "宽": 400.0,
+            "尺寸": "500*400",
+            "尺寸_2d": "500*400",
+            "形状": "矩形",
+            "控制方式": "常开熔断",
+            "熔断温度": 70,
+            "电动": false,
+            "长": 500.0,
+            "防火": true
+          },
+          "clean_text": "500*400 70℃",
+          "domain": "damper",
+          "kv_dict": {},
+          "model": "",
+          "name": "防火阀",
+          "noise_text": "",
+          "rule_diagnostics": {
+            "cleaning": {
+              "applied_rules": [],
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": []
+            },
+            "context": {
+              "domain": "damper",
+              "material_category": "",
+              "name": "防火阀",
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "stage": "extraction"
+            },
+            "degraded": false,
+            "errors": [],
+            "extraction": {
+              "applied_rules": [],
+              "context": {
+                "domain": "damper",
+                "material_category": "",
+                "name": "防火阀",
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "stage": "extraction"
+              },
+              "degraded": false,
+              "errors": [],
+              "skipped_rules": [],
+              "stage": "extraction"
+            }
+          },
+          "spec": "500*400 70℃"
+        },
+        "top_candidates": [
+          {
+            "brand": "",
+            "c_dn": null,
+            "c_od": null,
+            "c_thickness": null,
+            "category": "暖通",
+            "code": "M3-DEMO-02",
+            "description": "",
+            "hard_blocked": false,
+            "match_reasons": [
+              "品类名称一致",
+              "核心参数在公差范围内"
+            ],
+            "max_score": 1.0,
+            "name": "防火阀",
+            "parsed_params": "{\"model\": \"\", \"attrs\": {\"尺寸\": \"500*400\", \"熔断温度\": 70, \"防火\": true}}",
+            "recall_source": "fts",
+            "recall_sources": [
+              "fts",
+              "fts_hvac_防火阀",
+              "fts_hvac_防火阀 500 400",
+              "fts_hvac_500 400 70",
+              "fts_hvac_500 400"
+            ],
+            "score": 98.8,
+            "specification": "500×400 70℃",
+            "unit": "个"
+          }
+        ]
+      }
+    ],
+    "mining": {
+      "code": 0,
+      "msg": "数据挖掘与规则聚类完成",
+      "result": {
+        "analyzed_patterns_count": 1,
+        "param_adjust_groups_count": 0,
+        "processed_records_count": 3,
+        "skipped_missing_discipline_count": 0,
+        "status": "success"
+      }
+    },
+    "mining_idempotent": {
+      "code": 0,
+      "msg": "数据挖掘与规则聚类完成",
+      "result": {
+        "analyzed_patterns_count": 1,
+        "param_adjust_groups_count": 0,
+        "processed_records_count": 0,
+        "skipped_missing_discipline_count": 0,
+        "status": "success"
+      }
+    },
+    "no_tests_doc": true,
+    "restored_config_db_memory_fingerprint": true,
+    "snapshots": [
+      "snap_20261118_142825_fc6aae",
+      "snap_20261118_142835_974e87"
+    ],
+    "xlsx_bytes": 5534
+  },
+  "stdin_sha256": "ef9dd924525d6ca8c704772982f255c313aed06b5957729d3f6b5e510f2c60a3"
+}

@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-17 Asia/Shanghai",
+  "scope": "coordinator diagnostics and management only",
+  "manifest_excludes_itself": true,
+  "files": [
+    {
+      "path": "doc/README.md",
+      "bytes": 3406,
+      "sha256": "67d752f6fde142519474ac7a3def37150d39d57f708a700bda3aef360472885c"
+    },
+    {
+      "path": "doc/00_项目管理/版本路线图.md",
+      "bytes": 3894,
+      "sha256": "d100a230f85d517a6a5a442caf7439325e86f1ee70286bfc29cd939520f4db23"
+    },
+    {
+      "path": "doc/00_项目管理/进度总表.md",
+      "bytes": 14511,
+      "sha256": "20567b80725a9a735e8ea38ad09e927e22aa66bd7124ca46a222055cdf092426"
+    },
+    {
+      "path": "doc/00_项目管理/问题与版本归属总台账.md",
+      "bytes": 21280,
+      "sha256": "631628b6971c9e9ce83d04bfab51a89a181b39317081242d5278c43d1408e7a0"
+    },
+    {
+      "path": "doc/V0.1.6/01_实施方案与任务包.md",
+      "bytes": 6256,
+      "sha256": "d4c3ba1ab6ae7ca5aa7d876cee9a103cdb0f3bd3682fa96c8d0f05beab56df06"
+    },
+    {
+      "path": "doc/V0.1.6/02_任务台账.md",
+      "bytes": 3714,
+      "sha256": "0be420e4f284c23a8cc15291bfd8c89a86bed455ce0084a906690b66c68c18b8"
+    },
+    {
+      "path": "doc/V0.1.6/03_终审与版本准入.md",
+      "bytes": 1495,
+      "sha256": "1a5a2a4e02883b8917908e12b1e9f74d2532757bc13f2ac4535430b6b537bf8e"
+    },
+    {
+      "path": "doc/V0.1.6/rounds/V016-M0_R02_统筹裁决.md",
+      "bytes": 10470,
+      "sha256": "4e0dd07f2f0b978e30e998137cbd8546c87e82921fa680258d8c070873a5e770"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/business_after.json",
+      "bytes": 3686,
+      "sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/business_before.json",
+      "bytes": 3686,
+      "sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/check_state.py",
+      "bytes": 3817,
+      "sha256": "32806b5a631dff9412762d9b4827476bfe034f2cf6400d7f1a01699745065cf9"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/freeze_delivery.py",
+      "bytes": 2843,
+      "sha256": "f6c8efd8771dec6eb1a96fdf1d3a9ceb3c0ca88a48fe031e4aa1db85fba658b0"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_bridge.js",
+      "bytes": 3899,
+      "sha256": "a9918fe269a146dec931ca68732214e2ce12bcb86640d28a9af15c28073e8e1c"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_probe.log",
+      "bytes": 370,
+      "sha256": "12808292f6a7830d2f71b4809465893921b17f2db2947017eb0a94f496186d6a"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_probe.py",
+      "bytes": 6746,
+      "sha256": "b8375b950a91b28c10a237cad089f3c42c6a20aee0e6001291cf33c63a7ac24f"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_probe_local.log",
+      "bytes": 2715,
+      "sha256": "6c4907f66db878e9fa733ab01268b22af8b021e99e47cbb12ecd6a32defb12a9"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_probe_retry.log",
+      "bytes": 5520,
+      "sha256": "1da2e7127fcc58f22404257d39db6b356a0eb2f509dea2e12ea86b8849b8c466"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/frontend_http_report.json",
+      "bytes": 2515,
+      "sha256": "11ac75f268c244b5c1ad58ad7fcea2e27052a59926054dff66b7c6d31e8918cc"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/isolation_verify_after.json",
+      "bytes": 14028,
+      "sha256": "0d7d6d16122d7d14f77f96d091cd978218e2058db60dd4ba730710668fffb5f6"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/isolation_verify_after.log",
+      "bytes": 443,
+      "sha256": "b5285eb695d716273e32742d02c72b09eec3366f19a6d43105ed1e8028513925"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/state_after.json",
+      "bytes": 39540,
+      "sha256": "e13478ae3f8eda12a6cb646565eacda6702d8f5c929006b94db7aa4159c3df0c"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r02/state_before.json",
+      "bytes": 39406,
+      "sha256": "8490648f0e49ac3c9d77b492efea4fefb6138f511c090c145daacb09f69bf7c7"
+    }
+  ],
+  "business_before_sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190",
+  "business_after_sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190",
+  "business_bytes_identical": true,
+  "broken_management_links": []
+}

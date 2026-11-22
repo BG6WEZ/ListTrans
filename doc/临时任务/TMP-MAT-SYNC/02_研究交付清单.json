@@ -1,0 +1,71 @@
+{
+  "task": "TMP-MAT-SYNC",
+  "date": "2026-11-17",
+  "timezone": "Asia/Shanghai",
+  "status": "research_only_not_approved_for_implementation_or_deployment",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "baseline": "HEAD plus existing uncommitted workspace",
+  "source_access_performed": false,
+  "runtime_tests_performed": false,
+  "source_files": [
+    {
+      "path": "app/db_manager.py",
+      "sha256": "8aa774bd1f1d8db07a647486144f9798c570a68d953d010e9a2a8f1ec39af01c",
+      "unchanged": true
+    },
+    {
+      "path": "app/server.py",
+      "sha256": "cb6423ae4e2f74ab683f033ae15f3cf6be6063a0361f45bde73e97f5605dc999",
+      "unchanged": true
+    },
+    {
+      "path": "app/vector_index.py",
+      "sha256": "b339523deda9f1b90c4cb81a8590048346edf20740d46a6052d16844517e92b5",
+      "unchanged": true
+    },
+    {
+      "path": "app/binding_decisions.py",
+      "sha256": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "unchanged": true
+    },
+    {
+      "path": "docker-compose.yml",
+      "sha256": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7",
+      "unchanged": true
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "6f3b73001ffec927671c5496684f203c3bb6c7682bc4da628238a7f1cb2cc15f",
+      "unchanged": true
+    },
+    {
+      "path": "doc/物料库/物资明细视图说明.md",
+      "sha256": "df585583fa8a0bde13afe168ddc4ca9ee2a7c008f1fca22ea5d7e30a95422c48",
+      "unchanged": true
+    }
+  ],
+  "pre_edit_document_hashes": {
+    "doc/README.md": "cabe95fc762042af05a1bdfa940eaae520891a49af200c7d9619e1283409d1a0",
+    "doc/00_项目管理/进度总表.md": "c1e3a4f17f9ed1a0f000bf774575a9c3ad6311c41bb6a1f79eb94f4848984fe0"
+  },
+  "document_deliveries": [
+    {
+      "path": "doc/临时任务/TMP-MAT-SYNC/01_物料库每周增量同步方案_R1.md",
+      "bytes": 25100,
+      "sha256": "1eacd6bffad901637e0f99938ea32d8707d626d277f59169e800f549ec424cf4"
+    },
+    {
+      "path": "doc/README.md",
+      "bytes": 3304,
+      "sha256": "251f9906b97bb86ac85156ff3518147fd989b63a095109142713573ca802ff44"
+    },
+    {
+      "path": "doc/00_项目管理/进度总表.md",
+      "bytes": 13509,
+      "sha256": "e89837efb2a1227b4dbb6300b034a99a3cdfa318a340efd203fd7fdbe896c1d0"
+    }
+  ],
+  "additional_new_file": "doc/临时任务/TMP-MAT-SYNC/02_研究交付清单.json",
+  "self_hash_excluded": true,
+  "notes": "Only the three listed Markdown documents and this manifest were written for this task. Existing code, source description, business assets and version decisions were not edited."
+}

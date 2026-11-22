@@ -1,0 +1,549 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "python": "3.12.10",
+  "sqlite": "3.49.1",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "business_assets": 35,
+  "business_differences": [],
+  "auto_binding_rules": [],
+  "requirements": {
+    "requirements-test.txt": {
+      "sha256": "1444253aae55a9121e8c549472a24ef2e4eb4e512d18e35a14e7536a34139c2b",
+      "bytes": 492
+    },
+    "requirements.txt": {
+      "sha256": "84b1857f9ef5916ff8e8de25aad3ccad9f3fa36340fb92152b9d4acec7360861",
+      "bytes": 337
+    }
+  },
+  "windows_locks": {
+    "m3_r01_runtime_windows_py312.lock": {
+      "sha256": "eb23c560f415e61b389ce884a55ce0b07c36f49b94a32740202c0e95a34cfb66",
+      "locked": 73,
+      "installed_differences": {}
+    },
+    "m3_r01_test_windows_py312.lock": {
+      "sha256": "86c4bdc6dc98aceee5091801a5bf74b47b8be0d7b6eaffdb964ace9a03dce724",
+      "locked": 79,
+      "installed_differences": {}
+    }
+  },
+  "pip_check": {
+    "exit_code": 0,
+    "output": "No broken requirements found."
+  },
+  "image_copy_inputs": {
+    "app/acceptance_calibration.py": {
+      "sha256": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+      "bytes": 15568
+    },
+    "app/admin_api.py": {
+      "sha256": "e34bea10db3a6150739c5abc82f877ca60642ff67527c39fa9520c24fa842d2c",
+      "bytes": 14958
+    },
+    "app/audit_manager.py": {
+      "sha256": "a12adb525a00ef5d46b853506f17ac0d689d67320cf2ddb948886cf65ac8c50d",
+      "bytes": 28631
+    },
+    "app/auth_manager.py": {
+      "sha256": "0f621d06bc78d4abbc569b221a354b391322dee285ab02ed2091e65ca47472d8",
+      "bytes": 49239
+    },
+    "app/auth_middleware.py": {
+      "sha256": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+      "bytes": 3541
+    },
+    "app/binding_decisions.py": {
+      "sha256": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef",
+      "bytes": 33056
+    },
+    "app/bom.py": {
+      "sha256": "8f8e24a02e8a3e88fe8b51359f003ee14c9e9f8966ae8b37837c2c77a53fe5c0",
+      "bytes": 8208
+    },
+    "app/candidate_reranker.py": {
+      "sha256": "1a4f9b1efb43be0e55bebadcc60db900a94f02a5391f946cdce18acd50aca09f",
+      "bytes": 6939
+    },
+    "app/db_manager.py": {
+      "sha256": "fa792357e25843b591ceb55c32acda62f01216f9e6d2e42c4a9df4940c9b543f",
+      "bytes": 73164
+    },
+    "app/domain_extractors.py": {
+      "sha256": "ef9a40f2b93d665a1ee4bf71c437480cae7c72a56404cfffd24e18353ba68ad9",
+      "bytes": 41854
+    },
+    "app/domain_router.py": {
+      "sha256": "487dec64afec08eea9e949f4cc2dc72158205f0c634534ed521abaa9ed6e4848",
+      "bytes": 19406
+    },
+    "app/eval_assets/golden_runtime_v1.json": {
+      "sha256": "10e44b73d2b945e27146ad83eac018c1a736df945ed95fbdc710190dc7aa2057",
+      "bytes": 2452
+    },
+    "app/eval_assets/report_template_v1.json": {
+      "sha256": "d1cfc598623f7aee6d24ad3561ac5bb87410c976953569c939337519e0ae4767",
+      "bytes": 343
+    },
+    "app/eval_assets/smoke_materials_v1.json": {
+      "sha256": "f79a97ce989f79c1204758f35f95c8ab77bd485509603e13a468026b7f6899de",
+      "bytes": 1336
+    },
+    "app/excel_boundary.py": {
+      "sha256": "8e552f21aa52747ade205620ca07337d6697d176078e8093c352ba231d1fef7c",
+      "bytes": 31483
+    },
+    "app/feedback_contract.py": {
+      "sha256": "9a978a054aa5ae598a46f2cc35e748f315f226b2b5424f8ba42d1c43de6f3af6",
+      "bytes": 71632
+    },
+    "app/feedback_miner.py": {
+      "sha256": "5c820e42ad7dc9d65d9e70822087648dd0c5b52e73d2bb73220da246ff2d68c9",
+      "bytes": 29634
+    },
+    "app/feedback_ranker.py": {
+      "sha256": "0b9c1a9fcca9c06c42de4c9d0f132913385e459372b2df90d940220d9ad251cc",
+      "bytes": 5391
+    },
+    "app/feedback_train.py": {
+      "sha256": "6c72e753a29d47451a95c829dfcec758ec7a248b8e69729fb22cbb6e533943e2",
+      "bytes": 8376
+    },
+    "app/flywheel_db.py": {
+      "sha256": "5277096a601817f94c6e489dbe605b813fd3e646496c68864b4c6014dd41b260",
+      "bytes": 31377
+    },
+    "app/flywheel_sandbox.py": {
+      "sha256": "9891ad646cb1eaa03c775181d115e983cb10a2e2e038f8c3f67e48c6a5ffe868",
+      "bytes": 55275
+    },
+    "app/llm_client.py": {
+      "sha256": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+      "bytes": 17297
+    },
+    "app/llm_decision.py": {
+      "sha256": "745478547fca8cd7806aeae8d330867269161fdc4dd868d3b654b6babff88b77",
+      "bytes": 11313
+    },
+    "app/llm_rule_engine.py": {
+      "sha256": "6dc27316a2a345237831d3c343f3116dfb5e5761242a117d66c88465c74b36f8",
+      "bytes": 98695
+    },
+    "app/matcher.py": {
+      "sha256": "9b285e6ecec524dd14a9a7ad0d86abae5c25178a745acd85ea9fd505d7387bca",
+      "bytes": 142510
+    },
+    "app/normalizer.py": {
+      "sha256": "a6006074e80184c1251bca1b9c117c8a5d6e6d7781668376a3135dbff0c8a484",
+      "bytes": 18097
+    },
+    "app/preprocessor.py": {
+      "sha256": "0a1b005947e90025665bde4234a0a0a2b7387d7be717d7652684275c04f2f7c2",
+      "bytes": 30971
+    },
+    "app/query_preprocessor.py": {
+      "sha256": "cf100e82527500bae9ba7f3777886f9b4810f132be9d95278bf071987dc4f2e5",
+      "bytes": 48560
+    },
+    "app/report_generator.py": {
+      "sha256": "0832d4883f0a13a96de605d8a45873af1c7b6ea261863f696e52f1a92090b9fd",
+      "bytes": 10935
+    },
+    "app/rule_api.py": {
+      "sha256": "ecac520f7f01b7968e63b310530993d044f3ffafd0a7a4958b2e927eeaa92bcd",
+      "bytes": 9396
+    },
+    "app/rule_context.py": {
+      "sha256": "cd9b499ed00a4e59db929e3580426db603da37ac23092fa4176b07226053f38a",
+      "bytes": 12968
+    },
+    "app/rule_governance.py": {
+      "sha256": "8920d3a56d8abaa9070f8c405839163bf1598204294453ead5e2450e6f14cb68",
+      "bytes": 31406
+    },
+    "app/runtime_eval_assets.py": {
+      "sha256": "9f5c2969688997037516aabd7f1bef6f8ee18493f5fbf228350cdcace4fe62f1",
+      "bytes": 4014
+    },
+    "app/runtime_jobs.py": {
+      "sha256": "6ac3d9cdd3432c50f0c1a3e1ed7c456c6788c03d160b3891b42754b0aec1e0da",
+      "bytes": 6661
+    },
+    "app/runtime_retention.py": {
+      "sha256": "d7452100cf69cb813ed2c26b6687fce56333e60453c0f17de2357b0324d03ee5",
+      "bytes": 5995
+    },
+    "app/sandbox_evaluator.py": {
+      "sha256": "03769aeb839709a92fa51476ba2c4098d9fa06e5e6ab01f83d3b704781463776",
+      "bytes": 38035
+    },
+    "app/server.py": {
+      "sha256": "efe76b8645d375867756ad2c93b9d4e69c4f87629b46d70ea43805117d611b2d",
+      "bytes": 245366
+    },
+    "app/session_manager.py": {
+      "sha256": "513639f41e4a73b241b31df119da5051d0f5cc7e1f54abbdd1a61495e6d9505a",
+      "bytes": 12636
+    },
+    "app/sparse_recall.py": {
+      "sha256": "7aeb4a121b922df35f279f51655e9e5dfe6f4eb4cc2a8b6ab531d039f7fcaa1c",
+      "bytes": 26434
+    },
+    "app/structured_recall.py": {
+      "sha256": "627a77a3a84c8e5d5a8630c4784839d55fa8d97539293d264c8e750da510dd04",
+      "bytes": 34576
+    },
+    "app/typed_fields.py": {
+      "sha256": "784dc580e7f81dd5d7392a0ab5681677713185806f3c835efb254e3665393a09",
+      "bytes": 10296
+    },
+    "app/vector_fusion.py": {
+      "sha256": "30335e011151067662e342331e8951e9d16f4a8b9075d52ee9fa66abdc0181c9",
+      "bytes": 16113
+    },
+    "app/vector_index.py": {
+      "sha256": "a025dea272fafea5a03d8e0dd2fc748c3a3e952c3bf74502d13f7634f8e1c684",
+      "bytes": 44756
+    },
+    "config/alias_dict.json": {
+      "sha256": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "bytes": 23131
+    },
+    "config/auto_binding_rules.json": {
+      "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "bytes": 4
+    },
+    "config/boost_rules.json": {
+      "sha256": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "bytes": 769
+    },
+    "config/category_domain_map.json": {
+      "sha256": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "bytes": 11199
+    },
+    "config/connection_dict.json": {
+      "sha256": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "bytes": 274
+    },
+    "config/domain_schema.json": {
+      "sha256": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "bytes": 50144
+    },
+    "config/flags_dict.json": {
+      "sha256": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "bytes": 473
+    },
+    "config/llm_config.json": {
+      "sha256": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "bytes": 282
+    },
+    "config/llm_prompts.json": {
+      "sha256": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "bytes": 2482
+    },
+    "config/material_dict.json": {
+      "sha256": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "bytes": 1315
+    },
+    "config/model_config.json": {
+      "sha256": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "bytes": 522
+    },
+    "config/stop_words.json": {
+      "sha256": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "bytes": 117
+    },
+    "config/tolerance_rules.json": {
+      "sha256": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "bytes": 265
+    },
+    "config/unit_norm.json": {
+      "sha256": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "bytes": 1440
+    },
+    "config/unit_rules.json": {
+      "sha256": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "bytes": 257
+    },
+    "config/weight_rules.json": {
+      "sha256": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803",
+      "bytes": 428
+    },
+    "requirements.txt": {
+      "sha256": "84b1857f9ef5916ff8e8de25aad3ccad9f3fa36340fb92152b9d4acec7360861",
+      "bytes": 337
+    },
+    "web/admin.html": {
+      "sha256": "37fdb1bb97400d273b6b116b6b833277b66273e46e6517768df3810f59367a43",
+      "bytes": 161180
+    },
+    "web/app.js": {
+      "sha256": "77e79aee7887c03d8c2727d24324fe289c18313251628896648f6d718e0bb00c",
+      "bytes": 213365
+    },
+    "web/index.css": {
+      "sha256": "c1d4d6160fa17591fa35702e0d478b13bbe4def727c5a625289e40bc51ca9b64",
+      "bytes": 38354
+    },
+    "web/index.html": {
+      "sha256": "c5df77ac493474cd371c3d7516cb89cda86ed4316c9fb4c9fc17684020d7eed3",
+      "bytes": 126808
+    },
+    "web/login.css": {
+      "sha256": "20bf8b2f52ffd9c0cac59d0979604d1ad4b6ec1ba7f676388ba0c9db1f726acd",
+      "bytes": 5984
+    },
+    "web/login.html": {
+      "sha256": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+      "bytes": 7400
+    },
+    "web/logo.png": {
+      "sha256": "886da7965a5f07b8525ba921b11d9d3e2df02303efed5de90e482557b88be539",
+      "bytes": 49757
+    },
+    "web/logo500.png": {
+      "sha256": "7d71cef49bf5db0c71727daea3c75895cc114a4bc32aa5f4b47c5fd8516dcb00",
+      "bytes": 60992
+    }
+  },
+  "container_recipes": {
+    ".dockerignore": {
+      "sha256": "76a933dd31f7381e9fd6fb62c5b8d8c25aa6569ac9ee20ff08c1fb3fa2b66a35",
+      "bytes": 2207
+    },
+    "Dockerfile": {
+      "sha256": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466",
+      "bytes": 1681
+    },
+    "docker-compose.yml": {
+      "sha256": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7",
+      "bytes": 636
+    }
+  },
+  "out_of_main_image_experimental_assets": {
+    "app/calibration_assets/v019_m2_equivalences.json": {
+      "sha256": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+      "bytes": 13152
+    },
+    "app/calibration_assets/v019_m2_policy.json": {
+      "sha256": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+      "bytes": 954
+    },
+    "app/recall_candidates/v018_m1_aliases.json": {
+      "sha256": "9c69c06ba5d245b44192c5f572f78ed18d003a79d103065db0e32f5c413055f0",
+      "bytes": 10727
+    },
+    "app/rerank_candidates/v019_m1_linear.json": {
+      "sha256": "1448c1497902fc5f89552a1b91935fca0953c163cc3df4364721ea038a5d0437",
+      "bytes": 3024
+    }
+  },
+  "offline_model": {
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/.gitignore": {
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "bytes": 1
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/CACHEDIR.TAG": {
+      "sha256": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+      "bytes": 195
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/.gitattributes.metadata": {
+      "sha256": "e9a5e1a933a1afc1dfb53f306adc00fc3ae94c1cce56c23cd779752f81cf0c7c",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/1_Pooling/config.json.metadata": {
+      "sha256": "00fcdb3869a02f849a3dcddf7dfc8b11b68c58ec8ad3e4a6e0a6202bedc84459",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/README.md.metadata": {
+      "sha256": "d6a832e3ea518feeb09687319893f6ec77a22f9c5bd1043503a651bf61a21052",
+      "bytes": 103
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config.json.metadata": {
+      "sha256": "10ff5d7a7af27da81dcfa5017033d2a1228087221fc46648a3585c78af78984e",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config_sentence_transformers.json.metadata": {
+      "sha256": "aad08e0084715136365e0380ebe2c5ea71ceee9411dd0f6a61f2e68fb321bc2a",
+      "bytes": 103
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/model.safetensors.metadata": {
+      "sha256": "8bb53682b8ecc77e89aea7627f6a7f5c714c77cfc847b0e383a7e2c7f8efc49b",
+      "bytes": 128
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/modules.json.metadata": {
+      "sha256": "e1811acf4c00db0c0542e9a74f58eb33d2264d16bd142d74eada40a4168b9c72",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/pytorch_model.bin.metadata": {
+      "sha256": "c52cf209b8995efd52a7f4410494f9cda4c389753a03e8989d7943b30ec329dc",
+      "bytes": 128
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/sentence_bert_config.json.metadata": {
+      "sha256": "39cd1c75c6bda78b76662adc8acb22e574b3f01ddb946f18cdbc1659db70b9e7",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/special_tokens_map.json.metadata": {
+      "sha256": "e611bd5816b6f3462874ed067fbe73d275ec3038f4a1e13d22187b04e430b374",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer.json.metadata": {
+      "sha256": "55b6d8b7aef78bb252c112264ecd4715e5c6bb3c36d61edfc8f54004f8d9a213",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer_config.json.metadata": {
+      "sha256": "cc5984fb271a91df41454320e0a66fe7b150262956b6efd41fc1f6705d2adbce",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/vocab.txt.metadata": {
+      "sha256": "cee295dc78e14cdb5987eb3d146c30f09fcf0393bec1bf77d0fe21da6bb81b11",
+      "bytes": 104
+    },
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/trees/7999e1d3359715c523056ef9478215996d62a620.json": {
+      "sha256": "2346229ecde3983842cb8e070285e8aae7d6680819af7d7aa17e56bc0f48cbc9",
+      "bytes": 1849
+    },
+    "model_offline/bge-small-zh-v1.5/.gitattributes": {
+      "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+      "bytes": 1519
+    },
+    "model_offline/bge-small-zh-v1.5/1_Pooling/config.json": {
+      "sha256": "aaa8861589f80c961a03cc86c7eeaef7605c1676b9ab55329d33a304738769c6",
+      "bytes": 190
+    },
+    "model_offline/bge-small-zh-v1.5/README.md": {
+      "sha256": "c48a4eeea77f6b1d38b48ec1c5b8d4f86d5550cc43fa345a0db1b2ca1d082369",
+      "bytes": 27670
+    },
+    "model_offline/bge-small-zh-v1.5/config.json": {
+      "sha256": "3853a7979202c348751b753e36f579c41d8da7d36af617d3d907e1fc9b441f2a",
+      "bytes": 776
+    },
+    "model_offline/bge-small-zh-v1.5/config_sentence_transformers.json": {
+      "sha256": "940d5f50db195fa6e5e6a4f122c095f77880de259d74b14a65779ed48bdd7c56",
+      "bytes": 124
+    },
+    "model_offline/bge-small-zh-v1.5/model.safetensors": {
+      "sha256": "354763b9b1357bc9c44f62c6be2276321081ed2567773608c0d0785b61d5a026",
+      "bytes": 95827648
+    },
+    "model_offline/bge-small-zh-v1.5/modules.json": {
+      "sha256": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+      "bytes": 349
+    },
+    "model_offline/bge-small-zh-v1.5/pytorch_model.bin": {
+      "sha256": "7c5fe667bbed05dc10e246e229b701ad266fe4d95ab946e9e5aa402056611b88",
+      "bytes": 95842633
+    },
+    "model_offline/bge-small-zh-v1.5/sentence_bert_config.json": {
+      "sha256": "84e39fda68ccbff05bfa723ae9c0e70e23e2ec373b76e0f8c6e71af72a693cbf",
+      "bytes": 52
+    },
+    "model_offline/bge-small-zh-v1.5/special_tokens_map.json": {
+      "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+      "bytes": 125
+    },
+    "model_offline/bge-small-zh-v1.5/tokenizer.json": {
+      "sha256": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+      "bytes": 439125
+    },
+    "model_offline/bge-small-zh-v1.5/tokenizer_config.json": {
+      "sha256": "e6f3b96db926a37d4039995fbf5ad17de158dfb8f6343d607e4dbaad18d75f5a",
+      "bytes": 367
+    },
+    "model_offline/bge-small-zh-v1.5/vocab.txt": {
+      "sha256": "45bbac6b341c319adc98a532532882e91a9cefc0329aa57bac9ae761c27b291c",
+      "bytes": 109540
+    }
+  },
+  "catalog": {
+    "quick_check": "ok",
+    "user_version": 0,
+    "schema_sha256": "55c9f9380f7cc3bd2045b44a9605866f480e638d95bbb58357ed66c70f652d44",
+    "tables": [
+      "flywheel_config_snapshots",
+      "flywheel_documents",
+      "flywheel_feedback_samples",
+      "flywheel_pattern_aggregates",
+      "flywheel_recommendation_snapshots",
+      "flywheel_records",
+      "flywheel_rule_suggestions",
+      "flywheel_schema_meta",
+      "flywheel_sheets",
+      "flywheel_source_rows",
+      "llm_cache",
+      "llm_providers",
+      "llm_rules",
+      "materials",
+      "materials_fts",
+      "materials_fts_config",
+      "materials_fts_content",
+      "materials_fts_data",
+      "materials_fts_docsize",
+      "materials_fts_idx",
+      "materials_metadata",
+      "rule_audit_logs",
+      "rule_eval_runs",
+      "sqlite_sequence",
+      "sqlite_stat1",
+      "test_table"
+    ],
+    "metadata": {},
+    "effective_db_revision": 0,
+    "materials_rows": 26863,
+    "fts_rows": 26863,
+    "row_parsed_schema_versions": {
+      "2": 26863
+    }
+  },
+  "synthetic_auth_schema": {
+    "quick_check": "ok",
+    "user_version": 0,
+    "schema_sha256": "966cf0ac50929dac36beed7f468e50a173bf35a2c6c54161b6bfc617adb4f476",
+    "tables": [
+      "active_heartbeats",
+      "audit_logs",
+      "binding_decisions",
+      "issued_temp_credentials",
+      "load_alert_snapshots",
+      "login_attempts",
+      "revoked_tokens",
+      "sqlite_sequence",
+      "system_stats_summary",
+      "users",
+      "work_sessions"
+    ]
+  },
+  "sqlite_catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "vector_cache_metadata": {
+    "model_name": "bge-small-zh-v1.5",
+    "dimension": 512,
+    "item_count": 26863,
+    "db_revision": null,
+    "text_schema_version": null
+  },
+  "vector_cache_sha256": {
+    "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+    "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+    "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+    "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+    "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+  },
+  "parsed_schema_target": 3,
+  "linux_wheelhouse_verified": false,
+  "docker": {
+    "cli_found": true,
+    "local_probes": {
+      "dockerDesktopLinuxEngine": {
+        "exit_code": 1,
+        "output": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified."
+      },
+      "docker_engine": {
+        "exit_code": 1,
+        "output": "failed to connect to the docker API at npipe:////./pipe/docker_engine; check if the path is correct and if the daemon is running: open //./pipe/docker_engine: The system cannot find the file specified."
+      }
+    },
+    "local_linux_daemon_reached": false,
+    "build_layers_startup": "not_executed_by_inventory"
+  }
+}

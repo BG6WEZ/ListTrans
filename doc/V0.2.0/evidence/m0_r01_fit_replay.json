@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "sha256": {
+    "m0_r01_hard_negatives.json": {
+      "original": "58e3a746b187a1df7a1d4877f8d52f38feb88310fc95d64735eecc43e60ceb99",
+      "replay": "58e3a746b187a1df7a1d4877f8d52f38feb88310fc95d64735eecc43e60ceb99"
+    },
+    "m0_r01_ranker_asset.json": {
+      "original": "31f88fc01287293b2f219d329aaa004c3e949e9b32131585dc9569d7e3cf204c",
+      "replay": "31f88fc01287293b2f219d329aaa004c3e949e9b32131585dc9569d7e3cf204c"
+    }
+  },
+  "byte_exact": true
+}

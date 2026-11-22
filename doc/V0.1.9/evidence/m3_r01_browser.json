@@ -1,0 +1,581 @@
+{
+  "browser": "Chrome/158.0.8127.18",
+  "transport": "Chrome CDP and native inputs",
+  "paired_operator": "scripted repeatable review actions",
+  "pairs": [
+    {
+      "baseline": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 588
+      },
+      "candidate": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 588
+      }
+    },
+    {
+      "candidate": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 567
+      },
+      "baseline": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 566
+      }
+    },
+    {
+      "baseline": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 545
+      },
+      "candidate": {
+        "reviewed_rows": [
+          "INPUT-A",
+          "INPUT-B"
+        ],
+        "corrected_rows": [
+          "INPUT-B"
+        ],
+        "review_through_download_ms": 592
+      }
+    }
+  ],
+  "baseline": {
+    "corrected": 3,
+    "reviewed": 6,
+    "percentage": 50,
+    "p50_ms": 566,
+    "p95_ms": 588
+  },
+  "candidate": {
+    "corrected": 3,
+    "reviewed": 6,
+    "percentage": 50,
+    "p50_ms": 588,
+    "p95_ms": 592
+  },
+  "manual_change_rate_delta_pp": 0,
+  "native_flow": {
+    "five_filters": true,
+    "missing_explanation": true,
+    "reject_and_export_422": true,
+    "rematch_edit_invalidation": true,
+    "candidate_edit_invalidation": true,
+    "quantity_revert_invalidation": true,
+    "named_restore": true,
+    "actual_autosave_reload": true,
+    "route_trace": [
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/session/draft",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/upload",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/upload/status",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/session/draft",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/reject",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/export",
+        "method": "POST",
+        "status": 422
+      },
+      {
+        "path": "/api/binding/invalidate",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/invalidate",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/rematch",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/invalidate",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/binding/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/feedback/submit",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/flywheel/record",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/session/save",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/session/list",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/session/3b2cb864-e0f2-4052-989b-3f2ef4212577",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/session/annotate",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/export",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/session/draft",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/me",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/auth/heartbeat",
+        "method": "POST",
+        "status": 200
+      },
+      {
+        "path": "/api/session/draft",
+        "method": "GET",
+        "status": 200
+      },
+      {
+        "path": "/api/session/annotate",
+        "method": "POST",
+        "status": 200
+      }
+    ],
+    "dialog_count": 7
+  },
+  "exports": [
+    {
+      "file": "native-flow_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        },
+        "CDP-TWO": {
+          "cells_e_to_i": [
+            "CDP-TWO",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            4.5
+          ],
+          "ratio_in_quantity_cell_note": 2.25
+        },
+        "CDP-FAN": {
+          "cells_e_to_i": [
+            "CDP-FAN",
+            "复核轴流风机",
+            "风量 3000m³/h 防爆",
+            "台",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        }
+      },
+      "sha256": "8a608d78fd8c1d7a927e6248e000084b9d0715c310e2e404b2d503df1dca1aaa"
+    },
+    {
+      "file": "pair-1-baseline_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "f124af3119a78686e5e1c590c18f39bc06ea913199b0c72217f6e30376b3b785"
+    },
+    {
+      "file": "pair-1-candidate_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "e5dab1846ae13b663bf8f1d0bbd867f92d47697023a4aeb9dbd91a6cbb42708b"
+    },
+    {
+      "file": "pair-2-candidate_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "673f3093229347399b682b318057ea8e87447cb014663c10f68627d11318952a"
+    },
+    {
+      "file": "pair-2-baseline_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "14223fb10bb8489f034ec2b07c7efbd2bc263e431b5bd2b4458b61ed9b46f11b"
+    },
+    {
+      "file": "pair-3-baseline_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "ced4dcf7230f1f10ee3b2d6301bbc501f105be74236c9dc36c08c7b11723c0b8"
+    },
+    {
+      "file": "pair-3-candidate_已匹配.xlsx",
+      "xlsx_verified": {
+        "CDP-AUTO": {
+          "cells_e_to_i": [
+            "CDP-AUTO",
+            "复核配电箱",
+            "AL-411 配电箱 400x300x200",
+            "个",
+            2
+          ],
+          "ratio_in_quantity_cell_note": 1.0
+        },
+        "CDP-ONE": {
+          "cells_e_to_i": [
+            "CDP-ONE",
+            "复核组合配电箱",
+            "AL-422 配电箱 400x300x200",
+            "个",
+            3
+          ],
+          "ratio_in_quantity_cell_note": 1.5
+        }
+      },
+      "sha256": "3eb89c128e4d8b76231bb560520e7ab25e1f1ce31a179f9abcf952c4aae014cc"
+    }
+  ],
+  "exit_code": 0
+}

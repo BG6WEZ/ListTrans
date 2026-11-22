@@ -1,0 +1,473 @@
+{
+  "task": "V015-M2",
+  "round": "R01",
+  "role": "coordinator",
+  "created_at": "2026-11-14T12:00:13.335239+08:00",
+  "client_date": "2026-11-14",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": [
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/binding_decisions.py",
+      "manifest_line": 14,
+      "expected": "8b5bc83db8cd0ae90dc565c28f7ccd6c47235a04cd4688f86f6f1006f23c49db",
+      "actual": "8b5bc83db8cd0ae90dc565c28f7ccd6c47235a04cd4688f86f6f1006f23c49db",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/server.py",
+      "manifest_line": 15,
+      "expected": "a621a00cd31bfb4cff30003d33dcb1a152b548634b7bde0c7afd9386abcca1b3",
+      "actual": "a621a00cd31bfb4cff30003d33dcb1a152b548634b7bde0c7afd9386abcca1b3",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/session_manager.py",
+      "manifest_line": 16,
+      "expected": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "actual": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/web/app.js",
+      "manifest_line": 17,
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/test_binding_decisions.py",
+      "manifest_line": 18,
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/test_auto_binding.py",
+      "manifest_line": 19,
+      "expected": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "actual": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/db_manager.py",
+      "manifest_line": 25,
+      "expected": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "actual": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/report_generator.py",
+      "manifest_line": 26,
+      "expected": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "actual": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/matcher.py",
+      "manifest_line": 27,
+      "expected": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "actual": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/flywheel_sandbox.py",
+      "manifest_line": 28,
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/llm_rule_engine.py",
+      "manifest_line": 29,
+      "expected": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "actual": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/web/index.html",
+      "manifest_line": 30,
+      "expected": "f9883bd95c107586c1aec9542c071c066bbbcdf69499895ddb65081b5f08d435",
+      "actual": "f9883bd95c107586c1aec9542c071c066bbbcdf69499895ddb65081b5f08d435",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/web/index.css",
+      "manifest_line": 31,
+      "expected": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+      "actual": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/conftest.py",
+      "manifest_line": 32,
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/test_query_contract.py",
+      "manifest_line": 33,
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/eval_golden_set.py",
+      "manifest_line": 34,
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/README.md",
+      "manifest_line": 35,
+      "expected": "82b82d27b33667291e6d9d766c8635fdfdd7170d0a4a3e7332064d9ad320723a",
+      "actual": "82b82d27b33667291e6d9d766c8635fdfdd7170d0a4a3e7332064d9ad320723a",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/config/auto_binding_rules.json",
+      "manifest_line": 36,
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/fixtures/golden_set_v1.json",
+      "manifest_line": 37,
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/fixtures/sandbox_materials_v1.json",
+      "manifest_line": 38,
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/.local-archive/business_snapshot.py",
+      "manifest_line": 39,
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/AppData/Local/Temp/m2_r01_capture_evidence.py",
+      "manifest_line": 40,
+      "expected": "3d6abaa33ca52096909d18d0ee5705ff389b37593f4edb20881f0c1c5d2b1473",
+      "actual": "3d6abaa33ca52096909d18d0ee5705ff389b37593f4edb20881f0c1c5d2b1473",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_pre_baseline_hashes.md",
+      "manifest_line": 47,
+      "expected": "5ab90c038406ecda29eeed66954a342b4623e0b3a1224fb6dbcf7f102d272fc6",
+      "actual": "5ab90c038406ecda29eeed66954a342b4623e0b3a1224fb6dbcf7f102d272fc6",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_required_regressions.log",
+      "manifest_line": 48,
+      "expected": "f74097ad42cbeddfe83a2559ee4d2d6e5d4093efbced5a4101c487134b059c0c",
+      "actual": "f74097ad42cbeddfe83a2559ee4d2d6e5d4093efbced5a4101c487134b059c0c",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_compare_boundaries.log",
+      "manifest_line": 49,
+      "expected": "b1086e1b58e537d130e360b9c07c35ec91036e14a9e6bd2b7fa4fa5b6f13310e",
+      "actual": "b1086e1b58e537d130e360b9c07c35ec91036e14a9e6bd2b7fa4fa5b6f13310e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_gate_reports.json",
+      "manifest_line": 50,
+      "expected": "68f927621911aaaaa62f990efd74c7663543b8364b1579c0482efc8da6483d5a",
+      "actual": "68f927621911aaaaa62f990efd74c7663543b8364b1579c0482efc8da6483d5a",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_gate_reports_capture.log",
+      "manifest_line": 51,
+      "expected": "393125af858a0fc8af700858e2ef4f9c4b42ffd92a6b7b4d2ba5e20e80899d91",
+      "actual": "393125af858a0fc8af700858e2ef4f9c4b42ffd92a6b7b4d2ba5e20e80899d91",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_full_pytest.log",
+      "manifest_line": 52,
+      "expected": "20275b683628c24edfc939518decfa83be466ebd05804da323e13a11fff02aed",
+      "actual": "20275b683628c24edfc939518decfa83be466ebd05804da323e13a11fff02aed",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_venv_verify_before.json",
+      "manifest_line": 53,
+      "expected": "ee8fc512b811b1dff0dd562089bfe3b9ef2b34d9ba387ea1ab2b64eb060cc30a",
+      "actual": "ee8fc512b811b1dff0dd562089bfe3b9ef2b34d9ba387ea1ab2b64eb060cc30a",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_venv_verify_after.json",
+      "manifest_line": 54,
+      "expected": "54b1d0d9469c29b3caf73df4ac08f0d59a810a1b44886ca4b8eed6856faa6a3f",
+      "actual": "54b1d0d9469c29b3caf73df4ac08f0d59a810a1b44886ca4b8eed6856faa6a3f",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_venv_verify_after.log",
+      "manifest_line": 55,
+      "expected": "e7cf875b4928a45d8b775354e8b5f25f24f663971666809b7337ce6fe388ffa2",
+      "actual": "e7cf875b4928a45d8b775354e8b5f25f24f663971666809b7337ce6fe388ffa2",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_outer_snapshot_before.json",
+      "manifest_line": 56,
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_outer_snapshot_after.json",
+      "manifest_line": 57,
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m2_r01_outer_snapshot_after.log",
+      "manifest_line": 58,
+      "expected": "a8d444c183953352648b150e0aa68aaa7a92d9477fcbfc2b28ab7b5a509ecf9b",
+      "actual": "a8d444c183953352648b150e0aa68aaa7a92d9477fcbfc2b28ab7b5a509ecf9b",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/rounds/V015-M2_R01_开发小结.md",
+      "manifest_line": 64,
+      "expected": "aa831226c441fef843ce8e247e7f10a359916f09d0f869387b81c049e5e0219e",
+      "actual": "aa831226c441fef843ce8e247e7f10a359916f09d0f869387b81c049e5e0219e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/02_任务台账.md",
+      "manifest_line": 65,
+      "expected": "1bb457649358d694b0720891e8e5a57b88a298c95294295e57381401a6348c04",
+      "actual": "2d1687d6b28c4a37250c67a26b71e9841d980bc0df04df51a95da05b11b5335f",
+      "matches": false
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/rounds/README.md",
+      "manifest_line": 66,
+      "expected": "e59a9c48aff00e4187b1e4d5dca2309511c27642c772bd7add28e8ff2b5cfee3",
+      "actual": "64997c78fccb875c8c6d030683c3696578338ac01287aff4474849f2682b210b",
+      "matches": false
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/README.md",
+      "manifest_line": 67,
+      "expected": "b695432fa8e034f50b766263f4a130e8270f9ad90a95796113da60cf8ee6d0ce",
+      "actual": "4f555c92c278ae74ece25141b16c15fcb23c1f3147b365c22671af844c0f4f90",
+      "matches": false
+    }
+  ],
+  "matched": 35,
+  "total": 38,
+  "audit_summary_sha256": "e6b4bf9f93df884481edca5ab70b2910a5bc7996dc9b0730fff16cafbc3beb98",
+  "audit_gate_report_sha256": "08f44084157a4130dc33895722fae330e68b99ba29239a17aa11350eb562a4e9",
+  "audit_real_rule_results": {
+    "harmful": {
+      "passed": false,
+      "targeted_count": 24,
+      "violations": [
+        {
+          "id": "GT-0313",
+          "type": "target_score_decreased",
+          "base_T": 88.8,
+          "cand_T": 50.7,
+          "delta": -38.1
+        },
+        {
+          "id": "GT-0313",
+          "type": "margin_shrunk",
+          "base_margin": 82.1,
+          "cand_margin": 7.6,
+          "delta": -74.5,
+          "base_T": 88.8,
+          "cand_T": 50.7
+        }
+      ],
+      "snapshot_errors": []
+    },
+    "beneficial": {
+      "passed": true,
+      "targeted_count": 22,
+      "violations": [],
+      "snapshot_errors": []
+    },
+    "neutral": {
+      "passed": true,
+      "targeted_count": 16,
+      "violations": [],
+      "snapshot_errors": []
+    }
+  },
+  "audit_outer_hashes": {
+    "m2_r01_audit_outer_snapshot_before.json": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "m2_r01_audit_outer_snapshot_after.json": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+  },
+  "javascript_syntax": {
+    "task": "V015-M2",
+    "round": "R01",
+    "role": "coordinator",
+    "date": "2026-11-14",
+    "timezone": "Asia/Shanghai",
+    "file": "web/app.js",
+    "sha256": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+    "engine": "Node REPL V8 parser",
+    "command": "new vm.Script(source, {filename: appJsPath})",
+    "verdict": "PASS",
+    "scope": "JavaScript syntax parsing only. No DOM, browser interaction, server request, or production app execution.",
+    "browser_validation": "not executed; remains an explicit residual boundary"
+  },
+  "javascript_hash_matches_source": true,
+  "business_snapshot_before": {
+    "files": {
+      "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "app/auth.db-wal": null,
+      "app/auth.db-shm": null,
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "870bb62925f7dc973dccf98cafefdc69b4138666f303aaedb57794eeb07a01f9"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_snapshot_after": {
+    "files": {
+      "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "app/auth.db-wal": null,
+      "app/auth.db-shm": null,
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "870bb62925f7dc973dccf98cafefdc69b4138666f303aaedb57794eeb07a01f9"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_changes": [],
+  "business_snapshot_matches_audit": true,
+  "golden_paths_exist": {
+    "tests/fixtures/golden_last_run.json": false,
+    "data/golden_last_run.json": false
+  },
+  "scope": "Coordinator current-file hashes, actual binding/export/source checks, V8 syntax parse and audited evidence consistency checks. No coordinator rerun of HTTP/model/full-suite tests; true browser DOM interaction remains unexecuted."
+}

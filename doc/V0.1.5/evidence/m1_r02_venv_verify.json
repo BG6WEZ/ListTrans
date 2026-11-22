@@ -1,0 +1,11 @@
+﻿{
+  "verdict": "PASS",
+  "exit_code": 0,
+  "business_hash_unchanged": true,
+  "business_changes": [],
+  "pending_modules": [],
+  "hard_errors": [],
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_verify_fdsomza1",
+  "out": "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m0_isolation_verify.json",
+  "missing_deps": []
+}

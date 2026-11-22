@@ -1,0 +1,209 @@
+{
+  "hardware": {
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "logical_cores": 20,
+    "os": "Windows-11-10.0.26300-SP0",
+    "physical_cores": 14,
+    "python": "3.12.10",
+    "ram_mib": 16068.73828125
+  },
+  "max_probe_ms": 2000,
+  "mode": "keyword",
+  "phases": {
+    "concurrent_load": {
+      "process_peak_working_set_mib": 498.8125,
+      "sampled_peak_rss_mib": 498.7890625,
+      "seconds": 26.70215029999963
+    }
+  },
+  "probe_gate_passed": true,
+  "probes": {
+    "health": {
+      "max_ms": 409.303,
+      "n": 71,
+      "p50_ms": 246.0,
+      "p95_ms": 390.238
+    },
+    "status": {
+      "max_ms": 168.654,
+      "n": 71,
+      "p50_ms": 66.318,
+      "p95_ms": 150.251
+    }
+  },
+  "queues": {
+    "export": {
+      "admitted": 0,
+      "capacity": 6,
+      "rejected": 0,
+      "started": 1,
+      "wait": {
+        "max_ms": 0.0,
+        "n": 1,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0
+      },
+      "wait_max_ms": 0.0,
+      "wait_total_ms": 0.0
+    },
+    "match": {
+      "admitted": 0,
+      "capacity": 12,
+      "rejected": 3,
+      "started": 12,
+      "wait": {
+        "max_ms": 19844.0,
+        "n": 12,
+        "p50_ms": 9485.0,
+        "p95_ms": 19844.0
+      },
+      "wait_max_ms": 19844.0000000046,
+      "wait_total_ms": 106425.99999999948
+    },
+    "mining": {
+      "admitted": 0,
+      "capacity": 2,
+      "rejected": 0,
+      "started": 1,
+      "wait": {
+        "max_ms": 0.0,
+        "n": 1,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0
+      },
+      "wait_max_ms": 0.0,
+      "wait_total_ms": 0.0
+    },
+    "upload": {
+      "admitted": 0,
+      "capacity": 6,
+      "rejected": 0,
+      "started": 3,
+      "wait": {
+        "max_ms": 0.0,
+        "n": 3,
+        "p50_ms": 0.0,
+        "p95_ms": 0.0
+      },
+      "wait_max_ms": 0.0,
+      "wait_total_ms": 0.0
+    }
+  },
+  "status_counts": {
+    "200": 15,
+    "429": 3
+  },
+  "work": [
+    {
+      "kind": "batch",
+      "ms": 17303.227800002787,
+      "start_ms": 6.378500002028886,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 22487.32089999976,
+      "start_ms": 8.356400001503062,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 13694.629599995096,
+      "start_ms": 125.71540000499226,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 18336.64399999543,
+      "start_ms": 8.716800002730452,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 23531.94870000152,
+      "start_ms": 9.5835000029183,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 6018.598499998916,
+      "start_ms": 9.17180000396911,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 251.92339999921387,
+      "start_ms": 130.2919000008842,
+      "status": 429
+    },
+    {
+      "kind": "batch",
+      "ms": 371.43559999822173,
+      "start_ms": 9.987600002205,
+      "status": 429
+    },
+    {
+      "kind": "batch",
+      "ms": 19985.419900003762,
+      "start_ms": 126.58309999824269,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 250.3939000016544,
+      "start_ms": 131.51939999806928,
+      "status": 429
+    },
+    {
+      "kind": "batch",
+      "ms": 12530.559600003471,
+      "start_ms": 125.02120000135619,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 9619.885699998122,
+      "start_ms": 125.36940000427421,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 10483.735800000431,
+      "start_ms": 126.29890000243904,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 24684.439299999212,
+      "start_ms": 129.61039999936474,
+      "status": 200
+    },
+    {
+      "kind": "batch",
+      "ms": 23000.362999999197,
+      "start_ms": 126.0314000028302,
+      "status": 200
+    },
+    {
+      "kind": "upload",
+      "ms": 12300.158900005044,
+      "rows": 100,
+      "start_ms": 127.4727999989409,
+      "status": 200
+    },
+    {
+      "kind": "export",
+      "ms": 26452.51709999866,
+      "start_ms": 130.51950000226498,
+      "status": 200,
+      "xlsx": true
+    },
+    {
+      "kind": "mining",
+      "ms": 576.2152000024798,
+      "rows": 2500,
+      "start_ms": 126.79329999809852,
+      "status": 200
+    }
+  ]
+}

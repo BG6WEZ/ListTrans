@@ -1,0 +1,7 @@
+{
+  "file": "m0_r01_validation_fixed.log",
+  "sha256_before": "b09fe71c01074618192ac76030fd717f29f35095eb5cf221b91b8cb92fe74f46",
+  "sha256_delivered": "647984a730419c38e30780679c22473b12af45b9e5c3de54fd9e169fbf89fbd1",
+  "lines_redacted": 1,
+  "reason": "Omit synthetic account fixture display and retain failed assertion, test counts and elapsed time."
+}

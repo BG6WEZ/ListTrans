@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-19",
+  "package": "V017-M2",
+  "round": "R01",
+  "ruling": "PASS_RELEASE_M2_DISPATCH_M3",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "m2_delivery_sha256": {
+    "app/binding_decisions.py": "ed3ff9dc4b337f60110b623cca8630c0c2e5e570fcb9c5a7f062212dbc3756fd",
+    "app/db_manager.py": "d9a67877c35c80cea11ef1287ed5a08b41de47799900b895d4b58758a8f79df1",
+    "app/flywheel_sandbox.py": "427e00720021c31d077de95e75bb11a5ecff7e7a37378b64b9c7dda0b1550d74",
+    "app/matcher.py": "78a7a472d8ee08f8d2e9b25a5cdc97b27fe7f7590042d294f286990091c2c662",
+    "app/server.py": "06d70bc0dc8dbf716b611796b5c8d74c0fe53021284a03ce1162be9a729c5ac2",
+    "app/vector_index.py": "76fd306782d7951e9bd4677adbb8269a83bf640056d67ba6ba2bbd7a4bd7285f",
+    "scripts/batch_llm_structure.py": "271844176c06bbbd778e7027835c13017782d52740667320136c611893dc472c",
+    "tests/test_flywheel_sandbox.py": "2f93e30e12c3411cd68616c7e1f2b261ebf85da93735743df5fbebadb30208c3",
+    "tests/test_m5_file_boundary_and_compat.py": "e78b110b5c1f039aea129b247d3481c237dc2953d54d13da35c0dba0b0241e7c",
+    "tests/test_m5_r03_commit_arbitration.py": "d8a1a085ec7759c346ae0c975fe7a7b69593103541b5df730a1498ee24b682bd",
+    "tests/test_m5_r04_recovery_isolation.py": "ade8909dc0a264cae2f8e4b27af6884b5d3d78b5a1a34ab61e7d752a960ca918",
+    "tests/test_v016_m4_diagnostics.py": "f1cd7b3bf8f046b74e2e77d075c568671bc7e56eb322ba3b8560930d37e0821d",
+    "tests/test_v017_m2_catalog_revision.py": "745027e6297ec19bde8410cf86effcfbc132433eee7079462e26a2bbed61b967"
+  },
+  "frozen_assets_sha256": {
+    "app/rule_governance.py": "c0a0057f25b8104f5fcf70264491f39c18637cf209e7982a2d8f13171ebb616c",
+    "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "tests/fixtures/golden_set_v1.json": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+    "tests/fixtures/golden_baseline.json": "5ead8ac5462e849f0911cfb1eaa1aad7eae6d858451eb532ca32d11101e865fa",
+    "tests/fixtures/golden_governance_v1.json": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43",
+    "doc/V0.1.7/evidence/指标目标与性能预算.md": "e879c06495b29404223672ee497da6298e48db311105eeb3621bf5c5e1986add"
+  },
+  "coord_verify_verdict": "PASS",
+  "business_hash_unchanged": true,
+  "coord_m2_pytest": "10 passed / 0 failed (10.44s)",
+  "closed_f_ids": [
+    "F14",
+    "F15",
+    "F16",
+    "F17"
+  ],
+  "observations": [
+    "OBS-M2-01 (P3): vector Hit@3 288/729 vs M1 R01 ref 290/729; track at V0.1.7 final audit uniform re-baseline"
+  ]
+}

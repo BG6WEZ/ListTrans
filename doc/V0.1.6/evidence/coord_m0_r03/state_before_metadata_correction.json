@@ -1,0 +1,4 @@
+{
+  "correction": "state_before.json audit_r03_file_count counted R02 directory (34). Protected hashes already include all R03 files; 33/33 delivery and snapshot verdict unaffected.",
+  "actual_audit_r03_file_count": 41
+}

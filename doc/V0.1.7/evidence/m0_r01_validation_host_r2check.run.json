@@ -1,0 +1,18 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.6\\evidence\\m4_r01_runtime_host.py"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "dotenv_disabled": true,
+  "exit_code": 0,
+  "explicit_test_root": null,
+  "llm": false,
+  "native_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_host_uzr9is8f",
+  "seconds": 58.875,
+  "started_at": "2026-11-18T23:00:24.847582+08:00"
+}

@@ -1,0 +1,163 @@
+{
+  "task": "V015-M0",
+  "role": "coordinator",
+  "created_at": "2026-11-13T08:56:46.112938+08:00",
+  "command": "python doc/V0.1.5/evidence/m0_r02_coordinator_probe.py",
+  "python": "3.12.10",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "scope": "negative guardrail probes with controlled module doubles; no app modules imported; not full runtime acceptance",
+  "delivery_hashes": [
+    {
+      "file": "app/llm_client.py",
+      "expected": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+      "actual": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+      "matches": true
+    },
+    {
+      "file": "tests/test_llm_integration.py",
+      "expected": "2f7c7bb85a4743a3382385db2f984afb5d22729598d9aab3a62a5c6f7110a091",
+      "actual": "2f7c7bb85a4743a3382385db2f984afb5d22729598d9aab3a62a5c6f7110a091",
+      "matches": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "expected": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "actual": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "matches": true
+    },
+    {
+      "file": "tests/test_auto_binding.py",
+      "expected": "616f8603a95ec61e8a622c56cb3eea61e4651752f58a5175994da8124f932aad",
+      "actual": "616f8603a95ec61e8a622c56cb3eea61e4651752f58a5175994da8124f932aad",
+      "matches": true
+    },
+    {
+      "file": "app/flywheel_sandbox.py",
+      "expected": "2da38800fe4cc9160ecc714f2f47c47e7ed220d7afb4be7d0ef9df5bbc2ad930",
+      "actual": "2da38800fe4cc9160ecc714f2f47c47e7ed220d7afb4be7d0ef9df5bbc2ad930",
+      "matches": true
+    },
+    {
+      "file": "tests/eval_golden_set.py",
+      "expected": "2532fe1b1f8d337697cab1558463a523289020ceba0d275a09f60c86bc72fa25",
+      "actual": "2532fe1b1f8d337697cab1558463a523289020ceba0d275a09f60c86bc72fa25",
+      "matches": true
+    },
+    {
+      "file": "tests/conftest.py",
+      "expected": "85daa88f7decfd51675cfd0739c970a52581580a94934246e8a183ce620440b3",
+      "actual": "85daa88f7decfd51675cfd0739c970a52581580a94934246e8a183ce620440b3",
+      "matches": true
+    },
+    {
+      "file": "tests/verify_isolation.py",
+      "expected": "85543b567faff752c90de796044a396fb64d3e327975341b6f739f6164dc8dd6",
+      "actual": "85543b567faff752c90de796044a396fb64d3e327975341b6f739f6164dc8dd6",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m0_r02_isolation_verify.json",
+      "expected": "56538394bf496eea1aa32eab790deebbbe9464f014ddc5de8613d7a8abc62535",
+      "actual": "56538394bf496eea1aa32eab790deebbbe9464f014ddc5de8613d7a8abc62535",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m0_r02_full_pytest.log",
+      "expected": "a3f7f67eca1d396a5d76af5fbb16ba563e3a02858de737067933e88d88f693be",
+      "actual": "a3f7f67eca1d396a5d76af5fbb16ba563e3a02858de737067933e88d88f693be",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m0_r02_smoke_pytest.log",
+      "expected": "3514101613b3c4c09aeb58fce6a8b878b07a6354df7eba7de0ac8af7c676c1b7",
+      "actual": "3514101613b3c4c09aeb58fce6a8b878b07a6354df7eba7de0ac8af7c676c1b7",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M0_R02_开发小结.md",
+      "expected": "dd36254fb04fa741201d3a9a8a2dea5e6d945dc6765f8ee98bc98649719a0f3c",
+      "actual": "dd36254fb04fa741201d3a9a8a2dea5e6d945dc6765f8ee98bc98649719a0f3c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "c0d54a387abd7e3383c0a606603c211280dfabc5ec05f2c9a9bcf51e3f087457",
+      "actual": "c21198903addea455d2b8e2fa544d575a2d05b40bafa415cb57e4494210883d8",
+      "matches": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "23625000eeffa1172de5f845db79d4c474e1e354843926f49c0fe689484e2d93",
+      "actual": "55f671ffbfa00542e79e78f60a004bea2cc91fe60f3dbe8810c9e43d6cc6d9f4",
+      "matches": false
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "bfc85110308577f8267cb3a2c87aa7453834d478059851b23340c884ec4e8a74",
+      "actual": "02388571d2822c18d0cf2bd3465cf26d83209aa38540d0b31b3e6b8b7851d0d8",
+      "matches": false
+    }
+  ],
+  "delivery_hashes_matched": 12,
+  "delivery_hashes_total": 15,
+  "audit_summary_sha256": "716fdbfa15319f274628cf0bbdc4927b2728d94d8d897669dc688e356aab254c",
+  "fixture_production_path": {
+    "injected_materials_path": "C:\\Users\\tlyer\\project\\ListTrans\\app\\materials.db",
+    "exception_escaped_fixture": null,
+    "recorded_guardrail_checks": "app.db_manager=未校验：RuntimeError: 测试隔离护栏触发：materials 数据库路径指向业务库 C:\\Users\\tlyer\\project\\ListTrans\\app\\materials.db，禁止在测试会话中写业务库。请使用 tests/conftest.py 注入的临时路径。|app.auth_manager.AUTH_DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\auth.db|app.vector_index.CACHE_DIR=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\vector_cache|app.llm_rule_engine.DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\materials.db|app.llm_client.DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\materials.db|app.feedback_train.FEEDBACK_FILE=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\runtime\\feedback_samples.json"
+  },
+  "fixture_external_path": {
+    "injected_materials_path": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\m0_probe_never_opened.db",
+    "exception_escaped_fixture": null,
+    "recorded_guardrail_checks": "app.db_manager.DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\m0_probe_never_opened.db|app.auth_manager.AUTH_DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\auth.db|app.vector_index.CACHE_DIR=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\vector_cache|app.llm_rule_engine.DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\materials.db|app.llm_client.DB_PATH=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\db\\materials.db|app.feedback_train.FEEDBACK_FILE=C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_test_h97dt4vd\\runtime\\feedback_samples.json"
+  },
+  "verify_injected_escape": {
+    "exit_code": 0,
+    "verdict": "PASS",
+    "module_path_checks": [
+      {
+        "module": "app.db_manager",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\project\\ListTrans\\app\\materials.db",
+        "inside_isolation": false
+      },
+      {
+        "module": "app.auth_manager",
+        "attr": "AUTH_DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq\\db\\auth.db",
+        "inside_isolation": true
+      },
+      {
+        "module": "app.vector_index",
+        "attr": "CACHE_DIR",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq\\vector_cache",
+        "inside_isolation": true
+      },
+      {
+        "module": "app.llm_rule_engine",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq\\db\\materials.db",
+        "inside_isolation": true
+      },
+      {
+        "module": "app.llm_client",
+        "attr": "DB_PATH",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq\\db\\materials.db",
+        "inside_isolation": true
+      },
+      {
+        "module": "app.feedback_train",
+        "attr": "FEEDBACK_FILE",
+        "actual": "C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq\\runtime\\feedback_samples.json",
+        "inside_isolation": true
+      }
+    ],
+    "errors": [
+      "app.db_manager.DB_PATH=C:\\Users\\tlyer\\project\\ListTrans\\app\\materials.db 逃逸出隔离根 C:\\Users\\tlyer\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\AC\\#!sandbox.{2e6dfaa0-c0eb-463b-8441-32842a54c192}\\Temp\\listtrans_m0_verify_42mws_qq"
+    ]
+  },
+  "business_snapshot_matches_r02_audit": true,
+  "business_hash_unchanged": true,
+  "business_changes": [],
+  "negative_probes_reproduced": true
+}

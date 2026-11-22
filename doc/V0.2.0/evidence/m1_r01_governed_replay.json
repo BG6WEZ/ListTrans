@@ -1,0 +1,18 @@
+{
+  "activated_status": "auto_accepted",
+  "changed_payload_http": 409,
+  "configuration_rollback_byte_exact": true,
+  "confirm_http": 200,
+  "evaluation": {
+    "benefit": "improved",
+    "binding_checks_count": 2,
+    "binding_degraded_count": 0,
+    "guard_count": 1,
+    "safety_passed": true,
+    "targeted_count": 1
+  },
+  "evaluation_http": 200,
+  "exit_code": 0,
+  "fixture_sha256": "a3d951ebc8ca9df0a4cc1f456a8574960416499774eb5ba6d6914e28a633b069",
+  "old_and_rolled_back_status": "recommended"
+}

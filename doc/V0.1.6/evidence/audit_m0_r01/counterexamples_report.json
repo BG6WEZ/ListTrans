@@ -1,0 +1,229 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_v016_m0_r01_ce_5pm_69_7",
+  "cases": {
+    "CE1_no_actor_trusted_direct_write": {
+      "outcome": "WRITE_ACCEPTED",
+      "result": {
+        "code": 0,
+        "msg": "反馈提交成功",
+        "idempotent_replay": false
+      },
+      "file_record_count": 1,
+      "forged_record_persisted_as_trusted": true
+    },
+    "CE2_forged_full_identity_json_into_suggestions": {
+      "suggestion_count": 2,
+      "ce1_raw_text_in_suggestions": true,
+      "ce2_raw_text_in_suggestions": true,
+      "matching_suggestions": [
+        {
+          "suggested_typo": "CE1伪造旧直调风口",
+          "suggested_correction": "医用离心式排风机(箱）",
+          "confidence_count": 1
+        },
+        {
+          "suggested_typo": "CE2伪造JSON建议词",
+          "suggested_correction": "医用离心式排风机(箱）",
+          "confidence_count": 1
+        }
+      ]
+    },
+    "CE3_db_commit_json_sync_failure": {
+      "first_http_status": 500,
+      "first_http_detail": "injected_ce3_sync_failure",
+      "db_row_committed": [
+        {
+          "client_event_id": "ce3_sync_b3235de7",
+          "trust_level": "trusted",
+          "event_seq": 1,
+          "superseded": 0
+        }
+      ],
+      "event_in_file_before_retry": false,
+      "retry_http_status": 200,
+      "retry_idempotent_replay": true,
+      "event_in_file_after_retry": false,
+      "divergence_self_healed": false
+    },
+    "CE4_rematch_context_tampering": {
+      "source_row_before": [
+        {
+          "raw_name": "排风机",
+          "raw_spec": "风量：1000m3/h",
+          "professional": "暖通"
+        }
+      ],
+      "rematch_http_status": 200,
+      "rematch_snapshot": [
+        {
+          "snapshot_id": "snap_b808b26c19944a6d",
+          "revision": 2,
+          "is_initial": 0,
+          "snapshot_kind": "rematch",
+          "professional": "强电",
+          "parsed_spec_json": "{\"domain\": \"cable_power\", \"attrs\": {\"型号族\": \"YJV\", \"尺寸\": \"4*25\", \"型号\": \"YJV\", \"芯数\": \"999\", \"截面积\": \"25\", \"主芯数\": 4, \"主截面\": 25.0, \"名称\": \"完全篡改文本 电缆\", \"形状\": \"矩形\", \"尺寸_2d\": \"4*25\", \"is_circular\": false, \"长\": 4.0, \"宽\": 25.0, \"半周长\": 29.0}, \"model\": \"TAMPERED-MODEL\", \"name\": \"完全篡改文本 电缆\", \"spec\": \"完全篡改文本 电力电缆 YJV 4*25\", \"clean_text\": \"完全篡改文本 电力电缆 YJV 4*25\", \"noise_text\": \"\", \"kv_dict\": {}}"
+        }
+      ],
+      "match_http_status": 200,
+      "match_snapshot": [
+        {
+          "snapshot_id": "snap_2baccf635dd24285",
+          "revision": 2,
+          "snapshot_kind": "match_override",
+          "professional": "暖通",
+          "parsed_spec_json": "{\"domain\": \"fan\", \"attrs\": {\"CE4伪造维度\": \"X\"}, \"model\": \"\", \"name\": \"排风机\", \"spec\": \"排风机 风量:1000m3/h\", \"clean_text\": \"排风机 风量:1000m3/h\", \"noise_text\": \"\", \"kv_dict\": {\"排风机 风量\": \"1000m3/h\"}}"
+        }
+      ],
+      "row_a_revisions_before": [
+        {
+          "revision": 1,
+          "professional": "暖通"
+        }
+      ],
+      "row_a_revisions_after": [
+        {
+          "revision": 1,
+          "professional": "暖通"
+        },
+        {
+          "revision": 2,
+          "professional": "强电"
+        }
+      ],
+      "rev1_unchanged": true
+    },
+    "CE5_legacy_draft_overwrite": {
+      "legacy_draft_id": "2d538b4f-6eff-4eab-a114-05a2f6aac088",
+      "drafts_before": [
+        {
+          "id": "2d538b4f-6eff-4eab-a114-05a2f6aac088",
+          "trust_level": "legacy_untrusted",
+          "owner_account_epoch": "",
+          "document_id": "",
+          "items_json": "LEGACY_ITEMS_JSON"
+        }
+      ],
+      "trusted_save_http_status": 200,
+      "trusted_save_body": {
+        "success": true,
+        "draft_id": "2d538b4f-6eff-4eab-a114-05a2f6aac088",
+        "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+        "work_session_id": "ws_74cd5ce181034c1f82f9b8fb322d7312",
+        "trust_level": "trusted"
+      },
+      "drafts_after": [
+        {
+          "id": "2d538b4f-6eff-4eab-a114-05a2f6aac088",
+          "trust_level": "trusted",
+          "owner_account_epoch": "ep-ce_u1_18d858-7fdbf86c",
+          "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+          "items_json": "NEW_TRUSTED_ITEMS_JSON",
+          "updated_at": "2026-11-17 12:31:39"
+        }
+      ],
+      "legacy_row_reused_and_upgraded": true,
+      "legacy_items_preserved": false,
+      "draft_row_count_after": 1
+    },
+    "CE6_event_seq_strictness": {
+      "http": {
+        "float_fraction_1_5": {
+          "sent_event_seq": 1.5,
+          "status_code": 422,
+          "detail": [
+            {
+              "type": "int_from_float",
+              "loc": [
+                "body",
+                "event_seq"
+              ],
+              "msg": "Input should be a valid integer, got a number with a fractional part",
+              "input": 1.5
+            }
+          ],
+          "idempotent_replay": null
+        },
+        "float_whole_1_0": {
+          "sent_event_seq": 1.0,
+          "status_code": 200,
+          "detail": null,
+          "idempotent_replay": false
+        },
+        "string_2": {
+          "sent_event_seq": "2",
+          "status_code": 200,
+          "detail": null,
+          "idempotent_replay": false
+        },
+        "bool_true": {
+          "sent_event_seq": true,
+          "status_code": 409,
+          "detail": {
+            "error": "event_seq_conflict",
+            "message": "同一源行存在相同序号 event_seq=1 的并发冲突事件，请使用新事件序号重试。"
+          },
+          "idempotent_replay": null
+        },
+        "zero": {
+          "sent_event_seq": 0,
+          "status_code": 422,
+          "detail": {
+            "error": "invalid_event_seq",
+            "message": "event_seq 必须大于等于 1。"
+          },
+          "idempotent_replay": null
+        },
+        "negative_minus_3": {
+          "sent_event_seq": -3,
+          "status_code": 422,
+          "detail": {
+            "error": "invalid_event_seq",
+            "message": "event_seq 必须大于等于 1。"
+          },
+          "idempotent_replay": null
+        },
+        "missing": {
+          "status_code": 422,
+          "detail": {
+            "error": "missing_event_seq",
+            "message": "缺少单调递增事件序号 event_seq。"
+          }
+        }
+      },
+      "direct_float_1_5": {
+        "outcome": "REJECTED",
+        "status_code": 409,
+        "code": null
+      }
+    }
+  },
+  "setup": {
+    "materials_imported": 35,
+    "u1_user_id": 2,
+    "u1_epoch": "ep-ce_u1_18d858-7fdbf86c",
+    "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+    "rows": [
+      {
+        "tag": "row_a",
+        "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+        "sheet_id": "sht_2205deea394e4963",
+        "source_row_id": "row_5f562dde24cc4f90",
+        "recommendation_snapshot_id": "snap_54081a0f300d4d7a"
+      },
+      {
+        "tag": "row_b",
+        "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+        "sheet_id": "sht_2205deea394e4963",
+        "source_row_id": "row_7aef67be59ee4166",
+        "recommendation_snapshot_id": "snap_db8372df4c5e4ef6"
+      },
+      {
+        "tag": "row_c",
+        "document_id": "doc_45e87471c7a341a7a12ebe7e027d74ee",
+        "sheet_id": "sht_fb193c4444714148",
+        "source_row_id": "row_9acbb18d3d664177",
+        "recommendation_snapshot_id": "snap_b12abde2cf984180"
+      }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "check": "browser",
+    "exit_code": 0,
+    "wall_seconds": 20.39
+  },
+  {
+    "check": "gate",
+    "exit_code": 0,
+    "wall_seconds": 57.375
+  },
+  {
+    "check": "docker_engine",
+    "exit_code": 0,
+    "build_or_layer_scan_executed": false,
+    "status": "available; layer scan still unexecuted"
+  }
+]

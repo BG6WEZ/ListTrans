@@ -1,0 +1,34 @@
+{
+  "flywheel_untested_accept": {
+    "status_code": 200,
+    "snapshot": {
+      "targeted_eval_passed": 1,
+      "target_type": "ALIAS",
+      "is_active": 1
+    },
+    "leaked_to_plumbing": true
+  },
+  "binding_untested_confirm": {
+    "status_code": 200,
+    "body": {
+      "code": 0,
+      "msg": "规则已成功启用并保存"
+    }
+  },
+  "llm_rule_untested_publish": {
+    "status_code": 200,
+    "body": {
+      "success": true,
+      "rule_id": "M2-REPRO-d56d07",
+      "status": "published",
+      "revision": 1,
+      "content_digest": "ec439ec7f8b0a58ca746adc32e6e30ca63b6a8da946b5b51706bd81a5bad21ae",
+      "detail": "规则已成功发布生效！"
+    }
+  },
+  "sandbox_worker_gaps": {
+    "has_subprocess_timeout": false,
+    "runs_global_guard": false,
+    "runs_binding_pipeline": false
+  }
+}

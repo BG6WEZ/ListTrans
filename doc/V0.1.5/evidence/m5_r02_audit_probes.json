@@ -1,0 +1,279 @@
+{
+  "r01_replay_1_replace_index_fail": {
+    "task_status": "failed",
+    "state": {
+      "db_codes": [
+        "OLD-001"
+      ],
+      "fts_codes": [
+        "OLD-001"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:00"
+        },
+        {
+          "key": "filename",
+          "value": "seed.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "1"
+        },
+        {
+          "key": "imported_rows",
+          "value": "1"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "OLD-001"
+      ],
+      "cache_codes": [
+        "OLD-001"
+      ],
+      "cache_count": 1
+    },
+    "lock_held": false,
+    "all_stayed_old": true
+  },
+  "r01_replay_2_alive_worker_409": {
+    "worker_entered": true,
+    "timed_out_status": "failed",
+    "lock_held_while_alive": true,
+    "second_http_status": 409,
+    "lock_released_after_exit": true,
+    "passed": true
+  },
+  "r01_replay_3_publish_cancel_aborts": {
+    "mem_code": "AUDIT-OLD",
+    "errors": [
+      "ParseCancelledError"
+    ],
+    "passed": true
+  },
+  "r01_replay_4_5_excel_boundary": {
+    "budget_err": "UploadTooLargeError",
+    "exact_sz": 5040,
+    "exact_ok": true,
+    "minus1_err": "UploadTooLargeError",
+    "cancel_err": "ParseCancelledError",
+    "passed": true
+  },
+  "r02_probe_a_post_swap_cancel_split": {
+    "task_status": "failed",
+    "task_error": "向量索引发布已取消，保留原有索引",
+    "state": {
+      "db_codes": [
+        "PROBE-A-NEW"
+      ],
+      "fts_codes": [
+        "PROBE-A-NEW"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:01"
+        },
+        {
+          "key": "filename",
+          "value": "probe_a.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "1"
+        },
+        {
+          "key": "imported_rows",
+          "value": "1"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "OLD-001"
+      ],
+      "cache_codes": [
+        "OLD-001"
+      ],
+      "cache_count": 1
+    },
+    "split_brain_reproduced": true
+  },
+  "r02_probe_b_real_timeout_after_sql_commit": {
+    "committed_b": true,
+    "task_status": "failed",
+    "task_error": "物料库导入及向量重建超时（超过 0.2 秒），已发出取消信号；后台线程实际退出前导入锁保持占用，线程退出后自动释放。",
+    "state": {
+      "db_codes": [
+        "PROBE-B-NEW"
+      ],
+      "fts_codes": [
+        "PROBE-B-NEW"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:01"
+        },
+        {
+          "key": "filename",
+          "value": "probe_b.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "1"
+        },
+        {
+          "key": "imported_rows",
+          "value": "1"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "OLD-001"
+      ],
+      "cache_codes": [
+        "OLD-001"
+      ],
+      "cache_count": 1
+    },
+    "split_brain_reproduced": true
+  },
+  "r02_probe_c_step7_cache_replace_failure": {
+    "task_status": "failed",
+    "task_error": "simulated disk error on 2nd cache file replace",
+    "state": {
+      "db_codes": [
+        "PROBE-C-NEW"
+      ],
+      "fts_codes": [
+        "PROBE-C-NEW"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:01"
+        },
+        {
+          "key": "filename",
+          "value": "probe_c.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "1"
+        },
+        {
+          "key": "imported_rows",
+          "value": "1"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "PROBE-C-NEW"
+      ],
+      "cache_codes": [
+        "OLD-001"
+      ],
+      "cache_count": 1
+    },
+    "split_brain_reproduced": true
+  },
+  "r02_probe_d_append_index_failure": {
+    "task_status": "failed",
+    "task_error": "append_index_fail",
+    "state": {
+      "db_codes": [
+        "APPEND-NEW",
+        "OLD-001"
+      ],
+      "fts_codes": [
+        "APPEND-NEW",
+        "OLD-001"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:01"
+        },
+        {
+          "key": "filename",
+          "value": "probe_d.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "2"
+        },
+        {
+          "key": "imported_rows",
+          "value": "2"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "OLD-001"
+      ],
+      "cache_codes": [
+        "OLD-001"
+      ],
+      "cache_count": 1
+    },
+    "append_split_reproduced": true
+  },
+  "r02_probe_e_replace_success_unified": {
+    "task_status": "completed",
+    "state": {
+      "db_codes": [
+        "OK-001"
+      ],
+      "fts_codes": [
+        "OK-001"
+      ],
+      "meta_row": [
+        {
+          "key": "last_upload_date",
+          "value": "2026-11-16 14:23:01"
+        },
+        {
+          "key": "filename",
+          "value": "probe_e.xlsx"
+        },
+        {
+          "key": "total_rows",
+          "value": "1"
+        },
+        {
+          "key": "imported_rows",
+          "value": "1"
+        },
+        {
+          "key": "disabled_rows",
+          "value": "0"
+        }
+      ],
+      "mem_codes": [
+        "OK-001"
+      ],
+      "cache_codes": [
+        "OK-001"
+      ],
+      "cache_count": 1
+    },
+    "passed": true
+  }
+}

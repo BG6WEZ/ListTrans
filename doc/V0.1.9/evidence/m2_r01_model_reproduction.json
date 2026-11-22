@@ -1,0 +1,12 @@
+{
+  "exit_code": 0,
+  "policy_sha256": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+  "refit_policy_sha256": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+  "fit_report_sha256": "8eda0674811ef7a9abf9dbfa44ab71c30d6841f89cd5b1e277157ac764a4bce1",
+  "refit_report_sha256": "8eda0674811ef7a9abf9dbfa44ab71c30d6841f89cd5b1e277157ac764a4bce1",
+  "byte_identical": true,
+  "inputs_sha256": {
+    "m2_r01_keyword_capture.json": "d6c7bcce7faef855c008ca39112dea131e165a26090faef3813c74d090e2f280",
+    "m2_r01_vector_capture.json": "842b70e5c125b9e0a1911f0a36f633ae83a8e6b6d9a5ff32afab1be16051019e"
+  }
+}

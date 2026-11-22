@@ -1,0 +1,48 @@
+{
+  "cases": {
+    "candidate_brand_conflict": {
+      "approved_codes": [],
+      "pass": true,
+      "reason": "candidate_requires_confirmation",
+      "status": "pending_business_review"
+    },
+    "candidate_unit_conflict": {
+      "approved_codes": [],
+      "pass": true,
+      "reason": "candidate_requires_confirmation",
+      "status": "pending_business_review"
+    },
+    "equivalent_pair": {
+      "approved_codes": [
+        "SYN-A",
+        "SYN-B"
+      ],
+      "pass": true,
+      "reason": "current_equivalent_partition_matches_history",
+      "status": "equivalent_candidates"
+    },
+    "missing_only_is_not_no_substitute": {
+      "approved_codes": [],
+      "pass": true,
+      "reason": "insufficient_evidence_for_no_substitute",
+      "status": "pending_business_review"
+    },
+    "proven_remap": {
+      "approved_codes": [
+        "SYN-A"
+      ],
+      "pass": true,
+      "reason": "unique_identical_new_revision_and_retirement",
+      "status": "code_remapped"
+    },
+    "retired_with_no_candidate": {
+      "approved_codes": [],
+      "pass": true,
+      "reason": "retirement_evidence_and_no_candidate_in_offline_comparison",
+      "status": "disabled_or_retired"
+    }
+  },
+  "elapsed_sec": 0.0,
+  "exit_code": 0,
+  "fixture": "synthetic"
+}

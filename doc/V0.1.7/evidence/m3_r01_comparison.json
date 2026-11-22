@@ -1,0 +1,173 @@
+{
+  "verdict": "PASS",
+  "core_scope": "1,220 samples per mode, rank replay + 1,220 single HTTP + 25 uploads",
+  "modes": {
+    "keyword": {
+      "index": {
+        "enabled": false
+      },
+      "hardware": {
+        "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+        "logical_cores": 20,
+        "os": "Windows-11-10.0.26300-SP0",
+        "physical_cores": 14,
+        "python": "3.12.10",
+        "ram_mib": 16068.73828125
+      },
+      "semantic_rows": 0,
+      "portfolio_equal_to_released_m2": true,
+      "equal_core_ranking_domains": 9,
+      "candidate_recall": {
+        "d": 729,
+        "n": 426,
+        "pct": 58.4362
+      },
+      "hit_at_1": {
+        "d": 729,
+        "n": 180,
+        "pct": 24.6914
+      },
+      "hit_at_3": {
+        "d": 729,
+        "n": 254,
+        "pct": 34.8422
+      },
+      "explicit_rejection": {
+        "d": 152,
+        "n": 43,
+        "pct": 28.2895
+      },
+      "wrong_auto_binding": {
+        "d": 152,
+        "n": 0,
+        "pct": 0.0
+      },
+      "single_http": {
+        "max_ms": 861.713,
+        "min_ms": 9.016,
+        "n": 1220,
+        "p50_ms": 25.088,
+        "p95_ms": 257.815,
+        "sampled_peak_rss_mib": 644.66796875
+      },
+      "upload_http_50_rows": {
+        "max_ms": 21863.315,
+        "min_ms": 127.009,
+        "n": 24,
+        "p50_ms": 1519.115,
+        "p95_ms": 8506.443,
+        "upload_phase_sampled_peak_rss_mib": 651.703125
+      }
+    },
+    "vector": {
+      "index": {
+        "dimension": 512,
+        "enabled": true,
+        "faiss": false,
+        "rows": 26863
+      },
+      "hardware": {
+        "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+        "logical_cores": 20,
+        "os": "Windows-11-10.0.26300-SP0",
+        "physical_cores": 14,
+        "python": "3.12.10",
+        "ram_mib": 16068.73828125
+      },
+      "semantic_rows": 1220,
+      "portfolio_equal_to_released_m2": true,
+      "equal_core_ranking_domains": 9,
+      "candidate_recall": {
+        "d": 729,
+        "n": 643,
+        "pct": 88.203
+      },
+      "hit_at_1": {
+        "d": 729,
+        "n": 183,
+        "pct": 25.1029
+      },
+      "hit_at_3": {
+        "d": 729,
+        "n": 288,
+        "pct": 39.5062
+      },
+      "explicit_rejection": {
+        "d": 152,
+        "n": 42,
+        "pct": 27.6316
+      },
+      "wrong_auto_binding": {
+        "d": 152,
+        "n": 0,
+        "pct": 0.0
+      },
+      "single_http": {
+        "max_ms": 1019.179,
+        "min_ms": 30.059,
+        "n": 1220,
+        "p50_ms": 75.172,
+        "p95_ms": 319.673,
+        "sampled_peak_rss_mib": 965.9921875
+      },
+      "upload_http_50_rows": {
+        "max_ms": 27160.231,
+        "min_ms": 2578.85,
+        "n": 24,
+        "p50_ms": 5015.792,
+        "p95_ms": 10761.306,
+        "upload_phase_sampled_peak_rss_mib": 1302.5625
+      }
+    }
+  },
+  "all_portfolios_equal_to_m2": true,
+  "concurrent_probes": {
+    "health": {
+      "max_ms": 409.303,
+      "n": 71,
+      "p50_ms": 246.0,
+      "p95_ms": 390.238
+    },
+    "status": {
+      "max_ms": 168.654,
+      "n": 71,
+      "p50_ms": 66.318,
+      "p95_ms": 150.251
+    }
+  },
+  "admission_status": {
+    "200": 15,
+    "429": 3
+  },
+  "match_queue_wait": {
+    "max_ms": 19844.0,
+    "n": 12,
+    "p50_ms": 9485.0,
+    "p95_ms": 19844.0
+  },
+  "obs_m2_01_vector_hit_at_3": {
+    "m1_r01_reference": {
+      "d": 729,
+      "n": 290,
+      "pct": 39.7805
+    },
+    "m2_r01_released": {
+      "d": 729,
+      "n": 288,
+      "pct": 39.5062
+    },
+    "m3_r01_replayed": {
+      "d": 729,
+      "n": 288,
+      "pct": 39.5062
+    }
+  },
+  "inputs_sha256": {
+    "m1_r01_metrics.json": "f242d81eee289604aa0debc3b82b99ea8261da1081e11b2c26bd2486bb1b2c5f",
+    "m2_r01_metrics.json": "c9a94522848ff0b5766f6d8501fce591c7d51d8e7f7adf91c5a772327e9f1579",
+    "m3_r01_metrics.json": "bef4ac485dafb6e5c8d8b973ffe58f99924957d480013c929d738a081ad83bf8",
+    "m3_r01_load.json": "7ff1857a3d0539a071c4877b64985107f13194e1668503ed89be665a9a052d79"
+  },
+  "gate_groups": 18,
+  "gate_score_differences": 0
+}

@@ -1,0 +1,12 @@
+{
+  "server_port": 53953,
+  "steps": {
+    "login_page_clean": true,
+    "forced_modal_blocks_close": true,
+    "password_change_relogin_and_old_token_401": true,
+    "relogin_normal_and_publish_403_verified": true,
+    "logout_revokes_token_401": true,
+    "admin_publish_after_dual_approval": true
+  },
+  "passed": true
+}

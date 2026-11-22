@@ -1,0 +1,494 @@
+{
+  "cases": {
+    "GT-0339": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "628389457b84df0e3891001d39d1cb02b1d4f92906a8b469538dc65f887f163f",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 85.0,
+          "code": "2.26.33.0014",
+          "full_rank": 16,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0049",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.9
+        },
+        {
+          "code": "2.26.33.0038",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.8
+        },
+        {
+          "code": "2.26.33.0021",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.7
+        }
+      ]
+    },
+    "GT-0342": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "eebb7ba78e4911de5541cf245f90644c5c13a781f82f90aa33eec98153b5c9e2",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.9,
+          "code": "2.26.33.0031",
+          "full_rank": 9,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.8
+        },
+        {
+          "code": "2.26.33.0125",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.6
+        },
+        {
+          "code": "2.26.33.0126",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.5
+        }
+      ]
+    },
+    "GT-0343": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "eebb7ba78e4911de5541cf245f90644c5c13a781f82f90aa33eec98153b5c9e2",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 85.0,
+          "code": "2.26.33.0011",
+          "full_rank": 8,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.8
+        },
+        {
+          "code": "2.26.33.0125",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.7
+        },
+        {
+          "code": "2.26.33.0126",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.6
+        }
+      ]
+    },
+    "GT-0346": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "2b5cedacda98493f7ff1d0c12ec0c9bcf77b8fdd029b4910b5ab684335fdf54c",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.9,
+          "code": "2.26.33.0033",
+          "full_rank": 10,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0126",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.9
+        },
+        {
+          "code": "2.26.33.0050",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.8
+        },
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数冲突",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 93.8
+        }
+      ]
+    },
+    "GT-0347": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "2b5cedacda98493f7ff1d0c12ec0c9bcf77b8fdd029b4910b5ab684335fdf54c",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.9,
+          "code": "2.26.33.0033",
+          "full_rank": 10,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0126",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 99.0
+        },
+        {
+          "code": "2.26.33.0050",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.9
+        },
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数冲突",
+            "开关控数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 93.7
+        }
+      ]
+    },
+    "GT-0349": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "b89ff5cad8e2facd202ad4c56679bc944fee9ed447b7c0899682224c3bd7f919",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 59.2,
+          "code": "2.26.33.0016",
+          "full_rank": 14,
+          "max_score": 0.85,
+          "reasons": [
+            "开关联数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0042",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "开关联数一致"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 98.7
+        },
+        {
+          "code": "2.26.33.0044",
+          "match_reasons": [
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 97.0
+        },
+        {
+          "code": "2.26.33.0126",
+          "match_reasons": [
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 86.8
+        }
+      ]
+    },
+    "GT-0350": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "7294f172b4ec4ab69d867a828fc19c2270c8d2d8071b7ba3b8bc907bbde461b3",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "防爆": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "额定电流": "f1e42019aecc858ffbcca7fddec511b761b474916fde37b1a6ff321a9b459330"
+      },
+      "domain": "switchgear",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 51.6,
+          "code": "2.26.33.0119",
+          "full_rank": 15,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近"
+          ],
+          "recall_sources": [
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0018",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.3
+        },
+        {
+          "code": "2.26.33.0020",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.1
+        },
+        {
+          "code": "2.26.33.0021",
+          "match_reasons": [
+            "核心参数在公差范围内",
+            "语义高度相近"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 98.0
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "mode": "vector",
+  "version": "v018"
+}

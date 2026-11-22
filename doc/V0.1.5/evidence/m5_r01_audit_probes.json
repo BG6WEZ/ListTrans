@@ -1,0 +1,36 @@
+{
+  "failed_index_after_database_commit": {
+    "status": "failed",
+    "codes_after": [
+      "AUDIT-NEW-1",
+      "AUDIT-NEW-2"
+    ],
+    "reproduced": true
+  },
+  "replace_rollback_loses_old_table": {
+    "exception": "ParseCancelledError",
+    "codes_after": [],
+    "reproduced": true
+  },
+  "timeout_releases_lock_before_worker_exit": {
+    "worker_entered": true,
+    "worker_exited": false,
+    "second_import_acquired": true,
+    "temp_file_still_exists": true,
+    "reproduced": true
+  },
+  "cancel_before_swap_still_publishes_index": {
+    "cancel_set": true,
+    "published_code": "AUDIT-NEW",
+    "errors": [],
+    "reproduced": true
+  },
+  "direct_reader_ignores_file_size_budget": {
+    "file_bytes": 5023,
+    "budget_bytes": 1,
+    "parsed_rows": 4,
+    "reproduced": true
+  },
+  "scope": "Synthetic isolated workbooks/SQLite; fault injection only at index failure and deterministic concurrency barriers; real importer and swap implementation.",
+  "reproduced_count": 5
+}

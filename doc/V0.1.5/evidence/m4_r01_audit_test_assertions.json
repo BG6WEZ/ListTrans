@@ -1,0 +1,74 @@
+[
+  {
+    "path": "tests/test_admin_dashboard.py",
+    "before_source": "backup",
+    "before_sha256": "21a414db9f939b197b523a283c5ba69d9a2043e8c1dcfe99cc05b3adef8e8752",
+    "assertions_before": 39,
+    "assertions_after": 39,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_auth_security_fix.py",
+    "before_source": "backup",
+    "before_sha256": "4071b1d88343c19f65bc01b9889d6dc7a1275de8e284f6b4ccc68bb828d56055",
+    "assertions_before": 7,
+    "assertions_after": 7,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_binding_decisions.py",
+    "before_source": "backup",
+    "before_sha256": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+    "assertions_before": 88,
+    "assertions_after": 88,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_flywheel_end2end.py",
+    "before_source": "backup",
+    "before_sha256": "d47af7426ad2828d02725ac4589fc3325bbc30d8276e0b2699c074efb48c18c6",
+    "assertions_before": 35,
+    "assertions_after": 35,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m3_hard_constraints.py",
+    "before_source": "backup",
+    "before_sha256": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+    "assertions_before": 251,
+    "assertions_after": 251,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m3_hard_constraints_http.py",
+    "before_source": "backup",
+    "before_sha256": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+    "assertions_before": 192,
+    "assertions_after": 192,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_phase0_phase1.py",
+    "before_source": "backup",
+    "before_sha256": "891dbe21f0f79dcd65e18e40aa57219862ef1818e27a52063fa72eea19009e3e",
+    "assertions_before": 12,
+    "assertions_after": 13,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_v0_0_8_llm_rules.py",
+    "before_source": "backup",
+    "before_sha256": "9765eb7ac61882e2fe8334d3103e6352216ec471d8f491c1cb29e45f12493a6c",
+    "assertions_before": 13,
+    "assertions_after": 18,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_rule_deadlock_fix.py",
+    "before_source": "HEAD",
+    "before_sha256": "561bb448bae14f19744bbe0d09d60bc0ffad30e464b27b7b6871e257d29a4ce6",
+    "assertions_before": 2,
+    "assertions_after": 2,
+    "old_assertions_missing": 0
+  }
+]

@@ -1,0 +1,4794 @@
+{
+  "split_policy": "Train+Dev only (1060 rows; 651 core answerable: Train 529 / Dev 122; Test 160 strictly excluded)",
+  "signed_budgets_v017": {
+    "keyword": {
+      "single_p50": 30.0,
+      "single_p95": 300.0,
+      "up50_p50": 1750.0,
+      "up50_p95": 10000.0,
+      "wset": 768.0
+    },
+    "vector": {
+      "single_p50": 90.0,
+      "single_p95": 375.0,
+      "up50_p50": 6000.0,
+      "up50_p95": 12500.0,
+      "wset": 2048.0
+    }
+  },
+  "rollback_parity_B0_vs_m1_vec_off": {
+    "r100_equal": true,
+    "r200_equal": true,
+    "hit1_equal": true,
+    "hit3_equal": true,
+    "mrr10_equal": true,
+    "avg_pool_equal": true
+  },
+  "runs": {
+    "B0": {
+      "name": "B0_legacy_k50_union",
+      "mode": "vector",
+      "config": {
+        "cap": 0,
+        "fusion": "union",
+        "m0": false,
+        "m1": false,
+        "m2": false,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 50
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 144.993,
+      "peak_wset_mib": 1704.9,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 28980.268,
+          "n": 21,
+          "p50_ms": 5852.062,
+          "p95_ms": 11907.393
+        },
+        "single_http": {
+          "max_ms": 1327.71,
+          "n": 1060,
+          "p50_ms": 94.463,
+          "p95_ms": 396.852
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 526,
+            "pct": 80.7988
+          },
+          "r100_delta": 0,
+          "r200": {
+            "d": 651,
+            "n": 573,
+            "pct": 88.0184
+          },
+          "r200_delta": 0,
+          "hit1": {
+            "d": 651,
+            "n": 161,
+            "pct": 24.7312
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 651,
+            "n": 238,
+            "pct": 36.5591
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.330838,
+          "mrr_full": 0.346576,
+          "avg_pool_size": 116.65,
+          "max_pool_size": 836,
+          "channel_target_slot_counts": {
+            "fts": 327,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 36,
+            "semantic": 494
+          },
+          "exclusive_channel_slots": {
+            "fts": 39,
+            "model_match": 19,
+            "semantic": 197
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r200": 94,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 81,
+              "r100_delta": 0,
+              "r200": 96,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 166,
+              "r100_delta": 0,
+              "r200": 171,
+              "r200_delta": 0,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 69,
+              "r100_delta": 0,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 31,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 102,
+              "r100_delta": 0,
+              "r200": 103,
+              "r200_delta": 0,
+              "hit1": 26,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 23,
+            "pct": 20.0
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 413,
+            "pct": 78.0718
+          },
+          "r100_delta": 0,
+          "r200": {
+            "d": 529,
+            "n": 459,
+            "pct": 86.7675
+          },
+          "r200_delta": 0,
+          "hit1": {
+            "d": 529,
+            "n": 129,
+            "pct": 24.3856
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 529,
+            "n": 190,
+            "pct": 35.9168
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.326428,
+          "mrr_full": 0.341992,
+          "avg_pool_size": 129.03,
+          "max_pool_size": 836,
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 389
+          },
+          "exclusive_channel_slots": {
+            "fts": 30,
+            "model_match": 19,
+            "semantic": 157
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r200": 94,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 81,
+              "r100_delta": 0,
+              "r200": 96,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 166,
+              "r100_delta": 0,
+              "r200": 171,
+              "r200_delta": 0,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 63,
+              "r100_delta": 0,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 28,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 10,
+            "pct": 12.987
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 113,
+            "pct": 92.623
+          },
+          "r100_delta": 0,
+          "r200": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r200_delta": 0,
+          "hit1": {
+            "d": 122,
+            "n": 32,
+            "pct": 26.2295
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 122,
+            "n": 48,
+            "pct": 39.3443
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.349964,
+          "mrr_full": 0.366455,
+          "avg_pool_size": 62.96,
+          "max_pool_size": 184,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 105
+          },
+          "exclusive_channel_slots": {
+            "fts": 9,
+            "semantic": 40
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 102,
+              "r100_delta": 0,
+              "r200": 103,
+              "r200_delta": 0,
+              "hit1": 26,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 13,
+            "pct": 34.2105
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": false,
+        "up50_p50_ok": true,
+        "up50_p95_ok": true
+      }
+    },
+    "A1": {
+      "name": "A1_legacy_k100_union",
+      "mode": "vector",
+      "config": {
+        "cap": 0,
+        "fusion": "union",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 100
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 202.434,
+      "peak_wset_mib": 1748.08,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        },
+        "single_http": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 543,
+            "pct": 83.4101
+          },
+          "r100_delta": 17,
+          "r200": {
+            "d": 651,
+            "n": 590,
+            "pct": 90.6298
+          },
+          "r200_delta": 17,
+          "hit1": {
+            "d": 651,
+            "n": 155,
+            "pct": 23.8095
+          },
+          "hit1_delta": -6,
+          "hit3": {
+            "d": 651,
+            "n": 231,
+            "pct": 35.4839
+          },
+          "hit3_delta": -7,
+          "mrr_at_10": 0.319295,
+          "mrr_full": 0.335049,
+          "avg_pool_size": 161.41,
+          "max_pool_size": 886,
+          "channel_target_slot_counts": {
+            "fts": 327,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 36,
+            "semantic": 523
+          },
+          "exclusive_channel_slots": {
+            "fts": 28,
+            "model_match": 19,
+            "semantic": 214
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 96,
+              "r200_delta": 2,
+              "hit1": 21,
+              "hit1_delta": -1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 83,
+              "r100_delta": 2,
+              "r200": 98,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 69,
+              "r100_delta": 0,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 27,
+              "hit1_delta": -4
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 429,
+            "pct": 81.0964
+          },
+          "r100_delta": 16,
+          "r200": {
+            "d": 529,
+            "n": 475,
+            "pct": 89.7921
+          },
+          "r200_delta": 16,
+          "hit1": {
+            "d": 529,
+            "n": 124,
+            "pct": 23.4405
+          },
+          "hit1_delta": -5,
+          "hit3": {
+            "d": 529,
+            "n": 184,
+            "pct": 34.7826
+          },
+          "hit3_delta": -6,
+          "mrr_at_10": 0.315262,
+          "mrr_full": 0.330795,
+          "avg_pool_size": 173.31,
+          "max_pool_size": 886,
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 415
+          },
+          "exclusive_channel_slots": {
+            "fts": 21,
+            "model_match": 19,
+            "semantic": 173
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 96,
+              "r200_delta": 2,
+              "hit1": 21,
+              "hit1_delta": -1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 83,
+              "r100_delta": 2,
+              "r200": 98,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 63,
+              "r100_delta": 0,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 24,
+              "hit1_delta": -4
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 115,
+            "pct": 94.2623
+          },
+          "r200_delta": 1,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 47,
+            "pct": 38.5246
+          },
+          "hit3_delta": -1,
+          "mrr_at_10": 0.336781,
+          "mrr_full": 0.353492,
+          "avg_pool_size": 109.8,
+          "max_pool_size": 214,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 108
+          },
+          "exclusive_channel_slots": {
+            "fts": 7,
+            "semantic": 41
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        }
+      },
+      "budget_check": {
+        "wset_ok": true
+      }
+    },
+    "A2": {
+      "name": "A2_legacy_k200_union",
+      "mode": "vector",
+      "config": {
+        "cap": 0,
+        "fusion": "union",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 200
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 269.787,
+      "peak_wset_mib": 1829.74,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        },
+        "single_http": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 543,
+            "pct": 83.4101
+          },
+          "r100_delta": 17,
+          "r200": {
+            "d": 651,
+            "n": 600,
+            "pct": 92.1659
+          },
+          "r200_delta": 27,
+          "hit1": {
+            "d": 651,
+            "n": 152,
+            "pct": 23.3487
+          },
+          "hit1_delta": -9,
+          "hit3": {
+            "d": 651,
+            "n": 222,
+            "pct": 34.1014
+          },
+          "hit3_delta": -16,
+          "mrr_at_10": 0.308573,
+          "mrr_full": 0.322866,
+          "avg_pool_size": 255.74,
+          "max_pool_size": 983,
+          "channel_target_slot_counts": {
+            "fts": 327,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 36,
+            "semantic": 543
+          },
+          "exclusive_channel_slots": {
+            "fts": 23,
+            "model_match": 19,
+            "semantic": 225
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 102,
+              "r200_delta": 8,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 83,
+              "r100_delta": 2,
+              "r200": 99,
+              "r200_delta": 3,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 185,
+              "r200_delta": 14,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 69,
+              "r100_delta": 0,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 105,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 429,
+            "pct": 81.0964
+          },
+          "r100_delta": 16,
+          "r200": {
+            "d": 529,
+            "n": 484,
+            "pct": 91.4934
+          },
+          "r200_delta": 25,
+          "hit1": {
+            "d": 529,
+            "n": 121,
+            "pct": 22.8733
+          },
+          "hit1_delta": -8,
+          "hit3": {
+            "d": 529,
+            "n": 178,
+            "pct": 33.6484
+          },
+          "hit3_delta": -12,
+          "mrr_at_10": 0.30396,
+          "mrr_full": 0.318611,
+          "avg_pool_size": 267.22,
+          "max_pool_size": 983,
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 431
+          },
+          "exclusive_channel_slots": {
+            "fts": 19,
+            "model_match": 19,
+            "semantic": 183
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 102,
+              "r200_delta": 8,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 83,
+              "r100_delta": 2,
+              "r200": 99,
+              "r200_delta": 3,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 185,
+              "r200_delta": 14,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 63,
+              "r100_delta": 0,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 116,
+            "pct": 95.082
+          },
+          "r200_delta": 2,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 44,
+            "pct": 36.0656
+          },
+          "hit3_delta": -4,
+          "mrr_at_10": 0.328575,
+          "mrr_full": 0.341314,
+          "avg_pool_size": 205.98,
+          "max_pool_size": 285,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 112
+          },
+          "exclusive_channel_slots": {
+            "fts": 4,
+            "semantic": 42
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 105,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        }
+      },
+      "budget_check": {
+        "wset_ok": true
+      }
+    },
+    "A3": {
+      "name": "A3_legacy_k50_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 50
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 146.056,
+      "peak_wset_mib": 1670.7,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 11435.105,
+          "n": 21,
+          "p50_ms": 5672.029,
+          "p95_ms": 8596.223
+        },
+        "single_http": {
+          "max_ms": 400.628,
+          "n": 1060,
+          "p50_ms": 77.89,
+          "p95_ms": 261.425
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 535,
+            "pct": 82.1813
+          },
+          "r100_delta": 9,
+          "r200": {
+            "d": 651,
+            "n": 564,
+            "pct": 86.6359
+          },
+          "r200_delta": -9,
+          "hit1": {
+            "d": 651,
+            "n": 162,
+            "pct": 24.8848
+          },
+          "hit1_delta": 1,
+          "hit3": {
+            "d": 651,
+            "n": 234,
+            "pct": 35.9447
+          },
+          "hit3_delta": -4,
+          "mrr_at_10": 0.328393,
+          "mrr_full": 0.343931,
+          "avg_pool_size": 91.47,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 326,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 28,
+            "semantic": 494
+          },
+          "exclusive_channel_slots": {
+            "fts": 38,
+            "model_match": 11,
+            "semantic": 197
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r200": 94,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 91,
+              "r100_delta": 10,
+              "r200": 96,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 149,
+              "r100_delta": -17,
+              "r200": 162,
+              "r200_delta": -9,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 86,
+              "r100_delta": 17,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 32,
+              "hit1_delta": 1
+            },
+            "自控": {
+              "n": 17,
+              "r100": 10,
+              "r100_delta": -1,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 102,
+              "r100_delta": 0,
+              "r200": 103,
+              "r200_delta": 0,
+              "hit1": 26,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 23,
+            "pct": 20.0
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 422,
+            "pct": 79.7732
+          },
+          "r100_delta": 9,
+          "r200": {
+            "d": 529,
+            "n": 450,
+            "pct": 85.0662
+          },
+          "r200_delta": -9,
+          "hit1": {
+            "d": 529,
+            "n": 130,
+            "pct": 24.5747
+          },
+          "hit1_delta": 1,
+          "hit3": {
+            "d": 529,
+            "n": 185,
+            "pct": 34.9716
+          },
+          "hit3_delta": -5,
+          "mrr_at_10": 0.323261,
+          "mrr_full": 0.33855,
+          "avg_pool_size": 98.05,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 253,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 25,
+            "semantic": 389
+          },
+          "exclusive_channel_slots": {
+            "fts": 29,
+            "model_match": 11,
+            "semantic": 157
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r200": 94,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 91,
+              "r100_delta": 10,
+              "r200": 96,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 149,
+              "r100_delta": -17,
+              "r200": 162,
+              "r200_delta": -9,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 80,
+              "r100_delta": 17,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 29,
+              "hit1_delta": 1
+            },
+            "自控": {
+              "n": 17,
+              "r100": 10,
+              "r100_delta": -1,
+              "r200": 14,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 10,
+            "pct": 12.987
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 113,
+            "pct": 92.623
+          },
+          "r100_delta": 0,
+          "r200": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r200_delta": 0,
+          "hit1": {
+            "d": 122,
+            "n": 32,
+            "pct": 26.2295
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 122,
+            "n": 49,
+            "pct": 40.1639
+          },
+          "hit3_delta": 1,
+          "mrr_at_10": 0.350647,
+          "mrr_full": 0.367261,
+          "avg_pool_size": 62.96,
+          "max_pool_size": 184,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 105
+          },
+          "exclusive_channel_slots": {
+            "fts": 9,
+            "semantic": 40
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 102,
+              "r100_delta": 0,
+              "r200": 103,
+              "r200_delta": 0,
+              "hit1": 26,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 13,
+            "pct": 34.2105
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": true,
+        "single_p95_ok": true,
+        "up50_p50_ok": true,
+        "up50_p95_ok": true
+      }
+    },
+    "A4": {
+      "name": "A4_legacy_k100_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 100
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 212.961,
+      "peak_wset_mib": 1708.61,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 13638.136,
+          "n": 21,
+          "p50_ms": 7314.357,
+          "p95_ms": 11076.13
+        },
+        "single_http": {
+          "max_ms": 512.463,
+          "n": 1060,
+          "p50_ms": 140.592,
+          "p95_ms": 303.684
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 551,
+            "pct": 84.639
+          },
+          "r100_delta": 25,
+          "r200": {
+            "d": 651,
+            "n": 570,
+            "pct": 87.5576
+          },
+          "r200_delta": -3,
+          "hit1": {
+            "d": 651,
+            "n": 150,
+            "pct": 23.0415
+          },
+          "hit1_delta": -11,
+          "hit3": {
+            "d": 651,
+            "n": 225,
+            "pct": 34.5622
+          },
+          "hit3_delta": -13,
+          "mrr_at_10": 0.308733,
+          "mrr_full": 0.32417,
+          "avg_pool_size": 128.76,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 315,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 28,
+            "semantic": 523
+          },
+          "exclusive_channel_slots": {
+            "fts": 16,
+            "model_match": 11,
+            "semantic": 214
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 96,
+              "r200_delta": 2,
+              "hit1": 21,
+              "hit1_delta": -1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 93,
+              "r100_delta": 12,
+              "r200": 93,
+              "r200_delta": -3,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 161,
+              "r100_delta": -5,
+              "r200": 170,
+              "r200_delta": -1,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 85,
+              "r100_delta": 16,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 28,
+              "hit1_delta": -3
+            },
+            "自控": {
+              "n": 17,
+              "r100": 10,
+              "r100_delta": -1,
+              "r200": 12,
+              "r200_delta": -2,
+              "hit1": 2,
+              "hit1_delta": -2
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 25,
+            "pct": 21.7391
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 437,
+            "pct": 82.6087
+          },
+          "r100_delta": 24,
+          "r200": {
+            "d": 529,
+            "n": 455,
+            "pct": 86.0113
+          },
+          "r200_delta": -4,
+          "hit1": {
+            "d": 529,
+            "n": 119,
+            "pct": 22.4953
+          },
+          "hit1_delta": -10,
+          "hit3": {
+            "d": 529,
+            "n": 177,
+            "pct": 33.4594
+          },
+          "hit3_delta": -13,
+          "mrr_at_10": 0.301791,
+          "mrr_full": 0.316917,
+          "avg_pool_size": 133.16,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 242,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 25,
+            "semantic": 415
+          },
+          "exclusive_channel_slots": {
+            "fts": 9,
+            "model_match": 11,
+            "semantic": 173
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 96,
+              "r200_delta": 2,
+              "hit1": 21,
+              "hit1_delta": -1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 93,
+              "r100_delta": 12,
+              "r200": 93,
+              "r200_delta": -3,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 161,
+              "r100_delta": -5,
+              "r200": 170,
+              "r200_delta": -1,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 79,
+              "r100_delta": 16,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": -3
+            },
+            "自控": {
+              "n": 17,
+              "r100": 10,
+              "r100_delta": -1,
+              "r200": 12,
+              "r200_delta": -2,
+              "hit1": 2,
+              "hit1_delta": -2
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 11,
+            "pct": 14.2857
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 115,
+            "pct": 94.2623
+          },
+          "r200_delta": 1,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 48,
+            "pct": 39.3443
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.33883,
+          "mrr_full": 0.355621,
+          "avg_pool_size": 109.68,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 108
+          },
+          "exclusive_channel_slots": {
+            "fts": 7,
+            "semantic": 41
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 14,
+            "pct": 36.8421
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": true,
+        "up50_p50_ok": false,
+        "up50_p95_ok": true
+      }
+    },
+    "A5": {
+      "name": "A5_legacy_k200_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 200
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 188.123,
+      "peak_wset_mib": 1766.68,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 12274.504,
+          "n": 21,
+          "p50_ms": 8193.102,
+          "p95_ms": 11789.436
+        },
+        "single_http": {
+          "max_ms": 520.428,
+          "n": 1060,
+          "p50_ms": 161.42,
+          "p95_ms": 286.071
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 554,
+            "pct": 85.0998
+          },
+          "r100_delta": 28,
+          "r200": {
+            "d": 651,
+            "n": 581,
+            "pct": 89.2473
+          },
+          "r200_delta": 8,
+          "hit1": {
+            "d": 651,
+            "n": 148,
+            "pct": 22.7343
+          },
+          "hit1_delta": -13,
+          "hit3": {
+            "d": 651,
+            "n": 219,
+            "pct": 33.6406
+          },
+          "hit3_delta": -19,
+          "mrr_at_10": 0.301343,
+          "mrr_full": 0.315489,
+          "avg_pool_size": 200.0,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 317,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 27,
+            "semantic": 542
+          },
+          "exclusive_channel_slots": {
+            "fts": 13,
+            "model_match": 10,
+            "semantic": 224
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 102,
+              "r200_delta": 8,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 93,
+              "r100_delta": 12,
+              "r200": 94,
+              "r200_delta": -2,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 162,
+              "r100_delta": -4,
+              "r200": 172,
+              "r200_delta": 1,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 86,
+              "r100_delta": 17,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 26,
+              "hit1_delta": -5
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 13,
+              "r200_delta": -1,
+              "hit1": 3,
+              "hit1_delta": -1
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 105,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 24,
+            "pct": 20.8696
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 440,
+            "pct": 83.1758
+          },
+          "r100_delta": 27,
+          "r200": {
+            "d": 529,
+            "n": 465,
+            "pct": 87.9017
+          },
+          "r200_delta": 6,
+          "hit1": {
+            "d": 529,
+            "n": 117,
+            "pct": 22.1172
+          },
+          "hit1_delta": -12,
+          "hit3": {
+            "d": 529,
+            "n": 173,
+            "pct": 32.7032
+          },
+          "hit3_delta": -17,
+          "mrr_at_10": 0.294433,
+          "mrr_full": 0.308828,
+          "avg_pool_size": 200.0,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 244,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 24,
+            "semantic": 430
+          },
+          "exclusive_channel_slots": {
+            "fts": 9,
+            "model_match": 10,
+            "semantic": 182
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 94,
+              "r100_delta": 2,
+              "r200": 102,
+              "r200_delta": 8,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 93,
+              "r100_delta": 12,
+              "r200": 94,
+              "r200_delta": -2,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 162,
+              "r100_delta": -4,
+              "r200": 172,
+              "r200_delta": 1,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 80,
+              "r100_delta": 17,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 23,
+              "hit1_delta": -5
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 13,
+              "r200_delta": -1,
+              "hit1": 3,
+              "hit1_delta": -1
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 8,
+            "pct": 10.3896
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 116,
+            "pct": 95.082
+          },
+          "r200_delta": 2,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 46,
+            "pct": 37.7049
+          },
+          "hit3_delta": -2,
+          "mrr_at_10": 0.331307,
+          "mrr_full": 0.344372,
+          "avg_pool_size": 200.0,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 112
+          },
+          "exclusive_channel_slots": {
+            "fts": 4,
+            "semantic": 42
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 105,
+              "r200_delta": 2,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 16,
+            "pct": 42.1053
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": true,
+        "up50_p50_ok": false,
+        "up50_p95_ok": true
+      }
+    },
+    "A6": {
+      "name": "A6_canon_k50_union",
+      "mode": "vector",
+      "config": {
+        "cap": 0,
+        "fusion": "union",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "canonical",
+        "top_k": 50
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [
+          "v018-m2-canon-v1"
+        ],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": 571.455,
+      "evaluation_seconds": 272.289,
+      "peak_wset_mib": 2892.6,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        },
+        "single_http": {
+          "max_ms": null,
+          "n": 0,
+          "p50_ms": null,
+          "p95_ms": null
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 504,
+            "pct": 77.4194
+          },
+          "r100_delta": -22,
+          "r200": {
+            "d": 651,
+            "n": 540,
+            "pct": 82.9493
+          },
+          "r200_delta": -33,
+          "hit1": {
+            "d": 651,
+            "n": 167,
+            "pct": 25.6528
+          },
+          "hit1_delta": 6,
+          "hit3": {
+            "d": 651,
+            "n": 249,
+            "pct": 38.2488
+          },
+          "hit3_delta": 11,
+          "mrr_at_10": 0.336714,
+          "mrr_full": 0.349906,
+          "avg_pool_size": 116.1,
+          "max_pool_size": 835,
+          "channel_target_slot_counts": {
+            "fts": 327,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 36,
+            "semantic": 460
+          },
+          "exclusive_channel_slots": {
+            "fts": 41,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "model_match": 17,
+            "semantic": 167
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 85,
+              "r100_delta": -7,
+              "r200": 87,
+              "r200_delta": -7,
+              "hit1": 23,
+              "hit1_delta": 1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 84,
+              "r100_delta": 3,
+              "r200": 92,
+              "r200_delta": -4,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 155,
+              "r100_delta": -11,
+              "r200": 159,
+              "r200_delta": -12,
+              "hit1": 53,
+              "hit1_delta": 3
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 68,
+              "r100_delta": -1,
+              "r200": 87,
+              "r200_delta": -3,
+              "hit1": 32,
+              "hit1_delta": 1
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 13,
+              "r200_delta": -1,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 96,
+              "r100_delta": -6,
+              "r200": 97,
+              "r200_delta": -6,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 1
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 397,
+            "pct": 75.0473
+          },
+          "r100_delta": -16,
+          "r200": {
+            "d": 529,
+            "n": 432,
+            "pct": 81.6635
+          },
+          "r200_delta": -27,
+          "hit1": {
+            "d": 529,
+            "n": 135,
+            "pct": 25.5198
+          },
+          "hit1_delta": 6,
+          "hit3": {
+            "d": 529,
+            "n": 200,
+            "pct": 37.8072
+          },
+          "hit3_delta": 10,
+          "mrr_at_10": 0.334735,
+          "mrr_full": 0.347874,
+          "avg_pool_size": 128.12,
+          "max_pool_size": 835,
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 365
+          },
+          "exclusive_channel_slots": {
+            "fts": 29,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "model_match": 17,
+            "semantic": 133
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 85,
+              "r100_delta": -7,
+              "r200": 87,
+              "r200_delta": -7,
+              "hit1": 23,
+              "hit1_delta": 1
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 84,
+              "r100_delta": 3,
+              "r200": 92,
+              "r200_delta": -4,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 155,
+              "r100_delta": -11,
+              "r200": 159,
+              "r200_delta": -12,
+              "hit1": 53,
+              "hit1_delta": 3
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 62,
+              "r100_delta": -1,
+              "r200": 81,
+              "r200_delta": -3,
+              "hit1": 29,
+              "hit1_delta": 1
+            },
+            "自控": {
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r200": 13,
+              "r200_delta": -1,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 107,
+            "pct": 87.7049
+          },
+          "r100_delta": -6,
+          "r200": {
+            "d": 122,
+            "n": 108,
+            "pct": 88.5246
+          },
+          "r200_delta": -6,
+          "hit1": {
+            "d": 122,
+            "n": 32,
+            "pct": 26.2295
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 122,
+            "n": 49,
+            "pct": 40.1639
+          },
+          "hit3_delta": 1,
+          "mrr_at_10": 0.345297,
+          "mrr_full": 0.358716,
+          "avg_pool_size": 63.99,
+          "max_pool_size": 180,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 95
+          },
+          "exclusive_channel_slots": {
+            "fts": 12,
+            "semantic": 34
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 96,
+              "r100_delta": -6,
+              "r200": 97,
+              "r200_delta": -6,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 1
+            }
+          },
+          "wrong_auto_binding": null,
+          "negative_rejection": null,
+          "gt_guard_status": {}
+        }
+      },
+      "budget_check": {
+        "wset_ok": false
+      }
+    },
+    "A7": {
+      "name": "A7_canon_k100_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "canonical",
+        "top_k": 100
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [
+          "v018-m2-canon-v1"
+        ],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": 0.419,
+      "evaluation_seconds": 271.78,
+      "peak_wset_mib": 1843.61,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 17617.505,
+          "n": 21,
+          "p50_ms": 12067.021,
+          "p95_ms": 16003.865
+        },
+        "single_http": {
+          "max_ms": 603.784,
+          "n": 1060,
+          "p50_ms": 241.727,
+          "p95_ms": 408.693
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 531,
+            "pct": 81.5668
+          },
+          "r100_delta": 5,
+          "r200": {
+            "d": 651,
+            "n": 558,
+            "pct": 85.7143
+          },
+          "r200_delta": -15,
+          "hit1": {
+            "d": 651,
+            "n": 154,
+            "pct": 23.6559
+          },
+          "hit1_delta": -7,
+          "hit3": {
+            "d": 651,
+            "n": 235,
+            "pct": 36.0983
+          },
+          "hit3_delta": -3,
+          "mrr_at_10": 0.315401,
+          "mrr_full": 0.329465,
+          "avg_pool_size": 129.8,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 317,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 30,
+            "semantic": 508
+          },
+          "exclusive_channel_slots": {
+            "fts": 23,
+            "model_match": 7,
+            "semantic": 198
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 87,
+              "r100_delta": -5,
+              "r200": 89,
+              "r200_delta": -5,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 87,
+              "r100_delta": 6,
+              "r200": 92,
+              "r200_delta": -4,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 161,
+              "r100_delta": -5,
+              "r200": 171,
+              "r200_delta": 0,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 83,
+              "r100_delta": 14,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 31,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 9,
+              "r100_delta": -2,
+              "r200": 12,
+              "r200_delta": -2,
+              "hit1": 2,
+              "hit1_delta": -2
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 99,
+              "r100_delta": -3,
+              "r200": 99,
+              "r200_delta": -4,
+              "hit1": 24,
+              "hit1_delta": -2
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 1
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 21,
+            "pct": 18.2609
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 421,
+            "pct": 79.5841
+          },
+          "r100_delta": 8,
+          "r200": {
+            "d": 529,
+            "n": 448,
+            "pct": 84.6881
+          },
+          "r200_delta": -11,
+          "hit1": {
+            "d": 529,
+            "n": 123,
+            "pct": 23.2514
+          },
+          "hit1_delta": -6,
+          "hit3": {
+            "d": 529,
+            "n": 185,
+            "pct": 34.9716
+          },
+          "hit3_delta": -5,
+          "mrr_at_10": 0.309696,
+          "mrr_full": 0.323926,
+          "avg_pool_size": 134.13,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 244,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 27,
+            "semantic": 406
+          },
+          "exclusive_channel_slots": {
+            "fts": 15,
+            "model_match": 7,
+            "semantic": 162
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 87,
+              "r100_delta": -5,
+              "r200": 89,
+              "r200_delta": -5,
+              "hit1": 22,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 87,
+              "r100_delta": 6,
+              "r200": 92,
+              "r200_delta": -4,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "强电": {
+              "n": 202,
+              "r100": 161,
+              "r100_delta": -5,
+              "r200": 171,
+              "r200_delta": 0,
+              "hit1": 46,
+              "hit1_delta": -4
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 77,
+              "r100_delta": 14,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 28,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 9,
+              "r100_delta": -2,
+              "r200": 12,
+              "r200_delta": -2,
+              "hit1": 2,
+              "hit1_delta": -2
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 7,
+            "pct": 9.0909
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 110,
+            "pct": 90.1639
+          },
+          "r100_delta": -3,
+          "r200": {
+            "d": 122,
+            "n": 110,
+            "pct": 90.1639
+          },
+          "r200_delta": -4,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 50,
+            "pct": 40.9836
+          },
+          "hit3_delta": 2,
+          "mrr_at_10": 0.340138,
+          "mrr_full": 0.353485,
+          "avg_pool_size": 111.0,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 102
+          },
+          "exclusive_channel_slots": {
+            "fts": 8,
+            "semantic": 36
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 99,
+              "r100_delta": -3,
+              "r200": 99,
+              "r200_delta": -4,
+              "hit1": 24,
+              "hit1_delta": -2
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 1
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 14,
+            "pct": 36.8421
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": false,
+        "up50_p50_ok": false,
+        "up50_p95_ok": false
+      }
+    },
+    "C1": {
+      "name": "C1_m1_m2_k100_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": true,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 100
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 169.487,
+      "peak_wset_mib": 1738.45,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 10362.341,
+          "n": 21,
+          "p50_ms": 6033.046,
+          "p95_ms": 8165.793
+        },
+        "single_http": {
+          "max_ms": 482.592,
+          "n": 1060,
+          "p50_ms": 105.568,
+          "p95_ms": 231.529
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 590,
+            "pct": 90.6298
+          },
+          "r100_delta": 64,
+          "r200": {
+            "d": 651,
+            "n": 605,
+            "pct": 92.9339
+          },
+          "r200_delta": 32,
+          "hit1": {
+            "d": 651,
+            "n": 151,
+            "pct": 23.1951
+          },
+          "hit1_delta": -10,
+          "hit3": {
+            "d": 651,
+            "n": 231,
+            "pct": 35.4839
+          },
+          "hit3_delta": -7,
+          "mrr_at_10": 0.315275,
+          "mrr_full": 0.331343,
+          "avg_pool_size": 134.89,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 316,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 35,
+            "semantic": 523,
+            "sparse_alias": 63,
+            "sparse_name_param": 127,
+            "sparse_param_fallback": 128,
+            "sparse_phrase_split": 112
+          },
+          "exclusive_channel_slots": {
+            "fts": 14,
+            "model_match": 2,
+            "semantic": 75,
+            "sparse_alias": 6,
+            "sparse_name_param": 16,
+            "sparse_phrase_split": 1
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 101,
+              "r100_delta": 9,
+              "r200": 103,
+              "r200_delta": 9,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 105,
+              "r100_delta": 24,
+              "r200": 105,
+              "r200_delta": 9,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 85,
+              "r100_delta": 16,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 13,
+              "r100_delta": 2,
+              "r200": 15,
+              "r200_delta": 1,
+              "hit1": 2,
+              "hit1_delta": -2
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 25,
+            "pct": 21.7391
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 476,
+            "pct": 89.9811
+          },
+          "r100_delta": 63,
+          "r200": {
+            "d": 529,
+            "n": 490,
+            "pct": 92.6276
+          },
+          "r200_delta": 31,
+          "hit1": {
+            "d": 529,
+            "n": 120,
+            "pct": 22.6843
+          },
+          "hit1_delta": -9,
+          "hit3": {
+            "d": 529,
+            "n": 183,
+            "pct": 34.5936
+          },
+          "hit3_delta": -7,
+          "mrr_at_10": 0.310536,
+          "mrr_full": 0.326378,
+          "avg_pool_size": 139.08,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 243,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 32,
+            "semantic": 415,
+            "sparse_alias": 58,
+            "sparse_name_param": 115,
+            "sparse_param_fallback": 79,
+            "sparse_phrase_split": 101
+          },
+          "exclusive_channel_slots": {
+            "fts": 8,
+            "model_match": 2,
+            "semantic": 60,
+            "sparse_alias": 6,
+            "sparse_name_param": 16,
+            "sparse_phrase_split": 1
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 101,
+              "r100_delta": 9,
+              "r200": 103,
+              "r200_delta": 9,
+              "hit1": 20,
+              "hit1_delta": -2
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 105,
+              "r100_delta": 24,
+              "r200": 105,
+              "r200_delta": 9,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 79,
+              "r100_delta": 16,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 13,
+              "r100_delta": 2,
+              "r200": 15,
+              "r200_delta": 1,
+              "hit1": 2,
+              "hit1_delta": -2
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 10,
+            "pct": 12.987
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 115,
+            "pct": 94.2623
+          },
+          "r200_delta": 1,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 48,
+            "pct": 39.3443
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.335825,
+          "mrr_full": 0.35287,
+          "avg_pool_size": 116.74,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 108,
+            "sparse_alias": 5,
+            "sparse_name_param": 12,
+            "sparse_param_fallback": 49,
+            "sparse_phrase_split": 11
+          },
+          "exclusive_channel_slots": {
+            "fts": 6,
+            "semantic": 15
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 15,
+            "pct": 39.4737
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": true,
+        "up50_p50_ok": false,
+        "up50_p95_ok": true
+      }
+    },
+    "C2": {
+      "name": "C2_m0_m1_m2_k100_rrf",
+      "mode": "vector",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": true,
+        "m1": true,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 100
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 151.751,
+      "peak_wset_mib": 1796.2,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 9871.087,
+          "n": 21,
+          "p50_ms": 5606.066,
+          "p95_ms": 7594.58
+        },
+        "single_http": {
+          "max_ms": 330.572,
+          "n": 1060,
+          "p50_ms": 99.352,
+          "p95_ms": 220.447
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 591,
+            "pct": 90.7834
+          },
+          "r100_delta": 65,
+          "r200": {
+            "d": 651,
+            "n": 607,
+            "pct": 93.2412
+          },
+          "r200_delta": 34,
+          "hit1": {
+            "d": 651,
+            "n": 150,
+            "pct": 23.0415
+          },
+          "hit1_delta": -11,
+          "hit3": {
+            "d": 651,
+            "n": 227,
+            "pct": 34.8694
+          },
+          "hit3_delta": -11,
+          "mrr_at_10": 0.311445,
+          "mrr_full": 0.328042,
+          "avg_pool_size": 136.71,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 316,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 35,
+            "semantic": 523,
+            "sparse_alias": 63,
+            "sparse_name_param": 127,
+            "sparse_param_fallback": 128,
+            "sparse_phrase_split": 112,
+            "structured_model": 37,
+            "structured_recall": 143
+          },
+          "exclusive_channel_slots": {
+            "fts": 14,
+            "model_match": 2,
+            "semantic": 54,
+            "sparse_alias": 2,
+            "sparse_name_param": 4,
+            "structured_recall": 2
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 102,
+              "r100_delta": 10,
+              "r200": 105,
+              "r200_delta": 11,
+              "hit1": 19,
+              "hit1_delta": -3
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 105,
+              "r100_delta": 24,
+              "r200": 105,
+              "r200_delta": 9,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 85,
+              "r100_delta": 16,
+              "r200": 90,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 13,
+              "r100_delta": 2,
+              "r200": 15,
+              "r200_delta": 1,
+              "hit1": 2,
+              "hit1_delta": -2
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 24,
+            "pct": 20.8696
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 477,
+            "pct": 90.1701
+          },
+          "r100_delta": 64,
+          "r200": {
+            "d": 529,
+            "n": 492,
+            "pct": 93.0057
+          },
+          "r200_delta": 33,
+          "hit1": {
+            "d": 529,
+            "n": 119,
+            "pct": 22.4953
+          },
+          "hit1_delta": -10,
+          "hit3": {
+            "d": 529,
+            "n": 179,
+            "pct": 33.8374
+          },
+          "hit3_delta": -11,
+          "mrr_at_10": 0.305822,
+          "mrr_full": 0.322333,
+          "avg_pool_size": 141.02,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 243,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 32,
+            "semantic": 415,
+            "sparse_alias": 58,
+            "sparse_name_param": 115,
+            "sparse_param_fallback": 79,
+            "sparse_phrase_split": 101,
+            "structured_model": 34,
+            "structured_recall": 120
+          },
+          "exclusive_channel_slots": {
+            "fts": 8,
+            "model_match": 2,
+            "semantic": 41,
+            "sparse_alias": 2,
+            "sparse_name_param": 4,
+            "structured_recall": 2
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 102,
+              "r100_delta": 10,
+              "r200": 105,
+              "r200_delta": 11,
+              "hit1": 19,
+              "hit1_delta": -3
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 105,
+              "r100_delta": 24,
+              "r200": 105,
+              "r200_delta": 9,
+              "hit1": 26,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 178,
+              "r100_delta": 12,
+              "r200": 183,
+              "r200_delta": 12,
+              "hit1": 50,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 79,
+              "r100_delta": 16,
+              "r200": 84,
+              "r200_delta": 0,
+              "hit1": 22,
+              "hit1_delta": -6
+            },
+            "自控": {
+              "n": 17,
+              "r100": 13,
+              "r100_delta": 2,
+              "r200": 15,
+              "r200_delta": 1,
+              "hit1": 2,
+              "hit1_delta": -2
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 9,
+            "pct": 11.6883
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "r100_delta": 1,
+          "r200": {
+            "d": 122,
+            "n": 115,
+            "pct": 94.2623
+          },
+          "r200_delta": 1,
+          "hit1": {
+            "d": 122,
+            "n": 31,
+            "pct": 25.4098
+          },
+          "hit1_delta": -1,
+          "hit3": {
+            "d": 122,
+            "n": 48,
+            "pct": 39.3443
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.335825,
+          "mrr_full": 0.3528,
+          "avg_pool_size": 118.02,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 108,
+            "sparse_alias": 5,
+            "sparse_name_param": 12,
+            "sparse_param_fallback": 49,
+            "sparse_phrase_split": 11,
+            "structured_model": 3,
+            "structured_recall": 23
+          },
+          "exclusive_channel_slots": {
+            "fts": 6,
+            "semantic": 13
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 103,
+              "r100_delta": 1,
+              "r200": 104,
+              "r200_delta": 1,
+              "hit1": 25,
+              "hit1_delta": -1
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 15,
+            "pct": 39.4737
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": false,
+        "single_p95_ok": true,
+        "up50_p50_ok": true,
+        "up50_p95_ok": true
+      }
+    },
+    "KW": {
+      "name": "KW_rrf_degrade",
+      "mode": "keyword",
+      "config": {
+        "cap": 200,
+        "fusion": "rrf",
+        "m0": false,
+        "m1": false,
+        "m2": true,
+        "rrf_k": 60,
+        "text_mode": "legacy",
+        "top_k": 50
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 0,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "canonical_index_load_or_build_seconds": null,
+      "evaluation_seconds": 40.196,
+      "peak_wset_mib": 627.48,
+      "latency": {
+        "batch_http_50rows": {
+          "max_ms": 6540.178,
+          "n": 21,
+          "p50_ms": 1187.627,
+          "p95_ms": 3806.855
+        },
+        "single_http": {
+          "max_ms": 251.502,
+          "n": 1060,
+          "p50_ms": 23.253,
+          "p95_ms": 141.144
+        }
+      },
+      "splits": {
+        "train_dev": {
+          "counts": {
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "r100": {
+            "d": 651,
+            "n": 341,
+            "pct": 52.381
+          },
+          "r100_delta": -26,
+          "r200": {
+            "d": 651,
+            "n": 380,
+            "pct": 58.3717
+          },
+          "r200_delta": -12,
+          "hit1": {
+            "d": 651,
+            "n": 174,
+            "pct": 26.7281
+          },
+          "hit1_delta": 1,
+          "hit3": {
+            "d": 651,
+            "n": 242,
+            "pct": 37.1736
+          },
+          "hit3_delta": -5,
+          "mrr_at_10": 0.333794,
+          "mrr_full": 0.339688,
+          "avg_pool_size": 61.07,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fallback": 16,
+            "fts": 322,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 5,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 29
+          },
+          "exclusive_channel_slots": {
+            "fallback": 16,
+            "fts": 242,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_zh": 6,
+            "model_match": 12
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 72,
+              "r100_delta": 0,
+              "r200": 74,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 69,
+              "r100_delta": -1,
+              "r200": 74,
+              "r200_delta": 0,
+              "hit1": 40,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 61,
+              "r100_delta": -20,
+              "r200": 74,
+              "r200_delta": -8,
+              "hit1": 45,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 92,
+              "r100": 61,
+              "r100_delta": -1,
+              "r200": 75,
+              "r200_delta": -4,
+              "hit1": 33,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 5,
+              "r100_delta": -4,
+              "r200": 9,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 68,
+              "r100_delta": 0,
+              "r200": 69,
+              "r200_delta": 0,
+              "hit1": 23,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 766,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 115,
+            "n": 26,
+            "pct": 22.6087
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "train": {
+          "counts": {
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "r100": {
+            "d": 529,
+            "n": 262,
+            "pct": 49.5274
+          },
+          "r100_delta": -26,
+          "r200": {
+            "d": 529,
+            "n": 300,
+            "pct": 56.7108
+          },
+          "r200_delta": -12,
+          "hit1": {
+            "d": 529,
+            "n": 144,
+            "pct": 27.2212
+          },
+          "hit1_delta": 1,
+          "hit3": {
+            "d": 529,
+            "n": 193,
+            "pct": 36.4839
+          },
+          "hit3_delta": -5,
+          "mrr_at_10": 0.332465,
+          "mrr_full": 0.337975,
+          "avg_pool_size": 68.4,
+          "max_pool_size": 200,
+          "channel_target_slot_counts": {
+            "fallback": 10,
+            "fts": 249,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 5,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 26
+          },
+          "exclusive_channel_slots": {
+            "fallback": 10,
+            "fts": 182,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_zh": 6,
+            "model_match": 12
+          },
+          "domains": {
+            "医用气体": {
+              "n": 112,
+              "r100": 72,
+              "r100_delta": 0,
+              "r200": 74,
+              "r200_delta": 0,
+              "hit1": 25,
+              "hit1_delta": 0
+            },
+            "弱电": {
+              "n": 112,
+              "r100": 69,
+              "r100_delta": -1,
+              "r200": 74,
+              "r200_delta": 0,
+              "hit1": 40,
+              "hit1_delta": 1
+            },
+            "强电": {
+              "n": 202,
+              "r100": 61,
+              "r100_delta": -20,
+              "r200": 74,
+              "r200_delta": -8,
+              "hit1": 45,
+              "hit1_delta": 0
+            },
+            "暖通": {
+              "n": 86,
+              "r100": 55,
+              "r100_delta": -1,
+              "r200": 69,
+              "r200_delta": -4,
+              "hit1": 30,
+              "hit1_delta": 0
+            },
+            "自控": {
+              "n": 17,
+              "r100": 5,
+              "r100_delta": -4,
+              "r200": 9,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 77,
+            "n": 17,
+            "pct": 22.0779
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        },
+        "dev": {
+          "counts": {
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "r100": {
+            "d": 122,
+            "n": 79,
+            "pct": 64.7541
+          },
+          "r100_delta": 0,
+          "r200": {
+            "d": 122,
+            "n": 80,
+            "pct": 65.5738
+          },
+          "r200_delta": 0,
+          "hit1": {
+            "d": 122,
+            "n": 30,
+            "pct": 24.5902
+          },
+          "hit1_delta": 0,
+          "hit3": {
+            "d": 122,
+            "n": 49,
+            "pct": 40.1639
+          },
+          "hit3_delta": 0,
+          "mrr_at_10": 0.339559,
+          "mrr_full": 0.347119,
+          "avg_pool_size": 29.27,
+          "max_pool_size": 152,
+          "channel_target_slot_counts": {
+            "fallback": 6,
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3
+          },
+          "exclusive_channel_slots": {
+            "fallback": 6,
+            "fts": 60
+          },
+          "domains": {
+            "暖通": {
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r200": 6,
+              "r200_delta": 0,
+              "hit1": 3,
+              "hit1_delta": 0
+            },
+            "装饰": {
+              "n": 111,
+              "r100": 68,
+              "r100_delta": 0,
+              "r200": 69,
+              "r200_delta": 0,
+              "hit1": 23,
+              "hit1_delta": 0
+            },
+            "设备": {
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r200": 5,
+              "r200_delta": 0,
+              "hit1": 4,
+              "hit1_delta": 0
+            }
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0,
+            "pct": 0.0
+          },
+          "negative_rejection": {
+            "d": 38,
+            "n": 9,
+            "pct": 23.6842
+          },
+          "gt_guard_status": {
+            "GT-0674": "recommended",
+            "GT-0677": "recommended",
+            "GT-0678": "recommended"
+          }
+        }
+      },
+      "budget_check": {
+        "wset_ok": true,
+        "single_p50_ok": true,
+        "single_p95_ok": true,
+        "up50_p50_ok": true,
+        "up50_p95_ok": true
+      }
+    }
+  }
+}

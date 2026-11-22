@@ -1,0 +1,1034 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_test_z__gyvro",
+  "results": [
+    {
+      "case": "NEW-CONFIRM-UNIT-EVIDENCE",
+      "empty_unit": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R03AUD-M",
+              "reason": "单位非1倍率绑定缺失目标单位阻断"
+            }
+          ]
+        }
+      },
+      "missing_unit": {
+        "http": 422,
+        "detail": [
+          {
+            "type": "missing",
+            "loc": [
+              "body",
+              "bindings",
+              0,
+              "unit"
+            ],
+            "msg": "Field required",
+            "input": {
+              "code": "R03AUD-M",
+              "name": "镀锌钢管",
+              "specification": "DN15",
+              "category": "暖通",
+              "brand": "",
+              "qty": 10000,
+              "qty_ratio": 1000
+            }
+          }
+        ]
+      },
+      "converted": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "msg": "绑定关系已由服务端确认",
+          "decision": {
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "人工显式确认",
+            "decision_codes": [
+              "R03AUD-M"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "bf53faf09a9fca0fb50f4d387b4ab2ce48025c142417156297e3c85f58161174"
+          },
+          "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+          "binding_fingerprint": "bf53faf09a9fca0fb50f4d387b4ab2ce48025c142417156297e3c85f58161174"
+        }
+      },
+      "converted_export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R03AUD-M",
+            "镀锌钢管",
+            "DN15",
+            "m",
+            10000,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "saved_bindings": [
+        {
+          "brand": "",
+          "category": "暖通",
+          "code": "R03AUD-M",
+          "confirmed_orig_qty": 10.0,
+          "confirmed_orig_unit": "km",
+          "confirmed_unit": "m",
+          "confirmed_unit_mult": 1000.0,
+          "name": "镀锌钢管",
+          "qty": 10000.0,
+          "qty_ratio": 1000.0,
+          "specification": "DN15",
+          "unit": "m"
+        }
+      ],
+      "drift_variants": [
+        {
+          "unit": "m",
+          "restore": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "items": [
+                {
+                  "original_row_idx": 0,
+                  "original_name": "镀锌钢管",
+                  "original_spec": "DN15",
+                  "original_qty": 10,
+                  "original_unit": "km",
+                  "original_loss": 0,
+                  "original_category": "暖通",
+                  "original_brand": "",
+                  "professional": "暖通",
+                  "original_code": "",
+                  "matched_code": "R03AUD-M",
+                  "matched_name": "镀锌钢管",
+                  "matched_category": "",
+                  "matched_spec": "",
+                  "matched_unit": "",
+                  "matched_brand": "",
+                  "bindings": [
+                    {
+                      "code": "R03AUD-M",
+                      "name": "镀锌钢管",
+                      "specification": "DN15",
+                      "unit": "m",
+                      "category": "暖通",
+                      "brand": "",
+                      "qty": 10000,
+                      "qty_ratio": 1000
+                    }
+                  ],
+                  "decision_status": "recommended",
+                  "decision_source": "legacy_draft",
+                  "decision_reason": "绑定目标与清单行存在硬冲突(绑定目标单位与实时物料单位不一致阻断)，草稿已降为待复核",
+                  "decision_codes": [
+                    "R03AUD-M"
+                  ],
+                  "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+                  "binding_fingerprint": "bf53faf09a9fca0fb50f4d387b4ab2ce48025c142417156297e3c85f58161174"
+                }
+              ],
+              "downgraded": 1
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": {
+              "error": "export_blocked",
+              "row": {
+                "original_row_idx": 0,
+                "original_name": "镀锌钢管",
+                "original_spec": "DN15",
+                "reason": "绑定目标与清单行存在硬冲突",
+                "conflicts": [
+                  {
+                    "code": "R03AUD-M",
+                    "reason": "绑定目标单位与实时物料单位不一致阻断"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "unit": "km",
+          "restore": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "items": [
+                {
+                  "original_row_idx": 0,
+                  "original_name": "镀锌钢管",
+                  "original_spec": "DN15",
+                  "original_qty": 10,
+                  "original_unit": "km",
+                  "original_loss": 0,
+                  "original_category": "暖通",
+                  "original_brand": "",
+                  "professional": "暖通",
+                  "original_code": "",
+                  "matched_code": "R03AUD-M",
+                  "matched_name": "镀锌钢管",
+                  "matched_category": "",
+                  "matched_spec": "",
+                  "matched_unit": "",
+                  "matched_brand": "",
+                  "bindings": [
+                    {
+                      "code": "R03AUD-M",
+                      "name": "镀锌钢管",
+                      "specification": "DN15",
+                      "unit": "km",
+                      "category": "暖通",
+                      "brand": "",
+                      "qty": 10000,
+                      "qty_ratio": 1000
+                    }
+                  ],
+                  "decision_status": "recommended",
+                  "decision_source": "legacy_draft",
+                  "decision_reason": "绑定目标与清单行存在硬冲突(确认后物料目标单位发生漂移阻断)，草稿已降为待复核",
+                  "decision_codes": [
+                    "R03AUD-M"
+                  ],
+                  "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+                  "binding_fingerprint": "bf53faf09a9fca0fb50f4d387b4ab2ce48025c142417156297e3c85f58161174"
+                }
+              ],
+              "downgraded": 1
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": {
+              "error": "export_blocked",
+              "row": {
+                "original_row_idx": 0,
+                "original_name": "镀锌钢管",
+                "original_spec": "DN15",
+                "reason": "绑定目标与清单行存在硬冲突",
+                "conflicts": [
+                  {
+                    "code": "R03AUD-M",
+                    "reason": "确认后物料目标单位发生漂移阻断"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "unit": null,
+          "restore": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "items": [
+                {
+                  "original_row_idx": 0,
+                  "original_name": "镀锌钢管",
+                  "original_spec": "DN15",
+                  "original_qty": 10,
+                  "original_unit": "km",
+                  "original_loss": 0,
+                  "original_category": "暖通",
+                  "original_brand": "",
+                  "professional": "暖通",
+                  "original_code": "",
+                  "matched_code": "R03AUD-M",
+                  "matched_name": "镀锌钢管",
+                  "matched_category": "",
+                  "matched_spec": "",
+                  "matched_unit": "",
+                  "matched_brand": "",
+                  "bindings": [
+                    {
+                      "code": "R03AUD-M",
+                      "name": "镀锌钢管",
+                      "specification": "DN15",
+                      "category": "暖通",
+                      "brand": "",
+                      "qty": 10000,
+                      "qty_ratio": 1000
+                    }
+                  ],
+                  "decision_status": "recommended",
+                  "decision_source": "legacy_draft",
+                  "decision_reason": "绑定目标与清单行存在硬冲突(确认后物料目标单位发生漂移阻断)，草稿已降为待复核",
+                  "decision_codes": [
+                    "R03AUD-M"
+                  ],
+                  "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+                  "binding_fingerprint": "bf53faf09a9fca0fb50f4d387b4ab2ce48025c142417156297e3c85f58161174"
+                }
+              ],
+              "downgraded": 1
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": [
+              {
+                "type": "missing",
+                "loc": [
+                  "body",
+                  "items",
+                  0,
+                  "bindings",
+                  0,
+                  "unit"
+                ],
+                "msg": "Field required",
+                "input": {
+                  "code": "R03AUD-M",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "case": "LEGACY-NONEMPTY-CLIENT-UNIT",
+      "new_confirm_control": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "msg": "绑定关系已由服务端确认",
+          "decision": {
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "人工显式确认",
+            "decision_codes": [
+              "R03AUD-LEGACY"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "64c7199d536718f5ce5bbecc8fb33121aee1212b9b1587f746f7f3a210272bab"
+          },
+          "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+          "binding_fingerprint": "64c7199d536718f5ce5bbecc8fb33121aee1212b9b1587f746f7f3a210272bab"
+        }
+      },
+      "legacy_payload": {
+        "row": {
+          "original_row_idx": 0,
+          "original_name": "镀锌钢管",
+          "original_spec": "DN15",
+          "original_qty": 10,
+          "original_unit": "km",
+          "original_loss": 0,
+          "original_category": "暖通",
+          "original_brand": "",
+          "professional": "暖通",
+          "original_code": ""
+        },
+        "bindings": [
+          {
+            "code": "R03AUD-LEGACY",
+            "name": "镀锌钢管",
+            "specification": "DN15",
+            "unit": "km",
+            "category": "暖通",
+            "brand": "",
+            "qty": 10000,
+            "qty_ratio": 1000
+          }
+        ]
+      },
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R03AUD-LEGACY",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R03AUD-LEGACY",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "km",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000
+                }
+              ],
+              "decision_status": "manual_confirmed",
+              "decision_source": "manual",
+              "decision_reason": "已恢复服务端人工确认",
+              "decision_codes": [
+                "R03AUD-LEGACY"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "64c7199d536718f5ce5bbecc8fb33121aee1212b9b1587f746f7f3a210272bab"
+            }
+          ],
+          "downgraded": 0
+        }
+      },
+      "export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R03AUD-LEGACY",
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10000,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "original_qty": 10,
+      "original_unit": "km",
+      "requested_qty": 10000,
+      "requested_unit": "km"
+    },
+    {
+      "case": "RULE-READ-PARSE-RECOVERY",
+      "initial_confirm": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "msg": "绑定关系已由服务端确认",
+          "decision": {
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "人工显式确认",
+            "decision_codes": [
+              "R03AUD-FAIL"
+            ],
+            "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+            "binding_fingerprint": "b85c01c684a5d2fc24154ffbd556b1ba6e3cb5f7d1f1e686c44de5fc8cdba333"
+          },
+          "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+          "binding_fingerprint": "b85c01c684a5d2fc24154ffbd556b1ba6e3cb5f7d1f1e686c44de5fc8cdba333"
+        }
+      },
+      "valid_exclusion": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R03AUD-FAIL",
+              "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+            }
+          ]
+        }
+      },
+      "sql_failure": {
+        "rules": {
+          "available": false,
+          "error_type": "DynamicRuleUnavailableError",
+          "message": "动态规则库查询失败: no such column: priority"
+        },
+        "matcher": {
+          "score": 0.0,
+          "reasons": [
+            "品类名称一致",
+            "核心参数在公差范围内",
+            "语义高度相近",
+            "分类精准匹配",
+            "规格型号完全一致",
+            "动态规则不可用，无法完成排除复核: 动态规则库查询失败: no such column: priority"
+          ],
+          "hard_blocked": true,
+          "max_score": 0.0
+        },
+        "confirm": {
+          "http": 409,
+          "detail": {
+            "error": "binding_hard_conflict",
+            "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+            "conflicts": [
+              {
+                "code": "R03AUD-FAIL",
+                "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则库查询失败: no such column: priority"
+              }
+            ]
+          }
+        },
+        "restore": {
+          "http": 200,
+          "body": {
+            "code": 0,
+            "items": [
+              {
+                "original_row_idx": 0,
+                "original_name": "排风机",
+                "original_spec": "EXCL专用型",
+                "original_qty": 10,
+                "original_unit": "台",
+                "original_loss": 0,
+                "original_category": "暖通",
+                "original_brand": "",
+                "professional": "暖通",
+                "original_code": "",
+                "matched_code": "R03AUD-FAIL",
+                "matched_name": "排风机",
+                "matched_category": "",
+                "matched_spec": "",
+                "matched_unit": "",
+                "matched_brand": "",
+                "bindings": [
+                  {
+                    "code": "R03AUD-FAIL",
+                    "name": "排风机",
+                    "specification": "EXCL专用型",
+                    "unit": "台",
+                    "category": "暖通",
+                    "brand": "",
+                    "qty": 10,
+                    "qty_ratio": 1
+                  }
+                ],
+                "decision_status": "recommended",
+                "decision_source": "legacy_draft",
+                "decision_reason": "绑定目标与清单行存在硬冲突(动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则库查询失败: no such column: priority)，草稿已降为待复核",
+                "decision_codes": [
+                  "R03AUD-FAIL"
+                ],
+                "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+                "binding_fingerprint": "b85c01c684a5d2fc24154ffbd556b1ba6e3cb5f7d1f1e686c44de5fc8cdba333"
+              }
+            ],
+            "downgraded": 1
+          }
+        },
+        "export": {
+          "http": 422,
+          "detail": {
+            "error": "export_blocked",
+            "row": {
+              "original_row_idx": 0,
+              "original_name": "排风机",
+              "original_spec": "EXCL专用型",
+              "reason": "绑定目标与清单行存在硬冲突",
+              "conflicts": [
+                {
+                  "code": "R03AUD-FAIL",
+                  "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则库查询失败: no such column: priority"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "malformed": {
+        "bad_json": {
+          "rules": {
+            "available": false,
+            "error_type": "DynamicRuleUnavailableError",
+            "message": "动态规则 1 rule_json 解析失败: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+          },
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-FAIL",
+                  "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 rule_json 解析失败: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+                }
+              ]
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": {
+              "error": "export_blocked",
+              "row": {
+                "original_row_idx": 0,
+                "original_name": "排风机",
+                "original_spec": "EXCL专用型",
+                "reason": "绑定目标与清单行存在硬冲突",
+                "conflicts": [
+                  {
+                    "code": "R03AUD-FAIL",
+                    "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 rule_json 解析失败: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "bad_matching_list": {
+          "rules": {
+            "available": false,
+            "error_type": "DynamicRuleUnavailableError",
+            "message": "动态规则 1 matching_rules 结构非法: 期望 dict"
+          },
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-FAIL",
+                  "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 matching_rules 结构非法: 期望 dict"
+                }
+              ]
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": {
+              "error": "export_blocked",
+              "row": {
+                "original_row_idx": 0,
+                "original_name": "排风机",
+                "original_spec": "EXCL专用型",
+                "reason": "绑定目标与清单行存在硬冲突",
+                "conflicts": [
+                  {
+                    "code": "R03AUD-FAIL",
+                    "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 matching_rules 结构非法: 期望 dict"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "bad_required_type": {
+          "rules": {
+            "available": false,
+            "error_type": "DynamicRuleUnavailableError",
+            "message": "动态规则 1 must_contain 结构非法: 期望字符串列表"
+          },
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-FAIL",
+                  "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 must_contain 结构非法: 期望字符串列表"
+                }
+              ]
+            }
+          },
+          "export": {
+            "http": 422,
+            "detail": {
+              "error": "export_blocked",
+              "row": {
+                "original_row_idx": 0,
+                "original_name": "排风机",
+                "original_spec": "EXCL专用型",
+                "reason": "绑定目标与清单行存在硬冲突",
+                "conflicts": [
+                  {
+                    "code": "R03AUD-FAIL",
+                    "reason": "动态规则不可用阻断: 动态规则不可用，无法完成排除复核: 动态规则 1 must_contain 结构非法: 期望字符串列表"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "recovered_empty": {
+        "rules": {
+          "available": true,
+          "count": 0
+        },
+        "confirm": {
+          "http": 200,
+          "body": {
+            "code": 0,
+            "msg": "绑定关系已由服务端确认",
+            "decision": {
+              "decision_status": "manual_confirmed",
+              "decision_source": "manual",
+              "decision_reason": "人工显式确认",
+              "decision_codes": [
+                "R03AUD-FAIL"
+              ],
+              "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+              "binding_fingerprint": "b85c01c684a5d2fc24154ffbd556b1ba6e3cb5f7d1f1e686c44de5fc8cdba333"
+            },
+            "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+            "binding_fingerprint": "b85c01c684a5d2fc24154ffbd556b1ba6e3cb5f7d1f1e686c44de5fc8cdba333"
+          }
+        },
+        "export": {
+          "http": 200,
+          "xlsx_rows": [
+            [
+              "*序号",
+              "*费用类型",
+              "*清单类型",
+              "*材料类型",
+              "*清单编码",
+              "*清单名称",
+              "*特征/规格型号",
+              "单位",
+              "*工程量",
+              "材料损耗",
+              "品牌",
+              "竞聘系数",
+              "单价(无税)",
+              "备注",
+              "专业",
+              null
+            ],
+            [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            [
+              1,
+              null,
+              null,
+              null,
+              null,
+              "暖通",
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              "暖通",
+              null
+            ],
+            [
+              "1.1",
+              "材料费",
+              "手动录入",
+              "暖通",
+              null,
+              "排风机",
+              "EXCL专用型",
+              "台",
+              10,
+              0,
+              null,
+              null,
+              null,
+              "标段一",
+              "暖通",
+              null
+            ],
+            [
+              null,
+              "材料费",
+              "手动录入",
+              "暖通",
+              "R03AUD-FAIL",
+              "排风机",
+              "EXCL专用型",
+              "台",
+              10,
+              0,
+              null,
+              null,
+              null,
+              "标段一",
+              "暖通",
+              null
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "case": "SCOPE-CONTROLS",
+      "variants": [
+        {
+          "scope": "给排水",
+          "professional": "暖通",
+          "matched": false,
+          "confirm": {
+            "http": 200,
+            "body": {
+              "code": 0,
+              "msg": "绑定关系已由服务端确认",
+              "decision": {
+                "decision_status": "manual_confirmed",
+                "decision_source": "manual",
+                "decision_reason": "人工显式确认",
+                "decision_codes": [
+                  "R03AUD-SCOPE"
+                ],
+                "row_fingerprint": "b60c1e303ca9b52ad7a06f1f63b92fb619a1c42a3371a4a21b1c8a9359691f82",
+                "binding_fingerprint": "ced94a854278caffc68b0defa88f51ea270f2562500e324c0d50d81be782133d"
+              },
+              "row_fingerprint": "b60c1e303ca9b52ad7a06f1f63b92fb619a1c42a3371a4a21b1c8a9359691f82",
+              "binding_fingerprint": "ced94a854278caffc68b0defa88f51ea270f2562500e324c0d50d81be782133d"
+            }
+          }
+        },
+        {
+          "scope": "给排水",
+          "professional": "给排水",
+          "matched": true,
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-SCOPE",
+                  "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "scope": "通用",
+          "professional": "暖通",
+          "matched": true,
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-SCOPE",
+                  "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "scope": "医用气体",
+          "professional": "医气",
+          "matched": true,
+          "confirm": {
+            "http": 409,
+            "detail": {
+              "error": "binding_hard_conflict",
+              "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+              "conflicts": [
+                {
+                  "code": "R03AUD-SCOPE",
+                  "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

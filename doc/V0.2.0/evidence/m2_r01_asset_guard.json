@@ -1,0 +1,43 @@
+{
+  "archive_entry_count": 72,
+  "business_anchor": "m2_r01_dispatch_baseline.json",
+  "business_asset_count": 35,
+  "business_differences": {
+    "after_after": [],
+    "after_before": [],
+    "before_after": [],
+    "before_before": [],
+    "current": []
+  },
+  "default_off_rule_gate": {
+    "binding_checks": 40,
+    "binding_degradations": 0,
+    "rows": 1060,
+    "score_differences": 0,
+    "score_groups": 18,
+    "slice": "Train/Dev",
+    "unchanged_protected_probes": [
+      "GT-0674",
+      "GT-0677",
+      "GT-0678"
+    ]
+  },
+  "dispatch_business_asset_count_field": 18,
+  "effective_baseline_count": 196,
+  "exit_code": 0,
+  "finished_sha256": {
+    "app/llm_decision.py": "745478547fca8cd7806aeae8d330867269161fdc4dd868d3b654b6babff88b77",
+    "app/server.py": "efe76b8645d375867756ad2c93b9d4e69c4f87629b46d70ea43805117d611b2d",
+    "tests/test_v020_m2_llm_decision.py": "a11295d7c6fac783a93a70407dac022ae5d915989b1dbbce67974ade9b06a2d1"
+  },
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "new_paths_removed": [
+    "app/llm_decision.py",
+    "tests/test_v020_m2_llm_decision.py"
+  ],
+  "patch_sha256": "09ce6e3571abb5754deb1f3a7ae5e5c4aa6459deb6e425fdb4177652e5f71ab1",
+  "restored_sha256": {
+    "app/server.py": "9fe33469164ba58bc9e661971429d848de74b4ff35d67fe8327dd7072c9e624f"
+  },
+  "unchanged_count": 195
+}

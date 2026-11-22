@@ -12,6 +12,78 @@ domain_schema = load_json_config("domain_schema.json", {})
 unit_norm_data = load_json_config("unit_norm.json", {})
 unit_classes = unit_norm_data.get("unit_classes", {})
 
+# ---------------------------------------------------------------------------
+# V015-M3：三态否定单一事实源（抽取层/评分子层/确认导出层共用；matcher 重导出）
+# 否定判定永远先于肯定词，避免 "非防爆" 因子串命中 "防爆"、"不带泵" 被 "泵" 吞掉
+# ---------------------------------------------------------------------------
+NEGATION_PREFIXES = ("不带", "非", "无", "不含", "未配", "无配", "不具有", "没有")
+
+# V015-M3 R02：提升泵双向互斥单一事实源（推荐/规则/确认/恢复/导出共用）
+PUMP_NEGATION_TARGETS = (
+    "自带提升泵", "带提升泵", "带冷凝水提升泵", "冷凝水提升泵",
+    "提升泵", "冷凝水泵", "排水泵", "泵",
+)
+PUMP_POSITIVE_KEYWORDS = (
+    "自带提升泵", "带提升泵", "带冷凝水提升泵", "冷凝水提升泵",
+    "提升泵", "含提升泵", "配提升泵", "带排水泵", "带冷凝水泵",
+    "带泵", "含泵", "配泵",
+)
+
+
+def detect_three_state_flag(text: str, positive_keywords: List[str]) -> Optional[bool]:
+    """三态特征判定：明确否定 False / 明确肯定 True / 未说明 None（unknown 不臆断）。"""
+    if not text:
+        return None
+    t = str(text)
+    for pos in positive_keywords:
+        if not pos:
+            continue
+        for prefix in NEGATION_PREFIXES:
+            if f"{prefix}{pos}" in t:
+                return False
+    for pos in positive_keywords:
+        if pos and pos in t:
+            return True
+    return None
+
+
+def detect_pump_state(text: str, attrs: Optional[Dict[str, Any]] = None) -> Optional[bool]:
+    """提升泵三态判定：明确否定 False / 明确肯定 True / 未说明 None（unknown）。
+
+    显式否定前缀+泵词（含"不带泵"/"无泵"/"不带提升泵"）永远优先于肯定词与其它文本片段；
+    结构化布尔 attrs["提升泵"] 作为布尔补充；通用水泵名称如"离心水泵"不会误命中。
+    """
+    t = str(text or "")
+    if t:
+        for target in PUMP_NEGATION_TARGETS:
+            for prefix in NEGATION_PREFIXES:
+                if f"{prefix}{target}" in t:
+                    return False
+    if isinstance(attrs, dict) and isinstance(attrs.get("提升泵"), bool):
+        return attrs.get("提升泵")
+    if t:
+        for pos in PUMP_POSITIVE_KEYWORDS:
+            if pos in t:
+                return True
+    return None
+
+
+def check_pump_conflict(
+    q_text: str,
+    c_text: str,
+    q_attrs: Optional[Dict[str, Any]] = None,
+    c_attrs: Optional[Dict[str, Any]] = None,
+) -> Optional[str]:
+    """双向提升泵硬冲突判定：不带泵 vs 带泵，以及 带泵 vs 不带泵 均硬隔离；unknown 不阻断。"""
+    q_pump = detect_pump_state(q_text, q_attrs)
+    c_pump = detect_pump_state(c_text, c_attrs)
+    if q_pump is False and c_pump is True:
+        return "提升泵否定冲突硬隔离(不带泵/带泵)"
+    if q_pump is True and c_pump is False:
+        return "提升泵要求冲突硬隔离(带泵/不带泵)"
+    return None
+
+
 def get_unit_conversion(unit_str: str) -> Tuple[Optional[float], Optional[str]]:
     """
     Look up standard conversion factor and standard unit for a given unit string.
@@ -103,6 +175,38 @@ def parse_numeric_complex(text: str) -> Dict[str, Any]:
 
     return res
 
+
+# V017-M1 / M1-C02：外径前缀单一事实源（与 matcher._EXPLICIT_OD_RE 约定一致）。
+# De/φ/Φ/⌀/Ф/外径 属外径族，与 DN 分字段，严禁暗转为管径。
+_OD_PREFIX_RE = re.compile(r'(?:De|de|[φΦФ⌀]|外径)\s*[:：]?\s*\d')
+
+# V018-M0：防止不锈钢牌号（SS316L/SUS304/316L/S31603）在"规格、压力等级:SS316L材质"中被误抽为压力数值
+_PRESSURE_MATERIAL_GRADE_RE = re.compile(
+    r'(?:^|[^A-Za-z0-9])(?:(?:SS|SUS)\d{3,4}[A-Z]?|S30408|S31603|(?:304L?|316L)\s*(?:不锈钢|材质))',
+    re.IGNORECASE,
+)
+_PRESSURE_UNIT_OR_PREFIX_RE = re.compile(r'(?:PN|MPa|kPa|Pa|bar|PSI|kg|公斤|兆帕)', re.IGNORECASE)
+
+
+def _extract_od_prefix(text: str) -> Optional[str]:
+    """若原始文本中显式出现外径族前缀（De/φ/Φ/外径），返回该前缀，否则 None。"""
+    if not text:
+        return None
+    m = _OD_PREFIX_RE.search(text)
+    return m.group(0) if m else None
+
+
+def _first_numeric(parsed: Dict[str, Any]) -> Optional[float]:
+    """从 parse_numeric_complex 结果取主值（优先 val，其次 base_val）。"""
+    if not parsed:
+        return None
+    for k in ("val", "base_val"):
+        v = parsed.get(k)
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            return float(v)
+    return None
+
+
 class ConfigDrivenExtractor:
     """
     Core dynamic extractor loaded from configuration definitions in domain_schema.json.
@@ -129,6 +233,7 @@ class ConfigDrivenExtractor:
 
             # Try to match key pattern first if regex is provided
             val_found = None
+            val_match_span = None  # V017-M1 / M1-C02 修复 A-M1-02：记录命中子串，供 DN/外径前缀判别使用
             if regex:
                 match = re.search(regex, text, re.IGNORECASE)
                 if match:
@@ -137,6 +242,7 @@ class ConfigDrivenExtractor:
                         if g is not None:
                             val_found = g.strip()
                             break
+                    val_match_span = match.span()
             
             # Fallback dynamic key-value search if not matched by specific regex
             # e.g., if text has "风量: 1000" or similar
@@ -148,15 +254,44 @@ class ConfigDrivenExtractor:
                     kv_match = re.search(pattern, text, re.IGNORECASE)
                     if kv_match:
                         val_found = kv_match.group(1).strip()
+                        val_match_span = kv_match.span()
                         break
 
             if val_found:
                 if ftype == "float" or ftype == "int":
+                    if key == "压力":
+                        if val_match_span is not None:
+                            _p_lo = max(0, val_match_span[0] - 6)
+                            _p_hi = min(len(text), val_match_span[1] + 6)
+                            _p_ctx = text[_p_lo:_p_hi]
+                        else:
+                            _p_ctx = val_found
+                        if (
+                            _PRESSURE_MATERIAL_GRADE_RE.search(_p_ctx)
+                            and not _PRESSURE_UNIT_OR_PREFIX_RE.search(_p_ctx)
+                        ):
+                            continue
                     parsed = parse_numeric_complex(val_found)
+                    # V017-M1 / M1-C02：DN 与 De/Φ/外径彻底分离。配置正则仍可能把
+                    # De/φ/Φ/外径 与 DN 混入同一捕获组（外层 config 只读，不可改写），
+                    # 故在代码层按原始文本前缀判别：显式 De/φ/Φ/外径 提取的数值归外径族，
+                    # 严禁暗转或写入 dn_val/管径；仅显式 DN/管径/口径 才写管径字段。
                     if key in ["管径", "DN", "口径"]:
-                        for k_sub in ["val", "min_val", "max_val", "base_val"]:
-                            if k_sub in parsed:
-                                parsed[k_sub] = convert_de_to_dn(parsed[k_sub], text)
+                        # V017-M1 / M1-C02 修复 A-M1-02：仅按当前命中子串（而非整段 text）
+                        # 判别外径前缀。整段 text 同时含 DN50 与 φ57*3.5 时，旧逻辑会把
+                        # DN50 误判为外径并丢弃管径；改为只扫描 val_match_span 对应子串。
+                        if val_match_span is not None:
+                            _match_sub = text[val_match_span[0]:val_match_span[1]]
+                        else:
+                            _match_sub = text
+                        od_prefix = _extract_od_prefix(_match_sub)
+                        if od_prefix:
+                            od_val = _first_numeric(parsed)
+                            if od_val is not None:
+                                attrs["外径"] = od_val
+                                attrs["de_val"] = od_val
+                            # 命中外径前缀时不写管径/dn_val，也不落 min/max/op 到管径族
+                            continue
                     if "val" in parsed:
                         attrs[key] = int(parsed["val"]) if ftype == "int" else parsed["val"]
                     if "min_val" in parsed and "max_val" in parsed:
@@ -180,12 +315,12 @@ class ConfigDrivenExtractor:
                         break
 
         # 2. Check for Boolean Flags
+        # V015-M3：否定前缀优先三态——明确否定写 False、肯定命中写 True、未说明留缺省(unknown)，
+        # 修复旧逻辑 "非防爆" 因子串命中 "防爆" 而误置 True 的缺陷
         for flag in self.flags:
-            if flag in text:
-                attrs[flag] = True
-            else:
-                # If explicit negation is not present, we can just omit or check synonyms
-                pass
+            flag_state = detect_three_state_flag(text, [flag])
+            if flag_state is not None:
+                attrs[flag] = flag_state
 
         # 3. Size/Dimensions post-processing for HVAC plenum/damper/door etc.
         # Ensure standard form "A*B" or "A*B*C"
@@ -203,11 +338,20 @@ class ConfigDrivenExtractor:
             attrs["尺寸"] = attrs["尺寸"].replace('×', '*').replace('x', '*').replace(' ', '').strip()
 
         # Materials post-processing fallback
-        if "材质" not in attrs:
-            for mat in ["不锈钢304", "不锈钢316L", "不锈钢", "碳钢", "镀锌钢板", "玻璃钢", "PP", "PPH", "UPVC", "PE", "铜"]:
-                if mat in text:
-                    attrs["材质"] = mat
-                    break
+        if "材质" not in attrs or str(attrs.get("材质", "")).strip() == "不锈钢":
+            grade_m = re.search(
+                r'(?<![a-zA-Z0-9])(316L|S31603|06Cr19Ni10|304|S30408)(?![a-zA-Z0-9])',
+                text,
+                re.IGNORECASE,
+            )
+            if grade_m and ("不锈钢" in text or self.domain in ("pipe_ss", "pipe_steel")):
+                raw_g = grade_m.group(1).upper()
+                attrs["材质"] = "不锈钢316L" if raw_g in ("316L", "S31603") else "不锈钢304"
+            elif "材质" not in attrs:
+                for mat in ["不锈钢304", "不锈钢316L", "不锈钢", "碳钢", "镀锌钢板", "玻璃钢", "PP", "PPH", "UPVC", "PE", "铜"]:
+                    if mat.lower() in text.lower():
+                        attrs["材质"] = mat
+                        break
 
         # 4. Cable specific extraction override to maintain legacy string format (like "5" and "2.5" or "3+2" and "185+95")
         if self.domain in ["cable_power", "cable_control", "wire"]:
@@ -390,17 +534,20 @@ def extract_pipe_params(text: str) -> Dict[str, Any]:
             break
             
     # 2. Nominal Diameter DN / Outer Diameter De / φ
+    # V017-M1 / M1-C02：DN 与 De/φ/外径分字段，De 不再暗转 DN（保留显式外径语义）。
     dn_match = re.search(r'(?:DN|口径|管径)\s*[:：]?\s*(\d+)', t_clean, re.IGNORECASE)
     if dn_match:
         attrs["管径"] = f"DN{dn_match.group(1)}"
         attrs["dn_val"] = int(dn_match.group(1))
     else:
-        de_match = re.search(r'(?:DE|de)\s*[:：]?\s*(\d+)', t_clean)
+        de_match = re.search(r'(?:DE|de)\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean)
         if de_match:
-            dn_val = convert_de_to_dn(float(de_match.group(1)), t_clean)
-            if dn_val:
-                attrs["管径"] = f"DN{int(dn_val)}"
-                attrs["dn_val"] = int(dn_val)
+            # De 显式归外径族，不再 convert_de_to_dn 暗转为管径/dn_val
+            try:
+                attrs["外径"] = float(de_match.group(1))
+                attrs["de_val"] = float(de_match.group(1))
+            except ValueError:
+                pass
         else:
             phi_match = re.search(r'[φФΦ⌀]\s*(\d+(?:\.\d+)?)', t_clean)
             if phi_match:

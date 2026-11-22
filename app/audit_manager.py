@@ -315,6 +315,9 @@ def get_server_hardware_metrics() -> Dict[str, Any]:
             "memory_mb": 0.0,
             "threads_count": threading.active_count()
         },
+        "metrics_available": False,
+        "metrics_source": "unavailable",
+        "metrics_error": "",
         "is_alert": False,
         "alert_message": ""
     }
@@ -359,10 +362,24 @@ def get_server_hardware_metrics() -> Dict[str, Any]:
             proc = psutil.Process(os.getpid())
             metrics["process"]["memory_mb"] = round(proc.memory_info().rss / (1024 ** 2), 1)
             metrics["process"]["threads_count"] = proc.num_threads()
+
+            has_core_metrics = (
+                metrics["memory"]["total_gb"] > 0
+                and metrics["disk"]["total_gb"] > 0
+                and metrics["process"]["memory_mb"] > 0
+            )
+            metrics["metrics_source"] = "psutil"
+            metrics["metrics_available"] = bool(has_core_metrics)
+            if not has_core_metrics:
+                metrics["metrics_error"] = "psutil returned incomplete zero hardware metrics"
             
         except Exception as e:
+            metrics["metrics_available"] = False
+            metrics["metrics_source"] = "unavailable"
+            metrics["metrics_error"] = str(e)
             security_logger.error(f"Error querying psutil hardware metrics: {e}")
     else:
+        metrics["metrics_source"] = "fallback"
         # Fallback for Linux / generic environments without psutil
         try:
             import shutil
@@ -429,6 +446,15 @@ def get_server_hardware_metrics() -> Dict[str, Any]:
             metrics["process"]["memory_mb"] = round(usage.ru_maxrss / 1024, 1)
         except Exception:
             pass
+
+        has_fallback_metrics = (
+            metrics["memory"]["total_gb"] > 0
+            and metrics["disk"]["total_gb"] > 0
+            and metrics["process"]["memory_mb"] > 0
+        )
+        metrics["metrics_available"] = bool(has_fallback_metrics)
+        if not has_fallback_metrics:
+            metrics["metrics_error"] = "psutil unavailable and system fallback metrics incomplete"
 
     # Check if currently in high-load alert state
     is_cpu_alert = metrics["cpu"]["percent"] >= 90.0

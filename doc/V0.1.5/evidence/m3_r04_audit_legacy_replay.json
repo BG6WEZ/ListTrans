@@ -1,0 +1,90 @@
+{
+  "source_sha256": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+  "selected_predecessor_functions": [
+    "evaluate_hard_conflicts",
+    "record_decision",
+    "validate_bindings_against_row"
+  ],
+  "old_validation": {
+    "ok": true,
+    "invalid_codes": [],
+    "conflicts": []
+  },
+  "initial_live_unit": "m",
+  "legacy_saved_bindings": [
+    {
+      "brand": "",
+      "category": "暖通",
+      "code": "R04AUD-LEGACY-REPLAY",
+      "name": "镀锌钢管",
+      "qty": 10000,
+      "qty_ratio": 1000,
+      "specification": "DN15",
+      "unit": "km"
+    }
+  ],
+  "current_live_unit": "km",
+  "restore_http": 200,
+  "restore": {
+    "code": 0,
+    "items": [
+      {
+        "original_row_idx": 0,
+        "original_name": "镀锌钢管",
+        "original_spec": "DN15",
+        "original_qty": 10,
+        "original_unit": "km",
+        "original_loss": 0,
+        "original_category": "暖通",
+        "original_brand": "",
+        "professional": "暖通",
+        "original_code": "",
+        "matched_code": "R04AUD-LEGACY-REPLAY",
+        "matched_name": "镀锌钢管",
+        "matched_category": "",
+        "matched_spec": "",
+        "matched_unit": "",
+        "matched_brand": "",
+        "bindings": [
+          {
+            "code": "R04AUD-LEGACY-REPLAY",
+            "name": "镀锌钢管",
+            "specification": "DN15",
+            "unit": "km",
+            "category": "暖通",
+            "brand": "",
+            "qty": 10000,
+            "qty_ratio": 1000
+          }
+        ],
+        "decision_status": "recommended",
+        "decision_source": "legacy_draft",
+        "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+        "decision_codes": [
+          "R04AUD-LEGACY-REPLAY"
+        ],
+        "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+        "binding_fingerprint": "09db0e58f6adaf1248aac2bdf3b91bf89fabde8411634c520e1dc40645fedfe1"
+      }
+    ],
+    "downgraded": 1
+  },
+  "export_http": 422,
+  "export_detail": {
+    "detail": {
+      "error": "export_blocked",
+      "row": {
+        "original_row_idx": 0,
+        "original_name": "镀锌钢管",
+        "original_spec": "DN15",
+        "reason": "绑定目标与清单行存在硬冲突",
+        "conflicts": [
+          {
+            "code": "R04AUD-LEGACY-REPLAY",
+            "reason": "确认记录缺少权威目标单位证据阻断"
+          }
+        ]
+      }
+    }
+  }
+}

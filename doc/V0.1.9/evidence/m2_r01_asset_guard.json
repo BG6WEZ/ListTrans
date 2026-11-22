@@ -1,0 +1,55 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_files": 178,
+  "baseline_changes": {
+    "app/flywheel_sandbox.py": {
+      "m1_sha256": "5eef56584df5630f505e7fac29cea5a4df293fe406207c562e980aaf4ae35ce0",
+      "m2_sha256": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0"
+    },
+    "app/matcher.py": {
+      "m1_sha256": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2",
+      "m2_sha256": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0"
+    },
+    "app/sandbox_evaluator.py": {
+      "m1_sha256": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+      "m2_sha256": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5"
+    },
+    "app/server.py": {
+      "m1_sha256": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7",
+      "m2_sha256": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+    }
+  },
+  "source_rollback": {
+    "app/matcher.py": {
+      "restored_sha256": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2",
+      "m1_sha256": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2"
+    },
+    "app/server.py": {
+      "restored_sha256": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7",
+      "m1_sha256": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+    },
+    "app/sandbox_evaluator.py": {
+      "restored_sha256": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+      "m1_sha256": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173"
+    },
+    "app/flywheel_sandbox.py": {
+      "restored_sha256": "5eef56584df5630f505e7fac29cea5a4df293fe406207c562e980aaf4ae35ce0",
+      "m1_sha256": "5eef56584df5630f505e7fac29cea5a4df293fe406207c562e980aaf4ae35ce0"
+    }
+  },
+  "source_rollback_patch_sha256": "df24cb05740ae0b68cc457de0284a3550ea7f68aab64e5de8c055519fb991ca8",
+  "business_files_checked": 35,
+  "business_diffs_vs_m1": [
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "prior_archive_intact": true,
+  "offline_models": [
+    "bge-small-zh-v1.5",
+    "paraphrase-multilingual-MiniLM-L12-v2"
+  ],
+  "exit_code": 0
+}

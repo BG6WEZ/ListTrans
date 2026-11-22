@@ -1,0 +1,49 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_count": 191,
+  "source_changes": {
+    "app/binding_decisions.py": {
+      "m2": "ed3ff9dc4b337f60110b623cca8630c0c2e5e570fcb9c5a7f062212dbc3756fd",
+      "m3": "05bc4c724b37c99204cd3751e007167e3e43c2d6aa2900e5fc05fce55d6e800e"
+    },
+    "app/report_generator.py": {
+      "m2": "56fc3cebdc9efd0df7fca9f00ae7abee7c6cebc4f3a8aa350324ff8a22cf4ab3",
+      "m3": "0832d4883f0a13a96de605d8a45873af1c7b6ea261863f696e52f1a92090b9fd"
+    },
+    "app/server.py": {
+      "m2": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1",
+      "m3": "28ba7171c5f14cb55497291e44702b8eeba2a9cf231768c002e7bfc12dd30fcb"
+    },
+    "web/app.js": {
+      "m2": "d88936db277ea5751e872cbeb925fcd959cefe0448c8e6e8e79436383c105b49",
+      "m3": "77e79aee7887c03d8c2727d24324fe289c18313251628896648f6d718e0bb00c"
+    },
+    "web/index.css": {
+      "m2": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+      "m3": "c1d4d6160fa17591fa35702e0d478b13bbe4def727c5a625289e40bc51ca9b64"
+    },
+    "web/index.html": {
+      "m2": "bf6c68b08054c87e24e41cd1fc3ec038c730f9619268f3452e9d70f976ca6906",
+      "m3": "c5df77ac493474cd371c3d7516cb89cda86ed4316c9fb4c9fc17684020d7eed3"
+    }
+  },
+  "byte_exact_rollback_sha256": {
+    "app/binding_decisions.py": "ed3ff9dc4b337f60110b623cca8630c0c2e5e570fcb9c5a7f062212dbc3756fd",
+    "app/report_generator.py": "56fc3cebdc9efd0df7fca9f00ae7abee7c6cebc4f3a8aa350324ff8a22cf4ab3",
+    "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1",
+    "web/app.js": "d88936db277ea5751e872cbeb925fcd959cefe0448c8e6e8e79436383c105b49",
+    "web/index.css": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+    "web/index.html": "bf6c68b08054c87e24e41cd1fc3ec038c730f9619268f3452e9d70f976ca6906"
+  },
+  "rollback_patch_sha256": "1e248079a392c442de13836b55118af0b0f7b3dc13c951158a0560c08bcac0a2",
+  "business_assets": 35,
+  "business_differences": [
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "dockerfile_sha256": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466",
+  "exit_code": 0
+}

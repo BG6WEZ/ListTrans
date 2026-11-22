@@ -1,0 +1,1209 @@
+--- a/app/binding_decisions.py
++++ b/app/binding_decisions.py
+@@ -232,7 +232,6 @@
+     material: Dict[str, Any],
+     binding: Optional[Dict[str, Any]] = None,
+     allow_unit_conversion: bool = False,
+-    quantity_multiplier: float = 1.0,
+ ) -> Optional[str]:
+     """对单个目标物料做硬冲突复核，返回阻断原因；无冲突返回 None。
+ 
+@@ -248,7 +247,6 @@
+     5. 动态规则硬排除（must_not_contain / must_contain）：与 matcher 同源全链路不可逆阻断。
+     """
+     q_name = str(row.get("original_name", "") or "")
+-    unit_multiplier = _row_unit_multiplier(row)
+     q_spec = str(row.get("original_spec", "") or "")
+     q_text = f"{q_name} {q_spec}".strip()
+     c_name = str(material.get("name", "") or "")
+@@ -281,13 +279,13 @@
+     if q_unit and c_unit:
+         if not check_unit_compatibility(q_unit, c_unit):
+             return "单位不可换算阻断"
+-        mult = unit_multiplier(q_unit, c_unit)
++        mult = get_unit_multiplier(q_unit, c_unit)
+         if mult is None:
+             return "单位倍率不可靠阻断"
+         if binding is not None:
+             b_unit = str(binding.get("unit", "") or "").strip()
+             if b_unit:
+-                b_mult = unit_multiplier(b_unit, c_unit)
++                b_mult = get_unit_multiplier(b_unit, c_unit)
+                 if b_mult is None or abs(b_mult - 1.0) > 1e-6:
+                     return "绑定目标单位与实时物料单位不一致阻断"
+             elif abs(mult - 1.0) > 1e-9 and allow_unit_conversion:
+@@ -304,10 +302,9 @@
+             b_ratio = _to_finite_float(binding.get("qty_ratio"))
+             if b_qty is None or b_ratio is None:
+                 return "单位非1倍率工程量未按目标单位换算阻断"
+-            expected_ratio = mult * quantity_multiplier
+-            expected_qty = orig_qty * expected_ratio
++            expected_qty = orig_qty * mult
+             if (
+-                abs(b_ratio - expected_ratio) > 1e-6 * max(1.0, abs(expected_ratio))
++                abs(b_ratio - mult) > 1e-6 * max(1.0, abs(mult))
+                 or abs(b_qty - expected_qty) > 1e-6 * max(1.0, abs(expected_qty))
+             ):
+                 return "单位非1倍率工程量未按目标单位换算阻断"
+@@ -391,12 +388,6 @@
+     return f
+ 
+ 
+-def _row_unit_multiplier(row):
+-    from app.bom import is_bom_name, unit_multiplier
+-
+-    return unit_multiplier if is_bom_name(row.get("original_name")) else get_unit_multiplier
+-
+-
+ def _validate_saved_binding_unit_evidence(
+     row: Dict[str, Any],
+     sb: Optional[Dict[str, Any]],
+@@ -406,7 +397,6 @@
+ ) -> Optional[str]:
+     """V015-M3 R04：严格区分客户端 unit 与服务端权威确认单位证据来源。"""
+     q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
+-    unit_multiplier = _row_unit_multiplier(row)
+     raw_row_qty = row.get("original_qty")
+     if raw_row_qty is None:
+         raw_row_qty = row.get("qty")
+@@ -455,7 +445,7 @@
+             ):
+                 return "确认后单位换算上下文发生漂移阻断"
+ 
+-        saved_pair_mult = unit_multiplier(saved_orig_unit, saved_unit)
++        saved_pair_mult = get_unit_multiplier(saved_orig_unit, saved_unit)
+         if (
+             saved_pair_mult is None
+             or abs(saved_pair_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
+@@ -464,17 +454,17 @@
+ 
+         if not q_unit:
+             return "确认记录缺少权威目标单位证据阻断"
+-        orig_eq_mult = unit_multiplier(saved_orig_unit, q_unit)
++        orig_eq_mult = get_unit_multiplier(saved_orig_unit, q_unit)
+         if orig_eq_mult is None or abs(orig_eq_mult - 1.0) > 1e-6:
+             return "确认后单位换算上下文发生漂移阻断"
+ 
+         if not live_unit:
+             return "确认后物料目标单位发生漂移阻断"
+-        s_mult = unit_multiplier(saved_unit, live_unit)
++        s_mult = get_unit_multiplier(saved_unit, live_unit)
+         if s_mult is None or abs(s_mult - 1.0) > 1e-6:
+             return "确认后物料目标单位发生漂移阻断"
+ 
+-        curr_mult = unit_multiplier(q_unit, live_unit)
++        curr_mult = get_unit_multiplier(q_unit, live_unit)
+         if (
+             curr_mult is None
+             or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
+@@ -483,7 +473,7 @@
+ 
+         if not req_unit:
+             return "绑定目标单位缺失或与确认记录不一致阻断"
+-        u_mult = unit_multiplier(req_unit, saved_unit)
++        u_mult = get_unit_multiplier(req_unit, saved_unit)
+         if u_mult is None or abs(u_mult - 1.0) > 1e-6:
+             return "绑定目标单位与确认记录不一致阻断"
+         return None
+@@ -496,7 +486,7 @@
+         return None
+     if not live_unit:
+         return "确认后物料目标单位发生漂移阻断"
+-    s_mult = unit_multiplier(saved_unit, live_unit)
++    s_mult = get_unit_multiplier(saved_unit, live_unit)
+     if s_mult is None or abs(s_mult - 1.0) > 1e-6:
+         return "确认后物料目标单位发生漂移阻断"
+     if sb is not None and sb.get("confirmed_unit_mult") is not None:
+@@ -504,7 +494,7 @@
+         if prev_mult is None:
+             return "确认后单位换算上下文发生漂移阻断"
+         if q_unit and live_unit:
+-            curr_mult = unit_multiplier(q_unit, live_unit)
++            curr_mult = get_unit_multiplier(q_unit, live_unit)
+             if (
+                 curr_mult is None
+                 or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
+@@ -512,7 +502,7 @@
+                 return "确认后单位换算上下文发生漂移阻断"
+     if not req_unit:
+         return "绑定目标单位缺失或与确认记录不一致阻断"
+-    u_mult = unit_multiplier(req_unit, saved_unit)
++    u_mult = get_unit_multiplier(req_unit, saved_unit)
+     if u_mult is None or abs(u_mult - 1.0) > 1e-6:
+         return "绑定目标单位与确认记录不一致阻断"
+     return None
+@@ -524,7 +514,6 @@
+     allow_unit_conversion: bool = True,
+     saved_bindings: Optional[List[Dict[str, Any]]] = None,
+     require_saved_unit_evidence: bool = False,
+-    component_shares: Optional[Dict[str, float]] = None,
+ ) -> Dict[str, Any]:
+     """对整组绑定做新鲜有效性 + 硬冲突 + 确认后目标单位/换算上下文漂移复核。
+ 
+@@ -545,8 +534,7 @@
+         if not code or code in invalid_codes:
+             continue
+         reason = evaluate_hard_conflicts(
+-            row, live[code], binding=b, allow_unit_conversion=allow_unit_conversion,
+-            quantity_multiplier=component_shares[code] if component_shares is not None else 1.0,
++            row, live[code], binding=b, allow_unit_conversion=allow_unit_conversion
+         )
+         if not reason:
+             sb = saved_by_code.get(code)
+@@ -583,7 +571,6 @@
+     """V015-M3 R04：落盘前剔除伪造证据并仅从实时物料固化权威目标单位与换算上下文。"""
+     live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
+     q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
+-    unit_multiplier = _row_unit_multiplier(row)
+     raw_orig_qty = row.get("original_qty")
+     if raw_orig_qty is None:
+         raw_orig_qty = row.get("qty")
+@@ -609,7 +596,7 @@
+             item["confirmed_orig_unit"] = q_unit
+             if orig_qty is not None:
+                 item["confirmed_orig_qty"] = float(orig_qty)
+-            unit_mult = unit_multiplier(q_unit, live_unit) if q_unit else None
++            unit_mult = get_unit_multiplier(q_unit, live_unit) if q_unit else None
+             if unit_mult is not None and unit_mult > 0:
+                 item["confirmed_unit_mult"] = float(unit_mult)
+                 item["confirmed_unit_source"] = UNIT_EVIDENCE_SOURCE
+--- a/app/feedback_contract.py
++++ b/app/feedback_contract.py
+@@ -19,9 +19,6 @@
+ 
+ _ALGO_SOURCE_FILES = (
+     "app/matcher.py",
+-    "app/bom.py",
+-    "app/binding_decisions.py",
+-    "app/server.py",
+     "app/query_preprocessor.py",
+     "app/preprocessor.py",
+     "app/normalizer.py",
+--- a/app/flywheel_sandbox.py
++++ b/app/flywheel_sandbox.py
+@@ -525,8 +525,6 @@
+             "professional": prof,
+             "bound_materials": rule_meta.get("bound_materials") or [],
+         }
+-        if "bom" in rule_meta:
+-            new_rule["bom"] = rule_meta["bom"]
+         binding_data = [
+             r for r in binding_data
+             if not (
+--- a/app/rule_governance.py
++++ b/app/rule_governance.py
+@@ -12,7 +12,6 @@
+ import hashlib
+ import importlib
+ import json
+-import math
+ import os
+ import sqlite3
+ import threading
+@@ -207,14 +206,11 @@
+         code = str(item.get("code") or "").strip()
+         if not code:
+             raise EvalGateError(422, "invalid_binding_target", "绑定物料编码不能为空。")
+-        raw_ratio = item.get("qty_ratio") if item.get("qty_ratio") is not None else item.get("weight", 1.0)
+         try:
+-            if isinstance(raw_ratio, bool):
+-                raise ValueError("boolean ratio")
+-            ratio = float(raw_ratio)
++            ratio = float(item.get("qty_ratio") if item.get("qty_ratio") is not None else item.get("weight", 1.0))
+         except (TypeError, ValueError) as exc:
+             raise EvalGateError(422, "invalid_binding_target", f"绑定数量倍率非法: {item.get('qty_ratio')}") from exc
+-        if not math.isfinite(ratio) or round(ratio, 6) <= 0:
++        if ratio <= 0:
+             raise EvalGateError(422, "invalid_binding_target", f"绑定数量倍率必须为正数: {ratio}")
+         norm_list.append({
+             "code": code,
+@@ -314,7 +310,7 @@
+         if not orig_name:
+             raise EvalGateError(422, "invalid_binding_rule", "绑定规则原始名称不能为空。")
+         norm_targets = _normalize_bound_materials(target_value)
+-        result = {
++        return {
+             "rule_source": src,
+             "rule_key": rkey,
+             "rule_type": "BINDING_RULE",
+@@ -326,16 +322,6 @@
+             "original_spec": str(original_spec or "").strip(),
+             "bound_materials": norm_targets,
+         }
+-        from app.bom import is_bom_name, rule_metadata
+-
+-        if is_bom_name(orig_name):
+-            try:
+-                if src != "legacy_binding":
+-                    raise ValueError("BOM 规则须由管理员通过绑定规则评测入口明确声明")
+-                result["bom"] = rule_metadata(orig_name, result["original_spec"], canon_disc, norm_targets)
+-            except ValueError as exc:
+-                raise EvalGateError(422, "invalid_bom_rule", str(exc)) from exc
+-        return result
+ 
+     raise EvalGateError(400, "unsupported_rule_type", f"不支持的规则类型: {rtype}")
+ 
+--- a/app/sandbox_evaluator.py
++++ b/app/sandbox_evaluator.py
+@@ -242,21 +242,6 @@
+         conn.close()
+ 
+ 
+-def _bom_fixture_expected(item):
+-    from app.bom import Expansion, positive
+-
+-    expected = item.get("bom_expected")
+-    targets = set(item.get("target_codes") or ())
+-    if (item.get("label_type") != "1toN" or not isinstance(expected, list)
+-            or len(expected) != len(targets) or len(targets) != 2
+-            or any(not isinstance(row, dict) or not isinstance(row.get("code"), str)
+-                   or not isinstance(row.get("unit"), str) or not row["unit"].strip()
+-                   or not positive(row.get("qty")) or not positive(row.get("qty_ratio")) for row in expected)
+-            or {row["code"] for row in expected} != targets):
+-        return None
+-    return Expansion(expected, {}, "")
+-
+-
+ def _select_sandbox_subsets(all_items, rule_meta, guard_limit=40, *, with_stats=False):
+     """Select targeted subset + disjoint stratified global guard subset for M2 sandbox evaluation."""
+     from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, RuleContext, canonicalize_professional
+@@ -296,13 +281,7 @@
+                     targeted.append(x)
+     elif rule_type in ("BINDING", "BINDING_RULE"):
+         orig_name = str(rule_meta.get("original_name") or rule_meta.get("source_pattern") or "").strip().lower()
+-        if rule_meta.get("bom"):
+-            targeted = [item for item in clean_all
+-                        if item["name"].strip().lower() == orig_name
+-                        and item["specification"].strip() == rule_meta.get("original_spec")
+-                        and canonicalize_professional(item.get("professional", "")) == canon_disc
+-                        and _bom_fixture_expected(item) is not None]
+-        elif orig_name:
++        if orig_name:
+             for x in clean_all:
+                 if x.get("name", "").strip().lower() == orig_name or orig_name in x.get("name", "").lower():
+                     targeted.append(x)
+@@ -422,18 +401,7 @@
+         bound_codes = [b["code"] for b in norm_bindings if b["code"]]
+         bound_set = set(bound_codes)
+         row_context = srv._build_row_item_from_raw(raw_row)
+-        bom = srv._current_bom(row_context)
+-        if bom is None:
+-            val = validate_bindings_against_row(row_context, bindings, allow_unit_conversion=False)
+-        else:
+-            reason = bom.mismatch(bindings)
+-            if bindings:
+-                fixture = _bom_fixture_expected(it)
+-                discrepancy = fixture.mismatch(bindings) if fixture else "BOM 评测缺少独立集合与数量金标"
+-                if discrepancy:
+-                    reason = reason or discrepancy
+-                    qty_ratios_ok = False
+-            val = {"conflicts": [{"code": "", "reason": reason}] if reason and bindings else []}
++        val = validate_bindings_against_row(row_context, bindings, allow_unit_conversion=False)
+         invalid_codes = list(val.get("invalid_codes") or [])
+         conflicts = list(val.get("conflicts") or [])
+         dec_status = str(res_row.get("decision_status") or "")
+@@ -441,8 +409,6 @@
+         codes_match_gt = bool(gt_set) and (
+             (gt_set == bound_set) if it.get("label_type") == "1toN" else bool(bound_set & gt_set)
+         )
+-        if bom is not None:
+-            codes_match_gt = it.get("label_type") == "1toN" and codes_match_gt and not reason
+         export_eligible = (
+             dec_status == STATUS_AUTO_ACCEPTED
+             and not invalid_codes
+--- a/app/server.py
++++ b/app/server.py
+@@ -11,7 +11,6 @@
+ 
+ import logging
+ import math
+-import re
+ import shutil
+ import uuid
+ import pandas as pd
+@@ -22,7 +21,7 @@
+ from fastapi.responses import JSONResponse
+ from fastapi.staticfiles import StaticFiles
+ from fastapi.middleware.cors import CORSMiddleware
+-from pydantic import BaseModel, Field, StrictInt, field_validator
++from pydantic import BaseModel, Field, StrictInt
+ from typing import List, Optional, Dict, Any, Tuple
+ from logging.handlers import RotatingFileHandler
+ import json
+@@ -240,7 +239,6 @@
+     get_unit_multiplier,
+ )
+ from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding
+-from app.bom import expand as expand_bom, is_bom_name, positive as positive_quantity
+ from app.audit_manager import (
+     init_audit_tables, log_audit_event, record_heartbeat, 
+     update_processing_task, increment_stat_counter
+@@ -547,7 +545,7 @@
+         current_user["id"],
+         req.original_filename,
+         req.professional,
+-        _checked_session_boms(req.items_json, current_user, req.original_filename),
++        req.items_json,
+         account_epoch=str(current_user.get("account_epoch") or ""),
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -572,7 +570,7 @@
+             "id": draft["id"],
+             "original_filename": draft["original_filename"],
+             "professional": draft["professional"],
+-            "items_json": _checked_session_boms(draft["items_json"], current_user, draft["original_filename"]),
++            "items_json": draft["items_json"],
+             "document_id": draft.get("document_id") or "",
+             "work_session_id": draft.get("work_session_id") or "",
+             "trust_level": draft.get("trust_level") or "legacy_untrusted",
+@@ -596,7 +594,7 @@
+         req.session_name,
+         req.original_filename,
+         req.professional,
+-        _checked_session_boms(req.items_json, current_user, req.original_filename),
++        req.items_json,
+         account_epoch=str(current_user.get("account_epoch") or ""),
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -627,7 +625,7 @@
+             "session_name": session["session_name"],
+             "original_filename": session["original_filename"],
+             "professional": session["professional"],
+-            "items_json": _checked_session_boms(session["items_json"], current_user, session["original_filename"]),
++            "items_json": session["items_json"],
+             "document_id": session.get("document_id") or "",
+             "work_session_id": session.get("work_session_id") or "",
+             "trust_level": session.get("trust_level") or "legacy_untrusted",
+@@ -652,7 +650,7 @@
+     update_named_session(
+         current_user["id"],
+         session_id,
+-        _checked_session_boms(req.items_json, current_user, session["original_filename"]),
++        req.items_json,
+         account_epoch=ep,
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -675,20 +673,6 @@
+     scope_filename: Optional[str] = ""
+     document_id: Optional[str] = ""
+     work_session_id: Optional[str] = ""
+-
+-
+-def _checked_session_boms(items_json, current_user, filename):
+-    try:
+-        items = json.loads(items_json)
+-    except (ValueError, TypeError):
+-        return items_json
+-    if not isinstance(items, list):
+-        return items_json
+-    groups = [item for item in items if isinstance(item, dict) and is_bom_name(item.get("original_name"))]
+-    if not groups:
+-        return items_json
+-    _annotate_restored_items(groups, current_user, filename)
+-    return json.dumps(items, ensure_ascii=False)
+ 
+ 
+ @catalog_read
+@@ -705,6 +689,8 @@
+         item.pop("acceptance_calibration", None)
+         professional = item.get("professional") or "暖通"
+         scope_key = make_scope_key(scope or "", professional)
++        binds = normalize_bindings(item.get("bindings") or [], item.get("original_qty"))
++        binds = [b for b in binds if (b.get("code") or "").strip()]
+         row = {
+             "original_name": item.get("original_name", ""),
+             "original_spec": item.get("original_spec", ""),
+@@ -716,15 +702,6 @@
+             "original_code": item.get("original_code", ""),
+             "professional": professional,
+         }
+-        bom = _current_bom(item)
+-        if bom is not None:
+-            _restore_bom_item(item, row, bom, current_user["id"], scope_key)
+-            if item["decision_status"] not in EXPORTABLE_STATUSES:
+-                downgraded += 1
+-            annotated.append(item)
+-            continue
+-        binds = normalize_bindings(item.get("bindings") or [], item.get("original_qty"))
+-        binds = [b for b in binds if (b.get("code") or "").strip()]
+         status = STATUS_RECOMMENDED
+         source = SOURCE_RESTORE
+         reason = "旧草稿恢复：待人工复核，未确认不可导出"
+@@ -1313,8 +1290,7 @@
+                     professional=ident[1],
+                     require_concrete_discipline=False,
+                 )
+-                if er.get("bom") == es.get("bom"):
+-                    existing_digests[ident] = compute_rule_digest(es)
++                existing_digests[ident] = compute_rule_digest(es)
+             except EvalGateError:
+                 existing_digests[ident] = json.dumps(er, sort_keys=True, ensure_ascii=False)
+ 
+@@ -1346,10 +1322,9 @@
+                     "bound_materials": strict_spec["bound_materials"],
+                     "eval_id": str(eval_id or "").strip(),
+                     "rule_digest": compute_rule_digest(strict_spec),
+-                    **({"bom": strict_spec["bom"]} if "bom" in strict_spec else {}),
+                 })
+             else:
+-                normalized_after.append({**r, "bom": ns["bom"]} if "bom" in ns else r)
++                normalized_after.append(r)
+ 
+         for rkey, strict_spec, _ in new_or_changed:
+             verify_eval_credential_for_publish(
+@@ -1415,7 +1390,6 @@
+             "rule_digest": ev["payload_digest"],
+             "benefit_class": ev["benefit_class"],
+             "governance_provenance": "verified",
+-            **({"bom": norm_spec["bom"]} if "bom" in norm_spec else {}),
+         }
+         if ev["benefit_class"] == "neutral" and neutral_reason:
+             new_rule["neutral_reason"] = str(neutral_reason).strip()
+@@ -1518,8 +1492,6 @@
+ 
+     rule_spec = str(rule.get("original_spec", "") or "").strip()
+     rule_prof = str(rule.get("professional", "") or "").strip()
+-    if len(rule.get("bound_materials") or []) > 1 and not rule_spec:
+-        return False
+     if rule_prof:
+         if rule_prof in ("legacy_unscoped", "legacy_unknown", "未知"):
+             return False
+@@ -1536,13 +1508,7 @@
+         tokens = [t for t in rule_spec.lower().replace("×", "x").split() if t]
+         if not tokens and rule_spec:
+             tokens = [rule_spec.lower()]
+-        if len(rule.get("bound_materials") or []) > 1:
+-            row_spec = row_spec.replace("×", "x")
+-            # A constrained legacy multi-rule cannot use DN15 as a substring of DN150.
+-            if any(not re.search(r"(?<![a-z0-9])" + re.escape(tok) + r"(?![a-z0-9.])", row_spec)
+-                   for tok in tokens):
+-                return False
+-        elif any(tok not in row_spec for tok in tokens):
++        if any(tok not in row_spec for tok in tokens):
+             return False
+     return True
+ 
+@@ -1555,12 +1521,12 @@
+     from app.rule_context import canonicalize_professional
+ 
+     item_name = str(item.get("original_name") or item.get("name") or "").strip()
+-    if not item_name or not rules or is_bom_name(item_name):
++    if not item_name or not rules:
+         return None
+     row_prof = str(item.get("professional") or "").strip()
+     canon_row_prof = canonicalize_professional(row_prof) if row_prof else ""
+ 
+-    same_name_rules = [r for r in rules if "bom" not in r and str(r.get("original_name") or "").strip() == item_name]
++    same_name_rules = [r for r in rules if str(r.get("original_name") or "").strip() == item_name]
+     if not same_name_rules:
+         return None
+ 
+@@ -1648,62 +1614,6 @@
+     }
+ 
+ 
+-def _current_bom(row, rules=None):
+-    if not is_bom_name(row.get("original_name")):
+-        return None
+-    return expand_bom(row, load_auto_binding_rules() if rules is None else rules)
+-
+-
+-def _bom_match_fields(row, bom, *, review=None, edited=False):
+-    status = STATUS_AUTO_ACCEPTED if bom.bindings else STATUS_REJECTED if bom.hard_conflict else STATUS_RECOMMENDED
+-    source, reason, bindings = SOURCE_RULE, bom.reason, bom.bindings
+-    if edited and bindings:
+-        status, reason, bindings = STATUS_RECOMMENDED, "BOM 重算后须按原始条件和完整集合重新确认", []
+-    if review and (review["decision"] == STATUS_REJECTED or review["source"] == SOURCE_MANUAL_EDIT):
+-        status, reason, bindings = review["decision"], review["reason"], []
+-        source = SOURCE_MANUAL_REJECT if status == STATUS_REJECTED else SOURCE_MANUAL_EDIT
+-    first = bindings[0] if bindings else {}
+-    return {
+-        "bindings": bindings, "is_exact": bool(bindings), "matched_code": ",".join(b["code"] for b in bindings),
+-        **{f"matched_{key}": first.get(field, "") for key, field in (
+-            ("name", "name"), ("spec", "specification"), ("unit", "unit"), ("brand", "brand"), ("category", "category"),
+-        )},
+-        **_annotate_decision(row, bindings, status, source, reason),
+-    }
+-
+-
+-def _restore_bom_item(item, row, bom, user_id, scope_key):
+-    bindings = []
+-    try:
+-        bindings = normalize_bindings(item.get("bindings") or [], row["original_qty"])
+-        if any(not positive_quantity(b.get("qty")) or not positive_quantity(b.get("qty_ratio")) for b in bindings):
+-            bindings = []
+-        issue = bom.mismatch(bindings)
+-    except (AttributeError, TypeError, ValueError, OverflowError):
+-        issue = "BOM 草稿的绑定格式或数量无效"
+-    review = get_row_decision(user_id=user_id, scope_key=scope_key, row=row)
+-    if review and review["decision"] == STATUS_REJECTED:
+-        item.update(bindings=[], matched_code="", is_exact=False)
+-        item.update(_annotate_decision(row, [], STATUS_REJECTED, SOURCE_MANUAL_REJECT, review["reason"]))
+-        return
+-    if not issue and review:
+-        record = get_decision(user_id=user_id, scope_key=scope_key, row=row, bindings=bindings)
+-        if record and validate_bindings_against_row(
+-            row, bindings, saved_bindings=extract_saved_bindings(record),
+-            require_saved_unit_evidence=True, component_shares=bom.shares,
+-        )["ok"]:
+-            item.update(_bom_match_fields(row, bom))
+-            item.update(_annotate_decision(row, bom.bindings, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "已恢复 BOM 人工确认"))
+-            return
+-        issue = "BOM 确认内容或权威目标单位已变化，须重新确认"
+-    if issue:
+-        status = STATUS_REJECTED if bom.hard_conflict else STATUS_RECOMMENDED
+-        item.update(bindings=bindings, matched_code="", is_exact=False)
+-        item.update(_annotate_decision(row, bindings, status, SOURCE_RESTORE, issue))
+-    else:
+-        item.update(_bom_match_fields(row, bom))
+-
+-
+ def _calibrated_decision(row, query, result, policy, *, trusted=True):
+     assessed = assess_match(row, query, result, policy, trusted=trusted)
+     bindings = confirmed_binding(row, result, assessed)
+@@ -1744,15 +1654,6 @@
+ def _rule_expected_bindings(item: Dict[str, Any], rule: Dict[str, Any]) -> List[Dict[str, Any]]:
+     """按当前行数量与规则比例重建完整预期绑定，不从草稿/导出请求继承数量。"""
+     qty = float(item.get("qty") or 0.0)
+-    targets = rule.get("bound_materials") or []
+-    if not math.isfinite(qty) or any(
+-        not isinstance(b, dict) or (b.get("qty_ratio") is not None
+-                                  and (not positive_quantity(b["qty_ratio"]) or not math.isfinite(qty * b["qty_ratio"])))
+-        for b in targets
+-    ):
+-        return []
+-    if len({b["code"].strip() for b in targets if isinstance(b.get("code"), str) and b["code"].strip()}) != len(targets):
+-        return []
+     return normalize_bindings([
+         {
+             "code": (b.get("code") or "").strip(),
+@@ -1764,16 +1665,13 @@
+             "qty": qty * float(b.get("qty_ratio") if b.get("qty_ratio") is not None else 1.0),
+             "qty_ratio": b.get("qty_ratio"),
+         }
+-        for b in targets
++        for b in (rule.get("bound_materials") or [])
+     ], qty)
+ 
+ 
+ def _evaluate_rule_decision(item: Dict[str, Any], rule: Dict[str, Any], bindings: List[Dict[str, Any]]) -> Dict[str, Any]:
+     """评估规则命中行的服务端决策：名称-only 旧规则/约束不匹配/编码失效/硬冲突均降推荐。"""
+     row = _build_row_item_from_raw(item)
+-    if not bindings or len({b["code"] for b in bindings if b["code"]}) != len(bindings):
+-        return _annotate_decision(row, [], STATUS_RECOMMENDED, SOURCE_RULE,
+-                                  "旧规则的子项编码或数量比例无效，待人工复核")
+     if not _rule_is_constrained(rule):
+         return _annotate_decision(row, bindings, STATUS_RECOMMENDED, SOURCE_RULE,
+                                   "仅名称相等的旧规则，需人工确认")
+@@ -1896,13 +1794,6 @@
+     category: str
+     qty: float
+     qty_ratio: Optional[float] = None
+-
+-    @field_validator("qty", "qty_ratio", mode="before")
+-    @classmethod
+-    def reject_boolean_quantities(cls, value):
+-        if isinstance(value, bool):
+-            raise ValueError("工程量和比例须为数值")
+-        return value
+ 
+ class MatchedItemModel(BaseModel):
+     original_row_idx: int
+@@ -2506,24 +2397,24 @@
+         for i, (q_info, q_vector, item) in enumerate(match_jobs):
+             checkpoint()
+             res = first_pass_results[i]
+-            if is_bom_name(item.get("name")):
+-                row_for_bom = _build_row_item_from_raw(item)
+-                bom = _current_bom(row_for_bom, rules)
+-                owner = task_meta.get("owner_user_id")
+-                review = get_row_decision(
+-                    owner, make_scope_key(task_meta.get("original_filename"), row_for_bom["professional"]), row_for_bom,
+-                ) if owner is not None else None
+-                final_chunk_results.append({
+-                    **row_for_bom, "original_row_idx": item["row_idx"], "parsed_spec": q_info["parsed_spec"],
+-                    "top_candidates": res["top_candidates"], **_bom_match_fields(row_for_bom, bom, review=review),
+-                })
+-                continue
+             rule_obj = _select_matching_binding_rule(item, rules)
+             rule_bindings = rule_obj.get("bound_materials") if rule_obj else None
+             
+             if rule_bindings:
+                 # Apply confirmed auto-binding rule
+-                bindings_list = _rule_expected_bindings(item, rule_obj)
++                bindings_list = []
++                for rb in rule_bindings:
++                    ratio = rb.get("qty_ratio", 1.0)
++                    bindings_list.append({
++                        "code": rb.get("code", ""),
++                        "name": rb.get("name", ""),
++                        "specification": rb.get("specification", ""),
++                        "unit": rb.get("unit", ""),
++                        "brand": rb.get("brand", ""),
++                        "category": rb.get("category", ""),
++                        "qty": float(item["qty"]) * ratio,
++                        "qty_ratio": ratio,
++                    })
+                 first_b = bindings_list[0] if bindings_list else {}
+                 # V015-M2：规则命中不再天然可导出。名称-only 旧规则/约束不匹配/编码
+                 # 失效降为推荐，硬冲突拒绝；仅约束逐项匹配且编码当前有效才自动接受。
+@@ -2541,7 +2432,7 @@
+                     "professional": item.get("professional", "暖通"),
+                     "original_code": item.get("code", ""),
+                     "parsed_spec": q_info["parsed_spec"],
+-                    "is_exact": bool(bindings_list),
++                    "is_exact": True, # Rule match counts as exact（算法提示，非可导出凭据）
+                     "matched_code": ",".join([b["code"] for b in bindings_list]),
+                     "matched_name": first_b.get("name", ""),
+                     "matched_category": first_b.get("category", ""),
+@@ -2695,15 +2586,6 @@
+     # 规范化统一由 batch_match_rows 内的 prepare_query 契约完成。
+     raw_rows = []
+     for r in rows:
+-        name = r.get("name") or r.get("text", "")
+-        if is_bom_name(name):
+-            qty = r.get("qty")
+-            raw_rows.append({
+-                "row_idx": r.get("id", 0), "name": name, "specification": r.get("specification") or r.get("text", ""),
+-                "unit": r.get("unit", ""), "qty": qty if positive_quantity(qty) else 0.0, "loss": 1.0,
+-                "category": r.get("category", ""), "brand": r.get("brand", ""), "professional": r.get("professional") or "",
+-            })
+-            continue
+         raw_rows.append({
+             "row_idx": r.get("id", 0),
+             "name": r.get("text", ""),
+@@ -2781,26 +2663,19 @@
+                 merged_parsed.setdefault("spec", query_info["parsed_spec"].get("spec", ""))
+                 query_info["parsed_spec"] = merged_parsed
+ 
+-    if has_doc_ctx:
+-        raw = {"name": src_row.get("raw_name"), "specification": src_row.get("raw_spec"),
+-               "category": src_row.get("raw_category"), "brand": src_row.get("raw_brand"),
+-               "unit": src_row.get("raw_unit"), "qty": src_row.get("raw_qty"), "professional": professional}
+-    else:
+-        raw = {"name": name, "specification": text, "category": category, "brand": brand,
+-               "unit": unit, "qty": payload.get("qty"), "professional": payload.get("professional")}
+-    row_for_bom = _build_row_item_from_raw(raw)
+-    bom = _current_bom(row_for_bom)
+     checkpoint()
+     policy = acceptance_policy()
+-    if bom is not None:
+-        res = match_item(query_info)
+-        res.update(_bom_match_fields(row_for_bom, bom, edited="parsed_spec" in payload))
+-    elif policy is None:
++    if policy is None:
+         res = match_item(query_info)
+     else:
+         res = match_item(query_info, calibration_groups=policy.equivalences)
+-        if not has_doc_ctx and "qty" not in payload:
+-            raw["qty"] = 1.0
++        if has_doc_ctx:
++            raw = {"name": src_row.get("raw_name"), "specification": src_row.get("raw_spec"),
++                   "category": src_row.get("raw_category"), "brand": src_row.get("raw_brand"),
++                   "unit": src_row.get("raw_unit"), "qty": src_row.get("raw_qty"), "professional": professional}
++        else:
++            raw = {"name": name, "specification": text, "category": category, "brand": brand,
++                   "unit": unit, "qty": payload.get("qty", 1.0), "professional": payload.get("professional")}
+         decision, bindings = _calibrated_decision(
+             _build_row_item_from_raw(raw), query_info, res, policy,
+             trusted=not has_doc_ctx and "parsed_spec" not in payload,
+@@ -2906,12 +2781,6 @@
+ 
+     checkpoint()
+     res = match_item(query_info)
+-    if has_doc_ctx and is_bom_name(auth_name):
+-        row = _build_row_item_from_raw({
+-            "name": auth_name, "specification": auth_spec, "professional": professional,
+-            "category": auth_category, "brand": auth_brand, "unit": auth_unit, "qty": src_row.get("raw_qty"),
+-        })
+-        res.update(_bom_match_fields(row, _current_bom(row), edited=True))
+     checkpoint()
+ 
+     has_doc_ctx = any(
+@@ -4005,14 +3874,8 @@
+     }
+     binds = normalize_bindings(binds, req.original_qty)
+     scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
+-    bom = _current_bom({**row_item, "professional": req.professional
+-                        if "professional" in req.model_fields_set else None})
+-    if bom is not None:
+-        issue = bom.mismatch(binds)
+-        if issue:
+-            raise HTTPException(status_code=409, detail={"error": "binding_bom_invalid", "message": issue})
+     # 新鲜编码 + 行级硬冲突核验：硬排除不得靠人工/伪造状态绕过。
+-    validation = validate_bindings_against_row(row_item, binds, component_shares=bom.shares if bom else None)
++    validation = validate_bindings_against_row(row_item, binds)
+     if validation["invalid_codes"]:
+         raise HTTPException(
+             status_code=409,
+@@ -4033,7 +3896,7 @@
+         )
+ 
+     if any(
+-        not math.isfinite(b["qty"]) or not positive_quantity(b["qty_ratio"])
++        not math.isfinite(b["qty"]) or not math.isfinite(b["qty_ratio"])
+         or (req.original_qty > 0 and not math.isclose(
+             b["qty"], req.original_qty * b["qty_ratio"], rel_tol=1e-9, abs_tol=1e-9,
+         ))
+@@ -4041,7 +3904,7 @@
+     ):
+         raise HTTPException(status_code=409, detail="绑定数量与比例不一致")
+ 
+-    binds = bom.bindings if bom is not None else _with_live_binding_fields(binds, validation["live_materials"])
++    binds = _with_live_binding_fields(binds, validation["live_materials"])
+     record = record_decision(
+         user_id=current_user["id"],
+         scope_key=scope_key,
+@@ -4351,11 +4214,6 @@
+         deny("内容已修改，请重新确认")
+     if not binds:
+         deny("无有效绑定：未匹配或已拒绝，禁止导出（不默选 top1）")
+-    bom = _current_bom(item)
+-    if bom is not None:
+-        issue = bom.mismatch(binds)
+-        if issue:
+-            deny(issue)
+ 
+     # 1) 人工确认：服务端确认记录 + 行/绑定双指纹一致 + 编码当前有效 + 无硬冲突
+     record = get_decision(
+@@ -4370,7 +4228,6 @@
+             binds,
+             saved_bindings=extract_saved_bindings(record),
+             require_saved_unit_evidence=True,
+-            component_shares=bom.shares if bom else None,
+         )
+         if validation["invalid_codes"]:
+             deny("确认后物料编码已失效", invalid_codes=validation["invalid_codes"])
+@@ -4384,11 +4241,6 @@
+             saved = quantities.get(binding_fingerprint([binding])) or {}
+             checked.append({**binding, **{key: saved[key] for key in ("qty", "qty_ratio") if key in saved}})
+         return _with_live_binding_fields(checked, validation["live_materials"])
+-
+-    if bom is not None:
+-        if row_decision:
+-            deny("BOM 绑定与服务端确认不一致，须重新确认")
+-        return bom.bindings
+ 
+     # 2) 自动接受：仅带约束且逐项匹配的规则，且编码当前有效、无硬冲突。
+     #    名称-only 旧规则不进入自动接受（DN100 不得因 DN15 同名规则被接受）。
+@@ -4436,8 +4288,6 @@
+     for it in req.items:
+         checkpoint()
+         item = it.model_dump()
+-        if is_bom_name(item["original_name"]) and "professional" not in it.model_fields_set:
+-            item["professional"] = None
+         live = _gate_export_row(item, current_user, request_scope,
+                                 allow_calibrated="professional" in it.model_fields_set)
+         if live:
+diff --git a/app/bom.py b/app/bom.py
+deleted file mode 100644
+--- a/app/bom.py
++++ /dev/null
+@@ -1,178 +0,0 @@
+-"""Versioned BOM for explicitly specified 304 thin-wall stainless pipe segments."""
+-from dataclasses import dataclass
+-from decimal import Decimal
+-import math
+-import re
+-import unicodedata
+-
+-from app.db_manager import catalog_read
+-from app.matcher import UNIT_SYNONYMS, check_unit_compatibility, get_unit_multiplier
+-from app.rule_context import canonicalize_professional
+-
+-FAMILY_NAME = "304薄壁不锈钢管分段组合"
+-CATEGORY = "不锈钢管"
+-PROFESSIONAL = "暖通"
+-VERSION = 1
+-# Only catalog-confirmed pairs at the same DN, OD, grade and wall thickness.
+-VARIANTS = {
+-    (25, Decimal("25.4")): ("2.17.05.0628", "2.17.05.0479", "1.0"),
+-    (50, Decimal("50.8")): ("2.17.05.0631", "2.17.05.0482", "1.2"),
+-}
+-SPEC = re.compile(r"DN([0-9]{1,3})\s+D([0-9]{1,3}(?:\.[0-9]{1,3})?)\s+(?:SUS)?304", re.I)
+-SOURCE_UNITS = frozenset(("m", "米", "km", "千米", "cm", "厘米", "mm", "毫米"))
+-
+-
+-def is_bom_name(name):
+-    return _text(name) == FAMILY_NAME
+-
+-
+-def _text(value):
+-    return unicodedata.normalize("NFKC", str(value or "")).strip()
+-
+-
+-def _compact_spec(value):
+-    return "".join(_text(value).upper().split()).replace("×", "*")
+-
+-
+-def _condition(specification):
+-    match = SPEC.fullmatch(_text(specification))
+-    if not match:
+-        raise ValueError("BOM 需要明确 DN、外径 D 和 304 材质，规格示例：DN25 D25.4 304")
+-    key = (int(match[1]), Decimal(match[2]))
+-    if key not in VARIANTS:
+-        raise ValueError("BOM 仅支持 DN25/D25.4 或 DN50/D50.8 的 304 薄壁不锈钢管")
+-    return key
+-
+-
+-def positive(value):
+-    if type(value) not in (float, int):
+-        return False
+-    try:
+-        return value > 0 and math.isfinite(value)
+-    except OverflowError:
+-        return False
+-
+-
+-def unit_multiplier(source, target):
+-    source, target = source.strip().lower(), target.strip().lower()
+-    return get_unit_multiplier(UNIT_SYNONYMS.get(source, source), UNIT_SYNONYMS.get(target, target))
+-
+-
+-def rule_metadata(name, specification, professional, components):
+-    """Build the digest-bound schema from the admin's explicitly declared composition."""
+-    if not is_bom_name(name):
+-        return None
+-    if name != FAMILY_NAME or canonicalize_professional(professional) != PROFESSIONAL:
+-        raise ValueError("BOM 必须使用标准物料族名称和暖通专业")
+-    dn, od = _condition(specification)
+-    if specification != f"DN{dn} D{od.normalize()} 304":
+-        raise ValueError(f"BOM 规则规格须使用 DN{dn} D{od.normalize()} 304")
+-    bare, insulated, _ = VARIANTS[dn, od]
+-    codes = [part["code"] for part in components]
+-    if len(codes) != 2 or set(codes) != {bare, insulated}:
+-        raise ValueError("BOM 必须恰好包含当前规格的保温段和非保温段")
+-    shares = [part.get("qty_ratio") for part in components]
+-    if not all(positive(share) and share < 1 for share in shares) or not math.isclose(
+-        math.fsum(shares), 1, rel_tol=0, abs_tol=1e-12,
+-    ):
+-        raise ValueError("BOM 两段的声明比例须各自为有限正数且合计为 1")
+-    if any(get_unit_multiplier(part.get("unit", ""), "m") != 1 for part in components):
+-        raise ValueError("BOM 子项规则单位必须与冻结目录的米同义")
+-    return {"version": VERSION, "family": "304-thin-wall-pipe-segments", "category": CATEGORY,
+-            "dn": dn, "od_mm": float(od), "material_grade": "304"}
+-
+-
+-@dataclass(frozen=True)
+-class Expansion:
+-    bindings: list
+-    shares: dict
+-    reason: str
+-    hard_conflict: bool = False
+-
+-    def mismatch(self, submitted):
+-        if not self.bindings:
+-            return self.reason
+-        supplied = {item.get("code"): item for item in submitted}
+-        if len(submitted) != len(self.bindings) or set(supplied) != {b["code"] for b in self.bindings}:
+-            return "BOM 绑定集合不完整或不精确，须包含两段且每段仅出现一次"
+-        for expected in self.bindings:
+-            item = supplied[expected["code"]]
+-            if get_unit_multiplier(str(item.get("unit") or ""), expected["unit"]) != 1:
+-                return f"BOM 子项 {expected['code']} 目标单位与实时物料不一致"
+-            if any(not positive(item.get(k)) or not math.isclose(item[k], expected[k], rel_tol=1e-9)
+-                   for k in ("qty", "qty_ratio")):
+-                return f"BOM 子项 {expected['code']} 工程量或比例与规则不一致"
+-        return None
+-
+-
+-@catalog_read
+-def expand(row, rules):
+-    """Expand the whole bundle atomically, using current catalog evidence and server rules."""
+-    from app.binding_decisions import evaluate_hard_conflicts, fetch_live_material_map
+-
+-    def review(reason, hard=False):
+-        return Expansion([], {}, reason, hard)
+-
+-    if not is_bom_name(row.get("original_name")):
+-        return None
+-    if canonicalize_professional(str(row.get("professional") or "")) != PROFESSIONAL:
+-        return review("BOM 需要明确的暖通专业")
+-    if _text(row.get("original_category")) != CATEGORY:
+-        return review("BOM 需要明确的原始品类：不锈钢管")
+-    try:
+-        dn, od = _condition(row.get("original_spec"))
+-    except ValueError as exc:
+-        return review(str(exc))
+-    unit = str(row.get("original_unit") or "").strip().lower()
+-    qty = row.get("original_qty")
+-    if unit not in SOURCE_UNITS or not positive(qty):
+-        return review("BOM 需要已知长度单位和有限正工程量")
+-
+-    spec = f"DN{dn} D{od.normalize()} 304"
+-    matching = [rule for rule in rules if is_bom_name(rule.get("original_name"))
+-                and rule.get("original_spec") == spec
+-                and canonicalize_professional(str(rule.get("professional") or "")) == PROFESSIONAL]
+-    if len(matching) != 1:
+-        return review("BOM 缺少唯一的已评测规格规则，请人工核实")
+-    rule, = matching
+-    components = rule.get("bound_materials") or []
+-    try:
+-        expected_schema = rule_metadata(FAMILY_NAME, spec, PROFESSIONAL, components)
+-        schema = rule.get("bom")
+-        if schema != expected_schema or type(schema.get("version")) is not int:
+-            return review("BOM 旧规则或版本无效，须重新评测确认")
+-    except (KeyError, TypeError, ValueError) as exc:
+-        return review(f"BOM 规则无效：{exc}")
+-
+-    bare, insulated, wall = VARIANTS[dn, od]
+-    expected_names = {bare: "304薄壁不锈钢管", insulated: "304薄壁不锈钢管(保温)"}
+-    materials = fetch_live_material_map(list(expected_names))
+-    source = dict(row, original_unit=unit)
+-    bindings, shares = [], {}
+-    for part in components:
+-        code = part["code"]
+-        material = materials.get(code)
+-        if not material:
+-            return review(f"BOM 子项编码已失效：{code}", True)
+-        live_unit = str(material.get("unit") or "").strip()
+-        if (_text(material.get("name")) != expected_names[code] or material.get("category") != CATEGORY
+-                or _compact_spec(material.get("specification")) != f"DN{dn},D{od.normalize()}*{wall}"
+-                or get_unit_multiplier(live_unit, "m") != 1):
+-            return review(f"BOM 子项规格或实时单位与规则证据不符：{code}", True)
+-        multiplier = unit_multiplier(unit, live_unit)
+-        if not check_unit_compatibility(unit, live_unit) or not positive(multiplier):
+-            return review(f"BOM 子项单位无法可靠换算：{code}")
+-        share = part["qty_ratio"]
+-        ratio = share * multiplier
+-        quantity = qty * ratio
+-        if not positive(ratio) or not positive(quantity):
+-            return review(f"BOM 子项工程量或比例超出有效范围：{code}")
+-        binding = {**{key: material.get(key) or "" for key in ("name", "specification", "brand", "category")},
+-                   "code": code, "unit": live_unit, "qty": quantity, "qty_ratio": ratio}
+-        reason = evaluate_hard_conflicts(source, material, binding, allow_unit_conversion=True,
+-                                         quantity_multiplier=share)
+-        if reason:
+-            return review(f"BOM 子项 {code}：{reason}", True)
+-        bindings.append(binding)
+-        shares[code] = share
+-    return Expansion(bindings, shares, "BOM 完整集合、数量比例、目标单位及硬约束均已核验")
+diff --git a/tests/test_v020_m1_bom.py b/tests/test_v020_m1_bom.py
+deleted file mode 100644
+--- a/tests/test_v020_m1_bom.py
++++ /dev/null
+@@ -1,224 +0,0 @@
+-"""Isolated HTTP, rule governance and workbook checks for the first BOM family."""
+-from copy import deepcopy
+-from io import BytesIO
+-import json
+-from pathlib import Path
+-from tempfile import TemporaryDirectory
+-from unittest.mock import patch
+-
+-from openpyxl import Workbook, load_workbook
+-
+-from app import server
+-from app.audit_manager import init_audit_tables
+-from app.auth_manager import issue_token_for_user
+-from app.db_manager import get_db_connection
+-from app.flywheel_db import init_flywheel_tables
+-from app.flywheel_sandbox import _inject_candidate_rule_into_sandbox
+-from app.llm_rule_engine import init_rule_engine_db
+-from app.rule_governance import compute_rule_digest
+-from app.sandbox_evaluator import _evaluate_binding_pipeline, _select_sandbox_subsets
+-from test_binding_decisions import M2Base, _seed_material
+-
+-
+-NAME = "304薄壁不锈钢管分段组合"
+-CATEGORY = "不锈钢管"
+-SPEC = "DN25 D25.4 304"
+-BARE, INSULATED = "2.17.05.0628", "2.17.05.0479"
+-SCOPE = "bom-synthetic.xlsx"
+-
+-
+-class TestBom(M2Base):
+-    def setUp(self):
+-        super().setUp()
+-        init_flywheel_tables()
+-        init_rule_engine_db()
+-        init_audit_tables()
+-        for code, name, spec in (
+-            (BARE, "304薄壁不锈钢管", "DN25，D25.4*1.0"),
+-            (INSULATED, "304薄壁不锈钢管（保温）", "DN25，D25.4×1.0"),
+-            ("2.17.05.0631", "304薄壁不锈钢管", "DN50，D50.8*1.2"),
+-            ("2.17.05.0482", "304薄壁不锈钢管（保温）", "DN50，D50.8×1.2"),
+-        ):
+-            _seed_material(code, name, spec, "m", CATEGORY)
+-        self.row = self._row(name=NAME, category=CATEGORY, specification=SPEC, unit="千米", qty=2, code="BOM-25")
+-        self.targets = self._targets(BARE, INSULATED)
+-        self.rule, self.normalized = self._policy(SPEC, self.targets)
+-        self.rules_file = Path(server._get_auto_binding_rules_path())
+-        self.rules_file.write_text(json.dumps([self.rule], ensure_ascii=False), encoding="utf-8")
+-
+-    def _targets(self, *codes):
+-        return [
+-            {"code": code, "unit": "米", "qty_ratio": share, "name": "", "specification": "", "qty": 0,
+-             "brand": "", "category": ""}
+-            for code, share in zip(codes, (.6, .4), strict=True)
+-        ]
+-
+-    def _policy(self, spec, targets):
+-        _, normalized = server._build_legacy_binding_spec_and_key(
+-            NAME, targets, original_spec=spec, professional="暖通",
+-        )
+-        return dict(original_name=NAME, original_spec=spec, professional="暖通",
+-                    bound_materials=normalized["bound_materials"], bom=normalized["bom"]), normalized
+-
+-    def _post(self, path, payload):
+-        return self.client.post(path, json=payload, headers=self.auth)
+-
+-    def _upload(self):
+-        workbook = Workbook()
+-        ws = workbook.active
+-        ws.title = "暖通"
+-        ws.append(["项目编码", "项目名称", "项目特征描述", "计量单位", "工程量", "甲供材品类", "品牌"])
+-        ws.append(["BOM-25", NAME, SPEC, "千米", 2, CATEGORY, ""])
+-        buffer = BytesIO()
+-        workbook.save(buffer)
+-        workbook.close()
+-        uploaded = self.client.post("/api/upload", headers=self.auth, files={
+-            "file": (SCOPE, buffer.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+-        })
+-        assert uploaded.status_code == 200, uploaded.text
+-        status = self.client.get("/api/upload/status", headers=self.auth, params={"task_id": uploaded.json()["task_id"]})
+-        assert status.json()["status"] == "completed", status.text
+-        return status.json()["result"][0]
+-
+-    def test_match_upload_full_manual_draft_restore_and_excel(self):
+-        item = self._upload()
+-        assert item["decision_status"] == "auto_accepted", item["decision_reason"]
+-        assert item["source_row_id"] and item["recommendation_snapshot_id"]
+-        assert [(b["code"], b["unit"], b["qty"], b["qty_ratio"]) for b in item["bindings"]] == [
+-            (BARE, "m", 1200, 600), (INSULATED, "m", 800, 400),
+-        ]
+-        single = self._post("/api/match", dict(name=NAME, text=SPEC, professional="暖通",
+-                                                category=CATEGORY, unit="km", qty=2))
+-        assert single.status_code == 200 and single.json()["bindings"] == item["bindings"], single.text
+-        batch_payload = dict(name=NAME, specification=SPEC, professional="暖通", category=CATEGORY, unit="km")
+-        batch = self._post("/api/batch_match", {"rows": [dict(batch_payload, qty=2), batch_payload]})
+-        matched, incomplete = batch.json()["results"]
+-        assert matched["bindings"] == item["bindings"]
+-        assert incomplete["decision_status"] == "recommended" and incomplete["bindings"] == []
+-        qty_row = server._raw_item_from_export(item)
+-        confirm = self._confirm_payload({**qty_row, "row_idx": item["original_row_idx"]}, item["bindings"], SCOPE)
+-        confirmed = self._post("/api/binding/submit", confirm)
+-        assert confirmed.status_code == 200, confirmed.text
+-        assert confirmed.json()["decision"]["decision_status"] == "manual_confirmed"
+-        save = self._post("/api/session/draft", dict(original_filename=SCOPE, professional="暖通",
+-                                                     items_json=json.dumps([item], ensure_ascii=False)))
+-        assert save.status_code == 200, save.text
+-        saved = self.client.get("/api/session/draft", headers=self.auth).json()["draft"]
+-        restored, = json.loads(saved["items_json"])
+-        assert restored["decision_status"] == "manual_confirmed"
+-        assert restored["binding_fingerprint"] == confirmed.json()["binding_fingerprint"]
+-        assert restored["row_fingerprint"] == confirmed.json()["row_fingerprint"]
+-        assert restored["bindings"] == confirmed.json()["bindings"]
+-        exported = self._post("/api/export", dict(items=[restored], scope_filename=SCOPE))
+-        assert exported.status_code == 200, exported.text
+-        book = load_workbook(BytesIO(exported.content))
+-        try:
+-            cells = {r[4].value: r for r in book.active.iter_rows(min_row=2) if r[1].value == "材料费"}
+-            assert set(cells) == {"BOM-25", BARE, INSULATED}
+-            assert [c.value for c in cells["BOM-25"][4:9]] == ["BOM-25", NAME, SPEC, "千米", 2]
+-            for binding in restored["bindings"]:
+-                line = cells[binding["code"]]
+-                assert [c.value for c in line[4:9]] == [
+-                    binding[key] for key in ("code", "name", "specification", "unit", "qty")
+-                ]
+-                assert line[8].comment.text == f"绑定比例：{binding['qty_ratio']}"
+-        finally:
+-            book.close()
+-        assert self._post("/api/binding/invalidate", confirm).status_code == 200
+-        late = self.client.get("/api/session/draft", headers=self.auth).json()["draft"]
+-        assert json.loads(late["items_json"])[0]["decision_status"] == "recommended"
+-        assert self._post("/api/export", dict(items=[restored], scope_filename=SCOPE)).status_code == 422
+-
+-    def test_collection_quantity_and_unit_mismatches_fail_all_gates(self):
+-        item, = server.batch_match_rows([self.row])
+-        assert item["decision_status"] == "auto_accepted", item["decision_reason"]
+-        a, b = item["bindings"]
+-        for bindings in ([a], [a, b, a], [a, a], [a, dict(b, code="not-in-catalog")],
+-                         [a, dict(b, qty=2)], [a, dict(b, qty_ratio=0)], [a, dict(b, qty_ratio=-1)],
+-                         [a, dict(b, unit="m2")], [a, dict(b, unit="km")], [a, dict(b, unit="")]):
+-            bad = {**item, "bindings": bindings, "decision_status": "auto_accepted"}
+-            assert self._post("/api/binding/submit", self._confirm_payload(self.row, bindings, SCOPE)).status_code == 409
+-            assert self._post("/api/session/annotate", {"items": [bad], "scope_filename": SCOPE}).json()["items"][0][
+-                "decision_status"] == "recommended"
+-            assert self._post("/api/export", {"items": [bad], "scope_filename": SCOPE}).status_code == 422
+-        bool_bindings = [a, dict(b, qty_ratio=True)]
+-        assert self._post("/api/binding/submit", self._confirm_payload(self.row, bool_bindings, SCOPE)).status_code == 422
+-        confirm = self._confirm_payload(self.row, item["bindings"], SCOPE)
+-        confirm.pop("professional")
+-        item.pop("professional")
+-        assert self._post("/api/binding/submit", confirm).status_code == 409
+-        assert self._post("/api/export", {"items": [item], "scope_filename": SCOPE}).status_code == 422
+-        restored, = self._post("/api/session/annotate", {"items": [item]}).json()["items"]
+-        assert restored["decision_status"] == "recommended" and "暖通" in restored["decision_reason"]
+-
+-    def test_context_is_explicit_and_unit_synonyms_and_dn50_are_supported(self):
+-        for changes, reason in (
+-            ({"specification": "DN25"}, "外径"), ({"specification": "DN25 D25.4 316L"}, "304"),
+-            ({"specification": "DN250 D25.4 304"}, "仅支持"), ({"category": ""}, "原始品类"),
+-            ({"professional": "给排水"}, "暖通"), ({"unit": "m2"}, "长度单位"),
+-            ({"unit": "无"}, "长度单位"), ({"qty": 0}, "工程量"),
+-        ):
+-            item, = server.batch_match_rows([{**self.row, **changes}])
+-            assert item["decision_status"] == "recommended" and item["bindings"] == []
+-            assert reason in item["decision_reason"]
+-        rule50, _ = self._policy("DN50 D50.8 304", self._targets("2.17.05.0631", "2.17.05.0482"))
+-        self.rules_file.write_text(json.dumps([self.rule, rule50], ensure_ascii=False), encoding="utf-8")
+-        item, = server.batch_match_rows([{**self.row, "unit": "米", "qty": 5, "specification": "DN50 D50.8 304"}])
+-        assert item["decision_status"] == "auto_accepted"
+-        assert [(b["qty"], b["qty_ratio"]) for b in item["bindings"]] == [(3, .6), (2, .4)]
+-
+-    def test_catalog_drift_and_dynamic_hard_conflict_block_whole_group(self):
+-        item, = server.batch_match_rows([self.row])
+-        assert item["decision_status"] == "auto_accepted", item["decision_reason"]
+-        confirm = self._confirm_payload(self.row, item["bindings"], SCOPE)
+-        assert self._post("/api/binding/submit", confirm).status_code == 200
+-        rule = {"rule_id": "bom-forbid-insulation", "priority": 50, "scope_level": "discipline",
+-                "scope_target": "暖通", "parsed_dsl": {"matching_rules": {"must_not_contain": ["保温"]}}}
+-        from app.llm_rule_engine import LLMRuleManager
+-
+-        with patch.object(LLMRuleManager, "_active_rules_cache", [rule]):
+-            blocked, = server.batch_match_rows([self.row])
+-            assert blocked["decision_status"] == "rejected" and blocked["bindings"] == []
+-            assert "动态规则硬排除" in blocked["decision_reason"]
+-            assert self._post("/api/export", {"items": [item], "scope_filename": SCOPE}).status_code == 422
+-        conn = get_db_connection()
+-        try:
+-            conn.execute("UPDATE materials SET specification='DN25，D42*1.0' WHERE code=?", (INSULATED,))
+-            conn.commit()
+-            assert self._post("/api/binding/submit", confirm).status_code == 409
+-            conn.execute("DELETE FROM materials WHERE code=?", (INSULATED,))
+-            conn.commit()
+-        finally:
+-            conn.close()
+-        blocked, = server.batch_match_rows([self.row])
+-        assert "已失效" in blocked["decision_reason"] and not blocked["bindings"]
+-        assert self._post("/api/export", {"items": [item], "scope_filename": SCOPE}).status_code == 422
+-
+-    def test_old_bom_cannot_activate_and_sandbox_checks_independent_quantity_labels(self):
+-        old = {key: value for key, value in self.rule.items() if key != "bom"}
+-        self.rules_file.write_text(json.dumps([old], ensure_ascii=False), encoding="utf-8")
+-        item, = server.batch_match_rows([self.row])
+-        assert "旧规则" in item["decision_reason"] and item["bindings"] == []
+-        auth = {"Authorization": f"Bearer {issue_token_for_user(self._admin_actor)}"}
+-        request = dict(original_name=NAME, original_spec=SPEC, professional="暖通", bindings=self.targets)
+-        assert self.client.post("/api/binding/rules/confirm", json=request, headers=auth).status_code != 200
+-        assert json.loads(self.rules_file.read_text(encoding="utf-8")) == [old]
+-        with TemporaryDirectory() as directory:
+-            _inject_candidate_rule_into_sandbox(rule_meta=self.normalized, candidate_config_dir=directory,
+-                                                candidate_db_path="")
+-            activated, = json.loads((Path(directory) / "auto_binding_rules.json").read_text(encoding="utf-8"))
+-        assert activated == self.rule
+-        assert compute_rule_digest(self.normalized) != compute_rule_digest({**self.normalized, "bom": {"version": 2}})
+-        self.rules_file.write_text(json.dumps([activated], ensure_ascii=False), encoding="utf-8")
+-        gold = {"id": "BOM-25", "name": NAME, "professional": "暖通", "specification": SPEC, "unit": "km",
+-                "qty": 2, "supply_category": CATEGORY, "label_type": "1toN", "target_codes": [BARE, INSULATED],
+-                "bom_expected": [dict(code=BARE, unit="米", qty=1200, qty_ratio=600),
+-                                 dict(code=INSULATED, unit="m", qty=800, qty_ratio=400)]}
+-        assert _select_sandbox_subsets([gold], self.normalized)[0] == [gold]
+-        assert _select_sandbox_subsets([{**gold, "bom_expected": gold["bom_expected"][:1]}], self.normalized)[0] == []
+-        evaluation, = _evaluate_binding_pipeline([gold])
+-        assert evaluation["qty_ratios_ok"] and evaluation["codes_match_gt"] and evaluation["export_eligible"]
+-        wrong = deepcopy(gold)
+-        wrong["bom_expected"][1]["qty"] = 801
+-        evaluation, = _evaluate_binding_pipeline([wrong])
+-        assert not evaluation["qty_ratios_ok"] and not evaluation["export_eligible"]

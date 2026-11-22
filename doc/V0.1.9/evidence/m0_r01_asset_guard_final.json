@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-11-20T11:42:15.444108+08:00",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "checked_baseline_files": 174,
+  "baseline_changes": {
+    "app/matcher.py": {
+      "baseline": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac",
+      "current": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e"
+    },
+    "app/server.py": {
+      "baseline": "e2f6b20774742ce01cd79afe768688c440e31ae0fe039fb460240c5ed5f588f3",
+      "current": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+    }
+  },
+  "business_snapshot_slots": 35,
+  "business_diff_from_start": [],
+  "business_diff_v018_to_v019_start": [],
+  "archive_sha256": "238595cf17ecfb8ae934e2dadcda31cb5c6cccc759f691dd55cb8546cb3eead5",
+  "archive_restored_files": 88,
+  "restored_scoring_source": {
+    "app/matcher.py": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac",
+    "app/server.py": "e2f6b20774742ce01cd79afe768688c440e31ae0fe039fb460240c5ed5f588f3"
+  },
+  "benchmark_source_binding": {
+    "measured_runs": 6,
+    "measured_source_sha256": {
+      "app/matcher.py": "9e4bb8dc3b73a2b3e93ca8b1620dd8bc107a2dd7f628858110d31857c9e2355d",
+      "app/server.py": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+    },
+    "final_source_sha256": {
+      "app/matcher.py": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+      "app/server.py": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+    },
+    "restoring_only_pre_fix_wrapper_reproduces_measured_matcher": true,
+    "measured_server_matches_final": true,
+    "wrapper_references_in_app": []
+  },
+  "exit_code": 0
+}

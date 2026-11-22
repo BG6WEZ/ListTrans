@@ -1,0 +1,783 @@
+{
+  "baseline": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "started": "2026-11-14 23:25:50",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "hashes_before": [
+    {
+      "file": "app/matcher.py",
+      "expected": "4dfc51660debc8d60c217600a1e08bdbff9f55bb63b83719b80bfb93ce234cdb",
+      "actual": "4dfc51660debc8d60c217600a1e08bdbff9f55bb63b83719b80bfb93ce234cdb",
+      "matches": true
+    },
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "b012ef44cd871f67bdb7597a79a6ecb3347433c27faa916fe5498b628c7373a3",
+      "actual": "b012ef44cd871f67bdb7597a79a6ecb3347433c27faa916fe5498b628c7373a3",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "b9c5668e3278db9eb3dfc96363456bae2b60261ea353d3dbed25a5caf5ea82f9",
+      "actual": "b9c5668e3278db9eb3dfc96363456bae2b60261ea353d3dbed25a5caf5ea82f9",
+      "matches": true
+    },
+    {
+      "file": "app/domain_extractors.py",
+      "expected": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "actual": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "matches": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "expected": "6d2e18391516f0e5fb1a69303beb16ab28bfe955f27fabbef069fd2b2dca854b",
+      "actual": "6d2e18391516f0e5fb1a69303beb16ab28bfe955f27fabbef069fd2b2dca854b",
+      "matches": true
+    },
+    {
+      "file": "app/query_preprocessor.py",
+      "expected": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "actual": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "91b3ff0aafc6157ea97d2884986911e4d7b4ee1fa05838ce74da85ad32aad7dc",
+      "actual": "91b3ff0aafc6157ea97d2884986911e4d7b4ee1fa05838ce74da85ad32aad7dc",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "f5057f0400be13924873c2c290101d729a65dff729a98bfdb25fd7d3ab8d149b",
+      "actual": "f5057f0400be13924873c2c290101d729a65dff729a98bfdb25fd7d3ab8d149b",
+      "matches": true
+    },
+    {
+      "file": "app/db_manager.py",
+      "expected": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "actual": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "matches": true
+    },
+    {
+      "file": "app/report_generator.py",
+      "expected": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "actual": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "matches": true
+    },
+    {
+      "file": "app/flywheel_sandbox.py",
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "app/session_manager.py",
+      "expected": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "actual": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "matches": true
+    },
+    {
+      "file": "web/app.js",
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "matches": true
+    },
+    {
+      "file": "tests/conftest.py",
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "tests/verify_isolation.py",
+      "expected": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "actual": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m0_isolation.py",
+      "expected": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "actual": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m0_guardrail_regression.py",
+      "expected": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "actual": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "matches": true
+    },
+    {
+      "file": "tests/test_query_contract.py",
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true
+    },
+    {
+      "file": "tests/test_auto_binding.py",
+      "expected": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "actual": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "matches": true
+    },
+    {
+      "file": "tests/test_binding_decisions.py",
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "matches": true
+    },
+    {
+      "file": "tests/test_flywheel_sandbox.py",
+      "expected": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "actual": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "matches": true
+    },
+    {
+      "file": "tests/eval_golden_set.py",
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "tests/fixtures/golden_set_v1.json",
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "tests/fixtures/sandbox_materials_v1.json",
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "config/auto_binding_rules.json",
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "matches": true
+    },
+    {
+      "file": "config/model_config.json",
+      "expected": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "actual": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "matches": true
+    },
+    {
+      "file": "config/llm_config.json",
+      "expected": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "actual": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "matches": true
+    },
+    {
+      "file": ".local-archive/business_snapshot.py",
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pre_baseline_hashes.md",
+      "expected": "b992ea41e00b468aead00eadc830d1cf3cee2a01c6d3e88593bc8374e63343a2",
+      "actual": "b992ea41e00b468aead00eadc830d1cf3cee2a01c6d3e88593bc8374e63343a2",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_before.log",
+      "expected": "16ffc53fcb530d01bb01c05ed1341d9fdd032dbe55f1195b310e846a652e6c8c",
+      "actual": "16ffc53fcb530d01bb01c05ed1341d9fdd032dbe55f1195b310e846a652e6c8c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_before.json",
+      "expected": "9d289aaee2a42478f7c5fa930ed0c2d625e9eafdb41e61120c10286008c9051f",
+      "actual": "9d289aaee2a42478f7c5fa930ed0c2d625e9eafdb41e61120c10286008c9051f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_before.log",
+      "expected": "7d23a053e47305f9cd962ab4df9cc5a4c8e7c45eb0e5ba41314c67965d3d96dc",
+      "actual": "7d23a053e47305f9cd962ab4df9cc5a4c8e7c45eb0e5ba41314c67965d3d96dc",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_rerun.ps1",
+      "expected": "b94ede47862c24c329ffd2ea5cc5dd1d9fb81995ec9e39d421dd18f9ddb9e304",
+      "actual": "b94ede47862c24c329ffd2ea5cc5dd1d9fb81995ec9e39d421dd18f9ddb9e304",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_m3.txt",
+      "expected": "d7ffb6ddeb8000334f1ce5665eaec0cdebbdb1a740335feef018ee1695bc0feb",
+      "actual": "d7ffb6ddeb8000334f1ce5665eaec0cdebbdb1a740335feef018ee1695bc0feb",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_m0_m2_regression.txt",
+      "expected": "735b56ecd8816080747611dc5ee71452b5a68d1a4ab074ec7466a2606e4769c7",
+      "actual": "735b56ecd8816080747611dc5ee71452b5a68d1a4ab074ec7466a2606e4769c7",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_sandbox_30.txt",
+      "expected": "822cdd98229d292e7b2f846178ac1820375a2c46a010f1d55a525b9e9d89358c",
+      "actual": "822cdd98229d292e7b2f846178ac1820375a2c46a010f1d55a525b9e9d89358c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_capture_evidence.py",
+      "expected": "5f996cf98d6463749695213fbabc2b60c714f64a6ea130f4d1ad9e0f266e3ecc",
+      "actual": "5f996cf98d6463749695213fbabc2b60c714f64a6ea130f4d1ad9e0f266e3ecc",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_gate_reports.json",
+      "expected": "a721226727c6ad6b3a6cacd6a64c64f3caf888750b317177fdce1086cd2de78f",
+      "actual": "a721226727c6ad6b3a6cacd6a64c64f3caf888750b317177fdce1086cd2de78f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_3rule_gate.txt",
+      "expected": "fd9ba1211bf8b932d00d265a2ea13f2210d5506320d909b3f726638956eb44b0",
+      "actual": "fd9ba1211bf8b932d00d265a2ea13f2210d5506320d909b3f726638956eb44b0",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_r01_gate_compare.json",
+      "expected": "770e0639b75298292f9812c6ea25e69f233e9169e738024ffafd8d7e9e1468ff",
+      "actual": "770e0639b75298292f9812c6ea25e69f233e9169e738024ffafd8d7e9e1468ff",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_full.txt",
+      "expected": "960054f0ef59d54483ab96b0cf0639f6879a0f45f0b7d15f01d48c514eb3764e",
+      "actual": "960054f0ef59d54483ab96b0cf0639f6879a0f45f0b7d15f01d48c514eb3764e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_after.json",
+      "expected": "fd9554d33c16b2598670bbd6ccdc8d943a18614eefb9334ba7f15fe65a78a910",
+      "actual": "fd9554d33c16b2598670bbd6ccdc8d943a18614eefb9334ba7f15fe65a78a910",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_after.log",
+      "expected": "3fe02a79f93afd16024a34f77527b08bfdeace048cabe79be93f08ec64c45be3",
+      "actual": "3fe02a79f93afd16024a34f77527b08bfdeace048cabe79be93f08ec64c45be3",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_after.log",
+      "expected": "f45a814dbc56355d1f8e0fa49f163456c41b3fc602de32fca97d8b2f48408e5c",
+      "actual": "f45a814dbc56355d1f8e0fa49f163456c41b3fc602de32fca97d8b2f48408e5c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M3_R02_开发小结.md",
+      "expected": "b330f40f8bdf316513c66b11c118a72aa065f9fd7b1a57ab7dd1a29d3caad4b0",
+      "actual": "b330f40f8bdf316513c66b11c118a72aa065f9fd7b1a57ab7dd1a29d3caad4b0",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "efd5ea580a60b2bc6f21fdc75aa125863ead605a23477f6aea3732cdf269a76c",
+      "actual": "efd5ea580a60b2bc6f21fdc75aa125863ead605a23477f6aea3732cdf269a76c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "6816dab4c37a7362539f3260600371bc63d175cc1e3b989ee19e4c3fa839fa22",
+      "actual": "6816dab4c37a7362539f3260600371bc63d175cc1e3b989ee19e4c3fa839fa22",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "1e3b102b2aea55baf958a1590079c9fd8ce683743d4d77df98f6b3e3bbad7868",
+      "actual": "1e3b102b2aea55baf958a1590079c9fd8ce683743d4d77df98f6b3e3bbad7868",
+      "matches": true
+    }
+  ],
+  "backups": [
+    {
+      "file": "app/binding_decisions.py",
+      "backup_sha256": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "current_sha256": "b012ef44cd871f67bdb7597a79a6ecb3347433c27faa916fe5498b628c7373a3",
+      "changed": true
+    },
+    {
+      "file": "app/domain_extractors.py",
+      "backup_sha256": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "current_sha256": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "changed": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "backup_sha256": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "current_sha256": "6d2e18391516f0e5fb1a69303beb16ab28bfe955f27fabbef069fd2b2dca854b",
+      "changed": true
+    },
+    {
+      "file": "app/matcher.py",
+      "backup_sha256": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "current_sha256": "4dfc51660debc8d60c217600a1e08bdbff9f55bb63b83719b80bfb93ce234cdb",
+      "changed": true
+    },
+    {
+      "file": "app/query_preprocessor.py",
+      "backup_sha256": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "current_sha256": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "changed": false
+    },
+    {
+      "file": "app/server.py",
+      "backup_sha256": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "current_sha256": "b9c5668e3278db9eb3dfc96363456bae2b60261ea353d3dbed25a5caf5ea82f9",
+      "changed": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "backup_sha256": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "current_sha256": "91b3ff0aafc6157ea97d2884986911e4d7b4ee1fa05838ce74da85ad32aad7dc",
+      "changed": true,
+      "old_tests": 52,
+      "new_tests": 65,
+      "removed": [],
+      "modified_old": []
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "backup_sha256": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "current_sha256": "f5057f0400be13924873c2c290101d729a65dff729a98bfdb25fd7d3ab8d149b",
+      "changed": true,
+      "old_tests": 18,
+      "new_tests": 22,
+      "removed": [],
+      "modified_old": []
+    }
+  ],
+  "steps": [
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_verify_before.json"
+      ],
+      "exit": 0,
+      "seconds": 8.28,
+      "log": "m3_r02_audit_verify_before.log",
+      "sha256": "189d260a7e123a19793c76e8f1948396872e20692630145414d3fc3550a28f1f"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m3_hard_constraints.py",
+        "tests/test_m3_hard_constraints_http.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 11.713,
+      "log": "m3_r02_audit_m3.log",
+      "sha256": "8fd59c98bcd232325a3015be72b5542648c33cfe6bcdaee04b581079416fdd35"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m0_isolation.py",
+        "tests/test_m0_guardrail_regression.py",
+        "tests/test_query_contract.py",
+        "tests/test_auto_binding.py",
+        "tests/test_binding_decisions.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 14.731,
+      "log": "m3_r02_audit_required.log",
+      "sha256": "86415550b79077777c25c8b368be64cc6686d5feddf98ab5db9ad488d8bd94d0"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_flywheel_sandbox.py",
+        "-k",
+        "compare or nonzero",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 8.453,
+      "log": "m3_r02_audit_boundaries.log",
+      "sha256": "fc0bf9f92b8b3f77eeabca005dcb2faecf4f6833158f0e2b63df7ee39936d2a9"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_gate.py"
+      ],
+      "exit": 0,
+      "seconds": 55.04,
+      "log": "m3_r02_audit_gate.log",
+      "sha256": "56797e187597a0d5af497ccf9e6fdf872cc6c4a1ae5ace4a36b887dfaa740035"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 103.895,
+      "log": "m3_r02_audit_full.log",
+      "sha256": "863a9eca7e3fa5dded171fb5035c91598de97b5910e4eb2da8ed78c23c23e64f"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_verify_after.json"
+      ],
+      "exit": 0,
+      "seconds": 7.117,
+      "log": "m3_r02_audit_verify_after.log",
+      "sha256": "c8093340b41f9dddb9ba0c7c0987a4b401534feb806aa8968165aec439024b6c"
+    }
+  ],
+  "snapshot_before": {
+    "file": "m3_r02_audit_snapshot_before.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "snapshot_after": {
+    "file": "m3_r02_audit_snapshot_after.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "hashes_after": [
+    {
+      "file": "app/matcher.py",
+      "expected": "4dfc51660debc8d60c217600a1e08bdbff9f55bb63b83719b80bfb93ce234cdb",
+      "actual": "4dfc51660debc8d60c217600a1e08bdbff9f55bb63b83719b80bfb93ce234cdb",
+      "matches": true
+    },
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "b012ef44cd871f67bdb7597a79a6ecb3347433c27faa916fe5498b628c7373a3",
+      "actual": "b012ef44cd871f67bdb7597a79a6ecb3347433c27faa916fe5498b628c7373a3",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "b9c5668e3278db9eb3dfc96363456bae2b60261ea353d3dbed25a5caf5ea82f9",
+      "actual": "b9c5668e3278db9eb3dfc96363456bae2b60261ea353d3dbed25a5caf5ea82f9",
+      "matches": true
+    },
+    {
+      "file": "app/domain_extractors.py",
+      "expected": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "actual": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "matches": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "expected": "6d2e18391516f0e5fb1a69303beb16ab28bfe955f27fabbef069fd2b2dca854b",
+      "actual": "6d2e18391516f0e5fb1a69303beb16ab28bfe955f27fabbef069fd2b2dca854b",
+      "matches": true
+    },
+    {
+      "file": "app/query_preprocessor.py",
+      "expected": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "actual": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "91b3ff0aafc6157ea97d2884986911e4d7b4ee1fa05838ce74da85ad32aad7dc",
+      "actual": "91b3ff0aafc6157ea97d2884986911e4d7b4ee1fa05838ce74da85ad32aad7dc",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "f5057f0400be13924873c2c290101d729a65dff729a98bfdb25fd7d3ab8d149b",
+      "actual": "f5057f0400be13924873c2c290101d729a65dff729a98bfdb25fd7d3ab8d149b",
+      "matches": true
+    },
+    {
+      "file": "app/db_manager.py",
+      "expected": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "actual": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "matches": true
+    },
+    {
+      "file": "app/report_generator.py",
+      "expected": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "actual": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "matches": true
+    },
+    {
+      "file": "app/flywheel_sandbox.py",
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "app/session_manager.py",
+      "expected": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "actual": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "matches": true
+    },
+    {
+      "file": "web/app.js",
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "matches": true
+    },
+    {
+      "file": "tests/conftest.py",
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "tests/verify_isolation.py",
+      "expected": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "actual": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m0_isolation.py",
+      "expected": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "actual": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m0_guardrail_regression.py",
+      "expected": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "actual": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "matches": true
+    },
+    {
+      "file": "tests/test_query_contract.py",
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true
+    },
+    {
+      "file": "tests/test_auto_binding.py",
+      "expected": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "actual": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "matches": true
+    },
+    {
+      "file": "tests/test_binding_decisions.py",
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "matches": true
+    },
+    {
+      "file": "tests/test_flywheel_sandbox.py",
+      "expected": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "actual": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "matches": true
+    },
+    {
+      "file": "tests/eval_golden_set.py",
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "tests/fixtures/golden_set_v1.json",
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "tests/fixtures/sandbox_materials_v1.json",
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "config/auto_binding_rules.json",
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "matches": true
+    },
+    {
+      "file": "config/model_config.json",
+      "expected": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "actual": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "matches": true
+    },
+    {
+      "file": "config/llm_config.json",
+      "expected": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "actual": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "matches": true
+    },
+    {
+      "file": ".local-archive/business_snapshot.py",
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pre_baseline_hashes.md",
+      "expected": "b992ea41e00b468aead00eadc830d1cf3cee2a01c6d3e88593bc8374e63343a2",
+      "actual": "b992ea41e00b468aead00eadc830d1cf3cee2a01c6d3e88593bc8374e63343a2",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_before.log",
+      "expected": "16ffc53fcb530d01bb01c05ed1341d9fdd032dbe55f1195b310e846a652e6c8c",
+      "actual": "16ffc53fcb530d01bb01c05ed1341d9fdd032dbe55f1195b310e846a652e6c8c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_before.json",
+      "expected": "9d289aaee2a42478f7c5fa930ed0c2d625e9eafdb41e61120c10286008c9051f",
+      "actual": "9d289aaee2a42478f7c5fa930ed0c2d625e9eafdb41e61120c10286008c9051f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_before.log",
+      "expected": "7d23a053e47305f9cd962ab4df9cc5a4c8e7c45eb0e5ba41314c67965d3d96dc",
+      "actual": "7d23a053e47305f9cd962ab4df9cc5a4c8e7c45eb0e5ba41314c67965d3d96dc",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_rerun.ps1",
+      "expected": "b94ede47862c24c329ffd2ea5cc5dd1d9fb81995ec9e39d421dd18f9ddb9e304",
+      "actual": "b94ede47862c24c329ffd2ea5cc5dd1d9fb81995ec9e39d421dd18f9ddb9e304",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_m3.txt",
+      "expected": "d7ffb6ddeb8000334f1ce5665eaec0cdebbdb1a740335feef018ee1695bc0feb",
+      "actual": "d7ffb6ddeb8000334f1ce5665eaec0cdebbdb1a740335feef018ee1695bc0feb",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_m0_m2_regression.txt",
+      "expected": "735b56ecd8816080747611dc5ee71452b5a68d1a4ab074ec7466a2606e4769c7",
+      "actual": "735b56ecd8816080747611dc5ee71452b5a68d1a4ab074ec7466a2606e4769c7",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_sandbox_30.txt",
+      "expected": "822cdd98229d292e7b2f846178ac1820375a2c46a010f1d55a525b9e9d89358c",
+      "actual": "822cdd98229d292e7b2f846178ac1820375a2c46a010f1d55a525b9e9d89358c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_capture_evidence.py",
+      "expected": "5f996cf98d6463749695213fbabc2b60c714f64a6ea130f4d1ad9e0f266e3ecc",
+      "actual": "5f996cf98d6463749695213fbabc2b60c714f64a6ea130f4d1ad9e0f266e3ecc",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_gate_reports.json",
+      "expected": "a721226727c6ad6b3a6cacd6a64c64f3caf888750b317177fdce1086cd2de78f",
+      "actual": "a721226727c6ad6b3a6cacd6a64c64f3caf888750b317177fdce1086cd2de78f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_3rule_gate.txt",
+      "expected": "fd9ba1211bf8b932d00d265a2ea13f2210d5506320d909b3f726638956eb44b0",
+      "actual": "fd9ba1211bf8b932d00d265a2ea13f2210d5506320d909b3f726638956eb44b0",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_r01_gate_compare.json",
+      "expected": "770e0639b75298292f9812c6ea25e69f233e9169e738024ffafd8d7e9e1468ff",
+      "actual": "770e0639b75298292f9812c6ea25e69f233e9169e738024ffafd8d7e9e1468ff",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_pytest_full.txt",
+      "expected": "960054f0ef59d54483ab96b0cf0639f6879a0f45f0b7d15f01d48c514eb3764e",
+      "actual": "960054f0ef59d54483ab96b0cf0639f6879a0f45f0b7d15f01d48c514eb3764e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_after.json",
+      "expected": "fd9554d33c16b2598670bbd6ccdc8d943a18614eefb9334ba7f15fe65a78a910",
+      "actual": "fd9554d33c16b2598670bbd6ccdc8d943a18614eefb9334ba7f15fe65a78a910",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_venv_verify_after.log",
+      "expected": "3fe02a79f93afd16024a34f77527b08bfdeace048cabe79be93f08ec64c45be3",
+      "actual": "3fe02a79f93afd16024a34f77527b08bfdeace048cabe79be93f08ec64c45be3",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r02_outer_snapshot_after.log",
+      "expected": "f45a814dbc56355d1f8e0fa49f163456c41b3fc602de32fca97d8b2f48408e5c",
+      "actual": "f45a814dbc56355d1f8e0fa49f163456c41b3fc602de32fca97d8b2f48408e5c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M3_R02_开发小结.md",
+      "expected": "b330f40f8bdf316513c66b11c118a72aa065f9fd7b1a57ab7dd1a29d3caad4b0",
+      "actual": "b330f40f8bdf316513c66b11c118a72aa065f9fd7b1a57ab7dd1a29d3caad4b0",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "efd5ea580a60b2bc6f21fdc75aa125863ead605a23477f6aea3732cdf269a76c",
+      "actual": "efd5ea580a60b2bc6f21fdc75aa125863ead605a23477f6aea3732cdf269a76c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "6816dab4c37a7362539f3260600371bc63d175cc1e3b989ee19e4c3fa839fa22",
+      "actual": "6816dab4c37a7362539f3260600371bc63d175cc1e3b989ee19e4c3fa839fa22",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "1e3b102b2aea55baf958a1590079c9fd8ce683743d4d77df98f6b3e3bbad7868",
+      "actual": "1e3b102b2aea55baf958a1590079c9fd8ce683743d4d77df98f6b3e3bbad7868",
+      "matches": true
+    }
+  ],
+  "finished": "2026-11-14 23:29:20"
+}

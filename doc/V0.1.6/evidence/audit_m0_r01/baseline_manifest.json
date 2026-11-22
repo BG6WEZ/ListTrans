@@ -1,0 +1,29 @@
+{
+  "m3_r04": {
+    "path": "doc/V0.1.5/evidence/m3_r04_gate_reports.json",
+    "bytes": 51093,
+    "score_comparison_counts": {
+      "harmful": 23,
+      "beneficial": 21,
+      "neutral": 16
+    }
+  },
+  "m4_r03": {
+    "path": "doc/V0.1.5/evidence/m4_r03_gate_reports.json",
+    "bytes": 51096,
+    "score_comparison_counts": {
+      "harmful": 23,
+      "beneficial": 21,
+      "neutral": 16
+    }
+  },
+  "m5_r04": {
+    "path": "doc/V0.1.5/evidence/m5_r04_gate_reports.json",
+    "bytes": 52080,
+    "score_comparison_counts": {
+      "harmful": 23,
+      "beneficial": 21,
+      "neutral": 16
+    }
+  }
+}

@@ -10,7 +10,63 @@ function escapeHtml(val) {
 }
 
 let _isHandling401 = false;
-const AUTH_STORAGE_KEYS = ['token', 'username', 'name', 'position', 'role'];
+const AUTH_STORAGE_KEYS = ['token', 'username', 'name', 'position', 'role', 'employee_no', 'dept1', 'must_change_password', 'user_id', 'account_epoch', 'actor_token_ref'];
+const PENDING_FEEDBACK_STORAGE_KEY = 'listtrans_pending_feedback_v1';
+
+let currentActorUserId = null;
+let currentActorEpoch = '';
+let _actorIdentityPromise = null;
+let pendingFeedbackEvents = [];
+
+function _syncActorVarsFromStorage() {
+    try {
+        const tok = localStorage.getItem('token') || '';
+        const tokRef = localStorage.getItem('actor_token_ref') || '';
+        if (tok && tokRef && tok !== tokRef) {
+            currentActorUserId = null;
+            currentActorEpoch = '';
+            return;
+        }
+        const uidRaw = localStorage.getItem('user_id');
+        currentActorUserId = (uidRaw !== null && uidRaw !== '' && !Number.isNaN(Number(uidRaw))) ? Number(uidRaw) : null;
+        currentActorEpoch = String(localStorage.getItem('account_epoch') || '').trim();
+    } catch (_) {
+        currentActorUserId = null;
+        currentActorEpoch = '';
+    }
+}
+_syncActorVarsFromStorage();
+
+function loadPendingFeedbackEventsFromStorage() {
+    try {
+        const raw = localStorage.getItem(PENDING_FEEDBACK_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function savePendingFeedbackEventsToStorage() {
+    try {
+        const toPersist = pendingFeedbackEvents.filter(rec => rec && rec.status !== 'delivered');
+        localStorage.setItem(PENDING_FEEDBACK_STORAGE_KEY, JSON.stringify(toPersist));
+    } catch (_) {}
+}
+
+pendingFeedbackEvents = loadPendingFeedbackEventsFromStorage();
+
+function clearAuthStorage() {
+    AUTH_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+    currentActorUserId = null;
+    currentActorEpoch = '';
+    pendingFeedbackEvents = [];
+    try { localStorage.removeItem(PENDING_FEEDBACK_STORAGE_KEY); } catch (_) {}
+    if (typeof renderFeedbackDeliveryBanner === 'function') {
+        renderFeedbackDeliveryBanner();
+    }
+}
 
 // Intercept all fetch requests to inject authentication headers and handle token expiration
 const originalFetch = window.fetch;
@@ -45,10 +101,18 @@ window.fetch = async function (url, options) {
         if (response.status === 401) {
             if (!_isHandling401) {
                 _isHandling401 = true;
-                AUTH_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
+                clearAuthStorage();
                 alert("您的登录会话已失效，请重新登录。");
                 window.location.href = "login.html";
             }
+        } else if (response.status === 403 && typeof window._triggerForcedPasswordModal === 'function') {
+            try {
+                const cloned = response.clone();
+                const errJson = await cloned.json();
+                if (errJson && typeof errJson.detail === 'string' && errJson.detail.includes('MUST_CHANGE_PASSWORD')) {
+                    window._triggerForcedPasswordModal();
+                }
+            } catch (_) {}
         }
         return response;
     } catch (error) {
@@ -75,6 +139,221 @@ let searchQuery = ''; // Search query on left list
 let currentProfessional = '全部'; // Active professional tab filter
 let professionals = []; // List of professionals detected in uploaded list
 let originalFileName = ""; // Uploaded original list filename
+let currentDocumentId = ""; // Server-issued document ID for current upload/restored workbook
+let currentUploadTaskId = ""; // Server upload task ID
+let currentWorkSessionId = ""; // Server work session ID
+
+function generateClientEventId(prefix = 'evt') {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+}
+
+function isSameWorkbenchRow(a, b) {
+    if (!a || !b) return false;
+    if (a.source_row_id && b.source_row_id) {
+        return a.source_row_id === b.source_row_id;
+    }
+    return a.original_row_idx === b.original_row_idx;
+}
+
+function renderLegacyIsolationBanner(legacyCount) {
+    const existing = document.getElementById('legacy-isolation-banner');
+    if (!legacyCount || legacyCount <= 0) {
+        if (existing) existing.remove();
+        return;
+    }
+    const workbench = document.getElementById('workbench');
+    if (!workbench || !workbench.parentNode) return;
+    let banner = existing;
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'legacy-isolation-banner';
+        banner.style.cssText = 'background:#fff7ed;border:1px solid #fdba74;color:#9a3412;padding:8px 14px;font-size:12px;border-radius:6px;margin:8px 16px 0 16px;display:flex;align-items:center;gap:8px;';
+        workbench.parentNode.insertBefore(banner, workbench);
+    }
+    banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i><span>旧草稿/未绑定可核验服务端文档身份（' + Number(legacyCount) + ' 条），已隔离为只读复核；不会上报可信飞轮反馈，如需采集新反馈请重新上传清单。</span>';
+}
+
+function _actorMatchesRecord(rec, userId = currentActorUserId, epoch = currentActorEpoch) {
+    if (!rec) return false;
+    if (userId !== null && userId !== undefined && Number(rec.actor_user_id) !== Number(userId)) {
+        return false;
+    }
+    if (epoch && String(rec.actor_account_epoch || '') !== String(epoch)) {
+        return false;
+    }
+    if (userId === null && !epoch && (rec.actor_user_id !== null || rec.actor_account_epoch)) {
+        return false;
+    }
+    return true;
+}
+
+function purgePendingEventsExcept(userId, accountEpoch) {
+    pendingFeedbackEvents = pendingFeedbackEvents.filter(rec =>
+        rec && rec.status !== 'delivered' && _actorMatchesRecord(rec, userId, accountEpoch)
+    );
+    savePendingFeedbackEventsToStorage();
+    renderFeedbackDeliveryBanner();
+}
+
+function purgePendingEventsForDocument(documentId) {
+    if (!documentId) return;
+    pendingFeedbackEvents = pendingFeedbackEvents.filter(rec =>
+        rec && rec.document_id !== documentId
+    );
+    savePendingFeedbackEventsToStorage();
+    renderFeedbackDeliveryBanner();
+}
+
+function applyVerifiedActorIdentity(userId, accountEpoch) {
+    const nextId = (userId !== undefined && userId !== null && userId !== '') ? Number(userId) : null;
+    const nextEpoch = String(accountEpoch || '').trim();
+    const prevId = currentActorUserId;
+    const prevEpoch = currentActorEpoch;
+    if ((prevId !== null && nextId !== null && prevId !== nextId) ||
+        (prevEpoch && nextEpoch && prevEpoch !== nextEpoch)) {
+        purgePendingEventsExcept(nextId, nextEpoch);
+    }
+    currentActorUserId = nextId;
+    currentActorEpoch = nextEpoch;
+    try {
+        if (nextId !== null && !Number.isNaN(nextId)) localStorage.setItem('user_id', String(nextId));
+        if (nextEpoch) localStorage.setItem('account_epoch', nextEpoch);
+        const tok = localStorage.getItem('token') || '';
+        if (tok) localStorage.setItem('actor_token_ref', tok);
+    } catch (_) {}
+    renderFeedbackDeliveryBanner();
+}
+
+async function ensureVerifiedActorIdentity() {
+    if (currentActorUserId !== null && currentActorEpoch) {
+        return { actor_user_id: currentActorUserId, actor_account_epoch: currentActorEpoch };
+    }
+    if (_actorIdentityPromise) return _actorIdentityPromise;
+    _actorIdentityPromise = (async () => {
+        try {
+            const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : '';
+            const res = await fetch(`${backendUrl}/api/auth/me`, {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            });
+            if (res && res.ok) {
+                const u = await res.json().catch(() => null);
+                if (u && u.id !== undefined && u.id !== null) {
+                    applyVerifiedActorIdentity(u.id, u.account_epoch || '');
+                }
+            }
+        } catch (_) {}
+        return { actor_user_id: currentActorUserId, actor_account_epoch: currentActorEpoch };
+    })();
+    try {
+        return await _actorIdentityPromise;
+    } finally {
+        _actorIdentityPromise = null;
+    }
+}
+
+function getActivePendingFeedbackEvents() {
+    if (!currentDocumentId || !Array.isArray(items) || items.length === 0) {
+        return [];
+    }
+    return pendingFeedbackEvents.filter(rec => {
+        if (!rec || rec.status === 'delivered') return false;
+        if (!_actorMatchesRecord(rec)) return false;
+        if (rec.document_id !== currentDocumentId) return false;
+        return items.some(it =>
+            it && it.feedback_eligible !== false &&
+            it.document_id === rec.document_id &&
+            it.sheet_id === rec.sheet_id &&
+            it.source_row_id === rec.source_row_id
+        );
+    });
+}
+
+function reconcilePendingFeedbackForDocument() {
+    if (!Array.isArray(items) || items.length === 0) {
+        renderFeedbackDeliveryBanner();
+        return;
+    }
+    const active = getActivePendingFeedbackEvents();
+    items.forEach(it => {
+        if (!it || it.feedback_eligible === false) return;
+        const rowEvents = active.filter(rec =>
+            rec.document_id === it.document_id &&
+            rec.sheet_id === it.sheet_id &&
+            rec.source_row_id === it.source_row_id
+        );
+        const maxPendingFw = rowEvents
+            .filter(r => r.kind === 'flywheel')
+            .reduce((mx, r) => Math.max(mx, Number(r.event_seq || 0)), 0);
+        const maxPendingFb = rowEvents
+            .filter(r => r.kind === 'feedback')
+            .reduce((mx, r) => Math.max(mx, Number(r.event_seq || 0)), 0);
+        it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0), maxPendingFw);
+        it._feedback_seq = Math.max(Number(it._feedback_seq || 0), Number(it.max_feedback_seq || 0), maxPendingFb);
+    });
+    renderFeedbackDeliveryBanner();
+}
+
+function renderFeedbackDeliveryBanner() {
+    if (typeof document === 'undefined') return;
+    const existing = document.getElementById('feedback-delivery-banner');
+    const active = getActivePendingFeedbackEvents();
+    if (!active.length) {
+        if (existing) existing.remove();
+        return;
+    }
+    const workbench = document.getElementById('workbench');
+    if (!workbench || !workbench.parentNode) return;
+    let banner = existing;
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'feedback-delivery-banner';
+        workbench.parentNode.insertBefore(banner, workbench);
+    }
+    const retryable = active.filter(r => ['pending', 'retrying', 'failed_retryable'].includes(r.status));
+    const blocked = active.filter(r => ['blocked_conflict', 'blocked_invalid'].includes(r.status));
+    const isBlockedOnly = retryable.length === 0 && blocked.length > 0;
+    banner.style.cssText = isBlockedOnly
+        ? 'background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:8px 14px;font-size:12px;border-radius:6px;margin:8px 16px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;'
+        : 'background:#fff1f2;border:1px solid #fda4af;color:#9f1239;padding:8px 14px;font-size:12px;border-radius:6px;margin:8px 16px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
+
+    const sampleErr = (retryable[0] || blocked[0]);
+    const errText = sampleErr && sampleErr.last_error_message
+        ? `${sampleErr.last_http_status ? 'HTTP ' + sampleErr.last_http_status : '网络异常'}: ${sampleErr.last_error_message}`
+        : '等待重试';
+    const parts = [];
+    if (retryable.length > 0) {
+        parts.push(`<strong>${retryable.length} 条反馈/飞轮事件投递失败待重试</strong>（已保留原事件ID与序号；${escapeHtml(errText)}）`);
+    }
+    if (blocked.length > 0) {
+        parts.push(`<strong>${blocked.length} 条事件被服务端拒绝（409/422 已停止自动重试）</strong>（${escapeHtml(blocked[0].last_error_message || blocked[0].last_error_code)}；不影响当前确认/导出状态）`);
+    }
+    const buttonsHtml = [];
+    if (retryable.length > 0) {
+        buttonsHtml.push('<button type="button" id="retry-pending-feedback-btn" class="btn btn-warning" style="padding:4px 10px;font-size:11px;">重试待投递反馈</button>');
+    }
+    if (blocked.length > 0) {
+        buttonsHtml.push('<button type="button" id="dismiss-blocked-feedback-btn" class="btn" style="padding:4px 10px;font-size:11px;">清除冲突/无效提示</button>');
+    }
+    banner.innerHTML = `<span><i class="fa-solid fa-circle-exclamation"></i> ${parts.join('；')}</span><div style="display:flex;gap:8px;flex-shrink:0;">${buttonsHtml.join('')}</div>`;
+    const retryBtn = document.getElementById('retry-pending-feedback-btn');
+    if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+            retryPendingFeedbackEvents();
+        });
+    }
+    const dismissBtn = document.getElementById('dismiss-blocked-feedback-btn');
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+            const activeIds = new Set(blocked.map(b => b.event_id));
+            pendingFeedbackEvents = pendingFeedbackEvents.filter(rec => !activeIds.has(rec.event_id));
+            savePendingFeedbackEventsToStorage();
+            renderFeedbackDeliveryBanner();
+        });
+    }
+}
 
 // Pagination variables
 let currentPage = 1;
@@ -179,13 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.warn('Logout notice:', e);
         } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('name');
-            localStorage.removeItem('position');
-            localStorage.removeItem('role');
-            localStorage.removeItem('employee_no');
-            localStorage.removeItem('dept1');
+            clearAuthStorage();
             window.location.href = 'login.html';
         }
     }
@@ -193,6 +466,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', performUserLogout);
     }
+
+    let forcedPasswordMode = (localStorage.getItem('must_change_password') === '1');
+    const forcedBanner = document.getElementById('forced-password-banner');
+
+    function applyForcedPasswordModalState(isForced) {
+        forcedPasswordMode = Boolean(isForced);
+        localStorage.setItem('must_change_password', forcedPasswordMode ? '1' : '0');
+        if (forcedBanner) {
+            forcedBanner.style.display = forcedPasswordMode ? 'block' : 'none';
+        }
+        if (closeAccountModalBtn) {
+            closeAccountModalBtn.style.display = forcedPasswordMode ? 'none' : 'inline-block';
+        }
+        if (cancelAccountModalBtn) {
+            cancelAccountModalBtn.style.display = forcedPasswordMode ? 'none' : 'inline-block';
+        }
+        const newPwdEl = document.getElementById('setting-new-password');
+        const confirmPwdEl = document.getElementById('setting-confirm-password');
+        if (newPwdEl) newPwdEl.required = forcedPasswordMode;
+        if (confirmPwdEl) confirmPwdEl.required = forcedPasswordMode;
+        if (forcedPasswordMode) {
+            openAccountSettingsModal();
+        }
+    }
+    window._triggerForcedPasswordModal = () => applyForcedPasswordModalState(true);
     
     function updateUserUI() {
         if (usernameLbl) {
@@ -228,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Authorization': `Bearer ${token}` }
         }).then(r => r.ok ? r.json() : null).then(userData => {
             if (userData) {
+                applyVerifiedActorIdentity(userData.id, userData.account_epoch || '');
                 if (userData.username) {
                     localStorage.setItem('username', userData.username);
                 }
@@ -252,6 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('role', userData.role);
                 }
                 updateUserUI();
+                applyForcedPasswordModalState(Boolean(userData.must_change_password));
             }
         }).catch(err => console.log('Profile sync notice:', err));
 
@@ -294,6 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeAccountSettingsModal() {
+        if (forcedPasswordMode) return;
         if (accountModal) accountModal.style.display = 'none';
     }
 
@@ -315,6 +616,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const newPassword = document.getElementById('setting-new-password').value;
             const confirmPassword = document.getElementById('setting-confirm-password').value;
 
+            if (forcedPasswordMode && !newPassword) {
+                accountMsg.style.display = 'block';
+                accountMsg.style.background = 'var(--color-danger-bg)';
+                accountMsg.style.color = 'var(--color-danger)';
+                accountMsg.innerText = '首次登录或密码重置后必须设置新密码。';
+                return;
+            }
             if (newPassword && newPassword !== confirmPassword) {
                 accountMsg.style.display = 'block';
                 accountMsg.style.background = 'var(--color-danger-bg)';
@@ -342,7 +650,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(data.detail || '修改失败');
                 }
 
-                // Update local storage with refreshed access token and updated profile
+                forcedPasswordMode = false;
+                localStorage.setItem('must_change_password', '0');
+                accountMsg.style.display = 'block';
+                accountMsg.style.background = 'var(--color-success-bg)';
+                accountMsg.style.color = 'var(--color-success)';
+                accountMsg.innerText = data.detail || '保存成功！旧会话已失效，请重新登录。';
+
+                if (data.relogin_required) {
+                    clearAuthStorage();
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 900);
+                    return;
+                }
+
                 if (data.access_token) {
                     localStorage.setItem('token', data.access_token);
                 }
@@ -354,11 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('name', data.name);
                 }
                 updateUserUI();
-
-                accountMsg.style.display = 'block';
-                accountMsg.style.background = 'var(--color-success-bg)';
-                accountMsg.style.color = 'var(--color-success)';
-                accountMsg.innerText = data.detail || '保存成功！';
 
                 setTimeout(() => {
                     closeAccountSettingsModal();
@@ -525,9 +842,11 @@ function initEventListeners() {
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
-            filterTabs.forEach(t => t.classList.remove('active'));
             const clickedTab = e.currentTarget;
-            clickedTab.classList.add('active');
+            for (const t of filterTabs) {
+                t.classList.toggle('active', t === clickedTab);
+                t.setAttribute('aria-pressed', String(t === clickedTab));
+            }
             currentFilter = clickedTab.dataset.filter;
             currentPage = 1; // Reset to page 1
             renderTable();
@@ -711,6 +1030,14 @@ function initEventListeners() {
     dbUploadInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             const file = e.target.files[0];
+            const lowerName = (file.name || '').trim().toLowerCase();
+            if (!(lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls'))) {
+                e.target.value = '';
+                dbFileLabel.innerText = '未选择文件';
+                startDbImportBtn.disabled = true;
+                alert('物料库导入仅支持 .xlsx 或 .xls 格式文件。');
+                return;
+            }
             dbFileLabel.innerText = `已选择: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
             startDbImportBtn.disabled = false;
         } else {
@@ -782,72 +1109,8 @@ function initEventListeners() {
     });
 
     // Confirm match finished button click listener
-    document.getElementById('confirm-match-finished-btn').addEventListener('click', async () => {
-        if (!selectedItem) return;
-        
-        if (!selectedItem.bindings || selectedItem.bindings.length === 0) {
-            if (!confirm("当前清单行未绑定任何物料，确定要标记为已确认吗？")) {
-                return;
-            }
-        }
-        
-        showLoading("正在保存绑定记录...", "正在记录当前绑定关系以更新统计推荐值，并自动流转至下一行，请稍候...");
-        
-        try {
-            const response = await fetch(`${backendUrl}/api/binding/submit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    original_name: selectedItem.original_name,
-                    original_spec: selectedItem.original_spec,
-                    original_qty: selectedItem.original_qty,
-                    bindings: selectedItem.bindings || []
-                })
-            });
-            
-            if (!response.ok) throw new Error("提交绑定日志失败");
-            
-            // Report to Data Flywheel
-            const actionType = (selectedItem.bindings && selectedItem.bindings.length > 1) 
-                ? 'BIND_MULTI' 
-                : 'CONFIRM_TOP1';
-            reportFlywheelAction(selectedItem, actionType);
-
-            selectedItem.is_exact = true;
-            
-            // Find next unconfirmed item for auto flow (Task 4)
-            const curIdx = items.findIndex(it => it.original_row_idx === selectedItem.original_row_idx);
-            let nextItem = null;
-            for (let i = curIdx + 1; i < items.length; i++) {
-                if (!items[i].is_exact) {
-                    nextItem = items[i];
-                    break;
-                }
-            }
-            if (!nextItem) {
-                for (let i = 0; i < curIdx; i++) {
-                    if (!items[i].is_exact) {
-                        nextItem = items[i];
-                        break;
-                    }
-                }
-            }
-            
-            renderTable();
-            updateProgress();
-            
-            if (nextItem) {
-                jumpToItem(nextItem);
-            } else {
-                selectRow(selectedItem);
-            }
-            
-        } catch (e) {
-            alert(e.message);
-        } finally {
-            hideLoading();
-        }
-    });
+    document.getElementById('confirm-match-finished-btn').addEventListener('click', () => submitReview('submit'));
+    document.getElementById('reject-match-btn').addEventListener('click', () => submitReview('reject'));
 
     // Save Session triggers
     const saveTrigger = document.getElementById('save-trigger');
@@ -976,25 +1239,9 @@ function initEventListeners() {
 
 // 3.8 Jump to and Highlight a Row across Pages
 function jumpToItem(item) {
-    let filtered = items.filter(it => {
-        if (currentProfessional !== '全部' && it.professional !== currentProfessional) return false;
-        if (currentFilter === 'exact') return it.is_exact;
-        else if (currentFilter === 'fuzzy') return !it.is_exact && it.matched_code !== "";
-        else if (currentFilter === 'unmatched') return it.matched_code === "";
-        return true;
-    });
-    if (searchQuery) {
-        filtered = filtered.filter(it => {
-            return it.original_name.toLowerCase().includes(searchQuery) || 
-                   it.original_spec.toLowerCase().includes(searchQuery) ||
-                   it.matched_code.toLowerCase().includes(searchQuery);
-        });
-    }
-    
-    const idx = filtered.findIndex(it => it.original_row_idx === item.original_row_idx);
-    if (idx !== -1) {
-        currentPage = Math.floor(idx / pageSize) + 1;
-    }
+    const filtered = items.filter(matchesWorkbenchFilters);
+    const idx = filtered.findIndex(it => isSameWorkbenchRow(it, item));
+    if (idx !== -1) currentPage = Math.floor(idx / pageSize) + 1;
     selectRow(item);
     renderTable();
 }
@@ -1066,9 +1313,15 @@ function hideLoading() {
 
 // Task lifecycle control: End and reset current workbench task
 async function resetAndEndTask() {
+    const endingDocumentId = currentDocumentId;
     items = [];
     originalFileName = '';
     activeSessionId = null;
+    currentDocumentId = '';
+    currentUploadTaskId = '';
+    currentWorkSessionId = '';
+    purgePendingEventsForDocument(endingDocumentId);
+    renderLegacyIsolationBanner(0);
     searchQuery = '';
     currentFilter = 'all';
     currentPage = 1;
@@ -1116,6 +1369,14 @@ async function resetAndEndTask() {
 
 // 1. File Upload Handler
 async function handleFileUpload(file) {
+    const fileNameLower = (file && file.name ? file.name : '').trim().toLowerCase();
+    if (!fileNameLower.endsWith('.xlsx')) {
+        const fileInput = document.getElementById('xlsx-file-input');
+        if (fileInput) fileInput.value = '';
+        alert('工程清单上传仅支持标准 .xlsx 文件，旧版 .xls 文件请先另存为 .xlsx 后再上传。');
+        return;
+    }
+
     showLoading("正在上传并分析清单...", "系统正在初始化后台比对任务...", 0);
     
     // Show and reset the segmented progress container
@@ -1187,7 +1448,7 @@ async function handleFileUpload(file) {
                     clearInterval(window.uploadPollInterval);
                     window.uploadPollInterval = null;
                     hideLoading();
-                    processUploadResult(taskState.result, file.name);
+                    processUploadResult(taskState.result, file.name, taskState);
                 } else if (taskState.status === 'failed') {
                     clearInterval(window.uploadPollInterval);
                     window.uploadPollInterval = null;
@@ -1213,7 +1474,7 @@ async function handleFileUpload(file) {
 }
 
 // Processing matching results helper
-function processUploadResult(resultItems, fileName) {
+function processUploadResult(resultItems, fileName, taskState = null) {
     // 1. Reset all state and search filters to guarantee new file displays cleanly
     searchQuery = '';
     const listSearch = document.getElementById('list-search');
@@ -1229,26 +1490,23 @@ function processUploadResult(resultItems, fileName) {
     activeSessionId = null;
     currentPage = 1;
     selectedItem = null;
-    
+
     items = resultItems;
-    
-    // Cache initial matching codes
+    const firstItem = (items && items.length > 0) ? items[0] : null;
+    currentDocumentId = (taskState && taskState.document_id) || (firstItem && firstItem.document_id) || '';
+    currentUploadTaskId = (firstItem && firstItem.upload_task_id) || '';
+    currentWorkSessionId = (taskState && taskState.work_session_id) || (firstItem && firstItem.work_session_id) || '';
+    renderLegacyIsolationBanner(0);
+    reconcilePendingFeedbackForDocument();
+
+    // Cache initial matching codes and sequence counters (never overwrite server initial_auto_code)
     items.forEach(item => {
-        item.initial_auto_code = item.matched_code;
-        if (!item.bindings) {
-            item.bindings = [];
-            if (item.matched_code) {
-                item.bindings.push({
-                    code: item.matched_code,
-                    name: item.matched_name || "",
-                    specification: item.matched_spec || "",
-                    unit: item.matched_unit || "",
-                    brand: item.matched_brand || "",
-                    category: item.matched_category || "",
-                    qty: item.original_qty
-                });
-            }
+        if (item.initial_auto_code === undefined || item.initial_auto_code === null) {
+            item.initial_auto_code = item.matched_code || '';
         }
+        item._event_seq = Number(item.max_event_seq || 0);
+        item._feedback_seq = Number(item.max_feedback_seq || 0);
+        item.bindings ??= [];
     });
     
     // Initialize professional list
@@ -1325,33 +1583,9 @@ function renderTable() {
     const tbody = document.getElementById('items-tbody');
     tbody.innerHTML = '';
     
-    // Filter items
-    let filtered = items.filter(item => {
-        // Professional filter
-        if (currentProfessional !== '全部' && item.professional !== currentProfessional) {
-            return false;
-        }
-        
-        // Status filter
-        if (currentFilter === 'exact') {
-            return item.is_exact;
-        } else if (currentFilter === 'fuzzy') {
-            return !item.is_exact && item.matched_code !== "";
-        } else if (currentFilter === 'unmatched') {
-            return item.matched_code === "";
-        }
-        return true; // 'all'
-    });
-    
-    // Search query filter
-    if (searchQuery) {
-        filtered = filtered.filter(item => {
-            return item.original_name.toLowerCase().includes(searchQuery) || 
-                   item.original_spec.toLowerCase().includes(searchQuery) ||
-                   item.matched_code.toLowerCase().includes(searchQuery);
-        });
-    }
-    
+    // Professional, status, and search use the same view for table and navigation.
+    const filtered = items.filter(matchesWorkbenchFilters);
+
     document.getElementById('items-count').innerText = filtered.length;
     
     // Update pagination variables
@@ -1375,19 +1609,14 @@ function renderTable() {
     
     pageItems.forEach(item => {
         const tr = document.createElement('tr');
-        if (selectedItem && selectedItem.original_row_idx === item.original_row_idx) {
+        if (selectedItem && isSameWorkbenchRow(selectedItem, item)) {
             tr.classList.add('selected');
         }
         
-        let statusHtml = '';
-        if (item.is_exact) {
-            statusHtml = `<span class="row-status-pill exact"><i class="fa-solid fa-circle-check"></i> 精确</span>`;
-        } else if (item.matched_code) {
-            statusHtml = `<span class="row-status-pill fuzzy"><i class="fa-solid fa-circle-question"></i> 待确认</span>`;
-        } else {
-            statusHtml = `<span class="row-status-pill unmatched"><i class="fa-solid fa-triangle-exclamation"></i> 未匹配</span>`;
-        }
-        
+        const state = reviewState(item);
+        const statusHtml = `<span class="row-status-pill" data-state="${state}"
+            title="${escapeHtml(item.decision_reason || REVIEW_LABELS[state])}">${REVIEW_LABELS[state]}</span>`;
+
         let codeDisplay = '-';
         if (item.bindings && item.bindings.length > 0) {
             if (item.bindings.length === 1) {
@@ -1395,8 +1624,6 @@ function renderTable() {
             } else {
                 codeDisplay = `${item.bindings[0].code} (+${item.bindings.length - 1})`;
             }
-        } else if (item.matched_code) {
-            codeDisplay = item.matched_code;
         }
 
         tr.innerHTML = `
@@ -1426,36 +1653,9 @@ function renderTable() {
 // 3. Selection Handler
 function selectRow(item) {
     selectedItem = item;
-    if (!selectedItem.bindings) {
-        selectedItem.bindings = [];
-        if (selectedItem.matched_code) {
-            const codes = selectedItem.matched_code.split(",");
-            if (codes.length === 1) {
-                selectedItem.bindings.push({
-                    code: selectedItem.matched_code,
-                    name: selectedItem.matched_name || "",
-                    specification: selectedItem.matched_spec || "",
-                    unit: selectedItem.matched_unit || "",
-                    brand: selectedItem.matched_brand || "",
-                    category: selectedItem.matched_category || "",
-                    qty: selectedItem.original_qty
-                });
-            } else {
-                codes.forEach(c => {
-                    selectedItem.bindings.push({
-                        code: c.trim(),
-                        name: "已关联物料",
-                        specification: "",
-                        unit: selectedItem.original_unit,
-                        brand: "",
-                        category: "",
-                        qty: selectedItem.original_qty
-                    });
-                });
-            }
-        }
-    }
-    
+    selectedItem.bindings ??= [];
+    renderReviewDetail();
+
     renderBoundMaterials();
     
     // Hide prompt & show editor
@@ -1493,6 +1693,184 @@ function selectRow(item) {
     `;
 }
 
+const REVIEW_LABELS = Object.freeze({
+    auto_accepted: '自动接受',
+    manual_confirmed: '人工确认',
+    recommended: '推荐待复核',
+    needs_parameters: '待补参',
+    rejected: '拒绝'
+});
+const pendingReviewEdits = new WeakMap();
+
+function reviewState(item) {
+    if (item.decision_source !== 'manual_edit' && item.decision_status === 'recommended' &&
+        item.acceptance_calibration?.outcome === 'needs_parameters') return 'needs_parameters';
+    return Object.hasOwn(REVIEW_LABELS, item.decision_status) ? item.decision_status : 'recommended';
+}
+
+function hasReviewApproval(item) {
+    const state = reviewState(item);
+    return state === 'auto_accepted' || state === 'manual_confirmed';
+}
+
+function matchesWorkbenchFilters(item) {
+    return (currentProfessional === '全部' || item.professional === currentProfessional)
+        && (currentFilter === 'all' || currentFilter === reviewState(item))
+        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code]
+            .some(value => String(value ?? '').toLowerCase().includes(searchQuery)));
+}
+
+function reviewPayload(item) {
+    return {
+        original_name: item.original_name,
+        original_spec: item.original_spec,
+        original_qty: item.original_qty,
+        original_unit: item.original_unit || '',
+        original_loss: item.original_loss || 0,
+        original_category: item.original_category || '',
+        original_brand: item.original_brand || '',
+        original_code: item.original_code || '',
+        original_row_idx: item.original_row_idx || 0,
+        professional: item.professional || '暖通',
+        scope_filename: originalFileName || ''
+    };
+}
+
+async function postReview(action, payload) {
+    const response = await fetch(`${backendUrl}/api/binding/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.code !== 0) {
+        throw new Error(_parseFeedbackApiError(data, response.status).message);
+    }
+    return data;
+}
+
+function persistReviewEdit(item) {
+    const pending = pendingReviewEdits.get(item);
+    if (!pending) return Promise.resolve();
+    if (!pending.request) {
+        pending.request = postReview('invalidate', pending.payload)
+            .then(() => pendingReviewEdits.delete(item))
+            .catch(error => {
+                pending.request = null;
+                throw error;
+            });
+    }
+    return pending.request;
+}
+
+// V015-M2：内容/绑定变更使旧确认失效，降为待复核（须重新显式确认）
+function invalidateItemDecision(item, reason) {
+    const approved = hasReviewApproval(item);
+    item.decision_status = 'recommended';
+    item.decision_source = 'manual_edit';
+    item.decision_reason = reason || '内容已修改，请重新确认';
+    item.decision_codes = [];
+    item.row_fingerprint = '';
+    item.binding_fingerprint = '';
+    if (approved && !pendingReviewEdits.has(item)) {
+        pendingReviewEdits.set(item, {payload: reviewPayload(item)});
+        persistReviewEdit(item).catch(() => {
+            item.decision_reason = '服务端失效登记失败。保存或确认时会重试。';
+            if (selectedItem === item) renderReviewDetail();
+        });
+    }
+    if (selectedItem === item) renderReviewDetail();
+    renderTable();
+    updateProgress();
+}
+
+function syncBindingDisplay(item) {
+    const first = item.bindings[0];
+    item.matched_code = item.bindings.map(binding => binding.code).join(',');
+    item.matched_name = first?.name || '';
+    item.matched_spec = first?.specification || '';
+    item.matched_category = first?.category || '';
+    item.matched_unit = first?.unit || '';
+    item.matched_brand = first?.brand || '';
+}
+
+async function submitReview(action) {
+    const item = selectedItem;
+    if (!item || (action === 'submit' && !item.bindings.length)) return;
+    showLoading(action === 'reject' ? '正在拒绝此行…' : '正在核验绑定…');
+    try {
+        await persistReviewEdit(item);
+        const response = await postReview(action, {...reviewPayload(item), bindings: item.bindings});
+        const status = action === 'reject' ? 'rejected' : 'manual_confirmed';
+        if (response.decision?.decision_status !== status) throw new Error('服务端未返回有效复核状态');
+        Object.assign(item, response.decision);
+        item.bindings = action === 'reject' ? [] : response.bindings ?? item.bindings;
+        syncBindingDisplay(item);
+        if (selectedItem === item) {
+            renderReviewDetail();
+            renderBoundMaterials();
+            renderCandidates();
+        }
+        renderTable();
+        updateProgress();
+        if (action === 'submit') {
+            // Report to Data Flywheel (do not revoke binding_decisions/export status if flywheel delivery fails)
+            await reportFlywheelAction(item, item.bindings.length > 1 ? 'BIND_MULTI' : 'CONFIRM_TOP1');
+            // Find next unconfirmed item for auto flow (Task 4)
+            if (selectedItem === item) {
+                const index = items.findIndex(other => isSameWorkbenchRow(other, item));
+                const next = [...items.slice(index + 1), ...items.slice(0, index)].find(other =>
+                    matchesWorkbenchFilters(other) && ['recommended', 'needs_parameters'].includes(reviewState(other)));
+                if (next) jumpToItem(next);
+            }
+        }
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function renderReviewDetail() {
+    const item = selectedItem;
+    if (!item) return;
+    const state = reviewState(item);
+    const badge = document.getElementById('review-status');
+    badge.dataset.state = state;
+    badge.textContent = REVIEW_LABELS[state];
+    document.getElementById('review-reason').textContent = item.decision_reason || '';
+    document.getElementById('confirm-match-finished-btn').disabled = !item.bindings?.length;
+    document.getElementById('reject-match-btn').disabled = state === 'rejected';
+
+    const differences = document.getElementById('review-differences');
+    differences.replaceChildren();
+    const evidence = item.acceptance_calibration;
+    const add = (label, value) => {
+        if (!value) return;
+        const term = document.createElement('dt');
+        const detail = document.createElement('dd');
+        term.textContent = label;
+        detail.textContent = value;
+        differences.append(term, detail);
+    };
+    add('待补参数', evidence?.missing_fields?.join('、'));
+    add('关键差异', evidence?.different_fields?.join('、'));
+    add('硬冲突', evidence?.hard_conflict);
+    const eligible = (item.top_candidates || []).filter(candidate => !candidate.hard_blocked && candidate.score > 0);
+    const [top, second] = eligible;
+    if (top) {
+        const rival = evidence ? evidence.competitor_code : second?.code;
+        const gap = evidence ? evidence.distinct_margin : second && Number(top.score) - Number(second.score);
+        add('候选分差', Number.isFinite(gap) && rival
+            ? `${top.code} 与 ${rival} 相差 ${gap.toFixed(2)} 分` : '缺少可比较的第二候选');
+        add('清单与首选规格', `${item.original_spec || '未填写'} ／ ${top.specification || '未填写'}`);
+        add('首选理由', top.match_reasons?.join('、'));
+        const runnerUp = eligible.find(candidate => candidate.code === rival);
+        add('次选理由', runnerUp?.match_reasons?.join('、'));
+    }
+    add('确认等价编码', evidence?.equivalent_codes?.join('、'));
+}
+
 // 3.5 Render Bound Materials List (V0.1.0 Compact Cards)
 function renderBoundMaterials() {
     const container = document.getElementById('bound-materials-list');
@@ -1526,9 +1904,13 @@ function renderBoundMaterials() {
             <div class="bound-item-bottom">
                 <div class="bound-item-qty-wrap">
                     <span>数量:</span>
-                    <input type="number" class="bound-qty-input" value="${escapeHtml(b.qty !== undefined ? b.qty : selectedItem.original_qty)}" />
+                    <input type="number" step="any" aria-label="绑定数量" class="bound-qty-input" value="${escapeHtml(b.qty === undefined ? selectedItem.original_qty : b.qty ?? '')}" />
                     <span style="font-size: 11px; color: var(--color-text-muted);">${escapeHtml(b.unit || selectedItem.original_unit || '个')}</span>
                 </div>
+                <label class="bound-item-qty-wrap">比例
+                    <input type="number" step="any" aria-label="绑定比例" class="bound-qty-input bound-ratio-input"
+                        value="${escapeHtml(b.qty_ratio ?? '')}" ${Number(selectedItem.original_qty) > 0 ? '' : 'disabled'} />
+                </label>
                 <button class="btn btn-delete-binding" style="padding: 2px 6px; height: 22px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 12px;" title="删除绑定">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -1538,16 +1920,32 @@ function renderBoundMaterials() {
         const qtyInput = div.querySelector('.bound-qty-input');
         qtyInput.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
-            b.qty = isNaN(val) ? 0.0 : val;
+            const qty = Number.isFinite(val) ? val : null;
+            if (qty === b.qty) return;
+            b.qty = qty;
+            b.qty_ratio = qty !== null && Number(selectedItem.original_qty) > 0
+                ? qty / Number(selectedItem.original_qty) : null;
+            const ratioInput = div.querySelector('.bound-ratio-input');
+            ratioInput.value = b.qty_ratio ?? '';
+            // V015-M2：数量变更使旧确认失效（绑定指纹变化），须重新确认
+            invalidateItemDecision(selectedItem, '数量已修改，请重新确认');
         });
-        
+
+        div.querySelector('.bound-ratio-input').addEventListener('input', (e) => {
+            const ratio = e.target.valueAsNumber;
+            const qty = ratio * Number(selectedItem.original_qty);
+            b.qty_ratio = Number.isFinite(qty) ? ratio : null;
+            b.qty = Number.isFinite(qty) ? qty : null;
+            qtyInput.value = b.qty ?? '';
+            invalidateItemDecision(selectedItem, '绑定比例已修改，请重新确认');
+        });
+
         const deleteBtn = div.querySelector('.btn-delete-binding');
         deleteBtn.addEventListener('click', () => {
             selectedItem.bindings.splice(idx, 1);
-            selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
-            if (selectedItem.bindings.length === 0) {
-                selectedItem.matched_code = "";
-            }
+            syncBindingDisplay(selectedItem);
+            // V015-M2：绑定集合变化使旧确认失效
+            invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
             renderBoundMaterials();
             renderCandidates();
             renderTable();
@@ -1571,6 +1969,10 @@ function renderCandidates() {
     selectedItem.top_candidates.forEach((cand, idx) => {
         const card = document.createElement('div');
         card.className = 'candidate-card';
+        card.dataset.code = cand.code;
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `${cand.name} ${cand.code}`);
         
         const isActive = selectedItem.bindings && selectedItem.bindings.some(b => b.code === cand.code);
         if (isActive) {
@@ -1592,7 +1994,7 @@ function renderCandidates() {
                 if (reason.includes('语义')) tagClass = 'semantic';    // purple
                 if (reason.includes('品牌')) tagClass = 'brand';       // yellow
                 
-                tagsHtml += `<span class="match-reason-tag ${tagClass}">${reason}</span>`;
+                tagsHtml += `<span class="match-reason-tag ${tagClass}">${escapeHtml(reason)}</span>`;
             });
         }
         
@@ -1618,8 +2020,13 @@ function renderCandidates() {
             </div>
         `;
         
-        card.addEventListener('click', () => {
-            applyMatchCandidate(cand, 'PICK_CANDIDATE');
+        card.setAttribute('aria-pressed', String(isActive));
+        card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
+        card.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                card.click();
+            }
         });
         
         container.appendChild(card);
@@ -1638,10 +2045,8 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
     const existingIndex = selectedItem.bindings.findIndex(b => b.code === cand.code);
     if (existingIndex !== -1) {
         selectedItem.bindings.splice(existingIndex, 1);
-        selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
-        if (selectedItem.bindings.length === 0) {
-            selectedItem.matched_code = "";
-        }
+        syncBindingDisplay(selectedItem);
+        invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
         renderBoundMaterials();
         renderCandidates();
         renderTable();
@@ -1650,11 +2055,7 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
     }
     
     const wasCorrected = selectedItem.initial_auto_code !== cand.code;
-    if (wasCorrected) {
-        submitFeedbackSample(selectedItem.original_row_idx, selectedItem.original_spec, selectedItem.initial_auto_code, cand.code, false);
-    } else {
-        submitFeedbackSample(selectedItem.original_row_idx, selectedItem.original_spec, selectedItem.initial_auto_code, cand.code, true);
-    }
+    const fbDeliveryPromise = submitFeedbackSample(selectedItem, selectedItem.initial_auto_code, cand.code, !wasCorrected);
     
     const newBound = {
         code: cand.code,
@@ -1663,99 +2064,361 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
         unit: cand.unit || selectedItem.original_unit || "个",
         brand: cand.brand || "",
         category: cand.category || "",
-        qty: selectedItem.original_qty
+        qty: selectedItem.original_qty,
+        qty_ratio: 1.0
     };
     
     // Push new bound material
     selectedItem.bindings.push(newBound);
+    syncBindingDisplay(selectedItem);
+    invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
     
     // Report action to Data Flywheel
-    reportFlywheelAction(selectedItem, actionType, [newBound]);
+    const fwDeliveryPromise = reportFlywheelAction(selectedItem, actionType, [newBound]);
     
     // Update matched_code to be comma-separated list of bound codes
-    selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
+    syncBindingDisplay(selectedItem);
     
     // Render incremental updates instead of selectRow to keep scroll position and search results
     renderBoundMaterials();
     renderCandidates();
     renderTable();
     updateProgress();
+    await Promise.all([fbDeliveryPromise, fwDeliveryPromise]);
 }
 
-// Helper to submit Data Flywheel action logs asynchronously with keepalive
-async function reportFlywheelAction(item, actionType, customFinalTargets = null) {
-    if (!item) return;
-    try {
-        const clientEventId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
-            ? crypto.randomUUID() 
-            : ('fwevent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
-            
-        const targets = customFinalTargets || (item.bindings || []).map(b => ({
-            code: b.code,
-            name: b.name,
-            spec: b.specification || '',
-            unit: b.unit || '',
-            brand: b.brand || '',
-            category: b.category || '',
-            qty_ratio: (item.original_qty && Number(item.original_qty) > 0) ? (Number(b.qty) / Number(item.original_qty)) : 1.0
-        }));
-
-        const candidates = (item.candidates || item.top_candidates || []).slice(0, 3).map(c => ({
-            code: c.code,
-            name: c.name,
-            score: c.score || 0.0
-        }));
-
-        const top1 = candidates && candidates.length > 0 ? candidates[0] : null;
-
-        const payload = {
-            client_event_id: clientEventId,
-            session_id: (typeof currentSessionId !== 'undefined' && currentSessionId) ? String(currentSessionId) : 'default_session',
-            row_idx: item.original_row_idx || 0,
-            discipline: item.discipline || '通用',
-            raw_name: item.original_name || item.raw_name || item.name || '',
-            raw_spec: item.original_spec || item.spec || '',
-            raw_unit: item.original_unit || item.unit || '',
-            raw_category: item.original_category || item.category || '',
-            extracted_params: item.extracted_params || {},
-            auto_top1_code: top1 ? top1.code : (item.initial_auto_code || ''),
-            auto_top1_score: top1 ? top1.score : 0.0,
-            auto_top1_name: top1 ? top1.name : '',
-            auto_candidates: candidates,
-            algo_version: 'v1.0',
-            config_version: 'snap_v1',
-            action_type: actionType,
-            final_targets: targets
+function _parseFeedbackApiError(respJson, httpStatus) {
+    const d = respJson && respJson.detail;
+    if (d && typeof d === 'object' && !Array.isArray(d)) {
+        return {
+            code: String(d.error || d.code || `http_${httpStatus}`),
+            message: String(d.message || JSON.stringify(d))
         };
+    }
+    if (Array.isArray(d) && d.length > 0) {
+        return {
+            code: `http_${httpStatus}`,
+            message: d.map(x => (x && x.msg) ? x.msg : JSON.stringify(x)).join('; ')
+        };
+    }
+    if (typeof d === 'string' && d) {
+        return { code: `http_${httpStatus}`, message: d };
+    }
+    return { code: `http_${httpStatus}`, message: `HTTP ${httpStatus}` };
+}
 
-        fetch(`${backendUrl}/api/flywheel/record`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            keepalive: true
-        }).catch(err => console.warn('Flywheel record silent error:', err));
-    } catch (e) {
-        console.warn('Failed to dispatch flywheel action:', e);
+function _getRetryPolicy() {
+    const custom = (typeof window !== 'undefined' && window.__M0_FEEDBACK_RETRY_CONFIG) || {};
+    return {
+        maxAutoRetries: Number.isInteger(custom.maxAutoRetries) ? Math.max(0, custom.maxAutoRetries) : 1,
+        retryDelayMs: (typeof custom.retryDelayMs === 'number' && custom.retryDelayMs >= 0) ? custom.retryDelayMs : 120
+    };
+}
+
+function _findWorkbenchItemForRecord(rec) {
+    if (!rec || !Array.isArray(items)) return null;
+    return items.find(it =>
+        it && it.document_id === rec.document_id &&
+        it.sheet_id === rec.sheet_id &&
+        it.source_row_id === rec.source_row_id
+    ) || null;
+}
+
+function _syncItemDeliveryState(item, rec, result) {
+    const targetItem = item || _findWorkbenchItemForRecord(rec);
+    if (!targetItem) return;
+    const summary = {
+        status: rec.status,
+        event_id: rec.event_id,
+        event_seq: rec.event_seq,
+        http_status: rec.last_http_status,
+        error_code: rec.last_error_code,
+        error_message: rec.last_error_message,
+        idempotent_replay: Boolean(result && result.idempotent_replay),
+        attempts: rec.attempts
+    };
+    if (rec.kind === 'flywheel') {
+        targetItem._last_flywheel_delivery = summary;
+        targetItem.max_event_seq = Math.max(Number(targetItem.max_event_seq || 0), rec.status === 'delivered' ? rec.event_seq : 0);
+    } else {
+        targetItem._last_feedback_delivery = summary;
+        targetItem.max_feedback_seq = Math.max(Number(targetItem.max_feedback_seq || 0), rec.status === 'delivered' ? rec.event_seq : 0);
     }
 }
 
-// Helper to submit feedback logs
-async function submitFeedbackSample(rowId, text, autoCode, manualCode, isCorrect) {
-    try {
-        await fetch(`${backendUrl}/api/feedback/submit`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                row_id: rowId,
-                raw_text: text,
-                auto_code: autoCode,
-                manual_code: manualCode,
-                is_correct: isCorrect
-            })
-        });
-    } catch (e) {
-        console.error("Failed to submit matching feedback log", e);
+async function _dispatchSingleFeedbackRecord(rec, opts = {}) {
+    if (!rec) return { ok: false, retryable: false, error_code: 'missing_record', error_message: '事件记录缺失' };
+    if (!_actorMatchesRecord(rec)) {
+        rec.status = 'blocked_invalid';
+        rec.last_error_code = 'actor_mismatch';
+        rec.last_error_message = '当前登录主体或会话代际已变更，已阻断旧主体待投递事件。';
+        savePendingFeedbackEventsToStorage();
+        renderFeedbackDeliveryBanner();
+        return { ok: false, retryable: false, event_id: rec.event_id, event_seq: rec.event_seq, error_code: rec.last_error_code, error_message: rec.last_error_message };
     }
+    const policy = _getRetryPolicy();
+    const maxExtra = opts.skipAutoRetry ? 0 : policy.maxAutoRetries;
+    let lastOutcome = null;
+
+    for (let retryIdx = 0; retryIdx <= maxExtra; retryIdx++) {
+        if (retryIdx > 0 && policy.retryDelayMs > 0) {
+            await new Promise(resolve => setTimeout(resolve, policy.retryDelayMs));
+        }
+        rec.attempts = Number(rec.attempts || 0) + 1;
+        rec.status = 'retrying';
+        rec.updated_at = Date.now();
+        try {
+            const fetchOpts = {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(rec.payload)
+            };
+            if (rec.kind === 'flywheel') fetchOpts.keepalive = true;
+            const res = await fetch(`${backendUrl}${rec.endpoint}`, fetchOpts);
+            const respJson = await res.json().catch(() => ({}));
+            if (res && res.ok) {
+                rec.status = 'delivered';
+                rec.last_http_status = res.status;
+                rec.last_error_code = '';
+                rec.last_error_message = '';
+                rec.updated_at = Date.now();
+                pendingFeedbackEvents = pendingFeedbackEvents.filter(x => x.event_id !== rec.event_id);
+                savePendingFeedbackEventsToStorage();
+                lastOutcome = {
+                    ok: true,
+                    retryable: false,
+                    status: res.status,
+                    event_id: rec.event_id,
+                    event_seq: rec.event_seq,
+                    idempotent_replay: Boolean(respJson && respJson.idempotent_replay),
+                    data: respJson
+                };
+                _syncItemDeliveryState(opts.item, rec, lastOutcome);
+                renderFeedbackDeliveryBanner();
+                return lastOutcome;
+            }
+            const httpStatus = res ? res.status : 0;
+            const parsedErr = _parseFeedbackApiError(respJson, httpStatus);
+            rec.last_http_status = httpStatus;
+            rec.last_error_code = parsedErr.code;
+            rec.last_error_message = parsedErr.message;
+            rec.updated_at = Date.now();
+
+            const isRetryableStatus = (httpStatus === 0 || httpStatus >= 500 || httpStatus === 429 || httpStatus === 408);
+            if (!isRetryableStatus) {
+                rec.status = (httpStatus === 409) ? 'blocked_conflict' : 'blocked_invalid';
+                savePendingFeedbackEventsToStorage();
+                lastOutcome = {
+                    ok: false,
+                    retryable: false,
+                    status: httpStatus,
+                    event_id: rec.event_id,
+                    event_seq: rec.event_seq,
+                    error_code: parsedErr.code,
+                    error_message: parsedErr.message
+                };
+                _syncItemDeliveryState(opts.item, rec, lastOutcome);
+                renderFeedbackDeliveryBanner();
+                return lastOutcome;
+            }
+            rec.status = 'failed_retryable';
+            lastOutcome = {
+                ok: false,
+                retryable: true,
+                status: httpStatus,
+                event_id: rec.event_id,
+                event_seq: rec.event_seq,
+                error_code: parsedErr.code,
+                error_message: parsedErr.message
+            };
+        } catch (networkErr) {
+            rec.status = 'failed_retryable';
+            rec.last_http_status = 0;
+            rec.last_error_code = 'network_error';
+            rec.last_error_message = String((networkErr && networkErr.message) || networkErr || '网络异常');
+            rec.updated_at = Date.now();
+            lastOutcome = {
+                ok: false,
+                retryable: true,
+                status: 0,
+                event_id: rec.event_id,
+                event_seq: rec.event_seq,
+                error_code: 'network_error',
+                error_message: rec.last_error_message
+            };
+        }
+    }
+    savePendingFeedbackEventsToStorage();
+    _syncItemDeliveryState(opts.item, rec, lastOutcome);
+    renderFeedbackDeliveryBanner();
+    return lastOutcome;
+}
+
+async function retryPendingFeedbackEvents() {
+    await ensureVerifiedActorIdentity();
+    const candidates = getActivePendingFeedbackEvents()
+        .filter(r => ['pending', 'failed_retryable'].includes(r.status))
+        .sort((a, b) => (Number(a.event_seq || 0) - Number(b.event_seq || 0)) || (Number(a.created_at || 0) - Number(b.created_at || 0)));
+    const results = [];
+    for (const rec of candidates) {
+        const outcome = await _dispatchSingleFeedbackRecord(rec, { skipAutoRetry: true });
+        results.push(outcome);
+    }
+    return results;
+}
+
+// Helper to create an immutable Flywheel event once and deliver with bounded same-event retry
+async function reportFlywheelAction(item, actionType, customFinalTargets = null) {
+    if (!item) return { ok: false, skipped: true, reason: 'missing_item' };
+    if (item.feedback_eligible === false || !item.document_id || !item.sheet_id || !item.source_row_id) {
+        console.info('Skip flywheel record for isolated legacy/unverified row.');
+        return { ok: false, skipped: true, reason: 'legacy_untrusted' };
+    }
+    const actorCtx = await ensureVerifiedActorIdentity();
+    const clientEventId = generateClientEventId('fwevent');
+    item._event_seq = Number(item._event_seq || item.max_event_seq || 0) + 1;
+    const eventSeq = item._event_seq;
+
+    const targets = (customFinalTargets || item.bindings || []).map(b => ({
+        code: b.code,
+        name: b.name,
+        spec: b.specification || b.spec || '',
+        unit: b.unit || '',
+        brand: b.brand || '',
+        category: b.category || '',
+        qty_ratio: b.qty_ratio !== undefined && b.qty_ratio !== null
+            ? Number(b.qty_ratio)
+            : ((item.original_qty && Number(item.original_qty) > 0) ? (Number(b.qty) / Number(item.original_qty)) : 1.0)
+    }));
+
+    const candidates = (item.candidates || item.top_candidates || []).slice(0, 3).map(c => ({
+        code: c.code,
+        name: c.name,
+        score: c.score || 0.0
+    }));
+
+    const top1 = candidates && candidates.length > 0 ? candidates[0] : null;
+    const prof = item.professional || '暖通';
+    const recSnapId = item.recommendation_snapshot_id || item.initial_snapshot_id || '';
+
+    const payload = Object.freeze({
+        client_event_id: clientEventId,
+        document_id: item.document_id,
+        work_session_id: item.work_session_id || currentWorkSessionId || '',
+        saved_session_id: activeSessionId || '',
+        session_id: item.work_session_id || currentWorkSessionId || item.document_id,
+        sheet_id: item.sheet_id,
+        source_row_id: item.source_row_id,
+        row_idx: item.original_row_idx || 0,
+        event_seq: eventSeq,
+        recommendation_snapshot_id: recSnapId,
+        recommendation_revision: item.recommendation_revision || 1,
+        discipline: prof,
+        professional: prof,
+        raw_name: item.original_name || item.raw_name || item.name || '',
+        raw_spec: item.original_spec || item.spec || '',
+        raw_unit: item.original_unit || item.unit || '',
+        raw_category: item.original_category || item.category || '',
+        parsed_spec: item.parsed_spec || {},
+        extracted_params: item.extracted_params || item.parsed_spec || {},
+        auto_top1_code: top1 ? top1.code : (item.initial_auto_code || ''),
+        auto_top1_score: top1 ? top1.score : 0.0,
+        auto_top1_name: top1 ? top1.name : '',
+        auto_candidates: candidates,
+        algo_version: item.algo_version || '',
+        model_version: item.model_version || '',
+        config_version: item.config_version || '',
+        action_type: actionType,
+        final_targets: targets
+    });
+
+    const record = {
+        event_id: clientEventId,
+        kind: 'flywheel',
+        endpoint: '/api/flywheel/record',
+        actor_user_id: actorCtx.actor_user_id,
+        actor_account_epoch: actorCtx.actor_account_epoch,
+        document_id: item.document_id,
+        sheet_id: item.sheet_id,
+        source_row_id: item.source_row_id,
+        recommendation_snapshot_id: recSnapId,
+        event_seq: eventSeq,
+        payload: JSON.parse(JSON.stringify(payload)),
+        status: 'pending',
+        attempts: 0,
+        last_http_status: null,
+        last_error_code: '',
+        last_error_message: '',
+        created_at: Date.now(),
+        updated_at: Date.now()
+    };
+    pendingFeedbackEvents.push(record);
+    savePendingFeedbackEventsToStorage();
+    return await _dispatchSingleFeedbackRecord(record, { item });
+}
+
+// Helper to create an immutable feedback sample event once and deliver with bounded same-event retry
+async function submitFeedbackSample(item, autoCode, manualCode, isCorrect) {
+    if (!item || item.feedback_eligible === false || !item.document_id || !item.sheet_id || !item.source_row_id) {
+        return { ok: false, skipped: true, reason: 'legacy_untrusted' };
+    }
+    const actorCtx = await ensureVerifiedActorIdentity();
+    const clientEventId = generateClientEventId('fbevent');
+    item._feedback_seq = Number(item._feedback_seq || item.max_feedback_seq || 0) + 1;
+    const eventSeq = item._feedback_seq;
+    const recSnapId = item.recommendation_snapshot_id || item.initial_snapshot_id || '';
+
+    const payload = Object.freeze({
+        client_event_id: clientEventId,
+        document_id: item.document_id,
+        sheet_id: item.sheet_id,
+        source_row_id: item.source_row_id,
+        event_seq: eventSeq,
+        recommendation_snapshot_id: recSnapId,
+        row_id: item.original_row_idx || 0,
+        raw_text: item.original_spec || '',
+        auto_code: autoCode || '',
+        manual_code: manualCode || '',
+        is_correct: Boolean(isCorrect)
+    });
+
+    const record = {
+        event_id: clientEventId,
+        kind: 'feedback',
+        endpoint: '/api/feedback/submit',
+        actor_user_id: actorCtx.actor_user_id,
+        actor_account_epoch: actorCtx.actor_account_epoch,
+        document_id: item.document_id,
+        sheet_id: item.sheet_id,
+        source_row_id: item.source_row_id,
+        recommendation_snapshot_id: recSnapId,
+        event_seq: eventSeq,
+        payload: JSON.parse(JSON.stringify(payload)),
+        status: 'pending',
+        attempts: 0,
+        last_http_status: null,
+        last_error_code: '',
+        last_error_message: '',
+        created_at: Date.now(),
+        updated_at: Date.now()
+    };
+    pendingFeedbackEvents.push(record);
+    savePendingFeedbackEventsToStorage();
+    return await _dispatchSingleFeedbackRecord(record, { item });
+}
+
+if (typeof window !== 'undefined') {
+    window.retryPendingFeedbackEvents = retryPendingFeedbackEvents;
+    window.getActivePendingFeedbackEvents = getActivePendingFeedbackEvents;
+    window.reportFlywheelAction = reportFlywheelAction;
+    window.submitFeedbackSample = submitFeedbackSample;
+    window.applyVerifiedActorIdentity = applyVerifiedActorIdentity;
+    window.annotateRestoredItems = annotateRestoredItems;
+    window.__m0SetWorkbenchItems = (newItems, docId, wsId) => {
+        items = Array.isArray(newItems) ? newItems : [];
+        if (docId !== undefined) currentDocumentId = docId;
+        if (wsId !== undefined) currentWorkSessionId = wsId;
+    };
 }
 
 // 6. Manual Global Database Search
@@ -1816,7 +2479,8 @@ async function runManualSearch() {
 
 // 7. Manual Parameters Supplement Rematch (V0.0.2)
 async function runParamRematch() {
-    if (!selectedItem) return;
+    const item = selectedItem;
+    if (!item) return;
     
     const model = document.getElementById('modal-param-model').value.trim();
     const volume = document.getElementById('modal-param-volume').value ? parseInt(document.getElementById('modal-param-volume').value) : null;
@@ -1826,14 +2490,22 @@ async function runParamRematch() {
     document.getElementById('param-modal').style.display = 'none';
     showLoading("重新对齐特征参数...", "系统正在整合手动输入的指标并检索计算匹配得分...");
     
+    invalidateItemDecision(item, '已重算推荐，请重新确认');
     try {
+        await persistReviewEdit(item);
         const response = await fetch(`${backendUrl}/api/rematch`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                row_id: selectedItem.original_row_idx,
-                text: selectedItem.original_spec,
-                professional: selectedItem.professional || "暖通",
+                row_id: item.original_row_idx,
+                text: item.original_spec,
+                professional: item.professional || "暖通",
+                category: item.original_category || "",
+                brand: item.original_brand || "",
+                unit: item.original_unit || "",
+                document_id: item.document_id || null,
+                sheet_id: item.sheet_id || null,
+                source_row_id: item.source_row_id || null,
                 fixed_params: {
                     model: model || null,
                     air_volume: volume,
@@ -1849,43 +2521,18 @@ async function runParamRematch() {
         
         const data = await response.json();
         
-        // Update current selectedItem matching options and candidate ranks
-        selectedItem.is_exact = data.is_exact;
-        selectedItem.matched_code = data.matched_code || "";
-        selectedItem.top_candidates = data.top_candidates;
-        
-        if (data.top_candidates && data.top_candidates.length > 0) {
-            const top = data.top_candidates[0];
-            selectedItem.matched_name = top.name;
-            selectedItem.matched_category = top.category || "";
-            selectedItem.matched_spec = top.specification || "";
-            selectedItem.matched_unit = top.unit || "";
-            selectedItem.matched_brand = top.brand || "";
-            
-            if (data.is_exact) {
-                selectedItem.bindings = [{
-                    code: top.code,
-                    name: top.name,
-                    specification: top.specification || "",
-                    unit: top.unit || selectedItem.original_unit || "个",
-                    brand: top.brand || "",
-                    category: top.category || "",
-                    qty: selectedItem.original_qty
-                }];
-                selectedItem.matched_code = top.code;
-            }
-        }
-        
+        applyRematchResult(item, data);
+
         // Report param adjust to Flywheel
-        selectedItem.extracted_params = {
+        item.extracted_params = {
             model: model || null,
             air_volume: volume,
             power: power,
             dn: dn
         };
-        reportFlywheelAction(selectedItem, 'PARAM_ADJUST');
+        await reportFlywheelAction(item, 'PARAM_ADJUST');
 
-        selectRow(selectedItem);
+        if (selectedItem === item) selectRow(item);
         renderTable();
         updateProgress();
         
@@ -1965,32 +2612,40 @@ function renderParamChips() {
 
 // 7.3 Rematch Single Item with Active Parameter Dimensions
 async function rematchCurrentWithParams() {
-    if (!selectedItem) return;
+    const item = selectedItem;
+    if (!item?.parsed_spec) return;
     
     // Construct customized parsed_spec
     const customizedSpec = {
-        model: selectedItem.active_params['model'] ? selectedItem.parsed_spec.model : "",
+        model: (item.active_params || {})['model'] ? item.parsed_spec.model : "",
         attrs: {}
     };
     
-    const attrs = selectedItem.parsed_spec.attrs || {};
+    const attrs = item.parsed_spec.attrs || {};
     for (const k in attrs) {
-        if (selectedItem.active_params[k]) {
+        if ((item.active_params || {})[k]) {
             customizedSpec.attrs[k] = attrs[k];
         }
     }
     
     showLoading("重新对齐特征参数...", "系统正在使用选定的核心参数维度检索并重新匹配推荐项...");
     
+    invalidateItemDecision(item, '已重算推荐，请重新确认');
     try {
+        await persistReviewEdit(item);
         const response = await fetch(`${backendUrl}/api/match`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                text: selectedItem.original_spec,
-                name: selectedItem.original_name,
-                category: selectedItem.original_category || "",
-                professional: selectedItem.professional || "暖通",
+                text: item.original_spec,
+                name: item.original_name,
+                category: item.original_category || "",
+                professional: item.professional || "暖通",
+                brand: item.original_brand || "",
+                unit: item.original_unit || "",
+                document_id: item.document_id || null,
+                sheet_id: item.sheet_id || null,
+                source_row_id: item.source_row_id || null,
                 parsed_spec: customizedSpec
             })
         });
@@ -1999,34 +2654,9 @@ async function rematchCurrentWithParams() {
         
         const data = await response.json();
         
-        // Update item matching details
-        selectedItem.is_exact = data.is_exact;
-        selectedItem.matched_code = data.matched_code || "";
-        selectedItem.top_candidates = data.top_candidates;
-        
-        if (data.top_candidates && data.top_candidates.length > 0) {
-            const top = data.top_candidates[0];
-            selectedItem.matched_name = top.name;
-            selectedItem.matched_category = top.category || "";
-            selectedItem.matched_spec = top.specification || "";
-            selectedItem.matched_unit = top.unit || "";
-            selectedItem.matched_brand = top.brand || "";
-            
-            if (data.is_exact) {
-                selectedItem.bindings = [{
-                    code: top.code,
-                    name: top.name,
-                    specification: top.specification || "",
-                    unit: top.unit || selectedItem.original_unit || "个",
-                    brand: top.brand || "",
-                    category: top.category || "",
-                    qty: selectedItem.original_qty
-                }];
-                selectedItem.matched_code = top.code;
-            }
-        }
-        
-        selectRow(selectedItem);
+        applyRematchResult(item, data);
+
+        if (selectedItem === item) selectRow(item);
         renderTable();
         updateProgress();
         
@@ -2079,12 +2709,14 @@ async function batchApplyParamsAndRematch() {
                 }
             }
             
+            invalidateItemDecision(it, '已重算推荐，请重新确认');
+            await persistReviewEdit(it);
             // Build customized spec
             const customizedSpec = {
-                model: it.active_params['model'] ? it.parsed_spec.model : "",
+                model: it.active_params['model'] ? it.parsed_spec?.model : "",
                 attrs: {}
             };
-            const attrs = it.parsed_spec.attrs || {};
+            const attrs = it.parsed_spec?.attrs || {};
             for (const k in attrs) {
                 if (it.active_params[k]) {
                     customizedSpec.attrs[k] = attrs[k];
@@ -2099,6 +2731,11 @@ async function batchApplyParamsAndRematch() {
                     name: it.original_name,
                     category: it.original_category || "",
                     professional: it.professional || "暖通",
+                    brand: it.original_brand || "",
+                    unit: it.original_unit || "",
+                    document_id: it.document_id || null,
+                    sheet_id: it.sheet_id || null,
+                    source_row_id: it.source_row_id || null,
                     parsed_spec: customizedSpec
                 })
             });
@@ -2107,32 +2744,7 @@ async function batchApplyParamsAndRematch() {
             
             const data = await response.json();
             
-            // Update similar item details
-            it.is_exact = data.is_exact;
-            it.matched_code = data.matched_code || "";
-            it.top_candidates = data.top_candidates;
-            
-            if (data.top_candidates && data.top_candidates.length > 0) {
-                const top = data.top_candidates[0];
-                it.matched_name = top.name;
-                it.matched_category = top.category || "";
-                it.matched_spec = top.specification || "";
-                it.matched_unit = top.unit || "";
-                it.matched_brand = top.brand || "";
-                
-                if (data.is_exact) {
-                    it.bindings = [{
-                        code: top.code,
-                        name: top.name,
-                        specification: top.specification || "",
-                        unit: top.unit || it.original_unit || "个",
-                        brand: top.brand || "",
-                        category: top.category || "",
-                        qty: it.original_qty
-                    }];
-                    it.matched_code = top.code;
-                }
-            }
+            applyRematchResult(it, data);
         });
         
         await Promise.all(promises);
@@ -2151,12 +2763,24 @@ async function batchApplyParamsAndRematch() {
     }
 }
 
+function applyRematchResult(item, result) {
+    // Preserve initial_auto_code and initial_snapshot_id for feedback provenance.
+    item.bindings = [];
+    item.top_candidates = result.top_candidates || [];
+    item.acceptance_calibration = result.acceptance_calibration;
+    for (const key of ['recommendation_snapshot_id', 'recommendation_revision', 'algo_version',
+        'model_version', 'config_version', 'parsed_spec']) {
+        if (result[key] !== undefined) item[key] = result[key];
+    }
+    syncBindingDisplay(item);
+}
+
 // 8. Update progress indicators
 function updateProgress() {
     if (items.length === 0) return;
     
     // 1. Overall progress
-    const matchedCount = items.filter(item => item.is_exact || item.matched_code !== "").length;
+    const matchedCount = items.filter(item => hasReviewApproval(item)).length;
     const progressPercent = Math.round((matchedCount / items.length) * 100) || 0;
     
     document.getElementById('match-progress-bar').style.width = `${progressPercent}%`;
@@ -2168,10 +2792,10 @@ function updateProgress() {
         profItems = items.filter(item => item.professional === currentProfessional);
     }
     
-    const profMatchedCount = profItems.filter(item => item.is_exact || item.matched_code !== "").length;
+    const profMatchedCount = profItems.filter(item => hasReviewApproval(item)).length;
     const profProgressPercent = Math.round((profMatchedCount / profItems.length) * 100) || 0;
     
-    document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}匹配进度:`;
+    document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}可导出进度`;
     document.getElementById('current-prof-progress-bar').style.width = `${profProgressPercent}%`;
     document.getElementById('current-prof-progress-percent').innerText = `${profProgressPercent}%`;
 }
@@ -2183,6 +2807,7 @@ async function handleExport() {
     showLoading("正在精准写入模板并导出报表...", "系统正在执行非破坏性写入，自动填充价格列并重新生成序号，请稍候...", 0);
     
     try {
+        await Promise.all(items.map(persistReviewEdit));
         const response = await fetch(`${backendUrl}/api/export`, {
             method: 'POST',
             headers: {
@@ -2192,8 +2817,13 @@ async function handleExport() {
         });
         
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.detail || "生成报表时出错");
+            const err = await response.json().catch(() => ({}));
+            // V015-M2：行级导出门禁原因展示
+            const d = err.detail;
+            if (d && d.row) {
+                throw new Error(`第 ${d.row.original_row_idx} 行「${d.row.original_name}」：${d.row.reason}`);
+            }
+            throw new Error((typeof d === 'string' ? d : (d && d.message)) || "生成报表时出错");
         }
         
         const blob = await response.blob();
@@ -2246,10 +2876,16 @@ function jsonPayloadData() {
             matched_brand: item.matched_brand,
             professional: item.professional || "暖通",
             original_code: item.original_code || "",
-            bindings: item.bindings || null
+            // V015-M1 / F19：原始品类/品牌随导出 payload 贯通，缺失回退空串兼容旧会话
+            original_category: item.original_category || "",
+            original_brand: item.original_brand || "",
+            bindings: item.bindings || null,
+            // V015-M2：决策状态仅作展示上下文，导出端不信任，服务端逐项复核
+            decision_status: item.decision_status || "",
+            decision_source: item.decision_source || ""
         };
     });
-    return JSON.stringify({ items: mapped });
+    return JSON.stringify({ items: mapped, scope_filename: originalFileName || "" });
 }
 
 // 10. Configurations panel loading & rendering
@@ -2420,27 +3056,91 @@ async function loadAndRenderBindingSuggestionsAndRules() {
                     
                     const boundListHtml = s.bindings.map(b => `<div style="font-size: 11.5px; margin-bottom: 2px;"><code style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: var(--color-primary); padding: 1px 4px; border-radius: 3px; font-size: 11px;">${escapeHtml(b.code)}</code> <strong>${escapeHtml(b.name)}</strong> (比例: ${escapeHtml(b.qty_ratio.toFixed(2))})</div>`).join('');
                     
+                    const suggKey = `${s.original_name}::${s.professional || ''}::${s.original_spec || ''}`;
+                    window._bindingEvalCache = window._bindingEvalCache || {};
+
                     tr.innerHTML = `
-                        <td><strong>${escapeHtml(s.original_name)}</strong></td>
+                        <td><strong>${escapeHtml(s.original_name)}</strong>${s.professional ? `<div style="font-size:11px;color:var(--color-text-muted);">${escapeHtml(s.professional)} ${escapeHtml(s.original_spec || '')}</div>` : ''}</td>
                         <td><div style="display: flex; flex-direction: column; gap: 4px;">${boundListHtml}</div></td>
                         <td><span class="badge" style="background-color: var(--color-success-bg); color: var(--color-success); font-weight: 700; padding: 2px 8px; font-size: 11px;">${escapeHtml(s.confidence_count)} 次</span></td>
-                        <td><button class="btn btn-success" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳规则</button></td>
+                        <td>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                <button class="btn btn-secondary btn-bind-eval" style="padding: 4px 8px; font-size: 11px;">🧪 评测</button>
+                                <button class="btn btn-success btn-bind-confirm" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 采纳规则</button>
+                            </div>
+                        </td>
                     `;
-                    
-                    tr.querySelector('button').addEventListener('click', async () => {
+
+                    tr.querySelector('.btn-bind-eval').addEventListener('click', async () => {
+                        const prof = (s.professional || prompt('请输入该绑定规则的明确专业 (例如 暖通 / 给排水 / 强电 / 医气):', '暖通') || '').trim();
+                        if (!prof) return;
+                        s.professional = prof;
+                        try {
+                            const evRes = await fetch(`${backendUrl}/api/binding/rules/eval`, {
+                                method: 'POST',
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify({
+                                    original_name: s.original_name,
+                                    original_spec: s.original_spec || '',
+                                    professional: prof,
+                                    bindings: s.bindings
+                                })
+                            });
+                            const evData = await evRes.json();
+                            if (!evRes.ok) {
+                                const msg = typeof evData.detail === 'object' ? (evData.detail.message || JSON.stringify(evData.detail)) : evData.detail;
+                                throw new Error(msg || '启动评测失败');
+                            }
+                            const evalId = evData.eval_id || evData.task_id;
+                            for (let attempt = 0; attempt < 90; attempt++) {
+                                await new Promise(r => setTimeout(r, 1000));
+                                const stRes = await fetch(`${backendUrl}/api/binding/rules/eval/${evalId}`, { headers: getAuthHeaders() });
+                                if (!stRes.ok) continue;
+                                const st = await stRes.json();
+                                if (st.status === 'completed' || st.status === 'failed') {
+                                    window._bindingEvalCache[suggKey] = {
+                                        eval_id: evalId,
+                                        benefit: st.benefit || 'invalid',
+                                        safety_passed: Boolean(st.safety_passed ?? st.passed),
+                                        professional: prof
+                                    };
+                                    alert(`沙箱评测完成 (${evalId})\n结论: safety=${Boolean(st.safety_passed ?? st.passed)}, benefit=${st.benefit || 'invalid'}`);
+                                    return;
+                                }
+                            }
+                            alert('沙箱评测超时，请稍后重试');
+                        } catch (err) {
+                            alert('绑定规则评测失败: ' + err.message);
+                        }
+                    });
+
+                    tr.querySelector('.btn-bind-confirm').addEventListener('click', async () => {
+                        const cached = window._bindingEvalCache[suggKey] || {};
+                        const prof = cached.professional || s.professional || '';
+                        let neutralReason = null;
+                        if (cached.benefit === 'neutral') {
+                            neutralReason = prompt('该规则沙箱评测为 neutral（无改善），确需启用请填写理由:');
+                            if (neutralReason === null) return;
+                        }
                         const confirmResp = await fetch(`${backendUrl}/api/binding/rules/confirm`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: getAuthHeaders(),
                             body: JSON.stringify({
                                 original_name: s.original_name,
-                                bindings: s.bindings
+                                original_spec: s.original_spec || '',
+                                professional: prof,
+                                bindings: s.bindings,
+                                eval_id: cached.eval_id || null,
+                                neutral_reason: neutralReason
                             })
                         });
                         if (confirmResp.ok) {
                             alert(`已启用原始清单 "${s.original_name}" 对应的多物料自动绑定推荐规则！`);
                             loadAndRenderBindingSuggestionsAndRules();
                         } else {
-                            alert('采纳规则失败');
+                            const errBody = await confirmResp.json().catch(() => ({}));
+                            const errMsg = typeof errBody.detail === 'object' ? (errBody.detail.message || JSON.stringify(errBody.detail)) : errBody.detail;
+                            alert('采纳规则失败: ' + (errMsg || confirmResp.status));
                         }
                     });
                     
@@ -2473,8 +3173,12 @@ async function loadAndRenderBindingSuggestionsAndRules() {
                         if (confirm(`确定要删除针对 "${r.original_name}" 的自动绑定推荐规则吗？`)) {
                             const delResp = await fetch(`${backendUrl}/api/binding/rules/delete`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ original_name: r.original_name })
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify({
+                                    original_name: r.original_name,
+                                    original_spec: r.original_spec || null,
+                                    professional: r.professional || null
+                                })
                             });
                             if (delResp.ok) {
                                 loadAndRenderBindingSuggestionsAndRules();
@@ -2623,6 +3327,15 @@ async function handleDbUploadAndImport() {
     const dbFileLabel = document.getElementById('db-selected-file-label');
     
     if (dbUploadInput.files.length === 0) return;
+    const dbCheckFile = dbUploadInput.files[0];
+    const dbNameLower = (dbCheckFile && dbCheckFile.name ? dbCheckFile.name : '').trim().toLowerCase();
+    if (!(dbNameLower.endsWith('.xlsx') || dbNameLower.endsWith('.xls'))) {
+        dbUploadInput.value = '';
+        if (dbFileLabel) dbFileLabel.innerText = '未选择文件';
+        if (startDbImportBtn) startDbImportBtn.disabled = true;
+        alert('物料库导入仅支持 .xlsx 或 .xls 格式文件。');
+        return;
+    }
     const file = dbUploadInput.files[0];
     
     const importMode = document.querySelector('input[name="db-import-mode"]:checked')?.value || 'replace';
@@ -2977,10 +3690,13 @@ function startAutoSave() {
 async function saveDraft() {
     if (items.length === 0) return;
     try {
+        await Promise.all(items.map(persistReviewEdit));
         const payload = {
             original_filename: originalFileName,
             professional: currentProfessional || '全部',
-            items_json: JSON.stringify(items)
+            items_json: JSON.stringify(items),
+            document_id: currentDocumentId || '',
+            work_session_id: currentWorkSessionId || ''
         };
         await fetch(`${backendUrl}/api/session/draft`, {
             method: 'POST',
@@ -2990,6 +3706,67 @@ async function saveDraft() {
         console.log("Draft auto-saved successfully.");
     } catch (err) {
         console.error("Failed to auto-save draft:", err);
+    }
+}
+
+// V015-M2：草稿/保存进度恢复后，请求服务端做权威状态注释与降级提示
+async function annotateRestoredItems() {
+    const downgradeUnverified = () => {
+        let downgraded = 0;
+        items.forEach(item => {
+            if (hasReviewApproval(item)) {
+                downgraded++;
+            }
+            if (!item.decision_status || ['auto_accepted', 'manual_confirmed'].includes(item.decision_status)) {
+                item.decision_status = 'recommended';
+                item.decision_source = 'legacy_draft';
+                item.decision_reason = '服务端状态未能核验，请重新人工确认';
+            }
+        });
+        if (downgraded > 0) {
+            alert(`已载入进度：${downgraded} 条记录的服务端确认状态无法核验，已降为「待确认」，请复核后再导出。`);
+        }
+    };
+    try {
+        const res = await fetch(`${backendUrl}/api/session/annotate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items: items,
+                scope_filename: originalFileName || '',
+                document_id: currentDocumentId || '',
+                work_session_id: currentWorkSessionId || ''
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.items) {
+            if (data.actor_user_id !== undefined && data.actor_user_id !== null) {
+                applyVerifiedActorIdentity(data.actor_user_id, data.actor_account_epoch || '');
+            }
+            items = data.items;
+            items.forEach(it => {
+                it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0));
+                it._feedback_seq = Math.max(Number(it._feedback_seq || 0), Number(it.max_feedback_seq || 0));
+            });
+            const firstVerified = items.find(it => it.identity_status === 'verified' && it.document_id);
+            if (firstVerified) {
+                currentDocumentId = firstVerified.document_id;
+                currentWorkSessionId = firstVerified.work_session_id || currentWorkSessionId;
+            }
+            renderLegacyIsolationBanner(data.legacy_untrusted_count || 0);
+            reconcilePendingFeedbackForDocument();
+            if (data.downgraded > 0) {
+                alert(`已载入进度：${data.downgraded} 条记录的旧绑定/确认状态无法核验或已失效，已统一降为「待确认」，请逐项复核后再导出。`);
+            }
+            if (data.legacy_untrusted_count > 0) {
+                alert(`旧草稿/会话隔离提示：${data.legacy_untrusted_count} 条记录缺少可核验的服务端文档/源行身份，已隔离为只读复核，不会提交可信反馈；如需新采集反馈请重新上传清单。`);
+            }
+        } else {
+            downgradeUnverified();
+        }
+    } catch (err) {
+        downgradeUnverified();
+        console.warn("草稿状态注释失败，已保守降级；导出仍受服务端门禁约束:", err);
     }
 }
 
@@ -3004,8 +3781,12 @@ async function checkForDraft() {
                 // Restore state
                 originalFileName = draft.original_filename;
                 currentProfessional = draft.professional || '全部';
+                currentDocumentId = draft.document_id || '';
+                currentWorkSessionId = draft.work_session_id || '';
                 items = JSON.parse(draft.items_json);
-                
+                // V015-M2：草稿恢复经服务端注释，旧确认无凭据者降为待复核
+                await annotateRestoredItems();
+
                 document.getElementById('welcome-slate').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
                 document.getElementById('export-btn').disabled = false;
@@ -3043,11 +3824,14 @@ async function saveNamedSession(name) {
     if (items.length === 0) return;
     try {
         showLoading("正在保存工作进度...", "正在备份当前清单匹配工作状态，请稍候...");
+        await Promise.all(items.map(persistReviewEdit));
         const payload = {
             session_name: name,
             original_filename: originalFileName,
             professional: currentProfessional || '全部',
-            items_json: JSON.stringify(items)
+            items_json: JSON.stringify(items),
+            document_id: currentDocumentId || '',
+            work_session_id: currentWorkSessionId || ''
         };
         
         let res;
@@ -3056,7 +3840,11 @@ async function saveNamedSession(name) {
             res = await fetch(`${backendUrl}/api/session/${activeSessionId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items_json: payload.items_json })
+                body: JSON.stringify({
+                    items_json: payload.items_json,
+                    document_id: payload.document_id,
+                    work_session_id: payload.work_session_id
+                })
             });
         } else {
             // Create a new named session
@@ -3135,7 +3923,11 @@ async function loadSession(sessionId) {
         const session = data.session;
         originalFileName = session.original_filename;
         currentProfessional = session.professional || '全部';
+        currentDocumentId = session.document_id || '';
+        currentWorkSessionId = session.work_session_id || '';
         items = JSON.parse(session.items_json);
+        // V015-M2：命名进度恢复经服务端注释，旧确认无凭据者降为待复核
+        await annotateRestoredItems();
         
         // Render view
         document.getElementById('welcome-slate').style.display = 'none';
@@ -3510,12 +4302,15 @@ async function fetchAndRenderActiveRules() {
     if (!tbody) return;
 
     try {
-        const res = await fetch(`${backendUrl}/api/llm-rules?status=all_active`, {
-            headers: getAuthHeaders()
-        });
-        if (!res.ok) return;
+        const [resActive, resApprovedPending] = await Promise.all([
+            fetch(`${backendUrl}/api/llm-rules?status=all_active`, { headers: getAuthHeaders() }),
+            fetch(`${backendUrl}/api/llm-rules?status=approved_pending_publish`, { headers: getAuthHeaders() })
+        ]);
+        if (!resActive.ok) return;
 
-        cachedActiveRules = await res.json();
+        const listActive = await resActive.json();
+        const listApprovedPending = resApprovedPending.ok ? await resApprovedPending.json() : [];
+        cachedActiveRules = [...listApprovedPending, ...listActive];
         renderActiveRulesTable();
     } catch (e) {
         console.error('Failed to fetch active rules:', e);
@@ -3548,10 +4343,18 @@ function renderActiveRulesTable() {
 
     filtered.forEach(r => {
         const tr = document.createElement('tr');
-        const isApproved = r.status === 'approved';
-        const statusBadge = isApproved 
-            ? '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--color-success-bg); color: var(--color-success); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> 生效运行中</span>'
-            : '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--bg-subtle); color: var(--color-text-muted); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-pause"></i> 已停用</span>';
+        const isPublished = r.status === 'published';
+        const isPendingPublish = r.status === 'approved_pending_publish';
+        let statusBadge = '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--bg-subtle); color: var(--color-text-muted); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-pause"></i> 已停用</span>';
+        if (isPublished) {
+            statusBadge = '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: var(--color-success-bg); color: var(--color-success); font-size: 11px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> 生效运行中</span>';
+        } else if (isPendingPublish) {
+            statusBadge = '<span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(245,158,11,0.16); color: #f59e0b; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-clock"></i> 已审待发布</span>';
+        }
+
+        const primaryActionBtn = isPendingPublish
+            ? `<button class="btn btn-success btn-rule-publish" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="仅管理员可发布生效"><i class="fa-solid fa-rocket"></i> 发布生效</button>`
+            : `<button class="btn ${isPublished ? 'btn-warning' : 'btn-success'} btn-rule-toggle" style="padding: 3px 8px; font-size: 11px; height: 26px; ${isPublished ? 'background-color: var(--color-warning); border-color: var(--color-warning); color: white;' : ''}" title="${isPublished ? '停用此规则' : '启用此规则'}">${isPublished ? '<i class="fa-solid fa-pause"></i> 停用' : '<i class="fa-solid fa-play"></i> 启用'}</button>`;
 
         tr.innerHTML = `
             <td><code>${escapeHtml(r.rule_id)}</code></td>
@@ -3561,20 +4364,27 @@ function renderActiveRulesTable() {
             <td style="text-align: center;">${statusBadge}</td>
             <td style="text-align: right;"><strong style="color: var(--color-success); font-size: 14px;">${escapeHtml(r.hit_count || 0)}</strong> 次</td>
             <td><span style="font-size: 12px;">${escapeHtml(r.author_name || '-')}</span> <span style="color: var(--color-text-muted); font-size: 11px;">/ ${escapeHtml(r.approver_name || '-')}</span></td>
-            <td style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(r.approved_at || r.updated_at || '-')}</td>
+            <td style="font-size: 12px; color: var(--color-text-secondary);">${escapeHtml(r.published_at || r.approved_at || r.updated_at || '-')}</td>
             <td style="text-align: center;">
                 <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: center;">
                     <button class="btn btn-secondary btn-rule-edit" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="修改规则配置"><i class="fa-solid fa-pen-to-square"></i> 修改</button>
-                    <button class="btn ${isApproved ? 'btn-warning' : 'btn-success'} btn-rule-toggle" style="padding: 3px 8px; font-size: 11px; height: 26px; ${isApproved ? 'background-color: var(--color-warning); border-color: var(--color-warning); color: white;' : ''}" title="${isApproved ? '停用此规则' : '启用此规则'}">
-                        ${isApproved ? '<i class="fa-solid fa-pause"></i> 停用' : '<i class="fa-solid fa-play"></i> 启用'}
-                    </button>
-                    <button class="btn btn-danger btn-rule-del" style="padding: 3px 8px; font-size: 11px; height: 26px; background-color: var(--color-danger); border-color: var(--color-danger); color: white;" title="彻底删除此规则"><i class="fa-solid fa-trash"></i> 删除</button>
+                    <button class="btn btn-secondary btn-rule-eval" style="padding: 3px 8px; font-size: 11px; height: 26px;" title="运行沙箱回归评测">🧪 评测</button>
+                    ${primaryActionBtn}
+                    <button class="btn btn-danger btn-rule-del" style="padding: 3px 8px; font-size: 11px; height: 26px; background: var(--color-danger); border-color: var(--color-danger); color: white;" title="删除未发布草稿"><i class="fa-solid fa-trash"></i> 删除</button>
                     <button class="btn btn-rule-dsl" style="padding: 3px 8px; font-size: 11px; height: 26px; background: var(--bg-subtle); border-color: var(--border-color); color: var(--color-info);" title="查看DSL代码"><i class="fa-solid fa-code"></i> DSL</button>
                 </div>
             </td>
         `;
         tr.querySelector('.btn-rule-edit').addEventListener('click', () => openRuleEditModal(r.rule_id));
-        tr.querySelector('.btn-rule-toggle').addEventListener('click', () => toggleActiveRule(r.rule_id));
+        tr.querySelector('.btn-rule-eval').addEventListener('click', () => startLlmRuleEval(r));
+        const pubBtn = tr.querySelector('.btn-rule-publish');
+        if (pubBtn) {
+            pubBtn.addEventListener('click', () => publishActiveRule(r.rule_id, r.revision, r.content_digest, r.last_eval_id));
+        }
+        const togBtn = tr.querySelector('.btn-rule-toggle');
+        if (togBtn) {
+            togBtn.addEventListener('click', () => toggleActiveRule(r.rule_id, r.status, r.last_eval_id));
+        }
         tr.querySelector('.btn-rule-del').addEventListener('click', () => deleteActiveRule(r.rule_id));
         tr.querySelector('.btn-rule-dsl').addEventListener('click', () => viewActiveRuleDsl(r.rule_id));
         tbody.appendChild(tr);
@@ -3657,7 +4467,7 @@ async function submitModalRuleUpdate() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.error || '保存规则修改失败');
 
-        alert(`规则 [${editingRuleId}] 修改成功并已即时生效！`);
+        alert(data.detail || `规则 [${editingRuleId}] 修改已保存为草稿，需重新提交审核并由管理员发布后生效！`);
         closeRuleEditModal();
         fetchAndRenderActiveRules();
         loadRuleStats();
@@ -3666,15 +4476,98 @@ async function submitModalRuleUpdate() {
     }
 }
 
-async function toggleActiveRule(ruleId) {
+window._llmEvalCache = window._llmEvalCache || {};
+
+function _formatRuleError(data, fallback) {
+    if (!data) return fallback;
+    const d = data.detail;
+    if (d && typeof d === 'object') return d.message || d.code || JSON.stringify(d);
+    return d || data.error || fallback;
+}
+
+async function startLlmRuleEval(ruleObj) {
+    const ruleId = ruleObj.rule_id;
     try {
-        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/toggle`, {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/eval`, {
             method: 'POST',
             headers: getAuthHeaders()
         });
+        const data = await res.json();
+        if (!res.ok) throw new Error(_formatRuleError(data, '启动沙箱评测失败'));
+        const evalId = data.eval_id || data.task_id;
+        for (let attempt = 0; attempt < 90; attempt++) {
+            await new Promise(r => setTimeout(r, 1000));
+            const stRes = await fetch(`${backendUrl}/api/llm-rules/eval/${evalId}`, { headers: getAuthHeaders() });
+            if (!stRes.ok) continue;
+            const st = await stRes.json();
+            if (st.status === 'completed' || st.status === 'failed') {
+                window._llmEvalCache[ruleId] = {
+                    eval_id: evalId,
+                    benefit: st.benefit || 'invalid',
+                    safety_passed: Boolean(st.safety_passed ?? st.passed),
+                    revision: ruleObj.revision,
+                    content_digest: ruleObj.content_digest
+                };
+                alert(`规则 [${ruleId}] 沙箱评测完成 (${evalId})\n结论: safety=${Boolean(st.safety_passed ?? st.passed)}, benefit=${st.benefit || 'invalid'}`);
+                return;
+            }
+        }
+        alert(`规则 [${ruleId}] 评测超时，请稍后查看。`);
+    } catch (err) {
+        alert(`沙箱评测失败: ${err.message}`);
+    }
+}
+
+async function publishActiveRule(ruleId, expectedRevision, expectedDigest, dbEvalId = null) {
+    const cached = window._llmEvalCache[ruleId];
+    const evalId = (cached && cached.revision === expectedRevision && cached.eval_id) || dbEvalId || null;
+    let neutralReason = null;
+    if (cached && cached.benefit === 'neutral') {
+        neutralReason = prompt('该规则沙箱评测收益为 neutral（无改善），确需发布请填写审批理由:');
+        if (neutralReason === null) return;
+    }
+    try {
+        const payload = {
+            expected_revision: expectedRevision ?? null,
+            expected_digest: expectedDigest ?? null,
+            eval_id: evalId
+        };
+        if (neutralReason !== null) payload.neutral_reason = neutralReason;
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/publish`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(_formatRuleError(data, '发布失败'));
+        alert(data.detail || '规则发布生效成功！');
+        fetchAndRenderActiveRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`发布失败: ${err.message}`);
+    }
+}
+
+async function toggleActiveRule(ruleId, currentStatus = '', dbEvalId = null) {
+    const cached = window._llmEvalCache[ruleId];
+    const evalId = (cached && cached.eval_id) || dbEvalId || null;
+    let neutralReason = null;
+    if (currentStatus === 'disabled' && cached && cached.benefit === 'neutral') {
+        neutralReason = prompt('该停用规则沙箱评测收益为 neutral，确需重新启用请填写审批理由:');
+        if (neutralReason === null) return;
+    }
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/toggle`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                eval_id: evalId,
+                neutral_reason: neutralReason
+            })
+        });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || data.error || '状态切换失败');
+        if (!res.ok) throw new Error(_formatRuleError(data, '状态切换失败'));
 
         alert(data.detail || '操作成功！');
         fetchAndRenderActiveRules();
@@ -3759,12 +4652,14 @@ async function fetchAndRenderPendingRules() {
                 <td>${escapeHtml(r.author_name)}</td>
                 <td>${escapeHtml(r.created_at || '-')}</td>
                 <td style="text-align: center;">
-                    <button class="btn btn-success btn-audit-approve" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 批准上线</button>
+                    <button class="btn btn-success btn-audit-approve" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-check"></i> 审核同意(待发布)</button>
                     <button class="btn btn-danger btn-audit-reject" style="padding: 4px 8px; font-size: 11px; background: var(--color-danger); border-color: var(--color-danger); color: white;"><i class="fa-solid fa-xmark"></i> 驳回</button>
+                    <button class="btn btn-secondary btn-audit-withdraw" style="padding: 4px 8px; font-size: 11px;"><i class="fa-solid fa-rotate-left"></i> 撤回</button>
                 </td>
             `;
-            tr.querySelector('.btn-audit-approve').addEventListener('click', () => auditRule(r.rule_id, 'approve'));
-            tr.querySelector('.btn-audit-reject').addEventListener('click', () => auditRule(r.rule_id, 'reject'));
+            tr.querySelector('.btn-audit-approve').addEventListener('click', () => auditRule(r.rule_id, 'approve', r.revision, r.content_digest));
+            tr.querySelector('.btn-audit-reject').addEventListener('click', () => auditRule(r.rule_id, 'reject', r.revision, r.content_digest));
+            tr.querySelector('.btn-audit-withdraw').addEventListener('click', () => withdrawPendingRule(r.rule_id));
             tbody.appendChild(tr);
         });
     } catch (e) {
@@ -3772,15 +4667,37 @@ async function fetchAndRenderPendingRules() {
     }
 }
 
-async function auditRule(ruleId, action) {
-    const comment = prompt(action === 'approve' ? '请输入批准说明（可选）：' : '请输入驳回原因：');
+async function withdrawPendingRule(ruleId) {
+    try {
+        const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/withdraw`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.error || '撤回失败');
+        alert(data.detail || '已撤回为草稿');
+        fetchAndRenderPendingRules();
+        fetchAndRenderActiveRules();
+        loadRuleStats();
+    } catch (err) {
+        alert(`撤回失败: ${err.message}`);
+    }
+}
+
+async function auditRule(ruleId, action, expectedRevision, expectedDigest) {
+    const comment = prompt(action === 'approve' ? '请输入审核说明（同意后需管理员发布生效）：' : '请输入驳回原因：');
     if (action === 'reject' && comment === null) return;
 
     try {
         const res = await fetch(`${backendUrl}/api/llm-rules/${ruleId}/audit`, {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ action, comment: comment || '' })
+            body: JSON.stringify({
+                action,
+                comment: comment || '',
+                expected_revision: expectedRevision ?? null,
+                expected_digest: expectedDigest ?? null
+            })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.error || '审核操作失败');

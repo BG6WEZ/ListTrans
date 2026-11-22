@@ -1,0 +1,65 @@
+{
+  "fixture": "all accounts/rows synthetic; Excel decoder substituted only; auth/SQLite/HTTP real",
+  "probes": {
+    "excel_role_change_old_token": {
+      "import_success": true,
+      "updated": 1,
+      "role_before": "manager",
+      "role_after": "employee",
+      "token_version_before": 2,
+      "token_version_after": 2,
+      "http_before": 200,
+      "http_after_old_token": 200,
+      "expected_after": 401,
+      "requirement_met": false
+    },
+    "excel_shared_explicit_initial_password": {
+      "created": 2,
+      "distinct_initial_passwords": 1,
+      "requirement_met": false
+    },
+    "http_shared_initial_and_reset_passwords": {
+      "create_statuses": [
+        200,
+        200
+      ],
+      "create_distinct_passwords": 1,
+      "reset_statuses": [
+        200,
+        200
+      ],
+      "reset_distinct_passwords": 1,
+      "requirement_met": false
+    },
+    "service_fabricated_existing_admin_identity": {
+      "employee_http_publish": 403,
+      "service_authenticated_token_supplied": false,
+      "service_publish_success": true,
+      "persisted_status": "published",
+      "requirement_met": false,
+      "limit": "Service boundary reproduction; HTTP request-body identity impersonation is NOT established"
+    },
+    "binding_persistence_missing_actor": {
+      "actor_supplied": false,
+      "global_file_written": true,
+      "requirement_met": false
+    },
+    "normal_http_authorization_control": {
+      "employee_publish_denied": true,
+      "employee_binding_confirm": 403,
+      "admin_current_token": 200
+    },
+    "logout_revocation_real_process_restart": {
+      "logout_http": 200,
+      "child_exit": 0,
+      "child_session_status": 401,
+      "child_accepted": false,
+      "requirement_met": true
+    },
+    "admin_role_change_token_control": {
+      "update_success": true,
+      "old_token_http": 401,
+      "requirement_met": true
+    }
+  }
+}

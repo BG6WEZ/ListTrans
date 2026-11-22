@@ -46,8 +46,6 @@ DEFAULT_UNITS = {
     "PA": "Pa",
     "帕": "Pa",
     "dn": "DN",
-    "Ф": "DN",
-    "Φ": "DN",
     "mm": "mm"
 }
 
@@ -79,12 +77,56 @@ def to_half_width(text: str) -> str:
         result.append(chr(code))
     return "".join(result)
 
-def clean_text(text: str) -> str:
+def clean_text(
+    text: str,
+    discipline: Optional[str] = None,
+    category: Optional[str] = None,
+    *,
+    rule_context=None,
+) -> str:
     """
-    Standardize text: delegate to normalizer.py
+    Standardize text: delegate to normalizer.py with optional RuleContext.
     """
     from app.normalizer import clean_text_standard
-    return clean_text_standard(text)
+    return clean_text_standard(
+        text,
+        discipline=discipline,
+        category=category,
+        rule_context=rule_context,
+    )
+
+# V018-M0：材质牌号/项目编码/标准编码不得被误抽为产品型号
+_MATERIAL_GRADE_MODEL_RE = re.compile(
+    r'^(?:(?:SS|SUS|S)\d{3,5}[A-Z]?|Q\d{3}[A-Z]?|06CR\d+NI\d+|304L?|316L|'
+    r'UPVC|CPVC|HDPE|LDPE|PPR|PPH|PVC|PTFE|EPDM|NBR)$',
+    re.IGNORECASE,
+)
+_PROJECT_OR_STANDARD_CODE_RE = re.compile(
+    r'^(?:\d{12}|(?:GT|XM|PRJ|BOQ)-\d+|\d{1,2}\.\d{2}\.\d{2}\.\d{4})$',
+    re.IGNORECASE,
+)
+
+
+def _is_non_model_token(val: str) -> bool:
+    if not val:
+        return True
+    val_upper = val.strip().upper()
+    if any(val_upper.startswith(prefix) for prefix in ["DN", "DE", "PN", "Ф", "Φ"]):
+        return True
+    if re.fullmatch(r'(MM|CM|M|KG|KW|KVA|PA|KPA|MPA|V|A|HZ|DB|M3|M2|ML|L|T|GB|MB)\d+', val_upper):
+        return True
+    if re.fullmatch(r'(AC|DC)\d+(?:V|A|W|HZ)?', val_upper):
+        return True
+    if re.fullmatch(r'(RJ|BNC|HDMI|USB|DP|DVI|VGA|SDI|XLR|TRS|SMA|N|F|TNC|MCX|MMCX|SMP|2M|3M|4M|5M|6M)\d*', val_upper):
+        return True
+    if _MATERIAL_GRADE_MODEL_RE.fullmatch(val_upper):
+        return True
+    if _PROJECT_OR_STANDARD_CODE_RE.fullmatch(val_upper):
+        return True
+    if is_device_tag(val):
+        return True
+    return False
+
 
 def extract_model(text: str) -> str:
     """
@@ -94,19 +136,23 @@ def extract_model(text: str) -> str:
         return ""
         
     model_regexes = [
+        # V017-M1 / M1-C02：电缆/电线型号主体优先。形如 WDZYJY-5*10、WDZB-YJY-4*120+1*70、
+        # WDZB-BYJR-10mm²、YJV-4*120+1*70 的"型号-芯数*截面/规格"形式，型号主体是连字符前
+        # 的字母序列（WDZYJY / WDZB-YJY / WDZB-BYJR / YJV）。若不优先提取，会被下方
+        # `([A-Z]+-[A-Z0-9]+)` 错误截断为 WDZYJY-5 / WDZB-BYJR-10mm（`*`/`²` 阻断），破坏
+        # 型号族泛化召回（M0 曾以 cable_params 的 YJY/BYJR 召回命中）。
+        r'([A-Z]{2,}(?:-[A-Z0-9]+)*?)(?=\s*-\d+(?:[\*x×]|MM|mm|M2|m2|²)|\s+\d+[\*x×])',
         r'([A-Z]+-[A-Z]+-[A-Z0-9\-]+)',    # RAU-Q-D301
         r'([A-Z]+-[A-Z0-9]+)',             # PAU-D301 or RAU-301
         r'([A-Z]{2,}\d+[A-Z0-9\-]+)',       # RAUD301
         r'([A-Z]+\d+[\*x×]\d+[\*x×]?\d*)',  # e.g. DN50*2.5
         r'(DN\d+)',                         # e.g. DN100, DN80
-        r'(\d+\.\d+\.\d+\.\d+)'             # e.g. 2.22.54.0113
     ]
     
     for r in model_regexes:
         for match in re.finditer(r, text, re.IGNORECASE):
             val = match.group(1).strip()
-            val_upper = val.upper()
-            if any(val_upper.startswith(prefix) for prefix in ["DN", "DE", "PN", "Ф", "Φ"]):
+            if _is_non_model_token(val):
                 continue
             return val
             
@@ -117,11 +163,50 @@ def extract_model(text: str) -> str:
         trail_match = re.search(r'([A-Za-z0-9\-]+)$', line)
         if trail_match:
             val = trail_match.group(1).strip()
-            val_upper = val.upper()
-            if not any(val_upper.startswith(prefix) for prefix in ["DN", "DE", "PN", "Ф", "Φ"]):
+            if not _is_non_model_token(val):
                 return val
             
     return ""
+
+# V017-M1 / M1-C02：工程设备位号与箱号前缀（单一事实源，供 extract_model 排除）。
+# 仅登记任务书明确列出的位号前缀（AHU/PAU）与电气箱号前缀（与 matcher BOX_PREFIXES 对齐）；
+# 其余 HVAC 缩写（RAU/FCU/MAU/RCU 等）可能同时是真实产品型号（如 RAU-Q-D301），
+# 不列入位号前缀，避免误伤型号提取。
+DEVICE_TAG_PREFIXES = (
+    "AHU", "PAU",
+    # 电气箱号前缀（与 matcher BOX_PREFIXES 对齐）
+    "AP", "AL", "ALE", "AT", "ACP", "AX", "ATD", "AFC",
+)
+
+
+def is_device_tag(value: str) -> bool:
+    """判断形如 AHU-J-01 / PAU-D301 / AP-1 / AL-2 的工程设备位号/箱号。
+
+    规则：大写字母前缀命中设备/箱号前缀集合，且紧随连字符+数字/字母编号。
+    """
+    if not value:
+        return False
+    v = value.strip().upper()
+    if "-" not in v:
+        return False
+    prefix = v.split("-")[0]
+    if prefix not in DEVICE_TAG_PREFIXES:
+        return False
+    # 位号形式：前缀 + 连字符 + 编号（数字或字母数字），如 AHU-J-01、PAU-D301、AP-1
+    remainder = v[len(prefix):]
+    return bool(re.match(r'^-[A-Z0-9]+(?:-[A-Z0-9]+)*$', remainder))
+
+
+def extract_device_tag(text: str) -> str:
+    """从文本提取工程设备位号/箱号（归入 tag_id 族，非产品型号）。"""
+    if not text:
+        return ""
+    for m in re.finditer(r'\b([A-Z]{2,}(?:-[A-Z0-9]+)+)\b', text, re.IGNORECASE):
+        val = m.group(1).strip()
+        if is_device_tag(val):
+            return val
+    return ""
+
 
 @lru_cache(maxsize=20000)
 def fts_tokenize(text: str) -> str:
@@ -242,12 +327,14 @@ def parse_sub_parameters(content: str) -> Dict[str, str]:
                 if k_clean:
                     sub_params[k_clean] = v
             else:
-                # No colon present - treat as material if keyword present, else boolean feature tag
+                # V017-M1 / M1-C01：无冒号冗余短句不再写成自引用键（sub_params[part]=part）。
+                # 这类"值等于键"的键无任何信息量，属自由文本噪声，会污染 attrs 并进入
+                # matcher processed_keys 参与属性打分。仅保留有实际语义的材质关键词归并，
+                # 其余短句直接丢弃（由上层白名单隔离兜底追溯）。
                 if len(part) < 15 and not any(c.isdigit() for c in part):
                     if any(mat in part for mat in ["钢", "铁", "铜", "铝", "塑", "PVC", "PPR", "PE", "UPVC", "HDPE", "不锈钢", "合金"]):
                         sub_params["材质"] = part
-                    else:
-                        sub_params[part] = part
+                    # 无信息量短句：不写入自引用键
     return sub_params
 
 def extract_general_params(text: str) -> Dict[str, Any]:
@@ -320,19 +407,26 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
     from app.domain_router import route_domain
     from app.normalizer import clean_text_standard
     from app.domain_extractors import extract_parameters_by_domain
+    from app.rule_context import RuleContext
 
     if not text:
         return {"model": "", "attrs": {}}
 
     # Clean construction info on raw text to preserve newlines
     text_no_const = remove_construction_info(text)
-    text_clean = clean_text_standard(text_no_const)
+    name_extracted = extract_device_name(text_no_const, category_hint)
+    clean_ctx = RuleContext.from_fields(
+        material_category=category_hint,
+        name=name_extracted,
+        raw_name=name_extracted,
+        stage="cleaning",
+    )
+    text_clean = clean_text_standard(text_no_const, rule_context=clean_ctx)
     
     # 1. Run legacy dynamic general parameter extraction on raw text (preserving original casing/units)
     attrs = extract_general_params(text_no_const)
     
     # 2. Route to domain
-    name_extracted = extract_device_name(text_no_const, category_hint)
     domain = route_domain(category_hint, name_extracted, text_clean, category_hint)
     
     # 3. Extract domain-specific attributes using the routed domain's extractor
@@ -437,6 +531,11 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
     # 4. Extract model
     model = extract_model(text_clean)
 
+    # V017-M1 / M1-C02：工程设备位号/箱号归入 tag_id（非产品型号），避免位号差异误触发型号冲突。
+    device_tag = extract_device_tag(text_no_const)
+    if device_tag:
+        attrs["tag_id"] = device_tag
+
     # 5. Fallback check for common parameters: 功率 and 尺寸
     if "功率" not in attrs:
         power_match = re.search(r'(?:功率|电机功率|风机功率|单机功率)(?:[^\d]*?)(\d+(?:\.\d+)?)\s*(?:kW|kw|千瓦|W|瓦|KW)?', text_clean, re.IGNORECASE)
@@ -497,7 +596,8 @@ def _extract_params_cached(text: str, category_hint: str = "") -> Dict[str, Any]
 
     return {
         "model": model,
-        "attrs": attrs
+        "attrs": attrs,
+        "domain": domain,
     }
 
 def extract_params(text: str, category_hint: str = "") -> Dict[str, Any]:
@@ -516,9 +616,25 @@ def extract_params(text: str, category_hint: str = "") -> Dict[str, Any]:
     if "过滤等级" in attrs and "过滤段" not in attrs:
         attrs["过滤段"] = [attrs["过滤等级"]] if isinstance(attrs["过滤等级"], str) else attrs["过滤等级"]
 
+    # V017-M1 / M1-C01：统一类型化字段与字段白名单（Material 端）。
+    # 将未命中受控白名单的自由文本键隔离至 unwhitelisted_attrs，仅白名单键保留在
+    # attrs 参与 matcher 属性打分；typed_attrs 为新增并行结构化结构。
+    from app.typed_fields import (
+        build_typed_attrs,
+        partition_whitelisted_attrs,
+        build_schema_version_payload,
+    )
+    domain = res.get("domain", "")
+    whitelisted, unwhitelisted = partition_whitelisted_attrs(attrs)
+    typed_attrs = build_typed_attrs(whitelisted, raw_text=text, domain=domain)
+
     return {
         "model": res.get("model", ""),
-        "attrs": attrs
+        "attrs": whitelisted,
+        "typed_attrs": typed_attrs,
+        "unwhitelisted_attrs": unwhitelisted,
+        "schema_version": 3,
+        "domain": domain,
     }
 
 PARAM_LABEL_WORDS = [

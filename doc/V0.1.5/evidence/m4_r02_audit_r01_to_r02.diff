@@ -1,0 +1,477 @@
+--- R01/app/auth_manager.py
++++ R02/app/auth_manager.py
+@@ -3,6 +3,7 @@
+ import re
+ import sqlite3
+ import datetime
++import hashlib
+ import logging
+ import secrets
+ from typing import List, Dict, Any, Optional, Tuple
+@@ -106,6 +107,38 @@
+ def generate_temp_password() -> str:
+     """Generate a unique, high-entropy one-time temporary password satisfying strength policy."""
+     return f"Lt!{secrets.token_urlsafe(12)}9"
++
++
++def _issue_unique_temp_password(
++    conn: sqlite3.Connection,
++    user_id: Optional[int] = None,
++    purpose: str = "init",
++) -> str:
++    """Allocate a one-time high-entropy temp password verified unique against issued_temp_credentials."""
++    conn.execute(
++        """
++        CREATE TABLE IF NOT EXISTS issued_temp_credentials (
++            secret_sha256 TEXT PRIMARY KEY,
++            user_id INTEGER,
++            purpose TEXT,
++            issued_at DATETIME DEFAULT CURRENT_TIMESTAMP
++        )
++        """
++    )
++    for _ in range(32):
++        candidate = generate_temp_password()
++        digest = hashlib.sha256(candidate.encode("utf-8")).hexdigest()
++        existing = conn.execute(
++            "SELECT 1 FROM issued_temp_credentials WHERE secret_sha256 = ? LIMIT 1",
++            (digest,),
++        ).fetchone()
++        if existing is None:
++            conn.execute(
++                "INSERT INTO issued_temp_credentials (secret_sha256, user_id, purpose) VALUES (?, ?, ?)",
++                (digest, user_id, purpose),
++            )
++            return candidate
++    raise RuntimeError("Unable to mint a distinct temporary password after retries.")
+ 
+ 
+ # JWT configuration (M4-03: fail-closed in production without valid SECRET_KEY)
+@@ -270,6 +303,16 @@
+         """)
+         cursor.execute("CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires ON revoked_tokens(expires_at)")
+ 
++        # Record SHA-256 digests of every server-issued one-time temp password (A-M4-03 uniqueness ledger)
++        cursor.execute("""
++            CREATE TABLE IF NOT EXISTS issued_temp_credentials (
++                secret_sha256 TEXT PRIMARY KEY,
++                user_id INTEGER,
++                purpose TEXT,
++                issued_at DATETIME DEFAULT CURRENT_TIMESTAMP
++            )
++        """)
++
+         # Check and insert initial admin account without weak defaults or plaintext password logging
+         cursor.execute("SELECT id, password_hash FROM users WHERE role = 'admin' LIMIT 1")
+         admin_row = cursor.fetchone()
+@@ -337,8 +380,10 @@
+     if not os.path.exists(excel_path):
+         return {"success": False, "count": 0, "message": f"人员清单文件不存在: {excel_path}"}
+ 
+-    if default_password is not None and is_weak_password(default_password):
+-        return {"success": False, "count": 0, "message": "禁止使用默认或弱临时口令批量导入账号。"}
++    if default_password is not None:
++        ok_pwd, err_msg = validate_password_strength(default_password)
++        if not ok_pwd:
++            return {"success": False, "count": 0, "message": "禁止使用默认或弱临时口令批量导入账号。"}
+ 
+     import xlrd
+     book = xlrd.open_workbook(excel_path)
+@@ -365,6 +410,7 @@
+ 
+     imported_count = 0
+     updated_count = 0
++    role_changed_count = 0
+     created_credentials: List[Dict[str, str]] = []
+ 
+     try:
+@@ -402,19 +448,39 @@
+ 
+             existing = None
+             if employee_no:
+-                cursor.execute("SELECT id, username FROM users WHERE employee_no = ?", (employee_no,))
++                cursor.execute(
++                    "SELECT id, username, role, is_active, token_version FROM users WHERE employee_no = ?",
++                    (employee_no,),
++                )
+                 existing = cursor.fetchone()
+             if not existing and phone:
+-                cursor.execute("SELECT id, username FROM users WHERE phone = ?", (phone,))
++                cursor.execute(
++                    "SELECT id, username, role, is_active, token_version FROM users WHERE phone = ?",
++                    (phone,),
++                )
+                 existing = cursor.fetchone()
+ 
+             if existing:
+-                cursor.execute("""
+-                    UPDATE users SET
+-                        name = ?, dept1 = ?, dept2 = ?, dept3 = ?,
+-                        position = ?, phone = ?, role = ?
+-                    WHERE id = ?
+-                """, (name, dept1, dept2, dept3, position, phone, role, existing["id"]))
++                old_role = str(existing["role"] or "")
++                old_active = int(existing["is_active"] if existing["is_active"] is not None else 1)
++                role_changed = (old_role != role)
++                active_changed = (old_active != 1)
++                if role_changed or active_changed:
++                    cursor.execute("""
++                        UPDATE users SET
++                            name = ?, dept1 = ?, dept2 = ?, dept3 = ?,
++                            position = ?, phone = ?, role = ?, is_active = 1,
++                            token_version = COALESCE(token_version, 1) + 1
++                        WHERE id = ?
++                    """, (name, dept1, dept2, dept3, position, phone, role, existing["id"]))
++                    role_changed_count += 1
++                else:
++                    cursor.execute("""
++                        UPDATE users SET
++                            name = ?, dept1 = ?, dept2 = ?, dept3 = ?,
++                            position = ?, phone = ?, role = ?
++                        WHERE id = ?
++                    """, (name, dept1, dept2, dept3, position, phone, role, existing["id"]))
+                 updated_count += 1
+             else:
+                 emp_to_insert = employee_no
+@@ -422,7 +488,8 @@
+                 if not emp_to_insert:
+                     emp_to_insert = f"EMP_TEMP_{phone}"
+                     need_setup = 1
+-                raw_temp = default_password if default_password is not None else generate_temp_password()
++                # A-M4-03: Ignore any caller-supplied default_password and mint a per-account unique temp secret.
++                raw_temp = _issue_unique_temp_password(conn, purpose="excel_import")
+                 hashed_temp = get_password_hash(raw_temp)
+                 epoch = secrets.token_hex(12)
+                 cursor.execute("""
+@@ -432,6 +499,13 @@
+                         token_version, must_change_password, account_epoch
+                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, 1, 1, ?)
+                 """, (username, hashed_temp, name, dept1, dept2, dept3, emp_to_insert, position, phone, role, need_setup, epoch))
++                new_uid = cursor.lastrowid
++                if new_uid is not None:
++                    temp_digest = hashlib.sha256(raw_temp.encode("utf-8")).hexdigest()
++                    cursor.execute(
++                        "UPDATE issued_temp_credentials SET user_id = ? WHERE secret_sha256 = ?",
++                        (int(new_uid), temp_digest),
++                    )
+                 imported_count += 1
+                 created_credentials.append({
+                     "username": username,
+@@ -449,11 +523,15 @@
+     finally:
+         conn.close()
+ 
+-    security_logger.info(f"Personnel import completed: {imported_count} created, {updated_count} updated.")
++    security_logger.info(
++        f"Personnel import completed: {imported_count} created, {updated_count} updated, {role_changed_count} role_or_status_changed."
++    )
+     return {
+         "success": True,
+         "imported_count": imported_count,
+         "updated_count": updated_count,
++        "role_changed_count": role_changed_count,
++        "default_password_ignored": bool(default_password is not None),
+         "total": imported_count + updated_count,
+         "created_credentials": created_credentials,
+     }
+@@ -495,15 +573,22 @@
+     if not epoch:
+         raise ValueError("Cannot issue token without account_epoch")
+     tv = int(user.get("token_version") or 1)
++    jti = secrets.token_hex(16)
+     payload = {
+         "sub": user["username"],
+         "uid": int(user["id"]),
+         "role": user.get("role", "employee"),
+         "tv": tv,
+         "ep": epoch,
+-        "jti": secrets.token_hex(16),
++        "jti": jti,
+     }
+-    return create_access_token(payload, expires_delta=expires_delta)
++    encoded_jwt = create_access_token(payload, expires_delta=expires_delta)
++    if isinstance(user, dict):
++        user["_auth_token"] = encoded_jwt
++        user["_token_jti"] = jti
++        user["_token_tv"] = tv
++        user["_token_ep"] = epoch
++    return encoded_jwt
+ 
+ 
+ def verify_access_token(token: str) -> Optional[dict]:
+@@ -602,6 +687,7 @@
+             return None, 403, "该账号已被停用，请联系管理员。"
+ 
+         user_dict = dict(row)
++        user_dict["_auth_token"] = token
+         user_dict["_token_jti"] = str(jti)
+         user_dict["_token_exp"] = payload.get("exp")
+         user_dict["_token_tv"] = tv_int
+@@ -618,30 +704,42 @@
+ 
+ 
+ def resolve_verified_user(user_info: Any) -> Optional[Dict[str, Any]]:
+-    """Verify an actor's identity and role directly from auth DB (never trust arbitrary body/dict role claims)."""
+-    if not isinstance(user_info, dict):
++    """Verify an actor carries a valid unrevoked session JWT and matches DB identity/role."""
++    if isinstance(user_info, str):
++        token = user_info.strip()
++        claim_dict: Optional[Dict[str, Any]] = None
++    elif isinstance(user_info, dict):
++        raw_tok = user_info.get("_auth_token") or user_info.get("access_token") or user_info.get("token")
++        token = raw_tok.strip() if isinstance(raw_tok, str) else ""
++        claim_dict = user_info
++    else:
+         return None
+-    uid = user_info.get("id") or user_info.get("uid")
+-    username = user_info.get("username") or user_info.get("sub")
+-    conn = get_auth_connection()
+-    try:
+-        row = None
+-        if uid is not None:
++
++    if not token:
++        return None
++
++    verified_user, code, _ = verify_token_session(token)
++    if not verified_user or code != 200:
++        return None
++
++    if claim_dict is not None:
++        claim_id = claim_dict.get("id") if claim_dict.get("id") is not None else claim_dict.get("uid")
++        if claim_id is not None:
+             try:
+-                row = conn.execute("SELECT * FROM users WHERE id = ?", (int(uid),)).fetchone()
++                if int(claim_id) != int(verified_user["id"]):
++                    return None
+             except (TypeError, ValueError):
+-                row = None
+-        if row is None and username:
+-            row = conn.execute("SELECT * FROM users WHERE username = ?", (str(username),)).fetchone()
+-        if not row or not row["is_active"]:
++                return None
++
++        claim_username = claim_dict.get("username") or claim_dict.get("sub")
++        if claim_username is not None and str(claim_username) != str(verified_user["username"]):
+             return None
+-        if username and row["username"] != str(username):
++
++        claim_role = claim_dict.get("role")
++        if claim_role is not None and str(claim_role) != str(verified_user["role"]):
+             return None
+-        return dict(row)
+-    except sqlite3.Error:
+-        return None
+-    finally:
+-        conn.close()
++
++    return verified_user
+ 
+ 
+ def authenticate_user_and_issue_token(
+@@ -808,19 +906,19 @@
+     position: str = "",
+     phone: str = "",
+ ) -> Dict[str, Any]:
+-    """Create a user with unique one-time temp password and must_change_password=1."""
++    """Create a user with server-guaranteed unique one-time temp password and must_change_password=1."""
+     clean_username = username.strip()
+     if not clean_username:
+         return {"success": False, "status_code": 400, "error": "用户名不能为空。"}
+ 
+-    raw_password = password if (password is not None and password != "") else generate_temp_password()
+-    ok_pwd, err_msg = validate_password_strength(raw_password)
+-    if not ok_pwd:
+-        return {"success": False, "status_code": 400, "error": err_msg}
++    caller_supplied_password = password is not None and str(password) != ""
++    if caller_supplied_password:
++        ok_pwd, err_msg = validate_password_strength(password)
++        if not ok_pwd:
++            return {"success": False, "status_code": 400, "error": err_msg}
+ 
+     clean_emp = employee_no.strip() if employee_no else ""
+     clean_phone = phone.strip() if phone else ""
+-    pwd_hash = get_password_hash(raw_password)
+     epoch = secrets.token_hex(12)
+ 
+     conn = get_auth_connection()
+@@ -836,6 +934,9 @@
+             conn.rollback()
+             return {"success": False, "status_code": 400, "error": f"手机号 '{clean_phone}' 已被其他账号绑定。"}
+ 
++        # A-M4-03: Always mint a distinct server-side temporary password per account.
++        raw_password = _issue_unique_temp_password(conn, purpose="admin_create")
++        pwd_hash = get_password_hash(raw_password)
+         final_emp = clean_emp if clean_emp else f"EMP_MAN_{clean_username}"
+         conn.execute(
+             """
+@@ -860,6 +961,11 @@
+             ),
+         )
+         new_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
++        temp_digest = hashlib.sha256(raw_password.encode("utf-8")).hexdigest()
++        conn.execute(
++            "UPDATE issued_temp_credentials SET user_id = ? WHERE secret_sha256 = ?",
++            (int(new_id), temp_digest),
++        )
+         conn.commit()
+         return {
+             "success": True,
+@@ -868,6 +974,8 @@
+             "role": role,
+             "must_change_password": 1,
+             "temp_password": raw_password,
++            "server_generated_temp_password": True,
++            "caller_password_ignored": caller_supplied_password,
+         }
+     except Exception:
+         try:
+@@ -959,13 +1067,13 @@
+ 
+ 
+ def admin_reset_password_atomic(user_id: int, new_password: Optional[str] = None) -> Dict[str, Any]:
+-    """Reset a user's password to a unique temp secret, force must_change_password=1, and bump token_version."""
+-    raw_password = new_password if (new_password is not None and new_password != "") else generate_temp_password()
+-    ok_pwd, err_msg = validate_password_strength(raw_password)
+-    if not ok_pwd:
+-        return {"success": False, "status_code": 400, "error": err_msg}
+-
+-    pwd_hash = get_password_hash(raw_password)
++    """Reset a user's password to a server-guaranteed unique temp secret, force must_change_password=1, and bump token_version."""
++    caller_supplied_password = new_password is not None and str(new_password) != ""
++    if caller_supplied_password:
++        ok_pwd, err_msg = validate_password_strength(new_password)
++        if not ok_pwd:
++            return {"success": False, "status_code": 400, "error": err_msg}
++
+     conn = get_auth_connection()
+     try:
+         conn.execute("BEGIN IMMEDIATE")
+@@ -973,6 +1081,9 @@
+         if not row:
+             conn.rollback()
+             return {"success": False, "status_code": 404, "error": "用户不存在。"}
++        # A-M4-03: Always mint a distinct server-side temporary password on reset.
++        raw_password = _issue_unique_temp_password(conn, user_id=int(user_id), purpose="admin_reset")
++        pwd_hash = get_password_hash(raw_password)
+         conn.execute(
+             """
+             UPDATE users
+@@ -990,6 +1101,8 @@
+             "username": row["username"],
+             "temp_password": raw_password,
+             "must_change_password": 1,
++            "server_generated_temp_password": True,
++            "caller_password_ignored": caller_supplied_password,
+         }
+     except Exception:
+         try:
+--- R01/app/server.py
++++ R02/app/server.py
+@@ -895,10 +895,9 @@
+         return []
+ 
+ def save_auto_binding_rules(rules: List[Dict[str, Any]], actor_user: Optional[Dict[str, Any]] = None):
+-    if actor_user is not None:
+-        verified = resolve_verified_user(actor_user)
+-        if not verified or verified.get("role") != "admin":
+-            raise PermissionError("仅管理员（admin）有权修改全局自动绑定规则。")
++    verified = resolve_verified_user(actor_user)
++    if not verified or verified.get("must_change_password") or verified.get("role") != "admin":
++        raise PermissionError("仅已认证的管理员（admin）有权修改全局自动绑定规则。")
+     try:
+         with open(AUTO_BINDING_RULES_FILE, "w", encoding="utf-8") as f:
+             json.dump(rules, f, ensure_ascii=False, indent=4)
+--- R01/app/flywheel_sandbox.py
++++ R02/app/flywheel_sandbox.py
+@@ -335,11 +335,13 @@
+ 
+ 
+ def get_eval_task_status_for_user(task_id: str, user_info: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+-    """Strict owner-only retrieval for HTTP handlers; missing owner, mismatched user, or recreated epoch all return None (404)."""
+-    if not isinstance(user_info, dict) or not user_info.get("id") or not user_info.get("account_epoch"):
++    """Strict owner-only retrieval via verified active session; unverified/revoked/mismatched callers return None (404)."""
++    from app.auth_manager import resolve_verified_user
++    verified = resolve_verified_user(user_info)
++    if not verified or not verified.get("id") or not verified.get("account_epoch"):
+         return None
+-    req_uid = int(user_info["id"])
+-    req_epoch = str(user_info["account_epoch"])
++    req_uid = int(verified["id"])
++    req_epoch = str(verified["account_epoch"])
+     with _tasks_lock:
+         task = _eval_tasks.get(task_id)
+         if not task:
+--- R01/.dockerignore
++++ R02/.dockerignore
+@@ -29,22 +29,38 @@
+ *.crt
+ *.jks
+ *secret*
++**/*secret*
+ *password*
++**/*password*
++*credential*
++**/*credential*
+ 
+-# Databases, Runtime State, Feedback & Backups (mounted externally at runtime)
++# Databases, Runtime State, CSV Data & Backups (mounted externally at runtime)
+ *.db
+ *.db-wal
+ *.db-shm
+ *.db-journal
++*.db.*
++**/*.db
++**/*.db.*
+ *.sqlite
+ *.sqlite3
++*.backup
++**/*.backup
++*backup*
++**/*backup*
+ app/*.db
+ app/*.db-*
++app/*.db.*
+ app/feedback_*.json
+ app/binding_feedback.json
+ app/uploads/
+ app/vector_cache/
+ app/__pycache__/
++data/
++**/data/
++*.csv
++**/*.csv
+ logs/
+ 
+ # Personnel, Snapshots, Docs, Scripts & Dev/Test Directories
+@@ -64,3 +80,30 @@
+ *.xlsx
+ *cloud_users_snapshot*
+ golden_last_run/
++
++# Config allowlist: deny non-baseline files (e.g. config/runtime_credentials.json) and permit ONLY the 16 baseline configs
++config/*
++!config/alias_dict.json
++!config/auto_binding_rules.json
++!config/boost_rules.json
++!config/category_domain_map.json
++!config/connection_dict.json
++!config/domain_schema.json
++!config/flags_dict.json
++!config/llm_config.json
++!config/llm_prompts.json
++!config/material_dict.json
++!config/model_config.json
++!config/stop_words.json
++!config/tolerance_rules.json
++!config/unit_norm.json
++!config/unit_rules.json
++!config/weight_rules.json
++
++# Final fail-safe exclusions after config allowlist
++config/*credential*
++config/*secret*
++config/*password*
++config/*backup*
++config/*.db*
++config/.env*

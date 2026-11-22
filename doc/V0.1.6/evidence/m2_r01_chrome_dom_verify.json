@@ -1,0 +1,37 @@
+{
+  "isolated_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m2_chrome_mh1l7few",
+  "chrome_binary": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "steps": {
+    "flywheel_untested_accept_blocked_409": {
+      "status": 409,
+      "dialogs": [
+        "确定采纳此条规则建议并原子写回配置吗？系统将秒级热重载生效。",
+        "操作失败: 缺少服务端沙箱评测凭据（eval_id），禁止跳过回归评测直接发布/采纳规则。"
+      ]
+    },
+    "flywheel_dom_eval_completed": {
+      "modal_title": "⚠️ 安全通过但收益为 neutral (需审批理由)",
+      "eval_id": "eval_61d66aea00d6",
+      "benefit": "neutral",
+      "safety_passed": true
+    },
+    "flywheel_post_edit_invalidation_blocked_409": {
+      "badge_text": "沙箱评测凭据：待重新评测（目标值或专业变更后需重新评测）",
+      "http_status": 409
+    },
+    "flywheel_dom_accept_200": {
+      "url": "/api/flywheel/suggestions/accept",
+      "status": 200,
+      "body": "{\"code\":0,\"msg\":\"规则已通过沙箱门禁并成功采纳生效\",\"snapshot_version\":\"snap_20261118_085937_59dfe8\",\"eval_id\":\"eval_61d66aea00d6\",\"benefit_class\":\"neutral\",\"discipline\":\"医气\"}"
+    },
+    "llm_rule_dom_eval_then_publish_200": {
+      "untested_status": 409,
+      "published": {
+        "url": "/api/llm-rules/DOM-TEST-RULE-01/publish",
+        "status": 200,
+        "body": "{\"success\":true,\"rule_id\":\"DOM-TEST-RULE-01\",\"status\":\"published\",\"revision\":1,\"content_digest\":\"d48db6bab38bc109b753e47e6be7314869fea00a38cde80f4dd5bc6584fa7100\",\"eval_id\":\"eval_45f8b2ee7c3e\",\"benefit_class\":\"neutral\",\"detail\":\"规则已成功发布生效！\"}"
+      }
+    }
+  },
+  "status": "PASS"
+}

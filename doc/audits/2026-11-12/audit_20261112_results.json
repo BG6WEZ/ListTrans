@@ -1,0 +1,294 @@
+{
+  "existing_tests": {
+    "run": 31,
+    "failures": 0,
+    "errors": 0
+  },
+  "data": {
+    "materials": 26863,
+    "golden_snapshot_rows": 47750,
+    "core": 1067,
+    "missing_target": 338,
+    "target_present": 729,
+    "missing_by_professional": {
+      "医用气体": 24,
+      "弱电": 1,
+      "强电": 58,
+      "暖通": 142,
+      "洁净装饰": 1,
+      "纯水": 14,
+      "给排水": 28,
+      "装饰": 68,
+      "设备": 2
+    },
+    "duplicate_name_spec_groups": 157,
+    "flywheel_records": 0
+  },
+  "negative_phrases": {
+    "非防爆 风量1000m3/h": {
+      "风量": 1000.0,
+      "机型": "离心",
+      "防爆": true,
+      "名称": "离心风机"
+    },
+    "不带冷凝水提升泵": {
+      "名称": "风机盘管",
+      "机组类型": "风机盘管机组",
+      "带冷凝水提升泵": "带冷凝水提升泵",
+      "提升泵": true
+    }
+  },
+  "same_brand_blocked": {
+    "blocked": true,
+    "candidate_brand": true,
+    "reasons": [
+      "品牌冲突阻断"
+    ]
+  },
+  "unit_compatibility": {
+    "m/m2": true,
+    "米/平方米": true,
+    "米/台": false
+  },
+  "professional_alias_conflict": {
+    "blocked": true,
+    "query_prof": "医用气体",
+    "candidate_prof": "医气",
+    "reasons": [
+      "专业冲突阻断"
+    ]
+  },
+  "discipline_extraction": {
+    "sentinel": null,
+    "swallowed_errors": [
+      "name 'discipline' is not defined"
+    ]
+  },
+  "hard_cap_overridden": {
+    "after_hard_gate": 0.3,
+    "after_dynamic_boost": 1.0,
+    "reasons": [
+      "管径冲突拦截",
+      "命中加分词 [阀门] (+100)"
+    ]
+  },
+  "production_input_and_zero_score_binding": {
+    "query_sent_to_matcher": {
+      "name": "普通阀门",
+      "specification": "1.名称：卫生级球阀\n2.规格：DN15\n3.工作内容：安装、调试",
+      "category": "给排水",
+      "brand": "",
+      "professional": "给排水",
+      "parsed_spec": {
+        "domain": "valve_water",
+        "attrs": {
+          "阀型": "球阀",
+          "管径": 15.0,
+          "名称": "卫生级球阀",
+          "形状": "圆形",
+          "is_circular": true,
+          "外径": 15.0
+        },
+        "model": "",
+        "clean_text": "名称:卫生级球阀\n规格:DN15",
+        "noise_text": "工作内容:安装、调试",
+        "kv_dict": {
+          "名称": "卫生级球阀",
+          "规格": "DN15"
+        }
+      }
+    },
+    "binding": [
+      {
+        "code": "AUDIT-WRONG",
+        "name": "错误候选",
+        "specification": "DN25",
+        "unit": "个",
+        "brand": "",
+        "category": "阀门",
+        "qty": 2.0
+      }
+    ],
+    "is_exact": false,
+    "matched_code": ""
+  },
+  "name_only_auto_binding": {
+    "query_spec": "DN100",
+    "bindings": [
+      {
+        "code": "DN15-CODE",
+        "name": "",
+        "specification": "DN15",
+        "unit": "",
+        "brand": "",
+        "category": "",
+        "qty": 2.0
+      }
+    ],
+    "is_exact": true
+  },
+  "cross_user_superseded": [
+    {
+      "user_id": "user-a",
+      "superseded": 1
+    },
+    {
+      "user_id": "user-b",
+      "superseded": 0
+    }
+  ],
+  "miner_param_adjust": "table flywheel_pattern_aggregates has no column named pattern_key",
+  "fts_append_replace": [
+    [
+      "SAME-CODE",
+      "旧名称"
+    ],
+    [
+      "SAME-CODE",
+      "新名称"
+    ]
+  ],
+  "employee_can_approve_draft": {
+    "success": true,
+    "new_status": "approved",
+    "detail": "规则已成功启用规则！"
+  },
+  "db_schema_fill_stats": {
+    "total_rows": 26863,
+    "overall_structuring_rate": 60.66,
+    "domains": {
+      "weak_current": {
+        "count": 89,
+        "structuring_rate": 0.0
+      },
+      "generic": {
+        "count": 2754,
+        "structuring_rate": 100.0
+      },
+      "purification": {
+        "count": 983,
+        "structuring_rate": 20.09
+      },
+      "conduit": {
+        "count": 157,
+        "structuring_rate": 91.4
+      },
+      "decoration": {
+        "count": 920,
+        "structuring_rate": 46.03
+      },
+      "ahu": {
+        "count": 2365,
+        "structuring_rate": 27.34
+      },
+      "heat_exchanger": {
+        "count": 690,
+        "structuring_rate": 21.88
+      },
+      "switchgear": {
+        "count": 833,
+        "structuring_rate": 12.24
+      },
+      "cable_power": {
+        "count": 2657,
+        "structuring_rate": 79.74
+      },
+      "medical_gas": {
+        "count": 1089,
+        "structuring_rate": 15.01
+      },
+      "lighting": {
+        "count": 439,
+        "structuring_rate": 5.35
+      },
+      "damper": {
+        "count": 1224,
+        "structuring_rate": 44.8
+      },
+      "elevator": {
+        "count": 691,
+        "structuring_rate": 58.18
+      },
+      "door": {
+        "count": 1822,
+        "structuring_rate": 65.28
+      },
+      "valve_medical_gas": {
+        "count": 21,
+        "structuring_rate": 31.75
+      },
+      "pump": {
+        "count": 260,
+        "structuring_rate": 31.03
+      },
+      "cable_control": {
+        "count": 315,
+        "structuring_rate": 74.71
+      },
+      "wire": {
+        "count": 679,
+        "structuring_rate": 44.33
+      },
+      "valve_water": {
+        "count": 2065,
+        "structuring_rate": 82.78
+      },
+      "filter_ffu": {
+        "count": 677,
+        "structuring_rate": 33.83
+      },
+      "pipe_plastic": {
+        "count": 515,
+        "structuring_rate": 82.14
+      },
+      "silencer": {
+        "count": 253,
+        "structuring_rate": 33.33
+      },
+      "ups": {
+        "count": 136,
+        "structuring_rate": 94.49
+      },
+      "plenum": {
+        "count": 222,
+        "structuring_rate": 95.27
+      },
+      "fan": {
+        "count": 1967,
+        "structuring_rate": 86.49
+      },
+      "air_terminal": {
+        "count": 331,
+        "structuring_rate": 44.56
+      },
+      "chiller": {
+        "count": 1074,
+        "structuring_rate": 85.8
+      },
+      "pipe_steel": {
+        "count": 480,
+        "structuring_rate": 65.21
+      },
+      "pipe_ss": {
+        "count": 466,
+        "structuring_rate": 67.02
+      },
+      "manifold": {
+        "count": 148,
+        "structuring_rate": 87.84
+      },
+      "cable_tray": {
+        "count": 389,
+        "structuring_rate": 89.2
+      },
+      "pipe_copper": {
+        "count": 152,
+        "structuring_rate": 98.03
+      }
+    }
+  },
+  "syntax": {
+    "files": 40,
+    "errors": []
+  }
+}

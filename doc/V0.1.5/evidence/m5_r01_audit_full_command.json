@@ -1,0 +1,11 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/",
+    "-q"
+  ],
+  "exit_code": 15,
+  "elapsed_seconds": 477.625
+}

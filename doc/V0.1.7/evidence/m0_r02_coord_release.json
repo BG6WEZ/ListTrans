@@ -1,0 +1,99 @@
+{
+  "timestamp": "2026-11-18T23:31:17.885205+08:00",
+  "role": "coordinator",
+  "task": "V017-M0_R02_release",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "delivery_manifest_check": {
+    "total": 55,
+    "matched_count": 53,
+    "updated_count": 2,
+    "missing_count": 0,
+    "updated_in_r02": [
+      {
+        "path": "doc/V0.1.7/02_任务台账.md",
+        "r01_bytes": 3283,
+        "r01_sha256": "b8e6554f37cbaf94b0c3bf22111411488ba85315e1e95a4e747ad88e59fab94e",
+        "current_bytes": 3750,
+        "current_sha256": "29dace3b48473bfcc8182bd7f791255e23dd88e7f90e84940c65617787e4eaf2"
+      },
+      {
+        "path": "doc/V0.1.7/evidence/指标目标与性能预算.md",
+        "r01_bytes": 7301,
+        "r01_sha256": "4e0e0ad2513fda70a029e91f7a25f554f6d30d06d05c57a2e51078e8e4a2600d",
+        "current_bytes": 7480,
+        "current_sha256": "e879c06495b29404223672ee497da6298e48db311105eeb3621bf5c5e1986add"
+      }
+    ],
+    "missing": []
+  },
+  "round_docs": {
+    "doc/V0.1.7/rounds/V017-M0_R01_统筹下发.md": {
+      "bytes": 13682,
+      "sha256": "d58966d4e560ab5a7f1ff52342f4cc2f5c6b2e5bd2ea4e7512c11619b7b64551"
+    },
+    "doc/V0.1.7/rounds/V017-M0_R01_开发小结.md": {
+      "bytes": 4398,
+      "sha256": "0f5577195cdd3fdec0b3f0ccea9a8f5ea172d65026a80e706d53661d9b76b58b"
+    },
+    "doc/V0.1.7/rounds/V017-M0_R01_统筹交审.md": {
+      "bytes": 2837,
+      "sha256": "a2d04b61cf38b13c4591d96722fdba08bad53126298fecc91875b2751d2456a6"
+    },
+    "doc/V0.1.7/rounds/V017-M0_R01_审核小结.md": {
+      "bytes": 4421,
+      "sha256": "b5c45e125171880a2c629c50e7ea33fda765b33de48421193d8fad7dfb712b09"
+    },
+    "doc/V0.1.7/rounds/V017-M0_R02_开发小结.md": {
+      "bytes": 2024,
+      "sha256": "409b62a711665e6178b5b96d092d824a601fac761d77261bf5cd89590280890c"
+    },
+    "doc/V0.1.7/rounds/V017-M0_R02_统筹裁决.md": {
+      "bytes": 2585,
+      "sha256": "c04b68c64872d702af4709092046b0c7d00e3d7db08a845cecd49106fcc8d4d8"
+    },
+    "doc/V0.1.7/rounds/V017-M0_终审前复核小结.md": {
+      "bytes": 4413,
+      "sha256": "a779cca2c7f5538865f99e6c4a38e6763de9896886e3fad6656379505324b1d5"
+    }
+  },
+  "protected_fixtures": {
+    "tests/fixtures/golden_set_v1.json": {
+      "bytes": 1328408,
+      "sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5"
+    },
+    "tests/fixtures/golden_baseline.json": {
+      "bytes": 2132,
+      "sha256": "5ead8ac5462e849f0911cfb1eaa1aad7eae6d858451eb532ca32d11101e865fa"
+    },
+    "tests/fixtures/ground_truth_500.json": {
+      "bytes": 154184,
+      "sha256": "8586afbf87c09df65a22dc38eb5b439c7e814ce170c9b6f81f8a13129f800bba"
+    },
+    "tests/fixtures/golden_governance_v1.json": {
+      "bytes": 222488,
+      "sha256": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43"
+    }
+  },
+  "outer_business_entries": 35,
+  "outer_business_equal": true,
+  "outer_mismatches": [],
+  "coordinator_checks": {
+    "special": {
+      "exit_code": 0,
+      "seconds": 13.75,
+      "log": "doc/V0.1.7/evidence/m0_r01_validation_special_coord_release.log",
+      "run_json": "doc/V0.1.7/evidence/m0_r01_validation_special_coord_release.run.json",
+      "summary": "16 passed in 12.34s"
+    },
+    "verify_isolation": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "seconds": 7.203,
+      "business_hash_unchanged": true,
+      "hard_errors": [],
+      "pending_modules": [],
+      "json": "doc/V0.1.7/evidence/m0_r01_validation_verify_coord_release.json",
+      "run_json": "doc/V0.1.7/evidence/m0_r01_validation_verify_coord_release.run.json"
+    }
+  }
+}

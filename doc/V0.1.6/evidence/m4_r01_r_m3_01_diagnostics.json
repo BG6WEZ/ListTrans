@@ -1,0 +1,2437 @@
+{
+  "GT-0674": {
+    "recall_pool_size": 35,
+    "targets": [
+      {
+        "code": "3.50.29.0199",
+        "in_catalog": true,
+        "recalled": true,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "recall_pool_size": 35,
+        "hard_blocked": false,
+        "reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ],
+        "max_score": 1.0,
+        "full_rank": 1,
+        "top10": true,
+        "T": 98.6,
+        "W": 98.5,
+        "margin": 0.09999999999999432,
+        "state": "top10_hit"
+      }
+    ],
+    "query_parsed_spec": {
+      "domain": "fan",
+      "attrs": {
+        "风量": 300.0,
+        "机外余压": 250.0,
+        "功率": 0.2,
+        "静音": true,
+        "名称": "医用静音型排风机",
+        "机组类型": "离心风机（箱）",
+        "安装形式": "吊装",
+        "吊装": true
+      },
+      "model": "",
+      "name": "医用静音型排风机",
+      "spec": "名称:医用静音型排风机\n规格:风量:300m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:吊装",
+      "clean_text": "名称:医用静音型排风机\n规格:风量:300m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:吊装",
+      "noise_text": "工作内容:设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+      "kv_dict": {
+        "名称": "医用静音型排风机",
+        "规格": "风量:300m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );",
+        "安装形式": "吊装"
+      },
+      "rule_diagnostics": {
+        "context": {
+          "professional": "暖通",
+          "raw_professional": "暖通",
+          "material_category": "离心式排风机",
+          "domain": "fan",
+          "name": "医用静音型排风机",
+          "stage": "extraction"
+        },
+        "cleaning": {
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "extraction": {
+          "stage": "extraction",
+          "context": {
+            "professional": "暖通",
+            "raw_professional": "暖通",
+            "material_category": "离心式排风机",
+            "domain": "fan",
+            "name": "医用静音型排风机",
+            "stage": "extraction"
+          },
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "errors": [],
+        "degraded": false
+      }
+    },
+    "candidates": [
+      {
+        "code": "3.50.29.0199",
+        "score": 98.6,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0200",
+        "score": 98.5,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0194",
+        "score": 98.2,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0560",
+        "score": 68.4,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0559",
+        "score": 68.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1369",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2563",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1549",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1189",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2515",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2467",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3415",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2377",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2251",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3391",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2851",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1837",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1825",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2095",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1861",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1195",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "2.17.15.0103",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0105",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0101",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0111",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0106",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0115",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0107",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0109",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0119",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0121",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0129",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.28.03.HARMFUL1",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.55.09.0012",
+        "score": 0.0,
+        "recall_sources": [
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机",
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.60.25.0001",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      }
+    ],
+    "decision": {
+      "decision_status": "recommended",
+      "decision_source": "matcher",
+      "decision_reason": "matcher 算法推荐，需人工确认",
+      "bindings": [
+        {
+          "code": "3.50.29.0199",
+          "name": "医用离心式排风机(箱）",
+          "specification": "风量：300m³/h，机外余压250pa，镀锌钢板",
+          "unit": "台",
+          "brand": "",
+          "category": "暖通",
+          "qty": 1.0,
+          "qty_ratio": 1.0
+        }
+      ]
+    },
+    "query_explosion_state": null,
+    "export_gate": {
+      "http_status": 422,
+      "detail": {
+        "error": "export_blocked",
+        "row": {
+          "original_row_idx": 0,
+          "original_name": "医用静音型排风机",
+          "original_spec": "1.名称：医用静音型排风机\n2.规格：风量：300m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+        }
+      }
+    }
+  },
+  "GT-0677": {
+    "recall_pool_size": 35,
+    "targets": [
+      {
+        "code": "3.50.29.0559",
+        "in_catalog": true,
+        "recalled": true,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "recall_pool_size": 35,
+        "hard_blocked": false,
+        "reasons": [
+          "核心参数在公差范围内",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ],
+        "max_score": 1.0,
+        "full_rank": 1,
+        "top10": true,
+        "T": 98.6,
+        "W": 98.5,
+        "margin": 0.09999999999999432,
+        "state": "top10_hit"
+      }
+    ],
+    "query_parsed_spec": {
+      "domain": "fan",
+      "attrs": {
+        "风量": 500.0,
+        "机外余压": 250.0,
+        "功率": 0.2,
+        "静音": true,
+        "名称": "医用静音型排风机",
+        "机组类型": "离心风机（箱）",
+        "安装形式": "落地",
+        "落地": true
+      },
+      "model": "",
+      "name": "医用静音型排风机",
+      "spec": "名称:医用静音型排风机\n规格:风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:落地安装",
+      "clean_text": "名称:医用静音型排风机\n规格:风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:落地安装",
+      "noise_text": "工作内容:设备安装、风电接口、检查接线、调试、试运转\n含减震垫",
+      "kv_dict": {
+        "名称": "医用静音型排风机",
+        "规格": "风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );",
+        "安装形式": "落地安装"
+      },
+      "rule_diagnostics": {
+        "context": {
+          "professional": "暖通",
+          "raw_professional": "暖通",
+          "material_category": "离心式排风机",
+          "domain": "fan",
+          "name": "医用静音型排风机",
+          "stage": "extraction"
+        },
+        "cleaning": {
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "extraction": {
+          "stage": "extraction",
+          "context": {
+            "professional": "暖通",
+            "raw_professional": "暖通",
+            "material_category": "离心式排风机",
+            "domain": "fan",
+            "name": "医用静音型排风机",
+            "stage": "extraction"
+          },
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "errors": [],
+        "degraded": false
+      }
+    },
+    "candidates": [
+      {
+        "code": "3.50.29.0559",
+        "score": 98.6,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0560",
+        "score": 98.5,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0200",
+        "score": 68.3,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1369",
+        "score": 68.1,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1189",
+        "score": 68.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0199",
+        "score": 68.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1195",
+        "score": 66.2,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0194",
+        "score": 65.6,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2563",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1549",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2377",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2851",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1837",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1825",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1861",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3415",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2251",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3391",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2515",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2467",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2095",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "2.17.15.0105",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0101",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0103",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0111",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0106",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0107",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0115",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0109",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0119",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0121",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0129",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.28.03.HARMFUL1",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.55.09.0012",
+        "score": 0.0,
+        "recall_sources": [
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机",
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.60.25.0001",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      }
+    ],
+    "decision": {
+      "decision_status": "recommended",
+      "decision_source": "matcher",
+      "decision_reason": "matcher 算法推荐，需人工确认",
+      "bindings": [
+        {
+          "code": "3.50.29.0559",
+          "name": "医用离心式排风机(箱）",
+          "specification": "风量：500m³/h，机外余压250pa，镀锌钢板",
+          "unit": "台",
+          "brand": "",
+          "category": "暖通",
+          "qty": 1.0,
+          "qty_ratio": 1.0
+        }
+      ]
+    },
+    "query_explosion_state": null,
+    "export_gate": {
+      "http_status": 422,
+      "detail": {
+        "error": "export_blocked",
+        "row": {
+          "original_row_idx": 1,
+          "original_name": "医用静音型排风机",
+          "original_spec": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式:落地安装\n4.工作内容：设备安装、风电接口、检查接线、调试、试运转\n5.含减震垫",
+          "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+        }
+      }
+    }
+  },
+  "GT-0678": {
+    "recall_pool_size": 35,
+    "targets": [
+      {
+        "code": "3.50.29.0559",
+        "in_catalog": true,
+        "recalled": true,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "recall_pool_size": 35,
+        "hard_blocked": false,
+        "reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ],
+        "max_score": 1.0,
+        "full_rank": 1,
+        "top10": true,
+        "T": 98.6,
+        "W": 98.5,
+        "margin": 0.09999999999999432,
+        "state": "top10_hit"
+      }
+    ],
+    "query_parsed_spec": {
+      "domain": "fan",
+      "attrs": {
+        "风量": 500.0,
+        "机外余压": 250.0,
+        "功率": 0.2,
+        "静音": true,
+        "名称": "医用静音型排风机",
+        "机组类型": "离心风机（箱）",
+        "安装形式": "吊装",
+        "吊装": true
+      },
+      "model": "",
+      "name": "医用静音型排风机",
+      "spec": "名称:医用静音型排风机\n规格:风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:吊装",
+      "clean_text": "名称:医用静音型排风机\n规格:风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );\n安装形式:吊装",
+      "noise_text": "工作内容:设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+      "kv_dict": {
+        "名称": "医用静音型排风机",
+        "规格": "风量:500m3/h;机外余压:250pa;配电功率:0.2kw;启动方式:直接;电源:220/1/50( V/Ph/H );",
+        "安装形式": "吊装"
+      },
+      "rule_diagnostics": {
+        "context": {
+          "professional": "暖通",
+          "raw_professional": "暖通",
+          "material_category": "离心式排风机",
+          "domain": "fan",
+          "name": "医用静音型排风机",
+          "stage": "extraction"
+        },
+        "cleaning": {
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "extraction": {
+          "stage": "extraction",
+          "context": {
+            "professional": "暖通",
+            "raw_professional": "暖通",
+            "material_category": "离心式排风机",
+            "domain": "fan",
+            "name": "医用静音型排风机",
+            "stage": "extraction"
+          },
+          "applied_rules": [],
+          "skipped_rules": [],
+          "errors": [],
+          "degraded": false
+        },
+        "errors": [],
+        "degraded": false
+      }
+    },
+    "candidates": [
+      {
+        "code": "3.50.29.0559",
+        "score": 98.6,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0560",
+        "score": 98.5,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0,
+        "match_reasons": [
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0200",
+        "score": 68.4,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1369",
+        "score": 68.2,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1189",
+        "score": 68.1,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0199",
+        "score": 68.1,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1195",
+        "score": 66.3,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.0194",
+        "score": 65.7,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2563",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1549",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2377",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2851",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic",
+          "fts_hvac_医用离心式排风机 500",
+          "fts_hvac_离心风机 500",
+          "fts_hvac_500"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1837",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1825",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.1861",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3415",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2251",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.3391",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2515",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "机外余压偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2467",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "语义高度相近",
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "3.50.29.2095",
+        "score": 30.0,
+        "recall_sources": [
+          "fts",
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机(箱）",
+          "fts_hvac_医用离心式排风机",
+          "fts_hvac_离心风机（箱）",
+          "fts_hvac_离心风机",
+          "fts_hvac_医用离心式排风机 300",
+          "fts_hvac_离心风机 300",
+          "fts_hvac_300",
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3,
+        "match_reasons": [
+          "参数超限偏离",
+          "风量偏差过大拦截",
+          "通风机品类匹配",
+          "默认标准镀锌钢板优选"
+        ]
+      },
+      {
+        "code": "2.17.15.0105",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0101",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0103",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0111",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0106",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0107",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0115",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0109",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0119",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "2.17.15.0121",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.17.15.0129",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85,
+        "match_reasons": [
+          "必填属性缺失处罚: 风量",
+          "必填属性缺失处罚: 机组类型",
+          "必填属性缺失处罚: 机外余压"
+        ]
+      },
+      {
+        "code": "2.28.03.HARMFUL1",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.55.09.0012",
+        "score": 0.0,
+        "recall_sources": [
+          "fts_extracted_name",
+          "fts_zh",
+          "fts_hvac_医用离心式排风机",
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      },
+      {
+        "code": "3.60.25.0001",
+        "score": 0.0,
+        "recall_sources": [
+          "semantic"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0,
+        "match_reasons": [
+          "专业冲突阻断"
+        ]
+      }
+    ],
+    "decision": {
+      "decision_status": "recommended",
+      "decision_source": "matcher",
+      "decision_reason": "matcher 算法推荐，需人工确认",
+      "bindings": [
+        {
+          "code": "3.50.29.0559",
+          "name": "医用离心式排风机(箱）",
+          "specification": "风量：500m³/h，机外余压250pa，镀锌钢板",
+          "unit": "台",
+          "brand": "",
+          "category": "暖通",
+          "qty": 1.0,
+          "qty_ratio": 1.0
+        }
+      ]
+    },
+    "query_explosion_state": null,
+    "export_gate": {
+      "http_status": 422,
+      "detail": {
+        "error": "export_blocked",
+        "row": {
+          "original_row_idx": 2,
+          "original_name": "医用静音型排风机",
+          "original_spec": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+        }
+      }
+    }
+  }
+}

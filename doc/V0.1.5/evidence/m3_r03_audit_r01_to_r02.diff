@@ -1,0 +1,1743 @@
+--- R02/app/binding_decisions.py
++++ R03/app/binding_decisions.py
+@@ -37,6 +37,7 @@
+     detect_three_state_flag,
+     check_pump_conflict,
+     evaluate_dynamic_exclusions,
++    DYNAMIC_RULE_UNAVAILABLE_PREFIX,
+     extract_query_params,
+ )
+ 
+@@ -284,6 +285,8 @@
+                 b_mult = get_unit_multiplier(b_unit, c_unit)
+                 if b_mult is None or abs(b_mult - 1.0) > 1e-6:
+                     return "绑定目标单位与实时物料单位不一致阻断"
++            elif abs(mult - 1.0) > 1e-9 and allow_unit_conversion:
++                return "单位非1倍率绑定缺失目标单位阻断"
+         if abs(mult - 1.0) > 1e-9:
+             if not allow_unit_conversion or binding is None:
+                 return "单位非1倍率工程量需按目标单位显式换算复核阻断"
+@@ -343,9 +346,11 @@
+     if q_ex_state is False and c_ex_state is True:
+         return "非防爆要求vs防爆硬隔离"
+ 
+-    # 8. 动态规则硬排除（must_not_contain / must_contain 与 matcher 评分管线同源）
++    # 8. 动态规则硬排除（must_not_contain / must_contain 与 matcher 评分管线同源；规则不可用 fail-closed）
+     dyn_reasons = evaluate_dynamic_exclusions(row, material)
+     if dyn_reasons:
++        if any(DYNAMIC_RULE_UNAVAILABLE_PREFIX in r for r in dyn_reasons):
++            return f"动态规则不可用阻断: {'; '.join(dyn_reasons)}"
+         return f"动态规则硬排除: {'; '.join(dyn_reasons)}"
+ 
+     return None
+@@ -356,20 +361,22 @@
+     bindings: List[Dict[str, Any]],
+     allow_unit_conversion: bool = True,
+     saved_bindings: Optional[List[Dict[str, Any]]] = None,
++    require_saved_unit_evidence: bool = False,
+ ) -> Dict[str, Any]:
+-    """对整组绑定做新鲜有效性 + 硬冲突复核。
++    """对整组绑定做新鲜有效性 + 硬冲突 + 确认后目标单位/换算上下文漂移复核。
+ 
+     返回 {"ok": bool, "invalid_codes": [...], "conflicts": [{code, reason}, ...]}。
+     """
+     invalid_codes = validate_binding_codes(bindings)
+     conflicts: List[Dict[str, str]] = []
+     live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
+-    saved_units: Dict[str, str] = {}
++    saved_by_code: Dict[str, Dict[str, Any]] = {}
+     for sb in (saved_bindings or []):
+         sc = str(sb.get("code", "")).strip()
+-        su = str(sb.get("unit", "") or "").strip()
+-        if sc and su and sc not in saved_units:
+-            saved_units[sc] = su
++        if sc and sc not in saved_by_code:
++            saved_by_code[sc] = sb
++
++    q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
+ 
+     for b in (bindings or []):
+         code = str(b.get("code", "")).strip()
+@@ -378,18 +385,47 @@
+         reason = evaluate_hard_conflicts(
+             row, live[code], binding=b, allow_unit_conversion=allow_unit_conversion
+         )
+-        if not reason and code in saved_units:
+-            saved_unit = saved_units[code]
++        if not reason:
++            sb = saved_by_code.get(code)
+             live_unit = str(live[code].get("unit", "") or "").strip()
+-            if live_unit:
+-                s_mult = get_unit_multiplier(saved_unit, live_unit)
+-                if s_mult is None or abs(s_mult - 1.0) > 1e-6:
++            req_unit = str(b.get("unit", "") or "").strip()
++            b_ratio = _to_finite_float(b.get("qty_ratio"))
++            has_non_one_ratio = b_ratio is not None and abs(b_ratio - 1.0) > 1e-6
++            saved_unit = str(
++                (sb or {}).get("confirmed_unit") or (sb or {}).get("unit") or ""
++            ).strip()
++
++            if require_saved_unit_evidence and (
++                sb is None or (not saved_unit and (live_unit or q_unit or has_non_one_ratio))
++            ):
++                reason = "确认记录缺少权威目标单位证据阻断"
++            elif saved_unit:
++                if not live_unit:
+                     reason = "确认后物料目标单位发生漂移阻断"
+-            req_unit = str(b.get("unit", "") or "").strip()
+-            if not reason and req_unit:
+-                u_mult = get_unit_multiplier(req_unit, saved_unit)
+-                if u_mult is None or abs(u_mult - 1.0) > 1e-6:
+-                    reason = "绑定目标单位与确认记录不一致阻断"
++                else:
++                    s_mult = get_unit_multiplier(saved_unit, live_unit)
++                    if s_mult is None or abs(s_mult - 1.0) > 1e-6:
++                        reason = "确认后物料目标单位发生漂移阻断"
++                if (
++                    not reason
++                    and sb is not None
++                    and sb.get("confirmed_unit_mult") is not None
++                ):
++                    prev_mult = _to_finite_float(sb.get("confirmed_unit_mult"))
++                    if prev_mult is not None and q_unit and live_unit:
++                        curr_mult = get_unit_multiplier(q_unit, live_unit)
++                        if (
++                            curr_mult is None
++                            or abs(curr_mult - prev_mult) > 1e-6 * max(1.0, abs(prev_mult))
++                        ):
++                            reason = "确认后单位换算上下文发生漂移阻断"
++                if not reason:
++                    if not req_unit:
++                        reason = "绑定目标单位缺失或与确认记录不一致阻断"
++                    else:
++                        u_mult = get_unit_multiplier(req_unit, saved_unit)
++                        if u_mult is None or abs(u_mult - 1.0) > 1e-6:
++                            reason = "绑定目标单位与确认记录不一致阻断"
+         if reason:
+             conflicts.append({"code": code, "reason": reason})
+     return {
+@@ -404,6 +440,37 @@
+ # ---------------------------------------------------------------------------
+ def _row_to_dict(row: Any) -> Optional[Dict[str, Any]]:
+     return dict(row) if row is not None else None
++
++
++def _enrich_saved_bindings(
++    row: Dict[str, Any], bindings: List[Dict[str, Any]]
++) -> List[Dict[str, Any]]:
++    """V015-M3 R03：落盘前固化实时物料权威目标单位及换算上下文，供恢复/导出校验漂移与遗留证据。"""
++    live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
++    q_unit = str(row.get("original_unit", "") or row.get("unit", "") or "").strip()
++    orig_qty = _to_finite_float(row.get("original_qty"))
++    if orig_qty is None:
++        orig_qty = _to_finite_float(row.get("qty"))
++
++    enriched_list: List[Dict[str, Any]] = []
++    for b in (bindings or []):
++        item = dict(b)
++        code = str(item.get("code", "") or "").strip()
++        mat = live.get(code)
++        live_unit = str((mat or {}).get("unit", "") or "").strip()
++        req_unit = str(item.get("unit", "") or "").strip()
++        confirmed_unit = live_unit or req_unit
++        if confirmed_unit and not req_unit:
++            item["unit"] = confirmed_unit
++        item["confirmed_unit"] = confirmed_unit
++        item["confirmed_orig_unit"] = q_unit
++        if orig_qty is not None:
++            item["confirmed_orig_qty"] = orig_qty
++        unit_mult = get_unit_multiplier(q_unit, live_unit) if (q_unit and live_unit) else None
++        if unit_mult is not None:
++            item["confirmed_unit_mult"] = unit_mult
++        enriched_list.append(item)
++    return enriched_list
+ 
+ 
+ def record_decision(
+@@ -422,7 +489,8 @@
+     row_fp = row_content_fingerprint(row)
+     bind_fp = binding_fingerprint(bindings)
+     codes = ",".join(sorted({str(b.get("code", "")).strip() for b in (bindings or []) if str(b.get("code", "")).strip()}))
+-    payload_json = _canonical_json({"row": row, "bindings": bindings or []})
++    saved_bindings = _enrich_saved_bindings(row, bindings or [])
++    payload_json = _canonical_json({"row": row, "bindings": saved_bindings})
+ 
+     conn = get_auth_connection()
+     try:
+--- R02/app/llm_rule_engine.py
++++ R03/app/llm_rule_engine.py
+@@ -500,14 +500,48 @@
+         return extracted
+ 
+     @staticmethod
++    def validate_matching_rules(matching_rules: Any, rule_id: Any = "?") -> Dict[str, Any]:
++        """V015-M3 R03：校验动态规则 matching_rules 结构，损坏时显式抛 DynamicRuleUnavailableError。"""
++        if matching_rules is None:
++            return {}
++        if not isinstance(matching_rules, dict):
++            raise DynamicRuleUnavailableError(f"动态规则 {rule_id} matching_rules 结构非法: 期望 dict")
++        for list_key in ("must_not_contain", "must_contain"):
++            if list_key in matching_rules and matching_rules[list_key] is not None:
++                val = matching_rules[list_key]
++                if not isinstance(val, list) or any(not isinstance(item, str) for item in val):
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} {list_key} 结构非法: 期望字符串列表"
++                    )
++        if "score_boost_keywords" in matching_rules and matching_rules["score_boost_keywords"] is not None:
++            boosts = matching_rules["score_boost_keywords"]
++            if not isinstance(boosts, dict):
++                raise DynamicRuleUnavailableError(
++                    f"动态规则 {rule_id} score_boost_keywords 结构非法: 期望 dict"
++                )
++            for kw, boost in boosts.items():
++                if not isinstance(kw, str):
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} score_boost_keywords 键非法"
++                    )
++                try:
++                    float(boost)
++                except (TypeError, ValueError) as exc:
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} score_boost_keywords 分值非法: {boost}"
++                    ) from exc
++        return matching_rules
++
++    @staticmethod
+     def evaluate_matching_filters(query_text: str, candidate_text: str, matching_rules: Dict[str, Any]) -> Tuple[bool, float, List[str]]:
+         """
+         Evaluates matching criteria against candidate item.
+         Returns: (is_excluded, score_adjustment, triggered_reasons)
+         """
++        validated_rules = DynamicRuleInterpreter.validate_matching_rules(matching_rules)
+         reasons = []
+         # Check hard exclusion keywords
+-        for not_word in matching_rules.get("must_not_contain", []):
++        for not_word in (validated_rules.get("must_not_contain") or []):
+             if not_word and not_word.strip():
+                 nw = not_word.strip()
+                 # Check if candidate contains not_word, but ignore if it is preceded by negation (e.g. "不带POE", "非POE", "无POE")
+@@ -519,7 +553,7 @@
+                         return True, -999.0, reasons
+                 
+         # Check hard required keywords
+-        for must_word in matching_rules.get("must_contain", []):
++        for must_word in (validated_rules.get("must_contain") or []):
+             if must_word and must_word.strip():
+                 mw = must_word.strip()
+                 if mw.lower() not in candidate_text.lower():
+@@ -528,7 +562,7 @@
+ 
+         # Calculate score boosts
+         score_adj = 0.0
+-        boost_map = matching_rules.get("score_boost_keywords", {})
++        boost_map = validated_rules.get("score_boost_keywords") or {}
+         for kw, boost in boost_map.items():
+             if kw and str(kw).strip():
+                 kw_str = str(kw).strip()
+@@ -584,6 +618,10 @@
+             conn.close()
+ 
+ 
++class DynamicRuleUnavailableError(RuntimeError):
++    """V015-M3 R03：动态规则库读取、schema 或 DSL 解析失败时显式 fail-closed，禁止静默视作无规则。"""
++
++
+ class LLMRuleManager:
+     """Rule CRUD, LLM compilation, audit workflow, and in-memory active rules cache."""
+     _active_rules_cache = None
+@@ -600,23 +638,50 @@
+             if cls._active_rules_cache is not None:
+                 return cls._active_rules_cache
+ 
+-            conn = get_db_conn()
++            conn = None
+             try:
++                conn = get_db_conn()
+                 cursor = conn.cursor()
+                 cursor.execute("SELECT * FROM llm_rules WHERE status = 'approved' ORDER BY priority ASC")
+                 rows = cursor.fetchall()
+-            except sqlite3.OperationalError:
+-                return []
++            except sqlite3.OperationalError as exc:
++                msg = str(exc).lower()
++                if "no such table" in msg and "llm_rules" in msg and conn is not None:
++                    try:
++                        table_row = conn.execute(
++                            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='llm_rules'"
++                        ).fetchone()
++                        if table_row is None:
++                            return []
++                    except Exception:
++                        pass
++                raise DynamicRuleUnavailableError(f"动态规则库查询失败: {exc}") from exc
++            except Exception as exc:
++                raise DynamicRuleUnavailableError(f"动态规则库连接或读取异常: {exc}") from exc
+             finally:
+-                conn.close()
++                if conn is not None:
++                    conn.close()
+ 
+             rules = []
+             for r in rows:
+                 item = dict(r)
++                rule_id = item.get("id", "?")
++                raw_json = item.get("rule_json")
++                if not isinstance(raw_json, str) or not raw_json.strip():
++                    raise DynamicRuleUnavailableError(f"动态规则 {rule_id} rule_json 缺失或非字符串")
+                 try:
+-                    item["parsed_dsl"] = json.loads(item["rule_json"])
+-                except Exception:
+-                    item["parsed_dsl"] = {}
++                    parsed = json.loads(raw_json)
++                except Exception as exc:
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} rule_json 解析失败: {exc}"
++                    ) from exc
++                if not isinstance(parsed, dict):
++                    raise DynamicRuleUnavailableError(f"动态规则 {rule_id} rule_json 顶层必须为 dict")
++                if "matching_rules" in parsed:
++                    DynamicRuleInterpreter.validate_matching_rules(
++                        parsed.get("matching_rules"), rule_id=rule_id
++                    )
++                item["parsed_dsl"] = parsed
+                 rules.append(item)
+ 
+             cls._active_rules_cache = rules
+--- R02/app/matcher.py
++++ R03/app/matcher.py
+@@ -16,6 +16,13 @@
+     detect_three_state_flag,
+     detect_pump_state,
+     check_pump_conflict,
++)
++# V015-M3 R03：专业别名归一化与动态规则作用域匹配收敛到 app.normalizer 单一事实源（无环依赖）
++from app.normalizer import (
++    PROFESSIONAL_ALIASES,
++    normalize_professional_category,
++    dynamic_scope_matches as _dyn_scope_matches,
++    dynamic_rule_matches_query as _dyn_rule_matches_query,
+ )
+ 
+ logger = logging.getLogger(__name__)
+@@ -351,12 +358,8 @@
+ # ---------------------------------------------------------------------------
+ # V015-M3：确认/导出/规则/恢复四链路共用的硬约束纯函数（三态语义，unknown 不臆断）
+ # ---------------------------------------------------------------------------
+-PROFESSIONAL_ALIASES = {
+-    "医气": "医气",
+-    "医用气体": "医气",
+-    "医疗气体": "医气",
+-    "气体": "医气",
+-}
++# V015-M3 R03：PROFESSIONAL_ALIASES / normalize_professional_category 单一事实源已收敛至 app.normalizer，
++# 模块顶部导入并重导出，保持外部调用兼容。
+ 
+ # 材质牌号枚举：仅登记可确定的等价写法，未知写法原样返回（不臆断牌号）
+ MATERIAL_GRADE_ALIASES = {
+@@ -372,16 +375,6 @@
+ 
+ # V015-M3：NEGATION_PREFIXES / detect_three_state_flag 的单一事实源在
+ # app.domain_extractors，模块顶部已导入并重导出，此处不再重复定义，避免否定词表漂移。
+-
+-
+-def normalize_professional_category(value: str) -> str:
+-    """专业枚举归一：展示名/别名统一到枚举值；空值返回 ''，未知值原样返回。"""
+-    if value is None:
+-        return ""
+-    text = str(value).strip()
+-    if not text:
+-        return ""
+-    return PROFESSIONAL_ALIASES.get(text, text)
+ 
+ 
+ def parse_material_attrs(material: Dict[str, Any]) -> Dict[str, Any]:
+@@ -1936,47 +1929,7 @@
+     ctx.base_score = base_score
+ 
+ 
+-def _dyn_scope_matches(scope_tgt: str, candidate_names: List[Any]) -> bool:
+-    if not scope_tgt:
+-        return True
+-    targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-    for c in candidate_names:
+-        if not c:
+-            continue
+-        c_low = str(c).lower()
+-        if any(t in c_low or c_low in t for t in targets):
+-            return True
+-    return False
+-
+-
+-def _dyn_rule_matches_query(rule: Dict[str, Any], query_info: Dict[str, Any]) -> bool:
+-    scope_lvl = rule.get("scope_level", "category")
+-    scope_tgt = rule.get("scope_target", "")
+-    if scope_lvl == "universal" or not scope_tgt:
+-        return True
+-    q_prof = str(query_info.get("professional", "") or query_info.get("original_category", "") or "").strip()
+-    if q_prof:
+-        q_prof = re.sub(r'^\d+[\.．\s]*', '', q_prof).strip()
+-    prof_candidates = [
+-        query_info.get("category", ""),
+-        query_info.get("original_category", ""),
+-        q_prof,
+-        normalize_professional_category(q_prof) if q_prof else "",
+-        query_info.get("domain", ""),
+-        query_info.get("discipline", ""),
+-        "给排水",
+-        "通用",
+-    ]
+-    name_candidates = [
+-        query_info.get("name", ""),
+-        query_info.get("raw_name", ""),
+-        query_info.get("original_name", ""),
+-    ]
+-    if scope_lvl == "discipline":
+-        return _dyn_scope_matches(scope_tgt, prof_candidates)
+-    if scope_lvl == "category":
+-        return _dyn_scope_matches(scope_tgt, name_candidates)
+-    return _dyn_scope_matches(scope_tgt, name_candidates + prof_candidates)
++DYNAMIC_RULE_UNAVAILABLE_PREFIX = "动态规则不可用，无法完成排除复核"
+ 
+ 
+ def _dyn_candidate_text(candidate: Dict[str, Any], c_name: str = "", c_full_spec: str = "") -> str:
+@@ -1993,33 +1946,45 @@
+ 
+ 
+ def evaluate_dynamic_exclusions(row_or_query: Dict[str, Any], candidate: Dict[str, Any]) -> List[str]:
+-    """V015-M3 R02：与 _apply_dynamic_rules 同源的动态硬排除判定（推荐/规则/确认/恢复/导出共用）。"""
++    """V015-M3 R03：与 _apply_dynamic_rules 同源的动态硬排除判定；规则不可用/损坏时 fail-closed 返回阻断原因。"""
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
+         active_rules = LLMRuleManager.get_active_rules()
+-    except Exception:
+-        return []
++    except Exception as exc:
++        logger.error("动态规则读取失败，按 fail-closed 阻断: %s", exc)
++        return [f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {exc}"]
+     if not active_rules:
+         return []
+     q_spec = str(row_or_query.get("spec", "") or row_or_query.get("original_spec", "") or "")
+     cand_text = _dyn_candidate_text(candidate)
+     excl_reasons: List[str] = []
+     for r in active_rules:
+-        if not _dyn_rule_matches_query(r, row_or_query):
+-            continue
+-        matching_rules = (r.get("parsed_dsl", {}) or {}).get("matching_rules", {})
+-        if not matching_rules:
+-            continue
+-        is_excl, _boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+-            q_spec, cand_text, matching_rules
+-        )
+-        if is_excl:
+-            excl_reasons.extend(dyn_reasons)
++        try:
++            dsl = r.get("parsed_dsl")
++            if dsl is None:
++                dsl = {}
++            if not isinstance(dsl, dict):
++                raise ValueError(f"动态规则 {r.get('id', '?')} parsed_dsl 结构非法")
++            matching_rules = dsl.get("matching_rules")
++            if matching_rules is not None and not isinstance(matching_rules, dict):
++                raise ValueError(f"动态规则 {r.get('id', '?')} matching_rules 结构非法")
++            if not _dyn_rule_matches_query(r, row_or_query):
++                continue
++            if not matching_rules:
++                continue
++            is_excl, _boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
++                q_spec, cand_text, matching_rules
++            )
++            if is_excl:
++                excl_reasons.extend(dyn_reasons)
++        except Exception as exc:
++            logger.error("动态规则判定异常，按 fail-closed 阻断: %s", exc)
++            excl_reasons.append(f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {exc}")
+     return excl_reasons
+ 
+ 
+ def _apply_dynamic_rules(ctx: ScoringContext):
+-    """Evaluate LLM-generated active matching rules."""
++    """Evaluate LLM-generated active matching rules (fail-closed on rule load/parse errors)."""
+     base_score = ctx.base_score
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+@@ -2030,10 +1995,16 @@
+             query_scope_info["original_name"] = ctx.q_name
+ 
+         for r in active_rules:
++            dsl = r.get("parsed_dsl")
++            if dsl is None:
++                dsl = {}
++            if not isinstance(dsl, dict):
++                raise ValueError(f"动态规则 {r.get('id', '?')} parsed_dsl 结构非法")
++            matching_rules = dsl.get("matching_rules")
++            if matching_rules is not None and not isinstance(matching_rules, dict):
++                raise ValueError(f"动态规则 {r.get('id', '?')} matching_rules 结构非法")
+             if not _dyn_rule_matches_query(r, query_scope_info):
+                 continue
+-            dsl = r.get("parsed_dsl", {})
+-            matching_rules = dsl.get("matching_rules", {})
+             if matching_rules:
+                 is_excl, boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+                     ctx.q_spec_text, cand_text, matching_rules
+@@ -2053,6 +2024,11 @@
+                         RuleHitStatsTracker().record_hit(r["rule_id"])
+     except Exception as e:
+         logger.error(f"Error evaluating dynamic matching rules: {e}")
++        # V015-M3 R03：规则读取/解析失败按 fail-closed 阻断自动接受，禁止退化成无规则通过
++        ctx.blocked = True
++        ctx.max_score = 0.0
++        base_score = 0.0
++        ctx.reasons.append(f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {e}")
+ 
+     ctx.base_score = base_score
+ 
+--- R02/app/normalizer.py
++++ R03/app/normalizer.py
+@@ -1,8 +1,106 @@
+ # -*- coding: utf-8 -*-
++import logging
+ import os
+ import re
+ import json
+ from typing import Dict, Any, List, Optional, Tuple
++
++logger = logging.getLogger(__name__)
++
++# V015-M3 R03：专业别名与动态规则作用域匹配单一事实源（无环底层，供 matcher/query_preprocessor/normalizer 共用）
++PROFESSIONAL_ALIASES = {
++    "医气": "医气",
++    "医用气体": "医气",
++    "医疗气体": "医气",
++    "气体": "医气",
++}
++DYNAMIC_UNIVERSAL_TOKENS = {"通用", "全部", "all", "universal"}
++
++
++def normalize_professional_category(value: Any) -> str:
++    """专业枚举归一：展示名/别名统一到枚举值；空值返回 ''，未知值原样返回。"""
++    if value is None:
++        return ""
++    text = str(value).strip()
++    if not text:
++        return ""
++    return PROFESSIONAL_ALIASES.get(text, text)
++
++
++def dynamic_scope_matches(scope_tgt: str, candidate_names: List[Any]) -> bool:
++    """按目标串及展示别名比较候选名称列表，不做任何跨专业默认值兜底。"""
++    if not scope_tgt:
++        return True
++    raw_targets = [t.strip() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
++    targets: List[str] = []
++    for t in raw_targets:
++        t_low = t.lower()
++        if t_low not in targets:
++            targets.append(t_low)
++        norm_t = normalize_professional_category(t).lower()
++        if norm_t and norm_t not in targets:
++            targets.append(norm_t)
++    for c in candidate_names:
++        if not c:
++            continue
++        c_str = str(c).strip()
++        if not c_str:
++            continue
++        c_low = c_str.lower()
++        c_norm = normalize_professional_category(c_str).lower()
++        for cand in (c_low, c_norm):
++            if cand and any(t in cand or cand in t for t in targets):
++                return True
++    return False
++
++
++def dynamic_rule_matches_query(rule: Dict[str, Any], query_info: Dict[str, Any]) -> bool:
++    """A-M3-05：按查询真实专业、名称及显式 universal/通用 契约判定动态规则作用域。"""
++    scope_lvl = str(rule.get("scope_level") or "category").strip().lower()
++    scope_tgt = str(rule.get("scope_target") or "").strip()
++    if scope_lvl == "universal" or not scope_tgt:
++        return True
++
++    targets = [t.strip() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
++    if scope_lvl == "discipline" and any(t.lower() in DYNAMIC_UNIVERSAL_TOKENS for t in targets):
++        return True
++
++    q_prof = str(
++        query_info.get("professional", "") or query_info.get("original_category", "") or ""
++    ).strip()
++    if q_prof:
++        q_prof = re.sub(r'^\d+[\.．\s]*', '', q_prof).strip()
++    raw_profs = [
++        query_info.get("category", ""),
++        query_info.get("original_category", ""),
++        q_prof,
++        query_info.get("domain", ""),
++        query_info.get("discipline", ""),
++    ]
++    prof_candidates: List[str] = []
++    for val in raw_profs:
++        s = str(val or "").strip()
++        if not s:
++            continue
++        if s not in prof_candidates:
++            prof_candidates.append(s)
++        stripped = re.sub(r'^\d+[\.．\s]*', '', s).strip()
++        if stripped and stripped not in prof_candidates:
++            prof_candidates.append(stripped)
++        norm = normalize_professional_category(stripped or s)
++        if norm and norm not in prof_candidates:
++            prof_candidates.append(norm)
++
++    name_candidates = [
++        query_info.get("name", ""),
++        query_info.get("raw_name", ""),
++        query_info.get("original_name", ""),
++    ]
++    if scope_lvl == "discipline":
++        return dynamic_scope_matches(scope_tgt, prof_candidates)
++    if scope_lvl == "category":
++        return dynamic_scope_matches(scope_tgt, name_candidates)
++    return dynamic_scope_matches(scope_tgt, name_candidates + prof_candidates)
+ 
+ CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
+ 
+@@ -74,47 +172,54 @@
+         result.append(chr(code))
+     return "".join(result)
+ 
+-def clean_text_standard(text: str, discipline: Optional[str] = None, category: Optional[str] = None) -> str:
+-    """
+-    Apply character cleaning, full-to-half conversion, lowercase normalization,
+-    and alias synonym replacements on raw text.
+-    """
+-    if not text or not isinstance(text, str):
+-        return ""
+-
+-    # 0. Apply dynamic LLM DSL cleaning rules on raw structured input (e.g. multi-line manifests)
++def _cleaning_rule_in_scope(rule: Dict[str, Any], discipline: Optional[str], category: Optional[str]) -> bool:
++    scope_lvl = str(rule.get("scope_level") or "universal").strip().lower()
++    scope_tgt = str(rule.get("scope_target") or "").strip()
++    if scope_lvl == "universal" or not scope_tgt:
++        return True
++    tokens = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
++    if scope_lvl == "discipline":
++        if any(t in DYNAMIC_UNIVERSAL_TOKENS for t in tokens):
++            return True
++        if discipline:
++            return dynamic_scope_matches(scope_tgt, [discipline])
++        return True
++    if scope_lvl == "category" and category:
++        return dynamic_scope_matches(scope_tgt, [category])
++    return True
++
++
++def _apply_dynamic_cleaning_pass(
++    text: str, discipline: Optional[str], category: Optional[str], phase: str
++) -> str:
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+         active_rules = LLMRuleManager.get_active_rules()
+-        
+-        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+-            if not scope_tgt:
+-                return True
+-            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-            for c in candidate_names:
+-                if not c:
+-                    continue
+-                c_low = str(c).lower()
+-                if any(t in c_low or c_low in t for t in targets):
+-                    return True
+-            return False
+-
+         for r in active_rules:
+-            scope_lvl = r.get("scope_level", "universal")
+-            scope_tgt = r.get("scope_target", "")
+-            if scope_lvl == "discipline" and scope_tgt and discipline and not scope_matches(scope_tgt, [discipline]):
+-                continue
+-            if scope_lvl == "category" and scope_tgt and category and not scope_matches(scope_tgt, [category]):
++            if not _cleaning_rule_in_scope(r, discipline, category):
+                 continue
+             dsl = r.get("parsed_dsl", {})
+             cleaning_rules = dsl.get("cleaning_rules", [])
+             if cleaning_rules:
+                 text_before = text
+-                text, actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
++                text, _actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
+                 if text != text_before and r.get("rule_id"):
+                     RuleHitStatsTracker().record_hit(r["rule_id"])
+-    except Exception:
+-        pass
++    except Exception as exc:
++        logger.warning(f"Dynamic {phase} cleaning rules skipped on normalization: {exc}")
++    return text
++
++
++def clean_text_standard(text: str, discipline: Optional[str] = None, category: Optional[str] = None) -> str:
++    """
++    Apply character cleaning, full-to-half conversion, lowercase normalization,
++    and alias synonym replacements on raw text.
++    """
++    if not text or not isinstance(text, str):
++        return ""
++
++    # 0. Apply dynamic LLM DSL cleaning rules on raw structured input (e.g. multi-line manifests)
++    text = _apply_dynamic_cleaning_pass(text, discipline, category, "pre-normalization")
+ 
+     # 1. Full-width to half-width & remove invisible control characters (except \n and \r)
+     text = to_half_width(text)
+@@ -146,25 +251,7 @@
+     text = re.sub(r'[ \t]+', ' ', text)
+ 
+     # 7. Apply dynamic LLM DSL cleaning rules (post-normalization pass)
+-    try:
+-        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+-        active_rules = LLMRuleManager.get_active_rules()
+-        for r in active_rules:
+-            scope_lvl = r.get("scope_level", "universal")
+-            scope_tgt = r.get("scope_target", "")
+-            if scope_lvl == "discipline" and scope_tgt and discipline and scope_tgt != discipline:
+-                continue
+-            if scope_lvl == "category" and scope_tgt and category and scope_tgt != category:
+-                continue
+-            dsl = r.get("parsed_dsl", {})
+-            cleaning_rules = dsl.get("cleaning_rules", [])
+-            if cleaning_rules:
+-                text_before = text
+-                text, actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
+-                if text != text_before and r.get("rule_id"):
+-                    RuleHitStatsTracker().record_hit(r["rule_id"])
+-    except Exception:
+-        pass
++    text = _apply_dynamic_cleaning_pass(text, discipline, category, "post-normalization")
+ 
+     return text.strip()
+ 
+--- R02/app/query_preprocessor.py
++++ R03/app/query_preprocessor.py
+@@ -1,8 +1,9 @@
+ # -*- coding: utf-8 -*-
++import logging
+ import re
+ from typing import Dict, Any, Tuple, Optional, List
+ 
+-from app.normalizer import clean_text_standard, to_half_width, convert_de_to_dn
++from app.normalizer import clean_text_standard, to_half_width, convert_de_to_dn, dynamic_rule_matches_query
+ from app.domain_router import route_domain
+ from app.domain_extractors import ConfigDrivenExtractor, parse_numeric_complex, detect_three_state_flag
+ 
+@@ -700,9 +701,11 @@
+     """
+     # 1. Decouple name and spec if spec is embedded in name
+     effective_name, effective_spec = decouple_name_and_spec(name, specification)
+-    name_clean = clean_text_standard(effective_name or "").strip()
++    cat_clean = (category or "").strip()
++    name_clean = clean_text_standard(
++        effective_name or "", discipline=cat_clean, category=cat_clean
++    ).strip()
+     spec_raw = (effective_spec or "").strip()
+-    cat_clean = (category or "").strip()
+ 
+     # 2. Determine domain using route_domain
+     domain = route_domain(cat_clean, name_clean, spec_raw)
+@@ -790,29 +793,19 @@
+ 
+     # 8. Apply dynamic LLM extraction rules
+     try:
+-        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
++        from app.llm_rule_engine import LLMRuleManager
+         active_rules = LLMRuleManager.get_active_rules()
+-        
+-        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+-            if not scope_tgt:
+-                return True
+-            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-            for c in candidate_names:
+-                if not c:
+-                    continue
+-                c_low = str(c).lower()
+-                if any(t in c_low or c_low in t for t in targets):
+-                    return True
+-            return False
+-
+-        # 与本函数其余部分一致，第三参语义为专业；动态规则的 discipline 范围
+-        # 以专业名比对，不再引用不存在的局部变量（V015-M1 / F01）。
++        q_scope_info = {
++            "name": final_name,
++            "raw_name": name_clean,
++            "original_name": name_clean,
++            "professional": cat_clean,
++            "category": cat_clean,
++            "domain": domain,
++        }
++        from app.llm_rule_engine import DynamicRuleInterpreter
+         for r in active_rules:
+-            scope_lvl = r.get("scope_level", "category")
+-            scope_tgt = r.get("scope_target", "")
+-            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [cat_clean, domain, "给排水", "通用"]):
+-                continue
+-            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [name_clean, final_name, combined_text]):
++            if not dynamic_rule_matches_query(r, q_scope_info):
+                 continue
+             dsl = r.get("parsed_dsl", {})
+             extraction_rules = dsl.get("extraction_rules", [])
+@@ -832,8 +825,8 @@
+                                 normalized_attrs["dn_val"] = float(m_dn.group(1))
+                             else:
+                                 normalized_attrs["规格"] = str(v)
+-    except Exception:
+-        pass
++    except Exception as exc:
++        logging.getLogger(__name__).warning(f"Dynamic extraction rules skipped: {exc}")
+ 
+     return {
+         "domain": domain,
+--- R02/app/server.py
++++ R03/app/server.py
+@@ -187,6 +187,8 @@
+     get_decision,
+     get_row_decision,
+     extract_saved_bindings,
++    fetch_live_material_map,
++    get_unit_multiplier,
+ )
+ from app.audit_manager import (
+     init_audit_tables, log_audit_event, record_heartbeat, 
+@@ -597,7 +599,10 @@
+                 )
+                 validation = (
+                     validate_bindings_against_row(
+-                        row, binds, saved_bindings=extract_saved_bindings(record)
++                        row,
++                        binds,
++                        saved_bindings=extract_saved_bindings(record),
++                        require_saved_unit_evidence=True,
+                     )
+                     if record else None
+                 )
+@@ -610,7 +615,15 @@
+                         if validation["invalid_codes"]:
+                             reason = "确认后物料编码已失效，草稿已降为待复核"
+                         else:
+-                            reason = "绑定目标与清单行存在硬冲突，草稿已降为待复核"
++                            first_conflict = (
++                                validation["conflicts"][0]["reason"]
++                                if validation.get("conflicts") else ""
++                            )
++                            reason = (
++                                f"绑定目标与清单行存在硬冲突({first_conflict})，草稿已降为待复核"
++                                if first_conflict
++                                else "绑定目标与清单行存在硬冲突，草稿已降为待复核"
++                            )
+                     # 尝试带约束自动接受规则（仅约束逐项匹配 + 编码有效 + 无硬冲突）
+                     rule = next(
+                         (r for r in load_auto_binding_rules()
+@@ -2698,7 +2711,10 @@
+     )
+     if record:
+         validation = validate_bindings_against_row(
+-            item, binds, saved_bindings=extract_saved_bindings(record)
++            item,
++            binds,
++            saved_bindings=extract_saved_bindings(record),
++            require_saved_unit_evidence=True,
+         )
+         if validation["invalid_codes"]:
+             deny("确认后物料编码已失效", invalid_codes=validation["invalid_codes"])
+@@ -2720,6 +2736,18 @@
+         if decision["decision_status"] == STATUS_AUTO_ACCEPTED:
+             if binding_fingerprint(binds) != binding_fingerprint(rule_binds):
+                 deny("自动接受绑定与当前规则数量/比例不一致，须重新人工确认")
++            live = fetch_live_material_map([b.get("code", "") for b in binds])
++            for b in binds:
++                code = str(b.get("code", "") or "").strip()
++                mat = live.get(code)
++                live_unit = str((mat or {}).get("unit", "") or "").strip()
++                req_unit = str(b.get("unit", "") or "").strip()
++                if live_unit:
++                    if not req_unit:
++                        deny("自动接受绑定缺失目标单位，须按当前物料单位导出")
++                    u_mult = get_unit_multiplier(req_unit, live_unit)
++                    if u_mult is None or abs(u_mult - 1.0) > 1e-6:
++                        deny("自动接受绑定目标单位与当前物料单位不一致，须重新人工确认")
+             return
+ 
+     # 3) 其余（推荐/旧草稿/伪造状态/确认后修改致指纹失配）一律拒绝
+--- R02/tests/test_m3_hard_constraints.py
++++ R03/tests/test_m3_hard_constraints.py
+@@ -1007,3 +1007,384 @@
+ 
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
++
++
++# ---------------------------------------------------------------------------
++# V015-M3 R03：A-M3-01 / A-M3-02 / A-M3-05 纯函数层闭环测试
++# ---------------------------------------------------------------------------
++
++class TestM3R03AuditClosureUnit(unittest.TestCase):
++    """V015-M3 R03：目标单位证据与漂移、规则读取 fail-closed、动态规则作用域隔离。"""
++
++    def setUp(self):
++        LLMRuleManager.clear_active_cache()
++
++    def tearDown(self):
++        LLMRuleManager.clear_active_cache()
++
++    def test_a_m3_01_non_one_multiplier_rejects_missing_target_unit(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN100",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++            original_category="暖通",
++        )
++        mat = _material(
++            code="CONC-M",
++            name="镀锌钢管",
++            specification="DN100",
++            unit="m",
++            category="暖通",
++        )
++        # 无目标 unit 提交 10 km -> 10000 必须被阻断
++        reason_missing = evaluate_hard_conflicts(
++            row, mat,
++            binding={"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0},
++            allow_unit_conversion=True,
++        )
++        self.assertIsNotNone(reason_missing)
++        self.assertIn("缺失目标单位", reason_missing)
++
++        # 显式目标 unit="m" 且换算准确 -> 放行
++        reason_ok = evaluate_hard_conflicts(
++            row, mat,
++            binding={"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"},
++            allow_unit_conversion=True,
++        )
++        self.assertIsNone(reason_ok)
++
++    def test_a_m3_01_saved_unit_evidence_drift_and_tamper_checks(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN100",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++            original_category="暖通",
++        )
++        live_m = {
++            "CONC-M": _material(
++                code="CONC-M", name="镀锌钢管", specification="DN100", unit="m", category="暖通"
++            )
++        }
++        live_km = {
++            "CONC-M": _material(
++                code="CONC-M", name="镀锌钢管", specification="DN100", unit="km", category="暖通"
++            )
++        }
++        binds_m = [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}]
++        binds_no_unit = [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0}]
++
++        with patch("app.binding_decisions.validate_binding_codes", return_value=[]):
++            # 1) 遗留无单位证据记录 + require_saved_unit_evidence=True -> 无论请求带不带 unit 都阻断
++            with patch("app.binding_decisions.fetch_live_material_map", return_value=live_m):
++                res_legacy_no_unit = validate_bindings_against_row(
++                    row, binds_no_unit, saved_bindings=binds_no_unit, require_saved_unit_evidence=True
++                )
++                self.assertFalse(res_legacy_no_unit["ok"])
++                self.assertIn("缺失目标单位", res_legacy_no_unit["conflicts"][0]["reason"])
++
++                res_legacy_with_req_unit = validate_bindings_against_row(
++                    row, binds_m, saved_bindings=binds_no_unit, require_saved_unit_evidence=True
++                )
++                self.assertFalse(res_legacy_with_req_unit["ok"])
++                self.assertIn("缺少权威目标单位证据", res_legacy_with_req_unit["conflicts"][0]["reason"])
++
++            # 2) 库单位从 m 漂移成 km -> 无论客户端保留 m / 改写 km / 删 unit 一律阻断
++            saved_ok = [{
++                "code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m",
++                "confirmed_unit": "m", "confirmed_orig_unit": "km", "confirmed_unit_mult": 1000.0,
++            }]
++            with patch("app.binding_decisions.fetch_live_material_map", return_value=live_km):
++                for client_binds in (
++                    [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "m"}],
++                    [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km"}],
++                    binds_no_unit,
++                ):
++                    res_drift = validate_bindings_against_row(
++                        row, client_binds, saved_bindings=saved_ok, require_saved_unit_evidence=True
++                    )
++                    self.assertFalse(res_drift["ok"], client_binds)
++
++            # 3) 库未漂移但客户端删去或篡改 unit -> 阻断
++            with patch("app.binding_decisions.fetch_live_material_map", return_value=live_m):
++                res_del = validate_bindings_against_row(
++                    row, binds_no_unit, saved_bindings=saved_ok, require_saved_unit_evidence=True
++                )
++                self.assertFalse(res_del["ok"])
++                self.assertIn("缺失目标单位", res_del["conflicts"][0]["reason"])
++
++                res_chg = validate_bindings_against_row(
++                    row,
++                    [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": "km"}],
++                    saved_bindings=saved_ok,
++                    require_saved_unit_evidence=True,
++                )
++                self.assertFalse(res_chg["ok"])
++
++                # 正例：一切一致 -> 放行
++                res_pass = validate_bindings_against_row(
++                    row, binds_m, saved_bindings=saved_ok, require_saved_unit_evidence=True
++                )
++                self.assertTrue(res_pass["ok"], res_pass)
++
++            # 4) 1.0 倍率自定义一对多系数 + 米/m 等价 -> 保留放行
++            row_one = _row(
++                original_name="镀锌钢管", original_spec="DN100", original_qty=200,
++                original_unit="米", professional="暖通", original_category="暖通",
++            )
++            saved_one = [{
++                "code": "CONC-M", "qty": 300.0, "qty_ratio": 1.5, "unit": "m",
++                "confirmed_unit": "m", "confirmed_orig_unit": "米", "confirmed_unit_mult": 1.0,
++            }]
++            with patch("app.binding_decisions.fetch_live_material_map", return_value=live_m):
++                res_one = validate_bindings_against_row(
++                    row_one,
++                    [{"code": "CONC-M", "qty": 300.0, "qty_ratio": 1.5, "unit": "米"}],
++                    saved_bindings=saved_one,
++                    require_saved_unit_evidence=True,
++                )
++                self.assertTrue(res_pass["ok"] and res_one["ok"], res_one)
++
++    def test_a_m3_02_get_active_rules_distinguishes_missing_table_vs_errors_and_recovers(self):
++        import sqlite3
++        import tempfile
++        from app.llm_rule_engine import DynamicRuleUnavailableError
++
++        with tempfile.TemporaryDirectory() as tmpdir:
++            db_missing = os.path.join(tmpdir, "rules_missing.db")
++            db_broken = os.path.join(tmpdir, "rules_broken.db")
++            conn = sqlite3.connect(db_missing)
++            try:
++                conn.execute("CREATE TABLE unrelated (id INTEGER PRIMARY KEY)")
++                conn.commit()
++            finally:
++                conn.close()
++
++            # 1) 全新未建表库确实没有 llm_rules 表 -> 允许返回 []
++            with patch.dict(os.environ, {"MATERIALS_DB_PATH": db_missing, "TESTING": "1"}):
++                with patch("app.llm_rule_engine.init_rule_engine_db", lambda: None):
++                    LLMRuleManager.clear_active_cache()
++                    self.assertEqual(LLMRuleManager.get_active_rules(), [])
++
++            # 2) llm_rules 表存在但缺列(如缺 priority) -> 必须抛 DynamicRuleUnavailableError 且不写缓存
++            conn = sqlite3.connect(db_broken)
++            try:
++                conn.execute(
++                    "CREATE TABLE llm_rules (id INTEGER PRIMARY KEY, rule_id TEXT, status TEXT, rule_json TEXT)"
++                )
++                conn.commit()
++            finally:
++                conn.close()
++            with patch.dict(os.environ, {"MATERIALS_DB_PATH": db_broken, "TESTING": "1"}):
++                with patch("app.llm_rule_engine.init_rule_engine_db", lambda: None):
++                    LLMRuleManager.clear_active_cache()
++                    with self.assertRaises(DynamicRuleUnavailableError):
++                        LLMRuleManager.get_active_rules()
++                    self.assertIsNone(LLMRuleManager._active_rules_cache)
++
++                    # 3) 补齐列但写入损坏 JSON -> 必须抛 DynamicRuleUnavailableError
++                    conn = sqlite3.connect(db_broken)
++                    try:
++                        conn.execute("ALTER TABLE llm_rules ADD COLUMN priority INTEGER DEFAULT 10")
++                        conn.execute(
++                            "INSERT INTO llm_rules (rule_id, status, rule_json, priority) VALUES (?, 'approved', ?, 1)",
++                            ("bad-json", "{broken_json"),
++                        )
++                        conn.commit()
++                    finally:
++                        conn.close()
++                    LLMRuleManager.clear_active_cache()
++                    with self.assertRaises(DynamicRuleUnavailableError):
++                        LLMRuleManager.get_active_rules()
++
++                    # 4) 合法 JSON 但 matching_rules 结构非法(非 dict) -> 必须抛 DynamicRuleUnavailableError
++                    conn = sqlite3.connect(db_broken)
++                    try:
++                        conn.execute(
++                            "UPDATE llm_rules SET rule_json = ? WHERE rule_id = 'bad-json'",
++                            (json.dumps({"matching_rules": ["wrong_type"]}, ensure_ascii=False),),
++                        )
++                        conn.commit()
++                    finally:
++                        conn.close()
++                    LLMRuleManager.clear_active_cache()
++                    with self.assertRaises(DynamicRuleUnavailableError):
++                        LLMRuleManager.get_active_rules()
++
++                    # 5) 修复后恢复可用
++                    conn = sqlite3.connect(db_broken)
++                    try:
++                        conn.execute(
++                            "UPDATE llm_rules SET rule_json = ? WHERE rule_id = 'bad-json'",
++                            (json.dumps({"matching_rules": {"must_not_contain": ["禁用词"]}}, ensure_ascii=False),),
++                        )
++                        conn.commit()
++                    finally:
++                        conn.close()
++                    LLMRuleManager.clear_active_cache()
++                    rules = LLMRuleManager.get_active_rules()
++                    self.assertEqual(len(rules), 1)
++                    self.assertEqual(rules[0]["rule_id"], "bad-json")
++
++    def test_a_m3_02_rule_unavailability_fails_closed_across_pure_chains_and_recovers(self):
++        from app.llm_rule_engine import DynamicRuleUnavailableError
++
++        row = _row(
++            original_name="镀锌钢管", original_spec="DN100", original_qty=10,
++            original_unit="米", professional="暖通", original_category="暖通",
++        )
++        mat = _material(
++            code="PIPE100", name="镀锌钢管", specification="DN100", unit="米", category="暖通",
++            semantic_score=0.0,
++        )
++        q_info = {
++            "name": "镀锌钢管", "raw_name": "镀锌钢管", "spec": "DN100",
++            "professional": "暖通", "category": "暖通", "original_category": "暖通",
++            "unit": "米", "brand": "", "params": {"dn": 100}, "attrs": {"dn": 100},
++        }
++        with patch.object(
++            LLMRuleManager, "get_active_rules", side_effect=DynamicRuleUnavailableError("db col err")
++        ):
++            dyn_reasons = evaluate_dynamic_exclusions(row, mat)
++            self.assertTrue(dyn_reasons)
++            self.assertIn("动态规则不可用", dyn_reasons[0])
++
++            conflict = evaluate_hard_conflicts(
++                row, mat, binding={"code": "PIPE100", "qty": 10, "qty_ratio": 1.0, "unit": "米"}
++            )
++            self.assertIsNotNone(conflict)
++            self.assertIn("动态规则不可用", conflict)
++
++            score, reasons, detail = score_candidate_with_detail(q_info, mat, 0.0)
++            self.assertEqual(score, 0.0)
++            self.assertTrue(detail["hard_blocked"])
++            self.assertTrue(any("动态规则不可用" in r for r in reasons), reasons)
++
++            with patch("app.matcher.hybrid_recall", return_value=[mat]):
++                matched = match_item(q_info)
++            tops = matched["top_candidates"]
++            self.assertTrue(tops)
++            self.assertEqual(tops[0]["score"], 0.0)
++            self.assertTrue(tops[0].get("hard_blocked"))
++
++        # 规则库恢复为空规则时立即恢复正常
++        LLMRuleManager._active_rules_cache = []
++        self.assertEqual(evaluate_dynamic_exclusions(row, mat), [])
++        self.assertIsNone(
++            evaluate_hard_conflicts(
++                row, mat, binding={"code": "PIPE100", "qty": 10, "qty_ratio": 1.0, "unit": "米"}
++            )
++        )
++        ok_score, _, _ = score_candidate_with_detail(q_info, mat, 0.0)
++        self.assertGreater(ok_score, 0.0)
++
++    def test_a_m3_05_discipline_scope_isolation_and_universal_or_alias_rules(self):
++        from app.normalizer import normalize_professional_category as norm_prof
++
++        self.assertEqual(norm_prof("医用气体"), normalize_professional_category("医用气体"))
++
++        plumbing_rule = {
++            "rule_id": "plumb-only-excl",
++            "scope_level": "discipline",
++            "scope_target": "给排水",
++            "parsed_dsl": {
++                "matching_rules": {"must_not_contain": ["禁用特征"], "score_boost_keywords": {}},
++                "cleaning_rules": [{"action": "remove_token", "token": "CLEANME"}],
++                "extraction_rules": [{"key": "plumb_tag", "pattern": r"PTAG-(\d+)"}],
++            },
++        }
++        LLMRuleManager._active_rules_cache = [plumbing_rule]
++
++        # 负例：暖通行不受给排水规则拦截，也不触发给排水清洗规则与参数抽取规则
++        hvac_row = _row(
++            original_name="轴流排风机", original_spec="FX-100", original_qty=1,
++            original_unit="台", professional="暖通", original_category="暖通",
++        )
++        hvac_cand = _material(
++            code="FAN-1", name="轴流排风机", specification="FX-100 禁用特征", unit="台", category="暖通"
++        )
++        hvac_q = {
++            "name": "轴流排风机", "raw_name": "轴流排风机", "spec": "FX-100",
++            "professional": "暖通", "category": "暖通", "original_category": "暖通",
++            "unit": "台", "brand": "", "params": {}, "attrs": {},
++        }
++        self.assertEqual(evaluate_dynamic_exclusions(hvac_row, hvac_cand), [])
++        self.assertIsNone(
++            evaluate_hard_conflicts(
++                hvac_row, hvac_cand, binding={"code": "FAN-1", "qty": 1, "qty_ratio": 1.0, "unit": "台"}
++            )
++        )
++        hvac_score, _, _ = score_candidate_with_detail(hvac_q, hvac_cand, 0.0)
++        self.assertGreater(hvac_score, 0.0)
++
++        from app.normalizer import clean_text_standard
++        self.assertIn("cleanme", clean_text_standard("FX-100 CLEANME", discipline="暖通", category="暖通").lower())
++        pq_hvac = prepare_query("轴流排风机 CLEANME", "FX-100 PTAG-88", "暖通", category="暖通")
++        self.assertIn("cleanme", pq_hvac.get("name", "").lower())
++        self.assertNotIn("plumb_tag", (pq_hvac.get("parsed_spec") or {}).get("attrs", {}))
++
++        # 正例：给排水行受给排水规则硬拦截，且触发给排水清洗规则与参数抽取规则
++        plumb_row = _row(
++            original_name="给水泵", original_spec="Q=10", original_qty=1,
++            original_unit="台", professional="给排水", original_category="给排水",
++        )
++        plumb_cand = _material(
++            code="PUMP-1", name="给水泵", specification="Q=10 禁用特征", unit="台", category="给排水"
++        )
++        plumb_q = {
++            "name": "给水泵", "raw_name": "给水泵", "spec": "Q=10",
++            "professional": "给排水", "category": "给排水", "original_category": "给排水",
++            "unit": "台", "brand": "", "params": {}, "attrs": {},
++        }
++        self.assertTrue(evaluate_dynamic_exclusions(plumb_row, plumb_cand))
++        self.assertIsNotNone(
++            evaluate_hard_conflicts(
++                plumb_row, plumb_cand, binding={"code": "PUMP-1", "qty": 1, "qty_ratio": 1.0, "unit": "台"}
++            )
++        )
++        plumb_score, _, plumb_detail = score_candidate_with_detail(plumb_q, plumb_cand, 0.0)
++        self.assertEqual(plumb_score, 0.0)
++        self.assertTrue(plumb_detail["hard_blocked"])
++        self.assertNotIn("cleanme", clean_text_standard("Q=10 CLEANME", discipline="给排水", category="给排水").lower())
++        pq_plumb = prepare_query("给水泵 CLEANME", "Q=10 PTAG-88", "给排水", category="给排水")
++        self.assertNotIn("cleanme", pq_plumb.get("name", "").lower())
++        self.assertEqual((pq_plumb.get("parsed_spec") or {}).get("attrs", {}).get("plumb_tag"), 88.0)
++
++        # 专业别名命中：医气规则匹配“医用气体”查询，不误伤“暖通”
++        LLMRuleManager._active_rules_cache = [{
++            "rule_id": "medgas-excl",
++            "scope_level": "discipline",
++            "scope_target": "医气",
++            "parsed_dsl": {"matching_rules": {"must_not_contain": ["禁用特征"]}},
++        }]
++        med_row = _row(
++            original_name="氧气终端", original_spec="", original_qty=1,
++            original_unit="套", professional="医用气体", original_category="医用气体",
++        )
++        med_cand = _material(
++            code="MED-1", name="氧气终端", specification="禁用特征", unit="套", category="医气"
++        )
++        self.assertTrue(evaluate_dynamic_exclusions(med_row, med_cand))
++        self.assertEqual(evaluate_dynamic_exclusions(hvac_row, hvac_cand), [])
++
++        # 显式通用规则("通用" / scope_level="universal")对暖通与给排水均生效
++        for univ_rule in (
++            {
++                "rule_id": "univ-target",
++                "scope_level": "discipline",
++                "scope_target": "通用",
++                "parsed_dsl": {"matching_rules": {"must_not_contain": ["禁用特征"]}},
++            },
++            {
++                "rule_id": "univ-level",
++                "scope_level": "universal",
++                "scope_target": "给排水",
++                "parsed_dsl": {"matching_rules": {"must_not_contain": ["禁用特征"]}},
++            },
++        ):
++            LLMRuleManager._active_rules_cache = [univ_rule]
++            self.assertTrue(evaluate_dynamic_exclusions(hvac_row, hvac_cand), univ_rule["rule_id"])
++            self.assertTrue(evaluate_dynamic_exclusions(plumb_row, plumb_cand), univ_rule["rule_id"])
+--- R02/tests/test_m3_hard_constraints_http.py
++++ R03/tests/test_m3_hard_constraints_http.py
+@@ -992,3 +992,489 @@
+ 
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
++
++
++# ---------------------------------------------------------------------------
++# 6. V015-M3 R03：A-M3-01 / A-M3-02 / A-M3-05 审计反例端到端 HTTP 闭环验证
++# ---------------------------------------------------------------------------
++
++class TestM3R03AuditClosureHttp(M3HttpBase):
++    """将 R02 审核反例全部固化为真实 FastAPI HTTP 闭环断言，并验证修复后恢复与正例保留。"""
++
++    def _seed_llm_rule(
++        self,
++        rule_id: str,
++        scope_level: str,
++        scope_target: str,
++        rule_obj: dict,
++        priority: int = 1,
++        status: str = "approved",
++    ):
++        from app.llm_rule_engine import init_rule_engine_db, get_db_conn
++
++        init_rule_engine_db()
++        conn = get_db_conn()
++        try:
++            conn.execute("DELETE FROM llm_rules WHERE rule_id = ?", (rule_id,))
++            conn.execute(
++                """
++                INSERT INTO llm_rules (
++                    rule_id, rule_name, scope_level, scope_target, discipline,
++                    rule_json, author_id, author_name, priority, status
++                ) VALUES (?, ?, ?, ?, ?, ?, 1, 'admin', ?, ?)
++                """,
++                (
++                    rule_id,
++                    rule_id,
++                    scope_level,
++                    scope_target,
++                    scope_target,
++                    json.dumps(rule_obj, ensure_ascii=False),
++                    priority,
++                    status,
++                ),
++            )
++            conn.commit()
++        finally:
++            conn.close()
++        LLMRuleManager.clear_active_cache()
++
++    def _clear_llm_rules(self):
++        from app.llm_rule_engine import init_rule_engine_db, get_db_conn
++
++        init_rule_engine_db()
++        conn = get_db_conn()
++        try:
++            conn.execute("DELETE FROM llm_rules")
++            conn.commit()
++        finally:
++            conn.close()
++        LLMRuleManager.clear_active_cache()
++
++    def test_r03_a_m3_01_empty_target_unit_drift_and_legacy_records_blocked(self):
++        import io
++        import openpyxl
++
++        self._seed("CONC-M", "镀锌钢管", "DN100", "m", "暖通")
++        row = self._row(
++            name="镀锌钢管", specification="DN100", qty=10, unit="km",
++            professional="暖通", category="暖通",
++        )
++
++        # 1) 缺 target unit 或 unit="" 的非1倍率确认 -> 一律拒绝 (缺键 422 / 空串 409)
++        for bad_unit_kw, expected_codes in (({}, (409, 422)), ({"unit": ""}, (409,))):
++            bad_bind = {
++                "code": "CONC-M", "name": "镀锌钢管", "specification": "DN100",
++                "category": "暖通", "brand": "", "qty": 10000.0, "qty_ratio": 1000.0,
++            }
++            bad_bind.update(bad_unit_kw)
++            resp_bad = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(row, [bad_bind], scope="r03_u1.xlsx"),
++                headers=self.auth,
++            )
++            self.assertIn(resp_bad.status_code, expected_codes, resp_bad.text)
++
++        # 2) 显式 target unit="m" 确认 -> 200，导出 XLSX 读回明确写出 10 km -> 10000 m
++        good_bind = self._bind(
++            "CONC-M", name="镀锌钢管", specification="DN100",
++            unit="m", category="暖通", qty=10000.0, qty_ratio=1000.0,
++        )
++        ok_confirm = self.client.post(
++            "/api/binding/submit",
++            json=self._confirm_payload(row, [good_bind], scope="r03_u1.xlsx"),
++            headers=self.auth,
++        )
++        self.assertEqual(ok_confirm.status_code, 200, ok_confirm.text)
++
++        item = self._export_item(row, [good_bind], status="manual_confirmed")
++        ok_exp = self.client.post(
++            "/api/export", json={"items": [item], "scope_filename": "r03_u1.xlsx"}, headers=self.auth
++        )
++        self.assertEqual(ok_exp.status_code, 200, ok_exp.text)
++        wb = openpyxl.load_workbook(io.BytesIO(ok_exp.content), data_only=True)
++        ws = wb.active
++        self.assertEqual(ws.cell(4, 8).value, "km")
++        self.assertEqual(ws.cell(4, 9).value, 10)
++        self.assertEqual(ws.cell(5, 8).value, "m")
++        self.assertEqual(ws.cell(5, 9).value, 10000)
++        wb.close()
++
++        # 3) 确认后物料库 unit 从 "m" 漂移成 "km"：保留 m / 改写 km / 删除 unit 全部阻断
++        conn = get_db_connection()
++        conn.execute("UPDATE materials SET unit = 'km' WHERE code = 'CONC-M'")
++        conn.commit()
++        conn.close()
++
++        drift_variants = [
++            good_bind,
++            dict(good_bind, unit="km"),
++            {k: v for k, v in good_bind.items() if k != "unit"},
++        ]
++        for mutated_bind in drift_variants:
++            mutated_item = self._export_item(row, [mutated_bind], status="manual_confirmed")
++            rest = self.client.post(
++                "/api/session/annotate",
++                json={"items": [mutated_item], "scope_filename": "r03_u1.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(rest.status_code, 200, rest.text)
++            self.assertEqual(rest.json()["items"][0]["decision_status"], "recommended", rest.text)
++            self.assertGreaterEqual(rest.json()["downgraded"], 1)
++
++            exp_blk = self.client.post(
++                "/api/export",
++                json={"items": [mutated_item], "scope_filename": "r03_u1.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_blk.status_code, 422, exp_blk.text)
++
++        # 4) 库恢复回 "m"，但客户端删掉或篡改 target unit -> 仍阻断；还原 unit="m" 后恢复 200
++        conn = get_db_connection()
++        conn.execute("UPDATE materials SET unit = 'm' WHERE code = 'CONC-M'")
++        conn.commit()
++        conn.close()
++        for bad_client_bind in (
++            {k: v for k, v in good_bind.items() if k != "unit"},
++            dict(good_bind, unit=""),
++            dict(good_bind, unit="km"),
++        ):
++            bad_item = self._export_item(row, [bad_client_bind], status="manual_confirmed")
++            rest_bad = self.client.post(
++                "/api/session/annotate",
++                json={"items": [bad_item], "scope_filename": "r03_u1.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(rest_bad.json()["items"][0]["decision_status"], "recommended")
++            exp_bad = self.client.post(
++                "/api/export",
++                json={"items": [bad_item], "scope_filename": "r03_u1.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_bad.status_code, 422, exp_bad.text)
++
++        exp_recovered = self.client.post(
++            "/api/export", json={"items": [item], "scope_filename": "r03_u1.xlsx"}, headers=self.auth
++        )
++        self.assertEqual(exp_recovered.status_code, 200, exp_recovered.text)
++
++        # 5) 直接向库写入遗留无权威单位证据的历史确认记录 -> 恢复降推荐 + 导出 422
++        from app.auth_manager import get_auth_connection
++        from app.binding_decisions import row_content_fingerprint, make_scope_key
++
++        legacy_row_fp = row_content_fingerprint(row)
++        scope_key = make_scope_key("r03_legacy.xlsx", row["professional"])
++        legacy_payload = json.dumps({
++            "row": row,
++            "bindings": [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0}],
++        }, ensure_ascii=False)
++        aconn = get_auth_connection()
++        try:
++            aconn.execute(
++                """
++                INSERT INTO binding_decisions (
++                    user_id, scope_key, row_fingerprint, binding_fingerprint,
++                    decision, source, reason, matched_codes, payload_json
++                ) VALUES (1, ?, ?, ?, 'manual_confirmed', 'manual', 'legacy', 'CONC-M', ?)
++                """,
++                (
++                    scope_key,
++                    legacy_row_fp,
++                    self.client.post(
++                        "/api/session/annotate",
++                        json={"items": [self._export_item(row, [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0}], status="recommended")], "scope_filename": "r03_legacy.xlsx"},
++                        headers=self.auth,
++                    ).json()["items"][0]["binding_fingerprint"],
++                    legacy_payload,
++                ),
++            )
++            aconn.commit()
++        finally:
++            aconn.close()
++
++        for legacy_binds in (
++            [{"code": "CONC-M", "qty": 10000.0, "qty_ratio": 1000.0, "unit": ""}],
++            [good_bind],
++        ):
++            legacy_item = self._export_item(row, legacy_binds, status="manual_confirmed")
++            rest_legacy = self.client.post(
++                "/api/session/annotate",
++                json={"items": [legacy_item], "scope_filename": "r03_legacy.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(rest_legacy.json()["items"][0]["decision_status"], "recommended", rest_legacy.text)
++            self.assertGreaterEqual(rest_legacy.json()["downgraded"], 1)
++            exp_legacy = self.client.post(
++                "/api/export",
++                json={"items": [legacy_item], "scope_filename": "r03_legacy.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_legacy.status_code, 422, exp_legacy.text)
++
++    def test_r03_a_m3_02_rule_db_failure_fails_closed_on_real_http_endpoints_and_recovers(self):
++        from app.llm_rule_engine import init_rule_engine_db, get_db_conn
++
++        init_rule_engine_db()
++        self._seed("OK-PIPE", "镀锌钢管", "DN100 常规", "米", "暖通")
++        self._seed("EX-PIPE", "镀锌钢管", "DN100 禁止词", "米", "暖通")
++        row = self._row(
++            name="镀锌钢管", specification="DN100", qty=10, unit="米",
++            professional="暖通", category="暖通",
++        )
++        ok_bind = self._bind(
++            "OK-PIPE", name="镀锌钢管", specification="DN100 常规",
++            unit="米", category="暖通", qty=10, qty_ratio=1.0,
++        )
++        ex_bind = self._bind(
++            "EX-PIPE", name="镀锌钢管", specification="DN100 禁止词",
++            unit="米", category="暖通", qty=10, qty_ratio=1.0,
++        )
++
++        # 配置带约束自动绑定规则，验证规则库故障时不会被自动接受放行
++        srv.save_auto_binding_rules([{
++            "original_name": "镀锌钢管",
++            "original_spec": "镀锌钢管",
++            "original_unit": "米",
++            "bound_materials": [{"code": "OK-PIPE", "specification": "DN100 常规", "qty_ratio": 1.0}],
++        }])
++
++        schema_broken = False
++        try:
++            # 1) 真实写库 approved 规则生效：EX-PIPE 被 409，OK-PIPE 200 确认
++            self._seed_llm_rule(
++                "r03-excl-rule", "discipline", "暖通",
++                {"matching_rules": {"must_not_contain": ["禁止词"]}},
++            )
++            r_ex = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(row, [ex_bind], scope="r03_m2.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(r_ex.status_code, 409, r_ex.text)
++
++            r_ok_pre = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(row, [ok_bind], scope="r03_m2.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(r_ok_pre.status_code, 200, r_ok_pre.text)
++
++            # 2) 制造真实 SQL 读取失败（破坏 priority 列），清空缓存 -> 全链路 fail-closed
++            conn = get_db_conn()
++            conn.execute("ALTER TABLE llm_rules RENAME COLUMN priority TO priority_broken")
++            conn.commit()
++            conn.close()
++            schema_broken = True
++            LLMRuleManager.clear_active_cache()
++
++            m_resp = self.client.post(
++                "/api/match",
++                json={"text": "镀锌钢管 DN100", "name": "镀锌钢管", "professional": "暖通", "category": "暖通", "unit": "米"},
++                headers=self.auth,
++            )
++            self.assertEqual(m_resp.status_code, 200, m_resp.text)
++            cands = m_resp.json().get("top_candidates", [])
++            self.assertTrue(cands, m_resp.text)
++            self.assertTrue(all(c["score"] == 0.0 and c.get("hard_blocked") for c in cands), cands)
++
++            bm_resp = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 0, "text": "镀锌钢管", "unit": "米", "qty": 10, "category": "暖通", "professional": "暖通"}]},
++                headers=self.auth,
++            )
++            self.assertEqual(bm_resp.status_code, 200, bm_resp.text)
++            bm_row = bm_resp.json()["results"][0]
++            self.assertEqual(bm_row["decision_status"], "rejected", bm_resp.text)
++            self.assertIn("动态规则不可用", bm_row["decision_reason"], bm_resp.text)
++            self.assertTrue(
++                all(c["score"] == 0.0 and c.get("hard_blocked") for c in bm_row["top_candidates"]),
++                bm_resp.text,
++            )
++
++            c_fail = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(row, [ok_bind], scope="r03_m2_new.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(c_fail.status_code, 409, c_fail.text)
++            self.assertIn("动态规则不可用", c_fail.text)
++
++            item_confirmed = self._export_item(row, [ok_bind], status="manual_confirmed")
++            rest_fail = self.client.post(
++                "/api/session/annotate",
++                json={"items": [item_confirmed], "scope_filename": "r03_m2.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(rest_fail.status_code, 200, rest_fail.text)
++            self.assertEqual(rest_fail.json()["items"][0]["decision_status"], "recommended", rest_fail.text)
++            self.assertGreaterEqual(rest_fail.json()["downgraded"], 1)
++
++            exp_fail = self.client.post(
++                "/api/export",
++                json={"items": [item_confirmed], "scope_filename": "r03_m2.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_fail.status_code, 422, exp_fail.text)
++
++            # 3) 修复数据库列结构 -> 自动恢复可确认、可恢复、可导出
++            conn = get_db_conn()
++            conn.execute("ALTER TABLE llm_rules RENAME COLUMN priority_broken TO priority")
++            conn.commit()
++            conn.close()
++            schema_broken = False
++            LLMRuleManager.clear_active_cache()
++
++            rest_ok = self.client.post(
++                "/api/session/annotate",
++                json={"items": [item_confirmed], "scope_filename": "r03_m2.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(rest_ok.json()["items"][0]["decision_status"], "manual_confirmed", rest_ok.text)
++            exp_ok = self.client.post(
++                "/api/export",
++                json={"items": [item_confirmed], "scope_filename": "r03_m2.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_ok.status_code, 200, exp_ok.text)
++        finally:
++            if schema_broken:
++                conn = get_db_conn()
++                try:
++                    conn.execute("ALTER TABLE llm_rules RENAME COLUMN priority_broken TO priority")
++                    conn.commit()
++                finally:
++                    conn.close()
++            self._clear_llm_rules()
++
++    def test_r03_a_m3_05_plumbing_rule_does_not_leak_to_hvac_http_e2e_and_universal_works(self):
++        self._seed("FAN-HVAC", "涡轮排风机R03", "FX-100 禁止特征", "台", "暖通")
++        self._seed("PUMP-PLUMB", "高扬程泵R03", "Q=10 禁止特征", "台", "给排水")
++
++        srv.save_auto_binding_rules([
++            {
++                "original_name": "涡轮排风机R03",
++                "original_spec": "涡轮排风机R03",
++                "original_unit": "台",
++                "bound_materials": [{"code": "FAN-HVAC", "specification": "FX-100 禁止特征", "qty_ratio": 1.0}],
++            },
++            {
++                "original_name": "高扬程泵R03",
++                "original_spec": "高扬程泵R03",
++                "original_unit": "台",
++                "bound_materials": [{"code": "PUMP-PLUMB", "specification": "Q=10 禁止特征", "qty_ratio": 1.0}],
++            },
++        ])
++
++        hvac_row = self._row(
++            name="涡轮排风机R03", specification="FX-100", qty=2, unit="台",
++            professional="暖通", category="暖通",
++        )
++        hvac_bind = self._bind(
++            "FAN-HVAC", name="涡轮排风机R03", specification="FX-100 禁止特征",
++            unit="台", category="暖通", qty=2, qty_ratio=1.0,
++        )
++        plumb_row = self._row(
++            name="高扬程泵R03", specification="Q=10", qty=1, unit="台",
++            professional="给排水", category="给排水",
++        )
++        plumb_bind = self._bind(
++            "PUMP-PLUMB", name="高扬程泵R03", specification="Q=10 禁止特征",
++            unit="台", category="给排水", qty=1, qty_ratio=1.0,
++        )
++
++        try:
++            # 给排水专用规则不得影响暖通行
++            self._seed_llm_rule(
++                "r03-plumb-excl", "discipline", "给排水",
++                {"matching_rules": {"must_not_contain": ["禁止特征"]}},
++            )
++
++            bm_hvac = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 0, "text": "涡轮排风机R03", "unit": "台", "qty": 2, "category": "暖通", "professional": "暖通"}]},
++                headers=self.auth,
++            )
++            self.assertEqual(bm_hvac.status_code, 200, bm_hvac.text)
++            self.assertEqual(bm_hvac.json()["results"][0]["decision_status"], "auto_accepted", bm_hvac.text)
++
++            c_hvac = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(hvac_row, [hvac_bind], scope="r03_scope.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(c_hvac.status_code, 200, c_hvac.text)
++
++            exp_hvac = self.client.post(
++                "/api/export",
++                json={"items": [self._export_item(hvac_row, [hvac_bind], status="manual_confirmed")], "scope_filename": "r03_scope.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_hvac.status_code, 200, exp_hvac.text)
++
++            # 同规则对目标专业“给排水”四链路全部有效拦截
++            bm_plumb = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 0, "text": "高扬程泵R03", "unit": "台", "qty": 1, "category": "给排水", "professional": "给排水"}]},
++                headers=self.auth,
++            )
++            bm_p_row = bm_plumb.json()["results"][0]
++            self.assertEqual(bm_p_row["decision_status"], "rejected", bm_plumb.text)
++            self.assertIn("动态规则", bm_p_row["decision_reason"], bm_plumb.text)
++            self.assertTrue(
++                all(
++                    c["score"] == 0.0 and c.get("hard_blocked")
++                    for c in bm_p_row["top_candidates"]
++                    if c["code"] == "PUMP-PLUMB" or "禁止特征" in c.get("specification", "")
++                ),
++                bm_plumb.text,
++            )
++
++            c_plumb = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(plumb_row, [plumb_bind], scope="r03_scope.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(c_plumb.status_code, 409, c_plumb.text)
++
++            exp_plumb = self.client.post(
++                "/api/export",
++                json={"items": [self._export_item(plumb_row, [plumb_bind], status="auto_accepted")], "scope_filename": "r03_scope.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_plumb.status_code, 422, exp_plumb.text)
++
++            # 切换为显式通用规则("通用") -> 暖通同样被拦截
++            self._seed_llm_rule(
++                "r03-plumb-excl", "discipline", "通用",
++                {"matching_rules": {"must_not_contain": ["禁止特征"]}},
++            )
++            c_hvac_univ = self.client.post(
++                "/api/binding/submit",
++                json=self._confirm_payload(hvac_row, [hvac_bind], scope="r03_scope_u.xlsx"),
++                headers=self.auth,
++            )
++            self.assertEqual(c_hvac_univ.status_code, 409, c_hvac_univ.text)
++            bm_hvac_univ = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 0, "text": "涡轮排风机R03", "unit": "台", "qty": 2, "category": "暖通", "professional": "暖通"}]},
++                headers=self.auth,
++            )
++            bm_hu_row = bm_hvac_univ.json()["results"][0]
++            self.assertEqual(bm_hu_row["decision_status"], "rejected", bm_hvac_univ.text)
++            self.assertIn("动态规则", bm_hu_row["decision_reason"], bm_hvac_univ.text)
++            self.assertTrue(
++                all(
++                    c["score"] == 0.0 and c.get("hard_blocked")
++                    for c in bm_hu_row["top_candidates"]
++                    if c["code"] == "FAN-HVAC" or "禁止特征" in c.get("specification", "")
++                ),
++                bm_hvac_univ.text,
++            )
++            exp_hvac_univ = self.client.post(
++                "/api/export",
++                json={"items": [self._export_item(hvac_row, [hvac_bind], status="manual_confirmed")], "scope_filename": "r03_scope.xlsx"},
++                headers=self.auth,
++            )
++            self.assertEqual(exp_hvac_univ.status_code, 422, exp_hvac_univ.text)
++        finally:
++            self._clear_llm_rules()

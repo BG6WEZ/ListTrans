@@ -1,0 +1,482 @@
+{
+  "cases": {
+    "GT-0339": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "628389457b84df0e3891001d39d1cb02b1d4f92906a8b469538dc65f887f163f",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.9,
+          "code": "2.26.33.0014",
+          "full_rank": 2,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0049",
+          "match_reasons": [
+            "品类名称一致",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 85.0
+        },
+        {
+          "code": "2.26.33.0014",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.9
+        },
+        {
+          "code": "2.26.33.0034",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.8
+        }
+      ]
+    },
+    "GT-0342": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "eebb7ba78e4911de5541cf245f90644c5c13a781f82f90aa33eec98153b5c9e2",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.8,
+          "code": "2.26.33.0031",
+          "full_rank": 3,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 85.0
+        },
+        {
+          "code": "2.26.33.0011",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.9
+        },
+        {
+          "code": "2.26.33.0031",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.8
+        }
+      ]
+    },
+    "GT-0343": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "eebb7ba78e4911de5541cf245f90644c5c13a781f82f90aa33eec98153b5c9e2",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.9,
+          "code": "2.26.33.0011",
+          "full_rank": 2,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0043",
+          "match_reasons": [
+            "品类名称一致",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 85.0
+        },
+        {
+          "code": "2.26.33.0011",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.9
+        },
+        {
+          "code": "2.26.33.0031",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.8
+        }
+      ]
+    },
+    "GT-0346": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "2b5cedacda98493f7ff1d0c12ec0c9bcf77b8fdd029b4910b5ab684335fdf54c",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.8,
+          "code": "2.26.33.0033",
+          "full_rank": 3,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0050",
+          "match_reasons": [
+            "品类名称一致",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 85.0
+        },
+        {
+          "code": "2.26.33.0013",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.9
+        },
+        {
+          "code": "2.26.33.0033",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.8
+        }
+      ]
+    },
+    "GT-0347": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "2b5cedacda98493f7ff1d0c12ec0c9bcf77b8fdd029b4910b5ab684335fdf54c",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 84.8,
+          "code": "2.26.33.0033",
+          "full_rank": 3,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0050",
+          "match_reasons": [
+            "品类名称一致",
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 85.0
+        },
+        {
+          "code": "2.26.33.0013",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.9
+        },
+        {
+          "code": "2.26.33.0033",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致",
+            "开关控数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 84.8
+        }
+      ]
+    },
+    "GT-0349": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "b89ff5cad8e2facd202ad4c56679bc944fee9ed447b7c0899682224c3bd7f919",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 59.2,
+          "code": "2.26.33.0016",
+          "full_rank": 2,
+          "max_score": 0.85,
+          "reasons": [
+            "开关联数一致"
+          ],
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0042",
+          "match_reasons": [
+            "语义高度相近",
+            "开关联数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 68.9
+        },
+        {
+          "code": "2.26.33.0016",
+          "match_reasons": [
+            "开关联数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 59.2
+        },
+        {
+          "code": "2.26.33.0017",
+          "match_reasons": [
+            "开关联数一致"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "fts",
+            "semantic"
+          ],
+          "score": 59.1
+        }
+      ]
+    },
+    "GT-0350": {
+      "attributes": {
+        "卧式": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+        "名称": "7294f172b4ec4ab69d867a828fc19c2270c8d2d8071b7ba3b8bc907bbde461b3",
+        "结构形式": "32b739bc0d51c058592744d0e384b2f929edc1ec1a420792bb745c73783d5376",
+        "防爆": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+      },
+      "domain": "cable_power",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 51.6,
+          "code": "2.26.33.0119",
+          "full_rank": 2,
+          "max_score": 0.85,
+          "reasons": [
+            "语义高度相近"
+          ],
+          "recall_sources": [
+            "semantic"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.26.33.0125",
+          "match_reasons": [],
+          "max_score": 0.85,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 52.3
+        },
+        {
+          "code": "2.26.33.0119",
+          "match_reasons": [
+            "语义高度相近"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 51.6
+        },
+        {
+          "code": "2.26.33.0040",
+          "match_reasons": [
+            "语义高度相近"
+          ],
+          "max_score": 0.85,
+          "recall_sources": [
+            "semantic"
+          ],
+          "score": 50.0
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "mode": "vector",
+  "version": "v017"
+}

@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-16",
+  "role": "coordinator",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "package_release": "V015-M5 RELEASED",
+  "version_final_review": "PASS_APPROVED_IMPLEMENTATION_SCOPE",
+  "production_release": "NOT_APPROVED",
+  "next_versions": "V0.1.6-V0.2.0_LOCKED",
+  "next_candidate_not_issued": "V016-M0",
+  "closed_items": [
+    "A-M5-06",
+    "A-M5-07",
+    "OBS-R03-1_BLOCKED_WRITE_PATHS"
+  ],
+  "current_scope_open_P0_P1": [],
+  "open_release_gate": "PRG-F11",
+  "deferred_risk": "R-M3-01 original diagnosis/closure deadlines unchanged",
+  "nonblocking_observations": [
+    "OBS-R04-1",
+    "OBS-R03-2"
+  ],
+  "protected_changes": {
+    "source_hashes": [],
+    "model_hashes": [],
+    "fixed_evidence_hashes": []
+  },
+  "incoming_delivery_checked": 33,
+  "r03_frozen_checked": 36,
+  "business_snapshot_equal": true,
+  "before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "verify": {
+    "before": "PASS",
+    "after": "PASS"
+  },
+  "coordinator_sample": "96 passed / 0 warnings / 32.94s",
+  "sample_exit_code": 0,
+  "sample_wall_seconds": 34.406,
+  "independent_audit_full_suite": "324 passed / 0 warnings / 195.80s (report citation)",
+  "full_suite_browser_docker_rerun": false,
+  "production_operations": false,
+  "milestone_record_sha256": {
+    "V015-M0_R04_统筹裁决.md": "e507a7333899550dc34f3d0a1f2a7f36ad91b1b88f01fd1300d1bf8b03d5db28",
+    "V015-M1_R02_统筹裁决.md": "5db9372c2c61d1501a71c1e76b8fe369cfab39999a40f7796d7e4e150d7c101a",
+    "V015-M2_R01_统筹裁决.md": "a28b18b80304ec72c32274f552419dd56800495ebdbfe9020c5211f9da4397b9",
+    "V015-M3_R04_统筹裁决.md": "5b4db65638d01c41df750e39ddaa0652a82fc62b79ffc90f5a23f060fb074281",
+    "V015-M4_R03_V-M4-01_统筹补充裁决.md": "e3fa9f951ee9c6d2baaacf4bd40e3372adaa05889a042dbe2a44e514cd721e16",
+    "V015-M4_R03_V-M4-02_审核与统筹裁决.md": "5bff79629eead830ab002b55c8ee9549a9e9a778f3d852193352f73797700599",
+    "V015-M5_R04_审核小结.md": "adecde71c8b4a9943cfa5be924e9e3df24e42c271f4a3997baae2eb814c646a4"
+  },
+  "broken_document_links": [],
+  "integrity_verdict": "PASS"
+}

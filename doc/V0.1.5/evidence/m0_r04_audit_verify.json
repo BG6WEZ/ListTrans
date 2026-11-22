@@ -1,0 +1,83 @@
+{
+  "task": "V015-M0",
+  "round": "R04",
+  "role": "reviewer",
+  "audited_at": "2026-11-13 11:39:00",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": {
+    "manifest": "doc/V0.1.5/evidence/m0_r04_delivery_hashes.md",
+    "matched": 17,
+    "total": 17,
+    "mismatches": 0
+  },
+  "system_python": {
+    "command": "python -m pytest tests/test_m0_guardrail_regression.py tests/test_m0_isolation.py -q",
+    "exit_code": 0,
+    "summary": "18 passed in 3.67s"
+  },
+  "venv_python": {
+    "executable": "venv/Scripts/python.exe",
+    "verify_isolation": {
+      "command": "venv/Scripts/python.exe tests/verify_isolation.py --out doc/V0.1.5/evidence/m0_r04_audit_venv_verify.json",
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "pending_modules": [],
+      "hard_errors": [],
+      "missing_deps": []
+    },
+    "pytest_regression": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_m0_guardrail_regression.py -q",
+      "exit_code": 0,
+      "summary": "13 passed in 9.92s"
+    },
+    "pytest_smoke": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_m0_isolation.py -q",
+      "exit_code": 0,
+      "summary": "5 passed in 6.45s"
+    },
+    "pytest_a_m0_05_isolated_modules": {
+      "test_admin_dashboard": { "exit_code": 0, "summary": "3 passed in 7.88s" },
+      "test_auth_security_fix": { "exit_code": 0, "summary": "2 passed in 7.20s" },
+      "test_auto_binding": { "exit_code": 0, "summary": "2 passed, 1 skipped, 1 warning in 7.18s" },
+      "test_feedback_miner": { "exit_code": 0, "summary": "2 passed in 6.26s" }
+    },
+    "pytest_order_combinations": {
+      "forward_end2end_then_m0": {
+        "command": "venv/Scripts/python.exe -m pytest tests/test_flywheel_end2end.py tests/test_m0_isolation.py -q",
+        "exit_code": 0,
+        "summary": "6 passed, 1 warning in 22.93s"
+      },
+      "reverse_m0_then_end2end": {
+        "command": "venv/Scripts/python.exe -m pytest tests/test_m0_isolation.py tests/test_flywheel_end2end.py -q",
+        "exit_code": 0,
+        "summary": "6 passed, 1 warning in 22.93s"
+      }
+    },
+    "legacy01_diagnosis_rerun": {
+      "command": "venv/Scripts/python.exe .local-archive/r04_legacy01_diagnose.py doc/V0.1.5/evidence/m0_r04_audit_legacy01_diagnose.json",
+      "exit_code": 0,
+      "golden_targeted_by_filter": 25,
+      "targeted_count": 24,
+      "materials_rows_after_init_db": 0,
+      "sandbox_passed": true,
+      "improved_count": 0,
+      "degraded_count": 0
+    },
+    "pytest_full": {
+      "command": "venv/Scripts/python.exe -m pytest tests/ -q --tb=short",
+      "exit_code": 1,
+      "summary": "1 failed, 76 passed, 1 skipped, 1 warning in 96.87s",
+      "failed": [
+        "tests/test_flywheel_sandbox.py::test_sandbox_harmful_rule_rejected"
+      ],
+      "skipped": [
+        "tests/test_auto_binding.py:230 (missing doc/sample/标准格式.xlsx)"
+      ],
+      "warnings": [
+        "app/vector_index.py:92 FutureWarning: get_sentence_embedding_dimension renamed to get_embedding_dimension"
+      ]
+    },
+    "outer_snapshot_diff_after_all_venv_runs": []
+  }
+}

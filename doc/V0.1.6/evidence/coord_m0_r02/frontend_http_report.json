@@ -1,0 +1,83 @@
+{
+  "scope": "isolated TestClient HTTP + real SQLite; real JS functions via IPC fetch",
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_v016_m0_r02_ce_g1yb7d6t",
+  "app_js_sha256": "e551c4b29b9bdc55c0535336bab309feecb5d2626621bdabbcfc5c468637aed1",
+  "http": [
+    {
+      "scenario": "flywheel_response_lost",
+      "attempt": 1,
+      "status": 200,
+      "event_id": "693e83ad-aa9b-4a39-8155-41ff7985e66c",
+      "event_seq": 1,
+      "response_dropped": true,
+      "idempotent_replay": false
+    },
+    {
+      "scenario": "flywheel_response_lost",
+      "attempt": 2,
+      "status": 200,
+      "event_id": "64b07c88-a0c1-4bc9-9021-44b442f23b62",
+      "event_seq": 2,
+      "response_dropped": false,
+      "idempotent_replay": false
+    },
+    {
+      "scenario": "feedback_json_sync_500",
+      "attempt": 1,
+      "status": 500,
+      "event_id": "e6eb7045-dd87-4297-9e0f-56c64e50b7a6",
+      "event_seq": 1,
+      "response_dropped": false,
+      "idempotent_replay": null
+    },
+    {
+      "scenario": "feedback_json_sync_500",
+      "attempt": 2,
+      "status": 200,
+      "event_id": "2c5a620c-02b0-444d-88a6-120faa2c16c2",
+      "event_seq": 2,
+      "response_dropped": false,
+      "idempotent_replay": false
+    }
+  ],
+  "sqlite": {
+    "flywheel_records": [
+      {
+        "client_event_id": "693e83ad-aa9b-4a39-8155-41ff7985e66c",
+        "event_seq": 1,
+        "superseded": 1
+      },
+      {
+        "client_event_id": "64b07c88-a0c1-4bc9-9021-44b442f23b62",
+        "event_seq": 2,
+        "superseded": 0
+      }
+    ],
+    "flywheel_feedback_samples": [
+      {
+        "client_event_id": "e6eb7045-dd87-4297-9e0f-56c64e50b7a6",
+        "event_seq": 1,
+        "superseded": 1
+      },
+      {
+        "client_event_id": "2c5a620c-02b0-444d-88a6-120faa2c16c2",
+        "event_seq": 2,
+        "superseded": 0
+      }
+    ]
+  },
+  "frontend": {
+    "flywheel_returned_before_response": true,
+    "flywheel_calls_after_first_failure": 1,
+    "feedback_500_thrown_to_caller": false,
+    "feedback_calls_after_first_failure": 1,
+    "app_js_sha256": "e551c4b29b9bdc55c0535336bab309feecb5d2626621bdabbcfc5c468637aed1"
+  },
+  "feedback_db_events": 2,
+  "feedback_json_events": 1,
+  "feedback_missing_json_events": [
+    "e6eb7045-dd87-4297-9e0f-56c64e50b7a6"
+  ],
+  "outside_network": "non-loopback socket connections blocked; model offline",
+  "counterexample_reproduced": true
+}

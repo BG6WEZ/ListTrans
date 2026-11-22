@@ -1,0 +1,343 @@
+{
+  "task": "V015-M3 R01 改动前后对照（同 35 行合成 fixture、同固定金标、同本地离线模型、LLM_ENABLED=false）",
+  "pre_report": {
+    "path": "m2_r01_gate_reports.json",
+    "sha256": "68f927621911aaaaa62f990efd74c7663543b8364b1579c0482efc8da6483d5a",
+    "generated": "2026-11-14 11:15:19",
+    "matcher_sha256_note": "M2 R01 交付时 matcher=48780dfe…e796（即 M3 改动前）"
+  },
+  "post_report": {
+    "path": "m3_r01_gate_reports.json",
+    "sha256": "2bd151ce6d7762de064b9f397a782d5f29f28faab8833aefff87b0d16373773a",
+    "generated": "2026-11-14 16:20:24",
+    "matcher_sha256_note": "M3 R01 当前 matcher=fe08ca6a…a946"
+  },
+  "cases": {
+    "harmful": {
+      "passed": [
+        false,
+        false
+      ],
+      "targeted_count": [
+        24,
+        24
+      ],
+      "improved_count": [
+        0,
+        0
+      ],
+      "degraded_count": [
+        0,
+        0
+      ],
+      "degraded_from_top1": [
+        0,
+        0
+      ],
+      "violations": [
+        [
+          [
+            "target_score_decreased",
+            "GT-0313"
+          ],
+          [
+            "margin_shrunk",
+            "GT-0313"
+          ]
+        ],
+        [
+          [
+            "target_score_decreased",
+            "GT-0313"
+          ],
+          [
+            "margin_shrunk",
+            "GT-0313"
+          ]
+        ]
+      ],
+      "snapshot_errors": [
+        [],
+        []
+      ],
+      "score_comparisons": [
+        23,
+        23
+      ],
+      "changed_rows": [
+        {
+          "id": "GT-0313",
+          "baseline.T": [
+            88.8,
+            85.0
+          ],
+          "baseline.margin": [
+            82.1,
+            78.3
+          ]
+        },
+        {
+          "id": "GT-0674",
+          "baseline.W": [
+            70.1,
+            98.5
+          ],
+          "baseline.margin": [
+            28.5,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.1,
+            98.5
+          ],
+          "candidate.margin": [
+            28.5,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0676",
+          "baseline.W": [
+            88.4,
+            85.0
+          ],
+          "baseline.margin": [
+            10.199999999999989,
+            13.599999999999994
+          ],
+          "candidate.W": [
+            88.4,
+            85.0
+          ],
+          "candidate.margin": [
+            10.199999999999989,
+            13.599999999999994
+          ]
+        },
+        {
+          "id": "GT-0677",
+          "baseline.W": [
+            70.0,
+            98.5
+          ],
+          "baseline.margin": [
+            28.599999999999994,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.0,
+            98.5
+          ],
+          "candidate.margin": [
+            28.599999999999994,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0678",
+          "baseline.W": [
+            70.1,
+            98.5
+          ],
+          "baseline.margin": [
+            28.5,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.1,
+            98.5
+          ],
+          "candidate.margin": [
+            28.5,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0681",
+          "baseline.W": [
+            98.2,
+            98.1
+          ],
+          "baseline.margin": [
+            0.29999999999999716,
+            0.4000000000000057
+          ],
+          "candidate.W": [
+            98.2,
+            98.1
+          ],
+          "candidate.margin": [
+            0.29999999999999716,
+            0.4000000000000057
+          ]
+        }
+      ]
+    },
+    "beneficial": {
+      "passed": [
+        true,
+        true
+      ],
+      "targeted_count": [
+        22,
+        22
+      ],
+      "improved_count": [
+        0,
+        0
+      ],
+      "degraded_count": [
+        0,
+        0
+      ],
+      "degraded_from_top1": [
+        0,
+        0
+      ],
+      "violations": [
+        [],
+        []
+      ],
+      "snapshot_errors": [
+        [],
+        []
+      ],
+      "score_comparisons": [
+        21,
+        21
+      ],
+      "changed_rows": [
+        {
+          "id": "GT-0674",
+          "baseline.W": [
+            70.1,
+            98.5
+          ],
+          "baseline.margin": [
+            28.5,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.1,
+            98.5
+          ],
+          "candidate.margin": [
+            28.5,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0676",
+          "baseline.W": [
+            88.4,
+            85.0
+          ],
+          "baseline.margin": [
+            10.199999999999989,
+            13.599999999999994
+          ],
+          "candidate.W": [
+            88.4,
+            85.0
+          ],
+          "candidate.margin": [
+            10.199999999999989,
+            13.599999999999994
+          ]
+        },
+        {
+          "id": "GT-0677",
+          "baseline.W": [
+            70.0,
+            98.5
+          ],
+          "baseline.margin": [
+            28.599999999999994,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.0,
+            98.5
+          ],
+          "candidate.margin": [
+            28.599999999999994,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0678",
+          "baseline.W": [
+            70.1,
+            98.5
+          ],
+          "baseline.margin": [
+            28.5,
+            0.09999999999999432
+          ],
+          "candidate.W": [
+            70.1,
+            98.5
+          ],
+          "candidate.margin": [
+            28.5,
+            0.09999999999999432
+          ]
+        },
+        {
+          "id": "GT-0681",
+          "baseline.W": [
+            98.2,
+            98.1
+          ],
+          "baseline.margin": [
+            0.29999999999999716,
+            0.4000000000000057
+          ],
+          "candidate.W": [
+            98.2,
+            98.1
+          ],
+          "candidate.margin": [
+            0.29999999999999716,
+            0.4000000000000057
+          ]
+        }
+      ]
+    },
+    "neutral": {
+      "passed": [
+        true,
+        true
+      ],
+      "targeted_count": [
+        16,
+        16
+      ],
+      "improved_count": [
+        0,
+        0
+      ],
+      "degraded_count": [
+        0,
+        0
+      ],
+      "degraded_from_top1": [
+        0,
+        0
+      ],
+      "violations": [
+        [],
+        []
+      ],
+      "snapshot_errors": [
+        [],
+        []
+      ],
+      "score_comparisons": [
+        16,
+        16
+      ],
+      "changed_rows": []
+    }
+  }
+}

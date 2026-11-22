@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-19",
+  "package": "V017-M1",
+  "round": "R02",
+  "ruling": "PASS_RELEASE_M1_DISPATCH_M2",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "m1_delivery_sha256": {
+    "app/matcher.py": "a92682c82f2a50dacd4ea57ca03f60729f30b06fd42f00fd4d83b430f6e4646f",
+    "app/preprocessor.py": "f7e54d0405ae1acf0258474b5f6914c53ce7a5dbf0c6676a44ad4363e3949511",
+    "app/query_preprocessor.py": "803e817767cba2c39ecf7c76f463e03b0d1fc02bbba7cce0fdcf830f952de643",
+    "app/normalizer.py": "a6006074e80184c1251bca1b9c117c8a5d6e6d7781668376a3135dbff0c8a484",
+    "app/db_manager.py": "937fe80ebb0c36d307fd13b7c5b2eccd416d3894fa22391614fda53ff81d4991",
+    "app/domain_extractors.py": "76cccdf27551de09e0a886c92240a42a8d977054f80eb651a5ae5c30790d8671",
+    "app/typed_fields.py": "784dc580e7f81dd5d7392a0ab5681677713185806f3c835efb254e3665393a09",
+    "tests/verify_m1_schema_v3.py": "52034eda5e8218d089bbcb5da74f17f7bafc26f46f678c04dacc178781a51181",
+    "tests/build_structured_extraction_eval.py": "f1899d8007d68405eb2edc2e92ce5107a0da824e1cde9586e2cd9bae6d4d2205",
+    "tests/eval_structured_extraction.py": "1c922f1f891393cbc7cd67ae0542ac31d29f96b61ed104972026d7299062da7a",
+    "tests/fixtures/structured_extraction_eval_v1.json": "6ae54b7a098d3fb913c6fa7a670d04830fdd3628d2e6401caa791f456016c873",
+    "tests/test_v017_m1_typed_fields.py": "66de118129f7239e3ae7a565f3cbc4908f467b8a0c32236ae4956eedd84e2fe5"
+  },
+  "frozen_assets_sha256": {
+    "app/rule_governance.py": "c0a0057f25b8104f5fcf70264491f39c18637cf209e7982a2d8f13171ebb616c",
+    "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "tests/fixtures/golden_set_v1.json": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+    "tests/fixtures/golden_baseline.json": "5ead8ac5462e849f0911cfb1eaa1aad7eae6d858451eb532ca32d11101e865fa",
+    "tests/fixtures/golden_governance_v1.json": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43",
+    "doc/V0.1.7/evidence/指标目标与性能预算.md": "e879c06495b29404223672ee497da6298e48db311105eeb3621bf5c5e1986add"
+  },
+  "audit_verify_verdict": "PASS",
+  "business_hash_unchanged": true,
+  "closed_issues": [
+    "A-M1-01",
+    "A-M1-02",
+    "A-M1-03",
+    "A-M1-04",
+    "A-M1-05",
+    "A-M1-06",
+    "A-M1-07",
+    "OBS-M1-01"
+  ],
+  "deferred_backlog": [
+    "alias_dict.json ~16 intra-domain over-specific mappings -> V0.1.8",
+    "A-M1-03 21 routing defects + 2 SS316L FPs -> V0.1.8"
+  ]
+}

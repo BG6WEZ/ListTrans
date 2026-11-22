@@ -1,0 +1,11 @@
+{
+  "pytest": 0,
+  "source_stable": true,
+  "source_sha256": {
+    "app/matcher.py": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2",
+    "app/server.py": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7",
+    "app/candidate_reranker.py": "1a4f9b1efb43be0e55bebadcc60db900a94f02a5391f946cdce18acd50aca09f",
+    "app/rerank_candidates/v019_m1_linear.json": "1448c1497902fc5f89552a1b91935fca0953c163cc3df4364721ea038a5d0437",
+    "tests/test_v019_m1_rerank.py": "18622b0c0e0c2b50db70b01c96f96d016afb5c3416f6fd63d4d922faad1aad43"
+  }
+}

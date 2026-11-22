@@ -1,0 +1,2511 @@
+{
+  "freeze_sha256": "b2d347fe210e4f7341fbc68aa395a2a16f99bd9985559eabf6b91494b49c8564",
+  "modes": {
+    "keyword": {
+      "checks": {
+        "ranking": false,
+        "six_domains": false,
+        "negative_rejection": true,
+        "wrong_proposals": false,
+        "zero_wrong_auto": true,
+        "perfect_precision_if_accepted": true,
+        "kit_top10": true,
+        "performance": true
+      },
+      "ranking": {
+        "candidate_recall@100": {
+          "value": {
+            "d": 729,
+            "n": 399,
+            "pct": 54.7325,
+            "wilson_95_pct": [
+              51.1038,
+              58.3116
+            ]
+          },
+          "v017_min": 399,
+          "delta": 0,
+          "passed": true
+        },
+        "candidate_recall@200": {
+          "value": {
+            "d": 729,
+            "n": 426,
+            "pct": 58.4362,
+            "wilson_95_pct": [
+              54.8236,
+              61.9604
+            ]
+          },
+          "v017_min": 426,
+          "delta": 0,
+          "passed": true
+        },
+        "hit@1": {
+          "value": {
+            "d": 729,
+            "n": 178,
+            "pct": 24.417,
+            "wilson_95_pct": [
+              21.4379,
+              27.6643
+            ]
+          },
+          "v017_min": 180,
+          "delta": -2,
+          "passed": false
+        },
+        "hit@3": {
+          "value": {
+            "d": 729,
+            "n": 250,
+            "pct": 34.2936,
+            "wilson_95_pct": [
+              30.9381,
+              37.8137
+            ]
+          },
+          "v017_min": 254,
+          "delta": -4,
+          "passed": false
+        },
+        "mrr_at_10": {
+          "value": 0.30634,
+          "v017_min": 0.309329,
+          "delta": -0.002989,
+          "passed": false
+        },
+        "mrr_full": {
+          "value": 0.311334,
+          "v017_min": 0.314174,
+          "delta": -0.00284,
+          "passed": false
+        }
+      },
+      "six_domain_floors": {
+        "强电": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 202,
+              "n": 81,
+              "pct": 40.099,
+              "wilson_95_pct": [
+                33.586,
+                46.9816
+              ]
+            },
+            "v017_min": 81,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 202,
+              "n": 82,
+              "pct": 40.5941,
+              "wilson_95_pct": [
+                34.0588,
+                47.4804
+              ]
+            },
+            "v017_min": 82,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 202,
+              "n": 45,
+              "pct": 22.2772,
+              "wilson_95_pct": [
+                17.0867,
+                28.5025
+              ]
+            },
+            "v017_min": 45,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "暖通": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 92,
+              "n": 62,
+              "pct": 67.3913,
+              "wilson_95_pct": [
+                57.2833,
+                76.1052
+              ]
+            },
+            "v017_min": 62,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 92,
+              "n": 79,
+              "pct": 85.8696,
+              "wilson_95_pct": [
+                77.3114,
+                91.5523
+              ]
+            },
+            "v017_min": 79,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 92,
+              "n": 33,
+              "pct": 35.8696,
+              "wilson_95_pct": [
+                26.8171,
+                46.0547
+              ]
+            },
+            "v017_min": 33,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "装饰": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 126,
+              "n": 80,
+              "pct": 63.4921,
+              "wilson_95_pct": [
+                54.802,
+                71.3837
+              ]
+            },
+            "v017_min": 80,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 126,
+              "n": 83,
+              "pct": 65.873,
+              "wilson_95_pct": [
+                57.2345,
+                73.5723
+              ]
+            },
+            "v017_min": 83,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 126,
+              "n": 24,
+              "pct": 19.0476,
+              "wilson_95_pct": [
+                13.1473,
+                26.7794
+              ]
+            },
+            "v017_min": 26,
+            "delta": -2,
+            "passed": false
+          }
+        },
+        "医用气体": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 112,
+              "n": 72,
+              "pct": 64.2857,
+              "wilson_95_pct": [
+                55.0736,
+                72.5504
+              ]
+            },
+            "v017_min": 72,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 112,
+              "n": 74,
+              "pct": 66.0714,
+              "wilson_95_pct": [
+                56.9001,
+                74.1769
+              ]
+            },
+            "v017_min": 74,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 112,
+              "n": 23,
+              "pct": 20.5357,
+              "wilson_95_pct": [
+                14.0919,
+                28.9337
+              ]
+            },
+            "v017_min": 23,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "弱电": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 114,
+              "n": 70,
+              "pct": 61.4035,
+              "wilson_95_pct": [
+                52.2343,
+                69.8292
+              ]
+            },
+            "v017_min": 70,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 114,
+              "n": 74,
+              "pct": 64.9123,
+              "wilson_95_pct": [
+                55.7958,
+                73.0565
+              ]
+            },
+            "v017_min": 74,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 114,
+              "n": 37,
+              "pct": 32.4561,
+              "wilson_95_pct": [
+                24.5551,
+                41.5009
+              ]
+            },
+            "v017_min": 37,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "给排水": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 57,
+              "n": 18,
+              "pct": 31.5789,
+              "wilson_95_pct": [
+                21.0043,
+                44.4798
+              ]
+            },
+            "v017_min": 18,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 57,
+              "n": 18,
+              "pct": 31.5789,
+              "wilson_95_pct": [
+                21.0043,
+                44.4798
+              ]
+            },
+            "v017_min": 18,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 57,
+              "n": 7,
+              "pct": 12.2807,
+              "wilson_95_pct": [
+                6.0781,
+                23.2464
+              ]
+            },
+            "v017_min": 7,
+            "delta": 0,
+            "passed": true
+          }
+        }
+      },
+      "negative_delta": 0,
+      "wrong_proposal_delta": [
+        14,
+        0
+      ],
+      "counts_and_decisions": {
+        "full": {
+          "counts": {
+            "confirmed_kit_1toN": 33,
+            "core_answerable": 729,
+            "core_negative": 152,
+            "core_pending": 186,
+            "core_total": 1067,
+            "total": 1220
+          },
+          "upload_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 729,
+              "n": 184,
+              "pct": 25.2401
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 881,
+              "n": 491,
+              "pct": 55.7321
+            },
+            "assessed_rows": 881,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 881,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.4341
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 881,
+              "n": 357,
+              "pct": 40.5221,
+              "wilson_95_pct": [
+                37.3283,
+                43.7983
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 1067,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0.0,
+                0.3587
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895,
+              "wilson_95_pct": [
+                21.7329,
+                35.9163
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 1067,
+              "n": 246,
+              "pct": 23.0553
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 1067,
+              "n": 289,
+              "pct": 27.0853
+            },
+            "negative_no_binding_rate": {
+              "d": 152,
+              "n": 65,
+              "pct": 42.7632
+            },
+            "rows": 1067,
+            "status_counts": {
+              "recommended": 821,
+              "rejected": 246
+            }
+          },
+          "upload_answerable_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 729,
+              "n": 184,
+              "pct": 25.2401
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 729,
+              "n": 404,
+              "pct": 55.4184
+            },
+            "assessed_rows": 729,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 729,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.5242
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 729,
+              "n": 270,
+              "pct": 37.037,
+              "wilson_95_pct": [
+                33.6081,
+                40.6019
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 729,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.5242
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "explicit_rejection_rate": {
+              "d": 729,
+              "n": 179,
+              "pct": 24.5542
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 729,
+              "n": 212,
+              "pct": 29.0809
+            },
+            "negative_no_binding_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "rows": 729,
+            "status_counts": {
+              "recommended": 550,
+              "rejected": 179
+            }
+          },
+          "upload_negative_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 152,
+              "n": 87,
+              "pct": 57.2368
+            },
+            "assessed_rows": 152,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 152,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.465
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 152,
+              "n": 87,
+              "pct": 57.2368,
+              "wilson_95_pct": [
+                49.2889,
+                64.828
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 152,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.465
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895,
+              "wilson_95_pct": [
+                21.7329,
+                35.9163
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 152,
+              "n": 36,
+              "pct": 23.6842
+            },
+            "negative_no_binding_rate": {
+              "d": 152,
+              "n": 65,
+              "pct": 42.7632
+            },
+            "rows": 152,
+            "status_counts": {
+              "recommended": 109,
+              "rejected": 43
+            }
+          },
+          "kit_confirmed_all_components": {
+            "candidate_recall": {
+              "d": 83,
+              "n": 29,
+              "pct": 34.9398
+            },
+            "candidate_recall@100": {
+              "d": 83,
+              "n": 28,
+              "pct": 33.7349
+            },
+            "candidate_recall@200": {
+              "d": 83,
+              "n": 29,
+              "pct": 34.9398
+            },
+            "candidate_recall@50": {
+              "d": 83,
+              "n": 26,
+              "pct": 31.3253
+            },
+            "channel_target_slot_counts": {
+              "fallback": 2,
+              "fts": 26,
+              "fts_extracted_name": 5,
+              "fts_zh": 5,
+              "model_match": 2
+            },
+            "hit@1": {
+              "d": 33,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            },
+            "hit@3": {
+              "d": 33,
+              "n": 1,
+              "pct": 3.0303
+            },
+            "hit@5": {
+              "d": 33,
+              "n": 1,
+              "pct": 3.0303
+            },
+            "mrr_at_10": 0.022848,
+            "mrr_full": 0.022848,
+            "rows": 33,
+            "stage_counts": {
+              "hard_blocked": 3,
+              "not_in_catalog": 0,
+              "not_recalled": 54,
+              "ranked_gt10": 6,
+              "top10_hit": 20
+            },
+            "target_slots": 83
+          }
+        },
+        "test": {
+          "counts": {
+            "confirmed_kit_1toN": 13,
+            "core_answerable": 78,
+            "core_negative": 37,
+            "core_pending": 18,
+            "core_total": 133,
+            "total": 160
+          },
+          "upload_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 78,
+              "n": 11,
+              "pct": 14.1026
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 115,
+              "n": 57,
+              "pct": 49.5652
+            },
+            "assessed_rows": 115,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 115,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                3.2324
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 115,
+              "n": 52,
+              "pct": 45.2174,
+              "wilson_95_pct": [
+                36.4224,
+                54.3216
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 133,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.8072
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 37,
+              "n": 17,
+              "pct": 45.9459,
+              "wilson_95_pct": [
+                31.0386,
+                61.616
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 133,
+              "n": 38,
+              "pct": 28.5714
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 133,
+              "n": 24,
+              "pct": 18.0451
+            },
+            "negative_no_binding_rate": {
+              "d": 37,
+              "n": 24,
+              "pct": 64.8649
+            },
+            "rows": 133,
+            "status_counts": {
+              "recommended": 95,
+              "rejected": 38
+            }
+          },
+          "upload_answerable_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 78,
+              "n": 11,
+              "pct": 14.1026
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 78,
+              "n": 44,
+              "pct": 56.4103
+            },
+            "assessed_rows": 78,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 78,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                4.6938
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 78,
+              "n": 39,
+              "pct": 50.0,
+              "wilson_95_pct": [
+                39.1674,
+                60.8326
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 78,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                4.6938
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "explicit_rejection_rate": {
+              "d": 78,
+              "n": 20,
+              "pct": 25.641
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 78,
+              "n": 18,
+              "pct": 23.0769
+            },
+            "negative_no_binding_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "rows": 78,
+            "status_counts": {
+              "recommended": 58,
+              "rejected": 20
+            }
+          },
+          "upload_negative_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 37,
+              "n": 13,
+              "pct": 35.1351
+            },
+            "assessed_rows": 37,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 37,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                9.4058
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 37,
+              "n": 13,
+              "pct": 35.1351,
+              "wilson_95_pct": [
+                21.8256,
+                51.241
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 37,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                9.4058
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 37,
+              "n": 17,
+              "pct": 45.9459,
+              "wilson_95_pct": [
+                31.0386,
+                61.616
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 37,
+              "n": 17,
+              "pct": 45.9459
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 37,
+              "n": 5,
+              "pct": 13.5135
+            },
+            "negative_no_binding_rate": {
+              "d": 37,
+              "n": 24,
+              "pct": 64.8649
+            },
+            "rows": 37,
+            "status_counts": {
+              "recommended": 20,
+              "rejected": 17
+            }
+          },
+          "kit_confirmed_all_components": {
+            "candidate_recall": {
+              "d": 38,
+              "n": 15,
+              "pct": 39.4737
+            },
+            "candidate_recall@100": {
+              "d": 38,
+              "n": 15,
+              "pct": 39.4737
+            },
+            "candidate_recall@200": {
+              "d": 38,
+              "n": 15,
+              "pct": 39.4737
+            },
+            "candidate_recall@50": {
+              "d": 38,
+              "n": 15,
+              "pct": 39.4737
+            },
+            "channel_target_slot_counts": {
+              "fallback": 2,
+              "fts": 13,
+              "fts_extracted_name": 4,
+              "fts_zh": 4
+            },
+            "hit@1": {
+              "d": 13,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 13,
+              "n": 2,
+              "pct": 15.3846
+            },
+            "hit@3": {
+              "d": 13,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@5": {
+              "d": 13,
+              "n": 0,
+              "pct": 0.0
+            },
+            "mrr_at_10": 0.019536,
+            "mrr_full": 0.019536,
+            "rows": 13,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 23,
+              "ranked_gt10": 3,
+              "top10_hit": 12
+            },
+            "target_slots": 38
+          }
+        }
+      },
+      "test_rank": {
+        "all": {
+          "candidate_recall": {
+            "d": 78,
+            "n": 34,
+            "pct": 43.5897
+          },
+          "candidate_recall@100": {
+            "d": 78,
+            "n": 32,
+            "pct": 41.0256
+          },
+          "candidate_recall@200": {
+            "d": 78,
+            "n": 34,
+            "pct": 43.5897
+          },
+          "candidate_recall@50": {
+            "d": 78,
+            "n": 23,
+            "pct": 29.4872
+          },
+          "channel_target_slot_counts": {
+            "fallback": 2,
+            "fts": 31,
+            "fts_extracted_name": 9,
+            "fts_zh": 9
+          },
+          "hit@1": {
+            "d": 78,
+            "n": 11,
+            "pct": 14.1026
+          },
+          "hit@10": {
+            "d": 78,
+            "n": 20,
+            "pct": 25.641
+          },
+          "hit@3": {
+            "d": 78,
+            "n": 15,
+            "pct": 19.2308
+          },
+          "hit@5": {
+            "d": 78,
+            "n": 19,
+            "pct": 24.359
+          },
+          "mrr_at_10": 0.173932,
+          "mrr_full": 0.181665,
+          "rows": 78,
+          "stage_counts": {
+            "hard_blocked": 0,
+            "not_in_catalog": 0,
+            "not_recalled": 44,
+            "ranked_gt10": 14,
+            "top10_hit": 20
+          },
+          "target_slots": 78
+        },
+        "domains": {
+          "弱电": {
+            "candidate_recall": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "candidate_recall@100": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "candidate_recall@200": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "candidate_recall@50": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "channel_target_slot_counts": {},
+            "hit@1": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@3": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@5": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "mrr_at_10": 0.0,
+            "mrr_full": 0.0,
+            "rows": 2,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 0,
+              "top10_hit": 0
+            },
+            "target_slots": 2
+          },
+          "纯水": {
+            "candidate_recall": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "candidate_recall@100": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "candidate_recall@200": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "candidate_recall@50": {
+              "d": 4,
+              "n": 1,
+              "pct": 25.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 2
+            },
+            "hit@1": {
+              "d": 4,
+              "n": 1,
+              "pct": 25.0
+            },
+            "hit@10": {
+              "d": 4,
+              "n": 1,
+              "pct": 25.0
+            },
+            "hit@3": {
+              "d": 4,
+              "n": 1,
+              "pct": 25.0
+            },
+            "hit@5": {
+              "d": 4,
+              "n": 1,
+              "pct": 25.0
+            },
+            "mrr_at_10": 0.25,
+            "mrr_full": 0.270833,
+            "rows": 4,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 1,
+              "top10_hit": 1
+            },
+            "target_slots": 4
+          },
+          "给排水": {
+            "candidate_recall": {
+              "d": 57,
+              "n": 18,
+              "pct": 31.5789
+            },
+            "candidate_recall@100": {
+              "d": 57,
+              "n": 18,
+              "pct": 31.5789
+            },
+            "candidate_recall@200": {
+              "d": 57,
+              "n": 18,
+              "pct": 31.5789
+            },
+            "candidate_recall@50": {
+              "d": 57,
+              "n": 17,
+              "pct": 29.8246
+            },
+            "channel_target_slot_counts": {
+              "fallback": 2,
+              "fts": 15,
+              "fts_extracted_name": 9,
+              "fts_zh": 9
+            },
+            "hit@1": {
+              "d": 57,
+              "n": 7,
+              "pct": 12.2807
+            },
+            "hit@10": {
+              "d": 57,
+              "n": 14,
+              "pct": 24.5614
+            },
+            "hit@3": {
+              "d": 57,
+              "n": 9,
+              "pct": 15.7895
+            },
+            "hit@5": {
+              "d": 57,
+              "n": 13,
+              "pct": 22.807
+            },
+            "mrr_at_10": 0.15614,
+            "mrr_full": 0.159976,
+            "rows": 57,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 39,
+              "ranked_gt10": 4,
+              "top10_hit": 14
+            },
+            "target_slots": 57
+          },
+          "装饰": {
+            "candidate_recall": {
+              "d": 15,
+              "n": 14,
+              "pct": 93.3333
+            },
+            "candidate_recall@100": {
+              "d": 15,
+              "n": 12,
+              "pct": 80.0
+            },
+            "candidate_recall@200": {
+              "d": 15,
+              "n": 14,
+              "pct": 93.3333
+            },
+            "candidate_recall@50": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "channel_target_slot_counts": {
+              "fts": 14
+            },
+            "hit@1": {
+              "d": 15,
+              "n": 3,
+              "pct": 20.0
+            },
+            "hit@10": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "hit@3": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "hit@5": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "mrr_at_10": 0.244444,
+            "mrr_full": 0.264525,
+            "rows": 15,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 1,
+              "ranked_gt10": 9,
+              "top10_hit": 5
+            },
+            "target_slots": 15
+          }
+        }
+      },
+      "latency": {
+        "single": {
+          "max_ms": 717.056,
+          "n": 1220,
+          "p50_ms": 23.456,
+          "p95_ms": 238.467
+        },
+        "upload50": {
+          "max_ms": 19529.411,
+          "n": 24,
+          "p50_ms": 1375.041,
+          "p95_ms": 7510.588
+        }
+      },
+      "budget_checks": {
+        "single_p50": true,
+        "single_p95": true,
+        "upload50_p50": true,
+        "upload50_p95": true,
+        "workset": true
+      },
+      "peak_working_set_mib": 684.66
+    },
+    "vector": {
+      "checks": {
+        "ranking": false,
+        "six_domains": false,
+        "negative_rejection": true,
+        "wrong_proposals": false,
+        "zero_wrong_auto": true,
+        "perfect_precision_if_accepted": true,
+        "kit_top10": true,
+        "performance": true
+      },
+      "ranking": {
+        "candidate_recall@100": {
+          "value": {
+            "d": 729,
+            "n": 594,
+            "pct": 81.4815,
+            "wilson_95_pct": [
+              78.4992,
+              84.1337
+            ]
+          },
+          "v017_min": 594,
+          "delta": 0,
+          "passed": true
+        },
+        "candidate_recall@200": {
+          "value": {
+            "d": 729,
+            "n": 643,
+            "pct": 88.203,
+            "wilson_95_pct": [
+              85.6587,
+              90.3468
+            ]
+          },
+          "v017_min": 643,
+          "delta": 0,
+          "passed": true
+        },
+        "hit@1": {
+          "value": {
+            "d": 729,
+            "n": 184,
+            "pct": 25.2401,
+            "wilson_95_pct": [
+              22.2222,
+              28.5175
+            ]
+          },
+          "v017_min": 183,
+          "delta": 1,
+          "passed": true
+        },
+        "hit@3": {
+          "value": {
+            "d": 729,
+            "n": 279,
+            "pct": 38.2716,
+            "wilson_95_pct": [
+              34.8135,
+              41.8527
+            ]
+          },
+          "v017_min": 288,
+          "delta": -9,
+          "passed": false
+        },
+        "mrr_at_10": {
+          "value": 0.339976,
+          "v017_min": 0.344091,
+          "delta": -0.004115,
+          "passed": false
+        },
+        "mrr_full": {
+          "value": 0.351991,
+          "v017_min": 0.355303,
+          "delta": -0.003312,
+          "passed": false
+        }
+      },
+      "six_domain_floors": {
+        "强电": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 202,
+              "n": 166,
+              "pct": 82.1782,
+              "wilson_95_pct": [
+                76.3153,
+                86.8401
+              ]
+            },
+            "v017_min": 166,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 202,
+              "n": 171,
+              "pct": 84.6535,
+              "wilson_95_pct": [
+                79.0406,
+                88.9729
+              ]
+            },
+            "v017_min": 171,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 202,
+              "n": 50,
+              "pct": 24.7525,
+              "wilson_95_pct": [
+                19.3091,
+                31.1382
+              ]
+            },
+            "v017_min": 50,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "暖通": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 92,
+              "n": 69,
+              "pct": 75.0,
+              "wilson_95_pct": [
+                65.2712,
+                82.7247
+              ]
+            },
+            "v017_min": 69,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 92,
+              "n": 90,
+              "pct": 97.8261,
+              "wilson_95_pct": [
+                92.4165,
+                99.4018
+              ]
+            },
+            "v017_min": 90,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 92,
+              "n": 31,
+              "pct": 33.6957,
+              "wilson_95_pct": [
+                24.8636,
+                43.8347
+              ]
+            },
+            "v017_min": 29,
+            "delta": 2,
+            "passed": true
+          }
+        },
+        "装饰": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 126,
+              "n": 114,
+              "pct": 90.4762,
+              "wilson_95_pct": [
+                84.0895,
+                94.4678
+              ]
+            },
+            "v017_min": 114,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 126,
+              "n": 117,
+              "pct": 92.8571,
+              "wilson_95_pct": [
+                86.9815,
+                96.1969
+              ]
+            },
+            "v017_min": 117,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 126,
+              "n": 28,
+              "pct": 22.2222,
+              "wilson_95_pct": [
+                15.846,
+                30.2421
+              ]
+            },
+            "v017_min": 29,
+            "delta": -1,
+            "passed": false
+          }
+        },
+        "医用气体": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 112,
+              "n": 92,
+              "pct": 82.1429,
+              "wilson_95_pct": [
+                74.0216,
+                88.1323
+              ]
+            },
+            "v017_min": 92,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 112,
+              "n": 94,
+              "pct": 83.9286,
+              "wilson_95_pct": [
+                76.0214,
+                89.5855
+              ]
+            },
+            "v017_min": 94,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 112,
+              "n": 22,
+              "pct": 19.6429,
+              "wilson_95_pct": [
+                13.345,
+                27.9541
+              ]
+            },
+            "v017_min": 22,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "弱电": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 114,
+              "n": 83,
+              "pct": 72.807,
+              "wilson_95_pct": [
+                63.9955,
+                80.1315
+              ]
+            },
+            "v017_min": 83,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 114,
+              "n": 98,
+              "pct": 85.9649,
+              "wilson_95_pct": [
+                78.4124,
+                91.1726
+              ]
+            },
+            "v017_min": 98,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 114,
+              "n": 25,
+              "pct": 21.9298,
+              "wilson_95_pct": [
+                15.3184,
+                30.3714
+              ]
+            },
+            "v017_min": 25,
+            "delta": 0,
+            "passed": true
+          }
+        },
+        "给排水": {
+          "candidate_recall@100": {
+            "value": {
+              "d": 57,
+              "n": 50,
+              "pct": 87.7193,
+              "wilson_95_pct": [
+                76.7536,
+                93.9219
+              ]
+            },
+            "v017_min": 50,
+            "delta": 0,
+            "passed": true
+          },
+          "candidate_recall@200": {
+            "value": {
+              "d": 57,
+              "n": 50,
+              "pct": 87.7193,
+              "wilson_95_pct": [
+                76.7536,
+                93.9219
+              ]
+            },
+            "v017_min": 50,
+            "delta": 0,
+            "passed": true
+          },
+          "hit@1": {
+            "value": {
+              "d": 57,
+              "n": 19,
+              "pct": 33.3333,
+              "wilson_95_pct": [
+                22.4938,
+                46.2775
+              ]
+            },
+            "v017_min": 19,
+            "delta": 0,
+            "passed": true
+          }
+        }
+      },
+      "negative_delta": 0,
+      "wrong_proposal_delta": [
+        11,
+        0
+      ],
+      "counts_and_decisions": {
+        "full": {
+          "counts": {
+            "confirmed_kit_1toN": 33,
+            "core_answerable": 729,
+            "core_negative": 152,
+            "core_pending": 186,
+            "core_total": 1067,
+            "total": 1220
+          },
+          "upload_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 729,
+              "n": 185,
+              "pct": 25.3772
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 881,
+              "n": 622,
+              "pct": 70.6016
+            },
+            "assessed_rows": 881,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 881,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.4341
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 881,
+              "n": 488,
+              "pct": 55.3916,
+              "wilson_95_pct": [
+                52.0929,
+                58.6435
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 1067,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0.0,
+                0.3587
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 152,
+              "n": 42,
+              "pct": 27.6316,
+              "wilson_95_pct": [
+                21.1406,
+                35.2253
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 1067,
+              "n": 262,
+              "pct": 24.5548
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 1067,
+              "n": 580,
+              "pct": 54.358
+            },
+            "negative_no_binding_rate": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895
+            },
+            "rows": 1067,
+            "status_counts": {
+              "recommended": 805,
+              "rejected": 262
+            }
+          },
+          "upload_answerable_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 729,
+              "n": 185,
+              "pct": 25.3772
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 729,
+              "n": 513,
+              "pct": 70.3704
+            },
+            "assessed_rows": 729,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 729,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.5242
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 729,
+              "n": 379,
+              "pct": 51.989,
+              "wilson_95_pct": [
+                48.3614,
+                55.5958
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 729,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                0.5242
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "explicit_rejection_rate": {
+              "d": 729,
+              "n": 200,
+              "pct": 27.4348
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 729,
+              "n": 389,
+              "pct": 53.3608
+            },
+            "negative_no_binding_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "rows": 729,
+            "status_counts": {
+              "recommended": 529,
+              "rejected": 200
+            }
+          },
+          "upload_negative_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 152,
+              "n": 109,
+              "pct": 71.7105
+            },
+            "assessed_rows": 152,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 152,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.465
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 152,
+              "n": 109,
+              "pct": 71.7105,
+              "wilson_95_pct": [
+                64.0837,
+                78.2671
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 152,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.465
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 152,
+              "n": 42,
+              "pct": 27.6316,
+              "wilson_95_pct": [
+                21.1406,
+                35.2253
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 152,
+              "n": 42,
+              "pct": 27.6316
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 152,
+              "n": 71,
+              "pct": 46.7105
+            },
+            "negative_no_binding_rate": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895
+            },
+            "rows": 152,
+            "status_counts": {
+              "recommended": 110,
+              "rejected": 42
+            }
+          },
+          "kit_confirmed_all_components": {
+            "candidate_recall": {
+              "d": 83,
+              "n": 47,
+              "pct": 56.6265
+            },
+            "candidate_recall@100": {
+              "d": 83,
+              "n": 44,
+              "pct": 53.012
+            },
+            "candidate_recall@200": {
+              "d": 83,
+              "n": 47,
+              "pct": 56.6265
+            },
+            "candidate_recall@50": {
+              "d": 83,
+              "n": 42,
+              "pct": 50.6024
+            },
+            "channel_target_slot_counts": {
+              "fts": 26,
+              "fts_extracted_name": 5,
+              "fts_zh": 5,
+              "model_match": 2,
+              "semantic": 41
+            },
+            "hit@1": {
+              "d": 33,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            },
+            "hit@3": {
+              "d": 33,
+              "n": 1,
+              "pct": 3.0303
+            },
+            "hit@5": {
+              "d": 33,
+              "n": 2,
+              "pct": 6.0606
+            },
+            "mrr_at_10": 0.025758,
+            "mrr_full": 0.028303,
+            "rows": 33,
+            "stage_counts": {
+              "hard_blocked": 9,
+              "not_in_catalog": 0,
+              "not_recalled": 36,
+              "ranked_gt10": 14,
+              "top10_hit": 24
+            },
+            "target_slots": 83
+          }
+        },
+        "test": {
+          "counts": {
+            "confirmed_kit_1toN": 13,
+            "core_answerable": 78,
+            "core_negative": 37,
+            "core_pending": 18,
+            "core_total": 133,
+            "total": 160
+          },
+          "upload_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 78,
+              "n": 23,
+              "pct": 29.4872
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 115,
+              "n": 70,
+              "pct": 60.8696
+            },
+            "assessed_rows": 115,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 115,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                3.2324
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 115,
+              "n": 53,
+              "pct": 46.087,
+              "wilson_95_pct": [
+                37.2507,
+                55.1762
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 133,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                2.8072
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514,
+              "wilson_95_pct": [
+                35.8949,
+                66.5536
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 133,
+              "n": 45,
+              "pct": 33.8346
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 133,
+              "n": 60,
+              "pct": 45.1128
+            },
+            "negative_no_binding_rate": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514
+            },
+            "rows": 133,
+            "status_counts": {
+              "recommended": 88,
+              "rejected": 45
+            }
+          },
+          "upload_answerable_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 78,
+              "n": 23,
+              "pct": 29.4872
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 78,
+              "n": 52,
+              "pct": 66.6667
+            },
+            "assessed_rows": 78,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 78,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                4.6938
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 78,
+              "n": 35,
+              "pct": 44.8718,
+              "wilson_95_pct": [
+                34.3344,
+                55.8906
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 78,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                4.6938
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "explicit_rejection_rate": {
+              "d": 78,
+              "n": 26,
+              "pct": 33.3333
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 78,
+              "n": 31,
+              "pct": 39.7436
+            },
+            "negative_no_binding_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "rows": 78,
+            "status_counts": {
+              "recommended": 52,
+              "rejected": 26
+            }
+          },
+          "upload_negative_decisions": {
+            "answerable_top1_code_rate": {
+              "d": 0,
+              "n": 0,
+              "pct": null
+            },
+            "assessed_auto_accepted_accuracy": {
+              "d": 0,
+              "n": 0,
+              "pct": null,
+              "wilson_95_pct": null
+            },
+            "assessed_proposed_binding_rate": {
+              "d": 37,
+              "n": 18,
+              "pct": 48.6486
+            },
+            "assessed_rows": 37,
+            "assessed_wrong_auto_binding_rate": {
+              "d": 37,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                9.4058
+              ]
+            },
+            "assessed_wrong_proposed_binding_rate": {
+              "d": 37,
+              "n": 18,
+              "pct": 48.6486,
+              "wilson_95_pct": [
+                33.4464,
+                64.1051
+              ]
+            },
+            "auto_accepted_coverage": {
+              "d": 37,
+              "n": 0,
+              "pct": 0.0,
+              "wilson_95_pct": [
+                0,
+                9.4058
+              ]
+            },
+            "correct_rejection_rate": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514,
+              "wilson_95_pct": [
+                35.8949,
+                66.5536
+              ]
+            },
+            "explicit_rejection_rate": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514
+            },
+            "matcher_is_exact_hint_rate": {
+              "d": 37,
+              "n": 20,
+              "pct": 54.0541
+            },
+            "negative_no_binding_rate": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514
+            },
+            "rows": 37,
+            "status_counts": {
+              "recommended": 18,
+              "rejected": 19
+            }
+          },
+          "kit_confirmed_all_components": {
+            "candidate_recall": {
+              "d": 38,
+              "n": 19,
+              "pct": 50.0
+            },
+            "candidate_recall@100": {
+              "d": 38,
+              "n": 19,
+              "pct": 50.0
+            },
+            "candidate_recall@200": {
+              "d": 38,
+              "n": 19,
+              "pct": 50.0
+            },
+            "candidate_recall@50": {
+              "d": 38,
+              "n": 19,
+              "pct": 50.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 13,
+              "fts_extracted_name": 4,
+              "fts_zh": 4,
+              "semantic": 19
+            },
+            "hit@1": {
+              "d": 13,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 13,
+              "n": 1,
+              "pct": 7.6923
+            },
+            "hit@3": {
+              "d": 13,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@5": {
+              "d": 13,
+              "n": 1,
+              "pct": 7.6923
+            },
+            "mrr_at_10": 0.019231,
+            "mrr_full": 0.025693,
+            "rows": 13,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 19,
+              "ranked_gt10": 8,
+              "top10_hit": 10
+            },
+            "target_slots": 38
+          }
+        }
+      },
+      "test_rank": {
+        "all": {
+          "candidate_recall": {
+            "d": 78,
+            "n": 70,
+            "pct": 89.7436
+          },
+          "candidate_recall@100": {
+            "d": 78,
+            "n": 68,
+            "pct": 87.1795
+          },
+          "candidate_recall@200": {
+            "d": 78,
+            "n": 70,
+            "pct": 89.7436
+          },
+          "candidate_recall@50": {
+            "d": 78,
+            "n": 59,
+            "pct": 75.641
+          },
+          "channel_target_slot_counts": {
+            "fts": 31,
+            "fts_extracted_name": 9,
+            "fts_zh": 9,
+            "semantic": 68
+          },
+          "hit@1": {
+            "d": 78,
+            "n": 23,
+            "pct": 29.4872
+          },
+          "hit@10": {
+            "d": 78,
+            "n": 52,
+            "pct": 66.6667
+          },
+          "hit@3": {
+            "d": 78,
+            "n": 42,
+            "pct": 53.8462
+          },
+          "hit@5": {
+            "d": 78,
+            "n": 47,
+            "pct": 60.2564
+          },
+          "mrr_at_10": 0.438248,
+          "mrr_full": 0.448241,
+          "rows": 78,
+          "stage_counts": {
+            "hard_blocked": 1,
+            "not_in_catalog": 0,
+            "not_recalled": 8,
+            "ranked_gt10": 17,
+            "top10_hit": 52
+          },
+          "target_slots": 78
+        },
+        "domains": {
+          "弱电": {
+            "candidate_recall": {
+              "d": 2,
+              "n": 2,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 2,
+              "n": 2,
+              "pct": 100.0
+            },
+            "candidate_recall@200": {
+              "d": 2,
+              "n": 2,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 2,
+              "n": 2,
+              "pct": 100.0
+            },
+            "channel_target_slot_counts": {
+              "semantic": 2
+            },
+            "hit@1": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@10": {
+              "d": 2,
+              "n": 1,
+              "pct": 50.0
+            },
+            "hit@3": {
+              "d": 2,
+              "n": 0,
+              "pct": 0.0
+            },
+            "hit@5": {
+              "d": 2,
+              "n": 1,
+              "pct": 50.0
+            },
+            "mrr_at_10": 0.125,
+            "mrr_full": 0.125,
+            "rows": 2,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 1
+            },
+            "target_slots": 2
+          },
+          "纯水": {
+            "candidate_recall": {
+              "d": 4,
+              "n": 4,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 4,
+              "n": 4,
+              "pct": 100.0
+            },
+            "candidate_recall@200": {
+              "d": 4,
+              "n": 4,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 4,
+              "n": 3,
+              "pct": 75.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 2,
+              "semantic": 4
+            },
+            "hit@1": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "hit@10": {
+              "d": 4,
+              "n": 3,
+              "pct": 75.0
+            },
+            "hit@3": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "hit@5": {
+              "d": 4,
+              "n": 2,
+              "pct": 50.0
+            },
+            "mrr_at_10": 0.525,
+            "mrr_full": 0.545833,
+            "rows": 4,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 1,
+              "top10_hit": 3
+            },
+            "target_slots": 4
+          },
+          "给排水": {
+            "candidate_recall": {
+              "d": 57,
+              "n": 50,
+              "pct": 87.7193
+            },
+            "candidate_recall@100": {
+              "d": 57,
+              "n": 50,
+              "pct": 87.7193
+            },
+            "candidate_recall@200": {
+              "d": 57,
+              "n": 50,
+              "pct": 87.7193
+            },
+            "candidate_recall@50": {
+              "d": 57,
+              "n": 49,
+              "pct": 85.9649
+            },
+            "channel_target_slot_counts": {
+              "fts": 15,
+              "fts_extracted_name": 9,
+              "fts_zh": 9,
+              "semantic": 49
+            },
+            "hit@1": {
+              "d": 57,
+              "n": 19,
+              "pct": 33.3333
+            },
+            "hit@10": {
+              "d": 57,
+              "n": 43,
+              "pct": 75.4386
+            },
+            "hit@3": {
+              "d": 57,
+              "n": 37,
+              "pct": 64.9123
+            },
+            "hit@5": {
+              "d": 57,
+              "n": 39,
+              "pct": 68.4211
+            },
+            "mrr_at_10": 0.505848,
+            "mrr_full": 0.512652,
+            "rows": 57,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 7,
+              "ranked_gt10": 7,
+              "top10_hit": 43
+            },
+            "target_slots": 57
+          },
+          "装饰": {
+            "candidate_recall": {
+              "d": 15,
+              "n": 14,
+              "pct": 93.3333
+            },
+            "candidate_recall@100": {
+              "d": 15,
+              "n": 12,
+              "pct": 80.0
+            },
+            "candidate_recall@200": {
+              "d": 15,
+              "n": 14,
+              "pct": 93.3333
+            },
+            "candidate_recall@50": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "channel_target_slot_counts": {
+              "fts": 14,
+              "semantic": 13
+            },
+            "hit@1": {
+              "d": 15,
+              "n": 2,
+              "pct": 13.3333
+            },
+            "hit@10": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "hit@3": {
+              "d": 15,
+              "n": 3,
+              "pct": 20.0
+            },
+            "hit@5": {
+              "d": 15,
+              "n": 5,
+              "pct": 33.3333
+            },
+            "mrr_at_10": 0.2,
+            "mrr_full": 0.220555,
+            "rows": 15,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 1,
+              "ranked_gt10": 9,
+              "top10_hit": 5
+            },
+            "target_slots": 15
+          }
+        }
+      },
+      "latency": {
+        "single": {
+          "max_ms": 881.747,
+          "n": 1220,
+          "p50_ms": 61.858,
+          "p95_ms": 288.019
+        },
+        "upload50": {
+          "max_ms": 23431.178,
+          "n": 24,
+          "p50_ms": 4055.821,
+          "p95_ms": 9543.021
+        }
+      },
+      "budget_checks": {
+        "single_p50": true,
+        "single_p95": true,
+        "upload50_p50": true,
+        "upload50_p95": true,
+        "workset": true
+      },
+      "peak_working_set_mib": 1714.04
+    }
+  },
+  "experiment_disposition": "keep_default_off",
+  "m2_on_clean_budget": {
+    "single_p50": true,
+    "single_p95": true,
+    "workset": true
+  }
+}

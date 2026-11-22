@@ -1,0 +1,106 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "scope": "Coordinator only; 7 management files, 2 new round documents, own evidence. No implementation changes.",
+  "files": {
+    "doc/00_项目管理/版本路线图.md": {
+      "bytes": 3895,
+      "sha256": "5da5ac7e5f05d6ad98fa9cbacf76ff5b4a1c5f13f3bebd9e4bb280e8f13b4281"
+    },
+    "doc/00_项目管理/进度总表.md": {
+      "bytes": 15398,
+      "sha256": "e84db919a22936a2e98d08293bdb5d2eced9fb992e9c35ba2c19a7b6463220fd"
+    },
+    "doc/00_项目管理/问题与版本归属总台账.md": {
+      "bytes": 21692,
+      "sha256": "5b88aa42948e6856076700856f1439a25d83f40724ddd0006c8b5f7f7d289036"
+    },
+    "doc/README.md": {
+      "bytes": 3357,
+      "sha256": "33c58553a09c5f3a8ced90ab4c972113438743165150355dc18a843ef566c9e8"
+    },
+    "doc/V0.1.6/01_实施方案与任务包.md": {
+      "bytes": 6748,
+      "sha256": "9233686cedb0a3a06fe1ca00fef06d3dbcfd2c2327900cb78fbf61be52d0eaf6"
+    },
+    "doc/V0.1.6/02_任务台账.md": {
+      "bytes": 4798,
+      "sha256": "e9471779584a193e83998483569e1dc2840cbe9af2465f7a643a0b00e52557cf"
+    },
+    "doc/V0.1.6/03_终审与版本准入.md": {
+      "bytes": 2799,
+      "sha256": "b8f33d18f40964e2d1db6e1d849d42d3a97bbe6cd2540bba33c63e4d38f6a1dd"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/collect_state.py": {
+      "bytes": 2593,
+      "sha256": "df5a5a244cf018eaf9082ac53f16cb2ea8f0ef22bc0d67e65e213de4bbd9c9e2"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/completion_checks.json": {
+      "bytes": 762,
+      "sha256": "da5768c0dc0ac51a87e7b4c4f03fc9c15bb89ad5b08ef813d0ac0de750639122"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/evidence_binding.json": {
+      "bytes": 9512,
+      "sha256": "e9d2828086ba2e41f6b89f8c64b94de2ff17e7019b50c938768cadb458041073"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/inspect_evidence.py": {
+      "bytes": 2924,
+      "sha256": "c5104bad1d1669f88984711b18563d7c617abfa27d176a6b24aef2a57a7cce9e"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/isolation_verify_after.exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/isolation_verify_after.json": {
+      "bytes": 12684,
+      "sha256": "b291a9bebec8f9fcb290faf008c7d9521996a14192226ee6b60f651eae2a8c2c"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/isolation_verify_after.log": {
+      "bytes": 351,
+      "sha256": "104b07fffbcf422631f7c9d16cc239308de591e20ea677da510314ec28dbb2f0"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/m1_only_review.diff": {
+      "bytes": 124326,
+      "sha256": "93545d216eb9872fc63f8bfe85f98a0e573b13f1114184fe22c22cbdc333f734"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/management_changes.json": {
+      "bytes": 13501,
+      "sha256": "7b35cd7720cf04a3620c1645441df222d7e8558b0368cd73118b0d78f42846fc"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/state_after.json": {
+      "bytes": 50538,
+      "sha256": "1576e42b388bee722663681abd55954c7b952f32a1126801d46380f35eff51a0"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/state_before.json": {
+      "bytes": 50479,
+      "sha256": "bc4a3f028e5ebdf35cf0387e1b3493a66578393533f2206f220f8d025b2063ee"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/state_final.json": {
+      "bytes": 50893,
+      "sha256": "32c5e1e4ecc372dd7081ee5f84f863e9da12fb390ebd6fdb7d2a42ad77b7f4c8"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/targeted_pytest.log": {
+      "bytes": 1689,
+      "sha256": "1aff5f93705ef3c9994d4978cb8aca5f7951320dedf824ff2439f071f1f4f8b7"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/targeted_pytest_local.exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/targeted_pytest_local.log": {
+      "bytes": 6203,
+      "sha256": "0e598033701ddb8270712aacf03321db045037f6d4d93a05f5c473065b31fd03"
+    },
+    "doc/V0.1.6/evidence/coord_m1_r01/update_management.py": {
+      "bytes": 9897,
+      "sha256": "91cb7290cbbf26cfa6c4c5a6db77f5371c882b8c0352a84e716adcdddd964b7a"
+    },
+    "doc/V0.1.6/rounds/V016-M1_R01_统筹裁决.md": {
+      "bytes": 5690,
+      "sha256": "65ada115722bd79698ac35f020ed26d3fdccdd498bed763d81360c3d2e96974f"
+    },
+    "doc/V0.1.6/rounds/V016-M2_R01_统筹下发.md": {
+      "bytes": 9777,
+      "sha256": "30124132cb14aa58a472e4ab62dee54b9e8f516ababfaf902c75b117df513534"
+    }
+  }
+}

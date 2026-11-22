@@ -1,0 +1,9 @@
+# V015-M0 测试专用依赖（与生产 requirements.txt 分离，可独立安装）
+# 安装：python -m pip install -r requirements-test.txt
+-r requirements.txt
+pytest>=8.0.0
+httpx>=0.24.0
+# V015-M0 R04: app/audit_manager.get_server_hardware_metrics 在 Windows 无 psutil 时
+# memory 恒为 0.0，历史断言 metrics["memory"]["total_gb"] > 0 无法满足（该断言在
+# 初始化修复前从未被执行到）。测试环境补齐 psutil，不改 app、不降断言。
+psutil>=5.9.0

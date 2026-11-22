@@ -1,0 +1,382 @@
+--- a/app/matcher.py
++++ b/app/matcher.py
+@@ -2747,7 +2747,7 @@
+     return pool_list
+ 
+ @catalog_read
+-def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None, calibration_groups=None) -> Dict[str, Any]:
++def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None) -> Dict[str, Any]:
+     """
+     Main entry point for matching a single query item.
+     """
+@@ -2802,7 +2802,6 @@
+         "exact_code" in (c.get("recall_sources") or ()) for c in candidates
+     )
+     score_contexts = {}
+-    capped_codes = set() if calibration_groups is not None else None
+     rerank_profile = os.getenv("LISTTRANS_V019_M1_RERANK", "off")
+     rerank_enabled = rerank_profile not in ("", "0", "off")
+     scored_candidates = []
+@@ -2819,8 +2818,6 @@
+             if not direct_code:
+                 score_contexts[cand["code"]] = ctx
+         cap_hundred = max_score_base * 100.0
+-        if capped_codes is not None and max_score_base != 1.0:
+-            capped_codes.add(cand["code"])
+         series_adjustment = 0.0
+ 
+         # Apply series clustering boost if candidate belongs to a confirmed series
+@@ -3019,11 +3016,6 @@
+         "matched_code": matched_code,
+         "top_candidates": res_candidates # Output Top 10 for detailed view
+     }
+-    if capped_codes is not None:
+-        from app.acceptance_calibration import ranking_evidence
+-
+-        uncapped = bool(scored_candidates and scored_candidates[0]["code"] not in capped_codes)
+-        result["_acceptance_rank"] = ranking_evidence(scored_candidates, calibration_groups, uncapped)
+     if diagnostic_targets is not None:
+         targets = list(dict.fromkeys(str(code).strip() for code in diagnostic_targets if str(code).strip()))
+         from app.db_manager import get_thread_db_connection
+--- a/app/server.py
++++ b/app/server.py
+@@ -235,7 +235,6 @@
+     fetch_live_material_map,
+     get_unit_multiplier,
+ )
+-from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding
+ from app.audit_manager import (
+     init_audit_tables, log_audit_event, record_heartbeat, 
+     update_processing_task, increment_stat_counter
+@@ -675,14 +674,13 @@
+ def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str):
+     """V015-M2：草稿/保存进度恢复时的服务端权威状态注释。
+ 
+-    可导出状态来自服务端人工确认、约束规则或新鲜校准复核。
+-    旧草稿里的绑定、编码和历史匹配提示本身不授予导出权限。
++    旧草稿的 bindings/matched_code/is_exact 一律不升级为可导出；只有能在
++    binding_decisions 中命中 manual_confirmed（行/绑定双指纹一致）或满足带约束
++    自动接受规则的行才恢复为可导出状态，其余统一降为待复核并给出可理解原因。
+     """
+     annotated = []
+     downgraded = 0
+-    policy = acceptance_policy()
+     for item in items:
+-        item.pop("acceptance_calibration", None)
+         professional = item.get("professional") or "暖通"
+         scope_key = make_scope_key(scope or "", professional)
+         binds = normalize_bindings(item.get("bindings") or [], item.get("original_qty"))
+@@ -702,7 +700,7 @@
+         source = SOURCE_RESTORE
+         reason = "旧草稿恢复：待人工复核，未确认不可导出"
+ 
+-        if binds or policy is not None:
++        if binds:
+             row_decision = get_row_decision(
+                 user_id=current_user["id"], scope_key=scope_key, row=row,
+             )
+@@ -745,7 +743,7 @@
+                             )
+                     # 尝试带约束自动接受规则（仅约束逐项匹配 + 编码有效 + 无硬冲突）
+                     rule = _select_matching_binding_rule(item, load_auto_binding_rules())
+-                    if rule is not None and binds:
++                    if rule is not None:
+                         raw = _raw_item_from_export(row)
+                         rule_binds = _rule_expected_bindings(raw, rule)
+                         dec = _evaluate_rule_decision(raw, rule, rule_binds)
+@@ -754,14 +752,6 @@
+                             status = STATUS_AUTO_ACCEPTED
+                             source = SOURCE_RULE
+                             reason = dec["decision_reason"]
+-                    if (policy is not None and binds and item.get("professional") and not row_decision
+-                            and status == STATUS_RECOMMENDED and rule is None):
+-                        calibrated, live_bindings = _revalidate_matcher_binding(row, binds, policy)
+-                        if live_bindings:
+-                            item.update(calibrated, bindings=live_bindings)
+-                            status, source, reason = (calibrated[k] for k in (
+-                                "decision_status", "decision_source", "decision_reason",
+-                            ))
+                 if status == STATUS_RECOMMENDED:
+                     downgraded += 1
+                     if (not record and
+@@ -1591,39 +1581,6 @@
+     }
+ 
+ 
+-def _calibrated_decision(row, query, result, policy, *, trusted=True):
+-    assessed = assess_match(row, query, result, policy, trusted=trusted)
+-    bindings = confirmed_binding(row, result, assessed)
+-    labels = {
+-        "accepted": "关键字段、实时物料与接受置信度联合核验通过",
+-        "review": "接受证据不足，待人工复核",
+-        "needs_parameters": "关键字段待补参：" + "、".join(assessed["missing_fields"]),
+-        "rejected": assessed["hard_conflict"] or "无有效答案或候选证据过弱，拒绝预绑定",
+-    }
+-    decision = _annotate_decision(row, bindings, assessed["decision_status"], SOURCE_MATCHER, labels[assessed["outcome"]])
+-    decision["acceptance_calibration"] = {k: v for k, v in assessed.items() if k not in ("features", "decision_status")}
+-    return decision, bindings
+-
+-
+-@catalog_read
+-def _revalidate_matcher_binding(row, incoming, policy):
+-    """Recompute from submitted original fields, using current server assets."""
+-    if len(incoming) != 1:
+-        return None, []
+-    from app.query_preprocessor import prepare_query
+-
+-    raw = _raw_item_from_export(row)
+-    query = prepare_query(raw["name"], raw["specification"], raw["professional"],
+-                          category=raw["category"], brand=raw["brand"], unit=raw["unit"])
+-    result = match_item(query, calibration_groups=policy.equivalences)
+-    decision, live = _calibrated_decision(row, query, result, policy)
+-    request_unit = str(incoming[0].get("unit") or "").strip()
+-    if (not live or not request_unit or get_unit_multiplier(request_unit, live[0]["unit"]) != 1.0
+-            or binding_fingerprint(incoming) != binding_fingerprint(live)):
+-        return None, []
+-    return decision, live
+-
+-
+ def _rule_expected_bindings(item: Dict[str, Any], rule: Dict[str, Any]) -> List[Dict[str, Any]]:
+     """按当前行数量与规则比例重建完整预期绑定，不从草稿/导出请求继承数量。"""
+     qty = float(item.get("qty") or 0.0)
+@@ -2235,8 +2192,6 @@
+     logger.debug(f"batch_match_rows started for {len(raw_rows)} rows. task_id: {task_id}")
+     total_results = []
+     total_items = len(raw_rows)
+-    policy = acceptance_policy()
+-    task_meta = (get_task_status(task_id) or {}) if policy is not None and task_id else {}
+ 
+     # Load confirmed auto-binding rules
+     logger.debug("Loading auto binding rules...")
+@@ -2343,10 +2298,7 @@
+             
+             logger.debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
+             t_start_match = time.time()
+-            if policy is None:
+-                res = match_item(q_info, q_vector)
+-            else:
+-                res = match_item(q_info, q_vector, calibration_groups=policy.equivalences)
++            res = match_item(q_info, q_vector)
+             t_elapsed_match = time.time() - t_start_match
+             logger.debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
+             first_pass_results.append(res)
+@@ -2445,8 +2397,6 @@
+                                     if "系列优先" not in cand.get("match_reasons", []):
+                                         cand.setdefault("match_reasons", []).append("系列优先")
+                         res["top_candidates"].sort(key=lambda x: x["score"], reverse=True)
+-                    if policy is not None:
+-                        res.pop("_acceptance_rank", None)
+                     
+                 top_cands = res["top_candidates"]
+                 first_cand = top_cands[0] if top_cands else None
+@@ -2459,10 +2409,7 @@
+                 bindings_list = []
+                 decision_status = STATUS_RECOMMENDED
+                 decision_reason = "matcher 算法推荐，需人工确认"
+-                calibrated = None
+-                if policy is not None:
+-                    calibrated, bindings_list = _calibrated_decision(row_for_decision, q_info, res, policy)
+-                elif not first_cand or top_score <= 0.0:
++                if not first_cand or top_score <= 0.0:
+                     decision_status = STATUS_RECOMMENDED
+                     decision_reason = "无有效候选或匹配得分为 0，不预绑定"
+                 else:
+@@ -2517,24 +2464,9 @@
+                     "top_candidates": top_cands,
+                     "bindings": bindings_list
+                 }
+-                result_row.update(calibrated if calibrated is not None else _annotate_decision(
++                result_row.update(_annotate_decision(
+                     row_for_decision, bindings_list, decision_status, SOURCE_MATCHER, decision_reason
+                 ))
+-                if calibrated is not None:
+-                    result_row["matched_code"] = bindings_list[0]["code"] if bindings_list else ""
+-                    owner = task_meta.get("owner_user_id")
+-                    if bindings_list and owner is not None:
+-                        scope = make_scope_key(task_meta.get("original_filename"), result_row["professional"])
+-                        review = get_row_decision(owner, scope, result_row)
+-                        if review:
+-                            status = review["decision"]
+-                            source = SOURCE_MANUAL_REJECT if status == STATUS_REJECTED else SOURCE_RESTORE
+-                            result_row.update(bindings=[], matched_code="")
+-                            result_row.pop("acceptance_calibration", None)
+-                            result_row.update(_annotate_decision(
+-                                result_row, [], STATUS_REJECTED if status == STATUS_REJECTED else STATUS_RECOMMENDED,
+-                                source, "已有人工决策，须按现有决定复核",
+-                            ))
+                 final_chunk_results.append(result_row)
+             
+         total_results.extend(final_chunk_results)
+@@ -2637,24 +2569,7 @@
+                 query_info["parsed_spec"] = merged_parsed
+ 
+     checkpoint()
+-    policy = acceptance_policy()
+-    if policy is None:
+-        res = match_item(query_info)
+-    else:
+-        res = match_item(query_info, calibration_groups=policy.equivalences)
+-        if has_doc_ctx:
+-            raw = {"name": src_row.get("raw_name"), "specification": src_row.get("raw_spec"),
+-                   "category": src_row.get("raw_category"), "brand": src_row.get("raw_brand"),
+-                   "unit": src_row.get("raw_unit"), "qty": src_row.get("raw_qty"), "professional": professional}
+-        else:
+-            raw = {"name": name, "specification": text, "category": category, "brand": brand,
+-                   "unit": unit, "qty": payload.get("qty", 1.0), "professional": payload.get("professional")}
+-        decision, bindings = _calibrated_decision(
+-            _build_row_item_from_raw(raw), query_info, res, policy,
+-            trusted=not has_doc_ctx and "parsed_spec" not in payload,
+-        )
+-        res.pop("_acceptance_rank", None)
+-        res.update(decision, bindings=bindings, matched_code=bindings[0]["code"] if bindings else "")
++    res = match_item(query_info)
+     checkpoint()
+     if has_doc_ctx:
+         try:
+@@ -4120,8 +4035,7 @@
+     )
+ 
+ 
+-def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+-                     allow_calibrated=True) -> Optional[List[Dict[str, Any]]]:
++def _gate_export_row(item: dict, current_user: dict, request_scope: str) -> None:
+     """对单行执行导出可导出性核验；不可导出时抛 HTTPException(422) 并带行级原因。"""
+     row_idx = item.get("original_row_idx")
+     name = item.get("original_name", "")
+@@ -4196,13 +4110,6 @@
+                         deny("自动接受绑定目标单位与当前物料单位不一致，须重新人工确认")
+             return
+ 
+-    policy = acceptance_policy()
+-    if (policy is not None and allow_calibrated and not row_decision
+-            and matched_rule is None and item.get("bindings")):
+-        _, live = _revalidate_matcher_binding(item, binds, policy)
+-        if live:
+-            return live
+-
+     # 3) 其余（推荐/旧草稿/伪造状态/确认后修改致指纹失配）一律拒绝
+     deny("未确认：须显式人工确认或满足带约束的自动接受规则后方可导出")
+ 
+@@ -4214,19 +4121,14 @@
+     logger.info(f"Exporting matched items list as standard Excel report: {len(req.items)} rows by {current_user.get('username')}.")
+     # V015-M2：导出前逐行 fail-closed 核验，任一不合规即整批 422（不默选 top1）。
+     request_scope = req.scope_filename or ""
+-    items_to_write = []
+     for it in req.items:
+         checkpoint()
+-        item = it.model_dump()
+-        live = _gate_export_row(item, current_user, request_scope,
+-                                allow_calibrated="professional" in it.model_fields_set)
+-        if live:
+-            item["bindings"] = live
+-        items_to_write.append(item)
++        _gate_export_row(it.model_dump(), current_user, request_scope)
+     try:
+         output_filename = f"标准格式_{uuid.uuid4().hex[:8]}.xlsx"
+         output_path = os.path.join(UPLOAD_DIR, output_filename)
+ 
++        items_to_write = [it.model_dump() for it in req.items]
+         with active_path(output_path):
+             generate_standard_report(items_to_write, None, output_path)
+         checkpoint()
+--- a/app/sandbox_evaluator.py
++++ b/app/sandbox_evaluator.py
+@@ -343,7 +343,6 @@
+     from app.binding_decisions import (
+         STATUS_AUTO_ACCEPTED,
+         STATUS_REJECTED,
+-        evaluate_hard_conflicts,
+         validate_bindings_against_row,
+     )
+ 
+@@ -400,8 +399,11 @@
+ 
+         bound_codes = [b["code"] for b in norm_bindings if b["code"]]
+         bound_set = set(bound_codes)
+-        row_context = srv._build_row_item_from_raw(raw_row)
+-        val = validate_bindings_against_row(row_context, bindings, allow_unit_conversion=False)
++        val = validate_bindings_against_row(
++            srv._build_row_item_from_raw(raw_row),
++            bindings,
++            allow_unit_conversion=False,
++        )
+         invalid_codes = list(val.get("invalid_codes") or [])
+         conflicts = list(val.get("conflicts") or [])
+         dec_status = str(res_row.get("decision_status") or "")
+@@ -416,7 +418,7 @@
+             and qty_ratios_ok
+             and bool(bound_codes)
+         )
+-        report_row = {
++        out.append({
+             "id": it.get("id"),
+             "is_guard": bool(is_guard),
+             "label_type": it.get("label_type", "1to1"),
+@@ -434,23 +436,7 @@
+             "codes_match_gt": codes_match_gt,
+             "export_eligible": export_eligible,
+             "rejected": dec_status == STATUS_REJECTED,
+-        }
+-        if res_row.get("acceptance_calibration") is not None:
+-            # Preserve the original matcher proposal as regression evidence for
+-            # rules even when calibration clears the actual response bindings.
+-            top = next(iter(res_row.get("top_candidates") or ()), {})
+-            has_candidate = float(top.get("score") or 0.0) > 0
+-            conflict = evaluate_hard_conflicts(row_context, top) if has_candidate else None
+-            proposal = str(top.get("code") or "").strip() if has_candidate and not conflict else ""
+-            report_row["prior_matcher_proposal"] = {
+-                "matched_code": proposal,
+-                "codes_match_gt": bool(proposal) and (
+-                    gt_set == {proposal} if it.get("label_type") == "1toN" else proposal in gt_set
+-                ),
+-                "rejected": conflict is not None,
+-                "decision_reason": conflict or "",
+-            }
+-        out.append(report_row)
++        })
+     return out
+ 
+ 
+--- a/app/flywheel_sandbox.py
++++ b/app/flywheel_sandbox.py
+@@ -355,26 +355,18 @@
+                 violations.append({"id": cid, "type": "binding_qty_ratio_mismatch"})
+                 continue
+ 
+-        prior_base = b.get("prior_matcher_proposal", b)
+-        prior_candidate = c.get("prior_matcher_proposal", c)
+-        rejected = c.get("rejected") and not b.get("rejected")
+-        prior_rejected = prior_candidate.get("rejected") and not prior_base.get("rejected")
+-        if rejected or prior_rejected:
+-            evidence = c if rejected else prior_candidate
++        if c.get("rejected") and not b.get("rejected"):
+             degraded += 1
+-            violations.append({"id": cid, "type": "binding_status_rejected", "reason": evidence.get("decision_reason", "")})
++            violations.append({"id": cid, "type": "binding_status_rejected", "reason": c.get("decision_reason", "")})
+             continue
+-        lost_correct_binding = b.get("codes_match_gt") and not c.get("codes_match_gt")
+-        lost_correct_proposal = prior_base.get("codes_match_gt") and not prior_candidate.get("codes_match_gt")
+-        if lost_correct_binding or lost_correct_proposal:
+-            previous, current = (b, c) if lost_correct_binding else (prior_base, prior_candidate)
++        if b.get("codes_match_gt") and not c.get("codes_match_gt"):
+             degraded += 1
+             violations.append(
+                 {
+                     "id": cid,
+                     "type": "binding_target_code_degraded",
+-                    "base_code": previous.get("matched_code", ""),
+-                    "cand_code": current.get("matched_code", ""),
++                    "base_code": b.get("matched_code", ""),
++                    "cand_code": c.get("matched_code", ""),
+                 }
+             )
+             continue
+@@ -387,7 +379,7 @@
+             and not c.get("conflicts")
+             and not c.get("invalid_codes")
+         ) or (
+-            not (b.get("codes_match_gt") or prior_base.get("codes_match_gt"))
++            not b.get("codes_match_gt")
+             and c.get("codes_match_gt")
+             and not c.get("rejected")
+             and not c.get("conflicts")

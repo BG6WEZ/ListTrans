@@ -1,0 +1,1662 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_test_h0j6srir",
+  "results": [
+    {
+      "case": "RAW-KM",
+      "matcher": {
+        "score": 30.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致",
+          "管径冲突拦截"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-RAW-KM",
+              "reason": "单位非1倍率工程量未按目标单位换算阻断"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-RAW-KM",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-RAW-KM",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-RAW-KM"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "252d043d2ca7297077a2ca416165365e5515a60eb95b042f31deae1c6eac0f26"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-RAW-KM:单位非1倍率工程量需按目标单位显式换算复核阻断",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "CONVERTED-KM",
+      "matcher": {
+        "score": 30.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致",
+          "管径冲突拦截"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3
+      },
+      "confirm": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-CONVERTED-KM"
+          ],
+          "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+          "binding_fingerprint": "b7f7801d59373e65726505d5f2fa85bd25b0d061a3e196d3245c95ccff5290bf"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-CONVERTED-KM",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-CONVERTED-KM",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10000,
+                "qty_ratio": 1000
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R02AUD-CONVERTED-KM"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "b7f7801d59373e65726505d5f2fa85bd25b0d061a3e196d3245c95ccff5290bf"
+          }
+        ]
+      },
+      "export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-CONVERTED-KM",
+            "镀锌钢管",
+            "DN15",
+            "m",
+            10000,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-CONVERTED-KM:单位非1倍率工程量需按目标单位显式换算复核阻断",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "UNIT-ONE",
+      "matcher": {
+        "score": 30.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致",
+          "管径冲突拦截"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.3
+      },
+      "confirm": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-UNIT-ONE"
+          ],
+          "row_fingerprint": "a986cda99b2a1eb3e4aef67f13d882649efbd07aac782d48ca4c92799fb6f4ed",
+          "binding_fingerprint": "a879f6dc50658313b998c1985c297e72bc65c085d1bb3333597244e0e39ee21f"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-UNIT-ONE",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-UNIT-ONE",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 15,
+                "qty_ratio": 1.5
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R02AUD-UNIT-ONE"
+            ],
+            "row_fingerprint": "a986cda99b2a1eb3e4aef67f13d882649efbd07aac782d48ca4c92799fb6f4ed",
+            "binding_fingerprint": "a879f6dc50658313b998c1985c297e72bc65c085d1bb3333597244e0e39ee21f"
+          }
+        ]
+      },
+      "export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "米",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-UNIT-ONE",
+            "镀锌钢管",
+            "DN15",
+            "m",
+            15,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "rule": {
+        "http": 200,
+        "status": "auto_accepted",
+        "reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+        "export_http": 200
+      }
+    },
+    {
+      "case": "DN-EMPTY",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径冲突拦截",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-DN-EMPTY",
+              "reason": "管径口径冲突阻断"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-DN-EMPTY",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-DN-EMPTY",
+                "name": "镀锌钢管",
+                "specification": "DN20",
+                "unit": "米",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-DN-EMPTY"
+            ],
+            "row_fingerprint": "a986cda99b2a1eb3e4aef67f13d882649efbd07aac782d48ca4c92799fb6f4ed",
+            "binding_fingerprint": "ca3c74b1a9ec7d6a3f70996a6dce655c87c04195b38258a839c27246f76c75fa"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-DN-EMPTY:管径口径冲突阻断",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "DN-BAD",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径冲突拦截",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-DN-BAD",
+              "reason": "管径口径冲突阻断"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-DN-BAD",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-DN-BAD",
+                "name": "镀锌钢管",
+                "specification": "DN20",
+                "unit": "米",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-DN-BAD"
+            ],
+            "row_fingerprint": "a986cda99b2a1eb3e4aef67f13d882649efbd07aac782d48ca4c92799fb6f4ed",
+            "binding_fingerprint": "2028a966679bfa483d1b414c9c2eecf223f36bf7b60505725ee675d6c2981233"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-DN-BAD:管径口径冲突阻断",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "GRADE-BAD",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "不锈钢牌号冲突硬隔离(304/316L)"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-GRADE-BAD",
+              "reason": "不锈钢牌号冲突硬隔离(304/316L)"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "不锈钢管",
+            "original_spec": "304",
+            "original_qty": 10,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-GRADE-BAD",
+            "matched_name": "不锈钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-GRADE-BAD",
+                "name": "不锈钢管",
+                "specification": "316L 不锈钢管",
+                "unit": "米",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-GRADE-BAD"
+            ],
+            "row_fingerprint": "e9a5411133ae2b9d846294f5ecdc410a9e11ba7269a722c1e5d443a254107e02",
+            "binding_fingerprint": "137b4c5215555cbadd61ecd82319ba8c5875160dfa2ce9e3fca602bafa68e736"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "不锈钢管",
+            "original_spec": "304",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-GRADE-BAD:不锈钢牌号冲突硬隔离(304/316L)",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "GRADE-OK",
+      "matcher": {
+        "score": 98.7,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-GRADE-OK"
+          ],
+          "row_fingerprint": "e9a5411133ae2b9d846294f5ecdc410a9e11ba7269a722c1e5d443a254107e02",
+          "binding_fingerprint": "a20a443ea0dac998a92974692db111a2e21ff446d4bf75524e236379062bfe5f"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "不锈钢管",
+            "original_spec": "304",
+            "original_qty": 10,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-GRADE-OK",
+            "matched_name": "不锈钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-GRADE-OK",
+                "name": "不锈钢管",
+                "specification": "06Cr19Ni10 不锈钢管",
+                "unit": "米",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R02AUD-GRADE-OK"
+            ],
+            "row_fingerprint": "e9a5411133ae2b9d846294f5ecdc410a9e11ba7269a722c1e5d443a254107e02",
+            "binding_fingerprint": "a20a443ea0dac998a92974692db111a2e21ff446d4bf75524e236379062bfe5f"
+          }
+        ]
+      },
+      "export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "不锈钢管",
+            "304",
+            "米",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-GRADE-OK",
+            "不锈钢管",
+            "06Cr19Ni10 不锈钢管",
+            "米",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "rule": {
+        "http": 200,
+        "status": "auto_accepted",
+        "reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+        "export_http": 200
+      }
+    },
+    {
+      "case": "PUMP-REV",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "提升泵要求冲突硬隔离(带泵/不带泵)"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-PUMP-REV",
+              "reason": "提升泵要求冲突硬隔离(带泵/不带泵)"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "风机盘管",
+            "original_spec": "带提升泵",
+            "original_qty": 10,
+            "original_unit": "台",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-PUMP-REV",
+            "matched_name": "风机盘管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-PUMP-REV",
+                "name": "风机盘管",
+                "specification": "不带提升泵",
+                "unit": "台",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-PUMP-REV"
+            ],
+            "row_fingerprint": "df15a8a52920c031da4f95e365595f9ddd2eb7f8787df69a795c60a2f34f8a5e",
+            "binding_fingerprint": "53506e401ea53125569605213058258d6cf003aa9412fb909dbc4fa22a3d358a"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "风机盘管",
+            "original_spec": "带提升泵",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-PUMP-REV:提升泵要求冲突硬隔离(带泵/不带泵)",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "PUMP-FWD",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "提升泵否定冲突硬隔离(不带泵/带泵)"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-PUMP-FWD",
+              "reason": "提升泵否定冲突硬隔离(不带泵/带泵)"
+            }
+          ]
+        }
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 1,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "风机盘管",
+            "original_spec": "不带泵",
+            "original_qty": 10,
+            "original_unit": "台",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-PUMP-FWD",
+            "matched_name": "风机盘管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-PUMP-FWD",
+                "name": "风机盘管",
+                "specification": "带提升泵",
+                "unit": "台",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "旧草稿绑定/确认状态已失效或无法核验，已降为待复核",
+            "decision_codes": [
+              "R02AUD-PUMP-FWD"
+            ],
+            "row_fingerprint": "95d2655bc5f762c7be38a10b4ebe23fba0b71206e3460682c02306bb9d461aaa",
+            "binding_fingerprint": "c94029523b71f16546cc5ccb18c3014c1416d8caae399f2bf5380d8386127cbc"
+          }
+        ]
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "风机盘管",
+            "original_spec": "不带泵",
+            "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+          }
+        }
+      },
+      "rule": {
+        "http": 200,
+        "status": "rejected",
+        "reason": "硬冲突阻断: R02AUD-PUMP-FWD:提升泵否定冲突硬隔离(不带泵/带泵)",
+        "export_http": 422
+      }
+    },
+    {
+      "case": "PUMP-UNKNOWN",
+      "matcher": {
+        "score": 98.3,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-PUMP-UNKNOWN"
+          ],
+          "row_fingerprint": "3a320cb9da0cdb508a21934ec7e553e8356015f567b821f888e0a00f26f1d0bc",
+          "binding_fingerprint": "a00e5d64d3514f8d9c598da0b601ced421253d68270ad7f6924d7aee65428f90"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "restore": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "风机盘管",
+            "original_spec": "通用型",
+            "original_qty": 10,
+            "original_unit": "台",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-PUMP-UNKNOWN",
+            "matched_name": "风机盘管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-PUMP-UNKNOWN",
+                "name": "风机盘管",
+                "specification": "带提升泵",
+                "unit": "台",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10,
+                "qty_ratio": 1
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R02AUD-PUMP-UNKNOWN"
+            ],
+            "row_fingerprint": "3a320cb9da0cdb508a21934ec7e553e8356015f567b821f888e0a00f26f1d0bc",
+            "binding_fingerprint": "a00e5d64d3514f8d9c598da0b601ced421253d68270ad7f6924d7aee65428f90"
+          }
+        ]
+      },
+      "export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "风机盘管",
+            "通用型",
+            "台",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-PUMP-UNKNOWN",
+            "风机盘管",
+            "带提升泵",
+            "台",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "rule": {
+        "http": 200,
+        "status": "auto_accepted",
+        "reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+        "export_http": 200
+      }
+    },
+    {
+      "case": "EMPTY-TARGET-UNIT-DRIFT",
+      "confirm": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-EMPTY-UNIT"
+          ],
+          "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+          "binding_fingerprint": "6722343be9eb2e8ccdc35d3275b659a0b1a81b5294c9097317fe065b7eb9569b"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "initial_export": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-EMPTY-UNIT",
+            "镀锌钢管",
+            "DN15",
+            null,
+            10000,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "restore_after_drift": {
+        "http": 200,
+        "decision": null,
+        "downgraded": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R02AUD-EMPTY-UNIT",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R02AUD-EMPTY-UNIT",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "km",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10000,
+                "qty_ratio": 1000
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R02AUD-EMPTY-UNIT"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "6722343be9eb2e8ccdc35d3275b659a0b1a81b5294c9097317fe065b7eb9569b"
+          }
+        ]
+      },
+      "export_after_drift": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-EMPTY-UNIT",
+            "镀锌钢管",
+            "DN15",
+            "km",
+            10000,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "original_qty": 10,
+      "original_unit": "km",
+      "requested_qty": 10000,
+      "requested_ratio": 1000,
+      "requested_unit": "km"
+    },
+    {
+      "case": "RULE-READ-FAIL-OPEN",
+      "before": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-DYN-ERROR",
+              "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+            }
+          ]
+        }
+      },
+      "active_rules_after_read_error": [],
+      "confirm_after_error": {
+        "http": 200,
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R02AUD-DYN-ERROR"
+          ],
+          "row_fingerprint": "fad5b7787245a690b13d06bc1085344ac68ba0e01424f18ba86928cad4a00d08",
+          "binding_fingerprint": "f4f01713f4a03b2eb2f0d0754013e9a74f25343f03ddc3ab96afeedbc0499ef0"
+        },
+        "downgraded": null,
+        "items": null
+      },
+      "export_after_error": {
+        "http": 200,
+        "xlsx_rows": [
+          [
+            "*序号",
+            "*费用类型",
+            "*清单类型",
+            "*材料类型",
+            "*清单编码",
+            "*清单名称",
+            "*特征/规格型号",
+            "单位",
+            "*工程量",
+            "材料损耗",
+            "品牌",
+            "竞聘系数",
+            "单价(无税)",
+            "备注",
+            "专业",
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "暖通",
+            null
+          ],
+          [
+            "1.1",
+            "材料费",
+            "手动录入",
+            "暖通",
+            null,
+            "排风机",
+            "EXCL专用型",
+            "台",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ],
+          [
+            null,
+            "材料费",
+            "手动录入",
+            "暖通",
+            "R02AUD-DYN-ERROR",
+            "排风机",
+            "EXCL专用型",
+            "台",
+            10,
+            0,
+            null,
+            null,
+            null,
+            "标段一",
+            "暖通",
+            null
+          ]
+        ]
+      },
+      "rule_after_error": {
+        "http": 200,
+        "status": "auto_accepted",
+        "reason": "约束规则逐项匹配且编码当前有效，服务端自动接受",
+        "export_http": 200
+      }
+    },
+    {
+      "case": "SCOPE-PLUMBING-ON-HVAC",
+      "dynamic_reasons": [
+        "包含排除词 [EXCL]"
+      ],
+      "confirm": {
+        "http": 409,
+        "detail": {
+          "error": "binding_hard_conflict",
+          "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+          "conflicts": [
+            {
+              "code": "R02AUD-SCOPE",
+              "reason": "动态规则硬排除: 包含排除词 [EXCL]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

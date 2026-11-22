@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "source_sha256": {
+    "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+    "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1",
+    "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+    "app/sandbox_evaluator.py": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5",
+    "app/flywheel_sandbox.py": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0",
+    "tests/test_v019_m2_calibration.py": "2ff8adcdeda707da24bc95626d981f53b9fd8a59ec83af39ddb65948ddeaa838",
+    "app/calibration_assets/v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+    "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120"
+  },
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_m2_suite_2fd5367e54554cd190ab3834da635c02"
+}

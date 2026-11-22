@@ -1,0 +1,102 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "scope": "Coordinator only; 7 management files, 2 new round documents, own evidence. No implementation or test changes.",
+  "files": {
+    "doc/00_项目管理/版本路线图.md": {
+      "bytes": 3927,
+      "sha256": "2413b4cd9ad58138c41c570f6f5c0d647e1a9583406fa268affca10cfdc79f01"
+    },
+    "doc/00_项目管理/进度总表.md": {
+      "bytes": 16057,
+      "sha256": "1cced82d45e617c4a8c24b3db739ce162ea6cc62c2db3d2409947b7b8be668e2"
+    },
+    "doc/00_项目管理/问题与版本归属总台账.md": {
+      "bytes": 22007,
+      "sha256": "937b008a37ade0e8f8f0d402681895eeacdc7ef48e92d388a1514e0de8b2f6b4"
+    },
+    "doc/README.md": {
+      "bytes": 3386,
+      "sha256": "99042f9a7e2945568ad9d55daada67bde3556a6e7e4e8d51e0d64bb3904d8e6d"
+    },
+    "doc/V0.1.6/01_实施方案与任务包.md": {
+      "bytes": 7079,
+      "sha256": "cf28a9278c07677ba8248bff87c2186d64bc70c13e0d141bc800e1bba78530d3"
+    },
+    "doc/V0.1.6/02_任务台账.md": {
+      "bytes": 5808,
+      "sha256": "25b69263f95fca72e28c3f9c45c84f15e01ce747661aadff0b46b59f4e6ff6e7"
+    },
+    "doc/V0.1.6/03_终审与版本准入.md": {
+      "bytes": 3732,
+      "sha256": "98ef9b54d9406eab550478601f06d10dbaf398653faa1927fefab149f7013707"
+    },
+    "doc/V0.1.6/rounds/V016-M2_R01_统筹裁决.md": {
+      "bytes": 10513,
+      "sha256": "166a4afc79bf6266e411bd3eae9608547c2b4c1896b1eb3e210479dd73f5c444"
+    },
+    "doc/V0.1.6/rounds/V016-M3_R01_统筹下发.md": {
+      "bytes": 9521,
+      "sha256": "46331902f594da91f5b57f0d210637b2860c1de1cdc0091785c9fce0962e3554"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/collect_state.py": {
+      "bytes": 3060,
+      "sha256": "39f0e2cfe89846eb2939d3260ab4a1ff0fbe34ea946c43aea66c6d898b0b30f8"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/completion_checks.json": {
+      "bytes": 1029,
+      "sha256": "b37e5c48a7ac36d8fa22d5eb3933e9debe9404f0f80ea984e5660bd043f77ee2"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/evidence_binding.json": {
+      "bytes": 21467,
+      "sha256": "2e36fa4039a047ee3436a6c15a950e1d20819d66f0968329298e226828f79ac0"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/inspect_evidence.py": {
+      "bytes": 8739,
+      "sha256": "e57c6152a24b13d22bd0f63a0f5e225f3b2897c91edfe288ce21e9bf75d840f2"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/isolation_verify_after.exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/isolation_verify_after.json": {
+      "bytes": 12684,
+      "sha256": "cb2a67143c9c727e5b53596d08e464779ec54ba27562ffab802d7242e5351cce"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/isolation_verify_after.log": {
+      "bytes": 351,
+      "sha256": "b0da7258b757cc0035d6a23eb78800a7db9415ae42972e86a458224d35e66024"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/m2_only_review.diff": {
+      "bytes": 245911,
+      "sha256": "f4efc18cd3ca9af9addb180bc9042b2b537d8fc9ab5c5f6474b65d6e6fefe21f"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/management_changes.json": {
+      "bytes": 16279,
+      "sha256": "a39e08517a7b19eb1aed5600012c0d6ac66d1d7c2a7bf12c7b6c3b43cd960645"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/state_after.json": {
+      "bytes": 57092,
+      "sha256": "eaffb1a670cd11e46a67ce9fde0e510627930b6654cc6d76ec5b3acc55607220"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/state_before.json": {
+      "bytes": 57033,
+      "sha256": "a4fbbc1e98b17568e3879bdd46419fec558dd573d997bcff75474e9e1abca0e2"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/state_final.json": {
+      "bytes": 57447,
+      "sha256": "d94564ff8c7aeee1baff92b6be835d21115f28da4e0bc220f7b475883510dfbf"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/targeted_pytest_local.exit.txt": {
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/targeted_pytest_local.log": {
+      "bytes": 7199,
+      "sha256": "2f6e47023e4f12e8d278f06f78e838c9ab0590e8cb1f0ca5e7f2d3bb908c5c92"
+    },
+    "doc/V0.1.6/evidence/coord_m2_r01/update_management.py": {
+      "bytes": 12020,
+      "sha256": "db742067fc50bc72c3d3a90c73786a0d6fad1ec4cf0baf41f3809132d2e115f0"
+    }
+  }
+}

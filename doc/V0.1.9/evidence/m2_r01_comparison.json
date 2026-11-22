@@ -1,0 +1,2382 @@
+{
+  "policy_sha256": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+  "split_id_sha256": {
+    "dev": "3ea218b0d200b46eff11c6972d1ec89ac98c2f3f0cafaf52651862d45f530fb6",
+    "test": "6182e4418368cc45e1fbba7b10e11938896bd223970e0c832a3b0948a9734eb3",
+    "train": "40960852f684a85e0b2561f6bf29731c6bde1b543a6f8323858c15f9764f3702"
+  },
+  "train_rows": 842,
+  "selection_dev_rows": 218,
+  "test_held_out_rows": 160,
+  "gate_off_group_diffs": {
+    "m3_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m2_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m0_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m3_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m4_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m5_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    }
+  },
+  "gate_on_safety": {
+    "empty": true,
+    "harmful": true,
+    "beneficial": true,
+    "beneficial_constrained": true,
+    "neutral": true
+  },
+  "gate_on_score_diffs_in_train_dev": {
+    "v016_m3_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "v016_m2_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "v016_m0_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "v015_m3_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "v015_m4_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "v015_m5_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    }
+  },
+  "rule_gate_checks": {
+    "off_18_exact": true,
+    "on_safety": true
+  },
+  "modes": {
+    "keyword": {
+      "m1_off_parity": {
+        "rows": true,
+        "per_sample_ans": true,
+        "recall_order_sha256": true,
+        "splits": true,
+        "scores": true
+      },
+      "unchanged_ranking_inputs_on": {
+        "catalog_sha256": true,
+        "golden_sha256": true,
+        "governance_sha256": true,
+        "vector_index": true,
+        "recall_order_sha256": true,
+        "scores": true,
+        "per_sample_ans": true
+      },
+      "changed_top3_ranks": 0,
+      "http_top_code_changes": {
+        "match": 0,
+        "upload": 0
+      },
+      "quality_checks": {
+        "m1_off_parity": true,
+        "fixed_ranking": true,
+        "fitting_features_reproduced": true,
+        "unknown_protection": true,
+        "manual_and_export_authority": true,
+        "negative_rejection_nondecreasing": true,
+        "wrong_proposals_nonincreasing": true,
+        "zero_wrong_auto": true,
+        "guard_budget_off": true,
+        "guard_budget_on": true
+      },
+      "train_dev_count_delta": {
+        "correct_rejection": 15,
+        "wrong_proposed_answerable": -232,
+        "wrong_proposed_negative": -74,
+        "wrong_auto_upload": 0
+      },
+      "profiles": {
+        "off": {
+          "latency": {
+            "batch_http_50rows": {
+              "max_ms": 23360.881,
+              "n": 21,
+              "p50_ms": 1648.76,
+              "p95_ms": 9519.122
+            },
+            "single_http": {
+              "max_ms": 928.782,
+              "n": 1060,
+              "p50_ms": 27.029,
+              "p95_ms": 278.454
+            }
+          },
+          "peak_working_set_mib": 680.2,
+          "budget_check": {
+            "single_p50_ok": true,
+            "single_p95_ok": true,
+            "up50_p50_ok": true,
+            "up50_p95_ok": true,
+            "wset_ok": true
+          },
+          "semantic_rows": 0,
+          "quality": {
+            "dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 218
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 130,
+                  "needs_parameters": 0,
+                  "explicit_reject": 88
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 38,
+                "n": 9,
+                "pct": 23.6842,
+                "wilson_95_pct": [
+                  12.9937,
+                  39.2068
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 122,
+                "n": 25,
+                "pct": 20.4918,
+                "wilson_95_pct": [
+                  14.283,
+                  28.5022
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 38,
+                "n": 23,
+                "pct": 60.5263,
+                "wilson_95_pct": [
+                  44.7179,
+                  74.4019
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.3446
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 110,
+                "rejected": 70
+              }
+            },
+            "train": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 842
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 684,
+                  "needs_parameters": 0,
+                  "explicit_reject": 158
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 77,
+                "n": 17,
+                "pct": 22.0779,
+                "wilson_95_pct": [
+                  14.2664,
+                  32.5431
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 529,
+                "n": 207,
+                "pct": 39.1304,
+                "wilson_95_pct": [
+                  35.0642,
+                  43.3534
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 77,
+                "n": 51,
+                "pct": 66.2338,
+                "wilson_95_pct": [
+                  55.1246,
+                  75.8001
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 616,
+                "rejected": 138
+              }
+            },
+            "train_dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 1060
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 814,
+                  "needs_parameters": 0,
+                  "explicit_reject": 246
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 115,
+                "n": 26,
+                "pct": 22.6087,
+                "wilson_95_pct": [
+                  15.9216,
+                  31.0666
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 651,
+                "n": 232,
+                "pct": 35.6375,
+                "wilson_95_pct": [
+                  32.0526,
+                  39.3909
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 115,
+                "n": 74,
+                "pct": 64.3478,
+                "wilson_95_pct": [
+                  55.2602,
+                  72.5079
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 726,
+                "rejected": 208
+              }
+            }
+          },
+          "http_probes": {
+            "after_confirm": {
+              "export": 200,
+              "restore": "manual_confirmed"
+            },
+            "after_reject": {
+              "export": 422,
+              "restore": "rejected"
+            },
+            "automatic": {},
+            "changed_qty_after_confirmation_export": 422,
+            "changed_row_after_confirmation_export": 422,
+            "confirmed_status": 200,
+            "protected_unknown": {
+              "GT-0674": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0677": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0678": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              }
+            },
+            "rejected_status": 200
+          },
+          "source_sha256": {
+            "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+            "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+            "app/calibration_assets/v019_m2_policy.json": "1d99c4125e9598725783b24c1ef439c25e673cf5e1f7d5d779c50346c3a2048c",
+            "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+            "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+          },
+          "failures": 0,
+          "skips": 0,
+          "fitting_features_reproduced": null
+        },
+        "on": {
+          "latency": {
+            "batch_http_50rows": {
+              "max_ms": 23131.906,
+              "n": 21,
+              "p50_ms": 1619.243,
+              "p95_ms": 8808.62
+            },
+            "single_http": {
+              "max_ms": 1059.878,
+              "n": 1060,
+              "p50_ms": 28.51,
+              "p95_ms": 283.412
+            }
+          },
+          "peak_working_set_mib": 681.98,
+          "budget_check": {
+            "single_p50_ok": true,
+            "single_p95_ok": true,
+            "up50_p50_ok": true,
+            "up50_p95_ok": true,
+            "wset_ok": true
+          },
+          "semantic_rows": 0,
+          "quality": {
+            "dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 84,
+                  "explicit_reject": 134
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 84,
+                  "explicit_reject": 134
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 38,
+                "n": 15,
+                "pct": 39.4737,
+                "wilson_95_pct": [
+                  25.5981,
+                  55.2821
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 122,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  3.0526
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 38,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  9.181
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.3446
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 81,
+                "rejected": 99
+              }
+            },
+            "train": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 499,
+                  "explicit_reject": 343
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 497,
+                  "explicit_reject": 345
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 77,
+                "n": 26,
+                "pct": 33.7662,
+                "wilson_95_pct": [
+                  24.1999,
+                  44.8754
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 529,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  0.7209
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 77,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  4.7518
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 435,
+                "rejected": 319
+              }
+            },
+            "train_dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 583,
+                  "explicit_reject": 477
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 581,
+                  "explicit_reject": 479
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 115,
+                "n": 41,
+                "pct": 35.6522,
+                "wilson_95_pct": [
+                  27.4921,
+                  44.7398
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 651,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5866
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 115,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  3.2324
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 516,
+                "rejected": 418
+              }
+            }
+          },
+          "http_probes": {
+            "after_confirm": {
+              "export": 200,
+              "restore": "manual_confirmed"
+            },
+            "after_reject": {
+              "export": 422,
+              "restore": "rejected"
+            },
+            "automatic": {},
+            "changed_qty_after_confirmation_export": 422,
+            "changed_row_after_confirmation_export": 422,
+            "confirmed_status": 200,
+            "protected_unknown": {
+              "GT-0674": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0677": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0678": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              }
+            },
+            "rejected_status": 200
+          },
+          "source_sha256": {
+            "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+            "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+            "app/calibration_assets/v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+            "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+            "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+          },
+          "failures": 0,
+          "skips": 0,
+          "fitting_features_reproduced": {
+            "capture_file_sha256": "d6c7bcce7faef855c008ca39112dea131e165a26090faef3813c74d090e2f280",
+            "feature_matrix_sha256": "53baa8358ef944cbc748ebc9f65dd8b646f64f4431a006e49130ee15b5dcf97b",
+            "rows": 1060
+          }
+        }
+      },
+      "off_policy_asset_read": false,
+      "notable_upload_cases": {
+        "explosion_unknown": {
+          "GT-0674": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10186681902455075,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.5999999999999943,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 97.6,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          },
+          "GT-0677": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10075131852892705,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.6000000000000085,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 96.9,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          },
+          "GT-0678": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10075131852892705,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.6000000000000085,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 96.9,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          }
+        },
+        "ambiguous": {
+          "GT-0983": {
+            "competitor_code": "2.33.41.0154",
+            "confidence": 0.13128774020053213,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.5,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "厚度",
+              "材质牌号",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 28.5,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate",
+              "insufficient_ranking_evidence"
+            ],
+            "top_code": "2.33.41.0088"
+          },
+          "GT-0990": {
+            "competitor_code": "2.12.17.0049",
+            "confidence": 0.13348168760623813,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "主截面",
+              "主芯数",
+              "厚度",
+              "型号族",
+              "材质牌号"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 98.6,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.12.17.0017"
+          },
+          "GT-0996": {
+            "competitor_code": "2.33.41.0019",
+            "confidence": 0.21615772216498413,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "厚度",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 88.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.33.41.0088"
+          }
+        },
+        "no_answer": {
+          "GT-1042": {
+            "competitor_code": null,
+            "confidence": 0.08312403107442334,
+            "different_fields": [],
+            "distinct_margin": null,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 0.0,
+            "reason_codes": [
+              "no_answer"
+            ],
+            "top_code": null
+          },
+          "GT-1043": {
+            "competitor_code": null,
+            "confidence": 0.08312403107442334,
+            "different_fields": [],
+            "distinct_margin": null,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 0.0,
+            "reason_codes": [
+              "no_answer"
+            ],
+            "top_code": null
+          },
+          "GT-1125": {
+            "competitor_code": null,
+            "confidence": 0.08312403107442334,
+            "different_fields": [],
+            "distinct_margin": null,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 0.0,
+            "reason_codes": [
+              "no_answer"
+            ],
+            "top_code": null
+          }
+        },
+        "equivalent_codes": {
+          "GT-0545": {
+            "competitor_code": "2.28.03.7809",
+            "confidence": 0.6940953224347065,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "WL1000385274"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "材质"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 85.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.28.03.0220"
+          },
+          "GT-0546": {
+            "competitor_code": "2.28.03.7810",
+            "confidence": 0.6940953224347065,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "WL1000385281"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "材质"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 85.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.28.03.0221"
+          },
+          "GT-0549": {
+            "competitor_code": "2.28.03.7809",
+            "confidence": 0.6940953224347065,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "WL1000385274"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "材质"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 85.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.28.03.0220"
+          }
+        }
+      }
+    },
+    "vector": {
+      "m1_off_parity": {
+        "rows": true,
+        "per_sample_ans": true,
+        "recall_order_sha256": true,
+        "splits": true,
+        "scores": true
+      },
+      "unchanged_ranking_inputs_on": {
+        "catalog_sha256": true,
+        "golden_sha256": true,
+        "governance_sha256": true,
+        "vector_index": true,
+        "recall_order_sha256": true,
+        "scores": true,
+        "per_sample_ans": true
+      },
+      "changed_top3_ranks": 0,
+      "http_top_code_changes": {
+        "match": 0,
+        "upload": 0
+      },
+      "quality_checks": {
+        "m1_off_parity": true,
+        "fixed_ranking": true,
+        "fitting_features_reproduced": true,
+        "unknown_protection": true,
+        "manual_and_export_authority": true,
+        "negative_rejection_nondecreasing": true,
+        "wrong_proposals_nonincreasing": true,
+        "zero_wrong_auto": true,
+        "guard_budget_off": true,
+        "guard_budget_on": true
+      },
+      "train_dev_count_delta": {
+        "correct_rejection": 1,
+        "wrong_proposed_answerable": -344,
+        "wrong_proposed_negative": -91,
+        "wrong_auto_upload": 0
+      },
+      "profiles": {
+        "off": {
+          "latency": {
+            "batch_http_50rows": {
+              "max_ms": 29616.317,
+              "n": 21,
+              "p50_ms": 5623.943,
+              "p95_ms": 11142.617
+            },
+            "single_http": {
+              "max_ms": 1048.268,
+              "n": 1060,
+              "p50_ms": 75.716,
+              "p95_ms": 357.156
+            }
+          },
+          "peak_working_set_mib": 1712.74,
+          "budget_check": {
+            "single_p50_ok": true,
+            "single_p95_ok": true,
+            "up50_p50_ok": true,
+            "up50_p95_ok": true,
+            "wset_ok": true
+          },
+          "semantic_rows": 1060,
+          "quality": {
+            "dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 218
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 95,
+                  "needs_parameters": 0,
+                  "explicit_reject": 123
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 38,
+                "n": 13,
+                "pct": 34.2105,
+                "wilson_95_pct": [
+                  21.2124,
+                  50.1079
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 122,
+                "n": 27,
+                "pct": 22.1311,
+                "wilson_95_pct": [
+                  15.6791,
+                  30.2846
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 38,
+                "n": 24,
+                "pct": 63.1579,
+                "wilson_95_pct": [
+                  47.284,
+                  76.6158
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.3446
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 87,
+                "rejected": 93
+              }
+            },
+            "train": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 842
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 709,
+                  "needs_parameters": 0,
+                  "explicit_reject": 133
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 77,
+                "n": 10,
+                "pct": 12.987,
+                "wilson_95_pct": [
+                  7.2098,
+                  22.2818
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 529,
+                "n": 317,
+                "pct": 59.9244,
+                "wilson_95_pct": [
+                  55.6913,
+                  64.0144
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 77,
+                "n": 67,
+                "pct": 87.013,
+                "wilson_95_pct": [
+                  77.7182,
+                  92.7902
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 630,
+                "rejected": 124
+              }
+            },
+            "train_dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 0,
+                  "explicit_reject": 0,
+                  "decision_not_exposed": 1060
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 804,
+                  "needs_parameters": 0,
+                  "explicit_reject": 256
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 115,
+                "n": 23,
+                "pct": 20.0,
+                "wilson_95_pct": [
+                  13.7131,
+                  28.2264
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 651,
+                "n": 344,
+                "pct": 52.8418,
+                "wilson_95_pct": [
+                  49.0017,
+                  56.6485
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 115,
+                "n": 91,
+                "pct": 79.1304,
+                "wilson_95_pct": [
+                  70.8222,
+                  85.5555
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 717,
+                "rejected": 217
+              }
+            }
+          },
+          "http_probes": {
+            "after_confirm": {
+              "export": 200,
+              "restore": "manual_confirmed"
+            },
+            "after_reject": {
+              "export": 422,
+              "restore": "rejected"
+            },
+            "automatic": {},
+            "changed_qty_after_confirmation_export": 422,
+            "changed_row_after_confirmation_export": 422,
+            "confirmed_status": 200,
+            "protected_unknown": {
+              "GT-0674": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0677": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0678": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              }
+            },
+            "rejected_status": 200
+          },
+          "source_sha256": {
+            "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+            "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+            "app/calibration_assets/v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+            "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+            "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+          },
+          "failures": 0,
+          "skips": 0,
+          "fitting_features_reproduced": null
+        },
+        "on": {
+          "latency": {
+            "batch_http_50rows": {
+              "max_ms": 28642.118,
+              "n": 21,
+              "p50_ms": 5508.5,
+              "p95_ms": 11313.804
+            },
+            "single_http": {
+              "max_ms": 1088.378,
+              "n": 1060,
+              "p50_ms": 79.45,
+              "p95_ms": 374.685
+            }
+          },
+          "peak_working_set_mib": 1714.71,
+          "budget_check": {
+            "single_p50_ok": true,
+            "single_p95_ok": true,
+            "up50_p50_ok": true,
+            "up50_p95_ok": true,
+            "wset_ok": true
+          },
+          "semantic_rows": 1060,
+          "quality": {
+            "dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 84,
+                  "explicit_reject": 134
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 84,
+                  "explicit_reject": 134
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 218,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    1.7316
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 160,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    2.3446
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 38,
+                "n": 14,
+                "pct": 36.8421,
+                "wilson_95_pct": [
+                  23.3842,
+                  52.716
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 122,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  3.0526
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 38,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  9.181
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.3446
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 81,
+                "rejected": 99
+              }
+            },
+            "train": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 696,
+                  "explicit_reject": 146
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 695,
+                  "explicit_reject": 147
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 842,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.4542
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 606,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.6299
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 77,
+                "n": 10,
+                "pct": 12.987,
+                "wilson_95_pct": [
+                  7.2098,
+                  22.2818
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 529,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  0.7209
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 77,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  4.7518
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 617,
+                "rejected": 137
+              }
+            },
+            "train_dev": {
+              "match": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 780,
+                  "explicit_reject": 280
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "upload": {
+                "counts": {
+                  "strict_auto": 0,
+                  "equivalent_auto": 0,
+                  "wrong_auto": 0,
+                  "review": 0,
+                  "needs_parameters": 779,
+                  "explicit_reject": 281
+                },
+                "coverage_all": {
+                  "n": 0,
+                  "d": 1060,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.3611
+                  ]
+                },
+                "coverage_assessed": {
+                  "n": 0,
+                  "d": 766,
+                  "pct": 0.0,
+                  "wilson_95_pct": [
+                    0,
+                    0.499
+                  ]
+                },
+                "precision_assessed": {
+                  "n": 0,
+                  "d": 0,
+                  "pct": null,
+                  "wilson_95_pct": null
+                }
+              },
+              "correct_rejection": {
+                "d": 115,
+                "n": 24,
+                "pct": 20.8696,
+                "wilson_95_pct": [
+                  14.4445,
+                  29.1778
+                ]
+              },
+              "wrong_proposed_answerable": {
+                "d": 651,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5866
+                ]
+              },
+              "wrong_proposed_negative": {
+                "d": 115,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  3.2324
+                ]
+              },
+              "wrong_auto_upload": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "assessed_upload_status_counts": {
+                "recommended": 698,
+                "rejected": 236
+              }
+            }
+          },
+          "http_probes": {
+            "after_confirm": {
+              "export": 200,
+              "restore": "manual_confirmed"
+            },
+            "after_reject": {
+              "export": 422,
+              "restore": "rejected"
+            },
+            "automatic": {},
+            "changed_qty_after_confirmation_export": 422,
+            "changed_row_after_confirmation_export": 422,
+            "confirmed_status": 200,
+            "protected_unknown": {
+              "GT-0674": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0677": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              },
+              "GT-0678": {
+                "client_claim_export": 422,
+                "client_claim_restore": "recommended",
+                "direct_export": 422,
+                "status": "recommended"
+              }
+            },
+            "rejected_status": 200
+          },
+          "source_sha256": {
+            "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+            "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+            "app/calibration_assets/v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+            "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+            "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+          },
+          "failures": 0,
+          "skips": 0,
+          "fitting_features_reproduced": {
+            "capture_file_sha256": "842b70e5c125b9e0a1911f0a36f633ae83a8e6b6d9a5ff32afab1be16051019e",
+            "feature_matrix_sha256": "b464560ac27bd5c1572d6877904e9bae484fced9831dfc3e7069796ab6b8ffc2",
+            "rows": 1060
+          }
+        }
+      },
+      "off_policy_asset_read": false,
+      "notable_upload_cases": {
+        "explosion_unknown": {
+          "GT-0674": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10186681902455075,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.5999999999999943,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 97.6,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          },
+          "GT-0677": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10075131852892705,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.6000000000000085,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 96.9,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          },
+          "GT-0678": {
+            "competitor_code": "3.50.29.0002",
+            "confidence": 0.10075131852892705,
+            "different_fields": [
+              "机外余压",
+              "风量",
+              "核心规格"
+            ],
+            "distinct_margin": 0.6000000000000085,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "功率",
+              "机型",
+              "材质",
+              "防爆"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 96.9,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.50.29.0001"
+          }
+        },
+        "ambiguous": {
+          "GT-0983": {
+            "competitor_code": "2.33.41.0088",
+            "confidence": 0.16142051063254576,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.30000000000000426,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "厚度",
+              "材质",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 42.6,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate",
+              "insufficient_ranking_evidence"
+            ],
+            "top_code": "2.33.41.0154"
+          },
+          "GT-0990": {
+            "competitor_code": "2.12.17.0017",
+            "confidence": 0.1376101607187537,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.9000000000000057,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "厚度",
+              "外径",
+              "材质牌号",
+              "管径",
+              "连接方式",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 99.5,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.17.05.0490"
+          },
+          "GT-0991": {
+            "competitor_code": "3.61.11.6239",
+            "confidence": 0.08557867618662879,
+            "different_fields": [
+              "尺寸",
+              "核心规格"
+            ],
+            "distinct_margin": 3.5999999999999943,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": null,
+            "missing_fields": [
+              "厚度",
+              "材质牌号",
+              "设备类型",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 76.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "3.60.01.1511"
+          }
+        },
+        "no_answer": {
+          "GT-1022": {
+            "competitor_code": "3.60.01.3014",
+            "confidence": 0.1572462764599638,
+            "different_fields": [],
+            "distinct_margin": 17.60000000000001,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": "单位倍率不可靠阻断",
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 85.2,
+            "reason_codes": [
+              "hard_conflict"
+            ],
+            "top_code": "3.60.01.1202"
+          },
+          "GT-1024": {
+            "competitor_code": "3.60.01.3014",
+            "confidence": 0.14246113696937257,
+            "different_fields": [],
+            "distinct_margin": 14.699999999999989,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": "单位倍率不可靠阻断",
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 82.6,
+            "reason_codes": [
+              "hard_conflict"
+            ],
+            "top_code": "3.60.01.1202"
+          },
+          "GT-1025": {
+            "competitor_code": "3.60.01.0169",
+            "confidence": 0.1323891061001859,
+            "different_fields": [],
+            "distinct_margin": 16.599999999999994,
+            "eligible": false,
+            "equivalent_codes": [],
+            "hard_conflict": "单位倍率不可靠阻断",
+            "missing_fields": [],
+            "outcome": "rejected",
+            "ranking_score": 75.1,
+            "reason_codes": [
+              "hard_conflict"
+            ],
+            "top_code": "3.60.01.1202"
+          }
+        },
+        "equivalent_codes": {
+          "GT-0004": {
+            "competitor_code": "2.17.25.0086",
+            "confidence": 0.662302638812984,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "2.17.25.0011"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "壁厚",
+              "管径",
+              "专业"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 98.6,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.17.25.0069"
+          },
+          "GT-0545": {
+            "competitor_code": "2.28.03.7809",
+            "confidence": 0.6940953224347065,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "WL1000385274"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "材质"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 85.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.28.03.0220"
+          },
+          "GT-0546": {
+            "competitor_code": "2.28.03.7810",
+            "confidence": 0.6940953224347065,
+            "different_fields": [
+              "核心规格"
+            ],
+            "distinct_margin": 0.09999999999999432,
+            "eligible": false,
+            "equivalent_codes": [
+              "WL1000385281"
+            ],
+            "hard_conflict": null,
+            "missing_fields": [
+              "材质"
+            ],
+            "outcome": "needs_parameters",
+            "ranking_score": 85.0,
+            "reason_codes": [
+              "missing_critical_fields",
+              "different_critical_fields",
+              "score_cap_or_stale_rank",
+              "ambiguous_distinct_candidate"
+            ],
+            "top_code": "2.28.03.0221"
+          }
+        }
+      }
+    }
+  },
+  "all_checks_passed": true
+}

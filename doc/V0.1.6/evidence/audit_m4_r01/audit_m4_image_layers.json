@@ -1,0 +1,142 @@
+{
+  "image_id": "sha256:9517cc2a941cf9eebb662f2c833cdf88046709131a98380410b3b8b7a877e1b3",
+  "rootfs_diff_ids": [
+    "sha256:dd57f90311a2567b55ff22eeacff1602fd04ad7566e315957731359eab173b90",
+    "sha256:cd9a29aa43e014bda7a7815521ab51a3ababf2bceb4de66302701ac217ff26fb",
+    "sha256:961adfab8c074ba37b3fa0c54bb96911f8648a1788176a864bfb0750cfdef155",
+    "sha256:688ef2053b5da5e0048efd435dace328a25d5d4c8cb5e2cd1a7a92c697c586d5",
+    "sha256:23959dbae3c56705336e72806243d7c6c4291cd533ef8c533f571d97f5f1196b",
+    "sha256:8931630d20496ea3aee7f12d5c17db496a48a2962984672bb67e14ae1900d922",
+    "sha256:c153deb4920531b1a6471e50d4b0d75deda59c4720399e7af05a2d0d642c0f99",
+    "sha256:15bf6da8a9392c2c3e862967661465a881a4d5730494ec66a43e6ed6c74b53bf",
+    "sha256:5a14fdd648261ce549561fd475adfbffd2ec558e392d297cb6815aac35342e69",
+    "sha256:7f755a392a2344c380eda7102f65c8f9f8c4a6658c13d97c29faeb2071b8b95d",
+    "sha256:54f04955b69f4fe9dea5d14f94dc69fc040a1b7bb30cd31d02d175a8eb0743b2",
+    "sha256:44137c8e21c1b99740fa5eaabd87108d0624bcc677c4edb7d88d52c37f7074ab"
+  ],
+  "layers": {
+    "blobs/sha256/11f061c035d5cbb6daaafa7347e2b97c755b8453c2a8e4e11d640c40dd611fa7": {
+      "files_total": 16,
+      "app_files": {
+        "config/alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+        "config/auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+        "config/boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+        "config/category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+        "config/connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+        "config/domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+        "config/flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+        "config/llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+        "config/llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+        "config/material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+        "config/model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+        "config/stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+        "config/tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+        "config/unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+        "config/unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+        "config/weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+      }
+    },
+    "blobs/sha256/20b649682f6962e8b9e29d7d50a276b14973d394cd3b32972c2f2daddab6b012": {
+      "files_total": 45184,
+      "app_files": {}
+    },
+    "blobs/sha256/37fb86c2a767b88d500c6872195f88078f64765fe0d2f9cc375cc2efbd4c0a41": {
+      "files_total": 2855,
+      "app_files": {}
+    },
+    "blobs/sha256/53daecf7856e9b7235583f1ec326387aae7d29af3d5cd2efc20246259ab817cc": {
+      "files_total": 503,
+      "app_files": {}
+    },
+    "blobs/sha256/6d7491e8d1fd494e1d0be37a31a59f88708a6594bc19b7d5ada0cb74d6c614fb": {
+      "files_total": 29,
+      "app_files": {
+        "app/admin_api.py": "5c2bb8256c8017d0678bea8e2c9d38e7d8207a6b056f67ed813f957059c5c2f3",
+        "app/audit_manager.py": "a12adb525a00ef5d46b853506f17ac0d689d67320cf2ddb948886cf65ac8c50d",
+        "app/auth_manager.py": "0f621d06bc78d4abbc569b221a354b391322dee285ab02ed2091e65ca47472d8",
+        "app/auth_middleware.py": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+        "app/binding_decisions.py": "39b9f4f7a43f398cba8e8455092d4f8a40a30f6fa261c285353a69976713d5bf",
+        "app/db_manager.py": "a39fee995f68353bad7c7a6dcb765ad49442ffbd6aa92711ef09ae2b242bae46",
+        "app/domain_extractors.py": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+        "app/domain_router.py": "262b3c44b54e24e1332de553495c83fd5322acf743a20b864aca93d6360a8b1e",
+        "app/excel_boundary.py": "a37f1c98167b308fae218685b5da93bdba57cb59b7204056cf3436c0d86fff34",
+        "app/feedback_contract.py": "e052c9359c24d3305fc2bd2e5e2ea096521169501d8024e1a8591988a4cc1c5b",
+        "app/feedback_miner.py": "45632cc952250b58abc4baf3525cf2864abebbf55633e6db0f3014ff61704eda",
+        "app/feedback_train.py": "6c72e753a29d47451a95c829dfcec758ec7a248b8e69729fb22cbb6e533943e2",
+        "app/flywheel_db.py": "5277096a601817f94c6e489dbe605b813fd3e646496c68864b4c6014dd41b260",
+        "app/flywheel_sandbox.py": "131e91e865dcef985c134311004c0238a2ab819683a62f9e3ac75daff1c70ce6",
+        "app/llm_client.py": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+        "app/llm_rule_engine.py": "6dc27316a2a345237831d3c343f3116dfb5e5761242a117d66c88465c74b36f8",
+        "app/matcher.py": "3571ff2b1805bb1ba30e347a99611ddb443f193fb0750abe6483c616ac103072",
+        "app/normalizer.py": "4ea399ddac3ad8e21167cdacbafa0d3097bac7ee802c3e1359ff3a454ce67676",
+        "app/preprocessor.py": "e226865b15cbb728404b5c81a06e12386501f922b0d9f53e311d81209f0fb390",
+        "app/query_preprocessor.py": "036529be77d9741b7c7b68e6690b19e37416f8ebcd3223f44b369324225b539d",
+        "app/report_generator.py": "56fc3cebdc9efd0df7fca9f00ae7abee7c6cebc4f3a8aa350324ff8a22cf4ab3",
+        "app/rule_api.py": "2b853149c440fb9eee542a622aaf91dcf45f2fc97e805e2f158d01333fc49447",
+        "app/rule_context.py": "cd9b499ed00a4e59db929e3580426db603da37ac23092fa4176b07226053f38a",
+        "app/rule_governance.py": "100ab3ee351f3870104bfdf1df9dc2d7ccfc6e44b136f80aac412f56db42add0",
+        "app/runtime_eval_assets.py": "9f5c2969688997037516aabd7f1bef6f8ee18493f5fbf228350cdcace4fe62f1",
+        "app/sandbox_evaluator.py": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "app/server.py": "dfdbf2db46aec8c52a43d90ac2b268ea5a76ad96fb8b3b4654a29b9e3daa5bf4",
+        "app/session_manager.py": "513639f41e4a73b241b31df119da5051d0f5cc7e1f54abbdd1a61495e6d9505a",
+        "app/vector_index.py": "fcd13c56907d4a022b9dea82ccdc070d74d3d729070dfd039554eeadf7d8ade2"
+      }
+    },
+    "blobs/sha256/7efbce397249e9202b070b8e638baff71160948c640b9a44f2226419a71f410d": {
+      "files_total": 2131,
+      "app_files": {}
+    },
+    "blobs/sha256/800abf3ff927b5b676045961cd1555ce4a6e7aafb2a2296ce322d90a52fb05cf": {
+      "files_total": 1,
+      "app_files": {
+        "requirements.txt": "6f3b73001ffec927671c5496684f203c3bb6c7682bc4da628238a7f1cb2cc15f"
+      }
+    },
+    "blobs/sha256/a7d907773ec551d549fd809ccb03e228f0eef79c0f7d498c4d975ab887c2044f": {
+      "files_total": 8,
+      "app_files": {
+        "web/admin.html": "37fdb1bb97400d273b6b116b6b833277b66273e46e6517768df3810f59367a43",
+        "web/app.js": "d88936db277ea5751e872cbeb925fcd959cefe0448c8e6e8e79436383c105b49",
+        "web/index.css": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+        "web/index.html": "bf6c68b08054c87e24e41cd1fc3ec038c730f9619268f3452e9d70f976ca6906",
+        "web/login.css": "20bf8b2f52ffd9c0cac59d0979604d1ad4b6ec1ba7f676388ba0c9db1f726acd",
+        "web/login.html": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+        "web/logo.png": "886da7965a5f07b8525ba921b11d9d3e2df02303efed5de90e482557b88be539",
+        "web/logo500.png": "7d71cef49bf5db0c71727daea3c75895cc114a4bc32aa5f4b47c5fd8516dcb00"
+      }
+    },
+    "blobs/sha256/bbe7053e6def9842d628414346e26f25e499463adb6ca48c0c8932e036e44000": {
+      "files_total": 5,
+      "app_files": {}
+    },
+    "blobs/sha256/d3c8400fe9c5f3864cec27f7ba830032158b3a90b50328be315d9ced1eeb9c6b": {
+      "files_total": 0,
+      "app_files": {}
+    },
+    "blobs/sha256/da54fb958fbb55939ac3e5ce805cc622d05d33b0ac026ac11b3d1e81d34893a8": {
+      "files_total": 0,
+      "app_files": {}
+    },
+    "blobs/sha256/dc30a4cc9b9601b7b53610f7da8666aa17128e6442a2e2de0cfff15d217534a9": {
+      "files_total": 3,
+      "app_files": {
+        "app/eval_assets/golden_runtime_v1.json": "10e44b73d2b945e27146ad83eac018c1a736df945ed95fbdc710190dc7aa2057",
+        "app/eval_assets/report_template_v1.json": "d1cfc598623f7aee6d24ad3561ac5bb87410c976953569c939337519e0ae4767",
+        "app/eval_assets/smoke_materials_v1.json": "f79a97ce989f79c1204758f35f95c8ab77bd485509603e13a468026b7f6899de"
+      }
+    }
+  },
+  "application_files": 57,
+  "violations": [],
+  "source_hashes_match": true,
+  "cmd": [
+    "uvicorn",
+    "app.server:app",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "18080",
+    "--workers",
+    "1"
+  ]
+}

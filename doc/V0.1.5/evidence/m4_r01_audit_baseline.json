@@ -1,0 +1,612 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "delivery_checks": [
+    {
+      "path": "app/auth_manager.py",
+      "expected": "ff30e866ced18596f545eafe4cc7df0237560072b849f18a013d82f6e5d4611b",
+      "actual": "ff30e866ced18596f545eafe4cc7df0237560072b849f18a013d82f6e5d4611b"
+    },
+    {
+      "path": "app/auth_middleware.py",
+      "expected": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+      "actual": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3"
+    },
+    {
+      "path": "app/admin_api.py",
+      "expected": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc",
+      "actual": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc"
+    },
+    {
+      "path": "app/rule_api.py",
+      "expected": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c",
+      "actual": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c"
+    },
+    {
+      "path": "app/llm_rule_engine.py",
+      "expected": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813",
+      "actual": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813"
+    },
+    {
+      "path": "app/flywheel_sandbox.py",
+      "expected": "887e24957704b35c10912f5dc85b1deaa7d4749f617d86566644ddca716953d3",
+      "actual": "887e24957704b35c10912f5dc85b1deaa7d4749f617d86566644ddca716953d3"
+    },
+    {
+      "path": "app/server.py",
+      "expected": "f91d9ab7ba73cb18a9f418b3ff829900be592d3d3f947ae45d6a350ae0eea94e",
+      "actual": "f91d9ab7ba73cb18a9f418b3ff829900be592d3d3f947ae45d6a350ae0eea94e"
+    },
+    {
+      "path": "web/login.html",
+      "expected": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+      "actual": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5"
+    },
+    {
+      "path": "web/index.html",
+      "expected": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae",
+      "actual": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae"
+    },
+    {
+      "path": "web/app.js",
+      "expected": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c",
+      "actual": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c"
+    },
+    {
+      "path": "web/admin.html",
+      "expected": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669",
+      "actual": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669"
+    },
+    {
+      "path": "Dockerfile",
+      "expected": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+      "actual": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a"
+    },
+    {
+      "path": ".dockerignore",
+      "expected": "d37c2ec4512f4e016c8d665ced63761127e00346f710c34760994c0443617d74",
+      "actual": "d37c2ec4512f4e016c8d665ced63761127e00346f710c34760994c0443617d74"
+    },
+    {
+      "path": ".env.example",
+      "expected": "2cf00504fd013eee4f357d7081625b1d151b59e4bddc621e83a99ebc3742342d",
+      "actual": "2cf00504fd013eee4f357d7081625b1d151b59e4bddc621e83a99ebc3742342d"
+    },
+    {
+      "path": "deploy_guide.md",
+      "expected": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b",
+      "actual": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b"
+    },
+    {
+      "path": "scripts/deploy_cloud.py",
+      "expected": "f1a7580878839eb84a84c49704fefe99b3d8eb5493c8caf29efe19f906f239fd",
+      "actual": "f1a7580878839eb84a84c49704fefe99b3d8eb5493c8caf29efe19f906f239fd"
+    },
+    {
+      "path": "scripts/deploy_to_cloud_safe.py",
+      "expected": "81b7d84d0ff05621da63f723facf1d9a39d17f742618b9a0acca584ceb4976b8",
+      "actual": "81b7d84d0ff05621da63f723facf1d9a39d17f742618b9a0acca584ceb4976b8"
+    },
+    {
+      "path": "scripts/check_cloud_status.py",
+      "expected": "78819b5b8e157b491521a383b9ac2051bfed6c9303b35d9c811980e6d1d5179c",
+      "actual": "78819b5b8e157b491521a383b9ac2051bfed6c9303b35d9c811980e6d1d5179c"
+    },
+    {
+      "path": "scripts/probe_servers.py",
+      "expected": "c1de9c53ffcc7aaf11382a9d16743ce67c67cfe9b51ea15a2fe2315fd12c6d54",
+      "actual": "c1de9c53ffcc7aaf11382a9d16743ce67c67cfe9b51ea15a2fe2315fd12c6d54"
+    },
+    {
+      "path": "tests/test_auth_security_fix.py",
+      "expected": "664a36b0a2a614bec22fdc7c18ce1fdb836cd0fee7e257c67b6de1bfcc150e6b",
+      "actual": "664a36b0a2a614bec22fdc7c18ce1fdb836cd0fee7e257c67b6de1bfcc150e6b"
+    },
+    {
+      "path": "tests/test_admin_dashboard.py",
+      "expected": "64d599e0645c75c8660d160df8845344fa9399846328d815646cc7e8421ae872",
+      "actual": "64d599e0645c75c8660d160df8845344fa9399846328d815646cc7e8421ae872"
+    },
+    {
+      "path": "tests/test_v0_0_8_llm_rules.py",
+      "expected": "18441fdcecd0c1d5ea5ef1355bd8f5e3464a99f84473d86a205fedb0ac17766e",
+      "actual": "18441fdcecd0c1d5ea5ef1355bd8f5e3464a99f84473d86a205fedb0ac17766e"
+    },
+    {
+      "path": "tests/test_phase0_phase1.py",
+      "expected": "1cdf4e055183990d14990007f339098a8a718fb827e8e0ceccca41eba8af1d34",
+      "actual": "1cdf4e055183990d14990007f339098a8a718fb827e8e0ceccca41eba8af1d34"
+    },
+    {
+      "path": "tests/test_flywheel_end2end.py",
+      "expected": "e14c024960314eb47ab633d9a9b2c91d57109e6e1e0f111a2422e7b2ae58a84b",
+      "actual": "e14c024960314eb47ab633d9a9b2c91d57109e6e1e0f111a2422e7b2ae58a84b"
+    },
+    {
+      "path": "tests/test_binding_decisions.py",
+      "expected": "d8e4cc8904fb73de7896fe5952af3d1b711976a23fafee9293c1f74a03dbdd0a",
+      "actual": "d8e4cc8904fb73de7896fe5952af3d1b711976a23fafee9293c1f74a03dbdd0a"
+    },
+    {
+      "path": "tests/test_rule_deadlock_fix.py",
+      "expected": "9409992021da53b2a6d596a6e713307bff7797d9e4a9271e843724f39987d49e",
+      "actual": "9409992021da53b2a6d596a6e713307bff7797d9e4a9271e843724f39987d49e"
+    },
+    {
+      "path": "tests/test_m3_hard_constraints.py",
+      "expected": "24fc94f8e399f2f5f663a7869946ee93ccfaeb6db73ab5c4fe2fb5809deae19b",
+      "actual": "24fc94f8e399f2f5f663a7869946ee93ccfaeb6db73ab5c4fe2fb5809deae19b"
+    },
+    {
+      "path": "tests/test_m3_hard_constraints_http.py",
+      "expected": "1adabbd3687b374d9b488be056b3d3c3a2ec45ec0d2f59e31a616bbadbb537d0",
+      "actual": "1adabbd3687b374d9b488be056b3d3c3a2ec45ec0d2f59e31a616bbadbb537d0"
+    },
+    {
+      "path": "scripts/_deploy_env.py",
+      "expected": "a9aa895e54885242d53fc1398a95bc91acd28c82062f55ad983eb8770d260f6d",
+      "actual": "a9aa895e54885242d53fc1398a95bc91acd28c82062f55ad983eb8770d260f6d"
+    },
+    {
+      "path": "tests/test_m4_auth_lifecycle.py",
+      "expected": "231dbccd9077d2fd9eff97f609d4ab6f521059ce77d9a05c3a12ace8f0a7f100",
+      "actual": "231dbccd9077d2fd9eff97f609d4ab6f521059ce77d9a05c3a12ace8f0a7f100"
+    },
+    {
+      "path": "tests/test_m4_permissions_and_tasks.py",
+      "expected": "635791610a90cfed0d879d14edc5d2e35802b32c19720f9d5a12bb79a1d7e02c",
+      "actual": "635791610a90cfed0d879d14edc5d2e35802b32c19720f9d5a12bb79a1d7e02c"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_browser_check.py",
+      "expected": "9696b2ac03219616634212b9bd7722665b5b73093b42e48d49139fb4aa9cecc2",
+      "actual": "9696b2ac03219616634212b9bd7722665b5b73093b42e48d49139fb4aa9cecc2"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_capture_evidence.py",
+      "expected": "f6481789046d4e6861e8f633724d59a3d637c464b8e57161be9d8c3d93587b1d",
+      "actual": "f6481789046d4e6861e8f633724d59a3d637c464b8e57161be9d8c3d93587b1d"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_rerun.ps1",
+      "expected": "1c75723e8ab077140e35f6be7566d2eac5b98bafa55e6041ca1385adb24f578e",
+      "actual": "1c75723e8ab077140e35f6be7566d2eac5b98bafa55e6041ca1385adb24f578e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_f11_rotation_runbook.md",
+      "expected": "8ed39503fa7eff369ac1801ab427b4664fa7c7dfd1912181f5033565ab59ffd2",
+      "actual": "8ed39503fa7eff369ac1801ab427b4664fa7c7dfd1912181f5033565ab59ffd2"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_browser_e2e.json",
+      "expected": "59ed0b6773e42a3f6d4117a3987ad7d986fc4ec7ad3f9ce9c9abc193d531f4c0",
+      "actual": "59ed0b6773e42a3f6d4117a3987ad7d986fc4ec7ad3f9ce9c9abc193d531f4c0"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_browser_e2e.log",
+      "expected": "e5f49d3dc63a9dd6071fc43fca987bed5a756ff69e61d9b2a16c54e36d827c30",
+      "actual": "e5f49d3dc63a9dd6071fc43fca987bed5a756ff69e61d9b2a16c54e36d827c30"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_browser_e2e.png",
+      "expected": "bf1ac5698dc15fc1c5655ea3f2d0de1bef4a46c23cc0d5eb1bb2d9c75a69fb06",
+      "actual": "bf1ac5698dc15fc1c5655ea3f2d0de1bef4a46c23cc0d5eb1bb2d9c75a69fb06"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_docker_check.log",
+      "expected": "b12eacc51814f25e0bf463fb02662998afcc8e786111af01d6acea3e3533e8ac",
+      "actual": "b12eacc51814f25e0bf463fb02662998afcc8e786111af01d6acea3e3533e8ac"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_gate_reports.json",
+      "expected": "36b47de462b0f565874d9c8f319f5eb5084c24bbe83d32b762e5f2c30cc15374",
+      "actual": "36b47de462b0f565874d9c8f319f5eb5084c24bbe83d32b762e5f2c30cc15374"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_m3_r04_gate_compare.json",
+      "expected": "e32093d2ba0dbbbd5ae21b36f8d16d57ffc5989c620c3745c3187128c4cebc79",
+      "actual": "e32093d2ba0dbbbd5ae21b36f8d16d57ffc5989c620c3745c3187128c4cebc79"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_3rule_gate.txt",
+      "expected": "e2265d14e34af46fb8016b178f1bbaceda52a03c2a487556bc12c3911cedad12",
+      "actual": "e2265d14e34af46fb8016b178f1bbaceda52a03c2a487556bc12c3911cedad12"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_venv_verify_before.json",
+      "expected": "dd474062775d64f9a7f364873855b0eed3e182e18da421af00ee7f034ec3fb41",
+      "actual": "dd474062775d64f9a7f364873855b0eed3e182e18da421af00ee7f034ec3fb41"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_venv_verify_after.json",
+      "expected": "71eb7834b2281441a4a6a747e6d7a592738dcc71edf9aa0091cb20e38088c0f2",
+      "actual": "71eb7834b2281441a4a6a747e6d7a592738dcc71edf9aa0091cb20e38088c0f2"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_py_compile.log",
+      "expected": "fade8ab2324915a555181c0059b7df2b721876cec2c7b8cba69f08f1b4bfb547",
+      "actual": "fade8ab2324915a555181c0059b7df2b721876cec2c7b8cba69f08f1b4bfb547"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_pytest_m4.txt",
+      "expected": "d5287558a5528db79b297cd9be9a60d6fb91e74df2860d930ea6814f9467b0ed",
+      "actual": "d5287558a5528db79b297cd9be9a60d6fb91e74df2860d930ea6814f9467b0ed"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_pytest_m3.txt",
+      "expected": "0b0d1c499521168d0c1b307ec4f6191cee1121298740b1c0f9a0132aa77fdf4e",
+      "actual": "0b0d1c499521168d0c1b307ec4f6191cee1121298740b1c0f9a0132aa77fdf4e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_pytest_m0_m2_regression.txt",
+      "expected": "ece0bae1e9feacd59d02f0c88b352033c8c9d5040ad84f260b9b3c23d5afe7e8",
+      "actual": "ece0bae1e9feacd59d02f0c88b352033c8c9d5040ad84f260b9b3c23d5afe7e8"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_pytest_sandbox_30.txt",
+      "expected": "4901d27e9c1ec6639bbda350da8b645c08007f04bdf923098a01ce01aa0a980d",
+      "actual": "4901d27e9c1ec6639bbda350da8b645c08007f04bdf923098a01ce01aa0a980d"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r01_pytest_full.txt",
+      "expected": "b03de6c14809f20d8942756afe01b9242f15642fe25ab983b6b7d6468aaa396e",
+      "actual": "b03de6c14809f20d8942756afe01b9242f15642fe25ab983b6b7d6468aaa396e"
+    },
+    {
+      "path": "doc/V0.1.5/rounds/V015-M4_R01_开发小结.md",
+      "expected": "1ed0c128e4d7229e97ce6c7821df5a32ae758acf49dc5c3b156dc0c8f298dd97",
+      "actual": "1ed0c128e4d7229e97ce6c7821df5a32ae758acf49dc5c3b156dc0c8f298dd97"
+    },
+    {
+      "path": "doc/V0.1.5/02_任务台账.md",
+      "expected": "a1835c299a4c374176f78ba85c2c9f9498fa0bd70ffa7d5bcf92ba21429bd55e",
+      "actual": "a1835c299a4c374176f78ba85c2c9f9498fa0bd70ffa7d5bcf92ba21429bd55e"
+    },
+    {
+      "path": "doc/V0.1.5/rounds/README.md",
+      "expected": "f0245a76f6f70a218da8115c34dfba05ab802e43ed640a833cf4c24e7e2aa862",
+      "actual": "f0245a76f6f70a218da8115c34dfba05ab802e43ed640a833cf4c24e7e2aa862"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/README.md",
+      "expected": "ddb81d61ecccea0490b096566834d39214b97cee0783c2316b2cd6eac6671026",
+      "actual": "ddb81d61ecccea0490b096566834d39214b97cee0783c2316b2cd6eac6671026"
+    }
+  ],
+  "backup_checks": [
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/auth_manager.py",
+      "expected": "8b5caeba98abc398c32f22e60adef2e31761ce9b4da9bc9a3d32f72aefa7dd78",
+      "actual": "8b5caeba98abc398c32f22e60adef2e31761ce9b4da9bc9a3d32f72aefa7dd78"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/auth_middleware.py",
+      "expected": "5aba3cc84f0dc2203581f29e92b4bd14fc71dfcb2f90732ab1f5c8b8edd449db",
+      "actual": "5aba3cc84f0dc2203581f29e92b4bd14fc71dfcb2f90732ab1f5c8b8edd449db"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/admin_api.py",
+      "expected": "46faf848c04c70e2f1537195957115f07e6febe750baee8f7bd51b38f9060fa9",
+      "actual": "46faf848c04c70e2f1537195957115f07e6febe750baee8f7bd51b38f9060fa9"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/rule_api.py",
+      "expected": "afecd2cf7942ea75e74ee99ceb1c4d14a549d32df941d88ebc3f81acb272ed5a",
+      "actual": "afecd2cf7942ea75e74ee99ceb1c4d14a549d32df941d88ebc3f81acb272ed5a"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/llm_rule_engine.py",
+      "expected": "fce79ce5204ff00266b6974c7492225bb5488486c190b8270bfc72edb20a9f86",
+      "actual": "fce79ce5204ff00266b6974c7492225bb5488486c190b8270bfc72edb20a9f86"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/flywheel_sandbox.py",
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/app/server.py",
+      "expected": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "actual": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/web/login.html",
+      "expected": "878febc185535aac4ca21d2dced2c3df13c0b71e660ce007debd90a1e5124c3f",
+      "actual": "878febc185535aac4ca21d2dced2c3df13c0b71e660ce007debd90a1e5124c3f"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/web/index.html",
+      "expected": "f9883bd95c107586c1aec9542c071c066bbbcdf69499895ddb65081b5f08d435",
+      "actual": "f9883bd95c107586c1aec9542c071c066bbbcdf69499895ddb65081b5f08d435"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/web/app.js",
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/web/admin.html",
+      "expected": "4350c8d5f7cea47d7515f0de475bcbdf01e0ea85437b2aabeb8031ce07b80e84",
+      "actual": "4350c8d5f7cea47d7515f0de475bcbdf01e0ea85437b2aabeb8031ce07b80e84"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/Dockerfile",
+      "expected": "34ae0eb6553f89997e080d0869b84da31287506a24087b9024039175738ad57a",
+      "actual": "34ae0eb6553f89997e080d0869b84da31287506a24087b9024039175738ad57a"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/.dockerignore",
+      "expected": "304cf9c894bd46f62bff7ae59f42da33f4dd672d21d0867283b7e75b179f9bac",
+      "actual": "304cf9c894bd46f62bff7ae59f42da33f4dd672d21d0867283b7e75b179f9bac"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/docker-compose.yml",
+      "expected": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7",
+      "actual": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/.env.example",
+      "expected": "645e5dbef395171918aa042572cdf1d99e3fe6903e9239131184185c15fd7f1d",
+      "actual": "645e5dbef395171918aa042572cdf1d99e3fe6903e9239131184185c15fd7f1d"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/deploy_guide.md",
+      "expected": "f9d0f5dd621410d940362cb0e45d075f8e1a9e5302942530bb5b7e2cfbe1701a",
+      "actual": "f9d0f5dd621410d940362cb0e45d075f8e1a9e5302942530bb5b7e2cfbe1701a"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/scripts/deploy_cloud.py",
+      "expected": "65281c5937df0188bf18e4f327dc5d23aad7f8211ac05d44560f024991bce25a",
+      "actual": "65281c5937df0188bf18e4f327dc5d23aad7f8211ac05d44560f024991bce25a"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/scripts/deploy_to_cloud_safe.py",
+      "expected": "b10cfc90eea587138cd1360937dcd72b55375a3d937858dd7ade519eaab333a4",
+      "actual": "b10cfc90eea587138cd1360937dcd72b55375a3d937858dd7ade519eaab333a4"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/scripts/check_cloud_status.py",
+      "expected": "19c7e51be22876e35e34291dba978f0da806549cae7633ad0616556566937455",
+      "actual": "19c7e51be22876e35e34291dba978f0da806549cae7633ad0616556566937455"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/scripts/probe_servers.py",
+      "expected": "34e23bc898e72be82b46bf973a730789c845ec05e0b6b9b0a836805f553e33ab",
+      "actual": "34e23bc898e72be82b46bf973a730789c845ec05e0b6b9b0a836805f553e33ab"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_auth_security_fix.py",
+      "expected": "4071b1d88343c19f65bc01b9889d6dc7a1275de8e284f6b4ccc68bb828d56055",
+      "actual": "4071b1d88343c19f65bc01b9889d6dc7a1275de8e284f6b4ccc68bb828d56055"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_admin_dashboard.py",
+      "expected": "21a414db9f939b197b523a283c5ba69d9a2043e8c1dcfe99cc05b3adef8e8752",
+      "actual": "21a414db9f939b197b523a283c5ba69d9a2043e8c1dcfe99cc05b3adef8e8752"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_v0_0_8_llm_rules.py",
+      "expected": "9765eb7ac61882e2fe8334d3103e6352216ec471d8f491c1cb29e45f12493a6c",
+      "actual": "9765eb7ac61882e2fe8334d3103e6352216ec471d8f491c1cb29e45f12493a6c"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_phase0_phase1.py",
+      "expected": "891dbe21f0f79dcd65e18e40aa57219862ef1818e27a52063fa72eea19009e3e",
+      "actual": "891dbe21f0f79dcd65e18e40aa57219862ef1818e27a52063fa72eea19009e3e"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_flywheel_end2end.py",
+      "expected": "d47af7426ad2828d02725ac4589fc3325bbc30d8276e0b2699c074efb48c18c6",
+      "actual": "d47af7426ad2828d02725ac4589fc3325bbc30d8276e0b2699c074efb48c18c6"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_binding_decisions.py",
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_m3_hard_constraints.py",
+      "expected": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "actual": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea"
+    },
+    {
+      "path": ".local-archive/m4_r01_pre_backup/tests/test_m3_hard_constraints_http.py",
+      "expected": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "actual": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c"
+    }
+  ],
+  "protected_hashes": {
+    ".dockerignore": "d37c2ec4512f4e016c8d665ced63761127e00346f710c34760994c0443617d74",
+    "Dockerfile": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+    "app/admin_api.py": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc",
+    "app/audit_manager.py": "412b3d99be88b10acb1f58b52c32fc979f8035da234636f841140fdf3d43e437",
+    "app/auth_manager.py": "ff30e866ced18596f545eafe4cc7df0237560072b849f18a013d82f6e5d4611b",
+    "app/auth_middleware.py": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+    "app/binding_decisions.py": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+    "app/db_manager.py": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+    "app/domain_extractors.py": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+    "app/domain_router.py": "262b3c44b54e24e1332de553495c83fd5322acf743a20b864aca93d6360a8b1e",
+    "app/feedback_miner.py": "981bede1183da115c6e5b1b8b951f688c9ce442b6ac14e56f82bb5e83fed2ecb",
+    "app/feedback_train.py": "b13ac9eff30ac0143cad1e51c02a6c893e79f4298f3dedaec0fe07e1df736cbf",
+    "app/flywheel_db.py": "fb7e262ac643587209b2c749fe3b220f7917795fb04c186d305660d9e5b18044",
+    "app/flywheel_sandbox.py": "887e24957704b35c10912f5dc85b1deaa7d4749f617d86566644ddca716953d3",
+    "app/llm_client.py": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+    "app/llm_rule_engine.py": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813",
+    "app/matcher.py": "6ebb305fe2afa94a01e252c248e103d330717caf47ea03e3310c32ce1bf25659",
+    "app/normalizer.py": "a89ceb48e883ef9e31925abc31617f7379378109db4f19088cf82a12e792fae3",
+    "app/preprocessor.py": "2e04f3022d5a658a87c6de4da9ddb125c8a5ff0d3fd0bc9db0df1cb6c89a7ac5",
+    "app/query_preprocessor.py": "f537f584604bf837fd0472ca35d013e6f57525ec0ab9f092087ac0e406993221",
+    "app/report_generator.py": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+    "app/rule_api.py": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c",
+    "app/server.py": "f91d9ab7ba73cb18a9f418b3ff829900be592d3d3f947ae45d6a350ae0eea94e",
+    "app/session_manager.py": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+    "app/vector_index.py": "58cc76e35dbae01d3354f58684d5f7b74be72c279ab0fcf72c9cb47a4f95748d",
+    "deploy_guide.md": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b",
+    "doc/V0.1.5/rounds/V015-M3_R04_审核小结.md": "a8021001e4b1bcc00eea2eb4ed80d827952940a2facf4dfb83a45c2b0ef755c3",
+    "doc/V0.1.5/rounds/V015-M3_R04_统筹裁决.md": "5b4db65638d01c41df750e39ddaa0652a82fc62b79ffc90f5a23f060fb074281",
+    "docker-compose.yml": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7",
+    "scripts/deploy_cloud.py": "f1a7580878839eb84a84c49704fefe99b3d8eb5493c8caf29efe19f906f239fd",
+    "scripts/deploy_to_cloud_safe.py": "81b7d84d0ff05621da63f723facf1d9a39d17f742618b9a0acca584ceb4976b8",
+    "tests/benchmark.py": "95865c035d4979f501ca676654752d266c304ef95d94f0e1877dd203483350cd",
+    "tests/build_golden_set.py": "3977fcac59c166cca1d1d1a9c8e323e6752c8301502640f5a64215085aafcd5b",
+    "tests/conftest.py": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+    "tests/eval_golden_set.py": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+    "tests/fixtures/gen_standard_template.py": "a66f32f3f3fd432d58ffe310a1612d0658021f122613c875324925250675eb93",
+    "tests/integration_test.py": "e2b1b19d7a1dd5c0e3deee38c401cb77374d7f2748c27f7cb44ceb8f69987123",
+    "tests/regression_runner.py": "bee891d47301f43259d353e03398f64b029cdf561379d6f3569ed1fd036cf0d0",
+    "tests/test_admin_dashboard.py": "64d599e0645c75c8660d160df8845344fa9399846328d815646cc7e8421ae872",
+    "tests/test_auth_security_fix.py": "664a36b0a2a614bec22fdc7c18ce1fdb836cd0fee7e257c67b6de1bfcc150e6b",
+    "tests/test_auto_binding.py": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+    "tests/test_binding_decisions.py": "d8e4cc8904fb73de7896fe5952af3d1b711976a23fafee9293c1f74a03dbdd0a",
+    "tests/test_feedback_miner.py": "3c70c6660a0c0ec111903841ddf0888795e6cd81cd6c613e3e364cc3895a4228",
+    "tests/test_flywheel_end2end.py": "e14c024960314eb47ab633d9a9b2c91d57109e6e1e0f111a2422e7b2ae58a84b",
+    "tests/test_flywheel_sandbox.py": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+    "tests/test_llm_integration.py": "2f7c7bb85a4743a3382385db2f984afb5d22729598d9aab3a62a5c6f7110a091",
+    "tests/test_m0_guardrail_regression.py": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+    "tests/test_m0_isolation.py": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+    "tests/test_m3_hard_constraints.py": "24fc94f8e399f2f5f663a7869946ee93ccfaeb6db73ab5c4fe2fb5809deae19b",
+    "tests/test_m3_hard_constraints_http.py": "1adabbd3687b374d9b488be056b3d3c3a2ec45ec0d2f59e31a616bbadbb537d0",
+    "tests/test_phase0_phase1.py": "1cdf4e055183990d14990007f339098a8a718fb827e8e0ceccca41eba8af1d34",
+    "tests/test_query_cleaning_pipeline.py": "0de3cea544985365eb7667c38c2bda95d1878a8a5c0c80d5d39d61c38b39be1c",
+    "tests/test_query_contract.py": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+    "tests/test_query_preprocessor.py": "159c573db7e3d40d0f6c26436e7e3d05388e0b166d6638077960211b22b73407",
+    "tests/test_rule_deadlock_fix.py": "9409992021da53b2a6d596a6e713307bff7797d9e4a9271e843724f39987d49e",
+    "tests/test_v0_0_8_llm_rules.py": "18441fdcecd0c1d5ea5ef1355bd8f5e3464a99f84473d86a205fedb0ac17766e",
+    "tests/verify_isolation.py": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+    "web/admin.html": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669",
+    "web/app.js": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c",
+    "web/index.css": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+    "web/index.html": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae",
+    "web/login.css": "20bf8b2f52ffd9c0cac59d0979604d1ad4b6ec1ba7f676388ba0c9db1f726acd",
+    "web/login.html": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+    "tests/test_m4_auth_lifecycle.py": "231dbccd9077d2fd9eff97f609d4ab6f521059ce77d9a05c3a12ace8f0a7f100",
+    "tests/test_m4_permissions_and_tasks.py": "635791610a90cfed0d879d14edc5d2e35802b32c19720f9d5a12bb79a1d7e02c",
+    "scripts/batch_llm_structure.py": "00c194b46fb634a6156d365190685a40c59f8b20c89cea13d20ebd860d0cb632",
+    "scripts/check_cloud_status.py": "78819b5b8e157b491521a383b9ac2051bfed6c9303b35d9c811980e6d1d5179c",
+    "scripts/clean_alias_dict.py": "e5c3fd90ff0074f2973ee06964e7c0f2f62bd14745aa542f3562e076588fda2e",
+    "scripts/export_structured_db.py": "25b7525dd0ffa245af30204464ec9aa799bb566e187eb631fa3757373ed8062c",
+    "scripts/measure_performance.py": "8f3c3f555a9217e4da8b92a068b00cba6c2a8a27ade87c18b02a48383b881dd8",
+    "scripts/migrate_legacy_feedback.py": "e4ce0f059cb22218daff5794dbd111550e7542194078bc7c75b8233f1283f1f3",
+    "scripts/probe_servers.py": "c1de9c53ffcc7aaf11382a9d16743ce67c67cfe9b51ea15a2fe2315fd12c6d54",
+    "scripts/_deploy_env.py": "a9aa895e54885242d53fc1398a95bc91acd28c82062f55ad983eb8770d260f6d",
+    ".env": "889a6bd2ebf47943ed0cd174bddb337dcc21dd9be95ec2ec738a9d5ab788598b",
+    ".env.example": "2cf00504fd013eee4f357d7081625b1d151b59e4bddc621e83a99ebc3742342d",
+    "doc/README.md": "930b73bd0344a528c687b6e4aec1b4f6edcd41ccb7e08489614ec62d6425f58d",
+    "doc/00_项目管理/进度总表.md": "4eed0a8df2d5ca98e7d9a769b08eb19f66a9137984d5951fd01f8f284d6bc87f"
+  },
+  "snapshot_equal_to_developer": true,
+  "git_status": [
+    " M .dockerignore",
+    " M .env.example",
+    " M .gitignore",
+    " M Dockerfile",
+    " M app/admin_api.py",
+    " M app/auth_manager.py",
+    " M app/auth_middleware.py",
+    " M app/db_manager.py",
+    " M app/domain_extractors.py",
+    " M app/feedback_train.py",
+    " M app/flywheel_sandbox.py",
+    " M app/llm_client.py",
+    " M app/llm_rule_engine.py",
+    " M app/matcher.py",
+    " M app/normalizer.py",
+    " M app/query_preprocessor.py",
+    " M app/rule_api.py",
+    " M app/server.py",
+    " M app/session_manager.py",
+    " D app/test_engine.py",
+    " M app/vector_index.py",
+    " M deploy_guide.md",
+    " D doc/llm_rule_engine_v0.0.8_archive/v0.0.8_llm_rule_engine_technical_solution.md",
+    " D doc/query_structuring_archive/audit_query_portrait.py",
+    " D doc/query_structuring_archive/query_cleaning_and_structuring_plan.md",
+    " D doc/query_structuring_archive/query_cleaning_and_structuring_plan_review.md",
+    " D doc/query_structuring_archive/query_data_portrait.md",
+    " D doc/query_structuring_archive/query_data_portrait_review.md",
+    " D \"doc/query_structuring_archive/walkthrough-Query\\347\\253\\257\\346\\225\\260\\346\\215\\256\\346\\270\\205\\346\\264\\227\\345\\217\\212\\347\\273\\223\\346\\236\\204\\345\\214\\226\\345\\212\\237\\350\\203\\275\\344\\274\\230\\345\\214\\226\\345\\256\\214\\346\\210\\220\\346\\212\\245\\345\\221\\212.md\"",
+    " D doc/stability_fix_archive/README.md",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\347\\250\\263\\345\\256\\232\\346\\200\\247\\344\\270\\216\\345\\256\\211\\345\\205\\250\\344\\277\\256\\345\\244\\215\\345\\256\\236\\346\\226\\275\\346\\212\\245\\345\\221\\212.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\347\\250\\263\\345\\256\\232\\346\\200\\247\\344\\270\\216\\345\\256\\211\\345\\205\\250\\344\\277\\256\\345\\244\\215\\345\\256\\236\\346\\226\\275\\346\\212\\245\\345\\221\\2122\\302\\267\\347\\213\\254\\347\\253\\213\\346\\240\\270\\351\\252\\214\\347\\273\\223\\350\\256\\272.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\347\\250\\263\\345\\256\\232\\346\\200\\247\\344\\270\\216\\345\\256\\211\\345\\205\\250\\344\\277\\256\\345\\244\\215\\346\\226\\271\\346\\241\\210.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\347\\250\\263\\345\\256\\232\\346\\200\\247\\344\\270\\216\\345\\256\\211\\345\\205\\250\\344\\277\\256\\345\\244\\215\\347\\273\\210\\346\\234\\237\\345\\256\\236\\346\\226\\275\\346\\212\\245\\345\\221\\2123\\302\\267\\347\\213\\254\\347\\253\\213\\346\\240\\270\\351\\252\\214\\347\\273\\223\\350\\256\\272\\357\\274\\210100%\\351\\227\\255\\347\\216\\257\\357\\274\\211.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\347\\250\\263\\345\\256\\232\\346\\200\\247\\345\\210\\206\\346\\236\\220\\346\\212\\245\\345\\221\\212\\302\\267\\347\\213\\254\\347\\253\\213\\350\\257\\204\\345\\256\\241\\344\\270\\216\\350\\241\\245\\345\\205\\205\\346\\226\\271\\346\\241\\210.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\351\\200\\273\\350\\276\\221\\344\\270\\216\\347\\250\\263\\345\\256\\232\\346\\200\\247\\345\\210\\206\\346\\236\\220\\346\\212\\245\\345\\221\\212.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\351\\200\\273\\350\\276\\221\\344\\270\\216\\347\\250\\263\\345\\256\\232\\346\\200\\247\\345\\210\\206\\346\\236\\220\\346\\212\\245\\345\\221\\2122.md\"",
+    " D \"doc/stability_fix_archive/\\347\\263\\273\\347\\273\\237\\351\\200\\273\\350\\276\\221\\344\\270\\216\\347\\250\\263\\345\\256\\232\\346\\200\\247\\345\\210\\206\\346\\236\\220\\346\\212\\245\\345\\221\\2123.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/Data Portrait.html\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/Data Portrait.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/V0.1.1_upgrade_and_rollback_guide.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/baseline_metrics_v0.0.5.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/data_cleaning_rules.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/final_structuring_master_plan.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/hardware_capacity_plan_v0.0.8.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/implementation_plan.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/material_list_reform_analysis_and_recommendations.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/procurement_material_analysis_and_optimization_report.md\"",
+    " D \"doc/\\345\\205\\266\\344\\273\\226/\\347\\211\\251\\346\\226\\231\\345\\272\\223\\345\\205\\250\\351\\235\\242\\346\\225\\260\\346\\215\\256\\350\\257\\212\\346\\226\\255\\344\\270\\216\\347\\230\\246\\350\\272\\253\\346\\226\\271\\346\\241\\210\\346\\212\\245\\345\\221\\212.html\"",
+    " M tests/eval_golden_set.py",
+    " D tests/fixtures/golden_last_run.json",
+    " M tests/test_admin_dashboard.py",
+    " M tests/test_auth_security_fix.py",
+    " M tests/test_auto_binding.py",
+    " M tests/test_feedback_miner.py",
+    " M tests/test_flywheel_end2end.py",
+    " M tests/test_flywheel_sandbox.py",
+    " M tests/test_llm_integration.py",
+    " M tests/test_phase0_phase1.py",
+    " M tests/test_rule_deadlock_fix.py",
+    " M tests/test_v0_0_8_llm_rules.py",
+    " M web/admin.html",
+    " M web/app.js",
+    " M web/index.html",
+    " M web/login.html",
+    "?? --out",
+    "?? AGENTS.md",
+    "?? app/binding_decisions.py",
+    "?? \"doc/00_\\351\\241\\271\\347\\233\\256\\347\\256\\241\\347\\220\\206/\"",
+    "?? doc/README.md",
+    "?? doc/V0.1.4/evidence/",
+    "?? doc/V0.1.5/",
+    "?? doc/V0.1.6/",
+    "?? doc/V0.1.7/",
+    "?? doc/V0.1.8/",
+    "?? doc/V0.1.9/",
+    "?? doc/V0.2.0/",
+    "?? doc/archive/",
+    "?? doc/audits/",
+    "?? \"doc/\\345\\205\\266\\344\\273\\226/README.md\"",
+    "?? \"doc/\\351\\241\\271\\347\\233\\256\\345\\205\\250\\351\\235\\242\\345\\256\\241\\346\\240\\270_2026-11-12.md\"",
+    "?? pytest.ini",
+    "?? requirements-test.txt",
+    "?? scripts/_deploy_env.py",
+    "?? scripts/check_cloud_status.py",
+    "?? scripts/cloud_users_snapshot.json",
+    "?? scripts/deploy_cloud.py",
+    "?? scripts/deploy_to_cloud_safe.py",
+    "?? scripts/probe_servers.py",
+    "?? tests/README.md",
+    "?? tests/conftest.py",
+    "?? tests/fixtures/gen_standard_template.py",
+    "?? tests/fixtures/sandbox_materials_v1.json",
+    "?? tests/test_binding_decisions.py",
+    "?? tests/test_m0_guardrail_regression.py",
+    "?? tests/test_m0_isolation.py",
+    "?? tests/test_m3_hard_constraints.py",
+    "?? tests/test_m3_hard_constraints_http.py",
+    "?? tests/test_m4_auth_lifecycle.py",
+    "?? tests/test_m4_permissions_and_tasks.py",
+    "?? tests/test_query_contract.py",
+    "?? tests/verify_isolation.py"
+  ],
+  "business_snapshot_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+}

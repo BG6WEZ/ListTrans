@@ -1,0 +1,1110 @@
+{
+  "count": 75,
+  "entries": [
+    {
+      "category": "UPVC球阀",
+      "expected_domain": "medical_gas",
+      "expected_fields": {
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0003",
+      "must_not_fields": [
+        "工作内容"
+      ],
+      "name": "UPVC球阀",
+      "notes": "DN20 球阀；施工噪声应拦截（注：受 alias_dict 脏数据 'UPVC球阀→WDZC-BVR 6' 污染，见评测发现）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：UPVC球阀\n2.材质:塑料\n3.规格：DN20\n4.连接形式：胶水粘接\n5.工作内容：切管、清理、阀门安装"
+    },
+    {
+      "category": "排水管",
+      "expected_domain": "pipe_plastic",
+      "expected_fields": {
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0004",
+      "must_not_fields": [
+        "dn_val",
+        "管径",
+        "口径"
+      ],
+      "name": "UPVC管",
+      "notes": "De32 归外径族，严禁暗转 DN；UPVC 管真实业务域为 pipe_plastic（A-M1-03 修正，旧版误写 damper 迎合错误现状）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称:UPVC管\n2.介质：其他空调（风管机、分体式空调器）冷凝水管\n3.规格:De32\n4.连接形式:粘接\n5.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、灌水试验\n6.管件为甲供材"
+    },
+    {
+      "category": "不锈钢总空球阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "材质": "不锈钢316L"
+      },
+      "id": "GT-0008",
+      "must_not_fields": [
+        "压力",
+        "型号"
+      ],
+      "name": "不锈钢总空球阀",
+      "notes": "SS316L 归一为不锈钢316L；压力/型号 为 SS316L 误抽字段（A-M1-03 纳入 field_fp）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:不锈钢总控球阀\n2.规格、压力等级:SS316L材质，接口形式：1/2\"卡套，适用高纯气体BA级\n3.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "不锈钢球阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0012",
+      "must_not_fields": [],
+      "name": "不锈钢球阀",
+      "notes": "DN15 不锈钢球阀",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：不锈钢球阀\n2.材质：不锈钢\n3.规格：DN15\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "医用脱脂无缝不锈钢管、管件（三通、弯头、大小头）",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0054",
+      "must_not_fields": [],
+      "name": "医用脱脂无缝不锈钢管",
+      "notes": "DN20*2.0 管径+壁厚",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：医用脱脂无缝不锈钢管\n2.规格：DN20*2.0\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材"
+    },
+    {
+      "category": "一体式无油涡旋空气压缩机（内置冷冻式干燥机、储气罐）",
+      "expected_domain": "medical_gas",
+      "expected_fields": {
+        "介质": {
+          "any": true
+        }
+      },
+      "id": "GT-0005",
+      "must_not_fields": [
+        "工作内容"
+      ],
+      "name": "一体式无油涡旋空气压缩机（内置冷冻式干燥机、储气罐）",
+      "notes": "不等式样本（路由 medical_gas 为既有行为，功率/排气量非该域 must 字段）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：一体式无油涡旋空气压缩机（内置冷冻式干燥机、储气罐）\n2.规格：排气量:>0.8m3/min；排气压力:0.8MPa；功率:≥7 5KW。\n3.工作内容：设备安装、检查接线、调试、试运转"
+    },
+    {
+      "category": "不锈钢球阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0013",
+      "must_not_fields": [],
+      "name": "不锈钢球阀",
+      "notes": "DN 球阀",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：不锈钢球阀\n2.材质：不锈钢\n3.规格：DN20\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "医用不锈钢球阀/铜球阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0014",
+      "must_not_fields": [],
+      "name": "不锈钢球阀",
+      "notes": "DN 球阀",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:不锈钢球阀\n2.规格、压力等级:DN20\n2.材质：铜质\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "医用铜质维修阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0015",
+      "must_not_fields": [],
+      "name": "不锈钢维修阀",
+      "notes": "DN 维修阀",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:不锈钢维修阀\n2.规格、压力等级:DN20\n4.连接形式：焊接\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "医用脱脂无缝不锈钢管、管件（三通、弯头、大小头）",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0055",
+      "must_not_fields": [],
+      "name": "医用脱脂无缝不锈钢管",
+      "notes": "DN 不锈钢管+壁厚",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：医用脱脂无缝不锈钢管\n2.规格：DN25*2.0\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材"
+    },
+    {
+      "category": "医用脱脂无缝不锈钢管、管件（三通、弯头、大小头）",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0056",
+      "must_not_fields": [],
+      "name": "医用脱脂无缝不锈钢管",
+      "notes": "DN 不锈钢管+壁厚",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：医用脱脂无缝不锈钢管\n2.规格：DN65*3.0\n3.焊接方法：氩弧焊连接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材"
+    },
+    {
+      "category": "医用脱脂无缝紫铜管",
+      "expected_domain": "pipe_copper",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0057",
+      "must_not_fields": [],
+      "name": "医用脱脂无缝紫铜管",
+      "notes": "紫铜管 外径*壁厚（非 DN）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：医用脱脂无缝紫铜管\n2.规格：DN10（φ12*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材"
+    },
+    {
+      "category": "医用脱脂无缝紫铜管",
+      "expected_domain": "pipe_copper",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0058",
+      "must_not_fields": [],
+      "name": "医用脱脂无缝紫铜管",
+      "notes": "紫铜管 外径*壁厚（非 DN）",
+      "precise": true,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：医用脱脂无缝紫铜管\n2.规格：DN15（φ15*1.2）\n3.焊接方法：硬钎焊焊接\n4.工作内容：调直、切管、焊接、管道及管件安装、气压试验、泄露性试验、空气吹扫、脱脂、喷涂标识\n5.管件为甲供材"
+    },
+    {
+      "category": "IP网络医护主机",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0001",
+      "must_not_fields": [],
+      "name": "IP网络医护主机",
+      "notes": "场景覆盖样本：施工噪声/不等式（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.材质：IP网络医护主机\n2.规格：(1)安装在护士站桌面,与系统采用IP方式相连;\n(2)采用彩色液晶屏(≥7寸),中文菜单触摸式操作;\n(3)显示窗口在多个病人呼叫时有排队,以方便护士优先选择接听,多个终端呼叫可全部储存;\n(4)通话可选免提或手柄操作方式;\n(5)同一个病区可根据需要配置多台医护工作站,任一医护工作站均可接听病人呼叫,根据工作环境可关闭或打开语音振铃提示音,振铃提示音可选语音报号、和弦音乐、单音等;\n(6)程序在线升级,减少设备拆装。\n3.工作内容：接线、本体安装、调试"
+    },
+    {
+      "category": "UPS不间断电源",
+      "expected_domain": "ups",
+      "expected_fields": {},
+      "id": "GT-0002",
+      "must_not_fields": [],
+      "name": "UPS电源",
+      "notes": "场景覆盖样本：施工噪声（A-M1-03 补标注 expected_domain=ups）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：UPS电源\n2.规格、型号：系统配套提供TG-BOX 850\n3.工作内容：搬运、固定、接线\n4.厂家包安装"
+    },
+    {
+      "category": "一氧化碳浓度仪",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0006",
+      "must_not_fields": [],
+      "name": "一氧化碳浓度仪",
+      "notes": "场景覆盖样本：施工噪声（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：一氧化碳浓度仪\n2.工作内容：设备安装、检查接线、调试、试运转"
+    },
+    {
+      "category": "三气报警面板（含传感器）",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0007",
+      "must_not_fields": [],
+      "name": "三气报警面板",
+      "notes": "场景覆盖样本：施工噪声（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：三气报警面板（含传感器）\n2.规格：各种规格型号\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查"
+    },
+    {
+      "category": "压力报警传感器",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0019",
+      "must_not_fields": [],
+      "name": "传感器",
+      "notes": "场景覆盖样本：不等式/传感器（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称:压力报警传感器\n2.规格:SS316L材质，量程：0-20MPa，输出/电源：4-20mA\n3.其他说明:详见相关图纸、招标文件及规范要求"
+    },
+    {
+      "category": "不锈钢隔膜阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0021",
+      "must_not_fields": [],
+      "name": "低压螺纹阀门",
+      "notes": "场景覆盖样本：牌号/阀门（A-M1-03 补标注 expected_domain=valve_water）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:不锈钢隔膜阀\n2.规格、压力等级:SS316L材质，适用99.999%高纯气体，接口形式：1/4\"卡套\n3.钢瓶组\n4.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "单向阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0022",
+      "must_not_fields": [],
+      "name": "低压螺纹阀门",
+      "notes": "场景覆盖样本：牌号/阀门（A-M1-03 补标注 expected_domain=valve_water）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:单向阀\n2.规格、压力等级:SS316L材质，接口形式：1/4\"卡套，适用高纯气体BA级\n3.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "终端控制球阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0023",
+      "must_not_fields": [],
+      "name": "低压螺纹阀门",
+      "notes": "场景覆盖样本：牌号/阀门（A-M1-03 补标注 expected_domain=valve_water）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:终端控制球阀\n2.规格、压力等级:SS316L材质，适用99.999%高纯气体，接口形式：1/4\"卡套，适用压力：1000PSI\n3.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "终端控制针阀",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0024",
+      "must_not_fields": [],
+      "name": "低压螺纹阀门",
+      "notes": "场景覆盖样本：牌号/阀门（A-M1-03 补标注 expected_domain=valve_water）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.类型:终端控制针阀\n2.规格、压力等级:SS316L材质，适用99.999%高纯气体，接口形式：1/4\"卡套，适用压力：1000PSI\n3.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "终端减压器",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0029",
+      "must_not_fields": [],
+      "name": "减压器",
+      "notes": "场景覆盖样本：不等式/减压器（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称:终端减压器\n2.可调压力：0-250PSI，接口形式：1/4''NPT，阀芯：哈氏合金，泄漏率：2*10-8m.bar\n3.含不锈钢固定面板，SS304材质，固定二级减压器，轴向面安装\n4.调节管道输出压力，稳定精确，开关，调压，显示一体式\n5.工作内容：阀门壳体压力试验和密封试验、管子切口、管口组对、焊接、阀门安装"
+    },
+    {
+      "category": "医用初级过滤器",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0033",
+      "must_not_fields": [],
+      "name": "医用初级过滤器",
+      "notes": "场景覆盖样本：不等式/过滤器（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：医用初级过滤器\n2.规格：处理量:≥0.8m3/min；过滤精度:1U；含油量:0.5ppm；自带电动排水阀；\n3.工作内容：本体安装、找平找正、与管道连接、压力试验"
+    },
+    {
+      "category": "医用压缩空气二级减压箱",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0037",
+      "must_not_fields": [],
+      "name": "医用压缩空气二级减压箱",
+      "notes": "场景覆盖样本：不等式/减压箱（A-M1-03 补标注 expected_domain=medical_gas）",
+      "precise": false,
+      "professional": "医用气体",
+      "source": "golden_train",
+      "specification": "1.名称：医用压缩空气二级减压箱\n2.规格：≤20m3/h\n3.工作内容：支架制作安装、本体安装、与管道连接、气体检查"
+    },
+    {
+      "category": "32寸触摸屏",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0148",
+      "must_not_fields": [],
+      "name": "32寸触摸式控制终端",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.材质：32寸触摸式控制终端 \n2.规格：32寸触摸屏\n3.工作内容：接线、本体安装、调试"
+    },
+    {
+      "category": "IP网络医护主机",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0149",
+      "must_not_fields": [],
+      "name": "IP网络医护主机",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.材质：IP网络医护主机\n2.规格：(1)对讲方式：手提/免提双向，标准60位一览表，数码循环显示呼叫房号、床号，LED呼叫显示方式，护理级别：普通/紧急，个性铃声、振铃音量无级可调，可连接多块走廊显示屏；(2)电源：AC220V，信号协议：二芯总线连接，通讯距离可达800米.\n3.工作内容：接线、本体安装、调试"
+    },
+    {
+      "category": "上位机控制电脑",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0150",
+      "must_not_fields": [],
+      "name": "上位机控制电脑",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：上位机控制电脑\n2.工作内容：接线、本体安装、调试"
+    },
+    {
+      "category": "交换机",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0152",
+      "must_not_fields": [],
+      "name": "交换机",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：交换机\n2.规格：8端口；\n3.工作内容：清洁搬运、定位安装机柜、机箱、装配接口板、接口检查、通电检查、清理现场、硬件系统调试、综合调测、接线、理线、打码"
+    },
+    {
+      "category": "人脸识别一体机",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0153",
+      "must_not_fields": [],
+      "name": "人脸识别一体机",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：人脸识别一体机\n2.工作内容：划线、定位、接线、本体安装、调试"
+    },
+    {
+      "category": "人脸门禁一体机电源",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0154",
+      "must_not_fields": [],
+      "name": "人脸门禁一体机电源",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：人脸门禁一体机电源\n2.工作内容：划线、定位、接线、本体安装、调试"
+    },
+    {
+      "category": "光端盒",
+      "expected_domain": "cable_power",
+      "expected_fields": {},
+      "id": "GT-0155",
+      "must_not_fields": [],
+      "name": "光端盒",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=cable_power）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：光端盒\n2.工作内容：安装盒体/面板、接线、连接处处理"
+    },
+    {
+      "category": "8芯单模光纤",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0156",
+      "must_not_fields": [],
+      "name": "光纤",
+      "notes": "场景覆盖样本：弱电（A-M1-03 补标注 expected_domain=weak_current）",
+      "precise": false,
+      "professional": "弱电",
+      "source": "golden_train",
+      "specification": "1.名称：光纤\n2.规格：8芯单模光纤\n3.工作内容：检查光缆、清理管道、制作穿线端头(钩)、穿放引线、穿放光缆、出口衬垫、封堵出口、线路通路测试"
+    },
+    {
+      "category": "LED平板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0291",
+      "must_not_fields": [],
+      "name": "LED平板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED平板灯\n2.规格：300*600、18W\n3.安装形式：详见图纸设计\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头、打胶收口\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "医用平板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0292",
+      "must_not_fields": [],
+      "name": "LED平板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED平板灯\n2.规格：600*600 20-25w\n3.安装形式：集成吊顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "医用平板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0293",
+      "must_not_fields": [],
+      "name": "LED平板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED平板灯\n2.规格：600*600 40-50w\n3.安装形式：集成吊顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "LED平板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0294",
+      "must_not_fields": [],
+      "name": "LED平板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED平板灯\n2.规格：600*600、36W\n3.安装形式：详见图纸设计\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头、打胶收口\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "LED扣板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0295",
+      "must_not_fields": [],
+      "name": "LED扣板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED扣板灯\n2.规格：600*600、36W\n3.安装形式：详见图纸设计\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头、打胶收口\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "LED防爆扣板灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0296",
+      "must_not_fields": [],
+      "name": "LED防爆扣板灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED防爆扣板灯\n2.规格：600*600、36W\n3.安装形式：详见图纸设计\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头、打胶收口\n5.不论灯具是否带应急电源，单价不做任何调整"
+    },
+    {
+      "category": "LED防爆灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0297",
+      "must_not_fields": [],
+      "name": "LED防爆灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：LED防爆灯\n2.规格：25-40w\n3.安装形式：嵌入式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头"
+    },
+    {
+      "category": "一体化LED筒灯",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0298",
+      "must_not_fields": [],
+      "name": "一体化LED筒灯",
+      "notes": "场景覆盖样本：强电（A-M1-03 补标注 expected_domain=lighting）",
+      "precise": false,
+      "professional": "强电",
+      "source": "golden_train",
+      "specification": "1.名称：一体化LED筒灯\n2.规格：5寸15W\n3.安装形式：嵌入式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0579",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:1000*300,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0580",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:160*120,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0581",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:200*200,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0582",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:320*200,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0583",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:320*320,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0584",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:320*500,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0585",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:500*320,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "70℃常开防火阀",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0586",
+      "must_not_fields": [],
+      "name": "70℃常开防火阀",
+      "notes": "场景覆盖样本：暖通（A-M1-03 补标注 expected_domain=damper）",
+      "precise": false,
+      "professional": "暖通",
+      "source": "golden_train",
+      "specification": "1.名称:70℃常开防火阀\n2.规格:500*400,常开，70℃熔断关闭，带3C认证\n3.材质：镀锌钢板\n4.工作内容：阀门安装、保温棉粘贴、单独支架制作安装、消防联动接线"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0960",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYY-2*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0961",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYYP-2*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0962",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYYP-2*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0963",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYYP-4*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0964",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYYP-7*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "控制线",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0965",
+      "must_not_fields": [],
+      "name": "控制线",
+      "notes": "场景覆盖样本：自控（A-M1-03 补标注 expected_domain=cable_control）",
+      "precise": false,
+      "professional": "自控",
+      "source": "golden_train",
+      "specification": "1.名称：控制线\n2.规格：WDZ-RYYSP-4*0.75mm²\n3.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路通路测试"
+    },
+    {
+      "category": "0.7mm厚聚乙烯丙纶卷材",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0981",
+      "must_not_fields": [],
+      "name": "0.7mm厚聚乙烯丙纶卷材",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：聚乙烯丙纶卷材\n2.涂膜厚度：0.7mm\n3.反边高度：四周沿墙上翻300mm高\n4.素面平整、补缺、四周抹小八字角、两道成活\n5.工作内容：清理基层,刷基底处理剂,铺贴卷材、防水试验、细沙保护"
+    },
+    {
+      "category": "2个单开传递门",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-0982",
+      "must_not_fields": [],
+      "name": "2个单开传递门",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=purification）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：2个单开传递门\n2.规格：1800*600*1400mm\n3.工作内容：支架制作安装、本体安装、接线、加固收边处理、表面清理"
+    },
+    {
+      "category": "ABS防撞带",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0983",
+      "must_not_fields": [],
+      "name": "ABS防撞带",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：ABS防撞带\n2.规格：150mm高ABS防撞带系墙螺栓/膨胀螺栓固定铝型材承座底部距地750每条不少于两个;\n3.基层：9mm木芯板打底\n3.工作内容：钉基层、定位、划线、下料、刷胶、安装、密封胶收口"
+    },
+    {
+      "category": "检修口",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0985",
+      "must_not_fields": [],
+      "name": "VHD检修口",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：VHD检修口\n2.规格：1500*400mm,1.5厚热镀锌钢板检修口\n3.工作内容：开孔、安装、安装、清理、加固\n4.此为成品安装价格"
+    },
+    {
+      "category": "不锈钢板",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0986",
+      "must_not_fields": [],
+      "name": "不锈钢包边（洁净窗）",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：不锈钢包边（洁净窗）\n2.基层：15mm厚木芯板；刷防火涂料两遍\n3.面层：1.2mm不锈钢板\n4.工作内容：下料、裁板、钉贴基层板、粘贴面层、净面"
+    },
+    {
+      "category": "不锈钢板",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0987",
+      "must_not_fields": [],
+      "name": "不锈钢包边（物流井道）",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：不锈钢包边（物流井道）\n2.基层：12mm厚木芯板；刷防火涂料两遍\n3.面层：1.2mm不锈钢板\n4.工作内容：下料、裁板、钉贴基层板、粘贴面层、净面"
+    },
+    {
+      "category": "不锈钢板",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0988",
+      "must_not_fields": [],
+      "name": "不锈钢包边（电梯）",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：不锈钢包边（电梯）\n2.基层：15mm厚木芯板；刷防火涂料两遍\n3.面层：1.2mm不锈钢板\n4.工作内容：下料、裁板、钉贴基层板、粘贴面层、净面"
+    },
+    {
+      "category": "不锈钢板",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0989",
+      "must_not_fields": [],
+      "name": "不锈钢包边（防火门）",
+      "notes": "场景覆盖样本：装饰（A-M1-03 补标注 expected_domain=decoration）",
+      "precise": false,
+      "professional": "装饰",
+      "source": "golden_dev",
+      "specification": "1.名称：不锈钢包边（防火门）\n2.基层：15mm厚木芯板；刷防火涂料两遍\n3.面层：1.2mm不锈钢板\n4.工作内容：下料、裁板、钉贴基层板、粘贴面层、净面"
+    },
+    {
+      "category": "",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-1214",
+      "must_not_fields": [],
+      "name": "单臂机械麻醉塔",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=purification）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称：单臂机械麻醉塔\n2.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-1215",
+      "must_not_fields": [],
+      "name": "洁净工作台",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=purification）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称：洁净工作台\n2.规格：型号：CJV1000-Y（有证）、外形尺寸：（1000*740*1620）、垂直流、洁净等级：ISO5级（100级）\n3.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "conduit",
+      "expected_fields": {},
+      "id": "GT-1216",
+      "must_not_fields": [],
+      "name": "生物安全柜",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=conduit）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称：生物安全柜\n2.规格：型号：BSC1000-Ⅱ-A2 外形尺寸：（1100*830*2200）、30%气体外排、70%气体循环，洁净等级：ISO4级（10级）\n3.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "conduit",
+      "expected_fields": {},
+      "id": "GT-1217",
+      "must_not_fields": [],
+      "name": "生物安全柜",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=conduit）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称：生物安全柜\n2.规格：型号：BSC1000-Ⅱ-B2 外形尺寸：（1100*830*2200）、100%气体外排，洁净等级：ISO4级（10级）\n3.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1218",
+      "must_not_fields": [],
+      "name": "钢木实验中央台",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=generic）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称:钢木实验中央台\n2.规格:尺寸:L*1500*850 台面:12.7mm爱克理化板\n3.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1219",
+      "must_not_fields": [],
+      "name": "钢木实验转角台",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=generic）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称:钢木实验转角台\n2.规格:尺寸:1000*1000*850 台面:12.7mm爱克理化板\n3.厂家包安装"
+    },
+    {
+      "category": "",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1220",
+      "must_not_fields": [],
+      "name": "钢木实验边台",
+      "notes": "场景覆盖样本：设备（A-M1-03 补标注 expected_domain=generic）",
+      "precise": false,
+      "professional": "设备",
+      "source": "golden_dev",
+      "specification": "1.名称:钢木实验边台\n2.规格:尺寸:L*600*850 台面:12.7mm爱克理化板\n3.厂家包安装"
+    },
+    {
+      "category": "组合式空调机组",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "tag_id": "AHU-J-01",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-001",
+      "must_not_fields": [],
+      "name": "组合式空调机组",
+      "notes": "AHU-J-01 设备位号应归 tag_id 而非 model（位号分离）",
+      "professional": "暖通",
+      "source": "synthetic",
+      "specification": "1.名称：组合式空调机组 AHU-J-01\n2.规格：风量2000m3/h 余压400Pa"
+    },
+    {
+      "category": "新风预处理机组",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "tag_id": "PAU-D301",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-002",
+      "must_not_fields": [],
+      "name": "新风预处理机组",
+      "notes": "PAU-D301 设备位号应归 tag_id 而非 model（路由 ahu 为既有行为）",
+      "professional": "暖通",
+      "source": "synthetic",
+      "specification": "1.名称：新风预处理机组 PAU-D301\n2.规格：风量3000m3/h"
+    },
+    {
+      "category": "动力配电箱",
+      "expected_domain": "switchgear",
+      "expected_fields": {
+        "box_type": {
+          "any": true
+        },
+        "tag_id": {
+          "any": true
+        }
+      },
+      "id": "SYN-TAG-003",
+      "must_not_fields": [],
+      "name": "动力配电箱",
+      "notes": "AP-1 配电箱编号应归 box_type 而非 model（路由 switchgear 为既有行为）",
+      "professional": "强电",
+      "source": "synthetic",
+      "specification": "1.名称：动力配电箱 AP-1\n2.规格：6回路"
+    },
+    {
+      "category": "照明配电箱",
+      "expected_domain": "switchgear",
+      "expected_fields": {
+        "box_type": {
+          "any": true
+        },
+        "tag_id": {
+          "any": true
+        }
+      },
+      "id": "SYN-TAG-004",
+      "must_not_fields": [],
+      "name": "照明配电箱",
+      "notes": "AL-2 照明箱编号应归 box_type 而非 model（路由 switchgear 为既有行为）",
+      "professional": "强电",
+      "source": "synthetic",
+      "specification": "1.名称：照明配电箱 AL-2\n2.规格：8回路"
+    },
+    {
+      "category": "回风循环空气处理机组",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "型号": "RAU-Q-D301",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-005",
+      "must_not_fields": [],
+      "name": "回风循环空气处理机组",
+      "notes": "RAU-Q-D301 为真实产品型号（非位号），应保留为 model（attrs 键为 型号）",
+      "professional": "暖通",
+      "source": "synthetic",
+      "specification": "1.名称：回风循环空气处理机组 RAU-Q-D301\n2.规格：风量4000m3/h"
+    }
+  ],
+  "precise_count": 13,
+  "schema": "structured_extraction_eval_v1",
+  "source_splits": [
+    "train",
+    "dev"
+  ],
+  "synthetic_count": 5,
+  "test_set_excluded": true,
+  "version": "v1"
+}

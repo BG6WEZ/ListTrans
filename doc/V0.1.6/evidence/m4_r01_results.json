@@ -1,0 +1,83 @@
+{
+  "baseline_head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "fixed": {
+    "passed": 373,
+    "pytest_elapsed_sec": 668.08,
+    "runner_elapsed_sec": 669.89,
+    "actual_isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_fixed_974tbarp",
+    "run_metadata": "m4_r01_full_fixed_native.run.json",
+    "log_sha256": "43659264a9c1c15e203c6ce5537e0659b4eac3e9bfc81f0374878525678aa91f"
+  },
+  "standard": {
+    "passed": 373,
+    "pytest_elapsed_sec": 709.48,
+    "runner_elapsed_sec": 711.36,
+    "actual_isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_test_479zq8fx",
+    "run_metadata": "m4_r01_full_standard.run.json",
+    "log_sha256": "279e8f046e192d576b4e6fb8b12d8598cf7a3356aed1d87cdea23956064b3d01"
+  },
+  "cold": {
+    "passed": 4,
+    "pytest_elapsed_sec": 43.31,
+    "runner_elapsed_sec": 45.0,
+    "actual_isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_cold_brjy4zz0",
+    "run_metadata": "m4_r01_cold_llm_rules.run.json",
+    "log_sha256": "0651c64bfdec23c6dfc322652eb97909086b6140dd6c7c9597745d791c4585f3"
+  },
+  "special_passed": 12,
+  "baseline_groups_zero_diff": 6,
+  "benefits": {
+    "empty": "invalid",
+    "harmful": "harmful",
+    "beneficial": "harmful",
+    "beneficial_constrained": "improved",
+    "neutral": "neutral"
+  },
+  "image_id": "sha256:9517cc2a941cf9eebb662f2c833cdf88046709131a98380410b3b8b7a877e1b3",
+  "layers": 12,
+  "application_files": 57,
+  "containers": {
+    "keyword": {
+      "calls": 51,
+      "elapsed_sec": 45.81,
+      "xlsx_bytes": 5534,
+      "vector_enabled": false
+    },
+    "vector": {
+      "calls": 51,
+      "elapsed_sec": 39.12,
+      "xlsx_bytes": 5535,
+      "vector_enabled": true
+    }
+  },
+  "r_m3_01": {
+    "GT-0674": {
+      "T": 98.6,
+      "W": 98.5,
+      "margin": 0.09999999999999432,
+      "export_status": 422
+    },
+    "GT-0677": {
+      "T": 98.6,
+      "W": 98.5,
+      "margin": 0.09999999999999432,
+      "export_status": 422
+    },
+    "GT-0678": {
+      "T": 98.6,
+      "W": 98.5,
+      "margin": 0.09999999999999432,
+      "export_status": 422
+    }
+  },
+  "isolation_before_after": "PASS",
+  "actual_paid_llm_calls": 0,
+  "production_release_authorized": false,
+  "code_hashes": {
+    "app/matcher.py": "3571ff2b1805bb1ba30e347a99611ddb443f193fb0750abe6483c616ac103072",
+    "app/sandbox_evaluator.py": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+    "app/flywheel_sandbox.py": "131e91e865dcef985c134311004c0238a2ab819683a62f9e3ac75daff1c70ce6",
+    "app/server.py": "dfdbf2db46aec8c52a43d90ac2b268ea5a76ad96fb8b3b4654a29b9e3daa5bf4",
+    "tests/test_v0_0_8_llm_rules.py": "3e0843db9e9de0efb40c433068395a80c7265c44a5ff6b99a21f57691d4bbe1e"
+  }
+}

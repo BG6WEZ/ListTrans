@@ -1,0 +1,10 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "tests/verify_isolation.py",
+    "--out",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m5_r01_audit_verify_before.json"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 11.593
+}

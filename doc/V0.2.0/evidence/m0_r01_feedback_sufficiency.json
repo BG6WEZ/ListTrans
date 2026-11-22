@@ -1,0 +1,19 @@
+{
+  "snapshot_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "flywheel_counts": {
+    "flywheel_feedback_samples": 0,
+    "flywheel_records": 0,
+    "flywheel_documents": 0,
+    "flywheel_source_rows": 0,
+    "flywheel_rule_suggestions": 0,
+    "flywheel_pattern_aggregates": 0
+  },
+  "trusted_current_events": 0,
+  "review_eligible": 0,
+  "split_status": "insufficient_reviewed_feedback",
+  "split_counts": null,
+  "online_automatic_training": false,
+  "offline_benchmark_is_distinct": true,
+  "finding_counts": {},
+  "trace": []
+}

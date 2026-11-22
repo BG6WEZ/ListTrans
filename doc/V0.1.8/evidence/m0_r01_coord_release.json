@@ -1,0 +1,348 @@
+{
+  "date": "2026-11-19",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "package": "V018-M0/R01",
+  "review_action": "release_package_dispatch_V018-M1_R01",
+  "delivery_sha256": {
+    "app/structured_recall.py": "627a77a3a84c8e5d5a8630c4784839d55fa8d97539293d264c8e750da510dd04",
+    "app/matcher.py": "d8f29761c992b3ee7d24c0fb8da8c921e353464db5cda8a3b579eab2e24a0225",
+    "app/domain_router.py": "487dec64afec08eea9e949f4cc2dc72158205f0c634534ed521abaa9ed6e4848",
+    "app/domain_extractors.py": "ef9a40f2b93d665a1ee4bf71c437480cae7c72a56404cfffd24e18353ba68ad9",
+    "app/preprocessor.py": "0a1b005947e90025665bde4234a0a0a2b7387d7be717d7652684275c04f2f7c2",
+    "app/query_preprocessor.py": "cf100e82527500bae9ba7f3777886f9b4810f132be9d95278bf071987dc4f2e5",
+    "tests/test_v018_m0_structured_recall.py": "d17ddd5b3aaf3cdbb7f6b001d61f5e1c5f06b8be9cd1814c0e4cc6cb630d19b9",
+    "doc/V0.1.8/evidence/m0_r01_eval.py": "c277e8413f95c69e9efce77db95eee332320066578b17f4bd60b1b69e554746a",
+    "doc/V0.1.8/evidence/m0_r01_comparison.json": "dd7dfc6a9fbda464c8f9f31c8b5356683bf676557f087ee21a86341c2c98115d",
+    "doc/V0.1.8/evidence/m0_r01_structured_eval.json": "a0127fe9b533667198a08a70c586037437415e34c5a92d529ff95be5322620e0",
+    "doc/V0.1.8/evidence/m0_r01_gate_exact.json": "37ad3c9e5d2b393b0164eb4829187ca0100210d1a657887ce6bf89d48dac0ca5"
+  },
+  "opening_fingerprint_sha256": "ebeb2c4060fd79a41ba6c0cd8efe48675add031878e732efe1c885006efca06a",
+  "verified_unmodified_source_and_test_count": 72,
+  "verified_frozen_count": 51,
+  "verified_dependencies_and_assets_count": 62,
+  "changed_opening_source_files": [
+    "app/domain_extractors.py",
+    "app/domain_router.py",
+    "app/matcher.py",
+    "app/preprocessor.py",
+    "app/query_preprocessor.py"
+  ],
+  "business_snapshot_slots": 35,
+  "business_snapshot_matches_m0_after_report": true,
+  "business_snapshot_equal_vs_m0_before_excluding_sqlite_sidecars": 33,
+  "sqlite_sidecars_created_between_isolation_runs": {
+    "app/materials.db-shm": {
+      "size_bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+    },
+    "app/materials.db-wal": {
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "coordinator_pytest": {
+    "passed": 109,
+    "exit": 0,
+    "seconds": 14.91,
+    "command": "python -B -X utf8 -m pytest -p no:cacheprovider --basetemp <native-temp>/pytest -q tests/test_v018_m0_structured_recall.py tests/test_v017_m1_typed_fields.py tests/test_v017_m2_catalog_revision.py tests/test_m3_hard_constraints.py"
+  },
+  "audit_report": {
+    "sha256": "7a6f8449bfac6a002b60ee96de3b5d1883e0388796d62609a140e0525ff589d3",
+    "targeted_passed": 109,
+    "full_passed": 421,
+    "full_exit": 0,
+    "standalone_log_accessible_to_coordinator": false
+  },
+  "developer_full_suite": {
+    "passed": 421,
+    "log_sha256": "49dabcac02fd76b3ab0dfd992c6a37030bd02b1a88b407b74aae854f8e2dd95e"
+  },
+  "developer_isolation_reports": {
+    "m0_r01_isolation_before.json": "7ded856f147b205ad7908c5b0e4ee04d349455dd552f752f439d124feed41128",
+    "m0_r01_isolation_after.json": "0185d5b598b366cc5e2fed542df30dd47c9523f675bd985ccc8d924065bedf9c"
+  },
+  "rule_score_diffs": {
+    "m3_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m2_r01": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m0_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m3_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m4_r03": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    },
+    "m5_r04": {
+      "harmful": 0,
+      "beneficial": 0,
+      "neutral": 0
+    }
+  },
+  "protected_decisions": {
+    "GT-0674": "recommended",
+    "GT-0677": "recommended",
+    "GT-0678": "recommended"
+  },
+  "structured_routing": {
+    "correct": 73,
+    "n": 75,
+    "fp": 0,
+    "expected_actual_for_unresolved_labels": {
+      "GT-0003": [
+        "medical_gas",
+        "valve_water"
+      ],
+      "GT-0155": [
+        "cable_power",
+        "weak_current"
+      ]
+    }
+  },
+  "train_dev_comparison": {
+    "keyword": {
+      "train_dev": {
+        "recall_at_100": {
+          "off": {
+            "d": 651,
+            "n": 367,
+            "pct": 56.3748
+          },
+          "on": {
+            "d": 651,
+            "n": 439,
+            "pct": 67.4347
+          },
+          "delta_n": 72,
+          "delta_pct": 11.0599
+        },
+        "recall_at_200": {
+          "off": {
+            "d": 651,
+            "n": 392,
+            "pct": 60.2151
+          },
+          "on": {
+            "d": 651,
+            "n": 458,
+            "pct": 70.3533
+          },
+          "delta_n": 66,
+          "delta_pct": 10.1382
+        },
+        "hit_at_1": {
+          "off": {
+            "d": 651,
+            "n": 173,
+            "pct": 26.5745
+          },
+          "on": {
+            "d": 651,
+            "n": 165,
+            "pct": 25.3456
+          },
+          "delta_n": -8
+        },
+        "hit_at_3": {
+          "off": {
+            "d": 651,
+            "n": 247,
+            "pct": 37.9416
+          },
+          "on": {
+            "d": 651,
+            "n": 248,
+            "pct": 38.0952
+          },
+          "delta_n": 1
+        },
+        "mrr_at_10": {
+          "off": 0.336657,
+          "on": 0.333884
+        },
+        "mrr_full": {
+          "off": 0.342944,
+          "on": 0.34302
+        }
+      },
+      "dev_recall_delta": [
+        8,
+        8
+      ],
+      "train_dev_negative_explicit_rejection": {
+        "off": {
+          "d": 115,
+          "n": 26,
+          "pct": 22.6087
+        },
+        "on": {
+          "d": 115,
+          "n": 23,
+          "pct": 20.0
+        }
+      },
+      "signed_budget_check_train_dev": true,
+      "off_vs_v017_same_split": {
+        "train": {
+          "v017_vs_m0_off": {
+            "hit@1": [
+              139,
+              143
+            ],
+            "hit@3": [
+              194,
+              198
+            ]
+          },
+          "n": 529
+        },
+        "dev": {
+          "v017_vs_m0_off": {
+            "hit@1": [
+              30,
+              30
+            ],
+            "hit@3": [
+              45,
+              49
+            ]
+          },
+          "n": 122
+        }
+      }
+    },
+    "vector": {
+      "train_dev": {
+        "recall_at_100": {
+          "off": {
+            "d": 651,
+            "n": 526,
+            "pct": 80.7988
+          },
+          "on": {
+            "d": 651,
+            "n": 572,
+            "pct": 87.8648
+          },
+          "delta_n": 46,
+          "delta_pct": 7.066
+        },
+        "recall_at_200": {
+          "off": {
+            "d": 651,
+            "n": 573,
+            "pct": 88.0184
+          },
+          "on": {
+            "d": 651,
+            "n": 599,
+            "pct": 92.0123
+          },
+          "delta_n": 26,
+          "delta_pct": 3.9939
+        },
+        "hit_at_1": {
+          "off": {
+            "d": 651,
+            "n": 161,
+            "pct": 24.7312
+          },
+          "on": {
+            "d": 651,
+            "n": 154,
+            "pct": 23.6559
+          },
+          "delta_n": -7
+        },
+        "hit_at_3": {
+          "off": {
+            "d": 651,
+            "n": 238,
+            "pct": 36.5591
+          },
+          "on": {
+            "d": 651,
+            "n": 233,
+            "pct": 35.7911
+          },
+          "delta_n": -5
+        },
+        "mrr_at_10": {
+          "off": 0.330838,
+          "on": 0.321094
+        },
+        "mrr_full": {
+          "off": 0.346576,
+          "on": 0.337765
+        }
+      },
+      "dev_recall_delta": [
+        0,
+        0
+      ],
+      "train_dev_negative_explicit_rejection": {
+        "off": {
+          "d": 115,
+          "n": 23,
+          "pct": 20.0
+        },
+        "on": {
+          "d": 115,
+          "n": 24,
+          "pct": 20.8696
+        }
+      },
+      "signed_budget_check_train_dev": true,
+      "off_vs_v017_same_split": {
+        "train": {
+          "v017_vs_m0_off": {
+            "hit@1": [
+              127,
+              129
+            ],
+            "hit@3": [
+              197,
+              190
+            ]
+          },
+          "n": 529
+        },
+        "dev": {
+          "v017_vs_m0_off": {
+            "hit@1": [
+              33,
+              32
+            ],
+            "hit@3": [
+              49,
+              48
+            ]
+          },
+          "n": 122
+        }
+      }
+    }
+  },
+  "raw_evaluation_sha256": {
+    "m0_r01_eval_kw_off.json": "d11141c529dbfa31cc2c8f583835c62fb1cd0b32c5eb9a51eb21bf85159d80f2",
+    "m0_r01_eval_kw_on.json": "f0f9571265f672a1963efdf4a73d6a8456d2a99c9397f9bec51d8004a8c9d6b9",
+    "m0_r01_eval_vec_off.json": "2d116cf5faae50b17553b2189f6511fd95a9be1aaa4e997ee4965d915f418e87",
+    "m0_r01_eval_vec_on.json": "c8736f032b3254d4b73bff7a62ec1238d972fd4698f6f1ab9cbe69be8c4c8716"
+  },
+  "candidate_switch_default": "OFF",
+  "off_reproducibility_scope": "V018-M0 OFF excludes the new recall channels; shared parsing/routing still differs from V017. Same-split candidate Recall@100/200 is equal; ranking metrics differ."
+}

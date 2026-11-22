@@ -1,0 +1,165 @@
+{
+  "source_sha256": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+  "selected_predecessor_functions": [
+    "evaluate_hard_conflicts",
+    "record_decision",
+    "validate_bindings_against_row"
+  ],
+  "old_validation": {
+    "ok": true,
+    "invalid_codes": [],
+    "conflicts": []
+  },
+  "initial_live_unit": "m",
+  "legacy_saved_bindings": [
+    {
+      "brand": "",
+      "category": "暖通",
+      "code": "R03AUD-LEGACY-REPLAY",
+      "name": "镀锌钢管",
+      "qty": 10000,
+      "qty_ratio": 1000,
+      "specification": "DN15",
+      "unit": "km"
+    }
+  ],
+  "current_live_unit": "km",
+  "restore_http": 200,
+  "restore": {
+    "code": 0,
+    "items": [
+      {
+        "original_row_idx": 0,
+        "original_name": "镀锌钢管",
+        "original_spec": "DN15",
+        "original_qty": 10,
+        "original_unit": "km",
+        "original_loss": 0,
+        "original_category": "暖通",
+        "original_brand": "",
+        "professional": "暖通",
+        "original_code": "",
+        "matched_code": "R03AUD-LEGACY-REPLAY",
+        "matched_name": "镀锌钢管",
+        "matched_category": "",
+        "matched_spec": "",
+        "matched_unit": "",
+        "matched_brand": "",
+        "bindings": [
+          {
+            "code": "R03AUD-LEGACY-REPLAY",
+            "name": "镀锌钢管",
+            "specification": "DN15",
+            "unit": "km",
+            "category": "暖通",
+            "brand": "",
+            "qty": 10000,
+            "qty_ratio": 1000
+          }
+        ],
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "已恢复服务端人工确认",
+        "decision_codes": [
+          "R03AUD-LEGACY-REPLAY"
+        ],
+        "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+        "binding_fingerprint": "54fc93e4e753be59c1c7a36a194398f7a5445d9c91773e69daa8537162e6c5c5"
+      }
+    ],
+    "downgraded": 0
+  },
+  "export_http": 200,
+  "xlsx_rows": [
+    [
+      "*序号",
+      "*费用类型",
+      "*清单类型",
+      "*材料类型",
+      "*清单编码",
+      "*清单名称",
+      "*特征/规格型号",
+      "单位",
+      "*工程量",
+      "材料损耗",
+      "品牌",
+      "竞聘系数",
+      "单价(无税)",
+      "备注",
+      "专业",
+      null
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    [
+      1,
+      null,
+      null,
+      null,
+      null,
+      "暖通",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "暖通",
+      null
+    ],
+    [
+      "1.1",
+      "材料费",
+      "手动录入",
+      "暖通",
+      null,
+      "镀锌钢管",
+      "DN15",
+      "km",
+      10,
+      0,
+      null,
+      null,
+      null,
+      "标段一",
+      "暖通",
+      null
+    ],
+    [
+      null,
+      "材料费",
+      "手动录入",
+      "暖通",
+      "R03AUD-LEGACY-REPLAY",
+      "镀锌钢管",
+      "DN15",
+      "km",
+      10000,
+      0,
+      null,
+      null,
+      null,
+      "标段一",
+      "暖通",
+      null
+    ]
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "-m",
+    "pytest",
+    "tests",
+    "-q",
+    "-ra",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_fixed_v8w5979b\\pytest"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "dotenv_disabled": true,
+  "exit_code": 0,
+  "explicit_test_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_fixed_v8w5979b\\session",
+  "llm": false,
+  "native_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_fixed_v8w5979b",
+  "seconds": 589.969,
+  "started_at": "2026-11-18T22:39:11.865028+08:00"
+}

@@ -1,0 +1,865 @@
+{
+  "date": "2026-11-12",
+  "workspace": "C:\\Users\\tlyer\\project\\ListTrans",
+  "operations": [
+    {
+      "action": "move",
+      "source": "doc/stability_fix_archive",
+      "destination": "doc/archive/stability_fix_archive",
+      "reason": "历史专题资料归档；保留同目录相对引用",
+      "files": [
+        {
+          "path": "doc/stability_fix_archive/系统逻辑与稳定性分析报告.md",
+          "bytes": 7646,
+          "sha256": "3556B932A1D9BDAB609E849F43B7786E2AEBD522362D4EA3885554FDDB446F9F"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统逻辑与稳定性分析报告2.md",
+          "bytes": 6418,
+          "sha256": "BD4DC6E39636AC425004B101F2CDDB5CDFF4ECD632A7DBA11B5FDDD7288BD141"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统逻辑与稳定性分析报告3.md",
+          "bytes": 4535,
+          "sha256": "55FC3C8465E45E76B00B8C4755A6D06183A2AB8BF6C7CAA33400B4ABB7CF2042"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统稳定性分析报告·独立评审与补充方案.md",
+          "bytes": 8229,
+          "sha256": "4F8DC8CB701939F9C6FAA3F8FC0E9580912DED0E263195906FBFD0D2910B6C0E"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统稳定性与安全修复方案.md",
+          "bytes": 8074,
+          "sha256": "8360D6B281E07EF36C69CC3B6908791E2B2682B4C1BA26AB0242CD8CEACA2A3D"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统稳定性与安全修复实施报告.md",
+          "bytes": 4931,
+          "sha256": "8572CCE3C9547B883F5583518DCDC8DD2EA433C746364759045004A24AF35CA6"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统稳定性与安全修复实施报告2·独立核验结论.md",
+          "bytes": 6853,
+          "sha256": "98B55116879C26FB120C3A4093D97DDCB42D856A15851A526474CEE352867A3A"
+        },
+        {
+          "path": "doc/stability_fix_archive/系统稳定性与安全修复终期实施报告3·独立核验结论（100%闭环）.md",
+          "bytes": 9769,
+          "sha256": "7F12C910E63C7709DBFD0AC5E844AC0F1336FAF6B404C3523A808649C090C715"
+        },
+        {
+          "path": "doc/stability_fix_archive/README.md",
+          "bytes": 2496,
+          "sha256": "876FECF6CB14B8F811D7E3CE292FC512D2A865314EB4EBAB20E6FEFFDC1CC6CA"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/query_structuring_archive",
+      "destination": "doc/archive/query_structuring_archive",
+      "reason": "历史专题资料归档；保留同目录相对引用",
+      "files": [
+        {
+          "path": "doc/query_structuring_archive/audit_query_portrait.py",
+          "bytes": 5416,
+          "sha256": "3C1E5ABA6C88F408BC5CAD7C4F33D7D0980639948FEDB2DC3E08EC2171153AC7"
+        },
+        {
+          "path": "doc/query_structuring_archive/query_cleaning_and_structuring_plan_review.md",
+          "bytes": 9609,
+          "sha256": "846F027F3D6439A2FC67509F72121F9AC6153D21B6911816CDB99C5FB4ECD47E"
+        },
+        {
+          "path": "doc/query_structuring_archive/query_cleaning_and_structuring_plan.md",
+          "bytes": 16798,
+          "sha256": "52EDFFBA3DC3486AF3B5B845B04AC0C1DF22980E456651699F8A81C19E6077D2"
+        },
+        {
+          "path": "doc/query_structuring_archive/query_data_portrait_review.md",
+          "bytes": 7581,
+          "sha256": "E226047ECC31BF609B35C231DEB8E5AB41272977FFE434BC7F16A353E436382A"
+        },
+        {
+          "path": "doc/query_structuring_archive/query_data_portrait.md",
+          "bytes": 14614,
+          "sha256": "8B79756395A35B2CC795DB982EC83A2B03CFEA10C576591A4E5616AFA25D22E0"
+        },
+        {
+          "path": "doc/query_structuring_archive/walkthrough-Query端数据清洗及结构化功能优化完成报告.md",
+          "bytes": 4283,
+          "sha256": "2C8F562E48F44E55DFEC845CCD7C13CC8452F8EA44C5AD038E29A72757FAB136"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/llm_rule_engine_v0.0.8_archive",
+      "destination": "doc/archive/llm_rule_engine_v0.0.8_archive",
+      "reason": "历史专题资料归档；保留同目录相对引用",
+      "files": [
+        {
+          "path": "doc/llm_rule_engine_v0.0.8_archive/v0.0.8_llm_rule_engine_technical_solution.md",
+          "bytes": 19897,
+          "sha256": "F0942C78A44364000DA035736A95CAB149A30B9EAC07528A60F951311593E47D"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/物料库全面数据诊断与瘦身方案报告.html",
+      "destination": "doc/archive/legacy_reference/物料库全面数据诊断与瘦身方案报告.html",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/物料库全面数据诊断与瘦身方案报告.html",
+          "bytes": 92832,
+          "sha256": "DA971928C5D565B2FFD9A4F31EA0049A44EC3B6549AA9B64467CBE6DC04E0EB8"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/baseline_metrics_v0.0.5.md",
+      "destination": "doc/archive/legacy_reference/baseline_metrics_v0.0.5.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/baseline_metrics_v0.0.5.md",
+          "bytes": 698,
+          "sha256": "36BF45C2E6212CD6AE8E34D5B73085AC0174DDF2323174B1CB6D9CD6F5BCC532"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/Data Portrait.html",
+      "destination": "doc/archive/legacy_reference/Data Portrait.html",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/Data Portrait.html",
+          "bytes": 31317,
+          "sha256": "6C8A42BE40B20D25153737C0AE0A62E8063A4E1BE8E67C79347D44187DB4323A"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/Data Portrait.md",
+      "destination": "doc/archive/legacy_reference/Data Portrait.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/Data Portrait.md",
+          "bytes": 5920,
+          "sha256": "DD4D1BBF76F108EF3832120366DF0AA20A9BEBCCC0E09C59E0169916242F2AD2"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/data_cleaning_rules.md",
+      "destination": "doc/archive/legacy_reference/data_cleaning_rules.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/data_cleaning_rules.md",
+          "bytes": 19748,
+          "sha256": "0A970CCD00D7AA4D9DB87F6506FDB12AB3A77C834D0958E5B4707BD7C820EF98"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/final_structuring_master_plan.md",
+      "destination": "doc/archive/legacy_reference/final_structuring_master_plan.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/final_structuring_master_plan.md",
+          "bytes": 49687,
+          "sha256": "42AF616EF218D6EA7144F5D99D7A7EF7B2FCB06AC68E4A39B5A8B313349146E7"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/hardware_capacity_plan_v0.0.8.md",
+      "destination": "doc/archive/legacy_reference/hardware_capacity_plan_v0.0.8.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/hardware_capacity_plan_v0.0.8.md",
+          "bytes": 5437,
+          "sha256": "E43594580D6D1CA99FD7DC6B4F301F3572C62417348947DFBB7A5BE387A9B0F0"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/implementation_plan.md",
+      "destination": "doc/archive/legacy_reference/implementation_plan.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/implementation_plan.md",
+          "bytes": 5134,
+          "sha256": "A4163625B744F035B206521B6F7B19D8508D3D40857C8C10EBA1C7097055A095"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/material_list_reform_analysis_and_recommendations.md",
+      "destination": "doc/archive/legacy_reference/material_list_reform_analysis_and_recommendations.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/material_list_reform_analysis_and_recommendations.md",
+          "bytes": 13878,
+          "sha256": "36AA34828BC54FAB1263C471DB38B3BB60E551D2E5176A683595BE6F24C73EF6"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/procurement_material_analysis_and_optimization_report.md",
+      "destination": "doc/archive/legacy_reference/procurement_material_analysis_and_optimization_report.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/procurement_material_analysis_and_optimization_report.md",
+          "bytes": 42321,
+          "sha256": "49C2312DE69D18C5BA6E58E7708BF428A12EC986A39B32A87DAD18FCB0CC9C6D"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "doc/其他/V0.1.1_upgrade_and_rollback_guide.md",
+      "destination": "doc/archive/legacy_reference/V0.1.1_upgrade_and_rollback_guide.md",
+      "reason": "历史分析文本归档；业务Excel留在原位",
+      "files": [
+        {
+          "path": "doc/其他/V0.1.1_upgrade_and_rollback_guide.md",
+          "bytes": 4584,
+          "sha256": "B6DCDB53DA17A3794A2996640D49150E9263090F4AD34AB558344B9DBDB31F47"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "app/test_engine.py",
+      "destination": "doc/archive/legacy_tests/app_test_engine.py.txt",
+      "reason": "旧一次性测试含导入写库副作用，退出生产代码目录；独有用例待V015-M0迁移",
+      "files": [
+        {
+          "path": "app/test_engine.py",
+          "bytes": 9248,
+          "sha256": "D6EFFB72AF8C0C54ACA4876CB5D608DAFB5AF4FAAF57572328A8DC5FDB064475"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "tests/fixtures/golden_last_run.json",
+      "destination": "doc/V0.1.4/evidence/golden_last_run_20260902.json",
+      "reason": "历史评测输出留证，不再作为版本化fixture",
+      "files": [
+        {
+          "path": "tests/fixtures/golden_last_run.json",
+          "bytes": 18790,
+          "sha256": "93EF406DCE6B6A272114F5BBB9CEFEFE3EDDCBD1782270EDFF5085A6215980D3"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/audit_20261112.py",
+      "destination": "doc/audits/2026-11-12/audit_20261112.py",
+      "reason": "保留独立审核可复核脚本",
+      "files": [
+        {
+          "path": "scratch/audit_20261112.py",
+          "bytes": 11953,
+          "sha256": "37B795B20418317FECB93B42F8FF2B8B30F4D4B7CA167D176A5168B6CA73DF19"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/audit_20261112_results.json",
+      "destination": "doc/audits/2026-11-12/audit_20261112_results.json",
+      "reason": "保留独立审核定向证据",
+      "files": [
+        {
+          "path": "scratch/audit_20261112_results.json",
+          "bytes": 6717,
+          "sha256": "71445B4A1540DB7DBDD92464C2B4376155D8809E93CBCDE5AA07FE1B1F59F1AF"
+        }
+      ]
+    },
+    {
+      "action": "delete_regenerable",
+      "source": ".pytest_cache",
+      "reason": "可重新生成的缓存、pyc或本轮安装失败的隔离环境",
+      "file_count": 5,
+      "bytes": 6673
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "app/__pycache__",
+      "reason": "可重新生成的缓存、pyc或本轮安装失败的隔离环境",
+      "file_count": 45,
+      "bytes": 1464518
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "tests/__pycache__",
+      "reason": "可重新生成的缓存、pyc或本轮安装失败的隔离环境",
+      "file_count": 25,
+      "bytes": 310054
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/audit_venv",
+      "reason": "可重新生成的缓存、pyc或本轮安装失败的隔离环境",
+      "file_count": 16,
+      "bytes": 124265
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/uv-cache",
+      "reason": "可重新生成的缓存、pyc或本轮安装失败的隔离环境",
+      "file_count": 15,
+      "bytes": 3958
+    },
+    {
+      "action": "delete_regenerable",
+      "source": ".screenshots",
+      "reason": "空截图目录，无实际图片",
+      "file_count": 0,
+      "bytes": 0
+    },
+    {
+      "action": "move",
+      "source": "scratch/analyze_materials_diff.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/analyze_materials_diff.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/analyze_materials_diff.py",
+          "bytes": 3487,
+          "sha256": "2330EC8C2699D768CB5D8C82802B1914DC78E0DBB337C3EE74DC980B821363BC"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/audit_admin_html.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/audit_admin_html.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/audit_admin_html.py",
+          "bytes": 357,
+          "sha256": "FAC0B8C2488022A08A94BCBEEA81226160612EECA453C997E4067B12AE152388"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/audit_colors.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/audit_colors.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/audit_colors.py",
+          "bytes": 1056,
+          "sha256": "E93BB547E9F4AA5DD65C1E0F4846AE08C8DFFAF33F09268F4CA61AC61A42A0A1"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/audit_index_html.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/audit_index_html.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/audit_index_html.py",
+          "bytes": 357,
+          "sha256": "A87647B15E5BD74FA766085334DBFFBEC20A0651BBFC7A1EC4888FE2B1E5E52D"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/check_auth.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/check_auth.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/check_auth.py",
+          "bytes": 694,
+          "sha256": "C9C506EDDA69CBC1C1A4050EF65D6F9C39C5FFE5F45AF3F5540ABCB4D9D141CF"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/cleanup_project.ps1",
+      "destination": ".local-archive/2026-11-12/diagnostics/cleanup_project.ps1",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/cleanup_project.ps1",
+          "bytes": 7315,
+          "sha256": "E094D330D1788BA6587A88752212FCB990FB50E292485FA924004A5C496BA175"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/debug_cases.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/debug_cases.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/debug_cases.py",
+          "bytes": 6663,
+          "sha256": "E18FD09ECA96C60BF46DD87A1CA00F34D094B3818F17205A7B7B3540B2ACB1AA"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/deep_analyze_revamp.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/deep_analyze_revamp.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/deep_analyze_revamp.py",
+          "bytes": 4454,
+          "sha256": "2C91C154753121ADF3BC43BEEE9A18E5E019A7DAC01636A8CE5597766C372EA8"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/dump_plan_details.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/dump_plan_details.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/dump_plan_details.py",
+          "bytes": 2181,
+          "sha256": "25CE87DE2E231C050D2F915287FF9770054B6CEB6350A9FBC56DC832C936A97F"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/inspect_db_categories.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/inspect_db_categories.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/inspect_db_categories.py",
+          "bytes": 1762,
+          "sha256": "AA0BE3DDD744698FE4B17ACC677702390C7C5FF7A5DA92066BE16A60E5B848AF"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/inspect_prefixes.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/inspect_prefixes.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/inspect_prefixes.py",
+          "bytes": 708,
+          "sha256": "220E1188EACAAE05D390D7245046E1D0B9838FA86621780D67F1E6E576BF3D22"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/list.whhksj.tech.conf",
+      "destination": ".local-archive/2026-11-12/diagnostics/list.whhksj.tech.conf",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/list.whhksj.tech.conf",
+          "bytes": 2873,
+          "sha256": "770F205ED5D001740515F36F05117BB0483E82354B024D2FD091FCC2B0BBC02C"
+        }
+      ]
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/matcher_full.json",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 14266
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/matcher_inspect.json",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 14266
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/out_facts.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 180089
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/out_facts2.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 60849
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/out_regex.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 0
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/out_score.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 3779
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/out_score2.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 3463
+    },
+    {
+      "action": "move",
+      "source": "scratch/patch_score_text.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/patch_score_text.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/patch_score_text.py",
+          "bytes": 1888,
+          "sha256": "B6A86E433972B10E2148531323CC3AA27DCF0413522469C1BB65A99C198FDD5C"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/patch_server.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/patch_server.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/patch_server.py",
+          "bytes": 34532,
+          "sha256": "5DC76D0F2BF19A4E2D36816F773BB0E20FC75666AB538ECBD9B56A95937B6360"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/patch_vector_index.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/patch_vector_index.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/patch_vector_index.py",
+          "bytes": 8999,
+          "sha256": "D6D769A9B0423CE77F4CA20CA3FAD04C6BDFAE681114FFDAAFAC2B8216DD0A8C"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/poc_concurrency.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/poc_concurrency.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/poc_concurrency.py",
+          "bytes": 4171,
+          "sha256": "F9BDFC9E4A82E65F14A1760D188180433CC7CDAFCF6ABA914C4B747590632325"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/prepare_version_docs.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/prepare_version_docs.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/prepare_version_docs.py",
+          "bytes": 36093,
+          "sha256": "370143C554AF5EEAA9F0C6DA0D0186B075DAB1D53A4DD915A2C15B96B4093D3C"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/refactor_matcher.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/refactor_matcher.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/refactor_matcher.py",
+          "bytes": 67032,
+          "sha256": "2F14D109A807B0067810791AD46D6D40087E70C0C475A6D7A9C593A55E154D4D"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/repro_q_fan_vol.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/repro_q_fan_vol.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/repro_q_fan_vol.py",
+          "bytes": 1855,
+          "sha256": "DFE83FA450180160D73DA6F2C338544FC774C6566B4393DBFF6A4F0142CD6BBE"
+        }
+      ]
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch/server_md5.txt",
+      "reason": "一次性诊断文本/接口检查输出；有价值的审核结果已另行留证",
+      "file_count": 1,
+      "bytes": 4495
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_actual_scoring.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_actual_scoring.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_actual_scoring.py",
+          "bytes": 3161,
+          "sha256": "D74A7162D2B265F24CFAB7216948A45D206E07B4D20027639BF8E0BADEAEB4E9"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_hvac_cases.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_hvac_cases.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_hvac_cases.py",
+          "bytes": 5830,
+          "sha256": "7CC7E7B0EBAD508307F0700F183CBA9A9D81E36B7512DDE344ECCE8F37D50808"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_impact_simulation.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_impact_simulation.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_impact_simulation.py",
+          "bytes": 2721,
+          "sha256": "4AFABE5B66ADC1981B3BEC1B4129EDAE076EF89F912A7928463E06B9B604602E"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_phase2_db.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_phase2_db.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_phase2_db.py",
+          "bytes": 1923,
+          "sha256": "BBB7800D3FC1618B831D5664E328E883EDAADE48ABBD4C3F93BB677FD971FFD9"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_prototype.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_prototype.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_prototype.py",
+          "bytes": 2250,
+          "sha256": "84711FB6C0D97E6FE4B0E128A40776BBC5F8344ECC52A4C9610752A22960A806"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_recall_breakdown.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_recall_breakdown.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_recall_breakdown.py",
+          "bytes": 6399,
+          "sha256": "63A5B04A1A7E19CCA92AF633982530F105A5F3F813FEE0FA5AB9DFAACB28C555"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_remote_match.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_remote_match.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_remote_match.py",
+          "bytes": 310,
+          "sha256": "C229F208ADE785F71265A1DB880FB9577B46ED7AA7F07A5646A561EB703BFB1F"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/test_semi_perimeter_ranking.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/test_semi_perimeter_ranking.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/test_semi_perimeter_ranking.py",
+          "bytes": 1575,
+          "sha256": "1FB4AEEA3D7BE3186B8692E9AB3C2ED3106EBCD2F1F3F31311E6CCCFBE456C5F"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_damper_scoring.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_damper_scoring.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_damper_scoring.py",
+          "bytes": 2047,
+          "sha256": "6870EB363D0C2D2F2EAD9C2E22B301C8D6597B238F1970F09A93493AD7781D34"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_regex.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_regex.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_regex.py",
+          "bytes": 4982,
+          "sha256": "547D2B39747FEA3C7612797DFB794AE68EBF53F5D0184E4DF43224E16E493279"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_report_facts.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_report_facts.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_report_facts.py",
+          "bytes": 5377,
+          "sha256": "DAE678E4FED611677FC010E69E612BAB05E4836819DC785FA049CB0A465E6635"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_scoring2.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_scoring2.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_scoring2.py",
+          "bytes": 4655,
+          "sha256": "91ADF132BBD45B67952C151357173B6BD48C50E1BF29E9DECBAFD3F6AF4FD112"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_target_validity.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_target_validity.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_target_validity.py",
+          "bytes": 2865,
+          "sha256": "31D6BE3E3C98376AD8A0E989B1BD5DD0A8B0890E51B83D39DD4C3A9C7B846E8C"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "scratch/verify_v012.py",
+      "destination": ".local-archive/2026-11-12/diagnostics/verify_v012.py",
+      "reason": "旧诊断、打补丁、原型与本轮整理工具仅归档；不作为正式测试入口",
+      "files": [
+        {
+          "path": "scratch/verify_v012.py",
+          "bytes": 2089,
+          "sha256": "927FACB4BA7A6511D49F01951917DA70141BA51F4156B2C3EDA1512068254169"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "app/materials.db.v0.1.2.bak",
+      "destination": ".local-archive/2026-11-12/database_snapshots/materials.db.v0.1.2.bak",
+      "reason": "旧数据库快照移出应用目录，完整保留以便追溯和回滚",
+      "files": [
+        {
+          "path": "app/materials.db.v0.1.2.bak",
+          "bytes": 35586048,
+          "sha256": "D747ED1F23CDE98511FDB0CBB5AB2D43EEED69CBD8934220C9B0FF9F370C30D4"
+        }
+      ]
+    },
+    {
+      "action": "move",
+      "source": "app/materials.db.v0.1.3.bak",
+      "destination": ".local-archive/2026-11-12/database_snapshots/materials.db.v0.1.3.bak",
+      "reason": "旧数据库快照移出应用目录，完整保留以便追溯和回滚",
+      "files": [
+        {
+          "path": "app/materials.db.v0.1.3.bak",
+          "bytes": 36478976,
+          "sha256": "5AF2C9FB52CE02D56E80AF6C14E573EEEC755632C7C89290A276F0B0A3D0B1D0"
+        }
+      ]
+    },
+    {
+      "action": "delete_regenerable",
+      "source": "scratch",
+      "reason": "已整理为空的一次性工作目录",
+      "file_count": 0,
+      "bytes": 0
+    }
+  ]
+}

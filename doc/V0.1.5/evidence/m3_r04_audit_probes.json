@@ -1,0 +1,1639 @@
+{
+  "matrix": [
+    {
+      "case": "client_unit_only",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "only_confirmed_unit",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "missing_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "bool_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "string_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "nan_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "inf_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "zero_mult",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "string_orig_qty",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "mismatched_orig_qty",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认后单位换算上下文发生漂移阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认后单位换算上下文发生漂移阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "wrong_source",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "wrong_version",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认记录缺少权威目标单位证据阻断"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "case": "inconsistent_orig_unit",
+      "restore": {
+        "http": 200,
+        "body": {
+          "code": 0,
+          "items": [
+            {
+              "original_row_idx": 0,
+              "original_name": "镀锌钢管",
+              "original_spec": "DN15",
+              "original_qty": 10,
+              "original_unit": "km",
+              "original_loss": 0,
+              "original_category": "暖通",
+              "original_brand": "",
+              "professional": "暖通",
+              "original_code": "",
+              "matched_code": "R04AUD-EVIDENCE",
+              "matched_name": "镀锌钢管",
+              "matched_category": "",
+              "matched_spec": "",
+              "matched_unit": "",
+              "matched_brand": "",
+              "bindings": [
+                {
+                  "code": "R04AUD-EVIDENCE",
+                  "name": "镀锌钢管",
+                  "specification": "DN15",
+                  "unit": "m",
+                  "category": "暖通",
+                  "brand": "",
+                  "qty": 10000,
+                  "qty_ratio": 1000,
+                  "confirmed_unit": "km",
+                  "confirmed_orig_unit": "km",
+                  "confirmed_orig_qty": 10,
+                  "confirmed_unit_mult": 1,
+                  "confirmed_unit_source": "client",
+                  "confirmed_unit_version": "fake"
+                }
+              ],
+              "decision_status": "recommended",
+              "decision_source": "legacy_draft",
+              "decision_reason": "绑定目标与清单行存在硬冲突(确认后单位换算上下文发生漂移阻断)，草稿已降为待复核",
+              "decision_codes": [
+                "R04AUD-EVIDENCE"
+              ],
+              "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+              "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+            }
+          ],
+          "downgraded": 1
+        }
+      },
+      "export": {
+        "http": 422,
+        "detail": {
+          "error": "export_blocked",
+          "row": {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "reason": "绑定目标与清单行存在硬冲突",
+            "conflicts": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "reason": "确认后单位换算上下文发生漂移阻断"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "forged_request_confirm": {
+    "http": 200,
+    "body": {
+      "code": 0,
+      "msg": "绑定关系已由服务端确认",
+      "decision": {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "decision_codes": [
+          "R04AUD-EVIDENCE"
+        ],
+        "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+        "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+      },
+      "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+      "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+    }
+  },
+  "server_saved_evidence": {
+    "brand": "",
+    "category": "暖通",
+    "code": "R04AUD-EVIDENCE",
+    "confirmed_orig_qty": 10.0,
+    "confirmed_orig_unit": "km",
+    "confirmed_unit": "m",
+    "confirmed_unit_mult": 1000.0,
+    "confirmed_unit_source": "server_live_material",
+    "confirmed_unit_version": "r04-v1",
+    "name": "镀锌钢管",
+    "qty": 10000.0,
+    "qty_ratio": 1000.0,
+    "specification": "DN15",
+    "unit": "m"
+  },
+  "fresh_export": {
+    "http": 200,
+    "rows": [
+      [
+        "*序号",
+        "*费用类型",
+        "*清单类型",
+        "*材料类型",
+        "*清单编码",
+        "*清单名称",
+        "*特征/规格型号",
+        "单位",
+        "*工程量",
+        "材料损耗",
+        "品牌",
+        "竞聘系数",
+        "单价(无税)",
+        "备注",
+        "专业",
+        null
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      [
+        1,
+        null,
+        null,
+        null,
+        null,
+        "暖通",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        "暖通",
+        null
+      ],
+      [
+        "1.1",
+        "材料费",
+        "手动录入",
+        "暖通",
+        null,
+        "镀锌钢管",
+        "DN15",
+        "km",
+        10,
+        0,
+        null,
+        null,
+        null,
+        "标段一",
+        "暖通",
+        null
+      ],
+      [
+        null,
+        "材料费",
+        "手动录入",
+        "暖通",
+        "R04AUD-EVIDENCE",
+        "镀锌钢管",
+        "DN15",
+        "m",
+        10000,
+        0,
+        null,
+        null,
+        null,
+        "标段一",
+        "暖通",
+        null
+      ]
+    ]
+  },
+  "r03_server_evidence_compatibility": {
+    "restore": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R04AUD-EVIDENCE",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10000,
+                "qty_ratio": 1000
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R04AUD-EVIDENCE"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+          }
+        ],
+        "downgraded": 0
+      }
+    },
+    "export": {
+      "http": 200,
+      "rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "km",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "R04AUD-EVIDENCE",
+          "镀锌钢管",
+          "DN15",
+          "m",
+          10000,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ]
+    }
+  },
+  "legacy_drift_with_forged_request": {
+    "restore": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R04AUD-EVIDENCE",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "km",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10000,
+                "qty_ratio": 1000,
+                "confirmed_unit": "km",
+                "confirmed_orig_unit": "km",
+                "confirmed_orig_qty": 10,
+                "confirmed_unit_mult": 1,
+                "confirmed_unit_source": "client",
+                "confirmed_unit_version": "fake"
+              }
+            ],
+            "decision_status": "recommended",
+            "decision_source": "legacy_draft",
+            "decision_reason": "绑定目标与清单行存在硬冲突(确认记录缺少权威目标单位证据阻断)，草稿已降为待复核",
+            "decision_codes": [
+              "R04AUD-EVIDENCE"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+          }
+        ],
+        "downgraded": 1
+      }
+    },
+    "export": {
+      "http": 422,
+      "detail": {
+        "error": "export_blocked",
+        "row": {
+          "original_row_idx": 0,
+          "original_name": "镀锌钢管",
+          "original_spec": "DN15",
+          "reason": "绑定目标与清单行存在硬冲突",
+          "conflicts": [
+            {
+              "code": "R04AUD-EVIDENCE",
+              "reason": "确认记录缺少权威目标单位证据阻断"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "reconfirmed": {
+    "confirm": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "msg": "绑定关系已由服务端确认",
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R04AUD-EVIDENCE"
+          ],
+          "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+          "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+        },
+        "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+        "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+      }
+    },
+    "restore": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 10,
+            "original_unit": "km",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R04AUD-EVIDENCE",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 10000,
+                "qty_ratio": 1000
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R04AUD-EVIDENCE"
+            ],
+            "row_fingerprint": "5a45bdae6869bc5428d9f5fac1c5a30f1403f50dd046245d7f90fb9518d37dd7",
+            "binding_fingerprint": "fce12f1fd5a31467e144c7b33c18f1caff3eb791924a0367dc7418c2c37639d3"
+          }
+        ],
+        "downgraded": 0
+      }
+    },
+    "export": {
+      "http": 200,
+      "rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "km",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "R04AUD-EVIDENCE",
+          "镀锌钢管",
+          "DN15",
+          "m",
+          10000,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ]
+    }
+  },
+  "one_to_many_ratio": {
+    "confirm": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "msg": "绑定关系已由服务端确认",
+        "decision": {
+          "decision_status": "manual_confirmed",
+          "decision_source": "manual",
+          "decision_reason": "人工显式确认",
+          "decision_codes": [
+            "R04AUD-EVIDENCE"
+          ],
+          "row_fingerprint": "746352756e174743f4e910a05807de7e85f6a501463fa166883a4903a22cf4e7",
+          "binding_fingerprint": "61cb6b58ad9e6eeb96dccf748cbe2d80af6d2695e6805b9f72c31a767dbcea11"
+        },
+        "row_fingerprint": "746352756e174743f4e910a05807de7e85f6a501463fa166883a4903a22cf4e7",
+        "binding_fingerprint": "61cb6b58ad9e6eeb96dccf748cbe2d80af6d2695e6805b9f72c31a767dbcea11"
+      }
+    },
+    "restore": {
+      "http": 200,
+      "body": {
+        "code": 0,
+        "items": [
+          {
+            "original_row_idx": 0,
+            "original_name": "镀锌钢管",
+            "original_spec": "DN15",
+            "original_qty": 200,
+            "original_unit": "米",
+            "original_loss": 0,
+            "original_category": "暖通",
+            "original_brand": "",
+            "professional": "暖通",
+            "original_code": "",
+            "matched_code": "R04AUD-EVIDENCE",
+            "matched_name": "镀锌钢管",
+            "matched_category": "",
+            "matched_spec": "",
+            "matched_unit": "",
+            "matched_brand": "",
+            "bindings": [
+              {
+                "code": "R04AUD-EVIDENCE",
+                "name": "镀锌钢管",
+                "specification": "DN15",
+                "unit": "m",
+                "category": "暖通",
+                "brand": "",
+                "qty": 300,
+                "qty_ratio": 1.5
+              }
+            ],
+            "decision_status": "manual_confirmed",
+            "decision_source": "manual",
+            "decision_reason": "已恢复服务端人工确认",
+            "decision_codes": [
+              "R04AUD-EVIDENCE"
+            ],
+            "row_fingerprint": "746352756e174743f4e910a05807de7e85f6a501463fa166883a4903a22cf4e7",
+            "binding_fingerprint": "61cb6b58ad9e6eeb96dccf748cbe2d80af6d2695e6805b9f72c31a767dbcea11"
+          }
+        ],
+        "downgraded": 0
+      }
+    },
+    "export": {
+      "http": 200,
+      "rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "米",
+          200,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "R04AUD-EVIDENCE",
+          "镀锌钢管",
+          "DN15",
+          "m",
+          300,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ]
+    }
+  }
+}

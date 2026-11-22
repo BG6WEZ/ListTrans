@@ -1,0 +1,56 @@
+{
+  "m2_effective_baseline_total": 166,
+  "unchanged_from_m2_effective_baseline": 164,
+  "modified_from_m2_effective_baseline": [
+    {
+      "path": "app/db_manager.py",
+      "before": "fefebb24125717e225a6588fa01c60e8f27d49c3fab31a13a102e0df08ddac88",
+      "after": "fa792357e25843b591ceb55c32acda62f01216f9e6d2e42c4a9df4940c9b543f"
+    },
+    {
+      "path": "app/matcher.py",
+      "before": "6da1f4a96919cbf1de3f28b708b0590da71f20d114cc0e2e9c2a2c2dd65e032b",
+      "after": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac"
+    }
+  ],
+  "freeze_chain_code_mismatches": [],
+  "freeze_record_sha256_matches_holdout": true,
+  "legacy_vector_cache_mismatches": [],
+  "legacy_vector_cache_has_candidates_dir": false,
+  "isolation_before_verdict": "PASS",
+  "isolation_after_verdict": "PASS",
+  "isolation_before_sha256": "4ca08463961bb051d1b28977dc417fc54fe905d446694ba7536246b956d82ce0",
+  "isolation_after_sha256": "0dc7c0ed998c50cb33cec4c67befc944e91772b101dc398d83eb2190f2d723cd",
+  "cross_isolation_diffs": [],
+  "sqlite_sidecars_on_disk": {
+    "app/materials.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/materials.db-shm": {
+      "exists": true,
+      "size": 32768
+    },
+    "app/auth.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/auth.db-shm": {
+      "exists": true,
+      "size": 32768
+    }
+  },
+  "delivery_sha256": {
+    "app/matcher.py": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac",
+    "app/db_manager.py": "fa792357e25843b591ceb55c32acda62f01216f9e6d2e42c4a9df4940c9b543f",
+    "tests/test_v018_m3_selection_degradation.py": "14d7f652c628a8ebc09eede7f016b70eb66966e86c29d2af5d2fbf7a90aa4a69",
+    "doc/V0.1.8/evidence/m3_r01_dev_selection.py": "9dc499616be71a7f2a47371b39a9f9b0945174bc82f77dd5eae180fcbecef6fa",
+    "doc/V0.1.8/evidence/m3_r01_holdout_eval.py": "1cddcdd5c71774f688afcbb7b24cf1be743f8bde6cb2df453088b44b55dc2587",
+    "doc/V0.1.8/evidence/m3_r01_dev_selection_summary.json": "36644ef65e2eb5cfd6096111dcb0851113509fd69f2dcd8b44e4688f345fd57b",
+    "doc/V0.1.8/evidence/m3_r01_candidate_freeze.json": "bcf422fe38fa3390ef1bb94aa15a3f5edfb5be36087d666212a72298f6f004bf",
+    "doc/V0.1.8/evidence/m3_r01_holdout_report.json": "911487dc0473206f8256422f229f4f2d615ed9a05c64a1fbb342faf14a53536e",
+    "doc/V0.1.8/evidence/m3_r01_gate_final.json": "4b036be0ef7803ca96498630d4d1e73e9cf8f5fe96aa4e3908ec362ee8aa248a",
+    "doc/V0.1.8/evidence/m3_r01_pytest_frozen.log": "1902ee7e2d527093c0608557618b975128c16c4a78c0f9ba0099eec5612fe91f"
+  },
+  "verdict": "PASS"
+}

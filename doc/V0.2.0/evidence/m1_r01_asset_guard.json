@@ -1,0 +1,41 @@
+{
+  "archive_entry_count": 72,
+  "business_anchor": "m0_r01_isolation_after.json",
+  "business_asset_count": 35,
+  "business_differences": {
+    "after_after": [],
+    "after_before": [],
+    "before_after": [],
+    "before_before": [],
+    "current": []
+  },
+  "effective_baseline_count": 194,
+  "exit_code": 0,
+  "finished_sha256": {
+    "app/binding_decisions.py": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef",
+    "app/bom.py": "8f8e24a02e8a3e88fe8b51359f003ee14c9e9f8966ae8b37837c2c77a53fe5c0",
+    "app/feedback_contract.py": "9a978a054aa5ae598a46f2cc35e748f315f226b2b5424f8ba42d1c43de6f3af6",
+    "app/flywheel_sandbox.py": "9891ad646cb1eaa03c775181d115e983cb10a2e2e038f8c3f67e48c6a5ffe868",
+    "app/rule_governance.py": "8920d3a56d8abaa9070f8c405839163bf1598204294453ead5e2450e6f14cb68",
+    "app/sandbox_evaluator.py": "03769aeb839709a92fa51476ba2c4098d9fa06e5e6ab01f83d3b704781463776",
+    "app/server.py": "9fe33469164ba58bc9e661971429d848de74b4ff35d67fe8327dd7072c9e624f",
+    "tests/test_v020_m1_bom.py": "0ae326c87b2eb239d341a8fcd505ea21a52a3b560c5a0020fe1c37a977edeea6"
+  },
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "m1_dispatch_business_asset_count_field": 0,
+  "m1_dispatch_business_snapshot_entry_count": 0,
+  "new_paths_removed": [
+    "app/bom.py",
+    "tests/test_v020_m1_bom.py"
+  ],
+  "patch_sha256": "34af0950b72db0229af1284c8df110187953f027425b69781a691c456e351a74",
+  "restored_sha256": {
+    "app/binding_decisions.py": "05bc4c724b37c99204cd3751e007167e3e43c2d6aa2900e5fc05fce55d6e800e",
+    "app/feedback_contract.py": "e052c9359c24d3305fc2bd2e5e2ea096521169501d8024e1a8591988a4cc1c5b",
+    "app/flywheel_sandbox.py": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0",
+    "app/rule_governance.py": "c0a0057f25b8104f5fcf70264491f39c18637cf209e7982a2d8f13171ebb616c",
+    "app/sandbox_evaluator.py": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5",
+    "app/server.py": "28ba7171c5f14cb55497291e44702b8eeba2a9cf231768c002e7bfc12dd30fcb"
+  },
+  "unchanged_count": 188
+}

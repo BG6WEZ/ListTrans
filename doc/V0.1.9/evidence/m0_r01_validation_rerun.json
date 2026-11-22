@@ -1,0 +1,9 @@
+{
+  "legacy_gate": 0,
+  "pytest": 0,
+  "source_sha256": {
+    "app/matcher.py": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+    "app/server.py": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+  },
+  "source_stable": true
+}

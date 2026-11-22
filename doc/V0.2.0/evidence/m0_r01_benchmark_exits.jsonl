@@ -1,0 +1,4 @@
+{"mode":"keyword","arm":"off","exit_code":0,"seconds":217.5144673,"environment":"native Windows loopback, offline"}
+{"mode":"keyword","arm":"on","exit_code":0,"seconds":205.819377,"environment":"native Windows loopback, offline"}
+{"mode":"vector","arm":"on","exit_code":0,"seconds":346.5370922,"environment":"native Windows loopback, offline"}
+{"mode":"vector","arm":"off","exit_code":0,"seconds":369.1733155,"environment":"native Windows loopback, offline"}

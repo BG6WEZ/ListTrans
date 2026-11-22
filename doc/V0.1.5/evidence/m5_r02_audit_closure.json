@@ -1,0 +1,53 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "round": "V015-M5 R02 Audit",
+  "verdict": "RETURN_FOR_REWORK",
+  "closed_items": [
+    "A-M5-03",
+    "A-M5-04",
+    "A-M5-05"
+  ],
+  "open_P1": [
+    "A-M5-01",
+    "A-M5-02"
+  ],
+  "dev_delivery_checked": 26,
+  "dev_delivery_mismatches": [],
+  "dev_delivery_short_hash_typos": [
+    {
+      "file": "m5_r02_outer_snapshot_before.json",
+      "listed": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    },
+    {
+      "file": "m5_r02_outer_snapshot_after.json",
+      "listed": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    }
+  ],
+  "r01_immutable_drift": [],
+  "zero_edit_check": {
+    "app/auth_manager.py": true,
+    "tests/conftest.py": true
+  },
+  "business_snapshot_equal": true,
+  "before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "verify": {
+    "before": "PASS",
+    "after": "PASS"
+  },
+  "independent_m4_m5_suite": "35 passed / 48.03s / exit_code=0",
+  "independent_full_suite": "286 passed / 0 warnings / 153.26s / exit_code=0",
+  "independent_3rule_gate": "harmful=false, beneficial=true, neutral=true, diffs_m3_r04=0, diffs_m4_r03=0 / 68.137s",
+  "independent_browser_e2e": "22/22 gates true / 30.974s / 3 audit screenshots inspected",
+  "independent_docker_audit": "listtrans:m5-r02-prod 11 layers, 49/49 /app sha256 match, 0 leaks, /login.html=200, psutil=7.2.2, fail_closed_rc=1",
+  "independent_probes_reproduced": [
+    "r02_probe_a_post_swap_cancel_split",
+    "r02_probe_b_real_timeout_after_sql_commit",
+    "r02_probe_c_step7_cache_replace_failure",
+    "r02_probe_d_append_index_failure"
+  ],
+  "PRG_F11": "OPEN_BEFORE_FIRST_REAL_DEPLOYMENT",
+  "future_versions": "LOCKED"
+}

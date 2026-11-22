@@ -1,0 +1,88 @@
+{
+  "checks": [
+    {
+      "name": "A1 not_in_catalog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A2 not_recalled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A3 hard_blocked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A4 ranked_gt10",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A5 top10_hit",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A6 recall_sources 透传",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "B1 candidate_recall=100（两目标均进候选池）",
+      "pass": true,
+      "detail": "num=2/den=2"
+    },
+    {
+      "name": "B2 miss@10=50（仅样本级，G12 出 top10）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "B3 两口径数值不同即证明分母不同",
+      "pass": true,
+      "detail": "cand_recall=100.0 vs miss@10=50.0"
+    },
+    {
+      "name": "B4 多目标 candidate_recall 分母=target数2",
+      "pass": true,
+      "detail": "num=1/den=2"
+    },
+    {
+      "name": "C1 默认无 diagnostics 键",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C2 诊断模式既有三字段完全一致",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C3 score_candidate 仍是二元组薄包装",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D1 failed_samples_count=1（异常样本仍在分母，rank=0）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D2 skipped_samples_count=2（移出指标分母）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "D3 fail 保留分母且 skip 已剔除（hit@1=50 -> n=2）",
+      "pass": true,
+      "detail": "hit@1=50.0 (expect n=2: 1 hit + 1 error)"
+    }
+  ],
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_m4_cxb7o6m8",
+  "total": 16,
+  "passed": 16,
+  "failed": 0
+}

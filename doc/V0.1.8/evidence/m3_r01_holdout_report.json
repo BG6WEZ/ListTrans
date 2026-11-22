@@ -1,0 +1,4062 @@
+{
+  "adoption_decision": "DO_NOT_ADOPT_EXPERIMENTAL_TOGGLES_KEEP_ALL_OFF",
+  "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "completed_at": "2026-11-20T00:55:11.664508+08:00",
+  "freeze_record_path": "doc/V0.1.8/evidence/m3_r01_candidate_freeze.json",
+  "freeze_record_sha256": "bcf422fe38fa3390ef1bb94aa15a3f5edfb5be36087d666212a72298f6f004bf",
+  "frozen_at": "2026-11-19T23:43:27.830000+08:00",
+  "frozen_submission_config": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_CANDIDATE_CAP": "0",
+    "LISTTRANS_V018_M2_FUSION_MODE": "union",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V018_M2_RRF_K": "60",
+    "LISTTRANS_V018_M2_TEXT_MODE": "legacy",
+    "LISTTRANS_V018_M2_VECTOR_TOPK": "50",
+    "canonical_text_enabled": false,
+    "keyword_rrf_enabled": false,
+    "vector_text_schema": "legacy-v1"
+  },
+  "golden_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+  "governance_sha256": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43",
+  "modes": {
+    "keyword": {
+      "evaluation_seconds": 63.926,
+      "gt_guard_status": {
+        "GT-0674": "recommended",
+        "GT-0677": "recommended",
+        "GT-0678": "recommended"
+      },
+      "hardware": {
+        "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+        "logical_cores": 20,
+        "os": "Windows-11-10.0.26300-SP0",
+        "physical_cores": 14,
+        "python": "3.12.10",
+        "ram_mib": 16068.73828125
+      },
+      "index": {
+        "enabled": false
+      },
+      "latency": {
+        "single_all": {
+          "max_ms": 867.106,
+          "min_ms": 9.433,
+          "n": 1220,
+          "p50_ms": 22.563,
+          "p95_ms": 238.831
+        },
+        "single_domains": {
+          "医用气体": {
+            "max_ms": 108.49,
+            "min_ms": 9.749,
+            "n": 147,
+            "p50_ms": 23.68,
+            "p95_ms": 89.292
+          },
+          "弱电": {
+            "max_ms": 89.1,
+            "min_ms": 9.834,
+            "n": 143,
+            "p50_ms": 21.896,
+            "p95_ms": 48.196
+          },
+          "强电": {
+            "max_ms": 259.589,
+            "min_ms": 9.433,
+            "n": 288,
+            "p50_ms": 12.8,
+            "p95_ms": 246.092
+          },
+          "暖通": {
+            "max_ms": 867.106,
+            "min_ms": 10.038,
+            "n": 252,
+            "p50_ms": 47.961,
+            "p95_ms": 665.961
+          },
+          "洁净装饰": {
+            "max_ms": 17.754,
+            "min_ms": 17.754,
+            "n": 1,
+            "p50_ms": 17.754,
+            "p95_ms": 17.754
+          },
+          "纯水": {
+            "max_ms": 56.806,
+            "min_ms": 11.258,
+            "n": 18,
+            "p50_ms": 44.752,
+            "p95_ms": 56.806
+          },
+          "给排水": {
+            "max_ms": 83.929,
+            "min_ms": 11.071,
+            "n": 110,
+            "p50_ms": 23.662,
+            "p95_ms": 81.722
+          },
+          "自控": {
+            "max_ms": 94.697,
+            "min_ms": 20.068,
+            "n": 21,
+            "p50_ms": 31.74,
+            "p95_ms": 90.971
+          },
+          "装饰": {
+            "max_ms": 111.654,
+            "min_ms": 9.76,
+            "n": 233,
+            "p50_ms": 18.279,
+            "p95_ms": 104.948
+          },
+          "设备": {
+            "max_ms": 31.753,
+            "min_ms": 11.481,
+            "n": 7,
+            "p50_ms": 25.98,
+            "p95_ms": 31.753
+          }
+        },
+        "upload_all": {
+          "max_ms": 18867.645,
+          "min_ms": 110.928,
+          "n": 25,
+          "p50_ms": 1325.02,
+          "p95_ms": 7477.397
+        },
+        "upload_batch_sizes": {
+          "20": 1,
+          "50": 24
+        },
+        "upload_full_batches": {
+          "max_ms": 18867.645,
+          "min_ms": 110.928,
+          "n": 24,
+          "p50_ms": 1325.02,
+          "p95_ms": 7477.397
+        }
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 0,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "peak_wset_mib": 684.31,
+      "phases": {
+        "batch_http": {
+          "process_peak_working_set_mib": 684.3125,
+          "sampled_peak_rss_mib": 683.88671875,
+          "seconds": 58.96290059999956
+        },
+        "full_rank_replay": {
+          "process_peak_working_set_mib": 664.74609375,
+          "sampled_peak_rss_mib": 664.74609375,
+          "seconds": 63.98723710000195
+        },
+        "single_http": {
+          "process_peak_working_set_mib": 669.72265625,
+          "sampled_peak_rss_mib": 669.72265625,
+          "seconds": 69.21797759999754
+        },
+        "startup_prepare": {
+          "process_peak_working_set_mib": 483.07421875,
+          "sampled_peak_rss_mib": 483.0703125,
+          "seconds": 6.603031599999667
+        },
+        "warmup": {
+          "process_peak_working_set_mib": 488.9765625,
+          "sampled_peak_rss_mib": 488.91796875,
+          "seconds": 0.8969930000021122
+        }
+      },
+      "semantic_rows": 0,
+      "splits": {
+        "all": {
+          "answerable_rows": 729,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fallback": 18,
+            "fts": 358,
+            "fts_extracted_name": 72,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 83,
+            "model_match": 36
+          },
+          "domains": {
+            "医用气体": {
+              "hit1": 23,
+              "hit1_delta": 0,
+              "hit1_v017": 23,
+              "hit3": 35,
+              "hit3_delta": 0,
+              "hit3_v017": 35,
+              "mrr_at_10": 0.281739,
+              "mrr_at_10_v017": 0.281739,
+              "n": 112,
+              "r100": 72,
+              "r100_delta": 0,
+              "r100_v017": 72,
+              "r200": 74,
+              "r200_delta": 0,
+              "r200_v017": 74,
+              "stage_counts": {
+                "hard_blocked": 9,
+                "not_in_catalog": 0,
+                "not_recalled": 38,
+                "ranked_gt10": 10,
+                "top10_hit": 55
+              }
+            },
+            "弱电": {
+              "hit1": 37,
+              "hit1_delta": 0,
+              "hit1_v017": 37,
+              "hit3": 54,
+              "hit3_delta": 0,
+              "hit3_v017": 54,
+              "mrr_at_10": 0.401107,
+              "mrr_at_10_v017": 0.400522,
+              "n": 114,
+              "r100": 70,
+              "r100_delta": 0,
+              "r100_v017": 70,
+              "r200": 74,
+              "r200_delta": 0,
+              "r200_v017": 74,
+              "stage_counts": {
+                "hard_blocked": 10,
+                "not_in_catalog": 0,
+                "not_recalled": 40,
+                "ranked_gt10": 7,
+                "top10_hit": 57
+              }
+            },
+            "强电": {
+              "hit1": 45,
+              "hit1_delta": 0,
+              "hit1_v017": 45,
+              "hit3": 61,
+              "hit3_delta": -2,
+              "hit3_v017": 63,
+              "mrr_at_10": 0.275729,
+              "mrr_at_10_v017": 0.279379,
+              "n": 202,
+              "r100": 81,
+              "r100_delta": 0,
+              "r100_v017": 81,
+              "r200": 82,
+              "r200_delta": 0,
+              "r200_v017": 82,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 120,
+                "ranked_gt10": 3,
+                "top10_hit": 79
+              }
+            },
+            "暖通": {
+              "hit1": 33,
+              "hit1_delta": 0,
+              "hit1_v017": 33,
+              "hit3": 40,
+              "hit3_delta": -1,
+              "hit3_v017": 41,
+              "mrr_at_10": 0.417042,
+              "mrr_at_10_v017": 0.421118,
+              "n": 92,
+              "r100": 62,
+              "r100_delta": 0,
+              "r100_v017": 62,
+              "r200": 79,
+              "r200_delta": 0,
+              "r200_v017": 79,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 13,
+                "ranked_gt10": 24,
+                "top10_hit": 54
+              }
+            },
+            "纯水": {
+              "hit1": 1,
+              "hit1_delta": 0,
+              "hit1_v017": 1,
+              "hit3": 1,
+              "hit3_delta": 0,
+              "hit3_v017": 1,
+              "mrr_at_10": 0.25,
+              "mrr_at_10_v017": 0.25,
+              "n": 4,
+              "r100": 2,
+              "r100_delta": 0,
+              "r100_v017": 2,
+              "r200": 2,
+              "r200_delta": 0,
+              "r200_v017": 2,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 2,
+                "ranked_gt10": 1,
+                "top10_hit": 1
+              }
+            },
+            "给排水": {
+              "hit1": 7,
+              "hit1_delta": 0,
+              "hit1_v017": 7,
+              "hit3": 9,
+              "hit3_delta": 0,
+              "hit3_v017": 9,
+              "mrr_at_10": 0.15614,
+              "mrr_at_10_v017": 0.15614,
+              "n": 57,
+              "r100": 18,
+              "r100_delta": 0,
+              "r100_v017": 18,
+              "r200": 18,
+              "r200_delta": 0,
+              "r200_v017": 18,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 39,
+                "ranked_gt10": 4,
+                "top10_hit": 14
+              }
+            },
+            "自控": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.235294,
+              "mrr_at_10_v017": 0.235294,
+              "n": 17,
+              "r100": 9,
+              "r100_delta": 0,
+              "r100_v017": 9,
+              "r200": 9,
+              "r200_delta": 0,
+              "r200_v017": 9,
+              "stage_counts": {
+                "hard_blocked": 5,
+                "not_in_catalog": 0,
+                "not_recalled": 8,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            },
+            "装饰": {
+              "hit1": 24,
+              "hit1_delta": -2,
+              "hit1_v017": 26,
+              "hit3": 42,
+              "hit3_delta": -1,
+              "hit3_v017": 43,
+              "mrr_at_10": 0.270446,
+              "mrr_at_10_v017": 0.279441,
+              "n": 126,
+              "r100": 80,
+              "r100_delta": 0,
+              "r100_v017": 80,
+              "r200": 83,
+              "r200_delta": 0,
+              "r200_v017": 83,
+              "stage_counts": {
+                "hard_blocked": 11,
+                "not_in_catalog": 0,
+                "not_recalled": 43,
+                "ranked_gt10": 22,
+                "top10_hit": 50
+              }
+            },
+            "设备": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.8,
+              "mrr_at_10_v017": 0.8,
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r100_v017": 5,
+              "r200": 5,
+              "r200_delta": 0,
+              "r200_v017": 5,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                21.44,
+                27.66
+              ],
+              "d": 729,
+              "n": 178,
+              "pct": 24.417
+            },
+            "delta_n": -2,
+            "v017": {
+              "d": 729,
+              "n": 180,
+              "pct": 24.6914
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                30.94,
+                37.81
+              ],
+              "d": 729,
+              "n": 250,
+              "pct": 34.2936
+            },
+            "delta_n": -4,
+            "v017": {
+              "d": 729,
+              "n": 254,
+              "pct": 34.8422
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.30634,
+            "delta": -0.002989,
+            "v017": 0.309329
+          },
+          "mrr_full": {
+            "current": 0.311334,
+            "delta": -0.00284,
+            "v017": 0.314174
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 152,
+              "n": 43,
+              "pct": 28.2895
+            }
+          },
+          "pending_rows": 226,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                51.1,
+                58.31
+              ],
+              "d": 729,
+              "n": 399,
+              "pct": 54.7325
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 729,
+              "n": 399,
+              "pct": 54.7325
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                54.82,
+                61.96
+              ],
+              "d": 729,
+              "n": 426,
+              "pct": 58.4362
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 729,
+              "n": 426,
+              "pct": 58.4362
+            }
+          },
+          "reject_rows": 152,
+          "rows": 1220,
+          "stage_counts": {
+            "hard_blocked": 37,
+            "not_in_catalog": 0,
+            "not_recalled": 303,
+            "ranked_gt10": 71,
+            "top10_hit": 318
+          },
+          "wrong_auto_binding": {
+            "d": 881,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 729,
+              "n": 270,
+              "pct": 37.037
+            },
+            "delta_n": 14,
+            "v017": {
+              "d": 729,
+              "n": 256,
+              "pct": 35.1166
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 152,
+              "n": 87,
+              "pct": 57.2368
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 152,
+              "n": 87,
+              "pct": 57.2368
+            }
+          }
+        },
+        "dev": {
+          "answerable_rows": 122,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fallback": 6,
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3
+          },
+          "domains": {
+            "暖通": {
+              "hit1": 3,
+              "hit1_delta": 0,
+              "hit1_v017": 3,
+              "hit3": 3,
+              "hit3_delta": 0,
+              "hit3_v017": 3,
+              "mrr_at_10": 0.544444,
+              "mrr_at_10_v017": 0.544444,
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r100_v017": 6,
+              "r200": 6,
+              "r200_delta": 0,
+              "r200_v017": 6,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 5
+              }
+            },
+            "装饰": {
+              "hit1": 21,
+              "hit1_delta": -2,
+              "hit1_v017": 23,
+              "hit3": 37,
+              "hit3_delta": -1,
+              "hit3_v017": 38,
+              "mrr_at_10": 0.27396,
+              "mrr_at_10_v017": 0.28417,
+              "n": 111,
+              "r100": 68,
+              "r100_delta": 0,
+              "r100_v017": 68,
+              "r200": 69,
+              "r200_delta": 0,
+              "r200_v017": 69,
+              "stage_counts": {
+                "hard_blocked": 11,
+                "not_in_catalog": 0,
+                "not_recalled": 42,
+                "ranked_gt10": 13,
+                "top10_hit": 45
+              }
+            },
+            "设备": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.8,
+              "mrr_at_10_v017": 0.8,
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r100_v017": 5,
+              "r200": 5,
+              "r200_delta": 0,
+              "r200_v017": 5,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                16.38,
+                31.17
+              ],
+              "d": 122,
+              "n": 28,
+              "pct": 22.9508
+            },
+            "delta_n": -2,
+            "v017": {
+              "d": 122,
+              "n": 30,
+              "pct": 24.5902
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                28.09,
+                44.89
+              ],
+              "d": 122,
+              "n": 44,
+              "pct": 36.0656
+            },
+            "delta_n": -1,
+            "v017": {
+              "d": 122,
+              "n": 45,
+              "pct": 36.8852
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 11,
+              "n": 1,
+              "pct": 9.0909
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 11,
+              "n": 1,
+              "pct": 9.0909
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.308821,
+            "delta": -0.00929,
+            "v017": 0.318111
+          },
+          "mrr_full": {
+            "current": 0.313966,
+            "delta": -0.009335,
+            "v017": 0.323301
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 38,
+              "n": 9,
+              "pct": 23.6842
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 38,
+              "n": 9,
+              "pct": 23.6842
+            }
+          },
+          "pending_rows": 40,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                55.94,
+                72.66
+              ],
+              "d": 122,
+              "n": 79,
+              "pct": 64.7541
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 122,
+              "n": 79,
+              "pct": 64.7541
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                56.78,
+                73.41
+              ],
+              "d": 122,
+              "n": 80,
+              "pct": 65.5738
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 122,
+              "n": 80,
+              "pct": 65.5738
+            }
+          },
+          "reject_rows": 38,
+          "rows": 218,
+          "stage_counts": {
+            "hard_blocked": 13,
+            "not_in_catalog": 0,
+            "not_recalled": 42,
+            "ranked_gt10": 13,
+            "top10_hit": 54
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 122,
+              "n": 25,
+              "pct": 20.4918
+            },
+            "delta_n": 3,
+            "v017": {
+              "d": 122,
+              "n": 22,
+              "pct": 18.0328
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 38,
+              "n": 23,
+              "pct": 60.5263
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 38,
+              "n": 23,
+              "pct": 60.5263
+            }
+          }
+        },
+        "test": {
+          "answerable_rows": 78,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fallback": 2,
+            "fts": 31,
+            "fts_extracted_name": 9,
+            "fts_zh": 9
+          },
+          "domains": {
+            "弱电": {
+              "hit1": 0,
+              "hit1_delta": 0,
+              "hit1_v017": 0,
+              "hit3": 0,
+              "hit3_delta": 0,
+              "hit3_v017": 0,
+              "mrr_at_10": 0.0,
+              "mrr_at_10_v017": 0.0,
+              "n": 2,
+              "r100": 0,
+              "r100_delta": 0,
+              "r100_v017": 0,
+              "r200": 0,
+              "r200_delta": 0,
+              "r200_v017": 0,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 2,
+                "ranked_gt10": 0,
+                "top10_hit": 0
+              }
+            },
+            "纯水": {
+              "hit1": 1,
+              "hit1_delta": 0,
+              "hit1_v017": 1,
+              "hit3": 1,
+              "hit3_delta": 0,
+              "hit3_v017": 1,
+              "mrr_at_10": 0.25,
+              "mrr_at_10_v017": 0.25,
+              "n": 4,
+              "r100": 2,
+              "r100_delta": 0,
+              "r100_v017": 2,
+              "r200": 2,
+              "r200_delta": 0,
+              "r200_v017": 2,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 2,
+                "ranked_gt10": 1,
+                "top10_hit": 1
+              }
+            },
+            "给排水": {
+              "hit1": 7,
+              "hit1_delta": 0,
+              "hit1_v017": 7,
+              "hit3": 9,
+              "hit3_delta": 0,
+              "hit3_v017": 9,
+              "mrr_at_10": 0.15614,
+              "mrr_at_10_v017": 0.15614,
+              "n": 57,
+              "r100": 18,
+              "r100_delta": 0,
+              "r100_v017": 18,
+              "r200": 18,
+              "r200_delta": 0,
+              "r200_v017": 18,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 39,
+                "ranked_gt10": 4,
+                "top10_hit": 14
+              }
+            },
+            "装饰": {
+              "hit1": 3,
+              "hit1_delta": 0,
+              "hit1_v017": 3,
+              "hit3": 5,
+              "hit3_delta": 0,
+              "hit3_v017": 5,
+              "mrr_at_10": 0.244444,
+              "mrr_at_10_v017": 0.244444,
+              "n": 15,
+              "r100": 12,
+              "r100_delta": 0,
+              "r100_v017": 12,
+              "r200": 14,
+              "r200_delta": 0,
+              "r200_v017": 14,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 1,
+                "ranked_gt10": 9,
+                "top10_hit": 5
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                8.06,
+                23.51
+              ],
+              "d": 78,
+              "n": 11,
+              "pct": 14.1026
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 11,
+              "pct": 14.1026
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                12.02,
+                29.33
+              ],
+              "d": 78,
+              "n": 15,
+              "pct": 19.2308
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 15,
+              "pct": 19.2308
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 13,
+              "n": 2,
+              "pct": 15.3846
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 13,
+              "n": 2,
+              "pct": 15.3846
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.173932,
+            "delta": 0.0,
+            "v017": 0.173932
+          },
+          "mrr_full": {
+            "current": 0.181665,
+            "delta": 0.0,
+            "v017": 0.181665
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 37,
+              "n": 17,
+              "pct": 45.9459
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 37,
+              "n": 17,
+              "pct": 45.9459
+            }
+          },
+          "pending_rows": 21,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                30.78,
+                52.11
+              ],
+              "d": 78,
+              "n": 32,
+              "pct": 41.0256
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 32,
+              "pct": 41.0256
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                33.14,
+                54.64
+              ],
+              "d": 78,
+              "n": 34,
+              "pct": 43.5897
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 34,
+              "pct": 43.5897
+            }
+          },
+          "reject_rows": 37,
+          "rows": 160,
+          "stage_counts": {
+            "hard_blocked": 0,
+            "not_in_catalog": 0,
+            "not_recalled": 44,
+            "ranked_gt10": 14,
+            "top10_hit": 20
+          },
+          "wrong_auto_binding": {
+            "d": 115,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 78,
+              "n": 39,
+              "pct": 50.0
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 39,
+              "pct": 50.0
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 37,
+              "n": 13,
+              "pct": 35.1351
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 37,
+              "n": 13,
+              "pct": 35.1351
+            }
+          }
+        },
+        "train": {
+          "answerable_rows": 529,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fallback": 10,
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33
+          },
+          "domains": {
+            "医用气体": {
+              "hit1": 23,
+              "hit1_delta": 0,
+              "hit1_v017": 23,
+              "hit3": 35,
+              "hit3_delta": 0,
+              "hit3_v017": 35,
+              "mrr_at_10": 0.281739,
+              "mrr_at_10_v017": 0.281739,
+              "n": 112,
+              "r100": 72,
+              "r100_delta": 0,
+              "r100_v017": 72,
+              "r200": 74,
+              "r200_delta": 0,
+              "r200_v017": 74,
+              "stage_counts": {
+                "hard_blocked": 9,
+                "not_in_catalog": 0,
+                "not_recalled": 38,
+                "ranked_gt10": 10,
+                "top10_hit": 55
+              }
+            },
+            "弱电": {
+              "hit1": 37,
+              "hit1_delta": 0,
+              "hit1_v017": 37,
+              "hit3": 54,
+              "hit3_delta": 0,
+              "hit3_v017": 54,
+              "mrr_at_10": 0.40827,
+              "mrr_at_10_v017": 0.407674,
+              "n": 112,
+              "r100": 70,
+              "r100_delta": 0,
+              "r100_v017": 70,
+              "r200": 74,
+              "r200_delta": 0,
+              "r200_v017": 74,
+              "stage_counts": {
+                "hard_blocked": 10,
+                "not_in_catalog": 0,
+                "not_recalled": 38,
+                "ranked_gt10": 7,
+                "top10_hit": 57
+              }
+            },
+            "强电": {
+              "hit1": 45,
+              "hit1_delta": 0,
+              "hit1_v017": 45,
+              "hit3": 61,
+              "hit3_delta": -2,
+              "hit3_v017": 63,
+              "mrr_at_10": 0.275729,
+              "mrr_at_10_v017": 0.279379,
+              "n": 202,
+              "r100": 81,
+              "r100_delta": 0,
+              "r100_v017": 81,
+              "r200": 82,
+              "r200_delta": 0,
+              "r200_v017": 82,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 120,
+                "ranked_gt10": 3,
+                "top10_hit": 79
+              }
+            },
+            "暖通": {
+              "hit1": 30,
+              "hit1_delta": 0,
+              "hit1_v017": 30,
+              "hit3": 37,
+              "hit3_delta": -1,
+              "hit3_v017": 38,
+              "mrr_at_10": 0.408153,
+              "mrr_at_10_v017": 0.412514,
+              "n": 86,
+              "r100": 56,
+              "r100_delta": 0,
+              "r100_v017": 56,
+              "r200": 73,
+              "r200_delta": 0,
+              "r200_v017": 73,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 13,
+                "ranked_gt10": 24,
+                "top10_hit": 49
+              }
+            },
+            "自控": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.235294,
+              "mrr_at_10_v017": 0.235294,
+              "n": 17,
+              "r100": 9,
+              "r100_delta": 0,
+              "r100_v017": 9,
+              "r200": 9,
+              "r200_delta": 0,
+              "r200_v017": 9,
+              "stage_counts": {
+                "hard_blocked": 5,
+                "not_in_catalog": 0,
+                "not_recalled": 8,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                22.71,
+                30.19
+              ],
+              "d": 529,
+              "n": 139,
+              "pct": 26.276
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 529,
+              "n": 139,
+              "pct": 26.276
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                32.13,
+                40.29
+              ],
+              "d": 529,
+              "n": 191,
+              "pct": 36.1059
+            },
+            "delta_n": -3,
+            "v017": {
+              "d": 529,
+              "n": 194,
+              "pct": 36.673
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 9,
+              "n": 0,
+              "pct": 0.0
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 9,
+              "n": 0,
+              "pct": 0.0
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.325292,
+            "delta": -0.001976,
+            "v017": 0.327268
+          },
+          "mrr_full": {
+            "current": 0.329846,
+            "delta": -0.001762,
+            "v017": 0.331608
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 77,
+              "n": 17,
+              "pct": 22.0779
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 77,
+              "n": 17,
+              "pct": 22.0779
+            }
+          },
+          "pending_rows": 165,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                50.18,
+                58.64
+              ],
+              "d": 529,
+              "n": 288,
+              "pct": 54.4423
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 529,
+              "n": 288,
+              "pct": 54.4423
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                54.74,
+                63.09
+              ],
+              "d": 529,
+              "n": 312,
+              "pct": 58.9792
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 529,
+              "n": 312,
+              "pct": 58.9792
+            }
+          },
+          "reject_rows": 77,
+          "rows": 842,
+          "stage_counts": {
+            "hard_blocked": 24,
+            "not_in_catalog": 0,
+            "not_recalled": 217,
+            "ranked_gt10": 44,
+            "top10_hit": 244
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 529,
+              "n": 206,
+              "pct": 38.9414
+            },
+            "delta_n": 11,
+            "v017": {
+              "d": 529,
+              "n": 195,
+              "pct": 36.862
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 77,
+              "n": 51,
+              "pct": 66.2338
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 77,
+              "n": 51,
+              "pct": 66.2338
+            }
+          }
+        }
+      },
+      "started_at": "2026-11-19T23:47:54.579690+08:00",
+      "test_holdout_miss_details": [
+        {
+          "channels": [],
+          "domain": "弱电",
+          "id": "GT-0181",
+          "name": "无线AP",
+          "pool_size": 1,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "弱电",
+          "id": "GT-0208",
+          "name": "电机接线盒",
+          "pool_size": 0,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "纯水",
+          "id": "GT-0832",
+          "name": "Y型过滤器",
+          "pool_size": 0,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "纯水",
+          "id": "GT-0834",
+          "name": "减压阀",
+          "pool_size": 91,
+          "rank": 12,
+          "recall_pos": 63,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "纯水",
+          "id": "GT-0840",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "给排水",
+          "id": "GT-0855",
+          "name": "不锈钢管",
+          "pool_size": 104,
+          "rank": 11,
+          "recall_pos": 64,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0869",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0870",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0871",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0872",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0873",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0874",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0875",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0876",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0877",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0878",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0879",
+          "name": "塑料管",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh"
+          ],
+          "domain": "给排水",
+          "id": "GT-0885",
+          "name": "复合管",
+          "pool_size": 100,
+          "rank": 17,
+          "recall_pos": 6,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh"
+          ],
+          "domain": "给排水",
+          "id": "GT-0886",
+          "name": "复合管",
+          "pool_size": 100,
+          "rank": 21,
+          "recall_pos": 3,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0890",
+          "name": "小便器",
+          "pool_size": 4,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0891",
+          "name": "水表",
+          "pool_size": 0,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0892",
+          "name": "淋浴器",
+          "pool_size": 5,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0894",
+          "name": "热水器、开水炉",
+          "pool_size": 13,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0900",
+          "name": "给、排水附(配)件",
+          "pool_size": 17,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0903",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0904",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0905",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0906",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0907",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0908",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0909",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0910",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0916",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0917",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0918",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0919",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0920",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0921",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0922",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0923",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0924",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0925",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0926",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0927",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0928",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0929",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0930",
+          "name": "螺纹阀门",
+          "pool_size": 56,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "给排水",
+          "id": "GT-0933",
+          "name": "软水机",
+          "pool_size": 75,
+          "rank": 47,
+          "recall_pos": 5,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1056",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 150,
+          "rank": 46,
+          "recall_pos": 79,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1059",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 150,
+          "rank": 38,
+          "recall_pos": 56,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1060",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 150,
+          "rank": 37,
+          "recall_pos": 53,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1061",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 150,
+          "rank": 51,
+          "recall_pos": 93,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1062",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 150,
+          "rank": 50,
+          "recall_pos": 92,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "装饰",
+          "id": "GT-1081",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 150,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1082",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 150,
+          "rank": 16,
+          "recall_pos": 122,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1085",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 150,
+          "rank": 35,
+          "recall_pos": 52,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1086",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 150,
+          "rank": 54,
+          "recall_pos": 91,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1087",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 150,
+          "rank": 13,
+          "recall_pos": 117,
+          "states": [
+            "ranked_gt10"
+          ]
+        }
+      ],
+      "v017_gate_check": {
+        "domains": {
+          "医用气体": {
+            "floor": [
+              72,
+              74,
+              23
+            ],
+            "hit1_ok": true,
+            "observed": [
+              72,
+              74,
+              23
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "弱电": {
+            "floor": [
+              70,
+              74,
+              37
+            ],
+            "hit1_ok": true,
+            "observed": [
+              70,
+              74,
+              37
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "强电": {
+            "floor": [
+              81,
+              82,
+              45
+            ],
+            "hit1_ok": true,
+            "observed": [
+              81,
+              82,
+              45
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "暖通": {
+            "floor": [
+              62,
+              79,
+              33
+            ],
+            "hit1_ok": true,
+            "observed": [
+              62,
+              79,
+              33
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "给排水": {
+            "floor": [
+              18,
+              18,
+              7
+            ],
+            "hit1_ok": true,
+            "observed": [
+              18,
+              18,
+              7
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "装饰": {
+            "floor": [
+              80,
+              83,
+              26
+            ],
+            "hit1_ok": false,
+            "observed": [
+              80,
+              83,
+              24
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          }
+        },
+        "global": {
+          "hit1_ok": false,
+          "hit3_ok": false,
+          "kit_top10_ok": true,
+          "mrr10_ok": false,
+          "mrr_full_ok": false,
+          "neg_rejection_ok": true,
+          "r100_ok": true,
+          "r200_ok": true,
+          "single_p50_ok": true,
+          "single_p95_ok": true,
+          "up50_p50_ok": true,
+          "up50_p95_ok": true,
+          "wrong_auto_binding_ok": true,
+          "wrong_proposed_ans_ok": false,
+          "wrong_proposed_neg_ok": true,
+          "wset_ok": true
+        }
+      }
+    },
+    "vector": {
+      "evaluation_seconds": 3778.58,
+      "gt_guard_status": {
+        "GT-0674": "recommended",
+        "GT-0677": "recommended",
+        "GT-0678": "recommended"
+      },
+      "hardware": {
+        "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+        "logical_cores": 20,
+        "os": "Windows-11-10.0.26300-SP0",
+        "physical_cores": 14,
+        "python": "3.12.10",
+        "ram_mib": 16068.73828125
+      },
+      "index": {
+        "dimension": 512,
+        "enabled": true,
+        "faiss": false,
+        "rows": 26863
+      },
+      "latency": {
+        "single_all": {
+          "max_ms": 829.258,
+          "min_ms": 29.085,
+          "n": 1220,
+          "p50_ms": 60.929,
+          "p95_ms": 280.283
+        },
+        "single_domains": {
+          "医用气体": {
+            "max_ms": 399.121,
+            "min_ms": 35.509,
+            "n": 147,
+            "p50_ms": 61.071,
+            "p95_ms": 117.919
+          },
+          "弱电": {
+            "max_ms": 143.659,
+            "min_ms": 33.778,
+            "n": 143,
+            "p50_ms": 53.661,
+            "p95_ms": 100.689
+          },
+          "强电": {
+            "max_ms": 299.585,
+            "min_ms": 31.824,
+            "n": 288,
+            "p50_ms": 59.789,
+            "p95_ms": 282.847
+          },
+          "暖通": {
+            "max_ms": 829.258,
+            "min_ms": 33.173,
+            "n": 252,
+            "p50_ms": 72.701,
+            "p95_ms": 775.0
+          },
+          "洁净装饰": {
+            "max_ms": 68.478,
+            "min_ms": 68.478,
+            "n": 1,
+            "p50_ms": 68.478,
+            "p95_ms": 68.478
+          },
+          "纯水": {
+            "max_ms": 84.262,
+            "min_ms": 57.577,
+            "n": 18,
+            "p50_ms": 63.143,
+            "p95_ms": 84.262
+          },
+          "给排水": {
+            "max_ms": 138.733,
+            "min_ms": 33.778,
+            "n": 110,
+            "p50_ms": 64.852,
+            "p95_ms": 111.335
+          },
+          "自控": {
+            "max_ms": 152.96,
+            "min_ms": 42.122,
+            "n": 21,
+            "p50_ms": 52.942,
+            "p95_ms": 152.464
+          },
+          "装饰": {
+            "max_ms": 183.743,
+            "min_ms": 29.085,
+            "n": 233,
+            "p50_ms": 61.508,
+            "p95_ms": 137.756
+          },
+          "设备": {
+            "max_ms": 67.191,
+            "min_ms": 38.91,
+            "n": 7,
+            "p50_ms": 64.481,
+            "p95_ms": 67.191
+          }
+        },
+        "upload_all": {
+          "max_ms": 23763.758,
+          "min_ms": 1651.375,
+          "n": 25,
+          "p50_ms": 4059.383,
+          "p95_ms": 9346.712
+        },
+        "upload_batch_sizes": {
+          "20": 1,
+          "50": 24
+        },
+        "upload_full_batches": {
+          "max_ms": 23763.758,
+          "min_ms": 2222.792,
+          "n": 24,
+          "p50_ms": 4059.383,
+          "p95_ms": 9346.712
+        }
+      },
+      "model_metadata": {
+        "active_db_revision": 0,
+        "active_item_count": 26863,
+        "active_text_schema_version": "legacy-v1",
+        "active_use_faiss": false,
+        "candidate_versions_loaded": [],
+        "dimension": 512,
+        "model_name": "bge-small-zh-v1.5",
+        "offline_path_exists": true,
+        "tokenizer": {
+          "do_lower_case": false,
+          "model_max_length": 512,
+          "tokenizer_class": "BertTokenizer"
+        }
+      },
+      "peak_wset_mib": 1714.1,
+      "phases": {
+        "batch_http": {
+          "process_peak_working_set_mib": 1714.1015625,
+          "sampled_peak_rss_mib": 1309.70703125,
+          "seconds": 127.9681184000001
+        },
+        "full_rank_replay": {
+          "process_peak_working_set_mib": 1714.1015625,
+          "sampled_peak_rss_mib": 1706.8515625,
+          "seconds": 3778.652856500001
+        },
+        "single_http": {
+          "process_peak_working_set_mib": 1714.1015625,
+          "sampled_peak_rss_mib": 1000.4453125,
+          "seconds": 118.94790400000056
+        },
+        "startup_prepare": {
+          "process_peak_working_set_mib": 484.3671875,
+          "sampled_peak_rss_mib": 484.36328125,
+          "seconds": 6.361588799998572
+        },
+        "warmup": {
+          "process_peak_working_set_mib": 726.42578125,
+          "sampled_peak_rss_mib": 718.66015625,
+          "seconds": 1.5906106000002183
+        }
+      },
+      "semantic_rows": 1220,
+      "splits": {
+        "all": {
+          "answerable_rows": 729,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fts": 358,
+            "fts_extracted_name": 72,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 83,
+            "model_match": 36,
+            "semantic": 562
+          },
+          "domains": {
+            "医用气体": {
+              "hit1": 22,
+              "hit1_delta": 0,
+              "hit1_v017": 22,
+              "hit3": 30,
+              "hit3_delta": 0,
+              "hit3_v017": 30,
+              "mrr_at_10": 0.264828,
+              "mrr_at_10_v017": 0.262596,
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r100_v017": 92,
+              "r200": 94,
+              "r200_delta": 0,
+              "r200_v017": 94,
+              "stage_counts": {
+                "hard_blocked": 9,
+                "not_in_catalog": 0,
+                "not_recalled": 18,
+                "ranked_gt10": 32,
+                "top10_hit": 53
+              }
+            },
+            "弱电": {
+              "hit1": 25,
+              "hit1_delta": 0,
+              "hit1_v017": 25,
+              "hit3": 38,
+              "hit3_delta": -1,
+              "hit3_v017": 39,
+              "mrr_at_10": 0.300473,
+              "mrr_at_10_v017": 0.300912,
+              "n": 114,
+              "r100": 83,
+              "r100_delta": 0,
+              "r100_v017": 83,
+              "r200": 98,
+              "r200_delta": 0,
+              "r200_v017": 98,
+              "stage_counts": {
+                "hard_blocked": 22,
+                "not_in_catalog": 0,
+                "not_recalled": 16,
+                "ranked_gt10": 23,
+                "top10_hit": 53
+              }
+            },
+            "强电": {
+              "hit1": 50,
+              "hit1_delta": 0,
+              "hit1_v017": 50,
+              "hit3": 74,
+              "hit3_delta": -7,
+              "hit3_v017": 81,
+              "mrr_at_10": 0.332084,
+              "mrr_at_10_v017": 0.348751,
+              "n": 202,
+              "r100": 166,
+              "r100_delta": 0,
+              "r100_v017": 166,
+              "r200": 171,
+              "r200_delta": 0,
+              "r200_v017": 171,
+              "stage_counts": {
+                "hard_blocked": 19,
+                "not_in_catalog": 0,
+                "not_recalled": 31,
+                "ranked_gt10": 41,
+                "top10_hit": 111
+              }
+            },
+            "暖通": {
+              "hit1": 31,
+              "hit1_delta": 2,
+              "hit1_v017": 29,
+              "hit3": 44,
+              "hit3_delta": 0,
+              "hit3_v017": 44,
+              "mrr_at_10": 0.422567,
+              "mrr_at_10_v017": 0.412604,
+              "n": 92,
+              "r100": 69,
+              "r100_delta": 0,
+              "r100_v017": 69,
+              "r200": 90,
+              "r200_delta": 0,
+              "r200_v017": 90,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 2,
+                "ranked_gt10": 30,
+                "top10_hit": 59
+              }
+            },
+            "纯水": {
+              "hit1": 2,
+              "hit1_delta": 0,
+              "hit1_v017": 2,
+              "hit3": 2,
+              "hit3_delta": 0,
+              "hit3_v017": 2,
+              "mrr_at_10": 0.525,
+              "mrr_at_10_v017": 0.525,
+              "n": 4,
+              "r100": 4,
+              "r100_delta": 0,
+              "r100_v017": 4,
+              "r200": 4,
+              "r200_delta": 0,
+              "r200_v017": 4,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 1,
+                "top10_hit": 3
+              }
+            },
+            "给排水": {
+              "hit1": 19,
+              "hit1_delta": 0,
+              "hit1_v017": 19,
+              "hit3": 37,
+              "hit3_delta": 0,
+              "hit3_v017": 37,
+              "mrr_at_10": 0.505848,
+              "mrr_at_10_v017": 0.505848,
+              "n": 57,
+              "r100": 50,
+              "r100_delta": 0,
+              "r100_v017": 50,
+              "r200": 50,
+              "r200_delta": 0,
+              "r200_v017": 50,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 7,
+                "ranked_gt10": 7,
+                "top10_hit": 43
+              }
+            },
+            "自控": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 6,
+              "hit3_delta": 0,
+              "hit3_v017": 6,
+              "mrr_at_10": 0.27451,
+              "mrr_at_10_v017": 0.27451,
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r100_v017": 11,
+              "r200": 14,
+              "r200_delta": 0,
+              "r200_v017": 14,
+              "stage_counts": {
+                "hard_blocked": 8,
+                "not_in_catalog": 0,
+                "not_recalled": 3,
+                "ranked_gt10": 0,
+                "top10_hit": 6
+              }
+            },
+            "装饰": {
+              "hit1": 28,
+              "hit1_delta": -1,
+              "hit1_v017": 29,
+              "hit3": 44,
+              "hit3_delta": -1,
+              "hit3_v017": 45,
+              "mrr_at_10": 0.308497,
+              "mrr_at_10_v017": 0.314449,
+              "n": 126,
+              "r100": 114,
+              "r100_delta": 0,
+              "r100_v017": 114,
+              "r200": 117,
+              "r200_delta": 0,
+              "r200_v017": 117,
+              "stage_counts": {
+                "hard_blocked": 21,
+                "not_in_catalog": 0,
+                "not_recalled": 9,
+                "ranked_gt10": 30,
+                "top10_hit": 66
+              }
+            },
+            "设备": {
+              "hit1": 3,
+              "hit1_delta": 0,
+              "hit1_v017": 3,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.7,
+              "mrr_at_10_v017": 0.7,
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r100_v017": 5,
+              "r200": 5,
+              "r200_delta": 0,
+              "r200_v017": 5,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                22.22,
+                28.52
+              ],
+              "d": 729,
+              "n": 184,
+              "pct": 25.2401
+            },
+            "delta_n": 1,
+            "v017": {
+              "d": 729,
+              "n": 183,
+              "pct": 25.1029
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                34.81,
+                41.85
+              ],
+              "d": 729,
+              "n": 279,
+              "pct": 38.2716
+            },
+            "delta_n": -9,
+            "v017": {
+              "d": 729,
+              "n": 288,
+              "pct": 39.5062
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 33,
+              "n": 3,
+              "pct": 9.0909
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.339976,
+            "delta": -0.004115,
+            "v017": 0.344091
+          },
+          "mrr_full": {
+            "current": 0.351991,
+            "delta": -0.003312,
+            "v017": 0.355303
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 152,
+              "n": 42,
+              "pct": 27.6316
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 152,
+              "n": 42,
+              "pct": 27.6316
+            }
+          },
+          "pending_rows": 226,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                78.5,
+                84.13
+              ],
+              "d": 729,
+              "n": 594,
+              "pct": 81.4815
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 729,
+              "n": 594,
+              "pct": 81.4815
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                85.66,
+                90.35
+              ],
+              "d": 729,
+              "n": 643,
+              "pct": 88.203
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 729,
+              "n": 643,
+              "pct": 88.203
+            }
+          },
+          "reject_rows": 152,
+          "rows": 1220,
+          "stage_counts": {
+            "hard_blocked": 81,
+            "not_in_catalog": 0,
+            "not_recalled": 86,
+            "ranked_gt10": 164,
+            "top10_hit": 398
+          },
+          "wrong_auto_binding": {
+            "d": 881,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 729,
+              "n": 379,
+              "pct": 51.989
+            },
+            "delta_n": 11,
+            "v017": {
+              "d": 729,
+              "n": 368,
+              "pct": 50.4801
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 152,
+              "n": 109,
+              "pct": 71.7105
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 152,
+              "n": 109,
+              "pct": 71.7105
+            }
+          }
+        },
+        "dev": {
+          "answerable_rows": 122,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 105
+          },
+          "domains": {
+            "暖通": {
+              "hit1": 3,
+              "hit1_delta": 0,
+              "hit1_v017": 3,
+              "hit3": 3,
+              "hit3_delta": 0,
+              "hit3_v017": 3,
+              "mrr_at_10": 0.5375,
+              "mrr_at_10_v017": 0.5375,
+              "n": 6,
+              "r100": 6,
+              "r100_delta": 0,
+              "r100_v017": 6,
+              "r200": 6,
+              "r200_delta": 0,
+              "r200_v017": 6,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 5
+              }
+            },
+            "装饰": {
+              "hit1": 26,
+              "hit1_delta": -1,
+              "hit1_v017": 27,
+              "hit3": 41,
+              "hit3_delta": -1,
+              "hit3_v017": 42,
+              "mrr_at_10": 0.323159,
+              "mrr_at_10_v017": 0.329916,
+              "n": 111,
+              "r100": 102,
+              "r100_delta": 0,
+              "r100_v017": 102,
+              "r200": 103,
+              "r200_delta": 0,
+              "r200_v017": 103,
+              "stage_counts": {
+                "hard_blocked": 21,
+                "not_in_catalog": 0,
+                "not_recalled": 8,
+                "ranked_gt10": 21,
+                "top10_hit": 61
+              }
+            },
+            "设备": {
+              "hit1": 3,
+              "hit1_delta": 0,
+              "hit1_v017": 3,
+              "hit3": 4,
+              "hit3_delta": 0,
+              "hit3_v017": 4,
+              "mrr_at_10": 0.7,
+              "mrr_at_10_v017": 0.7,
+              "n": 5,
+              "r100": 5,
+              "r100_delta": 0,
+              "r100_v017": 5,
+              "r200": 5,
+              "r200_delta": 0,
+              "r200_v017": 5,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 4
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                19.24,
+                34.67
+              ],
+              "d": 122,
+              "n": 32,
+              "pct": 26.2295
+            },
+            "delta_n": -1,
+            "v017": {
+              "d": 122,
+              "n": 33,
+              "pct": 27.0492
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                31.13,
+                48.21
+              ],
+              "d": 122,
+              "n": 48,
+              "pct": 39.3443
+            },
+            "delta_n": -1,
+            "v017": {
+              "d": 122,
+              "n": 49,
+              "pct": 40.1639
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 11,
+              "n": 1,
+              "pct": 9.0909
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 11,
+              "n": 1,
+              "pct": 9.0909
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.349145,
+            "delta": -0.006147,
+            "v017": 0.355292
+          },
+          "mrr_full": {
+            "current": 0.357772,
+            "delta": -0.006148,
+            "v017": 0.36392
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 38,
+              "n": 13,
+              "pct": 34.2105
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 38,
+              "n": 13,
+              "pct": 34.2105
+            }
+          },
+          "pending_rows": 40,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                86.57,
+                96.07
+              ],
+              "d": 122,
+              "n": 113,
+              "pct": 92.623
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 122,
+              "n": 113,
+              "pct": 92.623
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                87.59,
+                96.64
+              ],
+              "d": 122,
+              "n": 114,
+              "pct": 93.4426
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 122,
+              "n": 114,
+              "pct": 93.4426
+            }
+          },
+          "reject_rows": 38,
+          "rows": 218,
+          "stage_counts": {
+            "hard_blocked": 23,
+            "not_in_catalog": 0,
+            "not_recalled": 8,
+            "ranked_gt10": 21,
+            "top10_hit": 70
+          },
+          "wrong_auto_binding": {
+            "d": 160,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 122,
+              "n": 27,
+              "pct": 22.1311
+            },
+            "delta_n": 2,
+            "v017": {
+              "d": 122,
+              "n": 25,
+              "pct": 20.4918
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 38,
+              "n": 24,
+              "pct": 63.1579
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 38,
+              "n": 24,
+              "pct": 63.1579
+            }
+          }
+        },
+        "test": {
+          "answerable_rows": 78,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fts": 31,
+            "fts_extracted_name": 9,
+            "fts_zh": 9,
+            "semantic": 68
+          },
+          "domains": {
+            "弱电": {
+              "hit1": 0,
+              "hit1_delta": 0,
+              "hit1_v017": 0,
+              "hit3": 0,
+              "hit3_delta": 0,
+              "hit3_v017": 0,
+              "mrr_at_10": 0.125,
+              "mrr_at_10_v017": 0.125,
+              "n": 2,
+              "r100": 2,
+              "r100_delta": 0,
+              "r100_v017": 2,
+              "r200": 2,
+              "r200_delta": 0,
+              "r200_v017": 2,
+              "stage_counts": {
+                "hard_blocked": 1,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 0,
+                "top10_hit": 1
+              }
+            },
+            "纯水": {
+              "hit1": 2,
+              "hit1_delta": 0,
+              "hit1_v017": 2,
+              "hit3": 2,
+              "hit3_delta": 0,
+              "hit3_v017": 2,
+              "mrr_at_10": 0.525,
+              "mrr_at_10_v017": 0.525,
+              "n": 4,
+              "r100": 4,
+              "r100_delta": 0,
+              "r100_v017": 4,
+              "r200": 4,
+              "r200_delta": 0,
+              "r200_v017": 4,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 0,
+                "ranked_gt10": 1,
+                "top10_hit": 3
+              }
+            },
+            "给排水": {
+              "hit1": 19,
+              "hit1_delta": 0,
+              "hit1_v017": 19,
+              "hit3": 37,
+              "hit3_delta": 0,
+              "hit3_v017": 37,
+              "mrr_at_10": 0.505848,
+              "mrr_at_10_v017": 0.505848,
+              "n": 57,
+              "r100": 50,
+              "r100_delta": 0,
+              "r100_v017": 50,
+              "r200": 50,
+              "r200_delta": 0,
+              "r200_v017": 50,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 7,
+                "ranked_gt10": 7,
+                "top10_hit": 43
+              }
+            },
+            "装饰": {
+              "hit1": 2,
+              "hit1_delta": 0,
+              "hit1_v017": 2,
+              "hit3": 3,
+              "hit3_delta": 0,
+              "hit3_v017": 3,
+              "mrr_at_10": 0.2,
+              "mrr_at_10_v017": 0.2,
+              "n": 15,
+              "r100": 12,
+              "r100_delta": 0,
+              "r100_v017": 12,
+              "r200": 14,
+              "r200_delta": 0,
+              "r200_v017": 14,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 1,
+                "ranked_gt10": 9,
+                "top10_hit": 5
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                20.52,
+                40.38
+              ],
+              "d": 78,
+              "n": 23,
+              "pct": 29.4872
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 23,
+              "pct": 29.4872
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                42.86,
+                64.47
+              ],
+              "d": 78,
+              "n": 42,
+              "pct": 53.8462
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 42,
+              "pct": 53.8462
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 13,
+              "n": 1,
+              "pct": 7.6923
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 13,
+              "n": 1,
+              "pct": 7.6923
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.438248,
+            "delta": 0.0,
+            "v017": 0.438248
+          },
+          "mrr_full": {
+            "current": 0.448241,
+            "delta": 0.0,
+            "v017": 0.448241
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 37,
+              "n": 19,
+              "pct": 51.3514
+            }
+          },
+          "pending_rows": 21,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                77.98,
+                92.88
+              ],
+              "d": 78,
+              "n": 68,
+              "pct": 87.1795
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 68,
+              "pct": 87.1795
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                81.05,
+                94.71
+              ],
+              "d": 78,
+              "n": 70,
+              "pct": 89.7436
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 70,
+              "pct": 89.7436
+            }
+          },
+          "reject_rows": 37,
+          "rows": 160,
+          "stage_counts": {
+            "hard_blocked": 1,
+            "not_in_catalog": 0,
+            "not_recalled": 8,
+            "ranked_gt10": 17,
+            "top10_hit": 52
+          },
+          "wrong_auto_binding": {
+            "d": 115,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 78,
+              "n": 35,
+              "pct": 44.8718
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 78,
+              "n": 35,
+              "pct": 44.8718
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 37,
+              "n": 18,
+              "pct": 48.6486
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 37,
+              "n": 18,
+              "pct": 48.6486
+            }
+          }
+        },
+        "train": {
+          "answerable_rows": 529,
+          "auto_accepted_ans": 0,
+          "auto_accepted_neg": 0,
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 389
+          },
+          "domains": {
+            "医用气体": {
+              "hit1": 22,
+              "hit1_delta": 0,
+              "hit1_v017": 22,
+              "hit3": 30,
+              "hit3_delta": 0,
+              "hit3_v017": 30,
+              "mrr_at_10": 0.264828,
+              "mrr_at_10_v017": 0.262596,
+              "n": 112,
+              "r100": 92,
+              "r100_delta": 0,
+              "r100_v017": 92,
+              "r200": 94,
+              "r200_delta": 0,
+              "r200_v017": 94,
+              "stage_counts": {
+                "hard_blocked": 9,
+                "not_in_catalog": 0,
+                "not_recalled": 18,
+                "ranked_gt10": 32,
+                "top10_hit": 53
+              }
+            },
+            "弱电": {
+              "hit1": 25,
+              "hit1_delta": 0,
+              "hit1_v017": 25,
+              "hit3": 38,
+              "hit3_delta": -1,
+              "hit3_v017": 39,
+              "mrr_at_10": 0.303607,
+              "mrr_at_10_v017": 0.304053,
+              "n": 112,
+              "r100": 81,
+              "r100_delta": 0,
+              "r100_v017": 81,
+              "r200": 96,
+              "r200_delta": 0,
+              "r200_v017": 96,
+              "stage_counts": {
+                "hard_blocked": 21,
+                "not_in_catalog": 0,
+                "not_recalled": 16,
+                "ranked_gt10": 23,
+                "top10_hit": 52
+              }
+            },
+            "强电": {
+              "hit1": 50,
+              "hit1_delta": 0,
+              "hit1_v017": 50,
+              "hit3": 74,
+              "hit3_delta": -7,
+              "hit3_v017": 81,
+              "mrr_at_10": 0.332084,
+              "mrr_at_10_v017": 0.348751,
+              "n": 202,
+              "r100": 166,
+              "r100_delta": 0,
+              "r100_v017": 166,
+              "r200": 171,
+              "r200_delta": 0,
+              "r200_v017": 171,
+              "stage_counts": {
+                "hard_blocked": 19,
+                "not_in_catalog": 0,
+                "not_recalled": 31,
+                "ranked_gt10": 41,
+                "top10_hit": 111
+              }
+            },
+            "暖通": {
+              "hit1": 28,
+              "hit1_delta": 2,
+              "hit1_v017": 26,
+              "hit3": 41,
+              "hit3_delta": 0,
+              "hit3_v017": 41,
+              "mrr_at_10": 0.414549,
+              "mrr_at_10_v017": 0.40389,
+              "n": 86,
+              "r100": 63,
+              "r100_delta": 0,
+              "r100_v017": 63,
+              "r200": 84,
+              "r200_delta": 0,
+              "r200_v017": 84,
+              "stage_counts": {
+                "hard_blocked": 0,
+                "not_in_catalog": 0,
+                "not_recalled": 2,
+                "ranked_gt10": 30,
+                "top10_hit": 54
+              }
+            },
+            "自控": {
+              "hit1": 4,
+              "hit1_delta": 0,
+              "hit1_v017": 4,
+              "hit3": 6,
+              "hit3_delta": 0,
+              "hit3_v017": 6,
+              "mrr_at_10": 0.27451,
+              "mrr_at_10_v017": 0.27451,
+              "n": 17,
+              "r100": 11,
+              "r100_delta": 0,
+              "r100_v017": 11,
+              "r200": 14,
+              "r200_delta": 0,
+              "r200_v017": 14,
+              "stage_counts": {
+                "hard_blocked": 8,
+                "not_in_catalog": 0,
+                "not_recalled": 3,
+                "ranked_gt10": 0,
+                "top10_hit": 6
+              }
+            }
+          },
+          "hit_at_1": {
+            "current": {
+              "ci95_pct": [
+                20.92,
+                28.22
+              ],
+              "d": 529,
+              "n": 129,
+              "pct": 24.3856
+            },
+            "delta_n": 2,
+            "v017": {
+              "d": 529,
+              "n": 127,
+              "pct": 24.0076
+            }
+          },
+          "hit_at_3": {
+            "current": {
+              "ci95_pct": [
+                31.76,
+                39.9
+              ],
+              "d": 529,
+              "n": 189,
+              "pct": 35.7278
+            },
+            "delta_n": -8,
+            "v017": {
+              "d": 529,
+              "n": 197,
+              "pct": 37.2401
+            }
+          },
+          "kit_confirmed_all_components_top10": {
+            "current": {
+              "d": 9,
+              "n": 1,
+              "pct": 11.1111
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 9,
+              "n": 1,
+              "pct": 11.1111
+            }
+          },
+          "mrr_at_10": {
+            "current": 0.323371,
+            "delta": -0.004254,
+            "v017": 0.327625
+          },
+          "mrr_full": {
+            "current": 0.336466,
+            "delta": -0.003147,
+            "v017": 0.339613
+          },
+          "negative_explicit_rejection": {
+            "current": {
+              "d": 77,
+              "n": 10,
+              "pct": 12.987
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 77,
+              "n": 10,
+              "pct": 12.987
+            }
+          },
+          "pending_rows": 165,
+          "recall_at_100": {
+            "current": {
+              "ci95_pct": [
+                74.35,
+                81.39
+              ],
+              "d": 529,
+              "n": 413,
+              "pct": 78.0718
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 529,
+              "n": 413,
+              "pct": 78.0718
+            }
+          },
+          "recall_at_200": {
+            "current": {
+              "ci95_pct": [
+                83.61,
+                89.39
+              ],
+              "d": 529,
+              "n": 459,
+              "pct": 86.7675
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 529,
+              "n": 459,
+              "pct": 86.7675
+            }
+          },
+          "reject_rows": 77,
+          "rows": 842,
+          "stage_counts": {
+            "hard_blocked": 57,
+            "not_in_catalog": 0,
+            "not_recalled": 70,
+            "ranked_gt10": 126,
+            "top10_hit": 276
+          },
+          "wrong_auto_binding": {
+            "d": 606,
+            "n": 0
+          },
+          "wrong_proposed_binding_ans": {
+            "current": {
+              "d": 529,
+              "n": 317,
+              "pct": 59.9244
+            },
+            "delta_n": 9,
+            "v017": {
+              "d": 529,
+              "n": 308,
+              "pct": 58.2231
+            }
+          },
+          "wrong_proposed_binding_neg": {
+            "current": {
+              "d": 77,
+              "n": 67,
+              "pct": 87.013
+            },
+            "delta_n": 0,
+            "v017": {
+              "d": 77,
+              "n": 67,
+              "pct": 87.013
+            }
+          }
+        }
+      },
+      "started_at": "2026-11-20T00:55:10.647730+08:00",
+      "test_holdout_miss_details": [
+        {
+          "channels": [
+            "semantic"
+          ],
+          "domain": "弱电",
+          "id": "GT-0208",
+          "name": "电机接线盒",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": 22,
+          "states": [
+            "hard_blocked"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "纯水",
+          "id": "GT-0834",
+          "name": "减压阀",
+          "pool_size": 91,
+          "rank": 12,
+          "recall_pos": 63,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "给排水",
+          "id": "GT-0855",
+          "name": "不锈钢管",
+          "pool_size": 104,
+          "rank": 11,
+          "recall_pos": 64,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts_extracted_name",
+            "fts_zh",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0863",
+          "name": "其他成品卫生器具",
+          "pool_size": 50,
+          "rank": 23,
+          "recall_pos": 4,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0871",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0875",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0876",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0877",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0878",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0879",
+          "name": "塑料管",
+          "pool_size": 50,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0885",
+          "name": "复合管",
+          "pool_size": 102,
+          "rank": 18,
+          "recall_pos": 6,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0886",
+          "name": "复合管",
+          "pool_size": 102,
+          "rank": 23,
+          "recall_pos": 3,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "给排水",
+          "id": "GT-0900",
+          "name": "给、排水附(配)件",
+          "pool_size": 51,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0933",
+          "name": "软水机",
+          "pool_size": 83,
+          "rank": 34,
+          "recall_pos": 5,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0939",
+          "name": "镀锌隔离防护槽",
+          "pool_size": 50,
+          "rank": 16,
+          "recall_pos": 1,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "fts_extracted_name",
+            "fts_zh",
+            "semantic"
+          ],
+          "domain": "给排水",
+          "id": "GT-0940",
+          "name": "镀锌隔离防护槽",
+          "pool_size": 50,
+          "rank": 16,
+          "recall_pos": 2,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1056",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 160,
+          "rank": 35,
+          "recall_pos": 79,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1059",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 159,
+          "rank": 36,
+          "recall_pos": 56,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1060",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 157,
+          "rank": 22,
+          "recall_pos": 53,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1061",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 159,
+          "rank": 33,
+          "recall_pos": 93,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts"
+          ],
+          "domain": "装饰",
+          "id": "GT-1062",
+          "name": "成品乙级钢制防火门",
+          "pool_size": 159,
+          "rank": 69,
+          "recall_pos": 92,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [],
+          "domain": "装饰",
+          "id": "GT-1081",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 156,
+          "rank": null,
+          "recall_pos": null,
+          "states": [
+            "not_recalled"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1082",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 158,
+          "rank": 24,
+          "recall_pos": 122,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1085",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 156,
+          "rank": 32,
+          "recall_pos": 52,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1086",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 156,
+          "rank": 38,
+          "recall_pos": 91,
+          "states": [
+            "ranked_gt10"
+          ]
+        },
+        {
+          "channels": [
+            "fts",
+            "semantic"
+          ],
+          "domain": "装饰",
+          "id": "GT-1087",
+          "name": "成品甲级钢制防火门",
+          "pool_size": 156,
+          "rank": 16,
+          "recall_pos": 117,
+          "states": [
+            "ranked_gt10"
+          ]
+        }
+      ],
+      "v017_gate_check": {
+        "domains": {
+          "医用气体": {
+            "floor": [
+              92,
+              94,
+              22
+            ],
+            "hit1_ok": true,
+            "observed": [
+              92,
+              94,
+              22
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "弱电": {
+            "floor": [
+              83,
+              98,
+              25
+            ],
+            "hit1_ok": true,
+            "observed": [
+              83,
+              98,
+              25
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "强电": {
+            "floor": [
+              166,
+              171,
+              50
+            ],
+            "hit1_ok": true,
+            "observed": [
+              166,
+              171,
+              50
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "暖通": {
+            "floor": [
+              69,
+              90,
+              29
+            ],
+            "hit1_ok": true,
+            "observed": [
+              69,
+              90,
+              31
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "给排水": {
+            "floor": [
+              50,
+              50,
+              19
+            ],
+            "hit1_ok": true,
+            "observed": [
+              50,
+              50,
+              19
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          },
+          "装饰": {
+            "floor": [
+              114,
+              117,
+              29
+            ],
+            "hit1_ok": false,
+            "observed": [
+              114,
+              117,
+              28
+            ],
+            "r100_ok": true,
+            "r200_ok": true
+          }
+        },
+        "global": {
+          "hit1_ok": true,
+          "hit3_ok": false,
+          "kit_top10_ok": true,
+          "mrr10_ok": false,
+          "mrr_full_ok": false,
+          "neg_rejection_ok": true,
+          "r100_ok": true,
+          "r200_ok": true,
+          "single_p50_ok": true,
+          "single_p95_ok": true,
+          "up50_p50_ok": true,
+          "up50_p95_ok": true,
+          "wrong_auto_binding_ok": true,
+          "wrong_proposed_ans_ok": false,
+          "wrong_proposed_neg_ok": true,
+          "wset_ok": true
+        }
+      }
+    }
+  },
+  "package": "V018-M3/R01",
+  "stage": "ONE_SHOT_POST_FREEZE_HOLDOUT_VERIFICATION"
+}

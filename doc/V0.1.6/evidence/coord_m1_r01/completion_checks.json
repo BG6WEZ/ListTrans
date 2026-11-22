@@ -1,0 +1,16 @@
+{
+  "sandbox_attempt": "Interrupted during collection; not a test pass/failure result. Unified exec interruption returned 1. Original log retained.",
+  "socketpair_probe": "Minimal child socket.socketpair exceeded subprocess.run timeout=8; timeout child was terminated.",
+  "local_rerun": "Tool-approved outside sandbox; isolated conftest/environment and session network/LLM guards; 49 passed in 27.52s, exit 0.",
+  "checks": {
+    "business_unchanged": true,
+    "core_hashes_match": 15,
+    "preexisting_protected_changes": [],
+    "asset_hashes_unchanged": 43,
+    "new_rounds": [
+      "doc/V0.1.6/rounds/V016-M1_R01_统筹裁决.md",
+      "doc/V0.1.6/rounds/V016-M2_R01_统筹下发.md"
+    ],
+    "relative_document_links_valid": true
+  }
+}

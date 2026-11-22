@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "version": "m3-synthetic-v1",
+    "source": "synthetic_m3"
+  },
+  "items": [
+    {
+      "id": "M3-RUNTIME-01",
+      "professional": "暖通",
+      "name": "排风机",
+      "specification": "风量1000m³/h",
+      "unit": "台",
+      "target_codes": [
+        "M3-DEMO-01"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-02",
+      "professional": "暖通",
+      "name": "防火阀",
+      "specification": "500×400 70℃",
+      "unit": "个",
+      "target_codes": [
+        "M3-DEMO-02"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-03",
+      "professional": "给排水",
+      "name": "不锈钢球阀",
+      "specification": "DN25 304",
+      "unit": "个",
+      "target_codes": [
+        "M3-DEMO-03"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-04",
+      "professional": "给排水",
+      "name": "镀锌钢管",
+      "specification": "DN50",
+      "unit": "米",
+      "target_codes": [
+        "M3-DEMO-04"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-05",
+      "professional": "强电",
+      "name": "电缆",
+      "specification": "YJV 3×16",
+      "unit": "米",
+      "target_codes": [
+        "M3-DEMO-05"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-06",
+      "professional": "强电",
+      "name": "配电箱",
+      "specification": "600×500×200",
+      "unit": "台",
+      "target_codes": [
+        "M3-DEMO-06"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-07",
+      "professional": "医气",
+      "name": "紫铜管",
+      "specification": "DN15",
+      "unit": "米",
+      "target_codes": [
+        "M3-DEMO-07"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    },
+    {
+      "id": "M3-RUNTIME-08",
+      "professional": "医气",
+      "name": "氧气终端",
+      "specification": "墙式",
+      "unit": "套",
+      "target_codes": [
+        "M3-DEMO-08"
+      ],
+      "label_type": "1to1",
+      "ambiguous": false,
+      "qc_suspect": false
+    }
+  ]
+}

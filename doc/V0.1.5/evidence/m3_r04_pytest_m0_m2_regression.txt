@@ -1,0 +1,19 @@
+﻿..........................................................               [100%]
+============================== warnings summary ===============================
+tests/test_query_contract.py::TestEntrypointConsistency::test_batch_entry_prepare_query
+  C:\Users\tlyer\project\ListTrans\app\vector_index.py:92: FutureWarning: The `get_sentence_embedding_dimension` method has been renamed to `get_embedding_dimension`.
+    self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
+
+tests/test_binding_decisions.py: 12 warnings
+  C:\Users\tlyer\project\ListTrans\app\server.py:2766: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    _gate_export_row(it.dict(), current_user, request_scope)
+
+tests/test_binding_decisions.py::TestExportGate::test_auto_accepted_export_valid
+tests/test_binding_decisions.py::TestExportGate::test_batch_match_confirm_export_xlsx_reread
+tests/test_binding_decisions.py::TestExportGate::test_confirm_then_export_then_xlsx_reread
+  C:\Users\tlyer\project\ListTrans\app\server.py:2771: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    items_to_write = [it.dict() for it in req.items]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+58 passed, 16 warnings in 13.32s
+REQUIRED_EXIT=0 WALL_SECONDS=14.678

@@ -1,0 +1,13 @@
+--- V016-frozen/app/rule_governance.py
++++ V017-M0/app/rule_governance.py
+@@ -467,7 +467,9 @@
+                     bucket = out.setdefault(canon_k, {})
+                     for src, tgt in v.items():
+                         if isinstance(src, str) and isinstance(tgt, str):
+-                            bucket[src] = tgt
++                            src = src.strip()
++                            if src:
++                                bucket[src] = tgt
+         return out
+     except Exception:
+         return {}

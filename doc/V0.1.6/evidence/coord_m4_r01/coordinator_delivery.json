@@ -1,0 +1,102 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "scope": "Coordinator only; V016-M4 R01 approval + V0.1.6 Version Final Audit; 7 management files, 1 new round decision doc, own evidence. No implementation or test changes.",
+  "files": {
+    "doc/00_项目管理/版本路线图.md": {
+      "bytes": 4085,
+      "sha256": "671f1bd2b24632a68493ae78898c63a1a817a119876b3e6863e1e1dbaaa838b0"
+    },
+    "doc/00_项目管理/进度总表.md": {
+      "bytes": 17607,
+      "sha256": "8c6e7af4fab40bdce4696ce747963493d5b1db12e15bf4768cd82215ea290f87"
+    },
+    "doc/00_项目管理/问题与版本归属总台账.md": {
+      "bytes": 24007,
+      "sha256": "29ffa813f34bbd39b4e5d50b37db6b9aff9c58a24d72622ed750e4f3fa4cc6fa"
+    },
+    "doc/README.md": {
+      "bytes": 3412,
+      "sha256": "86b575f654cc37aa89078fe7b907cae06e0a674504899e4384819bd28adb75e1"
+    },
+    "doc/V0.1.6/01_实施方案与任务包.md": {
+      "bytes": 7778,
+      "sha256": "8c6301f0544dcfbefd2bbf0903e6426835d66a33d9032e009547e7c1b24a40a4"
+    },
+    "doc/V0.1.6/02_任务台账.md": {
+      "bytes": 9449,
+      "sha256": "ab28c802c67ce7cbf99b169cefe6e1b0b7cd3a1b27999411d65cebf33975f332"
+    },
+    "doc/V0.1.6/03_终审与版本准入.md": {
+      "bytes": 10396,
+      "sha256": "26c690d4a11b197e3606844d35e8b33c225d57d5a9706f91be88483086e52a3c"
+    },
+    "doc/V0.1.6/rounds/V016-M4_R01_统筹裁决.md": {
+      "bytes": 11569,
+      "sha256": "ef3821e6c32dcbba59c221fbc026d74d91729b6c99f4f0938c01ef944ada1068"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/collect_state.py": {
+      "bytes": 4679,
+      "sha256": "a96c27cbf867a6732a55877d997c51db6b03ee9e47af072deea6349e3086c243"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/completion_checks.json": {
+      "bytes": 2465,
+      "sha256": "b2677751fe60c7881570c57245220f00db267865a716c72597925896d32e2837"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/evidence_binding.json": {
+      "bytes": 38824,
+      "sha256": "11fe9ed0533278474ab2c236944ff0ece61ef4b08a7236f62e8ed26695cdd91e"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/finalize_checks.py": {
+      "bytes": 7102,
+      "sha256": "5ee024a73ae44016ac9dda0054162d5df3b4a94a53b5f44a8ce064e7fdb592ca"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/inspect_evidence.py": {
+      "bytes": 18903,
+      "sha256": "4ea7e6974a9cabc6eb04a97c7d8577b91f56d9362247f52b5f6e02720fb04bf4"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/isolation_verify_after.json": {
+      "bytes": 12684,
+      "sha256": "206267564ff05428d4302b4d63bf8dca7aebc73586fdd30bec044663e5501091"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/m4_only_review.diff": {
+      "bytes": 42270,
+      "sha256": "d4f7ae15f8ed2ce96b4dedd6ba9656a8849a4fdfcf5c40c94965195e18a4ede4"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/management_changes.json": {
+      "bytes": 21145,
+      "sha256": "02072c4dc943ad1994b1dd3aeac246d3a50d6361fb73e0701756986cdef6457f"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/run_targeted_pytest.py": {
+      "bytes": 2702,
+      "sha256": "ad29b0e0bd42271d5396238291cbf26944bb7d4b91ded58c20cd40128ed53d39"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/state_after.json": {
+      "bytes": 124785,
+      "sha256": "b25c69e221397b69e29dfdcd2753016391e4388e4b66c4f137d116890a0704c3"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/state_before.json": {
+      "bytes": 124726,
+      "sha256": "3b4688b5c26dd27ca4b74df1bf7f595fbb653f532af338fbf5c609e8e71248f7"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/state_final.json": {
+      "bytes": 124964,
+      "sha256": "912e82e3fbacee9c8d8159fff52959c59beebb11ad5f9e04d4dd3ac32309ae88"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/targeted_pytest_local.exit.txt": {
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/targeted_pytest_local.log": {
+      "bytes": 9472,
+      "sha256": "377e49730ecef400211aa9a18d0679c306742ebc196ce64c338034e70b9edcd3"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/targeted_pytest_local.run.json": {
+      "bytes": 1711,
+      "sha256": "ec83de3c8bb67e0573b3baec6bdcc7b65d568fbe471d2476569bb51ee6cb49e9"
+    },
+    "doc/V0.1.6/evidence/coord_m4_r01/update_management.py": {
+      "bytes": 23419,
+      "sha256": "cc2440f27d0321d590916d90b0caff76e5d6500721f12893cce5dfbea01782f2"
+    }
+  }
+}

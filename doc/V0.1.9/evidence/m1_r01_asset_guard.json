@@ -1,0 +1,22 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_files": 175,
+  "baseline_changes": {
+    "app/matcher.py": {
+      "m0": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+      "m1": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2"
+    }
+  },
+  "exact_m0_matcher_sha256_restored_in_temp": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+  "m0_matcher_sha256_expected": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+  "business_files_checked": 35,
+  "m0_to_m1_start_diff": [],
+  "m1_runtime_diff": [],
+  "prior_rollback_archive_unchanged": true,
+  "offline_models": [
+    "bge-small-zh-v1.5",
+    "paraphrase-multilingual-MiniLM-L12-v2"
+  ],
+  "cross_encoder": "not_run_no_offline_weights",
+  "exit_code": 0
+}

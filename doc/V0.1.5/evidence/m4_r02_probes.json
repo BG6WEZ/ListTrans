@@ -1,0 +1,92 @@
+{
+  "fixture": "all accounts/rows synthetic; Excel decoder substituted only; auth/SQLite/HTTP real inside temp dir",
+  "probes": {
+    "excel_role_change_old_token": {
+      "import_success": true,
+      "role_changed_count": 1,
+      "role_before": "manager",
+      "role_after": "employee",
+      "token_version_before": 2,
+      "token_version_after": 3,
+      "old_token_1_me_after": 401,
+      "old_token_2_me_after": 401,
+      "old_token_1_rules_after": 401,
+      "relogin_status": 200,
+      "relogin_role": "employee",
+      "unchanged_role_changed_count": 0,
+      "token_version_after_unchanged": 3,
+      "unchanged_role_token_me": 200,
+      "requirement_met": true
+    },
+    "excel_shared_explicit_initial_password": {
+      "weak_rejected": true,
+      "created": 2,
+      "distinct_initial_passwords": 2,
+      "ignored_explicit_default": true,
+      "requirement_met": true
+    },
+    "http_shared_initial_and_reset_passwords": {
+      "weak_create_status": 400,
+      "create_statuses": [
+        200,
+        200
+      ],
+      "create_distinct_passwords": 2,
+      "create_ignored_caller_secret": true,
+      "reset_statuses": [
+        200,
+        200
+      ],
+      "reset_distinct_passwords": 2,
+      "reset_ignored_caller_secret": true,
+      "requirement_met": true
+    },
+    "service_fabricated_existing_admin_identity": {
+      "employee_http_publish": 403,
+      "forged_emp_claim_result": {
+        "success": false,
+        "code": 401
+      },
+      "forged_adm_claim_result": {
+        "success": false,
+        "code": 401
+      },
+      "tampered_emp_role_result": {
+        "success": false,
+        "code": 401
+      },
+      "revoked_admin_result": {
+        "success": false,
+        "code": 401
+      },
+      "valid_admin_publish_result": {
+        "success": true,
+        "status": "published"
+      },
+      "requirement_met": true
+    },
+    "binding_persistence_missing_actor": {
+      "rejections": {
+        "none_actor": "PermissionError",
+        "forged_admin": "PermissionError",
+        "employee_actor": "PermissionError",
+        "revoked_admin2": "PermissionError"
+      },
+      "bad_writes_persisted": false,
+      "valid_admin_persisted": true,
+      "requirement_met": true
+    },
+    "flywheel_task_direct_service_check": {
+      "owner_allowed": true,
+      "forged_blocked": true,
+      "revoked_blocked": true,
+      "requirement_met": true
+    },
+    "logout_revocation_real_process_restart": {
+      "child_exit": 0,
+      "child_session_status": 401,
+      "child_accepted": false,
+      "requirement_met": true
+    }
+  }
+}

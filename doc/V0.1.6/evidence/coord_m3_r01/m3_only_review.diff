@@ -1,0 +1,2252 @@
+--- pre/.dockerignore
+
++++ .dockerignore
+
+@@ -1,3 +1,24 @@
+
++# Deny the workspace by default. Only Docker inputs are admitted below.
++**
++!Dockerfile
++!.dockerignore
++!requirements.txt
++!app/
++app/**
++!app/*.py
++!web/
++web/**
++!web/index.html
++!web/admin.html
++!web/app.js
++!web/index.css
++!web/logo500.png
++!web/logo.png
++!web/login.html
++!web/login.css
++!config/
++config/**
++
+ # VCS, IDE & Local Artifacts
+ .git
+ .gitignore
+@@ -21,7 +42,7 @@
+
+ # Environment & Secrets (NEVER enter Docker build context or layers)
+ .env
+ .env.*
+-!.env.example
++**/.env*
+ *.pem
+ *.key
+ *.pfx
+@@ -107,3 +128,10 @@
+
+ config/*backup*
+ config/*.db*
+ config/.env*
++
++# Runtime-only synthetic assets. Keep every other file in this directory out.
++!app/eval_assets/
++app/eval_assets/**
++!app/eval_assets/golden_runtime_v1.json
++!app/eval_assets/report_template_v1.json
++!app/eval_assets/smoke_materials_v1.json
+--- pre/Dockerfile
+
++++ Dockerfile
+
+@@ -18,6 +18,7 @@
+
+ # Allow-list copy ONLY clean application source, web assets, and baseline configs
+ # (sensitive files, .env variants, DBs/WAL/SHM, personnel lists, and runtime state must NEVER enter any image layer)
+ COPY app/*.py /app/app/
++COPY app/eval_assets/golden_runtime_v1.json app/eval_assets/report_template_v1.json app/eval_assets/smoke_materials_v1.json /app/app/eval_assets/
+ COPY web/ /app/web/
+ COPY config/ /app/config/
+ 
+--- pre/app/flywheel_sandbox.py
+
++++ app/flywheel_sandbox.py
+
+@@ -4,12 +4,11 @@
+
+ Implements M2 unified subprocess sandbox evaluation across flywheel suggestions,
+ legacy binding rules, and manual LLM DSL rules:
+ - Strict 300s per-subprocess timeout & 660s per-task deadline with kill & cleanup.
+-- Real production pipeline execution (eval_golden_set.py --eval-mode sandbox_v2):
++- Real production pipeline execution (app.sandbox_evaluator --eval-mode sandbox_v2):
+   targeted + stratified global guard set + batch_match_rows binding decision checks + hit counts.
+ - Explicit separation of safety_passed vs benefit (improved / neutral / harmful / invalid).
+ - Persistent SQLite eval credentials (rule_eval_runs) bound to normalized payload & live snapshot.
+ """
+-import hashlib
+ import json
+ import logging
+ import math
+@@ -22,10 +21,14 @@
+
+ import threading
+ import time
+ import uuid
++from pathlib import Path
+ from typing import Any, Dict, List, Optional
+ 
+ from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, canonicalize_professional
++from app.runtime_eval_assets import RuntimeAssetError, load_runtime_golden
+ from app.rule_governance import (
++    EvalGateError,
++    _resolve_materials_db_path,
+     SUBPROCESS_TIMEOUT_SECONDS,
+     TASK_TIMEOUT_SECONDS,
+     compute_publish_env_snapshot,
+@@ -41,41 +44,6 @@
+
+ PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+ CONFIG_PROD_DIR = os.getenv("CONFIG_DIR", os.path.join(PROJECT_ROOT, "config"))
+ SCORE_EPS = 1e-6
+-
+-
+-def _sha256_file(path: str) -> str:
+-    try:
+-        with open(path, "rb") as f:
+-            return hashlib.sha256(f.read()).hexdigest()
+-    except OSError:
+-        return ""
+-
+-
+-def _snapshot_identifier(config_dir: str) -> Dict[str, Any]:
+-    """Record snapshot hashes for baseline/candidate comparison and audit."""
+-    cfg_files: Dict[str, str] = {}
+-    if os.path.isdir(config_dir):
+-        for name in sorted(os.listdir(config_dir)):
+-            p = os.path.join(config_dir, name)
+-            if os.path.isfile(p):
+-                cfg_files[name] = _sha256_file(p)
+-    golden = os.getenv("GOLDEN_SET_FILE", os.path.join(PROJECT_ROOT, "tests", "fixtures", "golden_set_v1.json"))
+-    snap = {
+-        "config_files_sha256": cfg_files,
+-        "materials_db_sha256": _sha256_file(os.getenv("MATERIALS_DB_PATH", "")),
+-        "golden_set_sha256": _sha256_file(golden),
+-    }
+-    try:
+-        from app.vector_index import index_manager
+-
+-        snap["vector_channel"] = {
+-            "model": getattr(index_manager, "model_name", "") or "unknown",
+-            "enabled": bool(getattr(index_manager, "is_enabled", False)),
+-            "dim": getattr(index_manager, "embedding_dim", None),
+-        }
+-    except Exception:
+-        snap["vector_channel"] = {"model": "unknown", "enabled": None, "dim": None}
+-    return snap
+ 
+ 
+ def _row_score_maps(row: Dict[str, Any]):
+@@ -485,7 +453,7 @@
+
+     *,
+     rule_meta: Dict[str, Any],
+     candidate_config_dir: str,
+-    temp_sandbox_root: str,
++    candidate_db_path: str,
+     candidate_llm_rule_row: Optional[Dict[str, Any]] = None,
+ ) -> Optional[str]:
+     """Inject ONLY candidate rule into isolated sandbox config dir or temp SQLite DB copy."""
+@@ -549,17 +517,9 @@
+
+         return None
+ 
+     if rule_type == "LLM_DSL" or rule_source == "manual_llm":
+-        from app.llm_rule_engine import _resolve_db_path, compute_rule_content_digest
+-
+-        src_db = _resolve_db_path()
+-        cand_db = os.path.join(temp_sandbox_root, "candidate_materials.db")
+-        src_conn = sqlite3.connect(src_db, timeout=15.0)
+-        dst_conn = sqlite3.connect(cand_db, timeout=15.0)
+-        try:
+-            src_conn.backup(dst_conn)
+-        finally:
+-            dst_conn.close()
+-            src_conn.close()
++        from app.llm_rule_engine import compute_rule_content_digest
++
++        cand_db = candidate_db_path
+         row_info = candidate_llm_rule_row or {}
+         rid = str(rule_meta.get("rule_key") or "")
+         dsl_json = json.dumps(rule_meta.get("parsed_dsl") or {}, ensure_ascii=False)
+@@ -662,6 +622,58 @@
+
+     )
+ 
+ 
++def _snapshot_materials(source: str, dest: Path) -> None:
++    src = sqlite3.connect(Path(source).resolve().as_uri() + "?mode=ro", uri=True, timeout=15)
++    try:
++        dst = sqlite3.connect(dest)
++        try:
++            src.backup(dst)
++        finally:
++            dst.close()
++    finally:
++        src.close()
++
++
++def _child_environment(root: Path, side: str, config_dir: str, golden_path: Path, golden_digest: str) -> dict:
++    work = root / side
++    work.mkdir()
++    cache = work / "vector_cache"
++    cache.mkdir()
++    from app.vector_index import get_cache_dir
++    for name in ("materials.index", "materials_embeddings.npy", "index_to_material.json", "cache_metadata.json"):
++        source = Path(get_cache_dir()) / name
++        if source.is_file():
++            shutil.copyfile(source, cache / name)
++    paths = {
++        "MATERIALS_DB_PATH": work / "materials.db",
++        "AUTH_DB_PATH": work / "auth.db",
++        "CONFIG_DIR": Path(config_dir),
++        "VECTOR_CACHE_DIR": cache,
++        "UPLOAD_DIR": work / "uploads",
++        "OUTPUT_DIR": work / "output",
++        "LOG_DIR": work / "logs",
++        "BINDING_FEEDBACK_FILE": work / "binding_feedback.json",
++        "FEEDBACK_SAMPLES_FILE": work / "feedback_samples.json",
++        "GOLDEN_DETAIL_FILE": work / "golden_detail.json",
++    }
++    if any(root not in path.resolve().parents for path in paths.values()):
++        raise RuntimeError("沙箱路径不在任务隔离目录内。")
++    for key in ("UPLOAD_DIR", "OUTPUT_DIR", "LOG_DIR"):
++        paths[key].mkdir()
++    env = os.environ.copy()
++    env.pop("LISTTRANS_EVAL_KEYWORD_ONLY", None)
++    env.pop("LISTTRANS_EVAL_REQUIRE_VECTOR", None)
++    env.update({key: str(value) for key, value in paths.items()})
++    env.update({
++        "LISTTRANS_EVAL_ROOT": str(root), "PYTHONPATH": PROJECT_ROOT, "PYTHONIOENCODING": "utf-8",
++        "TOKENIZERS_PARALLELISM": "false", "OMP_NUM_THREADS": "1", "LLM_ENABLED": "false", "TESTING": "1",
++        "DASHSCOPE_API_KEY": "", "DEEPSEEK_API_KEY": "", "PYTHON_DOTENV_DISABLED": "1",
++        "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
++        "GOLDEN_SET_FILE": str(golden_path), "GOLDEN_SET_SHA256": golden_digest,
++    })
++    return env
++
++
+ def _run_sandbox_worker(
+     task_id: str,
+     rule_meta: Dict[str, Any],
+@@ -711,50 +723,33 @@
+
+                 json.dump(rule_meta, rf, ensure_ascii=False)
+ 
+             _update_task_state(task_id, progress=25, message="正在向候选沙箱注入拟发布规则...")
+-            cand_db_override = _inject_candidate_rule_into_sandbox(
++            initial = get_eval_run(task_id, db_path=db_path)
++            if not initial:
++                raise EvalGateError(409, "eval_not_found", "沙箱评测记录不存在。")
++            live = compute_publish_env_snapshot(db_path=db_path)
++            if any(live[key] != initial[key] for key in live):
++                raise EvalGateError(409, "eval_env_stale", "评测开始前运行资产或物料库已变化。")
++            golden_bytes, _, golden_digest = load_runtime_golden()
++            if golden_digest != live["eval_assets_digest"]:
++                raise EvalGateError(409, "eval_env_stale", "复制运行黄金集时摘要发生变化。")
++            sandbox_root = Path(temp_sandbox_root).resolve()
++            golden_path = sandbox_root / "golden_input.json"
++            golden_path.write_bytes(golden_bytes)
++            base_env = _child_environment(sandbox_root, "baseline", baseline_config_dir, golden_path, golden_digest)
++            cand_env = _child_environment(sandbox_root, "candidate", candidate_config_dir, golden_path, golden_digest)
++            _snapshot_materials(db_path or _resolve_materials_db_path(), Path(base_env["MATERIALS_DB_PATH"]))
++            shutil.copyfile(base_env["MATERIALS_DB_PATH"], cand_env["MATERIALS_DB_PATH"])
++            _inject_candidate_rule_into_sandbox(
+                 rule_meta=rule_meta,
+                 candidate_config_dir=candidate_config_dir,
+-                temp_sandbox_root=temp_sandbox_root,
++                candidate_db_path=cand_env["MATERIALS_DB_PATH"],
+                 candidate_llm_rule_row=candidate_llm_rule_row,
+             )
+ 
+-            base_env = os.environ.copy()
+-            base_env["CONFIG_DIR"] = baseline_config_dir
+-            base_env["PYTHONPATH"] = PROJECT_ROOT
+-            base_env["TOKENIZERS_PARALLELISM"] = "false"
+-            base_env["OMP_NUM_THREADS"] = "1"
+-            base_env["LLM_ENABLED"] = "false"
+-            base_env["TESTING"] = "1"
+-            base_env["GOLDEN_DETAIL_FILE"] = os.path.join(temp_sandbox_root, "golden_baseline_detail.json")
+-
+-            cand_env = os.environ.copy()
+-            cand_env["CONFIG_DIR"] = candidate_config_dir
+-            cand_env["PYTHONPATH"] = PROJECT_ROOT
+-            cand_env["TOKENIZERS_PARALLELISM"] = "false"
+-            cand_env["OMP_NUM_THREADS"] = "1"
+-            cand_env["LLM_ENABLED"] = "false"
+-            cand_env["TESTING"] = "1"
+-            cand_env["GOLDEN_DETAIL_FILE"] = os.path.join(temp_sandbox_root, "golden_candidate_detail.json")
+-            if cand_db_override:
+-                cand_env["MATERIALS_DB_PATH"] = cand_db_override
+-
+-            eval_script = os.path.join(PROJECT_ROOT, "tests", "eval_golden_set.py")
+-            cmd_baseline = [
+-                sys.executable,
+-                eval_script,
+-                "--eval-mode", "sandbox_v2",
+-                "--rule-json", rule_meta_json,
+-                "--output-json", baseline_output_json,
+-                "--chunk-size", "50",
+-            ]
+-            cmd_candidate = [
+-                sys.executable,
+-                eval_script,
+-                "--eval-mode", "sandbox_v2",
+-                "--rule-json", rule_meta_json,
+-                "--output-json", candidate_output_json,
+-                "--chunk-size", "50",
+-            ]
++            command = [sys.executable, "-m", "app.sandbox_evaluator", "--eval-mode", "sandbox_v2",
++                       "--rule-json", rule_meta_json, "--chunk-size", "50"]
++            cmd_baseline = command + ["--output-json", baseline_output_json]
++            cmd_candidate = command + ["--output-json", candidate_output_json]
+ 
+             # Baseline Subprocess with strict timeout
+             _update_task_state(task_id, progress=40, message="正在子进程执行基线对比评测 (Baseline)...")
+@@ -887,6 +882,16 @@
+
+ 
+             snapshot = _compare_evaluation_snapshots(base_data, cand_data)
+             snapshot_errors = list(snapshot.get("errors") or [])
++            for result in (snapshot.get("baseline"), snapshot.get("candidate")):
++                if not isinstance(result, dict):
++                    continue
++                for actual_key, expected_key in (("golden_set_sha256", "eval_assets_digest"),
++                                                 ("materials_db_sha256", "materials_revision"),
++                                                 ("model_version", "model_version")):
++                    if result.get(actual_key) != initial[expected_key]:
++                        snapshot_errors.append(f"子进程快照与评测凭据不符 ({actual_key})")
++            if compute_publish_env_snapshot(db_path=db_path) != live:
++                snapshot_errors.append("评测执行期间运行环境发生变化")
+             report["snapshot"] = snapshot
+ 
+             base_guard_rows = base_data.get("guard_rows", [])
+@@ -1014,6 +1019,9 @@
+
+                 message=reason,
+                 report=report,
+             )
++        except (EvalGateError, RuntimeAssetError) as exc:
++            _fail_task_closed(task_id, message=str(exc), error_code=exc.code,
++                              base_rc=base_rc, cand_rc=cand_rc, db_path=db_path)
+         except Exception as e:
+             logger.error("Error in sandbox evaluation task %s (%s): %s", task_id, type(e).__name__, e)
+             _fail_task_closed(
+@@ -1044,18 +1052,23 @@
+
+ ) -> str:
+     """Create persistent eval credential record and launch async isolated sandbox subprocess evaluation."""
+     task_id = f"eval_{uuid.uuid4().hex[:12]}"
+-    env_snap = compute_publish_env_snapshot(db_path=db_path)
+-    create_eval_run_record(
+-        eval_id=task_id,
+-        rule_source=rule_source,
+-        rule_key=str(rule_key),
+-        rule_type=rule_type,
+-        rule_revision=int(rule_revision or 1),
+-        normalized_spec=normalized_spec,
+-        env_snapshot=env_snap,
+-        owner_user=owner_user,
+-        db_path=db_path,
+-    )
++    asset_error = None
++    try:
++        env_snap = compute_publish_env_snapshot(db_path=db_path)
++    except EvalGateError as exc:
++        asset_error = exc
++    else:
++        create_eval_run_record(
++            eval_id=task_id,
++            rule_source=rule_source,
++            rule_key=str(rule_key),
++            rule_type=rule_type,
++            rule_revision=int(rule_revision or 1),
++            normalized_spec=normalized_spec,
++            env_snapshot=env_snap,
++            owner_user=owner_user,
++            db_path=db_path,
++        )
+ 
+     owner_uid = int(owner_user["id"]) if isinstance(owner_user, dict) and owner_user.get("id") is not None else None
+     owner_epoch = str(owner_user.get("account_epoch") or "") if isinstance(owner_user, dict) else ""
+@@ -1082,6 +1095,12 @@
+
+             "benefit": "invalid",
+             "report": None,
+         }
++
++    if asset_error is not None:
++        _update_task_state(task_id, status="failed", progress=100, error_code=asset_error.code,
++                           message=str(asset_error), report={"safety_passed": False, "benefit": "invalid",
++                                                             "error_code": asset_error.code, "reason": str(asset_error)})
++        return task_id
+ 
+     deadline_mono = time.monotonic() + TASK_TIMEOUT_SECONDS
+     t = threading.Thread(
+--- pre/app/report_generator.py
+
++++ app/report_generator.py
+
+@@ -4,6 +4,7 @@
+
+ from typing import List, Dict, Any, Optional
+ from openpyxl.styles import Font, PatternFill
+ from app.db_manager import query_by_code
++from app.runtime_eval_assets import load_report_template
+ 
+ def build_historical_price_map(template_path: str) -> Dict[str, float]:
+     """
+@@ -79,18 +80,13 @@
+
+             wb = None
+ 
+     if wb is None:
+-        # Build built-in template dynamically
++        # Generate the standard sheet from the verified synthetic template.
++        template, _ = load_report_template()
+         wb = openpyxl.Workbook()
+         sheet = wb.active
+-        sheet.title = "模板"
+-        
+-        headers = [
+-            '*序号', '*费用类型', '*清单类型', '*材料类型', '*清单编码', 
+-            '*清单名称', '*特征/规格型号', '单位', '*工程量', '材料损耗', 
+-            '品牌', '竞聘系数', '单价(无税)', '备注', '专业'
+-        ]
++        sheet.title = template["sheet"]
+         # Set headers styling
+-        for col_idx, header in enumerate(headers, start=1):
++        for col_idx, header in enumerate(template["headers"], start=1):
+             cell = sheet.cell(1, col_idx)
+             cell.value = header
+             cell.font = Font(name="微软雅黑", size=11, bold=True)
+--- pre/app/rule_api.py
+
++++ app/rule_api.py
+
+@@ -85,6 +85,7 @@
+
+     )
+     return res
+ 
++# Register static and dedicated evaluation GET paths before /{rule_id}.
+ @router.get("/stats")
+ async def get_rule_stats(current_user: dict = Depends(require_employee)):
+     """Retrieve rule hit statistics and leaderboard (registered before /{rule_id})."""
+--- pre/app/rule_governance.py
+
++++ app/rule_governance.py
+
+@@ -21,8 +21,9 @@
+
+ 
+ from app.flywheel_db import init_flywheel_tables, open_flywheel_tx_connection
+ from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, canonicalize_professional
+-
+-EVALUATOR_VERSION = "v016-m2-eval-v1"
++from app.runtime_eval_assets import RuntimeAssetError, evaluator_digest, load_report_template, load_runtime_golden, runtime_model_state
++
++EVALUATOR_VERSION = "v016-m3-eval-v1"
+ MIGRATION_VERSION = "v0.16-m2-v1"
+ EVAL_TTL_SECONDS = 24 * 3600
+ SUBPROCESS_TIMEOUT_SECONDS = 300
+@@ -76,13 +77,6 @@
+
+     if env_dir:
+         return Path(env_dir)
+     return _PROJECT_ROOT / "config"
+-
+-
+-def _resolve_golden_path() -> Path:
+-    env_path = os.getenv("GOLDEN_SET_FILE")
+-    if env_path:
+-        return Path(env_path)
+-    return _PROJECT_ROOT / "tests" / "fixtures" / "golden_set_v1.json"
+ 
+ 
+ def _resolve_materials_db_path() -> str:
+@@ -341,7 +335,7 @@
+
+     target = db_path or _resolve_materials_db_path()
+     if not os.path.exists(target):
+         return "materials_missing"
+-    conn = sqlite3.connect(target, timeout=15.0)
++    conn = sqlite3.connect(Path(target).resolve().as_uri() + "?mode=ro", uri=True, timeout=15.0)
+     try:
+         has_tbl = conn.execute(
+             "SELECT 1 FROM sqlite_master WHERE type='table' AND name='materials'"
+@@ -414,18 +408,23 @@
+
+ 
+ def compute_publish_env_snapshot(db_path: Optional[str] = None) -> Dict[str, str]:
+     """Compute live authoritative environment/asset fingerprint for evaluation binding & stale invalidation."""
++    materials_rev = require_materials_catalog(db_path=db_path)
+     fc = importlib.import_module("app.feedback_contract")
+     versions = fc.compute_runtime_versions()
+     cfg_digest = _compute_config_dir_digest()
+-    materials_rev = compute_materials_catalog_digest(db_path=db_path)
+     baseline_rel = _compute_baseline_published_rules_digest(db_path=db_path, config_digest=cfg_digest)
+ 
+-    golden_path = _resolve_golden_path()
+-    eval_assets_digest = _sha256_bytes(golden_path.read_bytes()) if golden_path.is_file() else "golden_missing"
++    try:
++        _, _, eval_assets_digest = load_runtime_golden()
++        _, template_digest = load_report_template()
++        eval_version = f"{EVALUATOR_VERSION}:{evaluator_digest()}"
++    except RuntimeAssetError as exc:
++        raise EvalGateError(409, exc.code, str(exc)) from exc
+     guard_assets_digest = _sha256_text(
+         canonical_json({
+             "eval_assets_digest": eval_assets_digest,
+-            "evaluator_version": EVALUATOR_VERSION,
++            "evaluator_version": eval_version,
++            "template_digest": template_digest,
+             "guard_mode": "stratified_active_materials_v1",
+         })
+     )
+@@ -434,11 +433,21 @@
+
+         "materials_revision": materials_rev,
+         "config_digest": cfg_digest,
+         "algo_version": str(versions.get("algo_version") or ""),
+-        "model_version": str(versions.get("model_version") or ""),
+-        "evaluator_version": EVALUATOR_VERSION,
++        "model_version": runtime_model_state()["model_version"],
++        "evaluator_version": eval_version,
+         "eval_assets_digest": eval_assets_digest,
+         "guard_assets_digest": guard_assets_digest,
+     }
++
++
++def require_materials_catalog(db_path: Optional[str] = None) -> str:
++    try:
++        digest = compute_materials_catalog_digest(db_path=db_path)
++    except (OSError, sqlite3.Error) as exc:
++        raise EvalGateError(409, "materials_invalid", "当前物料库无法读取或结构不完整。") from exc
++    if digest in ("materials_missing", "materials_no_table") or digest.startswith("0:"):
++        raise EvalGateError(409, "materials_unavailable", "当前物料库缺失、未初始化或没有物料。")
++    return digest
+ 
+ 
+ def load_scoped_aliases(config_dir: Optional[str] = None) -> Dict[str, Dict[str, str]]:
+@@ -642,13 +651,18 @@
+
+ def get_eval_run(eval_id: str, db_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+     if not str(eval_id or "").strip():
+         return None
+-    init_flywheel_tables(db_path=db_path)
+-    target = db_path or _resolve_materials_db_path()
+-    conn = sqlite3.connect(target, timeout=15.0)
++    target = Path(db_path or _resolve_materials_db_path()).resolve()
++    if not target.is_file():
++        return None
++    conn = sqlite3.connect(target.as_uri() + "?mode=ro", uri=True, timeout=15.0)
+     conn.row_factory = sqlite3.Row
+     try:
++        if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'rule_eval_runs' AND type = 'table'").fetchone():
++            return None
+         row = conn.execute("SELECT * FROM rule_eval_runs WHERE eval_id = ?", (str(eval_id).strip(),)).fetchone()
+         return dict(row) if row else None
++    except sqlite3.Error as exc:
++        raise EvalGateError(409, "eval_store_unavailable", "评测凭据库不可读取，禁止发布。") from exc
+     finally:
+         conn.close()
+ 
+@@ -676,6 +690,7 @@
+
+             "缺少服务端沙箱评测凭据（eval_id），禁止跳过回归评测直接发布/采纳规则。",
+         )
+ 
++    require_materials_catalog(db_path=db_path)
+     ev = get_eval_run(eid, db_path=db_path)
+     if not ev:
+         raise EvalGateError(
+--- pre/app/server.py
+
++++ app/server.py
+
+@@ -33,6 +33,7 @@
+
+ from app.vector_index import index_manager
+ from app.matcher import match_item, reload_matcher_configs
+ from app.report_generator import generate_standard_report
++from app.runtime_eval_assets import RuntimeAssetError
+ from app.excel_boundary import (
+     DEFAULT_MAX_UPLOAD_BYTES,
+     DbImportLockManager,
+@@ -110,9 +111,7 @@
+
+     except Exception as e:
+         logger.error(f"Error cleaning old drafts on startup: {e}")
+ 
+-    proj_dir = os.path.dirname(os.path.dirname(__file__))
+-    xlsx_path = os.path.join(proj_dir, "doc", "sample", "物料明细.xlsx")
+-    init_db(xlsx_path)
++    init_db()
+     
+     logger.info("Initializing vector index mapping...")
+     try:
+@@ -4018,8 +4017,6 @@
+
+ async def export_report(req: ExportRequest, current_user: dict = Depends(require_employee)):
+     """Export final verified matched items back to standard report template."""
+     logger.info(f"Exporting matched items list as standard Excel report: {len(req.items)} rows by {current_user.get('username')}.")
+-    proj_dir = os.path.dirname(os.path.dirname(__file__))
+-    template_path = os.path.join(proj_dir, "doc", "sample", "标准格式.xlsx")
+     # V015-M2：导出前逐行 fail-closed 核验，任一不合规即整批 422（不默选 top1）。
+     request_scope = req.scope_filename or ""
+     for it in req.items:
+@@ -4029,7 +4026,7 @@
+
+         output_path = os.path.join(UPLOAD_DIR, output_filename)
+ 
+         items_to_write = [it.model_dump() for it in req.items]
+-        generate_standard_report(items_to_write, template_path, output_path)
++        generate_standard_report(items_to_write, None, output_path)
+ 
+         # Increment total exported rows and log audit
+         increment_stat_counter("total_exported_rows", len(req.items))
+@@ -4047,6 +4044,8 @@
+
+             filename=output_filename,
+             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+         )
++    except RuntimeAssetError as exc:
++        raise HTTPException(status_code=500, detail={"code": exc.code, "message": str(exc)}) from exc
+     except HTTPException:
+         raise
+     except Exception as e:
+--- pre/app/vector_index.py
+
++++ app/vector_index.py
+
+@@ -260,6 +260,8 @@
+
+ 
+     @property
+     def is_enabled(self) -> bool:
++        if os.getenv("LISTTRANS_EVAL_KEYWORD_ONLY") == "1":
++            return False
+         if self.model is None and HAS_SENTENCE_TRANSFORMERS:
+             with self._lock:
+                 if self.model is None:
+@@ -279,6 +281,8 @@
+
+             embeddings = embeddings / norms
+             return embeddings
+         except Exception as e:
++            if os.getenv("LISTTRANS_EVAL_REQUIRE_VECTOR") == "1":
++                raise RuntimeError("沙箱向量编码失败。") from e
+             print(f"Error encoding query texts: {e}")
+             return None
+ 
+--- pre/tests/conftest.py
+
++++ tests/conftest.py
+
+@@ -107,6 +107,8 @@
+
+         "BINDING_FEEDBACK_FILE": str(layout["binding_feedback_file"]),
+         "FEEDBACK_SAMPLES_FILE": str(layout["feedback_samples_file"]),
+         "GOLDEN_DETAIL_FILE": str(layout["golden_detail_file"]),
++        "GOLDEN_SET_FILE": str(PROJECT_ROOT / "tests" / "fixtures" / "golden_set_v1.json"),
++        "GOLDEN_SET_SHA256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+         # 测试默认关闭 LLM 付费调用与开发态鉴权绕过（防止 .env 透传真实 Key）
+         "LLM_ENABLED": "false",
+         "DASHSCOPE_API_KEY": "",
+@@ -312,7 +314,7 @@
+
+ # 未登记的纯标准库模块（test_query_*、test_v0_0_8_llm_rules、test_rule_deadlock_fix、
+ # test_m0_isolation）在任何依赖组合下都真实执行。
+ _RUNTIME_REQUIREMENTS = {
+-    # flywheel_sandbox 顶层可导入，但会子进程运行 eval_golden_set.py，
++    # flywheel_sandbox 顶层可导入，但正式沙箱子进程需要以下运行依赖。
+     # 该链路导入 app.matcher/app.vector_index/app.db_manager，缺向量/pandas 依赖必然失败
+     "test_flywheel_sandbox.py": ("numpy", "faiss", "sentence_transformers", "pandas"),
+ }
+--- pre/tests/eval_golden_set.py
+
++++ tests/eval_golden_set.py
+
+@@ -1,680 +1,28 @@
+
+-# -*- coding: utf-8 -*-
+-"""
+-黄金测试集自动化回归评测 (Golden Set Evaluator)
++"""Compatibility CLI for the frozen development evaluator fixtures."""
++import io
++import os
++from pathlib import Path
++import sys
+ 
+-用法:
+-  python tests/eval_golden_set.py                     # 全量评测核心集
+-  python tests/eval_golden_set.py --limit 200         # 分层抽样快速评测
+-  python tests/eval_golden_set.py --chunk-size 100    # 内存紧张时减小分块（默认 200）
+-  python tests/eval_golden_set.py --include-1ton      # 同时评测 1toN 条目
+-  python tests/eval_golden_set.py --baseline          # 将本次结果写为基线
+-  python tests/eval_golden_set.py --gate              # 与基线比对，回退则退出码 1
++PROJECT_ROOT = Path(__file__).resolve().parents[1]
++if str(PROJECT_ROOT) not in sys.path:
++    sys.path.insert(0, str(PROJECT_ROOT))
+ 
+-指标定义:
+-  Hit@1         Top-1 命中率（首选物料即正确答案）
+-  Recall@3/5/10 前 K 个候选包含正确答案的比例
+-  MRR           平均倒数排名（未命中记 0）
+-  miss@10       Top-10 完全未命中比例，用于区分"召回漏"与"排序错"
+-
+-内存说明:
+-  本机 16G 内存，物料向量矩阵约 47750x512。评测采用分块流式处理，
+-  单进程峰值控制在 2G 以内；如仍紧张可用 --chunk-size 50 进一步降低。
+-"""
+-import os
+-import io
+-import gc
+-import sys
+-import json
+-import time
+-import argparse
+-import collections
+-import hashlib
+-
+-
+-def _sha256_file(path):
+-    with open(path, "rb") as f:
+-        return hashlib.sha256(f.read()).hexdigest()
+-
+-
+-def _evaluation_snapshot(items, chunk_size):
+-    """随结果记录只读物料、金标及离线模型/向量通道与预算标识。"""
+-    from app.vector_index import CACHE_DIR, index_manager
+-
+-    db_path = os.environ.get("MATERIALS_DB_PATH", "")
+-    cache_path = os.path.join(CACHE_DIR, "materials_embeddings.npy")
+-    materials_digest = ""
+-    if db_path and os.path.isfile(db_path):
+-        try:
+-            from app.rule_governance import compute_materials_catalog_digest
+-            materials_digest = compute_materials_catalog_digest(db_path=db_path)
+-        except Exception:
+-            materials_digest = _sha256_file(db_path)
+-    return {
+-        "materials_db_sha256": materials_digest,
+-        "golden_set_sha256": _sha256_file(GOLDEN_PATH),
+-        "golden_set_item_count": len(items),
+-        "vector_channel": {
+-            "model": getattr(index_manager, "model_name_or_path", "") or "unknown",
+-            "enabled": bool(getattr(index_manager, "is_enabled", False)),
+-            "dim": getattr(index_manager, "embedding_dim", None),
+-            "cache_embeddings_sha256": _sha256_file(cache_path) if os.path.isfile(cache_path) else "",
+-                "active_material_codes": [
+-                    m.get("code") for m in getattr(index_manager, "index_to_material", [])
+-                ],
+-        },
+-        "budget": {"chunk_size": chunk_size, "top_k": 10},
+-    }
+-
+-# 16G 内存机器：限制 BLAS/OMP 线程数，避免 numpy 矩阵运算开出多份线程私有缓冲区
+-for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+-           "NUMEXPR_NUM_THREADS"):
+-    os.environ.setdefault(_v, "2")
+-os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+-
+-if __name__ == "__main__" and hasattr(sys.stdout, "buffer"):
+-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+-
+-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+-if PROJECT_ROOT not in sys.path:
+-    sys.path.insert(0, PROJECT_ROOT)
+-
+-GOLDEN_PATH = os.path.join(PROJECT_ROOT, "tests", "fixtures", "golden_set_v1.json")
+-BASELINE_PATH = os.path.join(PROJECT_ROOT, "tests", "fixtures", "golden_baseline.json")
+-# R02 评测结果完整性：允许沙箱覆盖，但默认只读快照与评测入口使用同一固定版本。
+-GOLDEN_PATH = os.environ.get("GOLDEN_SET_FILE", GOLDEN_PATH)
+-# A-M0-02: 评测明细为可写产物，优先落到隔离 OUTPUT_DIR（conftest 注入），
+-# 未注入时保持历史默认 fixtures 路径；金标/基线为只读输入，路径不变。
+-DETAIL_PATH = os.environ.get(
+-    "GOLDEN_DETAIL_FILE",
+-    os.path.join(PROJECT_ROOT, "tests", "fixtures", "golden_last_run.json"),
++from app.sandbox_evaluator import (  # noqa: E402,F401
++    _evaluate_binding_pipeline, _select_sandbox_subsets, by_professional, evaluate, main as _run, metrics,
+ )
+ 
+-TARGETS = {"hit@1": 85.0, "recall@3": 90.0, "recall@5": 93.0, "mrr": 0.88}
+-
+-
+-def evaluate(items, chunk_size=200):
+-    """分块流式评测。
+-
+-    16G 内存机器上必须分块：一次性预处理 + 一次性向量化 1000+ 条会与
+-    47750x512 的物料向量矩阵（约 93MB float32，运算时的临时矩阵可达数百 MB）
+-    叠加，容易触发 OOM。此处按 chunk_size 分块，块内用完即释放。
+-    """
+-    from app.matcher import match_item
+-    from app.query_preprocessor import prepare_query
+-    from app.vector_index import index_manager
+-
+-    rows = []
+-    t0 = time.time()
+-    total = len(items)
+-
+-    for start in range(0, total, chunk_size):
+-        chunk = items[start:start + chunk_size]
+-
+-        # V015-M1：评测与生产 batch_match_rows 共用统一 prepare_query 契约，
+-        # 规范名称/清洗文本/专业/品类/单位/品牌来自同一函数，消除"评测读
+-        # attrs['名称']、生产 get('name') 恒回退原文"的双轨差异。
+-        prepped = []
+-        for it in chunk:
+-            prof = it["professional"]
+-            sup = (it.get("supply_category") or "").strip()
+-            if sup in ("无", "/", "-"):
+-                sup = ""
+-            prepped.append(prepare_query(
+-                it["name"], it["specification"], prof,
+-                category=sup,
+-                brand=it.get("brand", "") or "",
+-                unit=it.get("unit", "") or "",
+-                preserve_original=False,
+-            ))
+-
+-        vectors = [None] * len(prepped)
+-        if index_manager.is_enabled and prepped:
+-            texts = [f"{p['name']} {p['specification']}".strip() for p in prepped]
+-            embs = index_manager.encode_queries(texts)
+-            if embs is not None:
+-                for i, e in enumerate(embs):
+-                    vectors[i] = e
+-            del embs, texts
+-
+-        for i, it in enumerate(chunk):
+-            gt = set(it["target_codes"])
+-            try:
+-                res = match_item(dict(prepped[i]), vectors[i])
+-                cands = res.get("top_candidates", []) or []
+-            except Exception as e:
+-                rows.append({"id": it["id"], "professional": it["professional"], "rank": 0,
+-                             "error": str(e), "top": []})
+-                continue
+-
+-            rank = 0
+-            for pos, c in enumerate(cands, 1):
+-                if c.get("code") in gt:
+-                    rank = pos
+-                    break
+-            # V015-M1 R02 / LEGACY-01：除展示用 top5 外，补 `candidates` 保留
+-            # top_candidates 全量（match_item 输出 top10）的**原始未舍入合分**。
+-            # 沙箱门禁需据原始得分计算逐例正确目标得分 T 与领先间隔 margin=T-W，
+-            # 不得依赖 round(...,2) 的两位展示分或 top5 截断集（统筹裁决保护契约 §3/§4）。
+-            raw_cands = []
+-            for c in cands:
+-                try:
+-                    sc = float(c.get("score", 0.0))
+-                except (TypeError, ValueError):
+-                    sc = float("nan")
+-                raw_cands.append({"code": c.get("code"), "score": sc})
+-            rows.append({
+-                "id": it["id"],
+-                "professional": it["professional"],
+-                "name": it["name"],
+-                "clean_name": prepped[i]["name"],
+-                "specification": it["specification"][:200],
+-                "target_codes": it["target_codes"],
+-                "target_name": it["target_ref"][0]["db_name"] if it.get("target_ref") else "",
+-                "target_spec": str(it["target_ref"][0]["db_spec"])[:80] if it.get("target_ref") else "",
+-                "rank": rank,
+-                "weight": it.get("freq", 1),
+-                "top": [{"code": c.get("code"), "name": c.get("name"),
+-                         "spec": str(c.get("specification"))[:60],
+-                         "score": round(float(c.get("score", 0)), 2)} for c in cands[:5]],
+-                "candidates": raw_cands,
+-            })
+-            del res, cands
+-
+-        del prepped, vectors
+-        gc.collect()
+-        print(f"  ... {min(start + chunk_size, total)}/{total}  ({time.time() - t0:.1f}s)")
+-
+-    return rows, time.time() - t0
+-
+-
+-def metrics(rows):
+-    n = len(rows)
+-    if n == 0:
+-        return {
+-            "total": 0,
+-            "hit@1": 0.0,
+-            "recall@3": 0.0,
+-            "recall@5": 0.0,
+-            "recall@10": 0.0,
+-            "mrr": 0.0,
+-            "miss@10": 0.0,
+-        }
+-    hit1 = sum(1 for r in rows if r["rank"] == 1)
+-    r3 = sum(1 for r in rows if 1 <= r["rank"] <= 3)
+-    r5 = sum(1 for r in rows if 1 <= r["rank"] <= 5)
+-    r10 = sum(1 for r in rows if 1 <= r["rank"] <= 10)
+-    mrr = sum(1.0 / r["rank"] for r in rows if r["rank"] > 0) / n
+-    return {
+-        "total": n,
+-        "hit@1": round(hit1 / n * 100, 2),
+-        "recall@3": round(r3 / n * 100, 2),
+-        "recall@5": round(r5 / n * 100, 2),
+-        "recall@10": round(r10 / n * 100, 2),
+-        "mrr": round(mrr, 4),
+-        "miss@10": round((n - r10) / n * 100, 2),
+-    }
+-
+-
+-def by_professional(rows):
+-    g = collections.defaultdict(list)
+-    for r in rows:
+-        g[r["professional"]].append(r)
+-    return {k: metrics(v) for k, v in sorted(g.items(), key=lambda x: -len(x[1]))}
+-
+-
+-def _active_material_codes():
+-    from app.db_manager import get_db_connection
+-    conn = get_db_connection()
+-    try:
+-        return {str(r[0]) for r in conn.execute("SELECT code FROM materials").fetchall() if r[0]}
+-    finally:
+-        conn.close()
+-
+-
+-def _select_sandbox_subsets(all_items, rule_meta, guard_limit=40):
+-    """Select targeted subset + disjoint stratified global guard subset for M2 sandbox evaluation."""
+-    from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, RuleContext, canonicalize_professional
+-
+-    clean_1to1 = [
+-        x for x in all_items
+-        if x.get("label_type") == "1to1" and not x.get("ambiguous") and not x.get("qc_suspect")
+-    ]
+-    clean_all = [
+-        x for x in all_items
+-        if x.get("label_type") in ("1to1", "1toN") and not x.get("ambiguous") and not x.get("qc_suspect")
+-    ]
+-    rule_type = str(rule_meta.get("rule_type") or "ALIAS").upper()
+-    discipline = str(rule_meta.get("discipline") or "").strip()
+-    canon_disc = canonicalize_professional(discipline) if discipline else ""
+-    active_codes = _active_material_codes()
+-
+-    targeted = []
+-    if rule_type == "ALIAS":
+-        kw = str(rule_meta.get("source_pattern") or "").strip().lower()
+-        if kw:
+-            for x in clean_1to1:
+-                if canon_disc and canon_disc.lower() not in DYNAMIC_UNIVERSAL_TOKENS and canon_disc != "其它":
+-                    if canonicalize_professional(x.get("professional", "")) != canon_disc:
+-                        continue
+-                hit_kw = (
+-                    kw in x.get("name", "").lower()
+-                    or kw in x.get("specification", "").lower()
+-                    or kw in x.get("target_name", "").lower()
+-                    or any(kw in ref.get("db_name", "").lower() for ref in x.get("target_ref", []))
+-                    or kw in x.get("raw_name", "").lower()
+-                    or kw in x.get("raw_spec", "").lower()
+-                )
+-                if hit_kw:
+-                    targeted.append(x)
+-    elif rule_type in ("BINDING", "BINDING_RULE"):
+-        orig_name = str(rule_meta.get("original_name") or rule_meta.get("source_pattern") or "").strip().lower()
+-        if orig_name:
+-            for x in clean_all:
+-                if x.get("name", "").strip().lower() == orig_name or orig_name in x.get("name", "").lower():
+-                    targeted.append(x)
+-    elif rule_type == "LLM_DSL":
+-        scope_level = str(rule_meta.get("scope_level") or "category").strip()
+-        scope_target = str(rule_meta.get("scope_target") or "").strip()
+-        cand_pool = [x for x in clean_1to1 if set(x.get("target_codes") or []) & active_codes]
+-        if not cand_pool:
+-            cand_pool = list(clean_1to1)
+-        for x in cand_pool:
+-            ctx = RuleContext.from_fields(
+-                professional=x.get("professional", ""),
+-                material_category=x.get("supply_category", "") or "",
+-                name=x.get("name", ""),
+-                raw_name=x.get("raw_name", "") or x.get("name", ""),
+-                stage="matching",
+-            )
+-            if ctx.matches_rule({
+-                "scope_level": scope_level,
+-                "scope_target": scope_target,
+-                "discipline": discipline,
+-            }):
+-                targeted.append(x)
+-        if len(targeted) > 60:
+-            targeted = targeted[:60]
+-
+-    targeted_ids = {x.get("id") for x in targeted}
+-    guard_candidates = [
+-        x for x in clean_1to1
+-        if x.get("id") not in targeted_ids and (set(x.get("target_codes") or []) & active_codes)
+-    ]
+-    buckets = collections.OrderedDict()
+-    for x in sorted(guard_candidates, key=lambda it: (str(it.get("professional") or ""), str(it.get("id") or ""))):
+-        buckets.setdefault(canonicalize_professional(x.get("professional") or "") or "其它", []).append(x)
+-
+-    guard = []
+-    if guard_limit > 0 and buckets:
+-        bucket_lists = list(buckets.values())
+-        idx = 0
+-        while len(guard) < guard_limit and any(bucket_lists):
+-            for bl in bucket_lists:
+-                if bl and len(guard) < guard_limit:
+-                    guard.append(bl.pop(0))
+-            bucket_lists = [bl for bl in bucket_lists if bl]
+-            idx += 1
+-
+-    return targeted, guard
+-
+-
+-def _evaluate_binding_pipeline(items, is_guard=False):
+-    """Execute real production batch_match_rows + binding conflict/qty/export sanity checks."""
+-    from app import server as srv
+-    from app.binding_decisions import (
+-        STATUS_AUTO_ACCEPTED,
+-        STATUS_REJECTED,
+-        validate_bindings_against_row,
+-    )
+-
+-    if not items:
+-        return []
+-
+-    raw_rows = []
+-    for idx, it in enumerate(items, start=1):
+-        sup = (it.get("supply_category") or "").strip()
+-        if sup in ("无", "/", "-"):
+-            sup = ""
+-        qty = float(it.get("qty") or 1.0)
+-        raw_rows.append({
+-            "row_idx": idx,
+-            "code": str(it.get("id") or ""),
+-            "name": it.get("name", ""),
+-            "specification": it.get("specification", ""),
+-            "unit": it.get("unit", "台") or "台",
+-            "qty": qty,
+-            "loss": 1.0,
+-            "category": sup,
+-            "brand": it.get("brand", "") or "",
+-            "professional": it.get("professional", "暖通"),
+-        })
+-
+-    matched_rows = srv.batch_match_rows(raw_rows)
+-    out = []
+-    for it, raw_row, res_row in zip(items, raw_rows, matched_rows):
+-        gt_codes = [str(c).strip() for c in (it.get("target_codes") or []) if str(c).strip()]
+-        gt_set = set(gt_codes)
+-        bindings = res_row.get("bindings") or []
+-        norm_bindings = []
+-        qty_ratios_ok = True
+-        orig_qty = float(raw_row["qty"] or 0.0)
+-        for b in bindings:
+-            code = str(b.get("code") or "").strip()
+-            b_qty = float(b.get("qty") or 0.0)
+-            ratio = b.get("qty_ratio")
+-            if ratio is None:
+-                qty_ratios_ok = False
+-                ratio_val = 1.0
+-            else:
+-                ratio_val = float(ratio)
+-                expected_qty = orig_qty * ratio_val
+-                if ratio_val <= 0 or abs(b_qty - expected_qty) > 1e-6 * max(1.0, abs(expected_qty)):
+-                    qty_ratios_ok = False
+-            norm_bindings.append({
+-                "code": code,
+-                "name": str(b.get("name") or ""),
+-                "unit": str(b.get("unit") or ""),
+-                "qty": b_qty,
+-                "qty_ratio": ratio_val,
+-            })
+-
+-        bound_codes = [b["code"] for b in norm_bindings if b["code"]]
+-        bound_set = set(bound_codes)
+-        val = validate_bindings_against_row(
+-            srv._build_row_item_from_raw(raw_row),
+-            bindings,
+-            allow_unit_conversion=False,
+-        )
+-        invalid_codes = list(val.get("invalid_codes") or [])
+-        conflicts = list(val.get("conflicts") or [])
+-        dec_status = str(res_row.get("decision_status") or "")
+-        dec_source = str(res_row.get("decision_source") or "")
+-        codes_match_gt = bool(gt_set) and (
+-            (gt_set == bound_set) if it.get("label_type") == "1toN" else bool(bound_set & gt_set)
+-        )
+-        export_eligible = (
+-            dec_status == STATUS_AUTO_ACCEPTED
+-            and not invalid_codes
+-            and not conflicts
+-            and qty_ratios_ok
+-            and bool(bound_codes)
+-        )
+-        out.append({
+-            "id": it.get("id"),
+-            "is_guard": bool(is_guard),
+-            "label_type": it.get("label_type", "1to1"),
+-            "professional": it.get("professional", ""),
+-            "target_codes": gt_codes,
+-            "decision_status": dec_status,
+-            "decision_source": dec_source,
+-            "decision_reason": str(res_row.get("decision_reason") or ""),
+-            "rule_applied": dec_source == "auto_binding_rule",
+-            "matched_code": str(res_row.get("matched_code") or ""),
+-            "bindings": norm_bindings,
+-            "invalid_codes": invalid_codes,
+-            "conflicts": conflicts,
+-            "qty_ratios_ok": qty_ratios_ok,
+-            "codes_match_gt": codes_match_gt,
+-            "export_eligible": export_eligible,
+-            "rejected": dec_status == STATUS_REJECTED,
+-        })
+-    return out
++FIXTURES = Path(__file__).resolve().parent / "fixtures"
++GOLDEN_PATH = os.getenv("GOLDEN_SET_FILE", str(FIXTURES / "golden_set_v1.json"))
++BASELINE_PATH = str(FIXTURES / "golden_baseline.json")
++DETAIL_PATH = os.getenv("GOLDEN_DETAIL_FILE", str(FIXTURES / "golden_last_run.json"))
+ 
+ 
+ def main():
+-    ap = argparse.ArgumentParser()
+-    ap.add_argument("--limit", type=int, default=0)
+-    ap.add_argument("--include-1ton", action="store_true")
+-    ap.add_argument("--include-ambiguous", action="store_true")
+-    ap.add_argument("--include-qc-suspect", action="store_true")
+-    ap.add_argument("--professional", default="")
+-    ap.add_argument("--exclude-source", default="", help="排除指定 source 评测用例 (如 flywheel_auto)")
+-    ap.add_argument("--filter-keyword", default="", help="按原始名称/规格关键词过滤评测用例")
+-    ap.add_argument("--case-ids", default="", help="按逗号分隔的 case id 列表过滤")
+-    ap.add_argument("--output-json", default="", help="将评测结果与明细输出为指定 JSON 文件")
+-    ap.add_argument("--chunk-size", type=int, default=200,
+-                    help="分块大小，内存紧张时减小（默认 200）")
+-    ap.add_argument("--baseline", action="store_true", help="将本次结果写为基线")
+-    ap.add_argument("--gate", action="store_true", help="与基线比对，回退则退出码 1")
+-    ap.add_argument("--tolerance", type=float, default=0.5, help="门禁允许的回退百分点")
+-    ap.add_argument("--eval-mode", default="match", choices=["match", "sandbox_v2"], help="评测模式")
+-    ap.add_argument("--rule-json", default="", help="sandbox_v2 模式下注入的规范化规则元数据文件路径")
+-    ap.add_argument("--guard-limit", type=int, default=40, help="sandbox_v2 全局保护抽样上限")
+-    args = ap.parse_args()
+-
+-    with open(GOLDEN_PATH, encoding="utf-8") as f:
+-        data = json.load(f)
+-    items = data["items"]
+-    meta_version = data["meta"]["version"]
+-    del data
+-    gc.collect()
+-
+-    if args.eval_mode == "sandbox_v2":
+-        from app.db_manager import init_db
+-        from app.vector_index import index_manager
+-        from app.normalizer import get_session_alias_hits, reset_session_alias_hits
+-        from app.llm_rule_engine import RuleHitStatsTracker
+-        from app.rule_context import canonicalize_professional
+-
+-        rule_meta = {}
+-        if args.rule_json and os.path.isfile(args.rule_json):
+-            with open(args.rule_json, encoding="utf-8") as rf:
+-                rule_meta = json.load(rf)
+-
+-        init_db()
+-        if not index_manager.load_cache():
+-            from app.db_manager import get_all_materials
+-            index_manager.build_index(get_all_materials(limit=10 ** 9))
+-            index_manager.save_cache()
+-
+-        targeted_items, guard_items = _select_sandbox_subsets(
+-            items, rule_meta, guard_limit=args.guard_limit
+-        )
+-        del items
+-        gc.collect()
+-
+-        reset_session_alias_hits()
+-        RuleHitStatsTracker().reset_session_hits()
+-
+-        targeted_rows, elapsed_t = evaluate(targeted_items, chunk_size=args.chunk_size)
+-        guard_rows, elapsed_g = evaluate(guard_items, chunk_size=args.chunk_size)
+-
+-        binding_targeted = _evaluate_binding_pipeline(targeted_items, is_guard=False)
+-        binding_guard = _evaluate_binding_pipeline(guard_items, is_guard=True)
+-
+-        rule_type = str(rule_meta.get("rule_type") or "ALIAS").upper()
+-        rule_execution_hits = 0
+-        if rule_type == "ALIAS":
+-            src_pat = str(rule_meta.get("source_pattern") or "").strip().lower()
+-            r_disc = str(rule_meta.get("discipline") or "").strip()
+-            canon_r_disc = canonicalize_professional(r_disc) if r_disc else ""
+-            for (h_disc, h_key), cnt in get_session_alias_hits().items():
+-                if h_key.lower() == src_pat:
+-                    if not canon_r_disc or canonicalize_professional(h_disc) == canon_r_disc:
+-                        rule_execution_hits += int(cnt)
+-        elif rule_type in ("BINDING", "BINDING_RULE"):
+-            rule_execution_hits = sum(1 for br in binding_targeted + binding_guard if br["rule_applied"])
+-        elif rule_type == "LLM_DSL":
+-            rid = str(rule_meta.get("rule_key") or rule_meta.get("rule_id") or "")
+-            if rid:
+-                rule_execution_hits = RuleHitStatsTracker().get_session_hit_count(rid)
+-
+-        result = {
+-            "time": time.strftime("%Y-%m-%d %H:%M:%S"),
+-            "mode": "sandbox_v2",
+-            "golden_version": meta_version,
+-            "overall": metrics(targeted_rows),
+-            "guard_overall": metrics(guard_rows),
+-            "elapsed_sec": round(elapsed_t + elapsed_g, 2),
+-            "targeted_count": len(targeted_rows),
+-            "guard_count": len(guard_rows),
+-            "rule_execution_hits": int(rule_execution_hits),
+-            "binding_checks_count": len(binding_targeted) + len(binding_guard),
+-            "eval_scope": {
+-                "count": len(targeted_rows),
+-                "guard_count": len(guard_rows),
+-                "chunk_size": args.chunk_size,
+-            },
+-            "snapshot": _evaluation_snapshot(targeted_items, args.chunk_size),
+-        }
+-        os.makedirs(os.path.dirname(os.path.abspath(DETAIL_PATH)), exist_ok=True)
+-        payload = {
+-            "summary": result,
+-            "rows": targeted_rows,
+-            "guard_rows": guard_rows,
+-            "binding_rows": binding_targeted + binding_guard,
+-        }
+-        with open(DETAIL_PATH, "w", encoding="utf-8") as f:
+-            json.dump(payload, f, ensure_ascii=False)
+-        if args.output_json:
+-            with open(args.output_json, "w", encoding="utf-8") as f:
+-                json.dump(payload, f, ensure_ascii=False, indent=2)
+-        return
+-
+-    if args.exclude_source:
+-        exc = set(s.strip() for s in args.exclude_source.split(",") if s.strip())
+-        items = [x for x in items if x.get("source") not in exc]
+-    if not args.include_1ton:
+-        items = [x for x in items if x["label_type"] == "1to1"]
+-    if not args.include_ambiguous:
+-        items = [x for x in items if not x["ambiguous"]]
+-    if not args.include_qc_suspect:
+-        items = [x for x in items if not x.get("qc_suspect")]
+-    if args.professional:
+-        items = [x for x in items if x["professional"] == args.professional]
+-    if args.filter_keyword:
+-        kw = args.filter_keyword.strip().lower()
+-        items = [
+-            x for x in items
+-            if kw in x.get("name", "").lower()
+-            or kw in x.get("specification", "").lower()
+-            or kw in x.get("target_name", "").lower()
+-            or any(kw in ref.get("db_name", "").lower() for ref in x.get("target_ref", []))
+-            or kw in x.get("raw_name", "").lower()
+-            or kw in x.get("raw_spec", "").lower()
+-        ]
+-    if args.case_ids:
+-        cids = set(c.strip() for c in args.case_ids.split(",") if c.strip())
+-        items = [x for x in items if str(x.get("id", "")) in cids or str(x.get("idx", "")) in cids]
+-    if args.limit and args.limit < len(items):
+-        # 测试集按专业排序存放，直接切片会造成抽样偏差，此处按专业比例分层抽样
+-        buckets = collections.OrderedDict()
+-        for x in items:
+-            buckets.setdefault(x["professional"], []).append(x)
+-        total = len(items)
+-        picked = []
+-        for p, lst in buckets.items():
+-            k = max(1, round(len(lst) / total * args.limit))
+-            step = max(1, len(lst) // k)
+-            picked.extend(lst[::step][:k])
+-        items = picked[:args.limit]
+-
+-    print(f"黄金测试集 {meta_version}，本次评测 {len(items)} 条，分块 {args.chunk_size}")
+-
+-    from app.db_manager import init_db
+-    from app.vector_index import index_manager
+-    init_db()
+-    if not index_manager.load_cache():
+-        # 缓存与当前模型维度/名称不一致时必须重建，否则向量召回通道静默失效，指标不可信
+-        print("向量索引缓存不可用，正在重建（首次或换模型后需要，耗时较长）...")
+-        from app.db_manager import get_all_materials
+-        index_manager.build_index(get_all_materials(limit=10 ** 9))
+-        index_manager.save_cache()
+-        print("向量索引重建完成。")
+-
+-    rows, elapsed = evaluate(items, chunk_size=args.chunk_size)
+-    del items
+-    gc.collect()
+-    m = metrics(rows)
+-    prof = by_professional(rows)
+-
+-    print("\n" + "=" * 66)
+-    print("整体指标")
+-    print("=" * 66)
+-    for k in ("total", "hit@1", "recall@3", "recall@5", "recall@10", "mrr", "miss@10"):
+-        tv = TARGETS.get(k)
+-        flag = ""
+-        if tv is not None:
+-            flag = "  [达标]" if m[k] >= tv else f"  [未达标 目标{tv}]"
+-        print(f"  {k:<10}: {m[k]}{flag}")
+-    print(f"  耗时      : {elapsed:.1f}s  ({elapsed / max(1, len(rows)) * 1000:.0f} ms/条)")
+-
+-    print("\n" + "=" * 66)
+-    print("分专业指标")
+-    print("=" * 66)
+-    print(f"  {'专业':<10}{'条数':>6}{'Hit@1':>9}{'R@3':>8}{'R@5':>8}{'MRR':>8}")
+-    for p, pm in prof.items():
+-        print(f"  {p:<10}{pm['total']:>6}{pm['hit@1']:>9}{pm['recall@3']:>8}"
+-              f"{pm['recall@5']:>8}{pm['mrr']:>8}")
+-
+-    print("\n" + "=" * 66)
+-    print("Top-1 错配 Top15（按真集出现频次排序，优先修这些）")
+-    print("=" * 66)
+-    bad = sorted([r for r in rows if r["rank"] != 1], key=lambda x: -x.get("weight", 1))
+-    for r in bad[:15]:
+-        top = r["top"][0] if r["top"] else {}
+-        print(f"  [{r['id']}] {r['professional']} freq={r.get('weight')} rank={r['rank']}")
+-        print(f"      Q  : {r['name']} | {r['specification'][:70]}")
+-        print(f"      GT : {r['target_codes']} {r['target_name']}")
+-        print(f"      系统: {top.get('code')} {top.get('name')} | {top.get('spec')} "
+-              f"score={top.get('score')}")
+-
+-    result = {"time": time.strftime("%Y-%m-%d %H:%M:%S"), "overall": m,
+-              "by_professional": prof, "elapsed_sec": round(elapsed, 1),
+-              "eval_scope": {"count": len(rows), "include_1ton": args.include_1ton,
+-                             "include_ambiguous": args.include_ambiguous,
+-                             "include_qc_suspect": args.include_qc_suspect,
+-                             "professional": args.professional or "ALL",
+-                             "filter_keyword": args.filter_keyword,
+-                             "case_ids": args.case_ids,
+-                             "exclude_source": args.exclude_source,
+-                             "limit": args.limit, "chunk_size": args.chunk_size},
+-              "snapshot": _evaluation_snapshot(rows, args.chunk_size)}
+-    # 流式逐行写盘，避免 json.dump 一次性构造上兆字符串占用内存
+-    os.makedirs(os.path.dirname(os.path.abspath(DETAIL_PATH)), exist_ok=True)
+-    with open(DETAIL_PATH, "w", encoding="utf-8") as f:
+-        f.write('{"summary": ')
+-        json.dump(result, f, ensure_ascii=False)
+-        f.write(', "rows": [\n')
+-        for i, r in enumerate(rows):
+-            if i:
+-                f.write(",\n")
+-            json.dump(r, f, ensure_ascii=False)
+-        f.write("\n]}\n")
+-    print(f"\n明细已写入: {DETAIL_PATH}")
+-
+-    if args.output_json:
+-        with open(args.output_json, "w", encoding="utf-8") as f:
+-            json.dump({"summary": result, "rows": rows}, f, ensure_ascii=False, indent=2)
+-        print(f"指定结果文件已写入: {args.output_json}")
+-
+-    if args.baseline:
+-        with open(BASELINE_PATH, "w", encoding="utf-8") as f:
+-            json.dump(result, f, ensure_ascii=False, indent=1)
+-        print(f"基线已写入: {BASELINE_PATH}")
+-
+-    if args.gate:
+-        if not os.path.exists(BASELINE_PATH):
+-            print("\n[GATE] 无基线文件，请先执行 --baseline")
+-            sys.exit(1)
+-        with open(BASELINE_PATH, encoding="utf-8") as f:
+-            base = json.load(f)["overall"]
+-        regress = []
+-        for k in ("hit@1", "recall@3", "recall@5"):
+-            delta = m[k] - base.get(k, 0)
+-            mark = "+" if delta >= 0 else ""
+-            print(f"[GATE] {k}: {base.get(k)} -> {m[k]}  ({mark}{delta:.2f})")
+-            if delta < -args.tolerance:
+-                regress.append(k)
+-        dm = m["mrr"] - base.get("mrr", 0)
+-        print(f"[GATE] mrr: {base.get('mrr')} -> {m['mrr']}  ({'+' if dm >= 0 else ''}{dm:.4f})")
+-        if dm < -args.tolerance / 100:
+-            regress.append("mrr")
+-        if regress:
+-            print(f"\n[GATE] 失败：指标回退 -> {regress}")
+-            sys.exit(1)
+-        print("\n[GATE] 通过：无指标回退")
++    _run(golden_path=GOLDEN_PATH, detail_path=DETAIL_PATH, baseline_path=BASELINE_PATH)
+ 
+ 
+ if __name__ == "__main__":
++    if hasattr(sys.stdout, "buffer"):
++        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+     main()
+--- pre/tests/test_flywheel_sandbox.py
+
++++ tests/test_flywheel_sandbox.py
+
+@@ -559,7 +559,7 @@
+
+     assert "缺少运行快照" in "".join(errors)
+ 
+ 
+-def test_sandbox_nonzero_subprocess_exit_fails_closed(tmp_path, monkeypatch):
++def test_sandbox_nonzero_subprocess_exit_fails_closed(tmp_path, monkeypatch, seed_isolated_materials):
+     """模型替身仅覆盖异常分支：子进程非零退出不得伪造评测通过。"""
+     import subprocess
+     import app.flywheel_sandbox as sandbox
+--- /dev/null
+
++++ app/runtime_eval_assets.py
+
+@@ -0,0 +1,87 @@
+
++"""Read-only, versioned inputs for rule evaluation and standard report export."""
++import hashlib
++import json
++import os
++from pathlib import Path
++
++
++ASSET_DIR = Path(__file__).resolve().with_name("eval_assets")
++EVALUATOR_PATH = Path(__file__).resolve().with_name("sandbox_evaluator.py")
++GOLDEN_SHA256 = "10e44b73d2b945e27146ad83eac018c1a736df945ed95fbdc710190dc7aa2057"
++TEMPLATE_SHA256 = "d1cfc598623f7aee6d24ad3561ac5bb87410c976953569c939337519e0ae4767"
++
++
++class RuntimeAssetError(ValueError):
++    def __init__(self, code: str, message: str):
++        super().__init__(message)
++        self.code = code
++
++
++def load_checked_json(path: Path, expected: str, kind: str):
++    try:
++        raw = path.read_bytes()
++    except OSError as exc:
++        raise RuntimeAssetError(f"{kind}_missing", f"无法读取运行资产 {kind}。") from exc
++    try:
++        data = json.loads(raw)
++    except (ValueError, UnicodeError) as exc:
++        raise RuntimeAssetError(f"{kind}_invalid", f"运行资产 {kind} 为空或不是有效 JSON。") from exc
++    digest = hashlib.sha256(raw).hexdigest()
++    if digest != expected.lower().strip():
++        raise RuntimeAssetError(f"{kind}_digest_mismatch", f"运行资产 {kind} 的 SHA256 与配置不符。")
++    return raw, data, digest
++
++
++def load_runtime_golden():
++    override = os.getenv("GOLDEN_SET_FILE")
++    path = Path(override) if override else ASSET_DIR / "golden_runtime_v1.json"
++    expected = os.getenv("GOLDEN_SET_SHA256", "") if override else GOLDEN_SHA256
++    raw, data, digest = load_checked_json(path, expected, "golden")
++    items = data.get("items") if isinstance(data, dict) else None
++    meta = data.get("meta") if isinstance(data, dict) else None
++    if not isinstance(items, list) or not items or not isinstance(meta, dict) or not meta.get("version"):
++        raise RuntimeAssetError("golden_invalid", "运行评测样本为空或缺少版本。")
++    ids = set()
++    for item in items:
++        if (not isinstance(item, dict)
++                or not all(isinstance(item.get(key), str) for key in ("id", "name", "professional", "specification"))
++                or not item["id"] or not item["name"] or item["id"] in ids
++                or item.get("label_type") not in ("1to1", "1toN")
++                or not isinstance(item.get("target_codes"), list) or not item["target_codes"]
++                or not all(isinstance(code, str) and code.strip() for code in item["target_codes"])):
++            raise RuntimeAssetError("golden_invalid", "运行评测样本缺少有效字段、目标编码或唯一 ID。")
++        ids.add(item["id"])
++    return raw, data, digest
++
++
++def load_report_template():
++    _, template, digest = load_checked_json(ASSET_DIR / "report_template_v1.json", TEMPLATE_SHA256, "template")
++    if (not isinstance(template, dict) or template.get("sheet") != "模板"
++            or not isinstance(template.get("headers"), list) or len(template["headers"]) != 15
++            or not all(isinstance(header, str) and header for header in template["headers"])):
++        raise RuntimeAssetError("template_invalid", "运行报表模板缺少有效工作表或表头。")
++    return template, digest
++
++
++def evaluator_digest() -> str:
++    try:
++        data = EVALUATOR_PATH.read_bytes()
++        compile(data, str(EVALUATOR_PATH), "exec")
++    except (OSError, SyntaxError, ValueError) as exc:
++        raise RuntimeAssetError("evaluator_unavailable", "正式沙箱评测入口缺失或无法编译。") from exc
++    if not data.strip():
++        raise RuntimeAssetError("evaluator_unavailable", "正式沙箱评测入口为空。")
++    return hashlib.sha256(data).hexdigest()
++
++
++def runtime_model_state():
++    from app.vector_index import index_manager
++
++    model = index_manager.model_name_or_path
++    enabled = index_manager.is_enabled
++    return {
++        "model": model,
++        "enabled": enabled,
++        "dim": index_manager.embedding_dim if enabled else None,
++        "model_version": f"{model}|loaded" if enabled else f"{model}|unavailable:keyword_only",
++    }
+--- /dev/null
+
++++ app/sandbox_evaluator.py
+
+@@ -0,0 +1,685 @@
+
++"""Run production matching and binding against versioned evaluation samples."""
++import os
++import gc
++import sys
++import json
++import time
++import argparse
++import collections
++import hashlib
++
++
++def _sha256_file(path):
++    with open(path, "rb") as f:
++        return hashlib.sha256(f.read()).hexdigest()
++
++
++def _evaluation_snapshot(items, chunk_size, golden_digest):
++    """随结果记录只读物料、金标及离线模型/向量通道与预算标识。"""
++    from app.vector_index import get_cache_dir, index_manager
++    from app.runtime_eval_assets import runtime_model_state
++
++    db_path = os.environ.get("MATERIALS_DB_PATH", "")
++    cache_path = os.path.join(get_cache_dir(), "materials_embeddings.npy")
++    materials_digest = ""
++    if db_path and os.path.isfile(db_path):
++        try:
++            from app.rule_governance import compute_materials_catalog_digest
++            materials_digest = compute_materials_catalog_digest(db_path=db_path)
++        except Exception:
++            materials_digest = _sha256_file(db_path)
++    model_state = runtime_model_state()
++    return {
++        "model_version": model_state["model_version"],
++        "materials_db_sha256": materials_digest,
++        "golden_set_sha256": golden_digest,
++        "golden_set_item_count": len(items),
++        "vector_channel": {
++            **model_state,
++            "cache_embeddings_sha256": _sha256_file(cache_path) if model_state["enabled"] and os.path.isfile(cache_path) else "",
++            "active_material_codes": [m.get("code") for m in index_manager.index_to_material] if model_state["enabled"] else [],
++        },
++        "budget": {"chunk_size": chunk_size, "top_k": 10},
++    }
++
++# 16G 内存机器：限制 BLAS/OMP 线程数，避免 numpy 矩阵运算开出多份线程私有缓冲区
++for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
++           "NUMEXPR_NUM_THREADS"):
++    os.environ.setdefault(_v, "2")
++os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
++
++TARGETS = {"hit@1": 85.0, "recall@3": 90.0, "recall@5": 93.0, "mrr": 0.88}
++
++
++def evaluate(items, chunk_size=200):
++    """分块流式评测。
++
++    16G 内存机器上必须分块：一次性预处理 + 一次性向量化 1000+ 条会与
++    47750x512 的物料向量矩阵（约 93MB float32，运算时的临时矩阵可达数百 MB）
++    叠加，容易触发 OOM。此处按 chunk_size 分块，块内用完即释放。
++    """
++    from app.matcher import match_item
++    from app.query_preprocessor import prepare_query
++    from app.vector_index import index_manager
++
++    rows = []
++    t0 = time.time()
++    total = len(items)
++
++    for start in range(0, total, chunk_size):
++        chunk = items[start:start + chunk_size]
++
++        # V015-M1：评测与生产 batch_match_rows 共用统一 prepare_query 契约，
++        # 规范名称/清洗文本/专业/品类/单位/品牌来自同一函数，消除"评测读
++        # attrs['名称']、生产 get('name') 恒回退原文"的双轨差异。
++        prepped = []
++        for it in chunk:
++            prof = it["professional"]
++            sup = (it.get("supply_category") or "").strip()
++            if sup in ("无", "/", "-"):
++                sup = ""
++            prepped.append(prepare_query(
++                it["name"], it["specification"], prof,
++                category=sup,
++                brand=it.get("brand", "") or "",
++                unit=it.get("unit", "") or "",
++                preserve_original=False,
++            ))
++
++        vectors = [None] * len(prepped)
++        if index_manager.is_enabled and prepped:
++            texts = [f"{p['name']} {p['specification']}".strip() for p in prepped]
++            embs = index_manager.encode_queries(texts)
++            if embs is not None:
++                for i, e in enumerate(embs):
++                    vectors[i] = e
++            del embs, texts
++
++        for i, it in enumerate(chunk):
++            gt = set(it["target_codes"])
++            try:
++                res = match_item(dict(prepped[i]), vectors[i])
++                cands = res.get("top_candidates", []) or []
++            except Exception as e:
++                rows.append({"id": it["id"], "professional": it["professional"], "rank": 0,
++                             "error": str(e), "top": []})
++                continue
++
++            rank = 0
++            for pos, c in enumerate(cands, 1):
++                if c.get("code") in gt:
++                    rank = pos
++                    break
++            # V015-M1 R02 / LEGACY-01：除展示用 top5 外，补 `candidates` 保留
++            # top_candidates 全量（match_item 输出 top10）的**原始未舍入合分**。
++            # 沙箱门禁需据原始得分计算逐例正确目标得分 T 与领先间隔 margin=T-W，
++            # 不得依赖 round(...,2) 的两位展示分或 top5 截断集（统筹裁决保护契约 §3/§4）。
++            raw_cands = []
++            for c in cands:
++                try:
++                    sc = float(c.get("score", 0.0))
++                except (TypeError, ValueError):
++                    sc = float("nan")
++                raw_cands.append({"code": c.get("code"), "score": sc})
++            rows.append({
++                "id": it["id"],
++                "professional": it["professional"],
++                "name": it["name"],
++                "clean_name": prepped[i]["name"],
++                "specification": it["specification"][:200],
++                "target_codes": it["target_codes"],
++                "target_name": it["target_ref"][0]["db_name"] if it.get("target_ref") else "",
++                "target_spec": str(it["target_ref"][0]["db_spec"])[:80] if it.get("target_ref") else "",
++                "rank": rank,
++                "weight": it.get("freq", 1),
++                "top": [{"code": c.get("code"), "name": c.get("name"),
++                         "spec": str(c.get("specification"))[:60],
++                         "score": round(float(c.get("score", 0)), 2)} for c in cands[:5]],
++                "candidates": raw_cands,
++            })
++            del res, cands
++
++        del prepped, vectors
++        gc.collect()
++        print(f"  ... {min(start + chunk_size, total)}/{total}  ({time.time() - t0:.1f}s)")
++
++    return rows, time.time() - t0
++
++
++def metrics(rows):
++    n = len(rows)
++    if n == 0:
++        return {
++            "total": 0,
++            "hit@1": 0.0,
++            "recall@3": 0.0,
++            "recall@5": 0.0,
++            "recall@10": 0.0,
++            "mrr": 0.0,
++            "miss@10": 0.0,
++        }
++    hit1 = sum(1 for r in rows if r["rank"] == 1)
++    r3 = sum(1 for r in rows if 1 <= r["rank"] <= 3)
++    r5 = sum(1 for r in rows if 1 <= r["rank"] <= 5)
++    r10 = sum(1 for r in rows if 1 <= r["rank"] <= 10)
++    mrr = sum(1.0 / r["rank"] for r in rows if r["rank"] > 0) / n
++    return {
++        "total": n,
++        "hit@1": round(hit1 / n * 100, 2),
++        "recall@3": round(r3 / n * 100, 2),
++        "recall@5": round(r5 / n * 100, 2),
++        "recall@10": round(r10 / n * 100, 2),
++        "mrr": round(mrr, 4),
++        "miss@10": round((n - r10) / n * 100, 2),
++    }
++
++
++def by_professional(rows):
++    g = collections.defaultdict(list)
++    for r in rows:
++        g[r["professional"]].append(r)
++    return {k: metrics(v) for k, v in sorted(g.items(), key=lambda x: -len(x[1]))}
++
++
++def _active_material_codes():
++    from app.db_manager import get_db_connection
++    conn = get_db_connection()
++    try:
++        return {str(r[0]) for r in conn.execute("SELECT code FROM materials").fetchall() if r[0]}
++    finally:
++        conn.close()
++
++
++def _select_sandbox_subsets(all_items, rule_meta, guard_limit=40):
++    """Select targeted subset + disjoint stratified global guard subset for M2 sandbox evaluation."""
++    from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, RuleContext, canonicalize_professional
++
++    clean_1to1 = [
++        x for x in all_items
++        if x.get("label_type") == "1to1" and not x.get("ambiguous") and not x.get("qc_suspect")
++    ]
++    clean_all = [
++        x for x in all_items
++        if x.get("label_type") in ("1to1", "1toN") and not x.get("ambiguous") and not x.get("qc_suspect")
++    ]
++    rule_type = str(rule_meta.get("rule_type") or "ALIAS").upper()
++    discipline = str(rule_meta.get("discipline") or "").strip()
++    canon_disc = canonicalize_professional(discipline) if discipline else ""
++    active_codes = _active_material_codes()
++
++    targeted = []
++    if rule_type == "ALIAS":
++        kw = str(rule_meta.get("source_pattern") or "").strip().lower()
++        if kw:
++            for x in clean_1to1:
++                if canon_disc and canon_disc.lower() not in DYNAMIC_UNIVERSAL_TOKENS and canon_disc != "其它":
++                    if canonicalize_professional(x.get("professional", "")) != canon_disc:
++                        continue
++                hit_kw = (
++                    kw in x.get("name", "").lower()
++                    or kw in x.get("specification", "").lower()
++                    or kw in x.get("target_name", "").lower()
++                    or any(kw in ref.get("db_name", "").lower() for ref in x.get("target_ref", []))
++                    or kw in x.get("raw_name", "").lower()
++                    or kw in x.get("raw_spec", "").lower()
++                )
++                if hit_kw:
++                    targeted.append(x)
++    elif rule_type in ("BINDING", "BINDING_RULE"):
++        orig_name = str(rule_meta.get("original_name") or rule_meta.get("source_pattern") or "").strip().lower()
++        if orig_name:
++            for x in clean_all:
++                if x.get("name", "").strip().lower() == orig_name or orig_name in x.get("name", "").lower():
++                    targeted.append(x)
++    elif rule_type == "LLM_DSL":
++        scope_level = str(rule_meta.get("scope_level") or "category").strip()
++        scope_target = str(rule_meta.get("scope_target") or "").strip()
++        cand_pool = [x for x in clean_1to1 if set(x.get("target_codes") or []) & active_codes]
++        if not cand_pool:
++            cand_pool = list(clean_1to1)
++        for x in cand_pool:
++            ctx = RuleContext.from_fields(
++                professional=x.get("professional", ""),
++                material_category=x.get("supply_category", "") or "",
++                name=x.get("name", ""),
++                raw_name=x.get("raw_name", "") or x.get("name", ""),
++                stage="matching",
++            )
++            if ctx.matches_rule({
++                "scope_level": scope_level,
++                "scope_target": scope_target,
++                "discipline": discipline,
++            }):
++                targeted.append(x)
++        if len(targeted) > 60:
++            targeted = targeted[:60]
++
++    targeted_ids = {x.get("id") for x in targeted}
++    guard_candidates = [
++        x for x in clean_1to1
++        if x.get("id") not in targeted_ids and (set(x.get("target_codes") or []) & active_codes)
++    ]
++    buckets = collections.OrderedDict()
++    for x in sorted(guard_candidates, key=lambda it: (str(it.get("professional") or ""), str(it.get("id") or ""))):
++        buckets.setdefault(canonicalize_professional(x.get("professional") or "") or "其它", []).append(x)
++
++    guard = []
++    if guard_limit > 0 and buckets:
++        bucket_lists = list(buckets.values())
++        idx = 0
++        while len(guard) < guard_limit and any(bucket_lists):
++            for bl in bucket_lists:
++                if bl and len(guard) < guard_limit:
++                    guard.append(bl.pop(0))
++            bucket_lists = [bl for bl in bucket_lists if bl]
++            idx += 1
++
++    return targeted, guard
++
++
++def _evaluate_binding_pipeline(items, is_guard=False):
++    """Execute real production batch_match_rows + binding conflict/qty/export sanity checks."""
++    from app import server as srv
++    from app.binding_decisions import (
++        STATUS_AUTO_ACCEPTED,
++        STATUS_REJECTED,
++        validate_bindings_against_row,
++    )
++
++    if not items:
++        return []
++
++    raw_rows = []
++    for idx, it in enumerate(items, start=1):
++        sup = (it.get("supply_category") or "").strip()
++        if sup in ("无", "/", "-"):
++            sup = ""
++        qty = float(it.get("qty") or 1.0)
++        raw_rows.append({
++            "row_idx": idx,
++            "code": str(it.get("id") or ""),
++            "name": it.get("name", ""),
++            "specification": it.get("specification", ""),
++            "unit": it.get("unit", "台") or "台",
++            "qty": qty,
++            "loss": 1.0,
++            "category": sup,
++            "brand": it.get("brand", "") or "",
++            "professional": it.get("professional", "暖通"),
++        })
++
++    matched_rows = srv.batch_match_rows(raw_rows)
++    out = []
++    for it, raw_row, res_row in zip(items, raw_rows, matched_rows):
++        gt_codes = [str(c).strip() for c in (it.get("target_codes") or []) if str(c).strip()]
++        gt_set = set(gt_codes)
++        bindings = res_row.get("bindings") or []
++        norm_bindings = []
++        qty_ratios_ok = True
++        orig_qty = float(raw_row["qty"] or 0.0)
++        for b in bindings:
++            code = str(b.get("code") or "").strip()
++            b_qty = float(b.get("qty") or 0.0)
++            ratio = b.get("qty_ratio")
++            if ratio is None:
++                qty_ratios_ok = False
++                ratio_val = 1.0
++            else:
++                ratio_val = float(ratio)
++                expected_qty = orig_qty * ratio_val
++                if ratio_val <= 0 or abs(b_qty - expected_qty) > 1e-6 * max(1.0, abs(expected_qty)):
++                    qty_ratios_ok = False
++            norm_bindings.append({
++                "code": code,
++                "name": str(b.get("name") or ""),
++                "unit": str(b.get("unit") or ""),
++                "qty": b_qty,
++                "qty_ratio": ratio_val,
++            })
++
++        bound_codes = [b["code"] for b in norm_bindings if b["code"]]
++        bound_set = set(bound_codes)
++        val = validate_bindings_against_row(
++            srv._build_row_item_from_raw(raw_row),
++            bindings,
++            allow_unit_conversion=False,
++        )
++        invalid_codes = list(val.get("invalid_codes") or [])
++        conflicts = list(val.get("conflicts") or [])
++        dec_status = str(res_row.get("decision_status") or "")
++        dec_source = str(res_row.get("decision_source") or "")
++        codes_match_gt = bool(gt_set) and (
++            (gt_set == bound_set) if it.get("label_type") == "1toN" else bool(bound_set & gt_set)
++        )
++        export_eligible = (
++            dec_status == STATUS_AUTO_ACCEPTED
++            and not invalid_codes
++            and not conflicts
++            and qty_ratios_ok
++            and bool(bound_codes)
++        )
++        out.append({
++            "id": it.get("id"),
++            "is_guard": bool(is_guard),
++            "label_type": it.get("label_type", "1to1"),
++            "professional": it.get("professional", ""),
++            "target_codes": gt_codes,
++            "decision_status": dec_status,
++            "decision_source": dec_source,
++            "decision_reason": str(res_row.get("decision_reason") or ""),
++            "rule_applied": dec_source == "auto_binding_rule",
++            "matched_code": str(res_row.get("matched_code") or ""),
++            "bindings": norm_bindings,
++            "invalid_codes": invalid_codes,
++            "conflicts": conflicts,
++            "qty_ratios_ok": qty_ratios_ok,
++            "codes_match_gt": codes_match_gt,
++            "export_eligible": export_eligible,
++            "rejected": dec_status == STATUS_REJECTED,
++        })
++    return out
++
++
++def validate_isolated_child_paths(output_path, rule_path):
++    """Refuse standalone execution before importing any writable app module."""
++    from pathlib import Path
++
++    root_name = os.getenv("LISTTRANS_EVAL_ROOT")
++    if not root_name or os.getenv("LLM_ENABLED") != "false" or os.getenv("TESTING") != "1":
++        raise ValueError("缺少正式沙箱的离线隔离环境。")
++    root = Path(root_name).resolve()
++    keys = ("MATERIALS_DB_PATH", "AUTH_DB_PATH", "CONFIG_DIR", "VECTOR_CACHE_DIR", "UPLOAD_DIR",
++            "OUTPUT_DIR", "LOG_DIR", "BINDING_FEEDBACK_FILE", "FEEDBACK_SAMPLES_FILE", "GOLDEN_DETAIL_FILE")
++    paths = [os.getenv(key) for key in keys] + [output_path, rule_path]
++    if any(not value or root not in Path(value).resolve().parents for value in paths):
++        raise ValueError("正式沙箱写入路径不在本任务隔离目录内。")
++
++
++def main(*, golden_path=None, detail_path=None, baseline_path=None):
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--limit", type=int, default=0)
++    ap.add_argument("--include-1ton", action="store_true")
++    ap.add_argument("--include-ambiguous", action="store_true")
++    ap.add_argument("--include-qc-suspect", action="store_true")
++    ap.add_argument("--professional", default="")
++    ap.add_argument("--exclude-source", default="", help="排除指定 source 评测用例 (如 flywheel_auto)")
++    ap.add_argument("--filter-keyword", default="", help="按原始名称/规格关键词过滤评测用例")
++    ap.add_argument("--case-ids", default="", help="按逗号分隔的 case id 列表过滤")
++    ap.add_argument("--output-json", default="", help="将评测结果与明细输出为指定 JSON 文件")
++    ap.add_argument("--chunk-size", type=int, default=200,
++                    help="分块大小，内存紧张时减小（默认 200）")
++    ap.add_argument("--baseline", action="store_true", help="将本次结果写为基线")
++    ap.add_argument("--gate", action="store_true", help="与基线比对，回退则退出码 1")
++    ap.add_argument("--tolerance", type=float, default=0.5, help="门禁允许的回退百分点")
++    ap.add_argument("--eval-mode", default="match", choices=["match", "sandbox_v2"], help="评测模式")
++    ap.add_argument("--rule-json", default="", help="sandbox_v2 模式下注入的规范化规则元数据文件路径")
++    ap.add_argument("--guard-limit", type=int, default=40, help="sandbox_v2 全局保护抽样上限")
++    args = ap.parse_args()
++
++    from pathlib import Path
++
++    runtime = golden_path is None
++    if runtime:
++        from app.runtime_eval_assets import load_runtime_golden, load_report_template
++
++        if args.eval_mode != "sandbox_v2" or args.baseline or args.gate:
++            ap.error("正式评测入口仅支持 sandbox_v2")
++        validate_isolated_child_paths(args.output_json, args.rule_json)
++        _, data, golden_digest = load_runtime_golden()
++        load_report_template()
++        detail_path = os.environ["GOLDEN_DETAIL_FILE"]
++    else:
++        raw = Path(golden_path).read_bytes()
++        data = json.loads(raw)
++        golden_digest = hashlib.sha256(raw).hexdigest()
++    items = data["items"]
++    meta_version = data["meta"]["version"]
++    del data
++    gc.collect()
++
++    if args.eval_mode == "sandbox_v2":
++        from app.db_manager import init_db
++        from app.vector_index import index_manager
++        from app.normalizer import get_session_alias_hits, reset_session_alias_hits
++        from app.llm_rule_engine import RuleHitStatsTracker
++        from app.rule_context import canonicalize_professional
++
++        rule_meta = {}
++        if args.rule_json and os.path.isfile(args.rule_json):
++            with open(args.rule_json, encoding="utf-8") as rf:
++                rule_meta = json.load(rf)
++
++        if runtime:
++            from app.rule_governance import require_materials_catalog
++            require_materials_catalog()
++        init_db()
++        if index_manager.is_enabled:
++            if runtime:
++                os.environ["LISTTRANS_EVAL_REQUIRE_VECTOR"] = "1"
++            if not index_manager.load_cache():
++                from app.db_manager import get_all_materials
++                index_manager.build_index(get_all_materials(limit=10 ** 9))
++                index_manager.save_cache()
++            if runtime and (index_manager.numpy_embeddings is None or not index_manager.index_to_material):
++                raise RuntimeError("向量模型可用，但隔离目录未生成有效物料索引。")
++        elif runtime:
++            os.environ["LISTTRANS_EVAL_KEYWORD_ONLY"] = "1"
++
++        targeted_items, guard_items = _select_sandbox_subsets(
++            items, rule_meta, guard_limit=args.guard_limit
++        )
++        del items
++        gc.collect()
++
++        if runtime and not guard_items:
++            raise ValueError("运行黄金集在当前物料库中没有可验证的全局保护样本。")
++        if runtime and meta_version == "m3-synthetic-v1":
++            active = _active_material_codes()
++            if targeted_items and any(not set(item["target_codes"]) <= active for item in targeted_items):
++                raise ValueError("内置合成样本的目标编码在当前物料库中缺失。")
++
++        reset_session_alias_hits()
++        RuleHitStatsTracker().reset_session_hits()
++
++        targeted_rows, elapsed_t = evaluate(targeted_items, chunk_size=args.chunk_size)
++        guard_rows, elapsed_g = evaluate(guard_items, chunk_size=args.chunk_size)
++
++        binding_targeted = _evaluate_binding_pipeline(targeted_items, is_guard=False)
++        binding_guard = _evaluate_binding_pipeline(guard_items, is_guard=True)
++
++        rule_type = str(rule_meta.get("rule_type") or "ALIAS").upper()
++        rule_execution_hits = 0
++        if rule_type == "ALIAS":
++            src_pat = str(rule_meta.get("source_pattern") or "").strip().lower()
++            r_disc = str(rule_meta.get("discipline") or "").strip()
++            canon_r_disc = canonicalize_professional(r_disc) if r_disc else ""
++            for (h_disc, h_key), cnt in get_session_alias_hits().items():
++                if h_key.lower() == src_pat:
++                    if not canon_r_disc or canonicalize_professional(h_disc) == canon_r_disc:
++                        rule_execution_hits += int(cnt)
++        elif rule_type in ("BINDING", "BINDING_RULE"):
++            rule_execution_hits = sum(1 for br in binding_targeted + binding_guard if br["rule_applied"])
++        elif rule_type == "LLM_DSL":
++            rid = str(rule_meta.get("rule_key") or rule_meta.get("rule_id") or "")
++            if rid:
++                rule_execution_hits = RuleHitStatsTracker().get_session_hit_count(rid)
++
++        result = {
++            "time": time.strftime("%Y-%m-%d %H:%M:%S"),
++            "mode": "sandbox_v2",
++            "golden_version": meta_version,
++            "overall": metrics(targeted_rows),
++            "guard_overall": metrics(guard_rows),
++            "elapsed_sec": round(elapsed_t + elapsed_g, 2),
++            "targeted_count": len(targeted_rows),
++            "guard_count": len(guard_rows),
++            "rule_execution_hits": int(rule_execution_hits),
++            "binding_checks_count": len(binding_targeted) + len(binding_guard),
++            "eval_scope": {
++                "count": len(targeted_rows),
++                "guard_count": len(guard_rows),
++                "chunk_size": args.chunk_size,
++            },
++            "snapshot": _evaluation_snapshot(targeted_items, args.chunk_size, golden_digest),
++        }
++        os.makedirs(os.path.dirname(os.path.abspath(detail_path)), exist_ok=True)
++        payload = {
++            "summary": result,
++            "rows": targeted_rows,
++            "guard_rows": guard_rows,
++            "binding_rows": binding_targeted + binding_guard,
++        }
++        with open(detail_path, "w", encoding="utf-8") as f:
++            json.dump(payload, f, ensure_ascii=False)
++        if args.output_json:
++            with open(args.output_json, "w", encoding="utf-8") as f:
++                json.dump(payload, f, ensure_ascii=False, indent=2)
++        return
++
++    if args.exclude_source:
++        exc = set(s.strip() for s in args.exclude_source.split(",") if s.strip())
++        items = [x for x in items if x.get("source") not in exc]
++    if not args.include_1ton:
++        items = [x for x in items if x["label_type"] == "1to1"]
++    if not args.include_ambiguous:
++        items = [x for x in items if not x["ambiguous"]]
++    if not args.include_qc_suspect:
++        items = [x for x in items if not x.get("qc_suspect")]
++    if args.professional:
++        items = [x for x in items if x["professional"] == args.professional]
++    if args.filter_keyword:
++        kw = args.filter_keyword.strip().lower()
++        items = [
++            x for x in items
++            if kw in x.get("name", "").lower()
++            or kw in x.get("specification", "").lower()
++            or kw in x.get("target_name", "").lower()
++            or any(kw in ref.get("db_name", "").lower() for ref in x.get("target_ref", []))
++            or kw in x.get("raw_name", "").lower()
++            or kw in x.get("raw_spec", "").lower()
++        ]
++    if args.case_ids:
++        cids = set(c.strip() for c in args.case_ids.split(",") if c.strip())
++        items = [x for x in items if str(x.get("id", "")) in cids or str(x.get("idx", "")) in cids]
++    if args.limit and args.limit < len(items):
++        # 测试集按专业排序存放，直接切片会造成抽样偏差，此处按专业比例分层抽样
++        buckets = collections.OrderedDict()
++        for x in items:
++            buckets.setdefault(x["professional"], []).append(x)
++        total = len(items)
++        picked = []
++        for p, lst in buckets.items():
++            k = max(1, round(len(lst) / total * args.limit))
++            step = max(1, len(lst) // k)
++            picked.extend(lst[::step][:k])
++        items = picked[:args.limit]
++
++    print(f"黄金测试集 {meta_version}，本次评测 {len(items)} 条，分块 {args.chunk_size}")
++
++    from app.db_manager import init_db
++    from app.vector_index import index_manager
++    init_db()
++    if not index_manager.load_cache():
++        # 缓存与当前模型维度/名称不一致时必须重建，否则向量召回通道静默失效，指标不可信
++        print("向量索引缓存不可用，正在重建（首次或换模型后需要，耗时较长）...")
++        from app.db_manager import get_all_materials
++        index_manager.build_index(get_all_materials(limit=10 ** 9))
++        index_manager.save_cache()
++        print("向量索引重建完成。")
++
++    rows, elapsed = evaluate(items, chunk_size=args.chunk_size)
++    del items
++    gc.collect()
++    m = metrics(rows)
++    prof = by_professional(rows)
++
++    print("\n" + "=" * 66)
++    print("整体指标")
++    print("=" * 66)
++    for k in ("total", "hit@1", "recall@3", "recall@5", "recall@10", "mrr", "miss@10"):
++        tv = TARGETS.get(k)
++        flag = ""
++        if tv is not None:
++            flag = "  [达标]" if m[k] >= tv else f"  [未达标 目标{tv}]"
++        print(f"  {k:<10}: {m[k]}{flag}")
++    print(f"  耗时      : {elapsed:.1f}s  ({elapsed / max(1, len(rows)) * 1000:.0f} ms/条)")
++
++    print("\n" + "=" * 66)
++    print("分专业指标")
++    print("=" * 66)
++    print(f"  {'专业':<10}{'条数':>6}{'Hit@1':>9}{'R@3':>8}{'R@5':>8}{'MRR':>8}")
++    for p, pm in prof.items():
++        print(f"  {p:<10}{pm['total']:>6}{pm['hit@1']:>9}{pm['recall@3']:>8}"
++              f"{pm['recall@5']:>8}{pm['mrr']:>8}")
++
++    print("\n" + "=" * 66)
++    print("Top-1 错配 Top15（按真集出现频次排序，优先修这些）")
++    print("=" * 66)
++    bad = sorted([r for r in rows if r["rank"] != 1], key=lambda x: -x.get("weight", 1))
++    for r in bad[:15]:
++        top = r["top"][0] if r["top"] else {}
++        print(f"  [{r['id']}] {r['professional']} freq={r.get('weight')} rank={r['rank']}")
++        print(f"      Q  : {r['name']} | {r['specification'][:70]}")
++        print(f"      GT : {r['target_codes']} {r['target_name']}")
++        print(f"      系统: {top.get('code')} {top.get('name')} | {top.get('spec')} "
++              f"score={top.get('score')}")
++
++    result = {"time": time.strftime("%Y-%m-%d %H:%M:%S"), "overall": m,
++              "by_professional": prof, "elapsed_sec": round(elapsed, 1),
++              "eval_scope": {"count": len(rows), "include_1ton": args.include_1ton,
++                             "include_ambiguous": args.include_ambiguous,
++                             "include_qc_suspect": args.include_qc_suspect,
++                             "professional": args.professional or "ALL",
++                             "filter_keyword": args.filter_keyword,
++                             "case_ids": args.case_ids,
++                             "exclude_source": args.exclude_source,
++                             "limit": args.limit, "chunk_size": args.chunk_size},
++              "snapshot": _evaluation_snapshot(rows, args.chunk_size, golden_digest)}
++    # 流式逐行写盘，避免 json.dump 一次性构造上兆字符串占用内存
++    os.makedirs(os.path.dirname(os.path.abspath(detail_path)), exist_ok=True)
++    with open(detail_path, "w", encoding="utf-8") as f:
++        f.write('{"summary": ')
++        json.dump(result, f, ensure_ascii=False)
++        f.write(', "rows": [\n')
++        for i, r in enumerate(rows):
++            if i:
++                f.write(",\n")
++            json.dump(r, f, ensure_ascii=False)
++        f.write("\n]}\n")
++    print(f"\n明细已写入: {detail_path}")
++
++    if args.output_json:
++        with open(args.output_json, "w", encoding="utf-8") as f:
++            json.dump({"summary": result, "rows": rows}, f, ensure_ascii=False, indent=2)
++        print(f"指定结果文件已写入: {args.output_json}")
++
++    if args.baseline:
++        with open(baseline_path, "w", encoding="utf-8") as f:
++            json.dump(result, f, ensure_ascii=False, indent=1)
++        print(f"基线已写入: {baseline_path}")
++
++    if args.gate:
++        if not os.path.exists(baseline_path):
++            print("\n[GATE] 无基线文件，请先执行 --baseline")
++            sys.exit(1)
++        with open(baseline_path, encoding="utf-8") as f:
++            base = json.load(f)["overall"]
++        regress = []
++        for k in ("hit@1", "recall@3", "recall@5"):
++            delta = m[k] - base.get(k, 0)
++            mark = "+" if delta >= 0 else ""
++            print(f"[GATE] {k}: {base.get(k)} -> {m[k]}  ({mark}{delta:.2f})")
++            if delta < -args.tolerance:
++                regress.append(k)
++        dm = m["mrr"] - base.get("mrr", 0)
++        print(f"[GATE] mrr: {base.get('mrr')} -> {m['mrr']}  ({'+' if dm >= 0 else ''}{dm:.4f})")
++        if dm < -args.tolerance / 100:
++            regress.append("mrr")
++        if regress:
++            print(f"\n[GATE] 失败：指标回退 -> {regress}")
++            sys.exit(1)
++        print("\n[GATE] 通过：无指标回退")
++
++
++if __name__ == "__main__":
++    main()
+--- /dev/null
+
++++ tests/test_v016_m3_runtime_assets.py
+
+@@ -0,0 +1,75 @@
+
++import re
++import shutil
++import sqlite3
++
++import pytest
++
++from app import runtime_eval_assets as assets
++from app.flywheel_sandbox import get_eval_task_status, start_governed_evaluation
++from app.rule_governance import EvalGateError, require_materials_catalog
++
++
++@pytest.mark.parametrize(("filename", "payload", "error"), [
++    ("golden_runtime_v1.json", None, "golden_missing"),
++    ("golden_runtime_v1.json", b"{", "golden_invalid"),
++    ("golden_runtime_v1.json", b"{}", "golden_digest_mismatch"),
++    ("report_template_v1.json", b"", "template_invalid"),
++    ("sandbox_evaluator.py", None, "evaluator_unavailable"),
++    ("sandbox_evaluator.py", b"def (", "evaluator_unavailable"),
++])
++def test_damaged_runtime_assets_are_immediate_failures(tmp_path, monkeypatch, filename, payload, error):
++    copied = tmp_path / "runtime_assets"
++    shutil.copytree(assets.ASSET_DIR, copied)
++    monkeypatch.setattr(assets, "ASSET_DIR", copied)
++    monkeypatch.delenv("GOLDEN_SET_FILE", raising=False)
++    path = copied / filename
++    if filename == "sandbox_evaluator.py":
++        monkeypatch.setattr(assets, "EVALUATOR_PATH", path)
++    if payload is None and path.exists():
++        path.unlink()
++    elif payload is not None:
++        path.write_bytes(payload)
++
++    database = tmp_path / "isolated.db"
++    with sqlite3.connect(database) as db:
++        db.execute("CREATE TABLE materials (code, name, specification, unit, brand, category, parsed_params)")
++        db.execute("INSERT INTO materials VALUES ('SYNTH', '测试阀', 'DN25', '个', '', '给排水', '{}')")
++    eval_id = start_governed_evaluation(
++        rule_source="flywheel_alias", rule_key="synthetic", rule_type="ALIAS", normalized_spec={},
++        db_path=str(database),
++    )
++    status = get_eval_task_status(eval_id)
++    assert status["status"] == "failed"
++    assert status["safety_passed"] is False
++    assert status["benefit"] == "invalid"
++    assert status["report"]["error_code"] == error
++    with sqlite3.connect(database) as db:
++        assert not db.execute("SELECT 1 FROM sqlite_master WHERE name='rule_eval_runs'").fetchone()
++
++
++def test_missing_or_empty_catalog_does_not_self_seed(tmp_path):
++    db = tmp_path / "missing.db"
++    with pytest.raises(EvalGateError, match="物料库缺失"):
++        require_materials_catalog(str(db))
++    assert not db.exists()
++    with sqlite3.connect(db) as conn:
++        conn.execute("CREATE TABLE materials (code, name, specification, unit, brand, category, parsed_params)")
++    with pytest.raises(EvalGateError) as exc:
++        require_materials_catalog(str(db))
++    assert exc.value.status_code == 409 and exc.value.code == "materials_unavailable"
++
++
++def test_static_api_prefixes_precede_matching_parameter_routes():
++    from fastapi.routing import APIRoute
++    from app.server import app
++
++    routes = [route for route in app.routes if isinstance(route, APIRoute)]
++    for i, route in enumerate(routes):
++        path = re.sub(r"\{[^}]+\}", "1", route.path)
++        for prior in routes[:i]:
++            if not (prior.methods & route.methods) or not prior.path_regex.fullmatch(path):
++                continue
++            old_parts = prior.path.strip("/").split("/")
++            new_parts = route.path.strip("/").split("/")
++            assert not any(old.startswith("{") and not new.startswith("{")
++                           for old, new in zip(old_parts, new_parts)), (prior.path, route.path)

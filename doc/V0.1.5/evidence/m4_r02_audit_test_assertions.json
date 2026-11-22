@@ -1,0 +1,44 @@
+[
+  {
+    "path": "tests/test_auto_binding.py",
+    "before": 36,
+    "after": 36,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_binding_decisions.py",
+    "before": 88,
+    "after": 88,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m3_hard_constraints.py",
+    "before": 251,
+    "after": 251,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m3_hard_constraints_http.py",
+    "before": 192,
+    "after": 192,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m4_auth_lifecycle.py",
+    "before": 72,
+    "after": 110,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_m4_permissions_and_tasks.py",
+    "before": 89,
+    "after": 103,
+    "old_assertions_missing": 0
+  },
+  {
+    "path": "tests/test_v0_0_8_llm_rules.py",
+    "before": 18,
+    "after": 18,
+    "old_assertions_missing": 0
+  }
+]

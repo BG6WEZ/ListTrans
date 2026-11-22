@@ -1,0 +1,155 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T17:05:27.920662+08:00",
+  "role": "coordinator",
+  "task": "V019-M2/R01",
+  "decision": "RELEASED_PACKAGE_WITH_EXPERIMENTAL_CALIBRATION_OFF",
+  "next_dispatch": "V019-M3/R01",
+  "v019_final_review": false,
+  "v020_approved": false,
+  "production_release_authorized": false,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_check": {
+    "total": 178,
+    "matched": 174,
+    "changed": {
+      "app/flywheel_sandbox.py": {
+        "m2_dispatch_baseline": "5eef56584df5630f505e7fac29cea5a4df293fe406207c562e980aaf4ae35ce0",
+        "current": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0"
+      },
+      "app/matcher.py": {
+        "m2_dispatch_baseline": "72d5b2a18cec5a8367e8f0dd2d956e5047d4673c689092ff5e2d1c048ea22bd2",
+        "current": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0"
+      },
+      "app/sandbox_evaluator.py": {
+        "m2_dispatch_baseline": "3850e5c8d8353da1d133099412413b9ec63a82e6b8c6e2d8bd187e1fd50ae173",
+        "current": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5"
+      },
+      "app/server.py": {
+        "m2_dispatch_baseline": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7",
+        "current": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1"
+      }
+    }
+  },
+  "delivery_manifest_check": {
+    "total": 46,
+    "matched": 45,
+    "changed": {
+      "doc/V0.1.9/02_任务台账.md": {
+        "delivery_frozen": "cad499ea025c84931f925abda2590db1ec2999b8d16628004b505334a3deea3e",
+        "current": "e79eecabbfb2cd9871c8fdd3fcbdf189f252ce76d21101ac996ce1d7218769cb"
+      }
+    },
+    "note": "doc/V0.1.9/02_任务台账.md updated by audit AI upon recording R01 review verdict and OBS-A-M2-01..03; all 45 other delivery files exact match."
+  },
+  "audit_summary_sha256": "1bfc8f5e442d52fe108d32b723f69e8c686a842301ad5662a6bc96af041834bd",
+  "rollback_archive_check": {
+    "path": ".local-archive/v018_final_v019_m0_source_baseline.zip",
+    "archive_sha256_matched": true,
+    "entries_checked": 88,
+    "mismatches": [],
+    "m2_four_file_rollback_patch_sha256": "df24cb05740ae0b68cc457de0284a3550ea7f68aab64e5de8c055519fb991ca8"
+  },
+  "frozen_assets_check": {
+    "catalog_matched": true,
+    "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "legacy_vector_cache_all_matched": true,
+    "legacy_vector_cache_candidates_dir_exists": false
+  },
+  "default_switches_probe": {
+    "v019_m0_scoring_default": "legacy",
+    "v019_m1_rerank_default": "off",
+    "v019_m2_active_policy_default_is_none": true,
+    "v018_m0_recall_default": false,
+    "v019_m2_invalid_returns_none": true,
+    "v019_m2_on_threshold": null,
+    "v019_m2_on_min_margin": 10.0,
+    "v019_m2_on_reject_below": 40.0
+  },
+  "gates_check": {
+    "off_legacy_groups": 18,
+    "off_legacy_nonzero_diffs": 0,
+    "on_exit_code": 0,
+    "on_all_5_safety_unchanged": true,
+    "on_probes_ok": true,
+    "on_beneficial_degraded_detected": 17,
+    "on_beneficial_constrained_degraded": 0
+  },
+  "coord_spot_check_pytest": {
+    "modules": [
+      "tests/test_v019_m2_calibration.py",
+      "tests/test_v019_m1_rerank.py",
+      "tests/test_v019_m0_ranking.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_auto_binding.py",
+      "tests/test_flywheel_sandbox.py",
+      "tests/test_v016_m2_publish_gate.py",
+      "tests/test_m3_hard_constraints_http.py",
+      "tests/test_v017_m2_catalog_revision.py"
+    ],
+    "passed": 144,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_s": 316.17,
+    "isolated_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_m2_coord_44e57ec433ec4b6e8c8b095e3524dac4",
+    "independent_audit_full_suite": {
+      "passed": 467,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "duration_s": 744.85,
+      "source": "doc/V0.1.9/rounds/V019-M2_R01_审核小结.md"
+    }
+  },
+  "isolation_and_snapshot_check": {
+    "coord_before_verdict": "PASS",
+    "coord_after_verdict": "PASS",
+    "business_snapshot_slots": 35,
+    "diffs_coord_before_vs_m0_start": [],
+    "diffs_coord_after_vs_m0_start": []
+  },
+  "observations_rulings": {
+    "OBS-A-M2-01": {
+      "severity": "P3",
+      "status": "ruling_recorded_tracked",
+      "ruling": "Endorse safety-first abstention (threshold=null, coverage 0/160 Dev and 0/766 Train/Dev, precision=null, zero wrong auto-binding). Never claim 99% precision without denominator. F20 separation/calibration architecture and R-M3-01 protection are implemented and verified, while calibration remains default OFF; final enablement verdict and Test 160 holdout summary belong to V019-M3 and V0.1.9 final review.",
+      "owner_package": "V019-M3 / V0.1.9 Final Review"
+    },
+    "OBS-A-M2-02": {
+      "severity": "P3",
+      "status": "open_tracked",
+      "ruling": "Do not relax 375ms BGE single-request P95 budget. BGE ON measured 374.685ms (0.315ms margin, within budget) while calibration stays default OFF (BGE OFF 357.156ms). Re-measure with clean load in V019-M3; any budget overrun disqualifies default enablement.",
+      "owner_package": "V019-M3"
+    },
+    "OBS-A-M2-03": {
+      "severity": "P3",
+      "status": "linked_to_ENV-V017-01",
+      "ruling": "Confirmed Dockerfile copies only app/*.py, app/eval_assets/*, web/, config/, excluding experimental calibration/rerank asset folders; missing assets safely fall back to OFF. Tracked under ENV-V017-01; if any experimental switch is ever proposed for default enablement in Linux image, exact asset allow-list update and offline container verification are mandatory.",
+      "owner_package": "ENV-V017-01 / V019 Final Review"
+    }
+  },
+  "m3_effective_source_updates_sha256": {
+    "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+    "app/calibration_assets/v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+    "app/calibration_assets/v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+    "app/flywheel_sandbox.py": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0",
+    "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+    "app/sandbox_evaluator.py": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5",
+    "app/server.py": "0292c741848a9f8e231274af5966453f42a7c07da93662f043f417e936f87eb1",
+    "tests/test_v019_m2_calibration.py": "2ff8adcdeda707da24bc95626d981f53b9fd8a59ec83af39ddb65948ddeaa838"
+  },
+  "m3_frontend_and_docker_baseline_sha256": {
+    "web/admin.html": "37fdb1bb97400d273b6b116b6b833277b66273e46e6517768df3810f59367a43",
+    "web/app.js": "d88936db277ea5751e872cbeb925fcd959cefe0448c8e6e8e79436383c105b49",
+    "web/index.css": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+    "web/index.html": "bf6c68b08054c87e24e41cd1fc3ec038c730f9619268f3452e9d70f976ca6906",
+    "web/login.css": "20bf8b2f52ffd9c0cac59d0979604d1ad4b6ec1ba7f676388ba0c9db1f726acd",
+    "web/login.html": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+    "web/logo.png": "886da7965a5f07b8525ba921b11d9d3e2df02303efed5de90e482557b88be539",
+    "web/logo500.png": "7d71cef49bf5db0c71727daea3c75895cc114a4bc32aa5f4b47c5fd8516dcb00",
+    "Dockerfile": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466"
+  },
+  "m3_effective_baseline_count": 191
+}

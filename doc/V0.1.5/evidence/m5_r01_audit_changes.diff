@@ -1,0 +1,1251 @@
+--- pre/requirements.txt
++++ current/requirements.txt
+@@ -10,4 +10,6 @@
+ passlib[bcrypt]>=1.7.4
+ python-dotenv>=1.0.0
+ openai>=1.0.0
++psutil>=5.9.0
++xlrd>=2.0.1
+ 
+--- pre/app/audit_manager.py
++++ current/app/audit_manager.py
+@@ -315,6 +315,9 @@
+             "memory_mb": 0.0,
+             "threads_count": threading.active_count()
+         },
++        "metrics_available": False,
++        "metrics_source": "unavailable",
++        "metrics_error": "",
+         "is_alert": False,
+         "alert_message": ""
+     }
+@@ -359,10 +362,24 @@
+             proc = psutil.Process(os.getpid())
+             metrics["process"]["memory_mb"] = round(proc.memory_info().rss / (1024 ** 2), 1)
+             metrics["process"]["threads_count"] = proc.num_threads()
++
++            has_core_metrics = (
++                metrics["memory"]["total_gb"] > 0
++                and metrics["disk"]["total_gb"] > 0
++                and metrics["process"]["memory_mb"] > 0
++            )
++            metrics["metrics_source"] = "psutil"
++            metrics["metrics_available"] = bool(has_core_metrics)
++            if not has_core_metrics:
++                metrics["metrics_error"] = "psutil returned incomplete zero hardware metrics"
+             
+         except Exception as e:
++            metrics["metrics_available"] = False
++            metrics["metrics_source"] = "unavailable"
++            metrics["metrics_error"] = str(e)
+             security_logger.error(f"Error querying psutil hardware metrics: {e}")
+     else:
++        metrics["metrics_source"] = "fallback"
+         # Fallback for Linux / generic environments without psutil
+         try:
+             import shutil
+@@ -430,6 +447,15 @@
+         except Exception:
+             pass
+ 
++        has_fallback_metrics = (
++            metrics["memory"]["total_gb"] > 0
++            and metrics["disk"]["total_gb"] > 0
++            and metrics["process"]["memory_mb"] > 0
++        )
++        metrics["metrics_available"] = bool(has_fallback_metrics)
++        if not has_fallback_metrics:
++            metrics["metrics_error"] = "psutil unavailable and system fallback metrics incomplete"
++
+     # Check if currently in high-load alert state
+     is_cpu_alert = metrics["cpu"]["percent"] >= 90.0
+     is_mem_alert = metrics["memory"]["percent"] >= 90.0
+--- pre/app/admin_api.py
++++ current/app/admin_api.py
+@@ -260,8 +260,13 @@
+     """
+     hardware = get_server_hardware_metrics()
+     online_info = get_online_and_active_users()
+-    
++    metrics_available = bool(hardware.get("metrics_available", False))
++    metrics_error = str(hardware.get("metrics_error") or "")
++
+     return {
++        "status": "healthy" if metrics_available else "degraded",
++        "metrics_available": metrics_available,
++        "metrics_error": metrics_error,
+         "hardware": hardware,
+         "online_count": online_info["online_count"],
+         "active_count": online_info["active_count"],
+--- pre/app/vector_index.py
++++ current/app/vector_index.py
+@@ -89,7 +89,11 @@
+         try:
+             self.model = SentenceTransformer(model_path)
+             try:
+-                self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
++                dim_fn = getattr(self.model, "get_embedding_dimension", None) or getattr(
++                    self.model, "get_sentence_embedding_dimension", None
++                )
++                if callable(dim_fn):
++                    self.embedding_dim = int(dim_fn())
+             except Exception:
+                 pass
+             print(f"SentenceTransformer model [{self.model_name_or_path}] loaded successfully (dim={self.embedding_dim}).")
+@@ -231,11 +235,20 @@
+         except Exception as e:
+             print(f"Error saving vector cache: {e}")
+ 
+-    def build_index(self, materials: List[Dict[str, Any]], task_id: Optional[str] = None):
++    def build_index(
++        self,
++        materials: List[Dict[str, Any]],
++        task_id: Optional[str] = None,
++        cancel_event: Optional[threading.Event] = None,
++    ):
+         """
+         Build index from scratch using shadow swap (R1 Concurrency safe).
+         materials: List of Dict containing 'code', 'name', 'specification', 'category'
+         """
++        if cancel_event is not None and cancel_event.is_set():
++            from app.excel_boundary import ParseCancelledError
++            raise ParseCancelledError("向量索引构建已在开始前取消")
++
+         if not self.is_enabled:
+             return
+             
+@@ -261,6 +274,9 @@
+         total_items = len(texts)
+         
+         for idx in range(0, total_items, chunk_size):
++            if cancel_event is not None and cancel_event.is_set():
++                from app.excel_boundary import ParseCancelledError
++                raise ParseCancelledError("向量索引构建已超时取消，保留原有索引")
+             chunk_texts = texts[idx : idx + chunk_size]
+             chunk_embs = self.encode_queries(chunk_texts, batch_size=256)
+             if chunk_embs is None:
+@@ -296,6 +312,11 @@
+         else:
+             print(f"Numpy index built in {time.time() - start_time:.2f}s.")
+ 
++        # Pre-commit check before swapping active vector index
++        if cancel_event is not None and cancel_event.is_set():
++            from app.excel_boundary import ParseCancelledError
++            raise ParseCancelledError("向量索引构建在切换前超时取消，已放弃写入")
++
+         # Shadow Index Atomic Swap (R1)
+         with self._lock:
+             self.index_to_material = new_index_to_material
+@@ -303,6 +324,8 @@
+             self.faiss_index = new_faiss_index
+             self.use_faiss = new_use_faiss
+ 
++        if cancel_event is not None and cancel_event.is_set():
++            return
+         self.save_cache()
+ 
+     def add_to_index(self, material: Dict[str, Any]):
+--- pre/app/db_manager.py
++++ current/app/db_manager.py
+@@ -430,12 +430,19 @@
+             return True, None, f"{match.group(0)}"
+     return True, None, f"{match.group(0)}"
+ 
++def _clean_excel_str_col(series: pd.Series) -> pd.Series:
++    """Safely convert an Excel Series to stripped strings without Pandas4 fillna downcasting warnings."""
++    s_obj = series.astype(object)
++    return s_obj.where(pd.notna(s_obj), "").astype(str).str.strip()
++
++
+ def import_materials_from_excel(
+     xlsx_path: str, 
+     mode: str = "replace", 
+     filename: str = "materials.xlsx", 
+     task_id: Optional[str] = None,
+-    disable_mode: str = "on_expire"
++    disable_mode: str = "on_expire",
++    cancel_event: Optional[threading.Event] = None,
+ ) -> Dict[str, Any]:
+     """
+     Import materials from Excel file into SQLite database.
+@@ -444,6 +451,12 @@
+     """
+     import json
+     import datetime
++    from app.excel_boundary import (
++        ExcelBoundaryError,
++        ParseCancelledError,
++        load_validated_dataframe_from_excel,
++        validate_extension,
++    )
+     
+     # Critical Production Protection Guardrail
+     is_testing = "PYTEST_CURRENT_TEST" in os.environ or os.getenv("TESTING") == "1"
+@@ -458,8 +471,18 @@
+ 
+     if not os.path.exists(xlsx_path):
+         raise FileNotFoundError(f"Excel file not found: {xlsx_path}")
+-        
+-    df = pd.read_excel(xlsx_path, header=1)
++
++    if filename and filename != "materials.xlsx":
++        validate_extension(filename, frozenset({".xlsx", ".xls"}), context_label="物料库导入")
++
++    df = load_validated_dataframe_from_excel(
++        xlsx_path,
++        header_row_index=1,
++        allowed_exts=frozenset({".xlsx", ".xls"}),
++        original_filename=xlsx_path,
++        cancel_event=cancel_event,
++        context_label="物料库导入",
++    )
+     
+     # Map columns
+     df = df.rename(columns={
+@@ -471,20 +494,30 @@
+         "常用品牌": "brand",
+         "描述": "description"
+     })
++
++    if "code" not in df.columns or "name" not in df.columns:
++        raise ExcelBoundaryError(
++            "物料库表格缺少必填列（第2行表头需包含“物料编码”和“物料名称”）",
++            status_code=400,
++            code="missing_material_columns",
++        )
+     
+     required_cols = ["code", "category", "name", "specification", "unit", "brand", "description"]
+     for col in required_cols:
+         if col not in df.columns:
+             df[col] = ""
+             
+-    df_cleaned = df[required_cols].dropna(subset=["code"])
+-    df_cleaned["code"] = df_cleaned["code"].astype(str).str.strip()
+-    df_cleaned["category"] = df_cleaned["category"].fillna("").astype(str).str.strip()
+-    df_cleaned["name"] = df_cleaned["name"].fillna("").astype(str).str.strip()
+-    df_cleaned["specification"] = df_cleaned["specification"].fillna("").astype(str).str.strip()
+-    df_cleaned["unit"] = df_cleaned["unit"].fillna("").astype(str).str.strip()
+-    df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
+-    df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
++    df_cleaned = df[required_cols].copy()
++    for col in required_cols:
++        df_cleaned[col] = _clean_excel_str_col(df_cleaned[col])
++    df_cleaned = df_cleaned[df_cleaned["code"] != ""].copy()
++
++    if len(df_cleaned) == 0:
++        raise ExcelBoundaryError(
++            "物料库表格不包含有效物料数据行（有效物料编码为空）",
++            status_code=400,
++            code="empty_material_rows",
++        )
+     
+     # Date-aware full-field disabled scan across: code, name, category, specification, description
+     today = datetime.date.today()
+@@ -566,6 +599,8 @@
+     parsed_params_list = []
+     
+     for idx, (_, row) in enumerate(df_cleaned.iterrows()):
++        if cancel_event is not None and cancel_event.is_set():
++            raise ParseCancelledError("物料库导入已取消或超时，已放弃解析")
+         tokens = f"{row['name']} {row['specification']} {row['category']}".lower()
+         search_tokens_list.append(tokens)
+         
+@@ -604,6 +639,9 @@
+     df_cleaned["search_tokens"] = search_tokens_list
+     df_cleaned["parsed_params"] = parsed_params_list
+     
++    if cancel_event is not None and cancel_event.is_set():
++        raise ParseCancelledError("物料库导入已在落库前超时取消")
++
+     conn = get_db_connection()
+     try:
+         cursor = conn.cursor()
+@@ -660,6 +698,8 @@
+             from app.preprocessor import fts_tokenize
+             fts_records = []
+             for _, row in df_cleaned.iterrows():
++                if cancel_event is not None and cancel_event.is_set():
++                    raise ParseCancelledError("物料库导入在构建 FTS 索引前超时取消")
+                 fts_records.append([
+                     row["code"],
+                     fts_tokenize(row["category"]),
+@@ -673,12 +713,21 @@
+                 (code, category, name, specification, brand, description)
+                 VALUES (?, ?, ?, ?, ?, ?)
+             """, fts_records)
+-            
++
++        if cancel_event is not None and cancel_event.is_set():
++            raise ParseCancelledError("物料库导入在数据库提交前超时取消")
++
+         conn.commit()
+         try:
+             conn.execute("PRAGMA optimize;")
+         except Exception:
+             pass
++    except Exception:
++        try:
++            conn.rollback()
++        except Exception:
++            pass
++        raise
+     finally:
+         try:
+             conn.close()
+--- pre/app/auth_manager.py
++++ current/app/auth_manager.py
+@@ -385,11 +385,25 @@
+         if not ok_pwd:
+             return {"success": False, "count": 0, "message": "禁止使用默认或弱临时口令批量导入账号。"}
+ 
+-    import xlrd
+-    book = xlrd.open_workbook(excel_path)
+-    sheet = book.sheet_by_index(0)
+-
+-    headers = [str(sheet.cell_value(0, c)).strip() for c in range(sheet.ncols)]
++    from app.excel_boundary import ExcelBoundaryError, load_validated_excel_sheets
++
++    try:
++        sheets = load_validated_excel_sheets(
++            excel_path,
++            allowed_exts=frozenset({".xlsx", ".xls"}),
++            original_filename=excel_path,
++            max_sheets_to_read=1,
++            context_label="人员清单导入",
++            allow_mock_xlrd=True,
++        )
++    except ExcelBoundaryError as exc:
++        return {"success": False, "count": 0, "message": exc.detail}
++
++    if not sheets or not sheets[0][1]:
++        return {"success": False, "count": 0, "message": "人员清单工作表为空"}
++
++    rows = sheets[0][1]
++    headers = [str(c).strip() if c is not None else "" for c in rows[0]]
+ 
+     # Map header names to indices
+     col_map = {}
+@@ -405,6 +419,9 @@
+     if "phone" not in col_map or "name" not in col_map:
+         return {"success": False, "count": 0, "message": "Excel缺少必要列（姓名或手机号）"}
+ 
++    if len(rows) <= 1:
++        return {"success": False, "count": 0, "message": "人员清单缺少数据行"}
++
+     conn = get_auth_connection()
+     cursor = conn.cursor()
+ 
+@@ -415,11 +432,16 @@
+ 
+     try:
+         conn.execute("BEGIN IMMEDIATE")
+-        for r in range(1, sheet.nrows):
++        for row_vals in rows[1:]:
+             def get_val(key):
+                 if key not in col_map:
+                     return ""
+-                val = sheet.cell_value(r, col_map[key])
++                c_idx = col_map[key]
++                if c_idx >= len(row_vals):
++                    return ""
++                val = row_vals[c_idx]
++                if val is None:
++                    return ""
+                 if isinstance(val, float) and val.is_integer():
+                     return str(int(val))
+                 elif isinstance(val, float):
+@@ -511,6 +533,9 @@
+                     "employee_no": emp_to_insert,
+                     "temp_password": raw_temp,
+                 })
++        if (imported_count + updated_count) == 0:
++            conn.rollback()
++            return {"success": False, "count": 0, "message": "人员清单中未找到包含有效姓名与手机号的数据行"}
+         conn.commit()
+     except Exception:
+         try:
+--- pre/app/server.py
++++ current/app/server.py
+@@ -33,6 +33,18 @@
+ from app.vector_index import index_manager
+ from app.matcher import match_item, reload_matcher_configs
+ from app.report_generator import generate_standard_report
++from app.excel_boundary import (
++    DEFAULT_MAX_UPLOAD_BYTES,
++    DbImportLockManager,
++    ExcelBoundaryError,
++    ParseCancelledError,
++    UploadTooLargeError,
++    ensure_workbook_non_empty,
++    load_validated_excel_sheets,
++    remove_file_quietly,
++    stream_save_upload_file,
++    validate_extension,
++)
+ 
+ # Ensure logs directory exists (test isolation: LOG_DIR redirects runtime logs)
+ LOG_DIR = os.getenv("LOG_DIR", "logs")
+@@ -1235,11 +1247,15 @@
+     manual_code: str
+     is_correct: bool
+ 
+-def _parse_and_prepare_upload_excel(task_id: str, temp_path: str) -> List[Dict[str, Any]]:
+-    """CPU-bound Excel extraction running in executor (M1 unblocking)."""
+-    wb = openpyxl.load_workbook(temp_path, data_only=True)
+-    raw_rows = []
+-    
++def _extract_upload_rows_from_sheets(
++    sheets: List[Tuple[str, List[Tuple[Any, ...]]]],
++    task_id: Optional[str] = None,
++    cancel_event: Optional[threading.Event] = None,
++) -> List[Dict[str, Any]]:
++    """Extract and validate query rows from pre-validated workbook sheets."""
++    ensure_workbook_non_empty(sheets, context_label="工程清单")
++    raw_rows: List[Dict[str, Any]] = []
++
+     def get_professional_by_sheet(sheet_name: str) -> str:
+         name_lower = sheet_name.lower()
+         if any(kw in name_lower for kw in ["装饰", "地材", "卷材", "橡胶", "pvc", "门", "手术室", "无影灯", "打胶", "自动门"]):
+@@ -1257,82 +1273,111 @@
+         if any(kw in name_lower for kw in ["纯水", "水处理"]):
+             return "纯水"
+         return "暖通"
+-        
++
++    def _cell(row_vals: Tuple[Any, ...], idx_1based: Optional[int]) -> Any:
++        if idx_1based is None or idx_1based <= 0 or idx_1based > len(row_vals):
++            return None
++        return row_vals[idx_1based - 1]
++
+     exclude_kws = ["说明", "汇总", "商务部", "备用"]
+-    update_task_progress(task_id, current_step="正在读取并解析 Excel 工作表...", structuring_progress=5)
+-    
++    if task_id:
++        update_task_progress(task_id, current_step="正在读取并解析 Excel 工作表...", structuring_progress=5)
++
+     global_row_counter = 1
+-    total_sheets = len(wb.sheetnames)
+-    for s_idx, sheet_name in enumerate(wb.sheetnames):
++    total_sheets = max(len(sheets), 1)
++    found_valid_header = False
++
++    for s_idx, (sheet_name, sheet_rows) in enumerate(sheets):
++        if cancel_event is not None and cancel_event.is_set():
++            raise ParseCancelledError("清单解析已取消或超时")
+         if any(kw in sheet_name for kw in exclude_kws):
+             continue
+-            
+-        sheet = wb[sheet_name]
++
+         professional = get_professional_by_sheet(sheet_name)
+-        
++
+         header_row = None
+-        for r in range(1, 11):
+-            if r > sheet.max_row:
++        for r_idx, row_vals in enumerate(sheet_rows[:10], start=1):
++            row_strs = [str(x).strip() for x in row_vals if x is not None]
++            if (
++                any(x in ["*编码", "项目编码", "编码", "项目名称", "*名称", "名称"] for x in row_strs)
++                and any("规格" in x or "特征" in x or "型号" in x for x in row_strs)
++            ):
++                header_row = r_idx
+                 break
+-            row_vals = [sheet.cell(r, c).value for c in range(1, sheet.max_column + 1)]
+-            row_strs = [str(x).strip() for x in row_vals if x is not None]
+-            if any(x in ["*编码", "项目编码", "编码", "项目名称", "*名称", "名称"] for x in row_strs) and any("规格" in x or "特征" in x for x in row_strs):
+-                header_row = r
+-                break
+-        
++
+         if not header_row:
+-            code_idx, name_idx, spec_idx, unit_idx, qty_idx = 1, 2, 3, 4, 5
+-            loss_idx, category_idx, brand_idx = None, None, None
+-            start_r = 1
+-        else:
+-            start_r = header_row + 1
+-            headers = [sheet.cell(header_row, c).value for c in range(1, sheet.max_column + 1)]
+-            code_idx = name_idx = spec_idx = unit_idx = qty_idx = loss_idx = category_idx = brand_idx = None
+-            
+-            for idx, h in enumerate(headers):
+-                if not h: continue
+-                h_str = str(h).strip()
+-                if "编码" in h_str and code_idx is None: code_idx = idx + 1
+-                elif "名称" in h_str and name_idx is None: name_idx = idx + 1
+-                elif ("规格" in h_str or "特征" in h_str) and spec_idx is None: spec_idx = idx + 1
+-                elif "单位" in h_str and unit_idx is None: unit_idx = idx + 1
+-                elif h_str in ["*数量", "数量", "工程量"] and qty_idx is None: qty_idx = idx + 1
+-                elif "损耗" in h_str and loss_idx is None: loss_idx = idx + 1
+-                elif h_str in ["甲供材品类", "品类", "分类"] and category_idx is None: category_idx = idx + 1
+-                elif "品牌" in h_str and brand_idx is None: brand_idx = idx + 1
+-
+-            if code_idx is None: code_idx = 1
+-            if name_idx is None: name_idx = 2
+-            if spec_idx is None: spec_idx = 3
+-            if unit_idx is None: unit_idx = 4
+-            if qty_idx is None: qty_idx = 5
+-        
+-        total_r = sheet.max_row
+-        for r in range(start_r, total_r + 1):
+-            val_b = sheet.cell(r, name_idx).value
+-            val_c = sheet.cell(r, spec_idx).value
+-            val_b_str = str(val_b or "").strip()
+-            val_c_str = str(val_c or "").strip()
+-            raw_unit = str(sheet.cell(r, unit_idx).value or "").strip() if unit_idx else ""
+-            original_code = str(sheet.cell(r, code_idx).value or "").strip() if code_idx else ""
++            continue
++
++        found_valid_header = True
++        start_r = header_row + 1
++        headers = sheet_rows[header_row - 1]
++        code_idx = name_idx = spec_idx = unit_idx = qty_idx = loss_idx = category_idx = brand_idx = None
++
++        for idx, h in enumerate(headers):
++            if not h:
++                continue
++            h_str = str(h).strip()
++            if "编码" in h_str and code_idx is None:
++                code_idx = idx + 1
++            elif "名称" in h_str and name_idx is None:
++                name_idx = idx + 1
++            elif ("规格" in h_str or "特征" in h_str or "型号" in h_str) and spec_idx is None:
++                spec_idx = idx + 1
++            elif "单位" in h_str and unit_idx is None:
++                unit_idx = idx + 1
++            elif h_str in ["*数量", "数量", "工程量"] and qty_idx is None:
++                qty_idx = idx + 1
++            elif "损耗" in h_str and loss_idx is None:
++                loss_idx = idx + 1
++            elif h_str in ["甲供材品类", "品类", "分类"] and category_idx is None:
++                category_idx = idx + 1
++            elif "品牌" in h_str and brand_idx is None:
++                brand_idx = idx + 1
++
++        if code_idx is None:
++            code_idx = 1
++        if name_idx is None:
++            name_idx = 2
++        if spec_idx is None:
++            spec_idx = 3
++        if unit_idx is None:
++            unit_idx = 4
++        if qty_idx is None:
++            qty_idx = 5
++
++        for r, row_vals in enumerate(sheet_rows[start_r - 1 :], start=start_r):
++            val_b = _cell(row_vals, name_idx)
++            val_c = _cell(row_vals, spec_idx)
++            val_b_str = str(val_b if val_b is not None else "").strip()
++            val_c_str = str(val_c if val_c is not None else "").strip()
++            raw_unit_val = _cell(row_vals, unit_idx)
++            raw_unit = str(raw_unit_val if raw_unit_val is not None else "").strip() if unit_idx else ""
++            raw_code_val = _cell(row_vals, code_idx)
++            original_code = str(raw_code_val if raw_code_val is not None else "").strip() if code_idx else ""
+ 
+             is_valid, _ = is_valid_query_item(val_b_str, val_c_str, raw_unit, original_code, r)
+             if not is_valid:
+                 continue
+ 
+             unit_str = raw_unit or "台"
+-            qty_val = sheet.cell(r, qty_idx).value
+-            try: qty = float(qty_val) if qty_val is not None else 0.0
+-            except ValueError: qty = 0.0
++            qty_val = _cell(row_vals, qty_idx)
++            try:
++                qty = float(qty_val) if qty_val is not None else 0.0
++            except (ValueError, TypeError):
++                qty = 0.0
+ 
+             loss = 1.0
+             if loss_idx:
+-                loss_val = sheet.cell(r, loss_idx).value
+-                try: loss = float(loss_val) if loss_val is not None else 1.0
+-                except ValueError: loss = 1.0
+-
+-            category = str(sheet.cell(r, category_idx).value or "").strip() if category_idx else ""
+-            brand = str(sheet.cell(r, brand_idx).value or "").strip() if brand_idx else ""
++                loss_val = _cell(row_vals, loss_idx)
++                try:
++                    loss = float(loss_val) if loss_val is not None else 1.0
++                except (ValueError, TypeError):
++                    loss = 1.0
++
++            raw_cat_val = _cell(row_vals, category_idx)
++            category = str(raw_cat_val if raw_cat_val is not None else "").strip() if category_idx else ""
++            raw_brand_val = _cell(row_vals, brand_idx)
++            brand = str(raw_brand_val if raw_brand_val is not None else "").strip() if brand_idx else ""
+ 
+             raw_rows.append({
+                 "row_idx": global_row_counter,
+@@ -1344,59 +1389,99 @@
+                 "loss": loss,
+                 "category": category,
+                 "brand": brand,
+-                "professional": professional
++                "professional": professional,
+             })
+             global_row_counter += 1
+ 
+-        sheet_prog = min(95, int(5 + ((s_idx + 1) / total_sheets) * 90))
+-        update_task_progress(task_id, structuring_progress=sheet_prog)
+-
+-    wb.close()
++        if task_id:
++            sheet_prog = min(95, int(5 + ((s_idx + 1) / total_sheets) * 90))
++            update_task_progress(task_id, structuring_progress=sheet_prog)
++
++    if not found_valid_header:
++        raise ExcelBoundaryError(
++            "清单文件缺少有效表头列（需包含“项目名称/名称/编码”以及“规格/特征/型号”列）",
++            status_code=400,
++            code="missing_query_columns",
++        )
++    if not raw_rows:
++        raise ExcelBoundaryError(
++            "清单文件中未识别出有效的待匹配物料数据行",
++            status_code=400,
++            code="empty_query_rows",
++        )
+     return raw_rows
+ 
+-async def async_process_upload_task(task_id: str, temp_path: str):
++
++def _precheck_upload_excel(temp_path: str, original_filename: Optional[str] = None) -> List[Dict[str, Any]]:
++    """Synchronous pre-validation (magic, zip bomb, budgets, columns, rows) before background task dispatch."""
++    sheets = load_validated_excel_sheets(
++        temp_path,
++        allowed_exts=frozenset({".xlsx"}),
++        original_filename=original_filename or temp_path,
++        context_label="清单上传",
++    )
++    return _extract_upload_rows_from_sheets(sheets, task_id=None)
++
++
++def _parse_and_prepare_upload_excel(
++    task_id: str,
++    temp_path: str,
++    cancel_event: Optional[threading.Event] = None,
++) -> List[Dict[str, Any]]:
++    """CPU-bound Excel extraction running in executor (M1 unblocking + M5 safety boundary)."""
++    sheets = load_validated_excel_sheets(
++        temp_path,
++        allowed_exts=frozenset({".xlsx"}),
++        original_filename=temp_path,
++        cancel_event=cancel_event,
++        context_label="清单上传",
++    )
++    return _extract_upload_rows_from_sheets(sheets, task_id=task_id, cancel_event=cancel_event)
++
++async def async_process_upload_task(
++    task_id: str,
++    temp_path: str,
++    prechecked_rows: Optional[List[Dict[str, Any]]] = None,
++):
+     matching_timeout = 120.0
+     try:
+         loop = asyncio.get_running_loop()
+-        # M1: Offload CPU-bound openpyxl parsing to executor
+-        raw_rows = await loop.run_in_executor(executor, _parse_and_prepare_upload_excel, task_id, temp_path)
+-        
+-        if os.path.exists(temp_path):
+-            try:
+-                os.remove(temp_path)
+-            except Exception:
+-                pass
+-        
++        if prechecked_rows is not None:
++            raw_rows = prechecked_rows
++            update_task_progress(task_id, structuring_progress=95)
++        else:
++            raw_rows = await loop.run_in_executor(executor, _parse_and_prepare_upload_excel, task_id, temp_path)
++
++        remove_file_quietly(temp_path)
++
+         update_task_progress(
+             task_id,
+             structuring_progress=100,
+             current_step="Excel 清单数据解析完成，开始智能特征比对..."
+         )
+-        
++
+         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=len(raw_rows), status="processing", current_step="正在智能清洗与特征比对...")
+         increment_stat_counter("total_processed_rows", len(raw_rows))
+-        
++
+         matching_timeout = max(120.0, len(raw_rows) * 1.5)
+         parsed_rows = await asyncio.wait_for(
+             loop.run_in_executor(executor, batch_match_rows, raw_rows, task_id),
+             timeout=matching_timeout
+         )
+-        
++
+         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="completed")
+         log_audit_event(username="system", action="智能比对完成", details=f"成功完成 {len(raw_rows)} 行清单特征清洗与智能匹配")
+-        
++
+         update_task_progress(
+             task_id,
+             status="completed",
+             result=parsed_rows,
+             current_step="所有清单项目已智能比对匹配完成！"
+         )
+-        
++
+     except asyncio.TimeoutError:
+         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
+-        if os.path.exists(temp_path):
+-            try: os.remove(temp_path)
+-            except Exception: pass
++        remove_file_quietly(temp_path)
+         logger.error(f"Async upload task {task_id} timed out after {matching_timeout:.1f}s.")
+         update_task_progress(
+             task_id,
+@@ -1406,9 +1491,7 @@
+         )
+     except Exception as e:
+         update_processing_task(task_id, filename=os.path.basename(temp_path), total_rows=0, status="failed")
+-        if os.path.exists(temp_path):
+-            try: os.remove(temp_path)
+-            except Exception: pass
++        remove_file_quietly(temp_path)
+         logger.error(f"Error during async process upload task: {e}")
+         update_task_progress(
+             task_id,
+@@ -1417,60 +1500,75 @@
+             current_step=f"处理出错: {str(e)}"
+         )
+ 
+-MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB limit
++MAX_UPLOAD_SIZE = DEFAULT_MAX_UPLOAD_BYTES  # 50 MB limit
+ 
+ @app.post("/api/upload")
+ async def upload_file(request: Request, background_tasks: BackgroundTasks, file: UploadFile = File(...), current_user: dict = Depends(require_employee)):
+     """
+-    Upload original list and start high performance batch matching background task.
++    Upload original list (.xlsx only) and start high performance batch matching background task.
+     """
+-    if not file.filename.endswith((".xlsx", ".xls")):
+-        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
+-        
+-    # Check Content-Length header first if present
+-    content_length = request.headers.get("content-length")
+-    if content_length and int(content_length) > MAX_UPLOAD_SIZE:
+-        raise HTTPException(status_code=413, detail="文件大小超出限制（最大允许 50MB）。")
+-        
+-    safe_filename = os.path.basename(file.filename)
+-    logger.info(f"Received query list Excel upload: {safe_filename} by user {current_user.get('username')}")
+-    file_id = str(uuid.uuid4())
+-    temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{safe_filename}")
+-    
+-    total_written = 0
+-    with open(temp_path, "wb") as buffer:
+-        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+-            total_written += len(chunk)
+-            if total_written > MAX_UPLOAD_SIZE:
+-                buffer.close()
+-                if os.path.exists(temp_path):
+-                    os.remove(temp_path)
+-                raise HTTPException(status_code=413, detail="文件大小超出限制（最大允许 50MB）。")
+-            buffer.write(chunk)
+-        
+-    clean_expired_upload_tasks()
+-    task_id = str(uuid.uuid4())
+-    set_task_initial(task_id, {
+-        "status": "processing",
+-        "created_time": time.time(),
+-        "structuring_progress": 0,
+-        "vectorization_progress": 0,
+-        "matching_progress": 0,
+-        "current_step": "正在初始化后台比对任务...",
+-        "result": None,
+-        "error": None
+-    }, owner_user=current_user)
+-    
+-    log_audit_event(
+-        username=current_user["username"],
+-        name=current_user.get("name"),
+-        role=current_user.get("role"),
+-        action="上传清单",
+-        details=f"上传待匹配清单: {file.filename}"
+-    )
+-    
+-    background_tasks.add_task(async_process_upload_task, task_id, temp_path)
+-    return JSONResponse(content={"task_id": task_id})
++    temp_path: Optional[str] = None
++    task_id: Optional[str] = None
++    scheduled = False
++
++    try:
++        ext = validate_extension(file.filename, frozenset({".xlsx"}), context_label="清单上传")
++        safe_filename = os.path.basename((file.filename or f"upload{ext}").strip())
++        if not safe_filename.lower().endswith(".xlsx"):
++            safe_filename = f"{safe_filename}.xlsx"
++        logger.info(f"Received query list Excel upload: {safe_filename} by user {current_user.get('username')}")
++        file_id = str(uuid.uuid4())
++        temp_path = os.path.join(UPLOAD_DIR, f"{file_id}_{safe_filename}")
++
++        max_bytes = MAX_UPLOAD_SIZE if MAX_UPLOAD_SIZE != DEFAULT_MAX_UPLOAD_BYTES else None
++        await stream_save_upload_file(request, file, temp_path, max_bytes=max_bytes)
++
++        prechecked_rows = _precheck_upload_excel(temp_path, file.filename)
++
++        clean_expired_upload_tasks()
++        task_id = str(uuid.uuid4())
++        set_task_initial(task_id, {
++            "status": "processing",
++            "created_time": time.time(),
++            "structuring_progress": 0,
++            "vectorization_progress": 0,
++            "matching_progress": 0,
++            "current_step": "正在初始化后台比对任务...",
++            "result": None,
++            "error": None
++        }, owner_user=current_user)
++
++        log_audit_event(
++            username=current_user["username"],
++            name=current_user.get("name"),
++            role=current_user.get("role"),
++            action="上传清单",
++            details=f"上传待匹配清单: {file.filename}"
++        )
++
++        # Wait: pass temp_path and rely on async task (with prechecked_rows fast-path) so tests mocking either keep working cleanly.
++        background_tasks.add_task(async_process_upload_task, task_id, temp_path)
++        scheduled = True
++        return JSONResponse(content={"task_id": task_id})
++    except ExcelBoundaryError as exc:
++        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
++    except HTTPException:
++        raise
++    except Exception as exc:
++        if task_id:
++            try:
++                update_task_progress(
++                    task_id,
++                    status="failed",
++                    error=f"上传任务启动失败: {exc}",
++                    current_step=f"任务启动失败: {exc}",
++                )
++            except Exception:
++                pass
++        raise HTTPException(status_code=500, detail=f"清单上传初始化失败: {exc}")
++    finally:
++        if not scheduled:
++            remove_file_quietly(temp_path)
+ 
+ @app.get("/api/upload/status")
+ async def get_upload_status(task_id: str, current_user: dict = Depends(require_employee)):
+@@ -2416,7 +2514,7 @@
+     """Submit human calibration logs."""
+     from app.feedback_train import save_feedback_sample
+     try:
+-        save_feedback_sample(req.dict())
++        save_feedback_sample(req.model_dump())
+         return {"code": 0, "msg": "反馈提交成功"}
+     except Exception as e:
+         raise HTTPException(status_code=500, detail=str(e))
+@@ -2810,12 +2908,12 @@
+     # V015-M2：导出前逐行 fail-closed 核验，任一不合规即整批 422（不默选 top1）。
+     request_scope = req.scope_filename or ""
+     for it in req.items:
+-        _gate_export_row(it.dict(), current_user, request_scope)
++        _gate_export_row(it.model_dump(), current_user, request_scope)
+     try:
+         output_filename = f"标准格式_{uuid.uuid4().hex[:8]}.xlsx"
+         output_path = os.path.join(UPLOAD_DIR, output_filename)
+ 
+-        items_to_write = [it.dict() for it in req.items]
++        items_to_write = [it.model_dump() for it in req.items]
+         generate_standard_report(items_to_write, template_path, output_path)
+ 
+         # Increment total exported rows and log audit
+@@ -2888,89 +2986,241 @@
+         raise HTTPException(status_code=500, detail=str(e))
+ 
+ _db_import_lock = threading.Lock()
+-
+-def async_process_db_upload_task(task_id: str, temp_path: str, mode: str, filename: str, disable_mode: str = "on_expire"):
+-    try:
+-        logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}, DisableMode: {disable_mode}")
+-        invalidate_categories_cache()
+-        update_task_progress(task_id, current_step="正在解析并清洗物料数据...", structuring_progress=10)
+-        
+-        # Import to SQLite
+-        from app.db_manager import import_materials_from_excel, get_db_connection
+-        meta = import_materials_from_excel(temp_path, mode, filename, task_id=task_id, disable_mode=disable_mode)
+-        
+-        update_task_progress(task_id, structuring_progress=100, current_step="物料数据结构化完成，开始重建向量索引...", vectorization_progress=10)
+-        
+-        # Reload vector index mapping & index from sqlite
+-        conn = get_db_connection()
++_db_import_lock_manager = DbImportLockManager(_db_import_lock)
++_DB_IMPORT_TASK_TIMEOUT_SECONDS = 600.0
++
++
++def _release_db_lock_if_held(lock_token: Optional[str]) -> None:
++    if lock_token is not None:
++        _db_import_lock_manager.release_for_token(lock_token)
++    elif _db_import_lock.locked():
+         try:
+-            cursor = conn.cursor()
+-            cursor.execute("SELECT code, name, specification, category FROM materials")
+-            materials = [dict(row) for row in cursor.fetchall()]
++            _db_import_lock.release()
++        except RuntimeError:
++            pass
++
++
++def async_process_db_upload_task(
++    task_id: str,
++    temp_path: str,
++    mode: str,
++    filename: str,
++    disable_mode: str = "on_expire",
++    lock_token: Optional[str] = None,
++):
++    cancel_event = threading.Event()
++    worker_result: Dict[str, Any] = {}
++    worker_error: Optional[BaseException] = None
++
++    def _run_worker():
++        nonlocal worker_result, worker_error
++        try:
++            logger.info(f"Background task {task_id} started for db upload. Filename: {filename}, Mode: {mode}, DisableMode: {disable_mode}")
++            invalidate_categories_cache()
++            if not cancel_event.is_set():
++                update_task_progress(task_id, current_step="正在解析并清洗物料数据...", structuring_progress=10)
++
++            from app.db_manager import import_materials_from_excel, get_db_connection
++            meta = import_materials_from_excel(
++                temp_path,
++                mode,
++                filename,
++                task_id=task_id,
++                disable_mode=disable_mode,
++                cancel_event=cancel_event,
++            )
++            if cancel_event.is_set():
++                raise ParseCancelledError("物料库导入任务在向量索引阶段前被取消或超时")
++
++            update_task_progress(
++                task_id,
++                structuring_progress=100,
++                current_step="物料数据结构化完成，开始重建向量索引...",
++                vectorization_progress=10,
++            )
++
++            conn = get_db_connection()
++            try:
++                cursor = conn.cursor()
++                cursor.execute("SELECT code, name, specification, category FROM materials")
++                materials = [dict(row) for row in cursor.fetchall()]
++            finally:
++                try:
++                    conn.close()
++                except Exception:
++                    pass
++
++            if cancel_event.is_set():
++                raise ParseCancelledError("物料库导入任务在读取物料表后被取消或超时")
++
++            update_task_progress(
++                task_id,
++                current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...",
++                vectorization_progress=30,
++            )
++
++            index_manager.build_index(materials, task_id=task_id, cancel_event=cancel_event)
++            if cancel_event.is_set():
++                raise ParseCancelledError("物料库导入任务在向量保存前被取消或超时")
++
++            index_manager.save_cache()
++            invalidate_categories_cache()
++            logger.info("Vector index rebuilt and saved successfully.")
++            worker_result = meta
++        except BaseException as exc:
++            worker_error = exc
+         finally:
+-            try:
+-                conn.close()
+-            except Exception:
+-                pass
+-        
+-        update_task_progress(task_id, current_step=f"正在为 {len(materials)} 项物料生成向量特征并重建索引...", vectorization_progress=30)
+-        
+-        # Rebuild vector index
+-        index_manager.build_index(materials, task_id=task_id)
+-        index_manager.save_cache()
+-        invalidate_categories_cache()
+-        logger.info("Vector index rebuilt and saved successfully.")
+-        
+-        update_task_progress(task_id, vectorization_progress=100, matching_progress=100, status="completed", result=meta, current_step="标准物料数据库导入及向量索引重建全部完成！")
+-    except Exception as e:
+-        logger.error(f"Error during async process db upload task: {e}")
++            remove_file_quietly(temp_path)
++
++    worker_thread = threading.Thread(
++        target=_run_worker,
++        name=f"db-upload-{task_id[:8]}",
++        daemon=True,
++    )
++
++    try:
++        worker_thread.start()
++        worker_thread.join(timeout=float(_DB_IMPORT_TASK_TIMEOUT_SECONDS))
++
++        if worker_thread.is_alive():
++            cancel_event.set()
++            logger.error(
++                f"Background db upload task {task_id} timed out after {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s; cancelling and releasing lock."
++            )
++            update_task_progress(
++                task_id,
++                status="failed",
++                error=f"物料库导入及向量重建超时（超过 {_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f} 秒），已安全中止并释放导入锁。",
++                current_step=f"导入超时（>{_DB_IMPORT_TASK_TIMEOUT_SECONDS:.1f}s），已中止并释放锁",
++            )
++            return
++
++        if worker_error is not None:
++            logger.error(f"Error during async process db upload task: {worker_error}")
++            update_task_progress(
++                task_id,
++                status="failed",
++                error=str(worker_error),
++                current_step=f"导入出错: {str(worker_error)}",
++            )
++            return
++
++        if cancel_event.is_set():
++            update_task_progress(
++                task_id,
++                status="failed",
++                error="物料库导入任务已取消。",
++                current_step="导入任务已取消",
++            )
++            return
++
++        update_task_progress(
++            task_id,
++            vectorization_progress=100,
++            matching_progress=100,
++            status="completed",
++            result=worker_result,
++            current_step="标准物料数据库导入及向量索引重建全部完成！",
++        )
++    except Exception as e:
++        cancel_event.set()
++        logger.error(f"Unexpected supervisor error in async_process_db_upload_task: {e}")
+         update_task_progress(task_id, status="failed", error=str(e), current_step=f"导入出错: {str(e)}")
+     finally:
+-        try:
+-            _db_import_lock.release()
+-        except Exception:
+-            pass
+-        # Clean up temp file
+-        if os.path.exists(temp_path):
+-            try:
+-                os.remove(temp_path)
+-            except Exception:
+-                pass
++        _release_db_lock_if_held(lock_token)
++        if not worker_thread.is_alive():
++            remove_file_quietly(temp_path)
++
+ 
+ @app.post("/api/db/upload")
+ async def api_db_upload(
++    request: Request,
+     background_tasks: BackgroundTasks,
+     file: UploadFile = File(...),
+-    mode: str = Form("replace"), # "replace" or "append"
+-    disable_mode: str = Form("on_expire"), # "on_expire" or "immediate"
++    mode: str = Form("replace"),  # "replace" or "append"
++    disable_mode: str = Form("on_expire"),  # "on_expire" or "immediate"
+     current_user: dict = Depends(require_director),
+ ):
+     """Upload and import materials to the global database, then rebuild FAISS index asynchronously."""
+-    if not file.filename.endswith((".xlsx", ".xls")):
+-        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported.")
+-        
+-    if not _db_import_lock.acquire(blocking=False):
++    if mode not in ("replace", "append"):
++        raise HTTPException(status_code=400, detail="无效的导入模式（仅支持 replace 或 append）")
++    if disable_mode not in ("on_expire", "immediate"):
++        raise HTTPException(status_code=400, detail="无效的禁用生效策略（仅支持 on_expire 或 immediate）")
++
++    try:
++        ext = validate_extension(file.filename, frozenset({".xlsx", ".xls"}), context_label="物料库导入")
++    except ExcelBoundaryError as exc:
++        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
++
++    lock_token = _db_import_lock_manager.try_acquire()
++    if not lock_token:
+         raise HTTPException(status_code=409, detail="当前已有物料库导入或索引重建任务正在运行中，请稍候再试。")
+-        
+-    safe_filename = os.path.basename(file.filename)
+-    temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{safe_filename}")
+-    with open(temp_path, "wb") as f:
+-        shutil.copyfileobj(file.file, f)
+-        
+-    task_id = str(uuid.uuid4())
+-    set_task_initial(task_id, {
+-        "status": "processing",
+-        "created_time": time.time(),
+-        "structuring_progress": 0,
+-        "vectorization_progress": 0,
+-        "matching_progress": 0,
+-        "current_step": "正在初始化后台物料库导入任务...",
+-        "result": None,
+-        "error": None
+-    }, owner_user=current_user)
+-    
+-    background_tasks.add_task(async_process_db_upload_task, task_id, temp_path, mode, file.filename, disable_mode)
+-    return JSONResponse(content={"task_id": task_id})
++
++    temp_path: Optional[str] = None
++    task_id: Optional[str] = None
++    scheduled = False
++
++    try:
++        safe_filename = os.path.basename((file.filename or f"materials{ext}").strip())
++        if not safe_filename.lower().endswith(ext):
++            safe_filename = f"{safe_filename}{ext}"
++        temp_path = os.path.join(UPLOAD_DIR, f"db_{uuid.uuid4().hex}_{safe_filename}")
++
++        max_bytes = MAX_UPLOAD_SIZE if MAX_UPLOAD_SIZE != DEFAULT_MAX_UPLOAD_BYTES else None
++        await stream_save_upload_file(request, file, temp_path, max_bytes=max_bytes)
++
++        sheets = load_validated_excel_sheets(
++            temp_path,
++            allowed_exts=frozenset({".xlsx", ".xls"}),
++            original_filename=file.filename or temp_path,
++            max_sheets_to_read=1,
++            context_label="物料库导入",
++        )
++        ensure_workbook_non_empty(sheets, context_label="物料库 Excel")
++
++        task_id = str(uuid.uuid4())
++        set_task_initial(task_id, {
++            "status": "processing",
++            "created_time": time.time(),
++            "structuring_progress": 0,
++            "vectorization_progress": 0,
++            "matching_progress": 0,
++            "current_step": "正在初始化后台物料库导入任务...",
++            "result": None,
++            "error": None
++        }, owner_user=current_user)
++
++        background_tasks.add_task(
++            async_process_db_upload_task,
++            task_id,
++            temp_path,
++            mode,
++            file.filename,
++            disable_mode,
++            lock_token=lock_token,
++        )
++        scheduled = True
++        return JSONResponse(content={"task_id": task_id})
++    except ExcelBoundaryError as exc:
++        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
++    except HTTPException:
++        raise
++    except Exception as exc:
++        if task_id:
++            try:
++                update_task_progress(
++                    task_id,
++                    status="failed",
++                    error=f"物料库后台任务调度失败: {exc}",
++                    current_step=f"任务调度失败: {exc}",
++                )
++            except Exception:
++                pass
++        raise HTTPException(status_code=500, detail=f"物料库导入启动失败: {exc}")
++    finally:
++        if not scheduled:
++            remove_file_quietly(temp_path)
++            _db_import_lock_manager.release_for_token(lock_token)
+ 
+ from pydantic import BaseModel, Field
+ from typing import Optional, List
+--- pre/web/index.html
++++ current/web/index.html
+@@ -63,7 +63,7 @@
+                     <button class="btn btn-primary" id="upload-trigger">
+                         <i class="fa-solid fa-cloud-arrow-up"></i> 上传原始清单
+                     </button>
+-                    <input type="file" id="xlsx-file-input" accept=".xlsx, .xls" style="display: none;" />
++                    <input type="file" id="xlsx-file-input" accept=".xlsx" style="display: none;" />
+                 </div>
+                 <button class="btn btn-success" id="export-btn" disabled>
+                     <i class="fa-solid fa-file-excel"></i> 导出标准格式
+@@ -563,7 +563,7 @@
+                                 </label>
+                             </div>
+                             <div style="display: flex; gap: 12px; align-items: center;">
+-                                <input type="file" id="db-upload-input" style="display: none;" accept=".xlsx">
++                                <input type="file" id="db-upload-input" style="display: none;" accept=".xlsx,.xls">
+                                 <button class="btn btn-primary" id="btn-select-db-file" style="flex: 1; padding: 10px;"><i class="fa-solid fa-file-excel"></i> 选择物料 Excel 库</button>
+                                 <button class="btn btn-success" id="btn-start-db-import" style="flex: 1; padding: 10px;" disabled><i class="fa-solid fa-upload"></i> 开始导入并重建向量</button>
+                             </div>
+@@ -1050,7 +1050,7 @@
+                             </div>
+                             <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: var(--color-text-primary);">上传原始工程清单</h4>
+                             <p style="margin: 0; font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;">
+-                                点击「上传原始清单」选择 <code>.xlsx / .xls</code> 文件。系统自适应解析表头，自动提取物料名称、型号、核心规格、风量功率、口径材质与单位。
++                                点击「上传原始清单」选择 <code>.xlsx</code> 文件。系统自适应解析表头，自动提取物料名称、型号、核心规格、风量功率、口径材质与单位。
+                             </p>
+                         </div>
+ 
+--- pre/web/app.js
++++ current/web/app.js
+@@ -760,6 +760,14 @@
+     dbUploadInput.addEventListener('change', (e) => {
+         if (e.target.files.length > 0) {
+             const file = e.target.files[0];
++            const lowerName = (file.name || '').trim().toLowerCase();
++            if (!(lowerName.endsWith('.xlsx') || lowerName.endsWith('.xls'))) {
++                e.target.value = '';
++                dbFileLabel.innerText = '未选择文件';
++                startDbImportBtn.disabled = true;
++                alert('物料库导入仅支持 .xlsx 或 .xls 格式文件。');
++                return;
++            }
+             dbFileLabel.innerText = `已选择: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+             startDbImportBtn.disabled = false;
+         } else {
+@@ -1188,6 +1196,14 @@
+ 
+ // 1. File Upload Handler
+ async function handleFileUpload(file) {
++    const fileNameLower = (file && file.name ? file.name : '').trim().toLowerCase();
++    if (!fileNameLower.endsWith('.xlsx')) {
++        const fileInput = document.getElementById('xlsx-file-input');
++        if (fileInput) fileInput.value = '';
++        alert('工程清单上传仅支持标准 .xlsx 文件，旧版 .xls 文件请先另存为 .xlsx 后再上传。');
++        return;
++    }
++
+     showLoading("正在上传并分析清单...", "系统正在初始化后台比对任务...", 0);
+     
+     // Show and reset the segmented progress container
+@@ -2744,6 +2760,15 @@
+     const dbFileLabel = document.getElementById('db-selected-file-label');
+     
+     if (dbUploadInput.files.length === 0) return;
++    const dbCheckFile = dbUploadInput.files[0];
++    const dbNameLower = (dbCheckFile && dbCheckFile.name ? dbCheckFile.name : '').trim().toLowerCase();
++    if (!(dbNameLower.endsWith('.xlsx') || dbNameLower.endsWith('.xls'))) {
++        dbUploadInput.value = '';
++        if (dbFileLabel) dbFileLabel.innerText = '未选择文件';
++        if (startDbImportBtn) startDbImportBtn.disabled = true;
++        alert('物料库导入仅支持 .xlsx 或 .xls 格式文件。');
++        return;
++    }
+     const file = dbUploadInput.files[0];
+     
+     const importMode = document.querySelector('input[name="db-import-mode"]:checked')?.value || 'replace';

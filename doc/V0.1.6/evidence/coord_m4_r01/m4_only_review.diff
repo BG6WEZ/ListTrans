@@ -1,0 +1,862 @@
+--- pre/app/flywheel_sandbox.py
+
++++ app/flywheel_sandbox.py
+
+@@ -789,6 +789,15 @@
+
+                 )
+                 return
+ 
++            # Private copies only: baseline and candidate share a catalog snapshot,
++            # never a writable cache directory. load_cache still validates metadata.
++            cache_copied = []
++            for name in ("materials.index", "materials_embeddings.npy", "index_to_material.json", "cache_metadata.json"):
++                source = Path(base_env["VECTOR_CACHE_DIR"]) / name
++                if source.is_file():
++                    shutil.copyfile(source, Path(cand_env["VECTOR_CACHE_DIR"]) / name)
++                    cache_copied.append(name)
++
+             # Candidate Subprocess with strict timeout
+             _update_task_state(task_id, progress=70, message="正在子进程执行候选规则与全局保护集评测 (Candidate)...")
+             remaining = task_deadline_mono - time.monotonic()
+@@ -925,6 +934,9 @@
+
+                 + snapshot_errors
+                 + list(guard_report.get("integrity_errors") or [])
+                 + list(binding_res.get("integrity_errors") or [])
++                + [f"绑定求值异常 ({side}/{row.get('id')}): {row['error']}"
++                   for side, data in (("baseline", base_data), ("candidate", cand_data))
++                   for row in data.get("binding_rows", []) if row.get("error")]
+             )
+             if report.get("targeted_count", 0) > 0 and rule_execution_hits <= 0:
+                 all_integrity_errors.append("规则在定向与全局保护集中命中次数为 0（未实际执行生效）")
+@@ -982,8 +994,21 @@
+
+                 "binding_degraded_count": int(binding_res.get("degraded_count") or 0),
+                 "binding_violations": binding_res.get("violations") or [],
+                 "rule_execution_hits": rule_execution_hits,
+-                "failed_samples_count": sum(1 for v in (report.get("violations") or []) if v.get("type") == "eval_error"),
+-                "skipped_samples_count": 0,
++                "failed_samples_count": len({(scope, row.get("id"))
++                    for data in (base_data, cand_data) for scope in ("rows", "guard_rows")
++                    for row in data.get(scope, []) if row.get("error")}
++                    | {("guard_rows" if row.get("is_guard") else "rows", row.get("id"))
++                       for data in (base_data, cand_data) for row in data.get("binding_rows", []) if row.get("error")}),
++                "skipped_samples_count": max(int((data.get("summary") or {}).get("skipped_samples_count") or 0)
++                                             for data in (base_data, cand_data)),
++                "baseline_metrics": (base_data.get("summary") or {}).get("overall", {}),
++                "candidate_metrics": cand_summary.get("overall", {}),
++                "baseline_guard_metrics": (base_data.get("summary") or {}).get("guard_overall", {}),
++                "candidate_guard_metrics": cand_summary.get("guard_overall", {}),
++                "candidate_diagnostics": [{"id": row.get("id"), "scope": scope, "diagnostics": row.get("diagnostics")}
++                    for scope in ("rows", "guard_rows") for row in cand_data.get(scope, []) if row.get("diagnostics")],
++                "cache_reused_files": cache_copied,
++                "skipped_samples": cand_summary.get("skipped_samples", []),
+                 "integrity_errors": all_integrity_errors,
+                 "reason": reason,
+             })
+--- pre/app/matcher.py
+
++++ app/matcher.py
+
+@@ -2192,6 +2192,11 @@
+
+     Returns: List of unique candidate material records with similarity scores.
+     """
+     candidates: Dict[str, Dict[str, Any]] = {}
++
++    def record_source(code, source):
++        channels = candidates[code].setdefault("recall_sources", [])
++        if source not in channels:
++            channels.append(source)
+     
+     q_name = query_info.get("name", "")
+     q_spec_text = query_info.get("specification", "")
+@@ -2216,6 +2221,7 @@
+
+             cand["recall_source"] = "model_match"
+             cand["semantic_score"] = 0.0
+             candidates[cand["code"]] = cand
++            record_source(cand["code"], "model_match")
+ 
+     # 2. Path A2: SQLite FTS5 search (Top 1000)
+     from app.normalizer import clean_text_standard
+@@ -2244,6 +2250,7 @@
+
+                 r["recall_source"] = "fts"
+                 r["semantic_score"] = 0.0
+                 candidates[r["code"]] = r
++            record_source(r["code"], "fts")
+ 
+     # Also search by extracted clean name from dynamic rules / query attributes (e.g. 截止阀)
+     q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+@@ -2255,6 +2262,7 @@
+
+                 r["recall_source"] = "fts_extracted_name"
+                 r["semantic_score"] = 0.0
+                 candidates[r["code"]] = r
++            record_source(r["code"], "fts_extracted_name")
+ 
+     # Also search by Chinese term without leading English prefix (e.g. AP-1 动力配电箱 -> 动力配电箱)
+     zh_term = re.sub(r'^[a-zA-Z0-9\-_]+', '', q_name).strip()
+@@ -2265,6 +2273,7 @@
+
+                 r["recall_source"] = "fts_zh"
+                 r["semantic_score"] = 0.0
+                 candidates[r["code"]] = r
++            record_source(r["code"], "fts_zh")
+ 
+     # HVAC specialized recall branches
+     hvac_recall_terms = []
+@@ -2362,6 +2371,7 @@
+
+                     r["recall_source"] = f"fts_hvac_{term}"
+                     r["semantic_score"] = 0.0
+                     candidates[r["code"]] = r
++                record_source(r["code"], f"fts_hvac_{term}")
+ 
+     # 3. Path B: Vector search (Top 50)
+     from app.vector_index import index_manager
+@@ -2386,6 +2396,7 @@
+
+                     candidates[code] = cand
+                 else:
+                     candidates[code]["semantic_score"] = score
++                record_source(code, "semantic")
+ 
+     # Fallback search if candidates is empty
+     if not candidates:
+@@ -2396,10 +2407,11 @@
+
+                 r["recall_source"] = "fallback"
+                 r["semantic_score"] = 0.0
+                 candidates[r["code"]] = r
++                record_source(r["code"], "fallback")
+ 
+     return list(candidates.values())
+ 
+-def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None) -> Dict[str, Any]:
++def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None) -> Dict[str, Any]:
+     """
+     Main entry point for matching a single query item.
+     """
+@@ -2505,7 +2517,9 @@
+
+             # V015-M3：只增字段不改既有契约；DN 独立字段 + 硬约束明细供确认/导出链路同源复核
+             "c_dn": c_dn,
+             "hard_blocked": hard_blocked,
+-            "max_score": round(max_score_base, 4)
++            "max_score": round(max_score_base, 4),
++            "recall_source": cand.get("recall_source", ""),
++            "recall_sources": list(cand.get("recall_sources") or [cand.get("recall_source", "")]),
+         })
+         
+     # Check if query has specified wall thickness
+@@ -2623,9 +2637,41 @@
+
+         c_copy["match_reasons"] = c_copy.get("match_reasons", [])[:2]
+         res_candidates.append(c_copy)
+ 
+-    return {
++    result = {
+         "is_exact": is_exact,
+         "matched_code": matched_code,
+         "top_candidates": res_candidates # Output Top 10 for detailed view
+     }
+-
++    if diagnostic_targets is not None:
++        targets = list(dict.fromkeys(str(code).strip() for code in diagnostic_targets if str(code).strip()))
++        from app.db_manager import get_thread_db_connection
++        conn = get_thread_db_connection()
++        catalog = set()
++        if targets:
++            catalog = {r[0] for r in conn.execute(
++                "SELECT code FROM materials WHERE code IN (" + ",".join("?" for _ in targets) + ")", targets)}
++        ranked = {c["code"]: (rank, c) for rank, c in enumerate(scored_candidates, 1)}
++        competitor = max((c["score"] for c in scored_candidates if c["code"] not in targets), default=0.0)
++        traces = []
++        for code in targets:
++            rank, candidate = ranked.get(code, (None, {}))
++            recalled = rank is not None
++            blocked = bool(candidate.get("hard_blocked"))
++            state = ("not_in_catalog" if code not in catalog else "not_recalled" if not recalled
++                     else "hard_blocked" if blocked else "ranked_gt10" if rank > 10 else "top10_hit")
++            score = candidate.get("score")
++            traces.append({"code": code, "in_catalog": code in catalog, "recalled": recalled,
++                           "recall_sources": candidate.get("recall_sources", []),
++                           "recall_pool_size": len(candidates), "hard_blocked": blocked,
++                           "reasons": list(candidate.get("match_reasons", [])),
++                           "max_score": candidate.get("max_score"), "full_rank": rank,
++                           "top10": recalled and rank <= 10, "T": score, "W": competitor,
++                           "margin": score - competitor if score is not None else None, "state": state})
++        result["diagnostics"] = {
++            "recall_pool_size": len(candidates), "targets": traces,
++            "query_parsed_spec": query_info.get("parsed_spec", {}),
++            "candidates": [{k: c.get(k) for k in ("code", "score", "recall_sources", "hard_blocked", "max_score", "match_reasons")}
++                           for c in scored_candidates],
++        }
++    return result
++
+--- pre/app/sandbox_evaluator.py
+
++++ app/sandbox_evaluator.py
+
+@@ -7,6 +7,7 @@
+
+ import argparse
+ import collections
+ import hashlib
++import math
+ 
+ 
+ def _sha256_file(path):
+@@ -51,6 +52,30 @@
+
+ TARGETS = {"hit@1": 85.0, "recall@3": 90.0, "recall@5": 93.0, "mrr": 0.88}
+ 
+ 
++def _sample_skip_reason(item):
++    if not isinstance(item, dict):
++        return "invalid_sample"
++    codes = item.get("target_codes")
++    if not isinstance(codes, list) or not codes or any(not isinstance(c, str) or not c.strip() for c in codes):
++        return "no_valid_target_codes"
++    if (not isinstance(item.get("name"), str) or not item["name"].strip()
++            or not isinstance(item.get("specification"), str)
++            or not isinstance(item.get("professional"), str) or not item.get("id")):
++        return "invalid_sample_fields"
++    if any(item.get(key) is not None and not isinstance(item[key], str)
++           for key in ("supply_category", "unit", "brand", "raw_name", "raw_spec", "target_name")):
++        return "invalid_sample_fields"
++    if item.get("target_ref") and (not isinstance(item["target_ref"], list)
++            or any(not isinstance(ref, dict) for ref in item["target_ref"])):
++        return "invalid_sample_fields"
++    try:
++        if not math.isfinite(float(item.get("qty") or 1.0)) or float(item.get("qty") or 1.0) <= 0:
++            return "invalid_sample_fields"
++    except (TypeError, ValueError):
++        return "invalid_sample_fields"
++    return ""
++
++
+ def evaluate(items, chunk_size=200):
+     """分块流式评测。
+ 
+@@ -73,18 +98,28 @@
+
+         # 规范名称/清洗文本/专业/品类/单位/品牌来自同一函数，消除"评测读
+         # attrs['名称']、生产 get('name') 恒回退原文"的双轨差异。
+         prepped = []
++        valid_chunk = []
+         for it in chunk:
++            skip_reason = _sample_skip_reason(it)
++            if skip_reason:
++                rows.append({"id": it.get("id") if isinstance(it, dict) else None,
++                             "professional": it.get("professional", "") if isinstance(it, dict) else "",
++                             "rank": 0, "top": [], "skipped": True, "skip_reason": skip_reason})
++                continue
+             prof = it["professional"]
+             sup = (it.get("supply_category") or "").strip()
+             if sup in ("无", "/", "-"):
+                 sup = ""
+-            prepped.append(prepare_query(
+-                it["name"], it["specification"], prof,
+-                category=sup,
+-                brand=it.get("brand", "") or "",
+-                unit=it.get("unit", "") or "",
+-                preserve_original=False,
+-            ))
++            try:
++                prepped.append(prepare_query(
++                    it["name"], it["specification"], prof,
++                    category=sup, brand=it.get("brand", "") or "", unit=it.get("unit", "") or "",
++                    preserve_original=False,
++                ))
++                valid_chunk.append(it)
++            except Exception as exc:
++                rows.append({"id": it["id"], "professional": prof, "rank": 0, "top": [],
++                             "target_codes": it["target_codes"], "error": f"{type(exc).__name__}: {exc}"})
+ 
+         vectors = [None] * len(prepped)
+         if index_manager.is_enabled and prepped:
+@@ -95,14 +130,14 @@
+
+                     vectors[i] = e
+             del embs, texts
+ 
+-        for i, it in enumerate(chunk):
++        for i, it in enumerate(valid_chunk):
+             gt = set(it["target_codes"])
+             try:
+-                res = match_item(dict(prepped[i]), vectors[i])
++                res = match_item(dict(prepped[i]), vectors[i], diagnostic_targets=it["target_codes"])
+                 cands = res.get("top_candidates", []) or []
+             except Exception as e:
+                 rows.append({"id": it["id"], "professional": it["professional"], "rank": 0,
+-                             "error": str(e), "top": []})
++                             "target_codes": it["target_codes"], "error": str(e), "top": []})
+                 continue
+ 
+             rank = 0
+@@ -136,6 +171,7 @@
+
+                          "spec": str(c.get("specification"))[:60],
+                          "score": round(float(c.get("score", 0)), 2)} for c in cands[:5]],
+                 "candidates": raw_cands,
++                "diagnostics": res.get("diagnostics", {}),
+             })
+             del res, cands
+ 
+@@ -147,6 +183,20 @@
+
+ 
+ 
+ def metrics(rows):
++    skipped = sum(bool(r.get("skipped")) for r in rows)
++    rows = [r for r in rows if not r.get("skipped")]
++    traces = [t for r in rows for t in (r.get("diagnostics") or {}).get("targets", [])]
++    channels = collections.Counter(source for t in traces if t.get("recalled")
++                                   for source in t.get("recall_sources", []))
++    target_count = sum(len(r.get("target_codes") or []) for r in rows)
++    stage_counts = {state + "_count": sum(t.get("state") == state for t in traces)
++                    for state in ("not_in_catalog", "not_recalled", "hard_blocked", "ranked_gt10", "top10_hit")}
++    extra = {"candidate_recall": round(sum(bool(t.get("recalled")) for t in traces) / target_count * 100, 2) if target_count else 0.0,
++             "candidate_recall_numerator": sum(bool(t.get("recalled")) for t in traces),
++             "candidate_recall_denominator": target_count, "channel_contributions": dict(channels),
++             "diagnostic_failed_targets_count": target_count - len(traces),
++             "failed_samples_count": sum(bool(r.get("error")) for r in rows),
++             "skipped_samples_count": skipped, **stage_counts}
+     n = len(rows)
+     if n == 0:
+         return {
+@@ -157,6 +207,7 @@
+
+             "recall@10": 0.0,
+             "mrr": 0.0,
+             "miss@10": 0.0,
++            **extra,
+         }
+     hit1 = sum(1 for r in rows if r["rank"] == 1)
+     r3 = sum(1 for r in rows if 1 <= r["rank"] <= 3)
+@@ -171,6 +222,7 @@
+
+         "recall@10": round(r10 / n * 100, 2),
+         "mrr": round(mrr, 4),
+         "miss@10": round((n - r10) / n * 100, 2),
++        **extra,
+     }
+ 
+ 
+@@ -190,10 +242,12 @@
+
+         conn.close()
+ 
+ 
+-def _select_sandbox_subsets(all_items, rule_meta, guard_limit=40):
++def _select_sandbox_subsets(all_items, rule_meta, guard_limit=40, *, with_stats=False):
+     """Select targeted subset + disjoint stratified global guard subset for M2 sandbox evaluation."""
+     from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, RuleContext, canonicalize_professional
+ 
++    original_items = all_items
++    all_items = [x for x in all_items if not _sample_skip_reason(x)]
+     clean_1to1 = [
+         x for x in all_items
+         if x.get("label_type") == "1to1" and not x.get("ambiguous") and not x.get("qc_suspect")
+@@ -274,6 +328,12 @@
+
+             bucket_lists = [bl for bl in bucket_lists if bl]
+             idx += 1
+ 
++    if with_stats:
++        selected = {id(x) for x in targeted + guard}
++        skipped = [{"id": x.get("id") if isinstance(x, dict) else None,
++                    "reason": _sample_skip_reason(x) or "filtered_or_not_selected"}
++                   for x in original_items if id(x) not in selected]
++        return targeted, guard, {"skipped_samples_count": len(skipped), "skipped_samples": skipped}
+     return targeted, guard
+ 
+ 
+@@ -395,6 +455,21 @@
+
+         raise ValueError("正式沙箱写入路径不在本任务隔离目录内。")
+ 
+ 
++def _binding_evaluation_with_errors(items, *, is_guard):
++    """Keep per-sample failures observable while retaining the normal batch path."""
++    try:
++        return _evaluate_binding_pipeline(items, is_guard=is_guard)
++    except Exception:
++        rows = []
++        for item in items:
++            try:
++                rows.extend(_evaluate_binding_pipeline([item], is_guard=is_guard))
++            except Exception as exc:
++                rows.append({"id": item["id"], "is_guard": is_guard,
++                             "error": f"{type(exc).__name__}: {exc}"})
++        return rows
++
++
+ def main(*, golden_path=None, detail_path=None, baseline_path=None):
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--limit", type=int, default=0)
+@@ -465,8 +540,8 @@
+
+         elif runtime:
+             os.environ["LISTTRANS_EVAL_KEYWORD_ONLY"] = "1"
+ 
+-        targeted_items, guard_items = _select_sandbox_subsets(
+-            items, rule_meta, guard_limit=args.guard_limit
++        targeted_items, guard_items, selection = _select_sandbox_subsets(
++            items, rule_meta, guard_limit=args.guard_limit, with_stats=True
+         )
+         del items
+         gc.collect()
+@@ -484,8 +559,13 @@
+
+         targeted_rows, elapsed_t = evaluate(targeted_items, chunk_size=args.chunk_size)
+         guard_rows, elapsed_g = evaluate(guard_items, chunk_size=args.chunk_size)
+ 
+-        binding_targeted = _evaluate_binding_pipeline(targeted_items, is_guard=False)
+-        binding_guard = _evaluate_binding_pipeline(guard_items, is_guard=True)
++        binding_targeted = _binding_evaluation_with_errors(targeted_items, is_guard=False)
++        binding_guard = _binding_evaluation_with_errors(guard_items, is_guard=True)
++        decisions = {r["id"]: r for r in binding_targeted + binding_guard}
++        for row in targeted_rows + guard_rows:
++            decision = decisions.get(row["id"], {})
++            row.setdefault("diagnostics", {})["decision"] = {
++                key: decision.get(key) for key in ("decision_status", "decision_source", "decision_reason", "export_eligible")}
+ 
+         rule_type = str(rule_meta.get("rule_type") or "ALIAS").upper()
+         rule_execution_hits = 0
+@@ -510,6 +590,8 @@
+
+             "golden_version": meta_version,
+             "overall": metrics(targeted_rows),
+             "guard_overall": metrics(guard_rows),
++            "failed_samples_count": len({r["id"] for r in targeted_rows + guard_rows + binding_targeted + binding_guard if r.get("error")}),
++            **selection,
+             "elapsed_sec": round(elapsed_t + elapsed_g, 2),
+             "targeted_count": len(targeted_rows),
+             "guard_count": len(guard_rows),
+--- pre/app/server.py
+
++++ app/server.py
+
+@@ -2681,6 +2681,15 @@
+
+                     pass
+             raise
+ 
++def _restore_flywheel_config(filepath: str, snapshot: Any):
++    """Read legacy content snapshots and M4 snapshots preserving file absence."""
++    versioned = isinstance(snapshot, dict) and snapshot.get("snapshot_format") == "v016-m4-file-v1"
++    content = snapshot["content"] if versioned else snapshot
++    atomic_write_json_config(filepath, content)
++    if versioned and not snapshot["existed"]:
++        os.remove(filepath)
++
++
+ def trigger_all_config_reloads(raise_on_error: bool = False):
+     """Trigger reload across all configuration consumers and clear caches."""
+     errors = []
+@@ -3106,6 +3115,8 @@
+
+                 + (" (经人工编辑)" if edited_target_value is not None else "")
+             )
+ 
++        before_snapshot = {"snapshot_format": "v016-m4-file-v1", "existed": os.path.isfile(target_path), "content": before_data}
++
+         # 2. Atomic write target config file (baseline alias_dict.json is never mutated by flywheel)
+         try:
+             atomic_write_json_config(target_path, after_data)
+@@ -3124,7 +3135,7 @@
+
+             if not cur_row or str(cur_row["status"] or "") not in ("pending", "observing", "rolled_back"):
+                 tx_conn.rollback()
+                 try:
+-                    atomic_write_json_config(target_path, before_data)
++                    _restore_flywheel_config(target_path, before_snapshot)
+                 except Exception as comp_exc:
+                     block_rule_publish_recovery(
+                         f"并发状态冲突且文件回滚失败: {comp_exc}",
+@@ -3170,7 +3181,7 @@
+
+             if cur.rowcount != 1:
+                 tx_conn.rollback()
+                 try:
+-                    atomic_write_json_config(target_path, before_data)
++                    _restore_flywheel_config(target_path, before_snapshot)
+                 except Exception as comp_exc:
+                     block_rule_publish_recovery(
+                         f"CAS 失败且文件回滚失败: {comp_exc}",
+@@ -3195,7 +3206,7 @@
+
+                 (
+                     snap_version,
+                     snap_target_type,
+-                    json.dumps(before_data, ensure_ascii=False),
++                    json.dumps(before_snapshot, ensure_ascii=False),
+                     json.dumps(after_data, ensure_ascii=False),
+                     suggestion_id,
+                     reason,
+@@ -3217,7 +3228,7 @@
+
+                 pass
+             logger.error(f"DB update failed during suggestion accept, compensating file rollback: {e}")
+             try:
+-                atomic_write_json_config(target_path, before_data)
++                _restore_flywheel_config(target_path, before_snapshot)
+             except Exception as ce:
+                 logger.critical(f"Compensating rollback failed for {target_path}: {ce}")
+                 block_rule_publish_recovery(
+@@ -3243,7 +3254,7 @@
+
+         except Exception as reload_exc:
+             logger.error(f"Config reload failed after flywheel accept, compensating file + DB: {reload_exc}")
+             try:
+-                atomic_write_json_config(target_path, before_data)
++                _restore_flywheel_config(target_path, before_snapshot)
+                 comp_conn = open_flywheel_tx_connection()
+                 try:
+                     comp_conn.execute("BEGIN IMMEDIATE")
+@@ -3363,6 +3374,9 @@
+
+     with _PUBLISH_GATE_LOCK:
+         tx_conn = open_flywheel_tx_connection()
+         try:
++            stack_top = tx_conn.execute(
++                "SELECT * FROM flywheel_config_snapshots WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
++            ).fetchone()
+             if req.snapshot_version:
+                 snap = tx_conn.execute(
+                     "SELECT * FROM flywheel_config_snapshots WHERE snapshot_version = ? AND is_active = 1",
+@@ -3374,6 +3388,8 @@
+
+                 ).fetchone()
+             if not snap:
+                 raise HTTPException(status_code=400, detail="没有可回滚的有效快照")
++            if not stack_top or snap["id"] != stack_top["id"]:
++                raise HTTPException(status_code=409, detail="只能按 LIFO 顺序回滚最新激活的栈顶快照。")
+             snap = dict(snap)
+         finally:
+             tx_conn.close()
+@@ -3397,7 +3413,7 @@
+
+             raise HTTPException(status_code=400, detail=f"Unsupported target type: {target_type}")
+ 
+         try:
+-            atomic_write_json_config(target_path, config_before)
++            _restore_flywheel_config(target_path, config_before)
+         except Exception as e:
+             logger.error(f"Failed to write config file {target_path} during rollback: {e}")
+             raise HTTPException(status_code=500, detail=f"配置文件回滚写入失败: {e}")
+@@ -3485,6 +3501,9 @@
+
+     from app.db_manager import get_db_cursor
+     from app.flywheel_db import init_flywheel_tables, trusted_flywheel_where_clause
+     from app.normalizer import alias_dict
++    from app.rule_governance import load_scoped_aliases
++    from app.rule_context import canonicalize_professional
++    scoped_aliases = load_scoped_aliases()
+     init_flywheel_tables()
+     trusted_eff = trusted_flywheel_where_clause()
+     with get_db_cursor() as cur:
+@@ -3506,7 +3525,8 @@
+
+         t_name = targets[0].get("name", "") if targets else ""
+ 
+         # P1-3: Prevent leakage: skip items where raw_name is already in alias_dict and action was CONFIRM_TOP1
+-        if r["raw_name"] in alias_dict and r["action_type"] == "CONFIRM_TOP1":
++        scoped = scoped_aliases.get(canonicalize_professional(r["discipline"] or ""), {})
++        if (r["raw_name"] in alias_dict or any(source.lower() in r["raw_name"].lower() for source in scoped)) and r["action_type"] == "CONFIRM_TOP1":
+             continue
+ 
+         items.append({
+--- pre/tests/test_v0_0_8_llm_rules.py
+
++++ tests/test_v0_0_8_llm_rules.py
+
+@@ -138,13 +138,15 @@
+
+         assert ev_start["success"] is True, ev_start
+         from app.flywheel_sandbox import get_eval_task_status
+         ev_id = ev_start["eval_id"]
+-        for _ in range(90):
++        for _ in range(240):
+             import time as _t
+             _t.sleep(0.5)
+             st = get_eval_task_status(ev_id)
+             if st and st["status"] in ("completed", "failed"):
+                 assert st["status"] == "completed" and st["safety_passed"] is True, st
+                 break
++
++        assert st and st["status"] == "completed" and st["safety_passed"] is True, st
+ 
+         res_pub = LLMRuleManager.publish_rule(
+             "TEST-RULE-001",
+--- /dev/null
+
++++ tests/test_v016_m4_diagnostics.py
+
+@@ -0,0 +1,117 @@
+
++"""M4 diagnostic contracts without changing production ranking or golden labels."""
++import copy
++import json
++import sqlite3
++from pathlib import Path
++from types import SimpleNamespace
++
++import pytest
++
++from app import db_manager, matcher, sandbox_evaluator, vector_index
++
++
++@pytest.fixture
++def diagnostic_catalog(monkeypatch):
++    conn = sqlite3.connect(":memory:")
++    conn.row_factory = sqlite3.Row
++    conn.execute("CREATE TABLE materials(code TEXT, unit TEXT, brand TEXT, description TEXT, parsed_params TEXT)")
++    codes = ["NOTREC", "BLOCK", "LOW", "HIT"] + [f"C{i}" for i in range(12)]
++    conn.executemany("INSERT INTO materials VALUES (?, '台', '', '', '')", [(c,) for c in codes])
++    monkeypatch.setattr(db_manager, "get_thread_db_connection", lambda: conn)
++    monkeypatch.setattr(vector_index, "index_manager", SimpleNamespace(is_enabled=False))
++
++    def recall(query, vector=None):
++        case = query["name"]
++        result = [{"code": f"C{i}", "score": 60 - i} for i in range(12)]
++        if case in ("BLOCK", "LOW", "HIT"):
++            result.append({"code": case, "score": {"BLOCK": 0, "LOW": 1, "HIT": 99}[case]})
++        for c in result:
++            c.update(name=c["code"], specification="", category="暖通", unit="台", brand="", description="",
++                     semantic_score=0.0, recall_source="fts", recall_sources=["fts", "semantic"])
++        return result
++
++    monkeypatch.setattr(matcher, "hybrid_recall", recall)
++    monkeypatch.setattr(matcher, "score_candidate_with_detail", lambda q, c, s: (
++        c["score"], ["防爆冲突", "动态排除", "完整第三条原因"] if c["code"] == "BLOCK" else ["候选"],
++        {"hard_blocked": c["code"] == "BLOCK", "max_score": 0 if c["code"] == "BLOCK" else 1}))
++    monkeypatch.setattr(sandbox_evaluator, "_active_material_codes", lambda: set(codes))
++    yield
++    conn.close()
++
++
++def item(code):
++    return {"id": code, "name": code, "specification": "", "professional": "暖通", "target_codes": [code],
++            "label_type": "1to1", "ambiguous": False}
++
++
++def test_five_stages_recall_denominator_and_full_reasons(diagnostic_catalog):
++    cases = ["MISSING", "NOTREC", "BLOCK", "LOW", "HIT"]
++    rows, _ = sandbox_evaluator.evaluate([item(c) for c in cases])
++    traces = {r["id"]: r["diagnostics"]["targets"][0] for r in rows}
++    assert [traces[c]["state"] for c in cases] == [
++        "not_in_catalog", "not_recalled", "hard_blocked", "ranked_gt10", "top10_hit"]
++    assert traces["BLOCK"]["reasons"] == ["防爆冲突", "动态排除", "完整第三条原因"]
++    assert traces["BLOCK"]["max_score"] == 0
++    assert traces["LOW"]["full_rank"] == 13 and traces["LOW"]["top10"] is False
++    assert traces["HIT"]["recall_sources"] == ["fts", "semantic"]
++    m = sandbox_evaluator.metrics(rows)
++    assert m["candidate_recall"] == 60 and m["recall@10"] == 20 and m["miss@10"] == 80
++    assert m["candidate_recall_numerator"] == 3 and m["candidate_recall_denominator"] == 5
++    assert all(m[s + "_count"] == 1 for s in ("not_in_catalog", "not_recalled", "hard_blocked", "ranked_gt10", "top10_hit"))
++    assert m["channel_contributions"] == {"fts": 3, "semantic": 3}
++
++
++def test_real_skips_and_evaluation_failures(diagnostic_catalog, monkeypatch):
++    old = matcher.match_item
++    def fail(query, *args, **kwargs):
++        if query["name"] == "FAIL":
++            raise RuntimeError("controlled_guard_failure")
++        return old(query, *args, **kwargs)
++    monkeypatch.setattr(matcher, "match_item", fail)
++    rows, _ = sandbox_evaluator.evaluate([item("HIT"), item("FAIL"), item("EMPTY") | {"target_codes": []}, {"id": "BAD"}])
++    m = sandbox_evaluator.metrics(rows)
++    assert m["failed_samples_count"] == 1 and m["skipped_samples_count"] == 2
++    assert m["candidate_recall"] == 50 and m["diagnostic_failed_targets_count"] == 1
++    _, _, selection = sandbox_evaluator._select_sandbox_subsets(
++        [item("HIT"), item("LOW") | {"ambiguous": True}, item("EMPTY") | {"target_codes": []}],
++        {"rule_type": "ALIAS", "source_pattern": "HIT", "discipline": "暖通"}, with_stats=True)
++    assert selection["skipped_samples_count"] == 2
++    assert {s["reason"] for s in selection["skipped_samples"]} == {"no_valid_target_codes", "filtered_or_not_selected"}
++
++
++def test_recall_preserves_all_channels_and_first_source(monkeypatch):
++    def search(*args, **kwargs):
++        return [{"code": "A", "name": "机组", "specification": "AB-1", "category": "暖通"}]
++    monkeypatch.setattr(matcher, "search_materials_keyword", search)
++    monkeypatch.setattr(vector_index, "index_manager", SimpleNamespace(
++        is_enabled=True, encode_single_query=lambda q: [1],
++        search=lambda *a, **k: [({"code": "A"}, .8)]))
++    query = {"name": "机组", "specification": "AB-1", "professional": "暖通", "parsed_spec": {"model": "AB-1", "attrs": {}}}
++    cand = matcher.hybrid_recall(query)[0]
++    assert cand["recall_source"] == "model_match"
++    assert {"model_match", "fts", "semantic"} <= set(cand["recall_sources"])
++    assert cand["semantic_score"] == .8
++
++
++def test_diagnostic_option_keeps_legacy_outputs_and_score_signature(diagnostic_catalog):
++    query = {"name": "HIT", "specification": "", "professional": "暖通", "parsed_spec": {"model": "", "attrs": {}}}
++    plain = matcher.match_item(copy.deepcopy(query))
++    detailed = matcher.match_item(copy.deepcopy(query), diagnostic_targets=["HIT"])
++    assert "diagnostics" not in plain
++    assert {key: detailed[key] for key in plain} == plain
++    # Existing score_candidate remains the two-value wrapper.
++    score, reasons = matcher.score_candidate(query, {"code": "HIT", "score": 99})
++    assert score == 99 and reasons == ["候选"]
++
++
++def test_invalid_optional_fields_and_binding_failure_attribution(monkeypatch):
++    assert sandbox_evaluator._sample_skip_reason(item("X") | {"supply_category": 123}) == "invalid_sample_fields"
++    assert sandbox_evaluator._sample_skip_reason(item("X") | {"qty": "invalid"}) == "invalid_sample_fields"
++    def binding(items, is_guard=False):
++        if len(items) > 1 or items[0]["id"] == "FAIL":
++            raise ValueError("binding_sample_failure")
++        return [{"id": items[0]["id"], "is_guard": is_guard, "decision_status": "recommended"}]
++    monkeypatch.setattr(sandbox_evaluator, "_evaluate_binding_pipeline", binding)
++    rows = sandbox_evaluator._binding_evaluation_with_errors([item("HIT"), item("FAIL")], is_guard=True)
++    assert rows[0]["decision_status"] == "recommended"
++    assert rows[1]["id"] == "FAIL" and rows[1]["is_guard"] and "binding_sample_failure" in rows[1]["error"]
+--- /dev/null
+
++++ tests/test_v016_m4_lifecycle.py
+
+@@ -0,0 +1,137 @@
+
++"""M4 LIFO, leakage, persistent process failures and truthful sample counters."""
++import copy
++import json
++import os
++import subprocess
++import sys
++import time
++from pathlib import Path
++from unittest.mock import patch
++
++import pytest
++
++from app import flywheel_sandbox, server
++from app.db_manager import get_db_connection
++from app.rule_governance import compute_publish_env_snapshot, get_eval_run, normalize_rule_spec, reset_rule_publish_block
++from tests.test_v016_m2_publish_gate import m2_env, _seed_completed_credential
++
++
++def wait_task(tid):
++    deadline = time.monotonic() + 20
++    while time.monotonic() < deadline:
++        status = flywheel_sandbox.get_eval_task_status(tid)
++        if status and status["status"] in ("completed", "failed", "timed_out"):
++            return status
++        time.sleep(.05)
++    raise TimeoutError(tid)
++
++
++def test_two_snapshot_lifo_and_absent_config_restoration(m2_env):
++    client, admin = m2_env["client"], m2_env["adm"]
++    path = Path(os.environ["CONFIG_DIR"]) / "scoped_aliases.json"
++    original = path.read_bytes() if path.exists() else None
++    snapshots, suggestions = [], []
++    try:
++        if path.exists():
++            path.unlink()
++        server.trigger_all_config_reloads(raise_on_error=True)
++        before = compute_publish_env_snapshot()
++        for source in ("M4别名甲", "M4别名乙"):
++            conn = get_db_connection()
++            sid = conn.execute("INSERT INTO flywheel_rule_suggestions (discipline,suggestion_type,source_pattern,target_value,status) "
++                               "VALUES ('暖通','ALIAS',?,'医用离心式排风机','pending')", (source,)).lastrowid
++            conn.commit(); conn.close()
++            suggestions.append(sid)
++            spec = normalize_rule_spec(rule_source="flywheel_alias", rule_key=f"suggestion:{sid}", rule_type="ALIAS",
++                                       discipline="暖通", source_pattern=source, target_value="医用离心式排风机", require_concrete_discipline=True)
++            eid = _seed_completed_credential(rule_source="flywheel_alias", rule_key=f"suggestion:{sid}", rule_type="ALIAS",
++                                             normalized_spec=spec, owner_user=admin["user"])
++            res = client.post("/api/flywheel/suggestions/accept", headers=admin["headers"], json={"suggestion_id": sid, "eval_id": eid})
++            assert res.status_code == 200, res.text
++            snapshots.append(res.json()["snapshot_version"])
++        two = path.read_bytes()
++        two_fp = compute_publish_env_snapshot()
++        res = client.post("/api/flywheel/rollback", headers=admin["headers"], json={"snapshot_version": snapshots[0]})
++        assert res.status_code == 409, res.text
++        assert path.read_bytes() == two and compute_publish_env_snapshot() == two_fp
++        assert client.post("/api/flywheel/rollback", headers=admin["headers"], json={"snapshot_version": snapshots[1]}).status_code == 200
++        assert "M4别名甲" in json.loads(path.read_text(encoding="utf-8"))["暖通"]
++        assert "M4别名乙" not in json.loads(path.read_text(encoding="utf-8"))["暖通"]
++        assert client.post("/api/flywheel/rollback", headers=admin["headers"], json={"snapshot_version": snapshots[0]}).status_code == 200
++        assert not path.exists() and compute_publish_env_snapshot() == before
++        conn = get_db_connection()
++        assert all(row[0] == "rolled_back" for row in conn.execute(
++            "SELECT status FROM flywheel_rule_suggestions WHERE id IN (?,?)", suggestions))
++        conn.close()
++    finally:
++        if original is not None:
++            path.write_bytes(original)
++        elif path.exists():
++            path.unlink()
++        conn = get_db_connection()
++        for sid in suggestions:
++            conn.execute("DELETE FROM flywheel_config_snapshots WHERE suggestion_id=?", (sid,))
++            conn.execute("DELETE FROM flywheel_rule_suggestions WHERE id=?", (sid,))
++        conn.commit(); conn.close()
++        server.trigger_all_config_reloads(raise_on_error=True)
++
++
++@pytest.mark.parametrize("fault,code", [("nonzero", "eval_baseline_nonzero"), ("missing", "eval_output_missing"), ("corrupt", "eval_corrupt_json")])
++def test_process_faults_persist_fail_closed(m2_env, fault, code):
++    def run(cmd, **kwargs):
++        if fault == "corrupt":
++            Path(cmd[cmd.index("--output-json") + 1]).write_text("{bad", encoding="utf-8")
++        return subprocess.CompletedProcess(cmd, 2 if fault == "nonzero" else 0, "", "controlled_failure")
++    with patch.object(flywheel_sandbox.subprocess, "run", side_effect=run):
++        tid = flywheel_sandbox.start_sandbox_evaluation(
++            {"suggestion_type": "ALIAS", "discipline": "暖通", "source_pattern": "排风机", "target_value": "排风机"}, owner_user=m2_env["adm"]["user"])
++        state = wait_task(tid)
++    assert state["status"] == "failed" and not state["safety_passed"]
++    record = get_eval_run(tid)
++    assert record["status"] == "failed" and record["error_message"]
++    assert state["error_code"] == code == json.loads(record["result_summary_json"])["error_code"]
++
++
++def test_real_timeout_kills_and_reaps_child(m2_env):
++    real_run, real_popen = subprocess.run, subprocess.Popen
++    children = []
++    def popen(*args, **kwargs):
++        child = real_popen(*args, **kwargs)
++        children.append(child)
++        return child
++    def slow(cmd, **kwargs):
++        return real_run([sys.executable, "-c", "import time; time.sleep(60)"], capture_output=True, timeout=.2)
++    with patch.object(flywheel_sandbox.subprocess, "run", side_effect=slow), patch.object(subprocess, "Popen", side_effect=popen):
++        tid = flywheel_sandbox.start_sandbox_evaluation(
++            {"suggestion_type": "ALIAS", "discipline": "暖通", "source_pattern": "排风机", "target_value": "排风机"}, owner_user=m2_env["adm"]["user"])
++        state = wait_task(tid)
++    assert children and all(p.poll() is not None for p in children)
++    assert state["status"] == "failed" and not state["safety_passed"]
++    record = get_eval_run(tid)
++    assert state["error_code"] == json.loads(record["result_summary_json"])["error_code"] == "eval_baseline_timeout"
++    assert record["error_message"]
++
++
++@pytest.mark.parametrize("error_scope", ["guard", "binding"])
++def test_guard_errors_and_skips_reach_database(m2_env, error_scope):
++    snap = compute_publish_env_snapshot()
++    snapshot = {"materials_db_sha256": snap["materials_revision"], "golden_set_sha256": snap["eval_assets_digest"],
++                "model_version": snap["model_version"], "golden_set_item_count": 1, "vector_channel": {}, "budget": {}}
++    row = {"id": "target", "target_codes": ["A"], "rank": 1, "candidates": [{"code": "A", "score": 90}, {"code": "B", "score": 50}]}
++    payload = {"rows": [row], "guard_rows": [row | {"id": "guard"}],
++               "binding_rows": [], "summary": {"snapshot": snapshot, "rule_execution_hits": 1, "skipped_samples_count": 7}}
++    if error_scope == "guard":
++        payload["guard_rows"][0]["error"] = "controlled_guard_failure"
++    else:
++        payload["binding_rows"] = [{"id": "guard", "is_guard": True, "error": "controlled_binding_failure"}]
++    def run(cmd, **kwargs):
++        Path(cmd[cmd.index("--output-json") + 1]).write_text(json.dumps(payload), encoding="utf-8")
++        return subprocess.CompletedProcess(cmd, 0, "", "")
++    with patch.object(flywheel_sandbox.subprocess, "run", side_effect=run):
++        tid = flywheel_sandbox.start_sandbox_evaluation(
++            {"suggestion_type": "ALIAS", "discipline": "暖通", "source_pattern": "排风机", "target_value": "排风机"}, owner_user=m2_env["adm"]["user"])
++        state = wait_task(tid)
++    assert state["report"]["failed_samples_count"] == 1 and state["report"]["skipped_samples_count"] == 7
++    record = get_eval_run(tid)
++    assert record["failed_samples_count"] == 1 and record["skipped_samples_count"] == 7
++    assert not record["safety_passed"]

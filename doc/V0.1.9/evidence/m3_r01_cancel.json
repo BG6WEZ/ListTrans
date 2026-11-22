@@ -1,0 +1,31 @@
+{
+  "deadline_probe_seconds_after_worker_start": 0.035,
+  "exit_code": 0,
+  "followup_upload": "completed",
+  "http_transport": "native loopback",
+  "probes": {
+    "cancel": {
+      "admitted_after": 0,
+      "admitted_http": 200,
+      "cancel_http": 200,
+      "reclaimed_after_ms": 153.226,
+      "result_written": false,
+      "terminal_reason": "任务已取消",
+      "terminal_status": "failed",
+      "upload_file_leases_after": 0,
+      "upload_files_after": 0
+    },
+    "deadline": {
+      "admitted_after": 0,
+      "admitted_http": 200,
+      "cancel_http": null,
+      "reclaimed_after_ms": 82.663,
+      "result_written": false,
+      "terminal_reason": "任务处理超时",
+      "terminal_status": "failed",
+      "upload_file_leases_after": 0,
+      "upload_files_after": 0
+    }
+  },
+  "rows_per_interrupted_workbook": 150
+}

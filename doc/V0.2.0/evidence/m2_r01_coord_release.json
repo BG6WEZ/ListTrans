@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-22",
+  "generated_at": "2026-11-22T09:32:59.087061+08:00",
+  "role": "coordinator",
+  "version": "V0.2.0",
+  "task": "V020-M2/R01",
+  "verdict": "RELEASED_LLM_OFF_MOCK_ONLY",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_check": {
+    "total": 196,
+    "unchanged": 195,
+    "changed": {
+      "app/server.py": {
+        "before": "9fe33469164ba58bc9e661971429d848de74b4ff35d67fe8327dd7072c9e624f",
+        "after": "efe76b8645d375867756ad2c93b9d4e69c4f87629b46d70ea43805117d611b2d"
+      }
+    },
+    "added": {
+      "app/llm_decision.py": "745478547fca8cd7806aeae8d330867269161fdc4dd868d3b654b6babff88b77",
+      "tests/test_v020_m2_llm_decision.py": "a11295d7c6fac783a93a70407dac022ae5d915989b1dbbce67974ade9b06a2d1"
+    }
+  },
+  "delivery_sha256_check": {
+    "total": 26,
+    "exact_match": 25,
+    "changed": {
+      "doc/V0.2.0/02_任务台账.md": {
+        "delivery": "e1a4526f65fd0aeab29016bda42711feb68eee6e3c4dc60cdaa30964f5d8c4ef",
+        "current": "d48d3a21e34c3fc0e8d04c4ed0b50b3ad6730347cc51784351cd83e9454cd717"
+      }
+    },
+    "audit_summary_path": "doc/V0.2.0/rounds/V020-M2_R01_审核小结.md",
+    "audit_summary_actual_sha256": "f191f5cae8668d9de0ef31b999a609913061ae6553d333df3bb759c68e307919"
+  },
+  "recovery_archive_check": {
+    "path": ".local-archive/v019_final_v020_m0_source_baseline.zip",
+    "sha256": "29b712dd7de8e23a49f72e6367c06dee94e6e1178849a60fb04c59417c697115",
+    "matches_dispatch": true,
+    "entry_count": 72
+  },
+  "coordinator_specialist_pytest": {
+    "modules": [
+      "tests/test_v020_m2_llm_decision.py",
+      "tests/test_v020_m1_bom.py",
+      "tests/test_v020_m0_feedback_ranker.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_m3_hard_constraints.py",
+      "tests/test_m3_hard_constraints_http.py"
+    ],
+    "passed": 157,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "elapsed_seconds": 24.68,
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    }
+  },
+  "business_assets_check": {
+    "asset_count": 35,
+    "matches_m2_dispatch_snapshot_exactly": true
+  },
+  "auto_binding_rules_check": {
+    "path": "config/auto_binding_rules.json",
+    "content": "[]"
+  },
+  "default_switches_verified": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LLM_ENABLED": "false",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off"
+  },
+  "selection_ruling": {
+    "v020_m2_llm_decision_adopted": false,
+    "v020_m2_llm_decision_default": "off",
+    "llm_enabled_default": "false",
+    "reason": "No external paid LLM authorization and no real-model accuracy/latency/cost evidence. Offline Mock safety boundaries verified; keep both LLM switches default OFF and do not claim live LLM capability."
+  },
+  "observations_ruling": {
+    "OBS-AUDIT-M2-01": "P3, closed in M3 dispatch baseline: fixed nested trees.files counter so business_snapshot_asset_count accurately reports 35 matching the full snapshot.",
+    "OBS-AUDIT-M0-01": "P3, tracked to M3: test_flywheel_end_to_end_pipeline env-sensitive 90s timeout under load; low-contention serial full suite 497/497 EXIT=0 passed."
+  },
+  "next_dispatch": "V020-M3/R01"
+}

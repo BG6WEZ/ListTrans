@@ -1,0 +1,24 @@
+{
+  "phase": "fixed",
+  "started_at": "2026-11-18T19:42:11.687890+08:00",
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-u",
+    "-m",
+    "pytest",
+    "tests",
+    "-v",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_fixed_974tbarp\\pytest"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "native_temp_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_fixed_974tbarp",
+  "explicit_test_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_fixed_974tbarp",
+  "dotenv_disabled": true,
+  "llm_enabled": false,
+  "cold_parent_cache_initial_files": 0,
+  "exit_code": 0,
+  "elapsed_sec": 669.89
+}

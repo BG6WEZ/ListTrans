@@ -1,0 +1,4756 @@
+{
+  "ci_scope": "Paired row-level percentile intervals describe this replay. Shared projects preclude a cross-project inference.",
+  "evaluation_scope": "Frozen Train/Dev diagnosis. Signed full-population quality gates remain unverified.",
+  "local_trusted_current_feedback": 0,
+  "modes": {
+    "keyword": {
+      "dev_ranking_net_improvement_without_regression": false,
+      "latency": {
+        "off": {
+          "budget": {
+            "single_p50_ms": 30.0,
+            "single_p95_ms": 300.0,
+            "up50_p50_ms": 1750.0,
+            "up50_p95_ms": 10000.0,
+            "wset_mib": 768.0
+          },
+          "budget_pass": {
+            "single_p50_ms": true,
+            "single_p95_ms": true,
+            "up50_p50_ms": true,
+            "up50_p95_ms": true,
+            "wset_mib": true
+          },
+          "peak_working_set_mib": 665.32,
+          "single": {
+            "max_ms": 1399.262,
+            "n": 1060,
+            "p50_ms": 24.964,
+            "p95_ms": 269.51
+          },
+          "upload50": {
+            "max_ms": 19579.63,
+            "n": 21,
+            "p50_ms": 1547.338,
+            "p95_ms": 7799.547
+          }
+        },
+        "on": {
+          "budget": {
+            "single_p50_ms": 30.0,
+            "single_p95_ms": 300.0,
+            "up50_p50_ms": 1750.0,
+            "up50_p95_ms": 10000.0,
+            "wset_mib": 768.0
+          },
+          "budget_pass": {
+            "single_p50_ms": true,
+            "single_p95_ms": true,
+            "up50_p50_ms": true,
+            "up50_p95_ms": true,
+            "wset_mib": true
+          },
+          "peak_working_set_mib": 673.62,
+          "single": {
+            "max_ms": 754.873,
+            "n": 1060,
+            "p50_ms": 22.415,
+            "p95_ms": 237.176
+          },
+          "upload50": {
+            "max_ms": 18650.517,
+            "n": 21,
+            "p50_ms": 1272.758,
+            "p95_ms": 7816.74
+          }
+        }
+      },
+      "on_performance_within_budget": true,
+      "proposal_and_zero_wrong_auto_binding_gate": true,
+      "result_sha256": {
+        "off": "adb5f4fbf03c5f75c59056485e6cb6c79de0396dc2fedd63c04732ee4849ae40",
+        "on": "e8377cf847ac57311f9a691323ef7c310a79caf18b4e61cbe79b5e5514dc9ed2"
+      },
+      "splits": {
+        "dev": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 180,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.0895
+                ]
+              },
+              "on": {
+                "d": 180,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.0895
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 38,
+                "n": 9,
+                "pct": 23.6842,
+                "wilson_95_pct": [
+                  12.9937,
+                  39.2068
+                ]
+              },
+              "on": {
+                "d": 38,
+                "n": 9,
+                "pct": 23.6842,
+                "wilson_95_pct": [
+                  12.9937,
+                  39.2068
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 122,
+                "n": 25,
+                "pct": 20.4918,
+                "wilson_95_pct": [
+                  14.283,
+                  28.5022
+                ]
+              },
+              "on": {
+                "d": 122,
+                "n": 25,
+                "pct": 20.4918,
+                "wilson_95_pct": [
+                  14.283,
+                  28.5022
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  2.3446
+                ]
+              },
+              "on": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  2.3446
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 38,
+                "n": 23,
+                "pct": 60.5263,
+                "wilson_95_pct": [
+                  44.7179,
+                  74.4019
+                ]
+              },
+              "on": {
+                "d": 38,
+                "n": 23,
+                "pct": 60.5263,
+                "wilson_95_pct": [
+                  44.7179,
+                  74.4019
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "same": 122
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.0
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.0
+            ],
+            "mrr_full": [
+              0.0,
+              0.0
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 11,
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 79,
+                  "pct": 64.7541,
+                  "wilson_95_pct": [
+                    55.9447,
+                    72.6627
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 79,
+                  "pct": 64.7541,
+                  "wilson_95_pct": [
+                    55.9447,
+                    72.6627
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 80,
+                  "pct": 65.5738,
+                  "wilson_95_pct": [
+                    56.7835,
+                    73.4133
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 80,
+                  "pct": 65.5738,
+                  "wilson_95_pct": [
+                    56.7835,
+                    73.4133
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 28,
+                  "pct": 22.9508,
+                  "wilson_95_pct": [
+                    16.3831,
+                    31.1699
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 28,
+                  "pct": 22.9508,
+                  "wilson_95_pct": [
+                    16.3831,
+                    31.1699
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 44,
+                  "pct": 36.0656,
+                  "wilson_95_pct": [
+                    28.0904,
+                    44.8915
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 44,
+                  "pct": 36.0656,
+                  "wilson_95_pct": [
+                    28.0904,
+                    44.8915
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.0,
+                "off": 0.308821,
+                "on": 0.308821
+              },
+              "mrr_full": {
+                "delta": 0.0,
+                "off": 0.313966,
+                "on": 0.313966
+              }
+            },
+            "domains": {
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.544444,
+                  "on": 0.544444
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.544444,
+                  "on": 0.544444
+                }
+              },
+              "装饰": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 68,
+                    "pct": 61.2613,
+                    "wilson_95_pct": [
+                      51.9669,
+                      69.8023
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 68,
+                    "pct": 61.2613,
+                    "wilson_95_pct": [
+                      51.9669,
+                      69.8023
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 69,
+                    "pct": 62.1622,
+                    "wilson_95_pct": [
+                      52.876,
+                      70.6347
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 69,
+                    "pct": 62.1622,
+                    "wilson_95_pct": [
+                      52.876,
+                      70.6347
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 21,
+                    "pct": 18.9189,
+                    "wilson_95_pct": [
+                      12.7203,
+                      27.1968
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 21,
+                    "pct": 18.9189,
+                    "wilson_95_pct": [
+                      12.7203,
+                      27.1968
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 37,
+                    "pct": 33.3333,
+                    "wilson_95_pct": [
+                      25.2511,
+                      42.5305
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 37,
+                    "pct": 33.3333,
+                    "wilson_95_pct": [
+                      25.2511,
+                      42.5305
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.27396,
+                  "on": 0.27396
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.279615,
+                  "on": 0.279615
+                }
+              },
+              "设备": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.8,
+                  "on": 0.8
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.8,
+                  "on": 0.8
+                }
+              }
+            }
+          }
+        },
+        "train": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 754,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5069
+                ]
+              },
+              "on": {
+                "d": 754,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5069
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 77,
+                "n": 17,
+                "pct": 22.0779,
+                "wilson_95_pct": [
+                  14.2664,
+                  32.5431
+                ]
+              },
+              "on": {
+                "d": 77,
+                "n": 17,
+                "pct": 22.0779,
+                "wilson_95_pct": [
+                  14.2664,
+                  32.5431
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": -1,
+              "delta_pp": -0.189,
+              "off": {
+                "d": 529,
+                "n": 207,
+                "pct": 39.1304,
+                "wilson_95_pct": [
+                  35.0642,
+                  43.3534
+                ]
+              },
+              "on": {
+                "d": 529,
+                "n": 206,
+                "pct": 38.9414,
+                "wilson_95_pct": [
+                  34.8801,
+                  43.1622
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "on": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 77,
+                "n": 51,
+                "pct": 66.2338,
+                "wilson_95_pct": [
+                  55.1246,
+                  75.8001
+                ]
+              },
+              "on": {
+                "d": 77,
+                "n": 51,
+                "pct": 66.2338,
+                "wilson_95_pct": [
+                  55.1246,
+                  75.8001
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "improved": 1,
+            "same": 528
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.005671
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.002836
+            ],
+            "mrr_full": [
+              0.0,
+              0.002836
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 9,
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 288,
+                  "pct": 54.4423,
+                  "wilson_95_pct": [
+                    50.1816,
+                    58.6391
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 288,
+                  "pct": 54.4423,
+                  "wilson_95_pct": [
+                    50.1816,
+                    58.6391
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 312,
+                  "pct": 58.9792,
+                  "wilson_95_pct": [
+                    54.7376,
+                    63.0914
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 312,
+                  "pct": 58.9792,
+                  "wilson_95_pct": [
+                    54.7376,
+                    63.0914
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 1,
+                "delta_pp": 0.189,
+                "off": {
+                  "d": 529,
+                  "n": 139,
+                  "pct": 26.276,
+                  "wilson_95_pct": [
+                    22.706,
+                    30.188
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 140,
+                  "pct": 26.465,
+                  "wilson_95_pct": [
+                    22.8852,
+                    30.3842
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 191,
+                  "pct": 36.1059,
+                  "wilson_95_pct": [
+                    32.1266,
+                    40.2855
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 191,
+                  "pct": 36.1059,
+                  "wilson_95_pct": [
+                    32.1266,
+                    40.2855
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.000945,
+                "off": 0.325292,
+                "on": 0.326237
+              },
+              "mrr_full": {
+                "delta": 0.000945,
+                "off": 0.329846,
+                "on": 0.330791
+              }
+            },
+            "domains": {
+              "医用气体": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 72,
+                    "pct": 64.2857,
+                    "wilson_95_pct": [
+                      55.0736,
+                      72.5504
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 72,
+                    "pct": 64.2857,
+                    "wilson_95_pct": [
+                      55.0736,
+                      72.5504
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 23,
+                    "pct": 20.5357,
+                    "wilson_95_pct": [
+                      14.0919,
+                      28.9337
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 23,
+                    "pct": 20.5357,
+                    "wilson_95_pct": [
+                      14.0919,
+                      28.9337
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 35,
+                    "pct": 31.25,
+                    "wilson_95_pct": [
+                      23.4082,
+                      40.3353
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 35,
+                    "pct": 31.25,
+                    "wilson_95_pct": [
+                      23.4082,
+                      40.3353
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.281739,
+                  "on": 0.281739
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.285184,
+                  "on": 0.285184
+                }
+              },
+              "弱电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 70,
+                    "pct": 62.5,
+                    "wilson_95_pct": [
+                      53.2597,
+                      70.9112
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 70,
+                    "pct": 62.5,
+                    "wilson_95_pct": [
+                      53.2597,
+                      70.9112
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 1,
+                  "delta_pp": 0.8929,
+                  "off": {
+                    "d": 112,
+                    "n": 37,
+                    "pct": 33.0357,
+                    "wilson_95_pct": [
+                      25.0148,
+                      42.1818
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 54,
+                    "pct": 48.2143,
+                    "wilson_95_pct": [
+                      39.174,
+                      57.373
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 54,
+                    "pct": 48.2143,
+                    "wilson_95_pct": [
+                      39.174,
+                      57.373
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.004464,
+                  "off": 0.40827,
+                  "on": 0.412734
+                },
+                "mrr_full": {
+                  "delta": 0.004464,
+                  "off": 0.412891,
+                  "on": 0.417355
+                }
+              },
+              "强电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 81,
+                    "pct": 40.099,
+                    "wilson_95_pct": [
+                      33.586,
+                      46.9816
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 81,
+                    "pct": 40.099,
+                    "wilson_95_pct": [
+                      33.586,
+                      46.9816
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 82,
+                    "pct": 40.5941,
+                    "wilson_95_pct": [
+                      34.0588,
+                      47.4804
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 82,
+                    "pct": 40.5941,
+                    "wilson_95_pct": [
+                      34.0588,
+                      47.4804
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 45,
+                    "pct": 22.2772,
+                    "wilson_95_pct": [
+                      17.0867,
+                      28.5025
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 45,
+                    "pct": 22.2772,
+                    "wilson_95_pct": [
+                      17.0867,
+                      28.5025
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 61,
+                    "pct": 30.198,
+                    "wilson_95_pct": [
+                      24.2847,
+                      36.8504
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 61,
+                    "pct": 30.198,
+                    "wilson_95_pct": [
+                      24.2847,
+                      36.8504
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.275729,
+                  "on": 0.275729
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.276749,
+                  "on": 0.276749
+                }
+              },
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 56,
+                    "pct": 65.1163,
+                    "wilson_95_pct": [
+                      54.5936,
+                      74.3463
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 56,
+                    "pct": 65.1163,
+                    "wilson_95_pct": [
+                      54.5936,
+                      74.3463
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 73,
+                    "pct": 84.8837,
+                    "wilson_95_pct": [
+                      75.8364,
+                      90.9479
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 73,
+                    "pct": 84.8837,
+                    "wilson_95_pct": [
+                      75.8364,
+                      90.9479
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 30,
+                    "pct": 34.8837,
+                    "wilson_95_pct": [
+                      25.6537,
+                      45.4064
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 30,
+                    "pct": 34.8837,
+                    "wilson_95_pct": [
+                      25.6537,
+                      45.4064
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 37,
+                    "pct": 43.0233,
+                    "wilson_95_pct": [
+                      33.0793,
+                      53.5638
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 37,
+                    "pct": 43.0233,
+                    "wilson_95_pct": [
+                      33.0793,
+                      53.5638
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.408153,
+                  "on": 0.408153
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.423267,
+                  "on": 0.423267
+                }
+              },
+              "自控": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.235294,
+                  "on": 0.235294
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.235294,
+                  "on": 0.235294
+                }
+              }
+            }
+          }
+        },
+        "train_dev": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 934,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.4096
+                ]
+              },
+              "on": {
+                "d": 934,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.4096
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 115,
+                "n": 26,
+                "pct": 22.6087,
+                "wilson_95_pct": [
+                  15.9216,
+                  31.0666
+                ]
+              },
+              "on": {
+                "d": 115,
+                "n": 26,
+                "pct": 22.6087,
+                "wilson_95_pct": [
+                  15.9216,
+                  31.0666
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": -1,
+              "delta_pp": -0.1536,
+              "off": {
+                "d": 651,
+                "n": 232,
+                "pct": 35.6375,
+                "wilson_95_pct": [
+                  32.0526,
+                  39.3909
+                ]
+              },
+              "on": {
+                "d": 651,
+                "n": 231,
+                "pct": 35.4839,
+                "wilson_95_pct": [
+                  31.9034,
+                  39.2346
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "on": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 115,
+                "n": 74,
+                "pct": 64.3478,
+                "wilson_95_pct": [
+                  55.2602,
+                  72.5079
+                ]
+              },
+              "on": {
+                "d": 115,
+                "n": 74,
+                "pct": 64.3478,
+                "wilson_95_pct": [
+                  55.2602,
+                  72.5079
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "improved": 1,
+            "same": 650
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.004608
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.002304
+            ],
+            "mrr_full": [
+              0.0,
+              0.002304
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 20,
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 367,
+                  "pct": 56.3748,
+                  "wilson_95_pct": [
+                    52.5389,
+                    60.1359
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 367,
+                  "pct": 56.3748,
+                  "wilson_95_pct": [
+                    52.5389,
+                    60.1359
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 392,
+                  "pct": 60.2151,
+                  "wilson_95_pct": [
+                    56.4059,
+                    63.9044
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 392,
+                  "pct": 60.2151,
+                  "wilson_95_pct": [
+                    56.4059,
+                    63.9044
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 1,
+                "delta_pp": 0.1537,
+                "off": {
+                  "d": 651,
+                  "n": 167,
+                  "pct": 25.6528,
+                  "wilson_95_pct": [
+                    22.4477,
+                    29.1436
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 168,
+                  "pct": 25.8065,
+                  "wilson_95_pct": [
+                    22.594,
+                    29.3028
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 235,
+                  "pct": 36.0983,
+                  "wilson_95_pct": [
+                    32.5004,
+                    39.8593
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 235,
+                  "pct": 36.0983,
+                  "wilson_95_pct": [
+                    32.5004,
+                    39.8593
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.000768,
+                "off": 0.322205,
+                "on": 0.322973
+              },
+              "mrr_full": {
+                "delta": 0.000768,
+                "off": 0.32687,
+                "on": 0.327638
+              }
+            },
+            "domains": {
+              "医用气体": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 72,
+                    "pct": 64.2857,
+                    "wilson_95_pct": [
+                      55.0736,
+                      72.5504
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 72,
+                    "pct": 64.2857,
+                    "wilson_95_pct": [
+                      55.0736,
+                      72.5504
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 23,
+                    "pct": 20.5357,
+                    "wilson_95_pct": [
+                      14.0919,
+                      28.9337
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 23,
+                    "pct": 20.5357,
+                    "wilson_95_pct": [
+                      14.0919,
+                      28.9337
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 35,
+                    "pct": 31.25,
+                    "wilson_95_pct": [
+                      23.4082,
+                      40.3353
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 35,
+                    "pct": 31.25,
+                    "wilson_95_pct": [
+                      23.4082,
+                      40.3353
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.281739,
+                  "on": 0.281739
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.285184,
+                  "on": 0.285184
+                }
+              },
+              "弱电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 70,
+                    "pct": 62.5,
+                    "wilson_95_pct": [
+                      53.2597,
+                      70.9112
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 70,
+                    "pct": 62.5,
+                    "wilson_95_pct": [
+                      53.2597,
+                      70.9112
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 74,
+                    "pct": 66.0714,
+                    "wilson_95_pct": [
+                      56.9001,
+                      74.1769
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 1,
+                  "delta_pp": 0.8929,
+                  "off": {
+                    "d": 112,
+                    "n": 37,
+                    "pct": 33.0357,
+                    "wilson_95_pct": [
+                      25.0148,
+                      42.1818
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 54,
+                    "pct": 48.2143,
+                    "wilson_95_pct": [
+                      39.174,
+                      57.373
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 54,
+                    "pct": 48.2143,
+                    "wilson_95_pct": [
+                      39.174,
+                      57.373
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.004464,
+                  "off": 0.40827,
+                  "on": 0.412734
+                },
+                "mrr_full": {
+                  "delta": 0.004464,
+                  "off": 0.412891,
+                  "on": 0.417355
+                }
+              },
+              "强电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 81,
+                    "pct": 40.099,
+                    "wilson_95_pct": [
+                      33.586,
+                      46.9816
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 81,
+                    "pct": 40.099,
+                    "wilson_95_pct": [
+                      33.586,
+                      46.9816
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 82,
+                    "pct": 40.5941,
+                    "wilson_95_pct": [
+                      34.0588,
+                      47.4804
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 82,
+                    "pct": 40.5941,
+                    "wilson_95_pct": [
+                      34.0588,
+                      47.4804
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 45,
+                    "pct": 22.2772,
+                    "wilson_95_pct": [
+                      17.0867,
+                      28.5025
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 45,
+                    "pct": 22.2772,
+                    "wilson_95_pct": [
+                      17.0867,
+                      28.5025
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 61,
+                    "pct": 30.198,
+                    "wilson_95_pct": [
+                      24.2847,
+                      36.8504
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 61,
+                    "pct": 30.198,
+                    "wilson_95_pct": [
+                      24.2847,
+                      36.8504
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.275729,
+                  "on": 0.275729
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.276749,
+                  "on": 0.276749
+                }
+              },
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 62,
+                    "pct": 67.3913,
+                    "wilson_95_pct": [
+                      57.2833,
+                      76.1052
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 62,
+                    "pct": 67.3913,
+                    "wilson_95_pct": [
+                      57.2833,
+                      76.1052
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 79,
+                    "pct": 85.8696,
+                    "wilson_95_pct": [
+                      77.3114,
+                      91.5523
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 79,
+                    "pct": 85.8696,
+                    "wilson_95_pct": [
+                      77.3114,
+                      91.5523
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 33,
+                    "pct": 35.8696,
+                    "wilson_95_pct": [
+                      26.8171,
+                      46.0547
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 33,
+                    "pct": 35.8696,
+                    "wilson_95_pct": [
+                      26.8171,
+                      46.0547
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 40,
+                    "pct": 43.4783,
+                    "wilson_95_pct": [
+                      33.8116,
+                      53.6678
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 40,
+                    "pct": 43.4783,
+                    "wilson_95_pct": [
+                      33.8116,
+                      53.6678
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.417042,
+                  "on": 0.417042
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.43117,
+                  "on": 0.43117
+                }
+              },
+              "自控": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 9,
+                    "pct": 52.9412,
+                    "wilson_95_pct": [
+                      30.9632,
+                      73.8349
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.235294,
+                  "on": 0.235294
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.235294,
+                  "on": 0.235294
+                }
+              },
+              "装饰": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 68,
+                    "pct": 61.2613,
+                    "wilson_95_pct": [
+                      51.9669,
+                      69.8023
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 68,
+                    "pct": 61.2613,
+                    "wilson_95_pct": [
+                      51.9669,
+                      69.8023
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 69,
+                    "pct": 62.1622,
+                    "wilson_95_pct": [
+                      52.876,
+                      70.6347
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 69,
+                    "pct": 62.1622,
+                    "wilson_95_pct": [
+                      52.876,
+                      70.6347
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 21,
+                    "pct": 18.9189,
+                    "wilson_95_pct": [
+                      12.7203,
+                      27.1968
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 21,
+                    "pct": 18.9189,
+                    "wilson_95_pct": [
+                      12.7203,
+                      27.1968
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 37,
+                    "pct": 33.3333,
+                    "wilson_95_pct": [
+                      25.2511,
+                      42.5305
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 37,
+                    "pct": 33.3333,
+                    "wilson_95_pct": [
+                      25.2511,
+                      42.5305
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.27396,
+                  "on": 0.27396
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.279615,
+                  "on": 0.279615
+                }
+              },
+              "设备": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.8,
+                  "on": 0.8
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.8,
+                  "on": 0.8
+                }
+              }
+            }
+          }
+        }
+      },
+      "upload_decision_rows_changed": 1
+    },
+    "vector": {
+      "dev_ranking_net_improvement_without_regression": false,
+      "latency": {
+        "off": {
+          "budget": {
+            "single_p50_ms": 90.0,
+            "single_p95_ms": 375.0,
+            "up50_p50_ms": 6000.0,
+            "up50_p95_ms": 12500.0,
+            "wset_mib": 2048.0
+          },
+          "budget_pass": {
+            "single_p50_ms": true,
+            "single_p95_ms": true,
+            "up50_p50_ms": true,
+            "up50_p95_ms": true,
+            "wset_mib": true
+          },
+          "peak_working_set_mib": 1707.42,
+          "single": {
+            "max_ms": 824.396,
+            "n": 1060,
+            "p50_ms": 59.25,
+            "p95_ms": 280.28
+          },
+          "upload50": {
+            "max_ms": 28908.724,
+            "n": 21,
+            "p50_ms": 5022.358,
+            "p95_ms": 11063.776
+          }
+        },
+        "on": {
+          "budget": {
+            "single_p50_ms": 90.0,
+            "single_p95_ms": 375.0,
+            "up50_p50_ms": 6000.0,
+            "up50_p95_ms": 12500.0,
+            "wset_mib": 2048.0
+          },
+          "budget_pass": {
+            "single_p50_ms": true,
+            "single_p95_ms": true,
+            "up50_p50_ms": true,
+            "up50_p95_ms": true,
+            "wset_mib": true
+          },
+          "peak_working_set_mib": 1708.3,
+          "single": {
+            "max_ms": 861.588,
+            "n": 1060,
+            "p50_ms": 58.75,
+            "p95_ms": 278.978
+          },
+          "upload50": {
+            "max_ms": 22937.019,
+            "n": 21,
+            "p50_ms": 4380.081,
+            "p95_ms": 8718.279
+          }
+        }
+      },
+      "on_performance_within_budget": true,
+      "proposal_and_zero_wrong_auto_binding_gate": true,
+      "result_sha256": {
+        "off": "3d393c19d58c2955343b73632e023e650be88bcddfeb2f239c503ba704584341",
+        "on": "34202e1507e1f2012994088fcb7040df3b1031dd549751e05ae83619fd02df39"
+      },
+      "splits": {
+        "dev": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 180,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.0895
+                ]
+              },
+              "on": {
+                "d": 180,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  2.0895
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 38,
+                "n": 13,
+                "pct": 34.2105,
+                "wilson_95_pct": [
+                  21.2124,
+                  50.1079
+                ]
+              },
+              "on": {
+                "d": 38,
+                "n": 13,
+                "pct": 34.2105,
+                "wilson_95_pct": [
+                  21.2124,
+                  50.1079
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 122,
+                "n": 27,
+                "pct": 22.1311,
+                "wilson_95_pct": [
+                  15.6791,
+                  30.2846
+                ]
+              },
+              "on": {
+                "d": 122,
+                "n": 27,
+                "pct": 22.1311,
+                "wilson_95_pct": [
+                  15.6791,
+                  30.2846
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  2.3446
+                ]
+              },
+              "on": {
+                "d": 160,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0.0,
+                  2.3446
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 38,
+                "n": 24,
+                "pct": 63.1579,
+                "wilson_95_pct": [
+                  47.284,
+                  76.6158
+                ]
+              },
+              "on": {
+                "d": 38,
+                "n": 24,
+                "pct": 63.1579,
+                "wilson_95_pct": [
+                  47.284,
+                  76.6158
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "same": 122
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.0
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.0
+            ],
+            "mrr_full": [
+              0.0,
+              0.0
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 11,
+            "core_answerable": 122,
+            "core_negative": 38,
+            "core_pending": 20,
+            "core_total": 180,
+            "total": 218
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 113,
+                  "pct": 92.623,
+                  "wilson_95_pct": [
+                    86.5731,
+                    96.0706
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 113,
+                  "pct": 92.623,
+                  "wilson_95_pct": [
+                    86.5731,
+                    96.0706
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 114,
+                  "pct": 93.4426,
+                  "wilson_95_pct": [
+                    87.5929,
+                    96.6401
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 114,
+                  "pct": 93.4426,
+                  "wilson_95_pct": [
+                    87.5929,
+                    96.6401
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 32,
+                  "pct": 26.2295,
+                  "wilson_95_pct": [
+                    19.2354,
+                    34.6748
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 32,
+                  "pct": 26.2295,
+                  "wilson_95_pct": [
+                    19.2354,
+                    34.6748
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 122,
+                  "n": 48,
+                  "pct": 39.3443,
+                  "wilson_95_pct": [
+                    31.1282,
+                    48.2109
+                  ]
+                },
+                "on": {
+                  "d": 122,
+                  "n": 48,
+                  "pct": 39.3443,
+                  "wilson_95_pct": [
+                    31.1282,
+                    48.2109
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.0,
+                "off": 0.349145,
+                "on": 0.349145
+              },
+              "mrr_full": {
+                "delta": 0.0,
+                "off": 0.357772,
+                "on": 0.357772
+              }
+            },
+            "domains": {
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 6,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      60.9666,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  },
+                  "on": {
+                    "d": 6,
+                    "n": 3,
+                    "pct": 50.0,
+                    "wilson_95_pct": [
+                      18.7616,
+                      81.2384
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.5375,
+                  "on": 0.5375
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.5375,
+                  "on": 0.5375
+                }
+              },
+              "装饰": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 102,
+                    "pct": 91.8919,
+                    "wilson_95_pct": [
+                      85.3054,
+                      95.6758
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 102,
+                    "pct": 91.8919,
+                    "wilson_95_pct": [
+                      85.3054,
+                      95.6758
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 103,
+                    "pct": 92.7928,
+                    "wilson_95_pct": [
+                      86.4197,
+                      96.303
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 103,
+                    "pct": 92.7928,
+                    "wilson_95_pct": [
+                      86.4197,
+                      96.303
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 26,
+                    "pct": 23.4234,
+                    "wilson_95_pct": [
+                      16.5157,
+                      32.1092
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 26,
+                    "pct": 23.4234,
+                    "wilson_95_pct": [
+                      16.5157,
+                      32.1092
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 41,
+                    "pct": 36.9369,
+                    "wilson_95_pct": [
+                      28.536,
+                      46.2118
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 41,
+                    "pct": 36.9369,
+                    "wilson_95_pct": [
+                      28.536,
+                      46.2118
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.323159,
+                  "on": 0.323159
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.332641,
+                  "on": 0.332641
+                }
+              },
+              "设备": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 3,
+                    "pct": 60.0,
+                    "wilson_95_pct": [
+                      23.0724,
+                      88.2379
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 3,
+                    "pct": 60.0,
+                    "wilson_95_pct": [
+                      23.0724,
+                      88.2379
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.7,
+                  "on": 0.7
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.7,
+                  "on": 0.7
+                }
+              }
+            }
+          }
+        },
+        "train": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 754,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5069
+                ]
+              },
+              "on": {
+                "d": 754,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.5069
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 77,
+                "n": 10,
+                "pct": 12.987,
+                "wilson_95_pct": [
+                  7.2098,
+                  22.2818
+                ]
+              },
+              "on": {
+                "d": 77,
+                "n": 10,
+                "pct": 12.987,
+                "wilson_95_pct": [
+                  7.2098,
+                  22.2818
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": -1,
+              "delta_pp": -0.1891,
+              "off": {
+                "d": 529,
+                "n": 317,
+                "pct": 59.9244,
+                "wilson_95_pct": [
+                  55.6913,
+                  64.0144
+                ]
+              },
+              "on": {
+                "d": 529,
+                "n": 316,
+                "pct": 59.7353,
+                "wilson_95_pct": [
+                  55.5004,
+                  63.8299
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              },
+              "on": {
+                "d": 606,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.6299
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 77,
+                "n": 67,
+                "pct": 87.013,
+                "wilson_95_pct": [
+                  77.7182,
+                  92.7902
+                ]
+              },
+              "on": {
+                "d": 77,
+                "n": 67,
+                "pct": 87.013,
+                "wilson_95_pct": [
+                  77.7182,
+                  92.7902
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "improved": 1,
+            "same": 528
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.005671
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.002836
+            ],
+            "mrr_full": [
+              0.0,
+              0.002836
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 9,
+            "core_answerable": 529,
+            "core_negative": 77,
+            "core_pending": 148,
+            "core_total": 754,
+            "total": 842
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 413,
+                  "pct": 78.0718,
+                  "wilson_95_pct": [
+                    74.3505,
+                    81.3884
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 413,
+                  "pct": 78.0718,
+                  "wilson_95_pct": [
+                    74.3505,
+                    81.3884
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 459,
+                  "pct": 86.7675,
+                  "wilson_95_pct": [
+                    83.6132,
+                    89.3917
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 459,
+                  "pct": 86.7675,
+                  "wilson_95_pct": [
+                    83.6132,
+                    89.3917
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 1,
+                "delta_pp": 0.1891,
+                "off": {
+                  "d": 529,
+                  "n": 129,
+                  "pct": 24.3856,
+                  "wilson_95_pct": [
+                    20.9196,
+                    28.221
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 130,
+                  "pct": 24.5747,
+                  "wilson_95_pct": [
+                    21.0978,
+                    28.4181
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 529,
+                  "n": 189,
+                  "pct": 35.7278,
+                  "wilson_95_pct": [
+                    31.7606,
+                    39.9008
+                  ]
+                },
+                "on": {
+                  "d": 529,
+                  "n": 189,
+                  "pct": 35.7278,
+                  "wilson_95_pct": [
+                    31.7606,
+                    39.9008
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.000946,
+                "off": 0.323371,
+                "on": 0.324317
+              },
+              "mrr_full": {
+                "delta": 0.000945,
+                "off": 0.336466,
+                "on": 0.337411
+              }
+            },
+            "domains": {
+              "医用气体": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 92,
+                    "pct": 82.1429,
+                    "wilson_95_pct": [
+                      74.0216,
+                      88.1323
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 92,
+                    "pct": 82.1429,
+                    "wilson_95_pct": [
+                      74.0216,
+                      88.1323
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 94,
+                    "pct": 83.9286,
+                    "wilson_95_pct": [
+                      76.0214,
+                      89.5855
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 94,
+                    "pct": 83.9286,
+                    "wilson_95_pct": [
+                      76.0214,
+                      89.5855
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 22,
+                    "pct": 19.6429,
+                    "wilson_95_pct": [
+                      13.345,
+                      27.9541
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 22,
+                    "pct": 19.6429,
+                    "wilson_95_pct": [
+                      13.345,
+                      27.9541
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 30,
+                    "pct": 26.7857,
+                    "wilson_95_pct": [
+                      19.4546,
+                      35.6565
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 30,
+                    "pct": 26.7857,
+                    "wilson_95_pct": [
+                      19.4546,
+                      35.6565
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.264828,
+                  "on": 0.264828
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.278368,
+                  "on": 0.278368
+                }
+              },
+              "弱电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 81,
+                    "pct": 72.3214,
+                    "wilson_95_pct": [
+                      63.4002,
+                      79.7622
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 81,
+                    "pct": 72.3214,
+                    "wilson_95_pct": [
+                      63.4002,
+                      79.7622
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 96,
+                    "pct": 85.7143,
+                    "wilson_95_pct": [
+                      78.0486,
+                      91.0113
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 96,
+                    "pct": 85.7143,
+                    "wilson_95_pct": [
+                      78.0486,
+                      91.0113
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 1,
+                  "delta_pp": 0.8929,
+                  "off": {
+                    "d": 112,
+                    "n": 25,
+                    "pct": 22.3214,
+                    "wilson_95_pct": [
+                      15.6012,
+                      30.8774
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 26,
+                    "pct": 23.2143,
+                    "wilson_95_pct": [
+                      16.363,
+                      31.842
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.004464,
+                  "off": 0.303607,
+                  "on": 0.308071
+                },
+                "mrr_full": {
+                  "delta": 0.004464,
+                  "off": 0.314487,
+                  "on": 0.318951
+                }
+              },
+              "强电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 166,
+                    "pct": 82.1782,
+                    "wilson_95_pct": [
+                      76.3153,
+                      86.8401
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 166,
+                    "pct": 82.1782,
+                    "wilson_95_pct": [
+                      76.3153,
+                      86.8401
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 171,
+                    "pct": 84.6535,
+                    "wilson_95_pct": [
+                      79.0406,
+                      88.9729
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 171,
+                    "pct": 84.6535,
+                    "wilson_95_pct": [
+                      79.0406,
+                      88.9729
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 50,
+                    "pct": 24.7525,
+                    "wilson_95_pct": [
+                      19.3091,
+                      31.1382
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 50,
+                    "pct": 24.7525,
+                    "wilson_95_pct": [
+                      19.3091,
+                      31.1382
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 74,
+                    "pct": 36.6337,
+                    "wilson_95_pct": [
+                      30.2965,
+                      43.4697
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 74,
+                    "pct": 36.6337,
+                    "wilson_95_pct": [
+                      30.2965,
+                      43.4697
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.332084,
+                  "on": 0.332084
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.344912,
+                  "on": 0.344912
+                }
+              },
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 63,
+                    "pct": 73.2558,
+                    "wilson_95_pct": [
+                      63.055,
+                      81.4679
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 63,
+                    "pct": 73.2558,
+                    "wilson_95_pct": [
+                      63.055,
+                      81.4679
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 84,
+                    "pct": 97.6744,
+                    "wilson_95_pct": [
+                      91.912,
+                      99.3599
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 84,
+                    "pct": 97.6744,
+                    "wilson_95_pct": [
+                      91.912,
+                      99.3599
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 28,
+                    "pct": 32.5581,
+                    "wilson_95_pct": [
+                      23.5857,
+                      43.0221
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 28,
+                    "pct": 32.5581,
+                    "wilson_95_pct": [
+                      23.5857,
+                      43.0221
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 86,
+                    "n": 41,
+                    "pct": 47.6744,
+                    "wilson_95_pct": [
+                      37.4455,
+                      58.1022
+                    ]
+                  },
+                  "on": {
+                    "d": 86,
+                    "n": 41,
+                    "pct": 47.6744,
+                    "wilson_95_pct": [
+                      37.4455,
+                      58.1022
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.414549,
+                  "on": 0.414549
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.433163,
+                  "on": 0.433163
+                }
+              },
+              "自控": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 11,
+                    "pct": 64.7059,
+                    "wilson_95_pct": [
+                      41.3004,
+                      82.6903
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 11,
+                    "pct": 64.7059,
+                    "wilson_95_pct": [
+                      41.3004,
+                      82.6903
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 14,
+                    "pct": 82.3529,
+                    "wilson_95_pct": [
+                      58.9705,
+                      93.8089
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 14,
+                    "pct": 82.3529,
+                    "wilson_95_pct": [
+                      58.9705,
+                      93.8089
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 6,
+                    "pct": 35.2941,
+                    "wilson_95_pct": [
+                      17.3097,
+                      58.6996
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 6,
+                    "pct": 35.2941,
+                    "wilson_95_pct": [
+                      17.3097,
+                      58.6996
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.27451,
+                  "on": 0.27451
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.27451,
+                  "on": 0.27451
+                }
+              }
+            }
+          }
+        },
+        "train_dev": {
+          "decisions": {
+            "auto_accepted_accuracy": {
+              "delta_count": 0,
+              "delta_pp": null,
+              "off": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              },
+              "on": {
+                "d": 0,
+                "n": 0,
+                "pct": null,
+                "wilson_95_pct": null
+              }
+            },
+            "auto_accepted_coverage": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 934,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.4096
+                ]
+              },
+              "on": {
+                "d": 934,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.4096
+                ]
+              }
+            },
+            "negative_explicit_rejection": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 115,
+                "n": 23,
+                "pct": 20.0,
+                "wilson_95_pct": [
+                  13.7131,
+                  28.2264
+                ]
+              },
+              "on": {
+                "d": 115,
+                "n": 23,
+                "pct": 20.0,
+                "wilson_95_pct": [
+                  13.7131,
+                  28.2264
+                ]
+              }
+            },
+            "wrong_answerable_proposals": {
+              "delta_count": -1,
+              "delta_pp": -0.1536,
+              "off": {
+                "d": 651,
+                "n": 344,
+                "pct": 52.8418,
+                "wilson_95_pct": [
+                  49.0017,
+                  56.6485
+                ]
+              },
+              "on": {
+                "d": 651,
+                "n": 343,
+                "pct": 52.6882,
+                "wilson_95_pct": [
+                  48.8483,
+                  56.4965
+                ]
+              }
+            },
+            "wrong_auto_binding": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              },
+              "on": {
+                "d": 766,
+                "n": 0,
+                "pct": 0.0,
+                "wilson_95_pct": [
+                  0,
+                  0.499
+                ]
+              }
+            },
+            "wrong_negative_proposals": {
+              "delta_count": 0,
+              "delta_pp": 0.0,
+              "off": {
+                "d": 115,
+                "n": 91,
+                "pct": 79.1304,
+                "wilson_95_pct": [
+                  70.8222,
+                  85.5555
+                ]
+              },
+              "on": {
+                "d": 115,
+                "n": 91,
+                "pct": 79.1304,
+                "wilson_95_pct": [
+                  70.8222,
+                  85.5555
+                ]
+              }
+            }
+          },
+          "paired_rank_changes": {
+            "improved": 1,
+            "same": 650
+          },
+          "paired_row_bootstrap_95_diagnostic_only": {
+            "hit@1": [
+              0.0,
+              0.004608
+            ],
+            "hit@3": [
+              0.0,
+              0.0
+            ],
+            "mrr_at_10": [
+              0.0,
+              0.002304
+            ],
+            "mrr_full": [
+              0.0,
+              0.002304
+            ]
+          },
+          "population": {
+            "confirmed_kit_1toN": 20,
+            "core_answerable": 651,
+            "core_negative": 115,
+            "core_pending": 168,
+            "core_total": 934,
+            "total": 1060
+          },
+          "rank": {
+            "all": {
+              "candidate_recall@100": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 526,
+                  "pct": 80.7988,
+                  "wilson_95_pct": [
+                    77.5959,
+                    83.6403
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 526,
+                  "pct": 80.7988,
+                  "wilson_95_pct": [
+                    77.5959,
+                    83.6403
+                  ]
+                }
+              },
+              "candidate_recall@200": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 573,
+                  "pct": 88.0184,
+                  "wilson_95_pct": [
+                    85.2982,
+                    90.2927
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 573,
+                  "pct": 88.0184,
+                  "wilson_95_pct": [
+                    85.2982,
+                    90.2927
+                  ]
+                }
+              },
+              "hit@1": {
+                "delta_count": 1,
+                "delta_pp": 0.1536,
+                "off": {
+                  "d": 651,
+                  "n": 161,
+                  "pct": 24.7312,
+                  "wilson_95_pct": [
+                    21.5716,
+                    28.1873
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 162,
+                  "pct": 24.8848,
+                  "wilson_95_pct": [
+                    21.7175,
+                    28.3468
+                  ]
+                }
+              },
+              "hit@3": {
+                "delta_count": 0,
+                "delta_pp": 0.0,
+                "off": {
+                  "d": 651,
+                  "n": 237,
+                  "pct": 36.4055,
+                  "wilson_95_pct": [
+                    32.7991,
+                    40.1714
+                  ]
+                },
+                "on": {
+                  "d": 651,
+                  "n": 237,
+                  "pct": 36.4055,
+                  "wilson_95_pct": [
+                    32.7991,
+                    40.1714
+                  ]
+                }
+              },
+              "mrr_at_10": {
+                "delta": 0.000768,
+                "off": 0.328201,
+                "on": 0.328969
+              },
+              "mrr_full": {
+                "delta": 0.000768,
+                "off": 0.340459,
+                "on": 0.341227
+              }
+            },
+            "domains": {
+              "医用气体": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 92,
+                    "pct": 82.1429,
+                    "wilson_95_pct": [
+                      74.0216,
+                      88.1323
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 92,
+                    "pct": 82.1429,
+                    "wilson_95_pct": [
+                      74.0216,
+                      88.1323
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 94,
+                    "pct": 83.9286,
+                    "wilson_95_pct": [
+                      76.0214,
+                      89.5855
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 94,
+                    "pct": 83.9286,
+                    "wilson_95_pct": [
+                      76.0214,
+                      89.5855
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 22,
+                    "pct": 19.6429,
+                    "wilson_95_pct": [
+                      13.345,
+                      27.9541
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 22,
+                    "pct": 19.6429,
+                    "wilson_95_pct": [
+                      13.345,
+                      27.9541
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 30,
+                    "pct": 26.7857,
+                    "wilson_95_pct": [
+                      19.4546,
+                      35.6565
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 30,
+                    "pct": 26.7857,
+                    "wilson_95_pct": [
+                      19.4546,
+                      35.6565
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.264828,
+                  "on": 0.264828
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.278368,
+                  "on": 0.278368
+                }
+              },
+              "弱电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 81,
+                    "pct": 72.3214,
+                    "wilson_95_pct": [
+                      63.4002,
+                      79.7622
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 81,
+                    "pct": 72.3214,
+                    "wilson_95_pct": [
+                      63.4002,
+                      79.7622
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 96,
+                    "pct": 85.7143,
+                    "wilson_95_pct": [
+                      78.0486,
+                      91.0113
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 96,
+                    "pct": 85.7143,
+                    "wilson_95_pct": [
+                      78.0486,
+                      91.0113
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 1,
+                  "delta_pp": 0.8929,
+                  "off": {
+                    "d": 112,
+                    "n": 25,
+                    "pct": 22.3214,
+                    "wilson_95_pct": [
+                      15.6012,
+                      30.8774
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 26,
+                    "pct": 23.2143,
+                    "wilson_95_pct": [
+                      16.363,
+                      31.842
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  },
+                  "on": {
+                    "d": 112,
+                    "n": 38,
+                    "pct": 33.9286,
+                    "wilson_95_pct": [
+                      25.8231,
+                      43.0999
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.004464,
+                  "off": 0.303607,
+                  "on": 0.308071
+                },
+                "mrr_full": {
+                  "delta": 0.004464,
+                  "off": 0.314487,
+                  "on": 0.318951
+                }
+              },
+              "强电": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 166,
+                    "pct": 82.1782,
+                    "wilson_95_pct": [
+                      76.3153,
+                      86.8401
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 166,
+                    "pct": 82.1782,
+                    "wilson_95_pct": [
+                      76.3153,
+                      86.8401
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 171,
+                    "pct": 84.6535,
+                    "wilson_95_pct": [
+                      79.0406,
+                      88.9729
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 171,
+                    "pct": 84.6535,
+                    "wilson_95_pct": [
+                      79.0406,
+                      88.9729
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 50,
+                    "pct": 24.7525,
+                    "wilson_95_pct": [
+                      19.3091,
+                      31.1382
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 50,
+                    "pct": 24.7525,
+                    "wilson_95_pct": [
+                      19.3091,
+                      31.1382
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 202,
+                    "n": 74,
+                    "pct": 36.6337,
+                    "wilson_95_pct": [
+                      30.2965,
+                      43.4697
+                    ]
+                  },
+                  "on": {
+                    "d": 202,
+                    "n": 74,
+                    "pct": 36.6337,
+                    "wilson_95_pct": [
+                      30.2965,
+                      43.4697
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.332084,
+                  "on": 0.332084
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.344912,
+                  "on": 0.344912
+                }
+              },
+              "暖通": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 69,
+                    "pct": 75.0,
+                    "wilson_95_pct": [
+                      65.2712,
+                      82.7247
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 69,
+                    "pct": 75.0,
+                    "wilson_95_pct": [
+                      65.2712,
+                      82.7247
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 90,
+                    "pct": 97.8261,
+                    "wilson_95_pct": [
+                      92.4165,
+                      99.4018
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 90,
+                    "pct": 97.8261,
+                    "wilson_95_pct": [
+                      92.4165,
+                      99.4018
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 31,
+                    "pct": 33.6957,
+                    "wilson_95_pct": [
+                      24.8636,
+                      43.8347
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 31,
+                    "pct": 33.6957,
+                    "wilson_95_pct": [
+                      24.8636,
+                      43.8347
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 92,
+                    "n": 44,
+                    "pct": 47.8261,
+                    "wilson_95_pct": [
+                      37.9121,
+                      57.9143
+                    ]
+                  },
+                  "on": {
+                    "d": 92,
+                    "n": 44,
+                    "pct": 47.8261,
+                    "wilson_95_pct": [
+                      37.9121,
+                      57.9143
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.422567,
+                  "on": 0.422567
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.439968,
+                  "on": 0.439968
+                }
+              },
+              "自控": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 11,
+                    "pct": 64.7059,
+                    "wilson_95_pct": [
+                      41.3004,
+                      82.6903
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 11,
+                    "pct": 64.7059,
+                    "wilson_95_pct": [
+                      41.3004,
+                      82.6903
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 14,
+                    "pct": 82.3529,
+                    "wilson_95_pct": [
+                      58.9705,
+                      93.8089
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 14,
+                    "pct": 82.3529,
+                    "wilson_95_pct": [
+                      58.9705,
+                      93.8089
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 4,
+                    "pct": 23.5294,
+                    "wilson_95_pct": [
+                      9.555,
+                      47.2618
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 17,
+                    "n": 6,
+                    "pct": 35.2941,
+                    "wilson_95_pct": [
+                      17.3097,
+                      58.6996
+                    ]
+                  },
+                  "on": {
+                    "d": 17,
+                    "n": 6,
+                    "pct": 35.2941,
+                    "wilson_95_pct": [
+                      17.3097,
+                      58.6996
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.27451,
+                  "on": 0.27451
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.27451,
+                  "on": 0.27451
+                }
+              },
+              "装饰": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 102,
+                    "pct": 91.8919,
+                    "wilson_95_pct": [
+                      85.3054,
+                      95.6758
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 102,
+                    "pct": 91.8919,
+                    "wilson_95_pct": [
+                      85.3054,
+                      95.6758
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 103,
+                    "pct": 92.7928,
+                    "wilson_95_pct": [
+                      86.4197,
+                      96.303
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 103,
+                    "pct": 92.7928,
+                    "wilson_95_pct": [
+                      86.4197,
+                      96.303
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 26,
+                    "pct": 23.4234,
+                    "wilson_95_pct": [
+                      16.5157,
+                      32.1092
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 26,
+                    "pct": 23.4234,
+                    "wilson_95_pct": [
+                      16.5157,
+                      32.1092
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 111,
+                    "n": 41,
+                    "pct": 36.9369,
+                    "wilson_95_pct": [
+                      28.536,
+                      46.2118
+                    ]
+                  },
+                  "on": {
+                    "d": 111,
+                    "n": 41,
+                    "pct": 36.9369,
+                    "wilson_95_pct": [
+                      28.536,
+                      46.2118
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.323159,
+                  "on": 0.323159
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.332641,
+                  "on": 0.332641
+                }
+              },
+              "设备": {
+                "candidate_recall@100": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "candidate_recall@200": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 5,
+                    "pct": 100.0,
+                    "wilson_95_pct": [
+                      56.5518,
+                      100
+                    ]
+                  }
+                },
+                "hit@1": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 3,
+                    "pct": 60.0,
+                    "wilson_95_pct": [
+                      23.0724,
+                      88.2379
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 3,
+                    "pct": 60.0,
+                    "wilson_95_pct": [
+                      23.0724,
+                      88.2379
+                    ]
+                  }
+                },
+                "hit@3": {
+                  "delta_count": 0,
+                  "delta_pp": 0.0,
+                  "off": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  },
+                  "on": {
+                    "d": 5,
+                    "n": 4,
+                    "pct": 80.0,
+                    "wilson_95_pct": [
+                      37.5535,
+                      96.3776
+                    ]
+                  }
+                },
+                "mrr_at_10": {
+                  "delta": 0.0,
+                  "off": 0.7,
+                  "on": 0.7
+                },
+                "mrr_full": {
+                  "delta": 0.0,
+                  "off": 0.7,
+                  "on": 0.7
+                }
+              }
+            }
+          }
+        }
+      },
+      "upload_decision_rows_changed": 2
+    }
+  },
+  "online_automatic_training": false,
+  "project_time_split": {
+    "decision": "diagnostic_only_pending_independent_projects_and_source_timestamps",
+    "exact_query_overlap": 0,
+    "frozen_population": {
+      "dev": 218,
+      "train": 842
+    },
+    "heldout_payloads_decoded": 0,
+    "heldout_rows_used": 0,
+    "project_overlap": [
+      "P1",
+      "P2"
+    ],
+    "row_source_timestamps_available": false,
+    "source_sheet_counts": {
+      "dev": 3,
+      "train": 10
+    },
+    "source_sheet_overlap": [],
+    "strict_project_time_validation": "unverified"
+  },
+  "recommended_ranker_switch": "off"
+}

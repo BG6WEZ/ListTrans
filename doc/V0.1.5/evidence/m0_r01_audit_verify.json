@@ -1,0 +1,49 @@
+{
+  "audit_round": "V015-M0_R01",
+  "audited_at": "2026-11-12 23:20:41",
+  "head_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes_all_matched": true,
+  "delivery_hashes_checked_count": 18,
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm",
+  "isolated_db_write": {
+    "materials": {
+      "rows": 1,
+      "path": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm\\db\\materials.db",
+      "size": 12288
+    },
+    "auth": {
+      "rows": 1,
+      "path": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm\\db\\auth.db",
+      "size": 12288
+    }
+  },
+  "importable_module_path_checks": {
+    "llm_rule_engine.DB_PATH": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm\\db\\materials.db",
+    "vector_index.CACHE_DIR": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm\\vector_cache",
+    "feedback_train.FEEDBACK_FILE": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_r01_audit_1wjw1gwm\\runtime\\feedback_samples.json"
+  },
+  "stdlib_tests_unnecessarily_skipped_by_conftest": {
+    "test_query_cleaning_and_preprocessor_ran": 31,
+    "test_query_failures_or_errors": 0,
+    "f25_llm_rule_engine_tests_ran": 5,
+    "f25_llm_rule_engine_passed": true
+  },
+  "blocking_findings_verified": {
+    "A-M0-01": [
+      "app/llm_client.py:19 hardcodes DB_PATH to app/materials.db without MATERIALS_DB_PATH",
+      "app/llm_client.py:54,89,425 instantiates QwenLLMClient() on module import and executes CREATE TABLE IF NOT EXISTS llm_cache on DB_PATH",
+      "tests/test_llm_integration.py:28-33 hardcodes app/materials.db and executes DELETE FROM llm_cache in setUp()"
+    ],
+    "A-M0-02": [
+      "app/llm_rule_engine.py:161-165 executes init_rule_engine_db() unconditionally on module import without production DB guardrail",
+      "tests/test_auto_binding.py:160,226 writes to hardcoded app/uploads/test_output_split.xlsx without UPLOAD_DIR or finally cleanup",
+      "app/flywheel_sandbox.py:21 and tests/eval_golden_set.py:46,294 hardcode config/ and tests/fixtures/golden_last_run.json"
+    ],
+    "A-M0-03": [
+      "tests/conftest.py:235-237 blanket-skips all non-smoke items when pandas/fastapi missing, skipping 36 runnable stdlib tests including 5 F25 tests",
+      "tests/conftest.py:156-175 and tests/verify_isolation.py:199-223 omit llm_rule_engine/llm_client/feedback_train path checks and block importable checks on pandas+fastapi"
+    ]
+  },
+  "business_hash_unchanged": true,
+  "business_changes": []
+}

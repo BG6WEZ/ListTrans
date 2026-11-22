@@ -1,0 +1,121 @@
+{
+  "pre_backup_checks": [
+    {
+      "path": "app/flywheel_db.py",
+      "match": true
+    },
+    {
+      "path": "app/feedback_miner.py",
+      "match": true
+    },
+    {
+      "path": "app/normalizer.py",
+      "match": true
+    },
+    {
+      "path": "app/query_preprocessor.py",
+      "match": true
+    },
+    {
+      "path": "app/matcher.py",
+      "match": true
+    },
+    {
+      "path": "app/preprocessor.py",
+      "match": true
+    },
+    {
+      "path": "app/db_manager.py",
+      "match": true
+    },
+    {
+      "path": "app/llm_rule_engine.py",
+      "match": true
+    },
+    {
+      "path": "app/rule_api.py",
+      "match": true
+    },
+    {
+      "path": "app/binding_decisions.py",
+      "match": true
+    },
+    {
+      "path": "app/server.py",
+      "match": true
+    }
+  ],
+  "assets": {
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/CACHEDIR.TAG": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/.gitattributes.metadata": "e9a5e1a933a1afc1dfb53f306adc00fc3ae94c1cce56c23cd779752f81cf0c7c",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/1_Pooling/config.json.metadata": "00fcdb3869a02f849a3dcddf7dfc8b11b68c58ec8ad3e4a6e0a6202bedc84459",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config.json.metadata": "10ff5d7a7af27da81dcfa5017033d2a1228087221fc46648a3585c78af78984e",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config_sentence_transformers.json.metadata": "aad08e0084715136365e0380ebe2c5ea71ceee9411dd0f6a61f2e68fb321bc2a",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/model.safetensors.metadata": "8bb53682b8ecc77e89aea7627f6a7f5c714c77cfc847b0e383a7e2c7f8efc49b",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/modules.json.metadata": "e1811acf4c00db0c0542e9a74f58eb33d2264d16bd142d74eada40a4168b9c72",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/pytorch_model.bin.metadata": "c52cf209b8995efd52a7f4410494f9cda4c389753a03e8989d7943b30ec329dc",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/README.md.metadata": "d6a832e3ea518feeb09687319893f6ec77a22f9c5bd1043503a651bf61a21052",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/sentence_bert_config.json.metadata": "39cd1c75c6bda78b76662adc8acb22e574b3f01ddb946f18cdbc1659db70b9e7",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/special_tokens_map.json.metadata": "e611bd5816b6f3462874ed067fbe73d275ec3038f4a1e13d22187b04e430b374",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer.json.metadata": "55b6d8b7aef78bb252c112264ecd4715e5c6bb3c36d61edfc8f54004f8d9a213",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer_config.json.metadata": "cc5984fb271a91df41454320e0a66fe7b150262956b6efd41fc1f6705d2adbce",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/vocab.txt.metadata": "cee295dc78e14cdb5987eb3d146c30f09fcf0393bec1bf77d0fe21da6bb81b11",
+    "model_offline/bge-small-zh-v1.5/.cache/huggingface/trees/7999e1d3359715c523056ef9478215996d62a620.json": "2346229ecde3983842cb8e070285e8aae7d6680819af7d7aa17e56bc0f48cbc9",
+    "model_offline/bge-small-zh-v1.5/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+    "model_offline/bge-small-zh-v1.5/1_Pooling/config.json": "aaa8861589f80c961a03cc86c7eeaef7605c1676b9ab55329d33a304738769c6",
+    "model_offline/bge-small-zh-v1.5/config.json": "3853a7979202c348751b753e36f579c41d8da7d36af617d3d907e1fc9b441f2a",
+    "model_offline/bge-small-zh-v1.5/config_sentence_transformers.json": "940d5f50db195fa6e5e6a4f122c095f77880de259d74b14a65779ed48bdd7c56",
+    "model_offline/bge-small-zh-v1.5/model.safetensors": "354763b9b1357bc9c44f62c6be2276321081ed2567773608c0d0785b61d5a026",
+    "model_offline/bge-small-zh-v1.5/modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+    "model_offline/bge-small-zh-v1.5/pytorch_model.bin": "7c5fe667bbed05dc10e246e229b701ad266fe4d95ab946e9e5aa402056611b88",
+    "model_offline/bge-small-zh-v1.5/README.md": "c48a4eeea77f6b1d38b48ec1c5b8d4f86d5550cc43fa345a0db1b2ca1d082369",
+    "model_offline/bge-small-zh-v1.5/sentence_bert_config.json": "84e39fda68ccbff05bfa723ae9c0e70e23e2ec373b76e0f8c6e71af72a693cbf",
+    "model_offline/bge-small-zh-v1.5/special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+    "model_offline/bge-small-zh-v1.5/tokenizer.json": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+    "model_offline/bge-small-zh-v1.5/tokenizer_config.json": "e6f3b96db926a37d4039995fbf5ad17de158dfb8f6343d607e4dbaad18d75f5a",
+    "model_offline/bge-small-zh-v1.5/vocab.txt": "45bbac6b341c319adc98a532532882e91a9cefc0329aa57bac9ae761c27b291c",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/1_Pooling/config.json": "bb80272f7adad76ce93073c25e18113ee66be1e91f60bcdd72aa41d05b28247e",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/config.json": "004318094b93b75667491f9052e9026497ca2bd16cc0d7aa757feeecae875f91",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/config_sentence_transformers.json": "3d4a0c494209e707d859ea4413bf01ac7e4fe447b8d7dea7ab7614396b332c5f",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/model.safetensors": "7f4f89d628f87ade0e0b57c40affb6402cd77abc8110584d8d35dc86da514ee8",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/modules.json": "318d49f1092cad125a35af58d9795bcddce84bf7e7240bd8d95b9b6858f9476b",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/README.md": "90bc9c8da4ec9fad492fd04218f7f3eabaa4173c9e8eec9dc59b519a01751cbb",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/sentence_bert_config.json": "5fee3fcdc4a727fad422f0fed0c867b0921eefa9051de221521956ed42eb4c19",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/tokenizer.json": "cad551d5600a84242d0973327029452a1e3672ba6313c2a3c3d69c4310e12719",
+    "model_offline/paraphrase-multilingual-MiniLM-L12-v2/tokenizer_config.json": "f87d4952eab944ea4c51ca5121310724ea6d71e7114532c848d67bc32a0f388f",
+    "tests/fixtures/gen_standard_template.py": "a66f32f3f3fd432d58ffe310a1612d0658021f122613c875324925250675eb93",
+    "tests/fixtures/golden_baseline.json": "5ead8ac5462e849f0911cfb1eaa1aad7eae6d858451eb532ca32d11101e865fa",
+    "tests/fixtures/golden_set_v1.json": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+    "tests/fixtures/ground_truth_500.json": "8586afbf87c09df65a22dc38eb5b439c7e814ce170c9b6f81f8a13129f800bba",
+    "tests/fixtures/sandbox_materials_v1.json": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4"
+  },
+  "gate_regenerated_sha256": "0f79f6d0ecf671237f6a32a59ca907be970dcdb4576bcd1e084e9fdc3225d82a",
+  "gate_generated": "2026-11-17 22:50:34",
+  "gate_comparisons": {
+    "score_comparison_diffs_vs_m3_r04": [],
+    "score_comparison_diffs_vs_m4_r03": [],
+    "score_comparison_diffs_vs_m5_r04": [],
+    "score_comparison_diffs_vs_m0_r03": [],
+    "rm3_diffs_vs_m0_r03": {}
+  },
+  "reports": {
+    "harmful": false,
+    "beneficial": true,
+    "neutral": true
+  },
+  "audit_evidence": {
+    "doc/V0.1.6/evidence/audit_m1_r01/3rule_gate.log": "bc01857372493c151fe12ef52fe7ed5247d2bf441385acfa12a8d7b3b36e68a1",
+    "doc/V0.1.6/evidence/audit_m1_r01/audit_events.log": "36ce2182df8abe3541bb9950e2d3bcf9d2f0018fac1e3aa88202e402a193c19c",
+    "doc/V0.1.6/evidence/audit_m1_r01/delivery_recheck.log": "b5f44fab77e19f099d514e745bdf259cc8271b648ae67961cf74c8fa3cb183f5",
+    "doc/V0.1.6/evidence/audit_m1_r01/full_pytest.log": "806cb9b09a87c77916120557a18362a7b602d4d96d747a772ad3263237f6d8c8",
+    "doc/V0.1.6/evidence/audit_m1_r01/isolation_verify_after.json": "dad0ebacfe444aed3ced11798f9da0ba60c946e3f4a85f47bed8e3d58987f2b3",
+    "doc/V0.1.6/evidence/audit_m1_r01/isolation_verify_before.json": "12636b8acd85b33e2076648524771e06416d7724a6c49814bb80fc883cd0fe3c",
+    "doc/V0.1.6/evidence/audit_m1_r01/outer_snapshot_before.json": "856eaccdccb2d4e93d6e7019babf19bfc47f07d7932a95adbb3bb7959bac7482",
+    "doc/V0.1.6/evidence/audit_m1_r01/outer_snapshot_diff.json": "360347cc53b080d0f9b44226fa3537dc193fbf05aaa3213c1386348859dc4aad",
+    "doc/V0.1.6/evidence/audit_m1_r01/probes_pytest.log": "d07bdae16df50ea3af4dee8e65c0c9d382ee94a7c01f92af61e8d6f40f253d9b",
+    "doc/V0.1.6/evidence/audit_m1_r01/special_pytest.log": "df50e554c86a4279ddfcefc305dd67eaee4259ff0601a2f1f2fe989db30a3931"
+  },
+  "qualification": "Original developer gate JSON is unavailable and its original bytes cannot be revalidated. Current JSON is auditor-regenerated evidence; intact developer script/log and independent auditor log are separate sources. No coordinator rerun of gate/full suite/browser is claimed.",
+  "wording_correction": "15 core items = 13 code + 2 tests; docs are separate. Current delivery is 31/33 matches: approved auditor ledger update plus AUDIT-SIDE-01. trusted_flywheel_where_clause checks payload_digest and ownership, but does not explicitly test empty client_event_id; M0 ingestion validates IDs and schema is UNIQUE NOT NULL. Do not repeat the audit prose as proof of an explicit non-empty-ID SQL predicate."
+}

@@ -1,0 +1,86 @@
+{
+  "backup_move_failure_loses_unmoved_old_files": {
+    "error": "SYNTHETIC_BACKUP_MOVE_FAILURE",
+    "backup_attempts": [
+      "materials.index",
+      "materials_embeddings.npy"
+    ],
+    "before": {
+      "materials.index": "a6efd3f245e02b64fefafcd10c6619e299b5543a038e1f1d2d946ea6bc78f72f",
+      "materials_embeddings.npy": "cc4a1af3f62369bffadd403bd08936e80efe71a3fce80282b1d4f94128ae7c65",
+      "index_to_material.json": "b298580a224212a69890dc7e553adb6a9a6b055093690ce9847665d97339b536",
+      "cache_metadata.json": "4c2c779197bdf4ccce891b6ddd04c3f211b78f4d886233086a07523b6cdd384b"
+    },
+    "after": {
+      "materials.index": "a6efd3f245e02b64fefafcd10c6619e299b5543a038e1f1d2d946ea6bc78f72f",
+      "materials_embeddings.npy": null,
+      "index_to_material.json": null,
+      "cache_metadata.json": null
+    },
+    "missing_files": [
+      "materials_embeddings.npy",
+      "index_to_material.json",
+      "cache_metadata.json"
+    ],
+    "cache_write_blocked": false,
+    "reproduced": true
+  },
+  "db_rollback_failure_does_not_block_followup": {
+    "before": {
+      "db_codes": [
+        "R03-OLD-1"
+      ],
+      "fts_codes": [
+        "R03-OLD-1"
+      ],
+      "metadata": {
+        "last_upload_date": "2026-11-16 21:02:20",
+        "filename": "r03_old_seed.xlsx",
+        "total_rows": 1,
+        "imported_rows": 1,
+        "disabled_rows": 0
+      },
+      "mem_codes": [
+        "R03-OLD-1"
+      ],
+      "cache_codes": [
+        "R03-OLD-1"
+      ],
+      "cache_count": 1,
+      "cache_write_blocked": false,
+      "stage_tables": [],
+      "leftover_cache_dirs": []
+    },
+    "after": {
+      "db_codes": [
+        "R03-OLD-1"
+      ],
+      "fts_codes": [
+        "R03-OLD-1"
+      ],
+      "metadata": {
+        "last_upload_date": "2026-11-16 21:02:20",
+        "filename": "r03_old_seed.xlsx",
+        "total_rows": 1,
+        "imported_rows": 1,
+        "disabled_rows": 0
+      },
+      "mem_codes": [
+        "R03-OLD-1"
+      ],
+      "cache_codes": [
+        "R03-OLD-1"
+      ],
+      "cache_count": 1,
+      "cache_write_blocked": false,
+      "stage_tables": [],
+      "leftover_cache_dirs": []
+    },
+    "task_status": "failed",
+    "task_error": "[WinError 206] 文件名或扩展名太长。: 'C:\\\\Users\\\\tlyer\\\\AppData\\\\Local\\\\Packages\\\\OpenAI.Codex_2p2nqsd0c76g0\\\\AC\\\\#!sandbox.{4812ce9e-4372-431a-9a92-5f08630b2c91}\\\\Temp\\\\listtrans_test_xnw9in6i\\\\uploads\\\\coordinator-final-probes\\\\r03_iso\\\\vector_cache\\\\.stage_coordinator-db-rollback-failure_38072_14060'",
+    "next_import_lock_acquired": true,
+    "reproduced": false
+  },
+  "scope": "Synthetic temporary files and SQLite only; fault injection at backup file move and rollback failure; actual cache/worker implementations unchanged.",
+  "reproduced_count": 1
+}

@@ -17,7 +17,7 @@ import os
 import sys
 import json
 import time
-import sqlite3
+from contextlib import closing
 import argparse
 import logging
 
@@ -39,7 +39,7 @@ from app.preprocessor import extract_device_name
 from app.normalizer import clean_text_standard
 from app.domain_extractors import domain_schema
 
-DB_PATH = os.path.join(BASE_DIR, "app", "materials.db")
+from app.db_manager import get_db_connection, update_material_params
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,28 +50,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger("batch_llm_structure")
 
-def setup_db_wal(conn):
-    try:
-        conn.execute("PRAGMA journal_mode=WAL;")
-        conn.execute("PRAGMA busy_timeout=30000;")
-    except Exception as e:
-        logger.warning(f"Failed to set WAL mode: {e}")
-
 def run_batch_structuring(args):
     if not llm_client.is_enabled():
         logger.error("LLM client is NOT enabled! Please check LLM_ENABLED and DASHSCOPE_API_KEY in .env file.")
         return
 
-    conn = sqlite3.connect(DB_PATH, timeout=30.0)
-    conn.row_factory = sqlite3.Row
-    setup_db_wal(conn)
-    cursor = conn.cursor()
+    # Keep the original values for the optimistic check when each batch is written.
+    with closing(get_db_connection()) as conn:
+        all_rows = conn.execute("""
+            SELECT code, name, specification, category, parsed_params,
+                   COALESCE(specification, '') || ' ' || COALESCE(description, '') AS catalog_spec
+            FROM materials
+        """).fetchall()
 
-    # Query target materials
-    query = "SELECT code, name, specification, category, parsed_params FROM materials"
-    cursor.execute(query)
-    all_rows = cursor.fetchall()
-    
     targets = []
     for row in all_rows:
         code = row["code"]
@@ -110,7 +101,9 @@ def run_batch_structuring(args):
             "category": cat,
             "full_spec": full_spec,
             "domain": domain,
-            "parsed": parsed
+            "parsed": parsed,
+            "previous_parsed": row["parsed_params"],
+            "catalog_spec": row["catalog_spec"],
         })
 
     total_targets = len(targets)
@@ -121,13 +114,13 @@ def run_batch_structuring(args):
 
     if len(targets) == 0:
         logger.info("No materials match the criteria. Exiting.")
-        conn.close()
         return
 
     success_cnt = 0
     fail_cnt = 0
     start_time = time.time()
 
+    pending_updates = []
     for idx, item in enumerate(targets, 1):
         if llm_client.check_circuit_breaker():
             logger.error("Circuit breaker is OPEN. Stopping batch execution.")
@@ -172,15 +165,16 @@ def run_batch_structuring(args):
                 if "管径" in parsed["attrs"]:
                     parsed["attrs"]["口径"] = parsed["attrs"]["管径"]
 
-                cursor.execute(
-                    "UPDATE materials SET parsed_params = ? WHERE code = ?",
-                    (json.dumps(parsed, ensure_ascii=False), code)
-                )
-                success_cnt += 1
+                pending_updates.append((
+                    code, item["previous_parsed"], json.dumps(parsed, ensure_ascii=False), item["catalog_spec"],
+                ))
 
-                if idx % args.batch_size == 0:
-                    conn.commit()
-                    logger.info(f"[{idx}/{len(targets)}] Committed batch to database.")
+                if len(pending_updates) >= args.batch_size:
+                    count = update_material_params(pending_updates)
+                    success_cnt += count
+                    fail_cnt += len(pending_updates) - count
+                    pending_updates.clear()
+                    logger.info(f"[{idx}/{len(targets)}] Committed {count} updates to database.")
         else:
             fail_cnt += 1
             logger.warning(f"[{idx}/{len(targets)}] Failed/Skipped LLM extraction for code={code}")
@@ -188,10 +182,10 @@ def run_batch_structuring(args):
         if args.delay > 0:
             time.sleep(args.delay)
 
-    if not args.dry_run:
-        conn.commit()
-
-    conn.close()
+    if pending_updates:
+        count = update_material_params(pending_updates)
+        success_cnt += count
+        fail_cnt += len(pending_updates) - count
 
     elapsed = time.time() - start_time
     logger.info("=" * 60)

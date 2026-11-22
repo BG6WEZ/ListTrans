@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-21",
+  "generated_at": "2026-11-21T22:39:17.243887+08:00",
+  "role": "coordinator",
+  "version": "V0.2.0",
+  "task": "V020-M1/R01",
+  "verdict": "RELEASED_RULES_INACTIVE_IN_PROD",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_check": {
+    "total": 194,
+    "unchanged": 188,
+    "changed": {
+      "app/binding_decisions.py": {
+        "before": "05bc4c724b37c99204cd3751e007167e3e43c2d6aa2900e5fc05fce55d6e800e",
+        "after": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef"
+      },
+      "app/feedback_contract.py": {
+        "before": "e052c9359c24d3305fc2bd2e5e2ea096521169501d8024e1a8591988a4cc1c5b",
+        "after": "9a978a054aa5ae598a46f2cc35e748f315f226b2b5424f8ba42d1c43de6f3af6"
+      },
+      "app/flywheel_sandbox.py": {
+        "before": "07729e9697cdf3634f7974b3d7235c22031f4528ce7adc9a7f786ceeabc609c0",
+        "after": "9891ad646cb1eaa03c775181d115e983cb10a2e2e038f8c3f67e48c6a5ffe868"
+      },
+      "app/rule_governance.py": {
+        "before": "c0a0057f25b8104f5fcf70264491f39c18637cf209e7982a2d8f13171ebb616c",
+        "after": "8920d3a56d8abaa9070f8c405839163bf1598204294453ead5e2450e6f14cb68"
+      },
+      "app/sandbox_evaluator.py": {
+        "before": "0a02a67a64ced36f79449f21459b1821705e64c505689400bf21def8933e1da5",
+        "after": "03769aeb839709a92fa51476ba2c4098d9fa06e5e6ab01f83d3b704781463776"
+      },
+      "app/server.py": {
+        "before": "28ba7171c5f14cb55497291e44702b8eeba2a9cf231768c002e7bfc12dd30fcb",
+        "after": "9fe33469164ba58bc9e661971429d848de74b4ff35d67fe8327dd7072c9e624f"
+      }
+    },
+    "added": {
+      "app/bom.py": "8f8e24a02e8a3e88fe8b51359f003ee14c9e9f8966ae8b37837c2c77a53fe5c0",
+      "tests/test_v020_m1_bom.py": "0ae326c87b2eb239d341a8fcd505ea21a52a3b560c5a0020fe1c37a977edeea6"
+    }
+  },
+  "delivery_sha256_check": {
+    "total": 33,
+    "exact_match": 32,
+    "changed": {
+      "doc/V0.2.0/02_任务台账.md": {
+        "delivery": "10ae530af1d8d8e5396dd595297a73c1fd90b521effa31af2489efa7198177d6",
+        "current": "937ff24182b2b710d9f93a10e22180fa08d601b5ae28b2b2de44038d5ee9e28c"
+      }
+    },
+    "audit_summary_path": "doc/V0.2.0/rounds/V020-M1_R01_审核小结.md",
+    "audit_summary_actual_sha256": "259eb61a17b769be3d90f045ddaebd15e4177b1a80609097e6f8340e6b75608d"
+  },
+  "recovery_archive_check": {
+    "path": ".local-archive/v019_final_v020_m0_source_baseline.zip",
+    "sha256": "29b712dd7de8e23a49f72e6367c06dee94e6e1178849a60fb04c59417c697115",
+    "matches_dispatch": true,
+    "entry_count": 72
+  },
+  "coordinator_specialist_pytest": {
+    "modules": [
+      "tests/test_v020_m1_bom.py",
+      "tests/test_v020_m0_feedback_ranker.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_m3_hard_constraints.py",
+      "tests/test_m3_hard_constraints_http.py"
+    ],
+    "passed": 146,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "elapsed_seconds": 30.13,
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    }
+  },
+  "business_assets_check": {
+    "anchor": "doc/V0.2.0/evidence/m0_r01_isolation_after.json",
+    "asset_count": 18,
+    "matches_m0_anchor_exactly": true,
+    "m1_dispatch_empty_snapshot_note": "Fixed in M2 dispatch baseline by reading business_snapshot_after directly from verify_isolation output."
+  },
+  "auto_binding_rules_check": {
+    "path": "config/auto_binding_rules.json",
+    "content": "[]",
+    "active_bom_rules_in_prod": 0
+  },
+  "default_switches_verified": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off"
+  },
+  "observations_ruling": {
+    "OBS-AUDIT-M1-01": "P3, logged: BOM v1 evaluation/confirmation/rollback verified on isolated fixtures only; production config/auto_binding_rules.json remains [] (0 active rules). Enabling any BOM v1 rule in production requires explicit engineering-basis share declaration, independent 1toN evaluation, and credentialed admin confirmation.",
+    "F03_F13_status": "V020-M1 implementation & contract closed for supported family (HVAC 304 thin-wall stainless pipe segments DN25/D25.4 & DN50/D50.8); production rule activation remains gated by admin governance."
+  },
+  "next_dispatch": "V020-M2/R01"
+}

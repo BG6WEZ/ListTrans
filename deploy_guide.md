@@ -1,127 +1,36 @@
-# 华康洁净物料清单匹配工具 V0.1.0 Windows 服务器部署指南
+# ListTrans V0.2.0 RC 运行与恢复手册
 
-本指南详细描述了如何在 Windows Server 服务器上基于 Docker 容器化部署**华康洁净物料清单匹配工具 V0.1.0**。
+当前工作区为 **V0.2.0 发布候选（RC）／待统筹终审，未获生产发布授权**。本手册用于隔离预验收和准备运行材料。资产校验、支持范围和待验证项目见[发布候选清单](doc/V0.2.0/evidence/v020_release_candidate_manifest.md)。
 
----
+## 准备本机预验收
 
-## 📋 1. 前置依赖准备
+1. 使用已核验的 Windows Python 3.12 venv 和对应[运行依赖锁](doc/V0.1.7/evidence/m3_r01_runtime_windows_py312.lock)。运行 `python -m pip check`，核对已安装版本。容器基础环境为 Linux Python 3.11，需要按目标平台独立锁定依赖及 wheel SHA256。
+2. 在仓外受控副本中准备应用、网页、16 份基准配置、3 份运行时评测资产、隔离 SQLite 库和 `model_offline/bge-small-zh-v1.5`。模型需保留原有目录结构。该模型产生 512 维向量。SQLite 与向量缓存应属于同一代目录，缓存不兼容时按索引流程重建。
+3. 将 `MATERIALS_DB_PATH`、`AUTH_DB_PATH`、`CONFIG_DIR`、`VECTOR_CACHE_DIR`、`UPLOAD_DIR`、`OUTPUT_DIR`、`LOG_DIR`、`BINDING_FEEDBACK_FILE`、`FEEDBACK_SAMPLES_FILE` 和 `GOLDEN_DETAIL_FILE` 指向隔离位置。为不可变素材保留只读输入。设置 `AUTH_DEV_MODE=false`、`PYTHON_DOTENV_DISABLED=1`、`HF_HUB_OFFLINE=1`、`TRANSFORMERS_OFFLINE=1`。10 项受控开关值见[候选清单](doc/V0.2.0/evidence/v020_release_candidate_manifest.md)。
+4. 非测试启动使用 `APP_ENV=production`、`TESTING=0`、全新强随机 `SECRET_KEY`。空账号库首次启动使用专门签发的强 `ADMIN_PASSWORD`，`ADMIN_USERNAME` 可自定义。通过受控环境注入秘密，设置 `ENABLE_DOCS=false`，`ALLOWED_ORIGINS` 填精确允许的源。自动化回归使用 `TESTING=1` 和测试夹具账号，按[复验方法](doc/V0.2.0/evidence/m3_r01_reproduce.md)运行前后隔离核验。
 
-在部署前，请确保目标 Windows 服务器已安装并配置好以下软件环境：
+在隔离副本根目录以**单 Worker**启动本机预验收，避免进程之间的索引、规则状态和 SQLite 写入分离。
 
-1. **Docker Desktop for Windows** 或 **Docker Engine**：
-   - 需确保运行在 **Linux 容器模式 (Linux containers)** 下。
-   - 确认 Docker 正在运行。可以在 CMD/PowerShell 中执行命令进行检查：
-     ```cmd
-     docker --version
-     ```
-2. **Docker Compose v2**：
-   - 确认已安装 `docker-compose`：
-     ```cmd
-     docker compose version
-     ```
-
----
-
-## 📂 2. 部署文件清单与目录结构
-
-请在服务器的磁盘中（建议选择 `C:\ListTrans` 或 `D:\ListTrans`）创建一个干净的安装目录，并将以下打包好的文件与目录复制到其中：
-
-```text
-ListTrans/
-├── material-matcher-v0.1.0.tar  # 打包生成的 Docker 镜像归档
-├── docker-compose.yml           # 容器服务定义文件
-├── .env.example                 # 环境变量模板文件（复制并重命名为 .env）
-├── model_offline/               # [重要] 离线 NLP 算法模型目录
-│   └── paraphrase-multilingual-MiniLM-L12-v2/
-├── config/                      # 系统提示词及映射配置文件目录
-│   ├── alias_dict.json
-│   ├── domain_schema.json
-│   ├── llm_config.json
-│   └── llm_prompts.json
-└── doc/
-    └── sample/
-        └── 物料明细.xlsx         # [重要] 系统初始化时所需的物料明细 Excel 模板
+```powershell
+python -m uvicorn app.server:app --host 127.0.0.1 --port 18080 --workers 1
 ```
 
-> [!IMPORTANT]
-> **离线模型** (`model_offline/`) 和 **初始化物料模板** (`doc/sample/物料明细.xlsx`) 是程序能够离线正确运行的核心，必须包含在上述目录结构中。
+启动后先核对 `GET /api/auth/me` 未登录返回 `401`，再校验隔离账号登录、角色分配和后台健康信息。用脱敏 `.xlsx` 清单试做一次上传、人工确认、草稿恢复和导出。核对未确认行的 `422` 与确认后的 Excel 下载。离线模型加载失败时检查目录、模型日志和索引状态，关键词 FTS5 可继续提供候选。
 
----
+## 容器候选核验
 
-## ⚙️ 3. 配置环境变量
+仓库 `Dockerfile` 的 pip 安装步骤依赖外部仓库，`docker-compose.yml` 仍使用历史 V0.1.4 标签并将主机应用目录覆盖到容器。`ENV-V017-01` 要求在目标 Linux 环境使用本地已校验基础镜像与目标平台 wheelhouse 完成断网重建、逐层白名单检查和无网络脱敏启动。完成验收并取得授权后，分发按 digest 锁定的镜像归档，显式映射目录和配置副本。
 
-1. 将部署目录下的 `.env.example` 复制一份并重命名为 `.env`。
-2. 使用文本编辑器打开 `.env` 并按需调整参数，常见配置项如下：
-   ```env
-   # JWT 鉴权密匙（可以使用默认生成的值，或自行使用 openssl 生成）
-   SECRET_KEY=941a8a25c1103f6f3a388f7c9e0d16eb222a1b32df511ef5e69dfad1f30a597a
-   ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=480
+- 镜像包括白名单内源码、网页、基准配置及运行评测资产。模型、SQLite、缓存、日志、上传、输出与秘密由运行时隔离挂载或注入。交付时逐层核对 `tests/`、`doc/`、业务库及其 WAL/SHM、`.env`、个人信息和明文密钥的排除记录。
+- 使用启动命令核对 `--workers 1`。验收时不发布端口，在断网容器内走本机回环健康、鉴权和脱敏评测。检查内置基准配置加载、隔离测试目录写入及退出后无业务资产变化。
 
-   # 默认初始管理员账号（系统在首次启动没有用户时会自动创建该账户）
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=admin       # 已修改为要求的简易密码
+## 备份、恢复与回滚
 
-   # CORS 跨域配置
-   ENABLE_DOCS=true
-   ALLOWED_ORIGINS=*
+1. 进入维护窗口，停止新增写入并等待在途任务退出。用 SQLite 在线备份机制，或经确认的停机快照，分别备份物料库和账号库。同时保存配置、规则快照、同代向量缓存、应用构建和模型标识。记录 SHA256、目录 revision、解析 schema 和向量模型／维度。
+2. 在隔离副本恢复并逐项核对 SQLite 完整性、物料和 FTS 行数及抽样查询、缓存映射、向量条数和 revision。对于旧目录 revision 缺失或旧格式平铺缓存，按兼容检查加载。目录变化后验证新缓存与目录同代。用实际上传、人工确认、草稿恢复、`200/422` 导出检验恢复后的服务。
+3. 目录发布失败时检查旧 SQLite／FTS、进程内向量、磁盘缓存及配置是否还在同代。若系统进入持久写阻断，保留现场和恢复材料，修复后由授权负责人调用 `POST /api/admin/recovery/verify-clear` 做一致性核验。核验通过后再恢复导入、重解析和索引更新。
+4. 飞轮规则发布采用 `eval_id` 绑定本次内容。回退通过 `POST /api/flywheel/rollback` 使用当前栈顶 `snapshot_version`。回退后复核规则配置、运行加载与待处理行。应用版本回退先验证旧代码与恢复副本 schema 兼容，并保留已轮换秘密和 Token 撤销记录。
 
-   # 大模型接入配置（根据需求配置是否启用大模型及 API Key）
-   LLM_ENABLED=false
-   DASHSCOPE_API_KEY=sk-placeholder
-   ```
+## 首次真实部署前凭据门禁
 
----
-
-## 🚀 4. 导入镜像与启动服务
-
-打开 Windows CMD 或 PowerShell 并切换至您的部署目录下（例如 `C:\ListTrans`），依次执行以下步骤：
-
-### 步骤 A：载入 Docker 镜像
-使用 Docker load 命令将打包好的镜像归档载入本地 Docker 镜像库：
-```cmd
-docker load -i material-matcher-v0.1.0.tar
-```
-*导入完成后，运行 `docker images`，应能看到 `material-matcher:v0.1.0` 镜像已在列表中。*
-
-### 步骤 B：启动容器
-运行 docker-compose 启动多容器守护进程：
-```cmd
-docker compose up -d
-```
-*容器会自动启动并映射 `18080` 端口。同时它会在您的本地 `ListTrans` 目录下挂载 `logs/` 日志文件夹以及 `app/` 下的数据库文件。*
-
----
-
-## 🔍 5. 状态检查与日志查看
-
-1. **检查容器运行状态**：
-   ```cmd
-   docker compose ps
-   ```
-   *状态应显示为 `Up` 正常运行中。*
-2. **查看实时运行日志**：
-   ```cmd
-   docker compose logs -f matcher-app
-   ```
-   *您应当看到类似如下的日志，代表服务已成功启动并成功加载了离线算法模型：*
-   ```text
-   INFO:     Started server process [1]
-   INFO:     Waiting for application startup.
-   Loading offline sentence-transformers model from /app/model_offline/paraphrase-multilingual-MiniLM-L12-v2...
-   INFO:     Application startup complete.
-   INFO:     Uvicorn running on http://0.0.0.0:18080 (Press CTRL+C to quit)
-   ```
-
----
-
-## 🎯 6. 验证与访问
-
-服务成功启动后，使用浏览器访问服务器的 IP 与映射端口：
-
-- **访问地址**：`http://服务器IP:18080/` 或 `http://127.0.0.1:18080/`
-- **系统管理员默认账号**：
-  - **用户名**：`admin`
-  - **密码**：`admin`
-- **物料库初始化验证**：
-  - 登录后点击“物料明细库”选项卡，应能看到由 `doc/sample/物料明细.xlsx` 自动解析导入并生成的物料数据库数字画像及所有明细记录。
+`PRG-F11` 仍开放。授权运维应轮换适用的历史远程登录凭据、JWT `SECRET_KEY` 和曾使用弱口令的账号凭据。账号重置使用唯一临时口令并完成首次改密。验证旧凭据被拒绝、新凭据能通过相应连接及 `/api/auth/me`，留存包含对象代号、日期、拒绝及通过结果、授权人和证据引用的脱敏记录。回滚期间继续使用新的凭据与撤销状态。

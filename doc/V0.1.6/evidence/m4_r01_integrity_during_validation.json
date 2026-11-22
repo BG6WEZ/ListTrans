@@ -1,0 +1,13 @@
+{
+  "protected_checked": 463,
+  "expected_changed": [
+    "app/flywheel_sandbox.py",
+    "app/matcher.py",
+    "app/sandbox_evaluator.py",
+    "app/server.py",
+    "tests/test_v0_0_8_llm_rules.py"
+  ],
+  "all_other_protected_unchanged": true,
+  "outer_business_unchanged": true,
+  "frozen_model_fixture_assets": 43
+}

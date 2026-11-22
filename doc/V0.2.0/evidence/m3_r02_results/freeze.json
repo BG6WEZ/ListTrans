@@ -1,0 +1,43 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "script_sha256": "0d0a83126f380462a8ac60d18542c70ce9650cd62e8e9456c4c45a7b2e29a384",
+  "file_sha256": {
+    "doc/V0.2.0/evidence/m3_r02_replay.py": "0d0a83126f380462a8ac60d18542c70ce9650cd62e8e9456c4c45a7b2e29a384",
+    "doc/V0.2.0/evidence/m3_r02_dispatch_baseline.json": "26ff2fca7e2d013c4b4287e0048b40169642a96eb5bfae8a9de0a6ab97d2c672",
+    "doc/V0.1.7/evidence/指标目标与性能预算_统筹签认.md": "532ca5dc768ea75175fd2cb8dc06e89e673c5598eb1bba88bc8332dc82fb2faa",
+    "doc/V0.1.7/evidence/m0_r01_benchmark.py": "bf30bbf8ee83f5368438212a4d0fa05a716b80cb6a7b88c5baf77b43f2e780dd",
+    "doc/V0.1.7/evidence/m0_r01_before.json": "0f23c7909250ab4e38fa4519f2b4c9f0a84b3ffcad2b98b2fc0727933fc978ec",
+    "doc/V0.1.7/evidence/m0_r01_build_governance.py": "d77534505248ed85c1cac23d02174e9f6ed762f217290c889036cb81dadc5b83",
+    "tests/fixtures/golden_governance_v1.json": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43",
+    "tests/fixtures/golden_set_v1.json": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+    "doc/V0.2.0/evidence/m3_r01_run.py": "423a927c59b8d532e70c110fb848c2f3e1902315a99343598d9d66d923006369",
+    "doc/V0.2.0/rounds/V020-M3_R02_统筹下发.md": "52cb2b7169d40e4c2b7dc2b52afa28066049014b22ec7e8b2b587069d3103649"
+  },
+  "settings": {
+    "mode_order": [
+      "keyword",
+      "vector"
+    ],
+    "batch_rows": 50,
+    "warmup_single": 5,
+    "warmup_upload_rows": 5,
+    "rank_rows": 1220,
+    "single_rows": 1220,
+    "full_uploads": 24,
+    "tail_rows": 20,
+    "nearest_rank": true,
+    "default_switches": {
+      "LISTTRANS_V018_M0_RECALL": "0",
+      "LISTTRANS_V018_M1_RECALL": "0",
+      "LISTTRANS_V018_M2_RECALL": "0",
+      "LISTTRANS_V019_M0_SCORING": "legacy",
+      "LISTTRANS_V019_M1_RERANK": "off",
+      "LISTTRANS_V019_M2_CALIBRATION": "off",
+      "ENABLE_SERIES_RERUN": "false",
+      "LISTTRANS_V020_M0_RANKER": "off",
+      "LLM_ENABLED": "false",
+      "LISTTRANS_V020_M2_LLM_DECISION": "off"
+    }
+  },
+  "frozen_at": "2026-11-22T11:13:34.783188+08:00"
+}

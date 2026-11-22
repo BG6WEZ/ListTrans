@@ -1,0 +1,111 @@
+{
+  "date": "2026-11-17 Asia/Shanghai",
+  "scope": "coordinator diagnostics and management only",
+  "manifest_excludes_itself": true,
+  "files": [
+    {
+      "path": "doc/README.md",
+      "bytes": 3387,
+      "sha256": "29762984d5d5a144eb667973058c823354955f22691bdeb29892e6741a502e3d"
+    },
+    {
+      "path": "doc/00_项目管理/版本路线图.md",
+      "bytes": 3863,
+      "sha256": "caef92d4f979fb1104dd51a114dc51fb79149e13275cbe40f22179db28503e53"
+    },
+    {
+      "path": "doc/00_项目管理/进度总表.md",
+      "bytes": 14885,
+      "sha256": "1a36b90a1c5dd05ea63860dbb01dd7f8a9b0485494b5254725adb1ae3f3d648f"
+    },
+    {
+      "path": "doc/00_项目管理/问题与版本归属总台账.md",
+      "bytes": 21387,
+      "sha256": "cfa25788aa8f72788908f773424a61077febbf67fd09f1a05de0fa417948ba95"
+    },
+    {
+      "path": "doc/V0.1.6/01_实施方案与任务包.md",
+      "bytes": 6397,
+      "sha256": "d6e6e9270fd973562020bce7f9c17afaa0d1ee059b491fc23ae09d52d7a26b4a"
+    },
+    {
+      "path": "doc/V0.1.6/02_任务台账.md",
+      "bytes": 4044,
+      "sha256": "bb86c85eb8c68b8ea3006353ae660db92a779d071e7fd1587ca0a2b847d800c2"
+    },
+    {
+      "path": "doc/V0.1.6/03_终审与版本准入.md",
+      "bytes": 2095,
+      "sha256": "eb965a6b631e1db91e71475ff4646c7c90fc85674d7bdc7d02a7350474395ce8"
+    },
+    {
+      "path": "doc/V0.1.6/rounds/V016-M0_R03_统筹裁决.md",
+      "bytes": 6053,
+      "sha256": "46e8586060dc4177c3a320792f5df73ae7460a7e5013370d818c37186618a0a1"
+    },
+    {
+      "path": "doc/V0.1.6/rounds/V016-M1_R01_统筹下发.md",
+      "bytes": 8995,
+      "sha256": "8fede9c2ac2a9df3364264ae236a96381689045c06abe1f38331a797ff8fd80f"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/business_after.json",
+      "bytes": 3686,
+      "sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/business_before.json",
+      "bytes": 3686,
+      "sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/check_state.py",
+      "bytes": 3934,
+      "sha256": "09376cbc4e70c7bfdda909fcd32a5ef5a51980fbd068ec1e33b637e761a04f79"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/freeze_delivery.py",
+      "bytes": 2953,
+      "sha256": "5c983ef6847bedd2668c558179f8f9c045d95fa2826c1b09908a766da5597f05"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/isolation_verify_after.json",
+      "bytes": 14028,
+      "sha256": "0acbb503b415faa6f8fa16c909f3f39399e3e71ec073791d4b8bf4dbf65d0f12"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/isolation_verify_after.log",
+      "bytes": 443,
+      "sha256": "ea1e067f2ce0e7dbd05381d2ec4286c5ebb97d030efe829e53090c3342ce99f5"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/state_after.json",
+      "bytes": 55221,
+      "sha256": "896e204506c1528ab52594574c89ba6b26853407db9bed071fb43fdfb83d24de"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/state_before.json",
+      "bytes": 55087,
+      "sha256": "6a6f0501c5b04e2411b64b694a43fc938a3e19bc8ffaea2a3b57fbe212cfd602"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/state_before_metadata_correction.json",
+      "bytes": 224,
+      "sha256": "8e5e6c4d017b1eeb09c3f940e4997dc0a5ed4c3229e6190aecac30f5790a9080"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/targeted_pytest.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "doc/V0.1.6/evidence/coord_m0_r03/targeted_pytest.log",
+      "bytes": 102,
+      "sha256": "08564481029c63a9a5622e7e6d8b1e953dd5799ca0a6784a87fd3202a209cd99"
+    }
+  ],
+  "business_before_sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190",
+  "business_after_sha256": "f43a8850cc6faa786a7f8decbd18d32e510adbdb2d42cb57f95b448bfd8f2190",
+  "business_bytes_identical": true,
+  "broken_management_links": []
+}

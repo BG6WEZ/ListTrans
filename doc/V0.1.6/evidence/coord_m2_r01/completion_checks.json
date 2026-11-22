@@ -1,0 +1,30 @@
+{
+  "coordinator_targeted_rerun": "58 passed in 127.95s, EXIT=0 (8 files covering M2 5 tests / 6 matrices, M1 7, miner 2, M0 15, llm_rules 4, LLM/isolation/guardrails 25)",
+  "isolation_verify_after": {
+    "verdict": "PASS",
+    "exit_code": 0,
+    "business_hash_unchanged": true
+  },
+  "checks": {
+    "business_unchanged": true,
+    "code_test_script_hashes_match": 20,
+    "delivery_matches_total": "24/25",
+    "delivery_mismatches": [
+      "doc/V0.1.6/02_任务台账.md"
+    ],
+    "protected_changes": [
+      "doc/V0.1.6/rounds/V016-M2_R01_统筹裁决.md",
+      "doc/V0.1.6/rounds/V016-M3_R01_统筹下发.md"
+    ],
+    "pre_backup_hashes_match": "19/19",
+    "asset_hashes_unchanged": 43,
+    "delivered_extra_evidence_match": "9/9",
+    "new_rounds": [
+      "doc/V0.1.6/rounds/V016-M2_R01_统筹裁决.md",
+      "doc/V0.1.6/rounds/V016-M3_R01_统筹下发.md"
+    ],
+    "checked_relative_links": 204,
+    "broken_relative_links": [],
+    "relative_document_links_valid": true
+  }
+}

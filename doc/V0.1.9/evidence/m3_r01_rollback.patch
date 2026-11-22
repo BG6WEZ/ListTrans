@@ -1,0 +1,1439 @@
+--- a/app/binding_decisions.py
++++ b/app/binding_decisions.py
+@@ -62,7 +62,6 @@
+ SOURCE_RULE = "auto_binding_rule"     # 自动绑定规则（名称-only 旧规则 / 约束规则）
+ SOURCE_MANUAL = "manual"              # 人工确认
+ SOURCE_MANUAL_REJECT = "manual_reject"  # 人工拒绝
+-SOURCE_MANUAL_EDIT = "manual_edit"      # 编辑后须重新确认
+ SOURCE_RESTORE = "legacy_draft"       # 旧草稿保守降级
+ 
+ 
+@@ -519,10 +518,9 @@
+ 
+     返回 {"ok": bool, "invalid_codes": [...], "conflicts": [{code, reason}, ...]}。
+     """
++    invalid_codes = validate_binding_codes(bindings)
+     conflicts: List[Dict[str, str]] = []
+     live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
+-    invalid_codes = [code for code in dict.fromkeys(str(b.get("code", "")).strip() for b in bindings or [])
+-                     if code and code not in live]
+     saved_by_code: Dict[str, Dict[str, Any]] = {}
+     for sb in (saved_bindings or []):
+         sc = str(sb.get("code", "")).strip()
+@@ -554,7 +552,6 @@
+         "ok": not invalid_codes and not conflicts,
+         "invalid_codes": invalid_codes,
+         "conflicts": conflicts,
+-        "live_materials": live,
+     }
+ 
+ 
+@@ -627,10 +624,8 @@
+     conn = get_auth_connection()
+     try:
+         cur = conn.cursor()
+-        cur.execute("BEGIN IMMEDIATE")
+         existing = cur.execute(
+-            "SELECT id FROM binding_decisions WHERE user_id = ? AND scope_key = ? AND row_fingerprint = ? "
+-            "ORDER BY id DESC LIMIT 1",
++            "SELECT id FROM binding_decisions WHERE user_id = ? AND scope_key = ? AND row_fingerprint = ?",
+             (user_id, scope_key, row_fp),
+         ).fetchone()
+         if existing:
+@@ -668,33 +663,6 @@
+     }
+ 
+ 
+-def invalidate_decision(user_id: int, scope_key: str, row: Dict[str, Any]) -> None:
+-    """Record an edit without replacing a prior explicit refusal."""
+-    init_binding_decision_db()
+-    row_fp = row_content_fingerprint(row)
+-    conn = get_auth_connection()
+-    try:
+-        conn.execute(
+-            """
+-            INSERT INTO binding_decisions
+-                (user_id, scope_key, row_fingerprint, binding_fingerprint,
+-                 decision, source, reason, matched_codes, payload_json)
+-            SELECT ?, ?, ?, ?, ?, ?, ?, '', '{}'
+-            WHERE COALESCE((
+-                SELECT decision FROM binding_decisions
+-                WHERE user_id = ? AND scope_key = ? AND row_fingerprint = ?
+-                ORDER BY id DESC LIMIT 1
+-            ), '') NOT IN (?, ?)
+-            """,
+-            (user_id, scope_key, row_fp, binding_fingerprint([]), STATUS_RECOMMENDED,
+-             SOURCE_MANUAL_EDIT, "内容已修改，请重新确认", user_id, scope_key, row_fp,
+-             STATUS_REJECTED, STATUS_RECOMMENDED),
+-        )
+-        conn.commit()
+-    finally:
+-        conn.close()
+-
+-
+ def get_row_decision(
+     user_id: int, scope_key: str, row: Dict[str, Any]
+ ) -> Optional[Dict[str, Any]]:
+--- a/app/report_generator.py
++++ b/app/report_generator.py
+@@ -3,7 +3,6 @@
+ import copy
+ from typing import List, Dict, Any, Optional
+ from openpyxl.styles import Font, PatternFill
+-from openpyxl.comments import Comment
+ from app.db_manager import query_by_code
+ from app.runtime_eval_assets import load_report_template
+ 
+@@ -212,10 +211,6 @@
+                         if style_templates:
+                             apply_style_dict(cell, style_templates[c - 1])
+                         cell.fill = no_fill
+-                    if b.get("qty_ratio") is not None:
+-                        sheet.cell(current_row, 9).comment = Comment(
+-                            f"绑定比例：{b['qty_ratio']}", "ListTrans",
+-                        )
+                     current_row += 1
+             else:
+                 # Fallback to single item match if any code is present
+--- a/app/server.py
++++ b/app/server.py
+@@ -10,7 +10,6 @@
+ os.environ["NUMEXPR_NUM_THREADS"] = "1"
+ 
+ import logging
+-import math
+ import shutil
+ import uuid
+ import pandas as pd
+@@ -221,7 +220,6 @@
+     SOURCE_RULE,
+     SOURCE_MANUAL,
+     SOURCE_MANUAL_REJECT,
+-    SOURCE_MANUAL_EDIT,
+     SOURCE_RESTORE,
+     make_scope_key,
+     row_content_fingerprint,
+@@ -231,7 +229,6 @@
+     evaluate_hard_conflicts,
+     normalize_bindings,
+     record_decision,
+-    invalidate_decision,
+     get_decision,
+     get_row_decision,
+     extract_saved_bindings,
+@@ -675,7 +672,6 @@
+     work_session_id: Optional[str] = ""
+ 
+ 
+-@catalog_read
+ def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str):
+     """V015-M2：草稿/保存进度恢复时的服务端权威状态注释。
+ 
+@@ -706,7 +702,7 @@
+         source = SOURCE_RESTORE
+         reason = "旧草稿恢复：待人工复核，未确认不可导出"
+ 
+-        if binds or policy is not None or item.get("decision_source") in (SOURCE_MANUAL_EDIT, SOURCE_MANUAL_REJECT):
++        if binds or policy is not None:
+             row_decision = get_row_decision(
+                 user_id=current_user["id"], scope_key=scope_key, row=row,
+             )
+@@ -715,9 +711,6 @@
+                 source = SOURCE_MANUAL_REJECT
+                 reason = "已恢复服务端人工拒绝，须重新选材并确认"
+                 downgraded += 1
+-            elif row_decision and row_decision["source"] == SOURCE_MANUAL_EDIT:
+-                source = SOURCE_MANUAL_EDIT
+-                reason = row_decision["reason"]
+             else:
+                 record = get_decision(
+                     user_id=current_user["id"], scope_key=scope_key,
+@@ -733,8 +726,6 @@
+                     if record else None
+                 )
+                 if record and validation["ok"]:
+-                    binds = _with_live_binding_fields(binds, validation["live_materials"])
+-                    item["bindings"] = binds
+                     status = STATUS_MANUAL_CONFIRMED
+                     source = SOURCE_MANUAL
+                     reason = "已恢复服务端人工确认"
+@@ -763,10 +754,6 @@
+                             status = STATUS_AUTO_ACCEPTED
+                             source = SOURCE_RULE
+                             reason = dec["decision_reason"]
+-                            binds = _with_live_binding_fields(
+-                                rule_binds, fetch_live_material_map([b["code"] for b in rule_binds]),
+-                            )
+-                            item["bindings"] = binds
+                     if (policy is not None and binds and item.get("professional") and not row_decision
+                             and status == STATUS_RECOMMENDED and rule is None):
+                         calibrated, live_bindings = _revalidate_matcher_binding(row, binds, policy)
+@@ -775,14 +762,6 @@
+                             status, source, reason = (calibrated[k] for k in (
+                                 "decision_status", "decision_source", "decision_reason",
+                             ))
+-                if (policy is not None and not binds and not row_decision and item.get("professional")
+-                        and status == STATUS_RECOMMENDED):
+-                    review = _calibrate_current_row(row, policy)[0]
+-                    if review["acceptance_calibration"]["outcome"] in ("needs_parameters", "rejected"):
+-                        item.update(review)
+-                        status, source, reason = (review[k] for k in (
+-                            "decision_status", "decision_source", "decision_reason",
+-                        ))
+                 if status == STATUS_RECOMMENDED:
+                     downgraded += 1
+                     if (not record and
+@@ -799,8 +778,6 @@
+         item["decision_codes"] = sorted({b["code"] for b in binds})
+         item["row_fingerprint"] = row_content_fingerprint(row)
+         item["binding_fingerprint"] = binding_fingerprint(binds)
+-        if status in EXPORTABLE_STATUSES:
+-            item["matched_code"] = ",".join(b["code"] for b in item["bindings"])
+         # is_exact 保留为算法提示，不再代表可导出
+         annotated.append(item)
+     return annotated, downgraded
+@@ -1633,22 +1610,18 @@
+     """Recompute from submitted original fields, using current server assets."""
+     if len(incoming) != 1:
+         return None, []
+-    decision, live = _calibrate_current_row(row, policy)
++    from app.query_preprocessor import prepare_query
++
++    raw = _raw_item_from_export(row)
++    query = prepare_query(raw["name"], raw["specification"], raw["professional"],
++                          category=raw["category"], brand=raw["brand"], unit=raw["unit"])
++    result = match_item(query, calibration_groups=policy.equivalences)
++    decision, live = _calibrated_decision(row, query, result, policy)
+     request_unit = str(incoming[0].get("unit") or "").strip()
+     if (not live or not request_unit or get_unit_multiplier(request_unit, live[0]["unit"]) != 1.0
+             or binding_fingerprint(incoming) != binding_fingerprint(live)):
+         return None, []
+     return decision, live
+-
+-
+-def _calibrate_current_row(row, policy):
+-    from app.query_preprocessor import prepare_query
+-
+-    raw = _raw_item_from_export(row)
+-    query = prepare_query(raw["name"], raw["specification"], raw["professional"],
+-                          category=raw["category"], brand=raw["brand"], unit=raw["unit"])
+-    result = match_item(query, calibration_groups=policy.equivalences)
+-    return _calibrated_decision(row, query, result, policy)
+ 
+ 
+ def _rule_expected_bindings(item: Dict[str, Any], rule: Dict[str, Any]) -> List[Dict[str, Any]]:
+@@ -3778,10 +3751,11 @@
+     except Exception as e:
+         raise HTTPException(status_code=500, detail=str(e))
+ 
+-class BindingRowRequest(BaseModel):
++class BindingSubmitRequest(BaseModel):
+     original_name: str
+     original_spec: str
+     original_qty: float
++    bindings: List[BindingModel]
+     # V015-M2：人工确认范围与来源行内容（用于服务端权威确认记录与行指纹）。
+     # 缺省视为旧客户端，行内容以本次提交为准，导出端仍逐项复核指纹。
+     professional: Optional[str] = "暖通"
+@@ -3793,14 +3767,6 @@
+     original_code: Optional[str] = ""
+     original_row_idx: Optional[int] = 0
+ 
+-    def row(self):
+-        row = self.model_dump(exclude={"scope_filename", "bindings"})
+-        return {**row, "professional": self.professional or "暖通"}
+-
+-
+-class BindingSubmitRequest(BindingRowRequest):
+-    bindings: List[BindingModel]
+-
+ class BindingRuleConfirmRequest(BaseModel):
+     original_name: str
+     bindings: List[BindingModel]
+@@ -3814,24 +3780,7 @@
+     original_spec: Optional[str] = None
+     professional: Optional[str] = None
+ 
+-
+-def _with_live_binding_fields(bindings, live):
+-    fields = ("name", "specification", "unit", "brand", "category")
+-    canonical = []
+-    for binding in bindings:
+-        code = str(binding["code"]).strip()
+-        canonical.append({**binding, "code": code, **{key: live[code].get(key) or "" for key in fields}})
+-    return canonical
+-
+-
+-@app.post("/api/binding/invalidate", dependencies=[Depends(require_employee)])
+-def api_invalidate_binding(req: BindingRowRequest, current_user: dict = Depends(get_current_user)):
+-    row = req.row()
+-    invalidate_decision(current_user["id"], make_scope_key(req.scope_filename, row["professional"]), row)
+-    return {"code": 0}
+-
+ @app.post("/api/binding/submit", dependencies=[Depends(require_employee)])
+-@catalog_read
+ def api_submit_binding(
+     req: BindingSubmitRequest,
+     current_user: dict = Depends(get_current_user),
+@@ -3874,6 +3823,7 @@
+     }
+     binds = normalize_bindings(binds, req.original_qty)
+     scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
++
+     # 新鲜编码 + 行级硬冲突核验：硬排除不得靠人工/伪造状态绕过。
+     validation = validate_bindings_against_row(row_item, binds)
+     if validation["invalid_codes"]:
+@@ -3895,16 +3845,6 @@
+             },
+         )
+ 
+-    if any(
+-        not math.isfinite(b["qty"]) or not math.isfinite(b["qty_ratio"])
+-        or (req.original_qty > 0 and not math.isclose(
+-            b["qty"], req.original_qty * b["qty_ratio"], rel_tol=1e-9, abs_tol=1e-9,
+-        ))
+-        for b in binds
+-    ):
+-        raise HTTPException(status_code=409, detail="绑定数量与比例不一致")
+-
+-    binds = _with_live_binding_fields(binds, validation["live_materials"])
+     record = record_decision(
+         user_id=current_user["id"],
+         scope_key=scope_key,
+@@ -3939,7 +3879,6 @@
+     return {
+         "code": 0,
+         "msg": "绑定关系已由服务端确认",
+-        "bindings": binds,
+         "decision": _annotate_decision(
+             row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认"
+         ),
+@@ -4181,7 +4120,6 @@
+     )
+ 
+ 
+-@catalog_read
+ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+                      allow_calibrated=True) -> Optional[List[Dict[str, Any]]]:
+     """对单行执行导出可导出性核验；不可导出时抛 HTTPException(422) 并带行级原因。"""
+@@ -4205,15 +4143,14 @@
+         }
+         raise HTTPException(status_code=422, detail=detail)
+ 
++    if not binds:
++        deny("无有效绑定：未匹配或已拒绝，禁止导出（不默选 top1）")
++
+     row_decision = get_row_decision(
+         user_id=current_user["id"], scope_key=scope_key, row=item,
+     )
+     if row_decision and row_decision["decision"] == STATUS_REJECTED:
+         deny("人工拒绝：须重新选材并显式确认后方可导出")
+-    if row_decision and row_decision["source"] == SOURCE_MANUAL_EDIT:
+-        deny("内容已修改，请重新确认")
+-    if not binds:
+-        deny("无有效绑定：未匹配或已拒绝，禁止导出（不默选 top1）")
+ 
+     # 1) 人工确认：服务端确认记录 + 行/绑定双指纹一致 + 编码当前有效 + 无硬冲突
+     record = get_decision(
+@@ -4233,14 +4170,7 @@
+             deny("确认后物料编码已失效", invalid_codes=validation["invalid_codes"])
+         if validation["conflicts"]:
+             deny("绑定目标与清单行存在硬冲突", conflicts=validation["conflicts"])
+-        # Quantities come from the confirmed snapshot when it is available.
+-        approved = extract_saved_bindings(record)
+-        quantities = {binding_fingerprint([b]): b for b in approved or []}
+-        checked = []
+-        for binding in binds:
+-            saved = quantities.get(binding_fingerprint([binding])) or {}
+-            checked.append({**binding, **{key: saved[key] for key in ("qty", "qty_ratio") if key in saved}})
+-        return _with_live_binding_fields(checked, validation["live_materials"])
++        return
+ 
+     # 2) 自动接受：仅带约束且逐项匹配的规则，且编码当前有效、无硬冲突。
+     #    名称-only 旧规则不进入自动接受（DN100 不得因 DN15 同名规则被接受）。
+@@ -4264,7 +4194,7 @@
+                     u_mult = get_unit_multiplier(req_unit, live_unit)
+                     if u_mult is None or abs(u_mult - 1.0) > 1e-6:
+                         deny("自动接受绑定目标单位与当前物料单位不一致，须重新人工确认")
+-            return _with_live_binding_fields(rule_binds, live)
++            return
+ 
+     policy = acceptance_policy()
+     if (policy is not None and allow_calibrated and not row_decision
+--- a/web/app.js
++++ b/web/app.js
+@@ -842,11 +842,9 @@
+     const filterTabs = document.querySelectorAll('.filter-tab');
+     filterTabs.forEach(tab => {
+         tab.addEventListener('click', (e) => {
++            filterTabs.forEach(t => t.classList.remove('active'));
+             const clickedTab = e.currentTarget;
+-            for (const t of filterTabs) {
+-                t.classList.toggle('active', t === clickedTab);
+-                t.setAttribute('aria-pressed', String(t === clickedTab));
+-            }
++            clickedTab.classList.add('active');
+             currentFilter = clickedTab.dataset.filter;
+             currentPage = 1; // Reset to page 1
+             renderTable();
+@@ -1109,8 +1107,94 @@
+     });
+ 
+     // Confirm match finished button click listener
+-    document.getElementById('confirm-match-finished-btn').addEventListener('click', () => submitReview('submit'));
+-    document.getElementById('reject-match-btn').addEventListener('click', () => submitReview('reject'));
++    document.getElementById('confirm-match-finished-btn').addEventListener('click', async () => {
++        if (!selectedItem) return;
++        
++        if (!selectedItem.bindings || selectedItem.bindings.length === 0) {
++            if (!confirm("当前清单行未绑定任何物料，确定要标记为已确认吗？")) {
++                return;
++            }
++        }
++        
++        showLoading("正在提交服务端确认...", "正在核验当前编码有效性并记录人工确认，请稍候...");
++
++        try {
++            const response = await fetch(`${backendUrl}/api/binding/submit`, {
++                method: 'POST',
++                headers: { 'Content-Type': 'application/json' },
++                body: JSON.stringify({
++                    original_name: selectedItem.original_name,
++                    original_spec: selectedItem.original_spec,
++                    original_qty: selectedItem.original_qty,
++                    bindings: selectedItem.bindings || [],
++                    professional: selectedItem.professional || '暖通',
++                    scope_filename: originalFileName || '',
++                    original_unit: selectedItem.original_unit || '',
++                    original_loss: selectedItem.original_loss || 0,
++                    original_category: selectedItem.original_category || '',
++                    original_brand: selectedItem.original_brand || '',
++                    original_code: selectedItem.original_code || '',
++                    original_row_idx: selectedItem.original_row_idx || 0
++                })
++            });
++
++            const respData = await response.json().catch(() => ({}));
++            if (!response.ok) {
++                const d = respData && respData.detail;
++                const msg = (d && (d.message || d)) || "服务端确认失败";
++                throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
++            }
++
++            // Report to Data Flywheel (do not revoke binding_decisions/export status if flywheel delivery fails)
++            const actionType = (selectedItem.bindings && selectedItem.bindings.length > 1)
++                ? 'BIND_MULTI'
++                : 'CONFIRM_TOP1';
++            await reportFlywheelAction(selectedItem, actionType);
++
++            // V015-M2：以服务端返回的决策凭据为准，不再本地自填 is_exact。
++            const dec = respData.decision || {};
++            selectedItem.decision_status = dec.decision_status || 'manual_confirmed';
++            selectedItem.decision_source = dec.decision_source || 'manual';
++            selectedItem.decision_reason = dec.decision_reason || '人工显式确认';
++            selectedItem.decision_codes = dec.decision_codes || (selectedItem.bindings || []).map(b => b.code);
++            selectedItem.row_fingerprint = dec.row_fingerprint || '';
++            selectedItem.binding_fingerprint = dec.binding_fingerprint || '';
++            selectedItem.is_exact = true;
++
++            // Find next unconfirmed item for auto flow (Task 4)
++            const isExportable = (it) => ['auto_accepted', 'manual_confirmed'].includes(it.decision_status);
++            const curIdx = items.findIndex(it => isSameWorkbenchRow(it, selectedItem));
++            let nextItem = null;
++            for (let i = curIdx + 1; i < items.length; i++) {
++                if (!isExportable(items[i])) {
++                    nextItem = items[i];
++                    break;
++                }
++            }
++            if (!nextItem) {
++                for (let i = 0; i < curIdx; i++) {
++                    if (!isExportable(items[i])) {
++                        nextItem = items[i];
++                        break;
++                    }
++                }
++            }
++            
++            renderTable();
++            updateProgress();
++            
++            if (nextItem) {
++                jumpToItem(nextItem);
++            } else {
++                selectRow(selectedItem);
++            }
++            
++        } catch (e) {
++            alert(e.message);
++        } finally {
++            hideLoading();
++        }
++    });
+ 
+     // Save Session triggers
+     const saveTrigger = document.getElementById('save-trigger');
+@@ -1239,9 +1323,26 @@
+ 
+ // 3.8 Jump to and Highlight a Row across Pages
+ function jumpToItem(item) {
+-    const filtered = items.filter(matchesWorkbenchFilters);
+-    const idx = filtered.findIndex(it => isSameWorkbenchRow(it, item));
+-    if (idx !== -1) currentPage = Math.floor(idx / pageSize) + 1;
++    let filtered = items.filter(it => {
++        if (currentProfessional !== '全部' && it.professional !== currentProfessional) return false;
++        const ds = (it) => it.decision_status || 'recommended';
++        if (currentFilter === 'exact') return ['auto_accepted', 'manual_confirmed'].includes(ds(it));
++        else if (currentFilter === 'fuzzy') return ds(it) === 'recommended' && it.matched_code !== "";
++        else if (currentFilter === 'unmatched') return it.matched_code === "" || ds(it) === 'rejected';
++        return true;
++    });
++    if (searchQuery) {
++        filtered = filtered.filter(it => {
++            return it.original_name.toLowerCase().includes(searchQuery) || 
++                   it.original_spec.toLowerCase().includes(searchQuery) ||
++                   it.matched_code.toLowerCase().includes(searchQuery);
++        });
++    }
++    
++    const idx = filtered.findIndex(it => it.original_row_idx === item.original_row_idx);
++    if (idx !== -1) {
++        currentPage = Math.floor(idx / pageSize) + 1;
++    }
+     selectRow(item);
+     renderTable();
+ }
+@@ -1506,7 +1607,20 @@
+         }
+         item._event_seq = Number(item.max_event_seq || 0);
+         item._feedback_seq = Number(item.max_feedback_seq || 0);
+-        item.bindings ??= [];
++        if (!item.bindings) {
++            item.bindings = [];
++            if (item.matched_code) {
++                item.bindings.push({
++                    code: item.matched_code,
++                    name: item.matched_name || "",
++                    specification: item.matched_spec || "",
++                    unit: item.matched_unit || "",
++                    brand: item.matched_brand || "",
++                    category: item.matched_category || "",
++                    qty: item.original_qty
++                });
++            }
++        }
+     });
+     
+     // Initialize professional list
+@@ -1583,9 +1697,34 @@
+     const tbody = document.getElementById('items-tbody');
+     tbody.innerHTML = '';
+     
+-    // Professional, status, and search use the same view for table and navigation.
+-    const filtered = items.filter(matchesWorkbenchFilters);
+-
++    // Filter items
++    let filtered = items.filter(item => {
++        // Professional filter
++        if (currentProfessional !== '全部' && item.professional !== currentProfessional) {
++            return false;
++        }
++        
++        // is_exact 仅为算法提示；旧草稿没有权威状态时统一待复核。
++        const ds = (it) => it.decision_status || 'recommended';
++        if (currentFilter === 'exact') {
++            return ['auto_accepted', 'manual_confirmed'].includes(ds(item));
++        } else if (currentFilter === 'fuzzy') {
++            return ds(item) === 'recommended' && item.matched_code !== "";
++        } else if (currentFilter === 'unmatched') {
++            return item.matched_code === "" || ds(item) === 'rejected';
++        }
++        return true; // 'all'
++    });
++    
++    // Search query filter
++    if (searchQuery) {
++        filtered = filtered.filter(item => {
++            return item.original_name.toLowerCase().includes(searchQuery) || 
++                   item.original_spec.toLowerCase().includes(searchQuery) ||
++                   item.matched_code.toLowerCase().includes(searchQuery);
++        });
++    }
++    
+     document.getElementById('items-count').innerText = filtered.length;
+     
+     // Update pagination variables
+@@ -1613,10 +1752,21 @@
+             tr.classList.add('selected');
+         }
+         
+-        const state = reviewState(item);
+-        const statusHtml = `<span class="row-status-pill" data-state="${state}"
+-            title="${escapeHtml(item.decision_reason || REVIEW_LABELS[state])}">${REVIEW_LABELS[state]}</span>`;
+-
++        // V015-M2：四态状态 pill（推荐/自动接受/人工确认/拒绝）
++        let statusHtml = '';
++        const dst = item.decision_status || 'recommended';
++        if (dst === 'manual_confirmed') {
++            statusHtml = `<span class="row-status-pill exact" title="${item.decision_reason || '人工确认'}"><i class="fa-solid fa-user-check"></i> 已确认</span>`;
++        } else if (dst === 'auto_accepted') {
++            statusHtml = `<span class="row-status-pill exact" title="${item.decision_reason || '规则自动接受'}"><i class="fa-solid fa-circle-check"></i> 自动接受</span>`;
++        } else if (dst === 'rejected') {
++            statusHtml = `<span class="row-status-pill unmatched" title="${item.decision_reason || '已拒绝'}"><i class="fa-solid fa-circle-xmark"></i> 已拒绝</span>`;
++        } else if (item.matched_code) {
++            statusHtml = `<span class="row-status-pill fuzzy" title="${item.decision_reason || '待人工确认'}"><i class="fa-solid fa-circle-question"></i> 待确认</span>`;
++        } else {
++            statusHtml = `<span class="row-status-pill unmatched" title="${item.decision_reason || '未匹配'}"><i class="fa-solid fa-triangle-exclamation"></i> 未匹配</span>`;
++        }
++        
+         let codeDisplay = '-';
+         if (item.bindings && item.bindings.length > 0) {
+             if (item.bindings.length === 1) {
+@@ -1624,6 +1774,8 @@
+             } else {
+                 codeDisplay = `${item.bindings[0].code} (+${item.bindings.length - 1})`;
+             }
++        } else if (item.matched_code) {
++            codeDisplay = item.matched_code;
+         }
+ 
+         tr.innerHTML = `
+@@ -1653,9 +1805,36 @@
+ // 3. Selection Handler
+ function selectRow(item) {
+     selectedItem = item;
+-    selectedItem.bindings ??= [];
+-    renderReviewDetail();
+-
++    if (!selectedItem.bindings) {
++        selectedItem.bindings = [];
++        if (selectedItem.matched_code) {
++            const codes = selectedItem.matched_code.split(",");
++            if (codes.length === 1) {
++                selectedItem.bindings.push({
++                    code: selectedItem.matched_code,
++                    name: selectedItem.matched_name || "",
++                    specification: selectedItem.matched_spec || "",
++                    unit: selectedItem.matched_unit || "",
++                    brand: selectedItem.matched_brand || "",
++                    category: selectedItem.matched_category || "",
++                    qty: selectedItem.original_qty
++                });
++            } else {
++                codes.forEach(c => {
++                    selectedItem.bindings.push({
++                        code: c.trim(),
++                        name: "已关联物料",
++                        specification: "",
++                        unit: selectedItem.original_unit,
++                        brand: "",
++                        category: "",
++                        qty: selectedItem.original_qty
++                    });
++                });
++            }
++        }
++    }
++    
+     renderBoundMaterials();
+     
+     // Hide prompt & show editor
+@@ -1693,182 +1872,13 @@
+     `;
+ }
+ 
+-const REVIEW_LABELS = Object.freeze({
+-    auto_accepted: '自动接受',
+-    manual_confirmed: '人工确认',
+-    recommended: '推荐待复核',
+-    needs_parameters: '待补参',
+-    rejected: '拒绝'
+-});
+-const pendingReviewEdits = new WeakMap();
+-
+-function reviewState(item) {
+-    if (item.decision_source !== 'manual_edit' && item.decision_status === 'recommended' &&
+-        item.acceptance_calibration?.outcome === 'needs_parameters') return 'needs_parameters';
+-    return Object.hasOwn(REVIEW_LABELS, item.decision_status) ? item.decision_status : 'recommended';
+-}
+-
+-function hasReviewApproval(item) {
+-    const state = reviewState(item);
+-    return state === 'auto_accepted' || state === 'manual_confirmed';
+-}
+-
+-function matchesWorkbenchFilters(item) {
+-    return (currentProfessional === '全部' || item.professional === currentProfessional)
+-        && (currentFilter === 'all' || currentFilter === reviewState(item))
+-        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code]
+-            .some(value => String(value ?? '').toLowerCase().includes(searchQuery)));
+-}
+-
+-function reviewPayload(item) {
+-    return {
+-        original_name: item.original_name,
+-        original_spec: item.original_spec,
+-        original_qty: item.original_qty,
+-        original_unit: item.original_unit || '',
+-        original_loss: item.original_loss || 0,
+-        original_category: item.original_category || '',
+-        original_brand: item.original_brand || '',
+-        original_code: item.original_code || '',
+-        original_row_idx: item.original_row_idx || 0,
+-        professional: item.professional || '暖通',
+-        scope_filename: originalFileName || ''
+-    };
+-}
+-
+-async function postReview(action, payload) {
+-    const response = await fetch(`${backendUrl}/api/binding/${action}`, {
+-        method: 'POST',
+-        headers: { 'Content-Type': 'application/json' },
+-        body: JSON.stringify(payload)
+-    });
+-    const data = await response.json().catch(() => ({}));
+-    if (!response.ok || data.code !== 0) {
+-        throw new Error(_parseFeedbackApiError(data, response.status).message);
+-    }
+-    return data;
+-}
+-
+-function persistReviewEdit(item) {
+-    const pending = pendingReviewEdits.get(item);
+-    if (!pending) return Promise.resolve();
+-    if (!pending.request) {
+-        pending.request = postReview('invalidate', pending.payload)
+-            .then(() => pendingReviewEdits.delete(item))
+-            .catch(error => {
+-                pending.request = null;
+-                throw error;
+-            });
+-    }
+-    return pending.request;
+-}
+-
+ // V015-M2：内容/绑定变更使旧确认失效，降为待复核（须重新显式确认）
+ function invalidateItemDecision(item, reason) {
+-    const approved = hasReviewApproval(item);
++    if (!item) return;
+     item.decision_status = 'recommended';
+-    item.decision_source = 'manual_edit';
++    item.decision_source = 'matcher';
+     item.decision_reason = reason || '内容已修改，请重新确认';
+-    item.decision_codes = [];
+-    item.row_fingerprint = '';
+-    item.binding_fingerprint = '';
+-    if (approved && !pendingReviewEdits.has(item)) {
+-        pendingReviewEdits.set(item, {payload: reviewPayload(item)});
+-        persistReviewEdit(item).catch(() => {
+-            item.decision_reason = '服务端失效登记失败。保存或确认时会重试。';
+-            if (selectedItem === item) renderReviewDetail();
+-        });
+-    }
+-    if (selectedItem === item) renderReviewDetail();
+-    renderTable();
+-    updateProgress();
+-}
+-
+-function syncBindingDisplay(item) {
+-    const first = item.bindings[0];
+-    item.matched_code = item.bindings.map(binding => binding.code).join(',');
+-    item.matched_name = first?.name || '';
+-    item.matched_spec = first?.specification || '';
+-    item.matched_category = first?.category || '';
+-    item.matched_unit = first?.unit || '';
+-    item.matched_brand = first?.brand || '';
+-}
+-
+-async function submitReview(action) {
+-    const item = selectedItem;
+-    if (!item || (action === 'submit' && !item.bindings.length)) return;
+-    showLoading(action === 'reject' ? '正在拒绝此行…' : '正在核验绑定…');
+-    try {
+-        await persistReviewEdit(item);
+-        const response = await postReview(action, {...reviewPayload(item), bindings: item.bindings});
+-        const status = action === 'reject' ? 'rejected' : 'manual_confirmed';
+-        if (response.decision?.decision_status !== status) throw new Error('服务端未返回有效复核状态');
+-        Object.assign(item, response.decision);
+-        item.bindings = action === 'reject' ? [] : response.bindings ?? item.bindings;
+-        syncBindingDisplay(item);
+-        if (selectedItem === item) {
+-            renderReviewDetail();
+-            renderBoundMaterials();
+-            renderCandidates();
+-        }
+-        renderTable();
+-        updateProgress();
+-        if (action === 'submit') {
+-            // Report to Data Flywheel (do not revoke binding_decisions/export status if flywheel delivery fails)
+-            await reportFlywheelAction(item, item.bindings.length > 1 ? 'BIND_MULTI' : 'CONFIRM_TOP1');
+-            // Find next unconfirmed item for auto flow (Task 4)
+-            if (selectedItem === item) {
+-                const index = items.findIndex(other => isSameWorkbenchRow(other, item));
+-                const next = [...items.slice(index + 1), ...items.slice(0, index)].find(other =>
+-                    matchesWorkbenchFilters(other) && ['recommended', 'needs_parameters'].includes(reviewState(other)));
+-                if (next) jumpToItem(next);
+-            }
+-        }
+-    } catch (error) {
+-        alert(error.message);
+-    } finally {
+-        hideLoading();
+-    }
+-}
+-
+-function renderReviewDetail() {
+-    const item = selectedItem;
+-    if (!item) return;
+-    const state = reviewState(item);
+-    const badge = document.getElementById('review-status');
+-    badge.dataset.state = state;
+-    badge.textContent = REVIEW_LABELS[state];
+-    document.getElementById('review-reason').textContent = item.decision_reason || '';
+-    document.getElementById('confirm-match-finished-btn').disabled = !item.bindings?.length;
+-    document.getElementById('reject-match-btn').disabled = state === 'rejected';
+-
+-    const differences = document.getElementById('review-differences');
+-    differences.replaceChildren();
+-    const evidence = item.acceptance_calibration;
+-    const add = (label, value) => {
+-        if (!value) return;
+-        const term = document.createElement('dt');
+-        const detail = document.createElement('dd');
+-        term.textContent = label;
+-        detail.textContent = value;
+-        differences.append(term, detail);
+-    };
+-    add('待补参数', evidence?.missing_fields?.join('、'));
+-    add('关键差异', evidence?.different_fields?.join('、'));
+-    add('硬冲突', evidence?.hard_conflict);
+-    const eligible = (item.top_candidates || []).filter(candidate => !candidate.hard_blocked && candidate.score > 0);
+-    const [top, second] = eligible;
+-    if (top) {
+-        const rival = evidence ? evidence.competitor_code : second?.code;
+-        const gap = evidence ? evidence.distinct_margin : second && Number(top.score) - Number(second.score);
+-        add('候选分差', Number.isFinite(gap) && rival
+-            ? `${top.code} 与 ${rival} 相差 ${gap.toFixed(2)} 分` : '缺少可比较的第二候选');
+-        add('清单与首选规格', `${item.original_spec || '未填写'} ／ ${top.specification || '未填写'}`);
+-        add('首选理由', top.match_reasons?.join('、'));
+-        const runnerUp = eligible.find(candidate => candidate.code === rival);
+-        add('次选理由', runnerUp?.match_reasons?.join('、'));
+-    }
+-    add('确认等价编码', evidence?.equivalent_codes?.join('、'));
++    item.is_exact = false;
+ }
+ 
+ // 3.5 Render Bound Materials List (V0.1.0 Compact Cards)
+@@ -1904,13 +1914,9 @@
+             <div class="bound-item-bottom">
+                 <div class="bound-item-qty-wrap">
+                     <span>数量:</span>
+-                    <input type="number" step="any" aria-label="绑定数量" class="bound-qty-input" value="${escapeHtml(b.qty === undefined ? selectedItem.original_qty : b.qty ?? '')}" />
++                    <input type="number" class="bound-qty-input" value="${escapeHtml(b.qty !== undefined ? b.qty : selectedItem.original_qty)}" />
+                     <span style="font-size: 11px; color: var(--color-text-muted);">${escapeHtml(b.unit || selectedItem.original_unit || '个')}</span>
+                 </div>
+-                <label class="bound-item-qty-wrap">比例
+-                    <input type="number" step="any" aria-label="绑定比例" class="bound-qty-input bound-ratio-input"
+-                        value="${escapeHtml(b.qty_ratio ?? '')}" ${Number(selectedItem.original_qty) > 0 ? '' : 'disabled'} />
+-                </label>
+                 <button class="btn btn-delete-binding" style="padding: 2px 6px; height: 22px; color: var(--color-danger); border-color: transparent; background: transparent; font-size: 12px;" title="删除绑定">
+                     <i class="fa-solid fa-trash-can"></i>
+                 </button>
+@@ -1920,30 +1926,20 @@
+         const qtyInput = div.querySelector('.bound-qty-input');
+         qtyInput.addEventListener('input', (e) => {
+             const val = parseFloat(e.target.value);
+-            const qty = Number.isFinite(val) ? val : null;
+-            if (qty === b.qty) return;
+-            b.qty = qty;
+-            b.qty_ratio = qty !== null && Number(selectedItem.original_qty) > 0
+-                ? qty / Number(selectedItem.original_qty) : null;
+-            const ratioInput = div.querySelector('.bound-ratio-input');
+-            ratioInput.value = b.qty_ratio ?? '';
++            b.qty = isNaN(val) ? 0.0 : val;
++            b.qty_ratio = Number(selectedItem.original_qty) > 0
++                ? b.qty / Number(selectedItem.original_qty) : 1.0;
+             // V015-M2：数量变更使旧确认失效（绑定指纹变化），须重新确认
+             invalidateItemDecision(selectedItem, '数量已修改，请重新确认');
+-        });
+-
+-        div.querySelector('.bound-ratio-input').addEventListener('input', (e) => {
+-            const ratio = e.target.valueAsNumber;
+-            const qty = ratio * Number(selectedItem.original_qty);
+-            b.qty_ratio = Number.isFinite(qty) ? ratio : null;
+-            b.qty = Number.isFinite(qty) ? qty : null;
+-            qtyInput.value = b.qty ?? '';
+-            invalidateItemDecision(selectedItem, '绑定比例已修改，请重新确认');
+         });
+ 
+         const deleteBtn = div.querySelector('.btn-delete-binding');
+         deleteBtn.addEventListener('click', () => {
+             selectedItem.bindings.splice(idx, 1);
+-            syncBindingDisplay(selectedItem);
++            selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
++            if (selectedItem.bindings.length === 0) {
++                selectedItem.matched_code = "";
++            }
+             // V015-M2：绑定集合变化使旧确认失效
+             invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
+             renderBoundMaterials();
+@@ -1969,10 +1965,6 @@
+     selectedItem.top_candidates.forEach((cand, idx) => {
+         const card = document.createElement('div');
+         card.className = 'candidate-card';
+-        card.dataset.code = cand.code;
+-        card.tabIndex = 0;
+-        card.setAttribute('role', 'button');
+-        card.setAttribute('aria-label', `${cand.name} ${cand.code}`);
+         
+         const isActive = selectedItem.bindings && selectedItem.bindings.some(b => b.code === cand.code);
+         if (isActive) {
+@@ -1994,7 +1986,7 @@
+                 if (reason.includes('语义')) tagClass = 'semantic';    // purple
+                 if (reason.includes('品牌')) tagClass = 'brand';       // yellow
+                 
+-                tagsHtml += `<span class="match-reason-tag ${tagClass}">${escapeHtml(reason)}</span>`;
++                tagsHtml += `<span class="match-reason-tag ${tagClass}">${reason}</span>`;
+             });
+         }
+         
+@@ -2020,13 +2012,8 @@
+             </div>
+         `;
+         
+-        card.setAttribute('aria-pressed', String(isActive));
+-        card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
+-        card.addEventListener('keydown', (event) => {
+-            if (event.key === 'Enter' || event.key === ' ') {
+-                event.preventDefault();
+-                card.click();
+-            }
++        card.addEventListener('click', () => {
++            applyMatchCandidate(cand, 'PICK_CANDIDATE');
+         });
+         
+         container.appendChild(card);
+@@ -2045,7 +2032,10 @@
+     const existingIndex = selectedItem.bindings.findIndex(b => b.code === cand.code);
+     if (existingIndex !== -1) {
+         selectedItem.bindings.splice(existingIndex, 1);
+-        syncBindingDisplay(selectedItem);
++        selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
++        if (selectedItem.bindings.length === 0) {
++            selectedItem.matched_code = "";
++        }
+         invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
+         renderBoundMaterials();
+         renderCandidates();
+@@ -2070,14 +2060,13 @@
+     
+     // Push new bound material
+     selectedItem.bindings.push(newBound);
+-    syncBindingDisplay(selectedItem);
+     invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
+     
+     // Report action to Data Flywheel
+     const fwDeliveryPromise = reportFlywheelAction(selectedItem, actionType, [newBound]);
+     
+     // Update matched_code to be comma-separated list of bound codes
+-    syncBindingDisplay(selectedItem);
++    selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
+     
+     // Render incremental updates instead of selectRow to keep scroll position and search results
+     renderBoundMaterials();
+@@ -2479,8 +2468,7 @@
+ 
+ // 7. Manual Parameters Supplement Rematch (V0.0.2)
+ async function runParamRematch() {
+-    const item = selectedItem;
+-    if (!item) return;
++    if (!selectedItem) return;
+     
+     const model = document.getElementById('modal-param-model').value.trim();
+     const volume = document.getElementById('modal-param-volume').value ? parseInt(document.getElementById('modal-param-volume').value) : null;
+@@ -2490,22 +2478,20 @@
+     document.getElementById('param-modal').style.display = 'none';
+     showLoading("重新对齐特征参数...", "系统正在整合手动输入的指标并检索计算匹配得分...");
+     
+-    invalidateItemDecision(item, '已重算推荐，请重新确认');
+     try {
+-        await persistReviewEdit(item);
+         const response = await fetch(`${backendUrl}/api/rematch`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+-                row_id: item.original_row_idx,
+-                text: item.original_spec,
+-                professional: item.professional || "暖通",
+-                category: item.original_category || "",
+-                brand: item.original_brand || "",
+-                unit: item.original_unit || "",
+-                document_id: item.document_id || null,
+-                sheet_id: item.sheet_id || null,
+-                source_row_id: item.source_row_id || null,
++                row_id: selectedItem.original_row_idx,
++                text: selectedItem.original_spec,
++                professional: selectedItem.professional || "暖通",
++                category: selectedItem.original_category || "",
++                brand: selectedItem.original_brand || "",
++                unit: selectedItem.original_unit || "",
++                document_id: selectedItem.document_id || null,
++                sheet_id: selectedItem.sheet_id || null,
++                source_row_id: selectedItem.source_row_id || null,
+                 fixed_params: {
+                     model: model || null,
+                     air_volume: volume,
+@@ -2521,18 +2507,52 @@
+         
+         const data = await response.json();
+         
+-        applyRematchResult(item, data);
+-
++        // Update current selectedItem matching options and candidate ranks (preserve initial_auto_code & initial_snapshot_id)
++        invalidateItemDecision(selectedItem, '已重算推荐，请重新确认');
++        selectedItem.is_exact = data.is_exact;
++        selectedItem.bindings = [];
++        selectedItem.matched_code = data.matched_code || "";
++        selectedItem.top_candidates = data.top_candidates;
++        if (data.recommendation_snapshot_id) selectedItem.recommendation_snapshot_id = data.recommendation_snapshot_id;
++        if (data.recommendation_revision) selectedItem.recommendation_revision = data.recommendation_revision;
++        if (data.algo_version) selectedItem.algo_version = data.algo_version;
++        if (data.model_version) selectedItem.model_version = data.model_version;
++        if (data.config_version) selectedItem.config_version = data.config_version;
++        if (data.parsed_spec) selectedItem.parsed_spec = data.parsed_spec;
++        
++        if (data.top_candidates && data.top_candidates.length > 0) {
++            const top = data.top_candidates[0];
++            selectedItem.matched_name = top.name;
++            selectedItem.matched_category = top.category || "";
++            selectedItem.matched_spec = top.specification || "";
++            selectedItem.matched_unit = top.unit || "";
++            selectedItem.matched_brand = top.brand || "";
++            
++            if (data.is_exact) {
++                selectedItem.bindings = [{
++                    code: top.code,
++                    name: top.name,
++                    specification: top.specification || "",
++                    unit: top.unit || selectedItem.original_unit || "个",
++                    brand: top.brand || "",
++                    category: top.category || "",
++                    qty: selectedItem.original_qty,
++                    qty_ratio: 1.0
++                }];
++                selectedItem.matched_code = top.code;
++            }
++        }
++        
+         // Report param adjust to Flywheel
+-        item.extracted_params = {
++        selectedItem.extracted_params = {
+             model: model || null,
+             air_volume: volume,
+             power: power,
+             dn: dn
+         };
+-        await reportFlywheelAction(item, 'PARAM_ADJUST');
+-
+-        if (selectedItem === item) selectRow(item);
++        await reportFlywheelAction(selectedItem, 'PARAM_ADJUST');
++
++        selectRow(selectedItem);
+         renderTable();
+         updateProgress();
+         
+@@ -2612,40 +2632,37 @@
+ 
+ // 7.3 Rematch Single Item with Active Parameter Dimensions
+ async function rematchCurrentWithParams() {
+-    const item = selectedItem;
+-    if (!item?.parsed_spec) return;
++    if (!selectedItem) return;
+     
+     // Construct customized parsed_spec
+     const customizedSpec = {
+-        model: (item.active_params || {})['model'] ? item.parsed_spec.model : "",
++        model: selectedItem.active_params['model'] ? selectedItem.parsed_spec.model : "",
+         attrs: {}
+     };
+     
+-    const attrs = item.parsed_spec.attrs || {};
++    const attrs = selectedItem.parsed_spec.attrs || {};
+     for (const k in attrs) {
+-        if ((item.active_params || {})[k]) {
++        if (selectedItem.active_params[k]) {
+             customizedSpec.attrs[k] = attrs[k];
+         }
+     }
+     
+     showLoading("重新对齐特征参数...", "系统正在使用选定的核心参数维度检索并重新匹配推荐项...");
+     
+-    invalidateItemDecision(item, '已重算推荐，请重新确认');
+     try {
+-        await persistReviewEdit(item);
+         const response = await fetch(`${backendUrl}/api/match`, {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+-                text: item.original_spec,
+-                name: item.original_name,
+-                category: item.original_category || "",
+-                professional: item.professional || "暖通",
+-                brand: item.original_brand || "",
+-                unit: item.original_unit || "",
+-                document_id: item.document_id || null,
+-                sheet_id: item.sheet_id || null,
+-                source_row_id: item.source_row_id || null,
++                text: selectedItem.original_spec,
++                name: selectedItem.original_name,
++                category: selectedItem.original_category || "",
++                professional: selectedItem.professional || "暖通",
++                brand: selectedItem.original_brand || "",
++                unit: selectedItem.original_unit || "",
++                document_id: selectedItem.document_id || null,
++                sheet_id: selectedItem.sheet_id || null,
++                source_row_id: selectedItem.source_row_id || null,
+                 parsed_spec: customizedSpec
+             })
+         });
+@@ -2654,9 +2671,42 @@
+         
+         const data = await response.json();
+         
+-        applyRematchResult(item, data);
+-
+-        if (selectedItem === item) selectRow(item);
++        // Update item matching details (preserve initial_auto_code & initial_snapshot_id)
++        invalidateItemDecision(selectedItem, '已重算推荐，请重新确认');
++        selectedItem.is_exact = data.is_exact;
++        selectedItem.bindings = [];
++        selectedItem.matched_code = data.matched_code || "";
++        selectedItem.top_candidates = data.top_candidates;
++        if (data.recommendation_snapshot_id) selectedItem.recommendation_snapshot_id = data.recommendation_snapshot_id;
++        if (data.recommendation_revision) selectedItem.recommendation_revision = data.recommendation_revision;
++        if (data.algo_version) selectedItem.algo_version = data.algo_version;
++        if (data.model_version) selectedItem.model_version = data.model_version;
++        if (data.config_version) selectedItem.config_version = data.config_version;
++        
++        if (data.top_candidates && data.top_candidates.length > 0) {
++            const top = data.top_candidates[0];
++            selectedItem.matched_name = top.name;
++            selectedItem.matched_category = top.category || "";
++            selectedItem.matched_spec = top.specification || "";
++            selectedItem.matched_unit = top.unit || "";
++            selectedItem.matched_brand = top.brand || "";
++            
++            if (data.is_exact) {
++                selectedItem.bindings = [{
++                    code: top.code,
++                    name: top.name,
++                    specification: top.specification || "",
++                    unit: top.unit || selectedItem.original_unit || "个",
++                    brand: top.brand || "",
++                    category: top.category || "",
++                    qty: selectedItem.original_qty,
++                    qty_ratio: 1.0
++                }];
++                selectedItem.matched_code = top.code;
++            }
++        }
++        
++        selectRow(selectedItem);
+         renderTable();
+         updateProgress();
+         
+@@ -2709,14 +2759,12 @@
+                 }
+             }
+             
+-            invalidateItemDecision(it, '已重算推荐，请重新确认');
+-            await persistReviewEdit(it);
+             // Build customized spec
+             const customizedSpec = {
+-                model: it.active_params['model'] ? it.parsed_spec?.model : "",
++                model: it.active_params['model'] ? it.parsed_spec.model : "",
+                 attrs: {}
+             };
+-            const attrs = it.parsed_spec?.attrs || {};
++            const attrs = it.parsed_spec.attrs || {};
+             for (const k in attrs) {
+                 if (it.active_params[k]) {
+                     customizedSpec.attrs[k] = attrs[k];
+@@ -2744,7 +2792,40 @@
+             
+             const data = await response.json();
+             
+-            applyRematchResult(it, data);
++            // Update similar item details (preserve initial_auto_code & initial_snapshot_id)
++            invalidateItemDecision(it, '已重算推荐，请重新确认');
++            it.is_exact = data.is_exact;
++            it.bindings = [];
++            it.matched_code = data.matched_code || "";
++            it.top_candidates = data.top_candidates;
++            if (data.recommendation_snapshot_id) it.recommendation_snapshot_id = data.recommendation_snapshot_id;
++            if (data.recommendation_revision) it.recommendation_revision = data.recommendation_revision;
++            if (data.algo_version) it.algo_version = data.algo_version;
++            if (data.model_version) it.model_version = data.model_version;
++            if (data.config_version) it.config_version = data.config_version;
++            
++            if (data.top_candidates && data.top_candidates.length > 0) {
++                const top = data.top_candidates[0];
++                it.matched_name = top.name;
++                it.matched_category = top.category || "";
++                it.matched_spec = top.specification || "";
++                it.matched_unit = top.unit || "";
++                it.matched_brand = top.brand || "";
++                
++                if (data.is_exact) {
++                    it.bindings = [{
++                        code: top.code,
++                        name: top.name,
++                        specification: top.specification || "",
++                        unit: top.unit || it.original_unit || "个",
++                        brand: top.brand || "",
++                        category: top.category || "",
++                        qty: it.original_qty,
++                        qty_ratio: 1.0
++                    }];
++                    it.matched_code = top.code;
++                }
++            }
+         });
+         
+         await Promise.all(promises);
+@@ -2763,24 +2844,12 @@
+     }
+ }
+ 
+-function applyRematchResult(item, result) {
+-    // Preserve initial_auto_code and initial_snapshot_id for feedback provenance.
+-    item.bindings = [];
+-    item.top_candidates = result.top_candidates || [];
+-    item.acceptance_calibration = result.acceptance_calibration;
+-    for (const key of ['recommendation_snapshot_id', 'recommendation_revision', 'algo_version',
+-        'model_version', 'config_version', 'parsed_spec']) {
+-        if (result[key] !== undefined) item[key] = result[key];
+-    }
+-    syncBindingDisplay(item);
+-}
+-
+ // 8. Update progress indicators
+ function updateProgress() {
+     if (items.length === 0) return;
+     
+     // 1. Overall progress
+-    const matchedCount = items.filter(item => hasReviewApproval(item)).length;
++    const matchedCount = items.filter(item => item.is_exact || item.matched_code !== "").length;
+     const progressPercent = Math.round((matchedCount / items.length) * 100) || 0;
+     
+     document.getElementById('match-progress-bar').style.width = `${progressPercent}%`;
+@@ -2792,10 +2861,10 @@
+         profItems = items.filter(item => item.professional === currentProfessional);
+     }
+     
+-    const profMatchedCount = profItems.filter(item => hasReviewApproval(item)).length;
++    const profMatchedCount = profItems.filter(item => item.is_exact || item.matched_code !== "").length;
+     const profProgressPercent = Math.round((profMatchedCount / profItems.length) * 100) || 0;
+     
+-    document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}可导出进度`;
++    document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}匹配进度:`;
+     document.getElementById('current-prof-progress-bar').style.width = `${profProgressPercent}%`;
+     document.getElementById('current-prof-progress-percent').innerText = `${profProgressPercent}%`;
+ }
+@@ -2807,7 +2876,6 @@
+     showLoading("正在精准写入模板并导出报表...", "系统正在执行非破坏性写入，自动填充价格列并重新生成序号，请稍候...", 0);
+     
+     try {
+-        await Promise.all(items.map(persistReviewEdit));
+         const response = await fetch(`${backendUrl}/api/export`, {
+             method: 'POST',
+             headers: {
+@@ -3690,7 +3758,6 @@
+ async function saveDraft() {
+     if (items.length === 0) return;
+     try {
+-        await Promise.all(items.map(persistReviewEdit));
+         const payload = {
+             original_filename: originalFileName,
+             professional: currentProfessional || '全部',
+@@ -3714,7 +3781,7 @@
+     const downgradeUnverified = () => {
+         let downgraded = 0;
+         items.forEach(item => {
+-            if (hasReviewApproval(item)) {
++            if (['auto_accepted', 'manual_confirmed'].includes(item.decision_status) || item.is_exact) {
+                 downgraded++;
+             }
+             if (!item.decision_status || ['auto_accepted', 'manual_confirmed'].includes(item.decision_status)) {
+@@ -3824,7 +3891,6 @@
+     if (items.length === 0) return;
+     try {
+         showLoading("正在保存工作进度...", "正在备份当前清单匹配工作状态，请稍候...");
+-        await Promise.all(items.map(persistReviewEdit));
+         const payload = {
+             session_name: name,
+             original_filename: originalFileName,
+--- a/web/index.css
++++ b/web/index.css
+@@ -1628,60 +1628,3 @@
+     }
+ }
+ 
+-.review-filters {
+-    flex-wrap: wrap;
+-}
+-
+-.review-filters .filter-tab {
+-    white-space: nowrap;
+-}
+-
+-.review-evidence {
+-    padding: 12px 14px;
+-    margin-bottom: 10px;
+-    border: 1px solid var(--border-color);
+-    border-radius: var(--radius-sm);
+-    color: var(--color-text-secondary);
+-    font-size: 12px;
+-}
+-
+-.review-heading, .review-actions {
+-    display: flex;
+-    flex-wrap: wrap;
+-    align-items: center;
+-    gap: 8px;
+-}
+-
+-.review-heading {
+-    justify-content: space-between;
+-}
+-
+-.review-heading h4 {
+-    margin: 0;
+-    color: var(--color-text-primary);
+-    font-size: 13px;
+-}
+-
+-#review-reason {
+-    margin: 6px 0;
+-}
+-
+-#review-differences {
+-    display: grid;
+-    grid-template-columns: auto minmax(0, 1fr);
+-    gap: 4px 10px;
+-    margin: 0;
+-    overflow-wrap: anywhere;
+-}
+-
+-#review-differences dt { font-weight: 600; }
+-#review-differences dd { margin: 0; }
+-.review-actions .btn { min-height: 32px; }
+-.review-actions .review-reject { color: var(--color-danger); }
+-
+-.row-status-pill[data-state="auto_accepted"] { color: #16754e; background: #e8faf2; }
+-.row-status-pill[data-state="manual_confirmed"] { color: #18549e; background: #eaf3ff; }
+-.row-status-pill[data-state="recommended"] { color: #69500c; background: #fff6d8; }
+-.row-status-pill[data-state="needs_parameters"] { color: #864219; background: #fff0e1; }
+-.row-status-pill[data-state="rejected"] { color: #a52333; background: #ffebed; }
+-
+--- a/web/index.html
++++ b/web/index.html
+@@ -27,7 +27,7 @@
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+     <!-- FontAwesome Icons -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+-    <link rel="stylesheet" href="index.css?v=v019_m3">
++    <link rel="stylesheet" href="index.css?v=20260818_corp">
+ </head>
+ <body>
+     <div class="app-container">
+@@ -93,7 +93,7 @@
+                     <ul class="feature-list">
+                         <li><i class="fa-solid fa-check text-success"></i> <strong>目标列属性解析</strong>：自动清洗并提取设备材料名称、型号和核心规格参数</li>
+                         <li><i class="fa-solid fa-check text-success"></i> <strong>全结构化检索</strong>：在4.6万行物料明细中进行毫秒级智能比对</li>
+-                        <li><i class="fa-solid fa-check text-success"></i> <strong>候选推荐</strong>：按行查看候选、关键差异和复核状态</li>
++                        <li><i class="fa-solid fa-check text-success"></i> <strong>精准与模糊推荐</strong>：100%对齐自动回写，其余提供Top-3高相似度候选</li>
+                         <li><i class="fa-solid fa-check text-success"></i> <strong>规范化回写导出</strong>：保留标准模板的原生样式和公式</li>
+                     </ul>
+                     <button class="btn btn-large btn-primary" id="welcome-upload-btn">
+@@ -114,13 +114,11 @@
+                                 <!-- Dynamically loaded tabs -->
+                             </div>
+                         </div>
+-                        <div class="filter-bar review-filters" role="group" aria-label="按复核状态筛选">
+-                            <button class="filter-tab active" data-filter="all" aria-pressed="true">全部</button>
+-                            <button class="filter-tab" data-filter="auto_accepted" aria-pressed="false">自动接受</button>
+-                            <button class="filter-tab" data-filter="manual_confirmed" aria-pressed="false">人工确认</button>
+-                            <button class="filter-tab" data-filter="recommended" aria-pressed="false">待复核</button>
+-                            <button class="filter-tab" data-filter="needs_parameters" aria-pressed="false">待补参</button>
+-                            <button class="filter-tab" data-filter="rejected" aria-pressed="false">拒绝</button>
++                        <div class="filter-bar">
++                            <button class="filter-tab active" data-filter="all">全部</button>
++                            <button class="filter-tab" data-filter="exact"><span class="badge badge-success"></span> 精确匹配</button>
++                            <button class="filter-tab" data-filter="fuzzy"><span class="badge badge-warning"></span> 待确认</button>
++                            <button class="filter-tab" data-filter="unmatched"><span class="badge badge-danger"></span> 未匹配</button>
+                         </div>
+                         <div class="search-box">
+                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
+@@ -151,14 +149,14 @@
+                     </div>
+                     <div class="panel-footer status-bar" style="display: flex; flex-direction: column; gap: 8px; height: auto; padding: 12px 16px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.1);">
+                         <div class="progress-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+-                            <span class="label" id="current-prof-progress-label" style="font-size: 12px; color: var(--color-text-primary);">暖通可导出进度</span>
++                            <span class="label" id="current-prof-progress-label" style="font-size: 12px; color: var(--color-text-primary);">暖通匹配进度:</span>
+                             <div class="progress-bar-container" style="flex: 1; margin: 0 10px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                 <div class="progress-bar" id="current-prof-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 4px; transition: width 0.3s ease;"></div>
+                             </div>
+                             <span class="value" id="current-prof-progress-percent" style="font-size: 12px; font-weight: 600; min-width: 32px; text-align: right;">0%</span>
+                         </div>
+                         <div class="progress-info" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+-                            <span class="label" style="font-size: 12px; color: var(--color-text-secondary);">总体可导出进度</span>
++                            <span class="label" style="font-size: 12px; color: var(--color-text-secondary);">总体匹配进度:</span>
+                             <div class="progress-bar-container" style="flex: 1; margin: 0 10px; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                 <div class="progress-bar" id="match-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px; transition: width 0.3s ease;"></div>
+                             </div>
+@@ -242,22 +240,13 @@
+ 
+                             <!-- Bottom: Recommendations / Candidate Selector (Scrollable) -->
+                             <div class="detail-scroll-bottom scroll-y">
+-                                <section class="review-evidence" aria-label="复核依据">
+-                                    <div class="review-heading">
+-                                        <h4>复核依据</h4>
+-                                        <span id="review-status" class="row-status-pill" role="status"></span>
+-                                    </div>
+-                                    <p id="review-reason"></p>
+-                                    <dl id="review-differences"></dl>
+-                                </section>
+                                 <!-- Bound Materials Section -->
+                                 <div class="glass-card section-card bound-materials-card">
+                                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                                         <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 已绑定物料 (<span id="bound-materials-count">0</span>)</span>
+-                                        <div class="review-actions">
+-                                            <button class="btn btn-secondary review-reject" id="reject-match-btn" type="button">拒绝此行</button>
+-                                            <button class="btn btn-success" id="confirm-match-finished-btn" type="button">确认绑定</button>
+-                                        </div>
++                                        <button class="btn btn-success" id="confirm-match-finished-btn" style="padding: 4px 12px; font-size: 11.5px; font-weight: 600; height: 28px;">
++                                            <i class="fa-solid fa-circle-check"></i> 确认匹配完成
++                                        </button>
+                                     </div>
+                                     <div class="bound-materials-list" id="bound-materials-list">
+                                         <!-- Loaded dynamically -->
+@@ -267,8 +256,8 @@
+                                 <!-- Bottom: Recommendations / Candidate Selector -->
+                                 <div class="recommendations-section">
+                                     <div class="section-header" style="margin-top: 0;">
+-                                        <h4>推荐候选</h4>
+-                                        <span class="sub">点选加入绑定，再次点选移除</span>
++                                        <h4>推荐匹配候选 (Top 3)</h4>
++                                        <span class="sub">点击卡片即可直接套用并覆盖该物料</span>
+                                     </div>
+                                     
+                                     <div class="candidates-list" id="candidates-container" style="margin-top: 10px;">
+@@ -1390,6 +1379,6 @@
+         </div>
+     </div>
+ 
+-    <script src="app.js?v=v019_m3"></script>
++    <script src="app.js?v=20260817_3col"></script>
+ </body>
+ </html>

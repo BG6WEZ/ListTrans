@@ -1,0 +1,39 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "verdict": "RETURN_FOR_REWORK",
+  "next_package": "V015-M5 R02",
+  "open_P1": [
+    "A-M5-01",
+    "A-M5-02"
+  ],
+  "open_current_P2": [
+    "A-M5-03",
+    "A-M5-04",
+    "A-M5-05"
+  ],
+  "delivery_checked_at_start": 30,
+  "delivery_mismatches_at_start": [],
+  "frozen_inputs_checked": 101,
+  "frozen_input_changes": [],
+  "developer_fixed_delivery_changes": [],
+  "active_ledger_updated": true,
+  "backup_checked": 12,
+  "backup_mismatches": [],
+  "out_of_scope_source_changes": [],
+  "business_snapshot_equal": true,
+  "before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "verify": {
+    "before": "PASS",
+    "after": "PASS"
+  },
+  "independent_suite": "269 passed / 0 warnings / 150.01s",
+  "suite_exit_code": 0,
+  "independent_negative_reproductions": 5,
+  "browser_docker_standalone_three_rule_rerun": false,
+  "production_operations": false,
+  "PRG_F11": "OPEN_BEFORE_FIRST_REAL_DEPLOYMENT",
+  "future_versions": "LOCKED",
+  "broken_new_review_links": [],
+  "integrity_verdict": "PASS"
+}

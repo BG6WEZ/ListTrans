@@ -1,0 +1,7 @@
+{
+  "harmful_passed": false,
+  "beneficial_passed": true,
+  "neutral_passed": true,
+  "score_comparison_diffs": [],
+  "compared_against": "c:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r04_gate_reports.json"
+}

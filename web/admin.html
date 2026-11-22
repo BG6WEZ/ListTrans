@@ -1211,13 +1211,25 @@
                         <input type="text" id="fw-edit-src" readonly style="opacity: 0.8;">
                     </div>
                     <div class="form-group">
+                        <label for="fw-edit-discipline">作用域专业 (必填具体专业，如 暖通 / 给排水 / 强电 / 医气) *</label>
+                        <input type="text" id="fw-edit-discipline" placeholder="暖通 / 给排水 / 强电 / 弱电 / 医用气体" required>
+                    </div>
+                    <div class="form-group">
                         <label for="fw-edit-target">建议目标映射值 (支持人工微调纠正) *</label>
                         <textarea id="fw-edit-target" rows="3" required></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="fw-edit-neutral-reason">中性收益启用理由 (当沙箱评测为 neutral 时必填)</label>
+                        <input type="text" id="fw-edit-neutral-reason" placeholder="若评测结果无退化且无改善，须填写启用依据">
+                    </div>
+                    <div id="fw-edit-eval-badge" style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 10px;">
+                        沙箱评测凭据：未评测（修改目标值/专业后需先重新评测通过）
+                    </div>
                     <div style="background: rgba(59,130,246,0.1); border-left: 3px solid #3b82f6; padding: 10px; border-radius: 4px; font-size: 12px; color: #93c5fd; margin-bottom: 12px;">
-                        💡 采纳后将自动生成配置快照，原子写回配置文件并秒级热重载生效。
+                        💡 采纳前必须完成对应内容/专业的沙箱评测凭据校验，采纳后原子写回配置快照并秒级热重载。
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn-action" id="fw-edit-eval-btn" onclick="startEditedFlywheelEval()">🧪 评测微调值</button>
                         <button type="button" class="btn-action" onclick="closeModal('fw-edit-modal')">取消</button>
                         <button type="submit" class="btn-action btn-primary-action">确认采纳并生效</button>
                     </div>
@@ -1352,8 +1364,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="create-password">初始密码 (默认：hkjj@12345)</label>
-                    <input type="password" id="create-password" value="hkjj@12345" required placeholder="至少6位">
+                    <label for="create-password">初始临时密码（留空由系统自动生成唯一强临时密码）</label>
+                    <input type="password" id="create-password" minlength="8" placeholder="留空自动生成一次性随机临时密码（推荐）">
                 </div>
 
                 <div class="modal-footer">
@@ -1446,8 +1458,8 @@
             <form id="pwd-form">
                 <input type="hidden" id="pwd-user-id">
                 <div class="form-group">
-                    <label id="pwd-user-label">为用户重置密码</label>
-                    <input type="password" id="new-password" placeholder="请输入至少6位新密码" required minlength="6">
+                    <label id="pwd-user-label">为用户重置密码（留空由系统生成唯一强临时密码）</label>
+                    <input type="password" id="new-password" placeholder="留空自动生成唯一随机临时密码（推荐，或输入>=8位强密码）" minlength="8">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-action" onclick="closeModal('pwd-modal')">取消</button>
@@ -2344,7 +2356,7 @@
         }
 
         async function syncPersonnelFromExcel() {
-            if (!confirm('确定要从 doc/人员清单.xls 自动同步并更新企业全员账号吗？\n新增员工将采用手机号作为账号并初始化默认密码。')) return;
+            if (!confirm('确定要从 doc/人员清单.xls 自动同步并更新企业全员账号吗？\n新增员工将自动生成唯一一次性随机临时密码并要求首次改密。')) return;
             
             try {
                 const res = await fetch(`${API_URL}/api/admin/users/sync-excel`, {
@@ -2353,7 +2365,13 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '同步失败'));
-                alert(`人员清单同步完成！\n新增: ${data.imported_count || 0} 人\n更新: ${data.updated_count || 0} 人\n总计: ${data.total || 0} 人`);
+                const creds = Array.isArray(data.created_credentials) ? data.created_credentials : [];
+                let msg = `人员清单同步完成！\n新增: ${data.imported_count || 0} 人\n更新: ${data.updated_count || 0} 人\n总计: ${data.total || 0} 人`;
+                if (creds.length > 0) {
+                    const preview = creds.slice(0, 10).map(c => `${c.username} (${c.name || ''}): ${c.temp_password}`).join('\n');
+                    msg += `\n\n一次性临时密码（仅显示本次，请安全分发）:\n${preview}` + (creds.length > 10 ? `\n...共 ${creds.length} 条（请勿写入普通日志）` : '');
+                }
+                alert(msg);
                 fetchUsers();
             } catch (err) {
                 alert('同步出错: ' + err.message);
@@ -2362,7 +2380,7 @@
 
         function openCreateModal() {
             document.getElementById('create-form').reset();
-            document.getElementById('create-password').value = 'hkjj@12345';
+            document.getElementById('create-password').value = '';
             document.getElementById('create-modal').style.display = 'flex';
         }
 
@@ -2380,28 +2398,33 @@
             }
             const position = document.getElementById('create-position').value.trim();
             const role = document.getElementById('create-role').value;
-            const password = document.getElementById('create-password').value;
+            const password = document.getElementById('create-password').value.trim();
 
             try {
+                const payload = {
+                    username: phone,
+                    phone,
+                    name,
+                    dept1,
+                    dept2,
+                    dept3,
+                    employee_no,
+                    position,
+                    role
+                };
+                if (password) payload.password = password;
                 const res = await fetch(`${API_URL}/api/admin/users`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        username: phone,
-                        phone,
-                        name,
-                        dept1,
-                        dept2,
-                        dept3,
-                        employee_no,
-                        position,
-                        role,
-                        password
-                    })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '创建用户失败'));
-                alert(data.detail || '用户创建成功！');
+                let msg = data.detail || '用户创建成功！';
+                if (data.temp_password) {
+                    msg += `\n一次性临时密码（仅展示一次）：${data.temp_password}`;
+                }
+                alert(msg);
                 closeModal('create-modal');
                 fetchUsers();
             } catch (err) {
@@ -2452,25 +2475,30 @@
 
         function openPwdModal(id, name) {
             document.getElementById('pwd-user-id').value = id;
-            document.getElementById('pwd-user-label').innerText = `为员工 "${name}" 重置新密码:`;
-            document.getElementById('new-password').value = 'hkjj@12345';
+            document.getElementById('pwd-user-label').innerText = `为员工 "${name}" 重置密码（留空则自动生成唯一随机临时密码）:`;
+            document.getElementById('new-password').value = '';
             document.getElementById('pwd-modal').style.display = 'flex';
         }
 
         document.getElementById('pwd-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('pwd-user-id').value;
-            const new_password = document.getElementById('new-password').value;
+            const new_password = document.getElementById('new-password').value.trim();
 
             try {
+                const payload = new_password ? { new_password } : {};
                 const res = await fetch(`${API_URL}/api/admin/users/${id}/password`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ new_password })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '密码重置失败'));
-                alert(data.detail || '密码重置成功');
+                let msg = data.detail || '密码重置成功';
+                if (data.temp_password) {
+                    msg += `\n一次性临时密码（仅展示一次）：${data.temp_password}`;
+                }
+                alert(msg);
                 closeModal('pwd-modal');
             } catch (err) {
                 alert(err.message);
@@ -2856,31 +2884,40 @@
             }
         }
 
-        async function startFlywheelEval(suggestionId) {
+        window._fwEvalCache = window._fwEvalCache || {};
+
+        async function startFlywheelEval(suggestionId, overrideTarget = null, overrideDiscipline = null) {
+            const sug = (allFlywheelSuggestions || []).find(item => item.id === suggestionId) || {};
+            const effectiveTarget = overrideTarget !== null ? overrideTarget : (sug.target_value || '');
+            const effectiveDisc = overrideDiscipline !== null ? overrideDiscipline : (sug.discipline || '');
+
             document.getElementById('fw-eval-title').innerText = '正在排队并启动隔离子进程沙箱评测...';
-            document.getElementById('fw-eval-msg').innerText = '正在克隆隔离环境并在独立进程执行定向黄金集验证...';
+            document.getElementById('fw-eval-msg').innerText = '正在克隆隔离环境并在独立进程执行定向+保护集回归评测...';
             document.getElementById('fw-eval-bar').style.width = '15%';
             document.getElementById('fw-eval-report').style.display = 'none';
             document.getElementById('fw-eval-modal').style.display = 'flex';
 
             try {
+                const payload = { suggestion_id: suggestionId };
+                if (overrideTarget !== null) payload.edited_target_value = overrideTarget;
+                if (overrideDiscipline !== null) payload.discipline = overrideDiscipline;
                 const res = await fetch(`${API_URL}/api/flywheel/suggestions/eval`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ suggestion_id: suggestionId })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '启动评测失败'));
                 
-                const taskId = data.task_id;
-                pollFlywheelEvalTask(taskId);
+                const taskId = data.task_id || data.eval_id;
+                pollFlywheelEvalTask(taskId, suggestionId, effectiveTarget, effectiveDisc);
             } catch (err) {
                 document.getElementById('fw-eval-title').innerText = '沙箱评测启动失败';
                 document.getElementById('fw-eval-msg').innerText = err.message;
             }
         }
 
-        function pollFlywheelEvalTask(taskId) {
+        function pollFlywheelEvalTask(taskId, suggestionId, evaluatedTarget, evaluatedDiscipline) {
             if (evalPollTimer) clearInterval(evalPollTimer);
             
             evalPollTimer = setInterval(async () => {
@@ -2897,18 +2934,32 @@
                     if (data.status === 'completed' || data.status === 'failed') {
                         clearInterval(evalPollTimer);
                         evalPollTimer = null;
-                        
+                        const evalId = data.eval_id || taskId;
+                        const benefit = data.benefit || (data.report && data.report.benefit) || 'invalid';
+                        const safetyPassed = Boolean(data.safety_passed ?? data.passed);
+                        window._fwEvalCache[suggestionId] = {
+                            eval_id: evalId,
+                            benefit,
+                            safety_passed: safetyPassed,
+                            target_value: evaluatedTarget,
+                            discipline: evaluatedDiscipline
+                        };
+                        updateEditModalEvalBadge(suggestionId);
+
                         if (data.status === 'completed') {
-                            document.getElementById('fw-eval-title').innerText = data.passed ? '✅ 沙箱评测通过 (可放心采纳)' : '⚠️ 评测未通过 (发现退化风险)';
+                            document.getElementById('fw-eval-title').innerText = safetyPassed
+                                ? (benefit === 'improved' ? '✅ 沙箱评测通过 (improved，可放心采纳)' : `⚠️ 安全通过但收益为 ${benefit} (需审批理由)`)
+                                : `❌ 评测未通过 (${benefit} / 发现退化或资产异常)`;
                             const rep = data.report || {};
                             document.getElementById('fw-eval-report').innerHTML = `
-                                <div style="font-weight: 600; margin-bottom: 6px; color: ${data.passed ? '#34d399' : '#ef4444'};">
-                                    评测结论：${escapeHtml(rep.reason || '-')}
+                                <div style="font-weight: 600; margin-bottom: 6px; color: ${safetyPassed ? '#34d399' : '#ef4444'};">
+                                    评测凭据：<code>${escapeHtml(evalId)}</code> | 收益等级：<strong>${escapeHtml(benefit)}</strong>
                                 </div>
                                 <div style="font-size: 12.5px; line-height: 1.8;">
-                                    • 定向用例覆盖量：<strong>${rep.targeted_count || 0}</strong> 条<br>
-                                    • 收益改善用例数：<strong style="color: #34d399;">+${rep.improved_count || 0}</strong><br>
-                                    • 恶化退化用例数：<strong style="color: #ef4444;">-${rep.degraded_count || 0}</strong>
+                                    • 评测结论：${escapeHtml(rep.reason || '-')}<br>
+                                    • 定向用例覆盖量：<strong>${rep.targeted_count || 0}</strong> 条（改善 +${rep.improved_count || 0} / 退化 -${rep.degraded_count || 0}）<br>
+                                    • 全局保护集：<strong>${rep.guard_report ? (rep.guard_report.targeted_count || 0) : 0}</strong> 条<br>
+                                    • 真实命中次数：<strong>${rep.rule_execution_hits ?? 0}</strong>
                                 </div>
                             `;
                             document.getElementById('fw-eval-report').style.display = 'block';
@@ -2923,12 +2974,24 @@
         }
 
         async function acceptFlywheelSuggestionDirect(suggestionId) {
+            const sug = (allFlywheelSuggestions || []).find(item => item.id === suggestionId) || {};
+            const cached = window._fwEvalCache[suggestionId];
+            const evalId = (cached && cached.eval_id) || sug.last_eval_id || '';
+            let neutralReason = null;
+            if (cached && cached.benefit === 'neutral') {
+                neutralReason = prompt('该规则沙箱收益为 neutral（无实际改善），确需启用请填写审批理由:');
+                if (neutralReason === null) return;
+            }
             if (!confirm('确定采纳此条规则建议并原子写回配置吗？系统将秒级热重载生效。')) return;
             try {
+                const payload = { suggestion_id: suggestionId };
+                if (evalId) payload.eval_id = evalId;
+                if (sug.discipline) payload.discipline = sug.discipline;
+                if (neutralReason !== null) payload.neutral_reason = neutralReason;
                 const res = await fetch(`${API_URL}/api/flywheel/suggestions/accept`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({ suggestion_id: suggestionId })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '采纳失败'));
@@ -2940,29 +3003,77 @@
             }
         }
 
+        function updateEditModalEvalBadge(suggestionId) {
+            const el = document.getElementById('fw-edit-eval-badge');
+            if (!el) return;
+            const cached = window._fwEvalCache[suggestionId];
+            const curTarget = (document.getElementById('fw-edit-target')?.value || '').trim();
+            const curDisc = (document.getElementById('fw-edit-discipline')?.value || '').trim();
+            if (cached && cached.target_value === curTarget && (!cached.discipline || cached.discipline === curDisc)) {
+                el.innerHTML = `沙箱评测凭据：<code>${escapeHtml(cached.eval_id)}</code> (benefit=<strong>${escapeHtml(cached.benefit)}</strong>)`;
+            } else {
+                el.innerText = '沙箱评测凭据：待重新评测（目标值或专业变更后需重新评测）';
+            }
+        }
+
         function openEditFlywheelModal(s) {
             document.getElementById('fw-edit-id').value = s.id;
             document.getElementById('fw-edit-src').value = s.source_pattern;
+            document.getElementById('fw-edit-discipline').value = s.discipline || '';
             document.getElementById('fw-edit-target').value = s.target_value;
+            document.getElementById('fw-edit-neutral-reason').value = '';
+            updateEditModalEvalBadge(s.id);
             document.getElementById('fw-edit-modal').style.display = 'flex';
         }
+
+        function startEditedFlywheelEval() {
+            const suggestionId = parseInt(document.getElementById('fw-edit-id').value);
+            const editedTarget = document.getElementById('fw-edit-target').value.trim();
+            const discipline = document.getElementById('fw-edit-discipline').value.trim();
+            if (!editedTarget) {
+                alert('建议目标映射值不能为空');
+                return;
+            }
+            if (!discipline) {
+                alert('必须填写明确专业作用域');
+                return;
+            }
+            startFlywheelEval(suggestionId, editedTarget, discipline);
+        }
+
+        document.getElementById('fw-edit-target').addEventListener('input', () => {
+            const sid = parseInt(document.getElementById('fw-edit-id').value);
+            if (sid) updateEditModalEvalBadge(sid);
+        });
+        document.getElementById('fw-edit-discipline').addEventListener('input', () => {
+            const sid = parseInt(document.getElementById('fw-edit-id').value);
+            if (sid) updateEditModalEvalBadge(sid);
+        });
 
         document.getElementById('fw-edit-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const suggestionId = parseInt(document.getElementById('fw-edit-id').value);
             const editedTarget = document.getElementById('fw-edit-target').value.trim();
+            const discipline = document.getElementById('fw-edit-discipline').value.trim();
+            const neutralReason = document.getElementById('fw-edit-neutral-reason').value.trim();
             if (!editedTarget) {
                 alert('建议目标映射值不能为空');
                 return;
             }
+            const cached = window._fwEvalCache[suggestionId];
+            const evalId = (cached && cached.target_value === editedTarget) ? cached.eval_id : '';
             try {
+                const payload = {
+                    suggestion_id: suggestionId,
+                    edited_target_value: editedTarget,
+                    discipline: discipline
+                };
+                if (evalId) payload.eval_id = evalId;
+                if (neutralReason) payload.neutral_reason = neutralReason;
                 const res = await fetch(`${API_URL}/api/flywheel/suggestions/accept`, {
                     method: 'POST',
                     headers: getAuthHeaders(),
-                    body: JSON.stringify({
-                        suggestion_id: suggestionId,
-                        edited_target_value: editedTarget
-                    })
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(extractErrorMessage(data.detail, '微调采纳失败'));

@@ -22,11 +22,15 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from app.server import app, atomic_write_json_config, trigger_all_config_reloads
 from app.db_manager import get_db_cursor, init_db
-from app.auth_manager import create_access_token, init_auth_db, get_auth_connection, get_password_hash
+from app.auth_manager import issue_token_for_user, get_user_by_username, init_auth_db, get_auth_connection, get_password_hash
 from app.flywheel_db import init_flywheel_tables
 from app.feedback_miner import miner
 
 client = TestClient(app)
+
+_SANDBOX_FIXTURE = os.path.join(
+    PROJECT_ROOT, "tests", "fixtures", "sandbox_materials_v1.json"
+)
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test_environment():
@@ -38,9 +42,9 @@ def setup_test_environment():
     conn = get_auth_connection()
     cur = conn.cursor()
     pwd_hash = get_password_hash("testpass123")
-    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active) VALUES ('admin_e2e_tester', ?, '测试管理员', 'admin', 1)", (pwd_hash,))
-    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active) VALUES ('engineer_alice', ?, '工程师爱丽丝', 'employee', 1)", (pwd_hash,))
-    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active) VALUES ('engineer_bob', ?, '工程师鲍勃', 'employee', 1)", (pwd_hash,))
+    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active, must_change_password, account_epoch) VALUES ('admin_e2e_tester', ?, '测试管理员', 'admin', 1, 0, 'ep-adm-e2e')", (pwd_hash,))
+    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active, must_change_password, account_epoch) VALUES ('engineer_alice', ?, '工程师爱丽丝', 'employee', 1, 0, 'ep-alice')", (pwd_hash,))
+    cur.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active, must_change_password, account_epoch) VALUES ('engineer_bob', ?, '工程师鲍勃', 'employee', 1, 0, 'ep-bob')", (pwd_hash,))
     conn.commit()
     conn.close()
 
@@ -51,33 +55,96 @@ def setup_test_environment():
         c.execute("DELETE FROM flywheel_config_snapshots")
         c.execute("DELETE FROM flywheel_pattern_aggregates")
 
+    # 可观察基线前置：仅向隔离库播种既定合成 fixture，禁止空库全 0 稳态通过。
+    # 与 test_flywheel_sandbox.py 使用同一真实 XLSX 导入链路及只读金标目标物料。
+    import pandas as pd
+    from app.db_manager import import_materials_from_excel, get_all_materials
+
+    with open(_SANDBOX_FIXTURE, encoding="utf-8") as f:
+        materials = json.load(f)["materials"]
+    xlsx_path = os.path.join(os.environ["UPLOAD_DIR"], "e2e_sandbox_materials.xlsx")
+    pd.DataFrame([
+        {
+            "物料分类": m["category"], "物料编码": m["code"],
+            "物料名称": m["name"], "规格/型号": m["spec"],
+            "计量单位": "台", "常用品牌": "", "描述": "",
+        }
+        for m in materials
+    ]).to_excel(xlsx_path, index=False, startrow=1)
+    meta = import_materials_from_excel(xlsx_path, mode="replace", filename="e2e_sandbox_materials.xlsx")
+    assert meta.get("imported_rows", 0) > 0
+    assert len(get_all_materials(limit=10 ** 6)) == len(materials)
+
+def _upload_e2e_rows(headers, filename, rows):
+    import io
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "医用气体"
+    ws.append(["项目编码", "项目名称", "项目特征描述", "计量单位", "工程量"])
+    for r in rows:
+        ws.append(r)
+    buf = io.BytesIO()
+    wb.save(buf)
+    wb.close()
+    up = client.post(
+        "/api/upload",
+        headers=headers,
+        files={"file": (filename, buf.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+    )
+    assert up.status_code == 200, up.text
+    task_id = up.json()["task_id"]
+    st = client.get(f"/api/upload/status?task_id={task_id}", headers=headers)
+    assert st.status_code == 200, st.text
+    body = st.json()
+    assert body["status"] == "completed", body
+    return body["result"]
+
+
 def test_flywheel_end_to_end_pipeline(tmp_path):
     """Test full Data Flywheel pipeline: Record -> Mine -> Sandbox Eval -> Accept -> Hot Reload -> Rollback -> Export."""
     # 1. Auth headers
-    admin_token = create_access_token(data={"sub": "admin_e2e_tester", "role": "admin"})
+    admin_token = issue_token_for_user(get_user_by_username("admin_e2e_tester"))
     admin_headers = {"Authorization": f"Bearer {admin_token}"}
     
-    user1_token = create_access_token(data={"sub": "engineer_alice", "role": "employee"})
+    user1_token = issue_token_for_user(get_user_by_username("engineer_alice"))
     user1_headers = {"Authorization": f"Bearer {user1_token}"}
     
-    user2_token = create_access_token(data={"sub": "engineer_bob", "role": "employee"})
+    user2_token = issue_token_for_user(get_user_by_username("engineer_bob"))
     user2_headers = {"Authorization": f"Bearer {user2_token}"}
+
+    alice_rows = _upload_e2e_rows(
+        user1_headers,
+        "alice_e2e.xlsx",
+        [
+            ["030101", "医用脱脂无缝紫铜管", "D15*1.0", "米", 10],
+            ["030102", "医用脱脂无缝紫铜管", "D22*1.2", "米", 20],
+        ],
+    )
+    bob_rows = _upload_e2e_rows(
+        user2_headers,
+        "bob_e2e.xlsx",
+        [
+            ["030101", "医用脱脂无缝紫铜管", "D28*1.5", "米", 30],
+        ],
+    )
 
     # 2. Insert feedback stream for alias: "医用脱脂无缝紫铜管" -> "磷酸脱氧无缝紫铜管" (3 actions from 2 distinct users)
     records_to_insert = [
-        (user1_headers, "evt_e2e_1", "sess_e1", 1, "医用脱脂无缝紫铜管", "D15*1.0", "MANUAL_REPLACE", [{"code": "2.17.01.0001", "name": "磷酸脱氧无缝紫铜管", "spec": "D15*1.0"}]),
-        (user1_headers, "evt_e2e_2", "sess_e2", 2, "医用脱脂无缝紫铜管", "D22*1.2", "PICK_CANDIDATE", [{"code": "2.17.01.0002", "name": "磷酸脱氧无缝紫铜管", "spec": "D22*1.2"}]),
-        (user2_headers, "evt_e2e_3", "sess_e3", 1, "医用脱脂无缝紫铜管", "D28*1.5", "MANUAL_REPLACE", [{"code": "2.17.01.0003", "name": "磷酸脱氧无缝紫铜管", "spec": "D28*1.5"}]),
+        (user1_headers, "evt_e2e_1", alice_rows[0], "MANUAL_REPLACE", [{"code": "2.17.01.0001", "name": "磷酸脱氧无缝紫铜管", "spec": "D15*1.0"}]),
+        (user1_headers, "evt_e2e_2", alice_rows[1], "PICK_CANDIDATE", [{"code": "2.17.01.0002", "name": "磷酸脱氧无缝紫铜管", "spec": "D22*1.2"}]),
+        (user2_headers, "evt_e2e_3", bob_rows[0], "MANUAL_REPLACE", [{"code": "2.17.01.0003", "name": "磷酸脱氧无缝紫铜管", "spec": "D28*1.5"}]),
     ]
 
-    for headers, evt_id, sess_id, r_idx, r_name, r_spec, act_type, targets in records_to_insert:
+    for headers, evt_id, row_ctx, act_type, targets in records_to_insert:
         payload = {
             "client_event_id": evt_id,
-            "session_id": sess_id,
-            "row_idx": r_idx,
-            "discipline": "医用气体",
-            "raw_name": r_name,
-            "raw_spec": r_spec,
+            "document_id": row_ctx["document_id"],
+            "sheet_id": row_ctx["sheet_id"],
+            "source_row_id": row_ctx["source_row_id"],
+            "recommendation_snapshot_id": row_ctx["recommendation_snapshot_id"],
+            "event_seq": 1,
             "action_type": act_type,
             "final_targets": targets
         }
@@ -126,13 +193,51 @@ def test_flywheel_end_to_end_pipeline(tmp_path):
                 break
     assert eval_finished, "Sandbox evaluation timed out"
 
-    # 6. Accept suggestion
+    # 6. Verify accept requires eval_id and rejects post-eval edit, then accepts with valid eval_id
+    missing_eval_res = client.post(
+        "/api/flywheel/suggestions/accept",
+        json={"suggestion_id": sug["id"], "discipline": sug.get("discipline") or "医用气体"},
+        headers=admin_headers,
+    )
+    assert missing_eval_res.status_code == 409
+
+    edited_mismatch_res = client.post(
+        "/api/flywheel/suggestions/accept",
+        json={
+            "suggestion_id": sug["id"],
+            "edited_target_value": "铜质阀门配件",
+            "eval_id": task_id,
+            "discipline": sug.get("discipline") or "医用气体",
+        },
+        headers=admin_headers,
+    )
+    assert edited_mismatch_res.status_code == 409
+
+    if st_data.get("benefit") == "neutral":
+        no_reason_res = client.post(
+            "/api/flywheel/suggestions/accept",
+            json={
+                "suggestion_id": sug["id"],
+                "edited_target_value": "磷酸脱氧无缝紫铜管",
+                "eval_id": task_id,
+                "discipline": sug.get("discipline") or "医用气体",
+            },
+            headers=admin_headers,
+        )
+        assert no_reason_res.status_code == 422
+
     accept_res = client.post(
         "/api/flywheel/suggestions/accept",
-        json={"suggestion_id": sug["id"], "edited_target_value": "磷酸脱氧无缝紫铜管"},
+        json={
+            "suggestion_id": sug["id"],
+            "edited_target_value": "磷酸脱氧无缝紫铜管",
+            "eval_id": task_id,
+            "discipline": sug.get("discipline") or "医用气体",
+            "neutral_reason": "E2E验证中性稳态别名经审批采纳" if st_data.get("benefit") == "neutral" else None,
+        },
         headers=admin_headers
     )
-    assert accept_res.status_code == 200
+    assert accept_res.status_code == 200, accept_res.text
     accept_data = accept_res.json()
     snap_ver = accept_data["snapshot_version"]
     assert snap_ver.startswith("snap_")

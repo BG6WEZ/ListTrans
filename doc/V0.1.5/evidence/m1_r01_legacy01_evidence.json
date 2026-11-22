@@ -1,0 +1,80 @@
+{
+  "task": "V015-M1 R01 / LEGACY-01 收口证据",
+  "generated": "2026-11-13",
+  "fixture": {
+    "path": "tests/fixtures/sandbox_materials_v1.json",
+    "sha256": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+    "seeded_rows": 35,
+    "composition": "34 金标目标物料（golden_set_v1.json target_ref 合成）+ 有害别名目标电缆 2.28.03.HARMFUL1 + 中性对照磷酸脱氧无缝紫铜管",
+    "import_entry": "import_materials_from_excel(mode=replace)（真实生产导入链，自动 FTS+parsed_params）",
+    "target_code_coverage": "金标目标码 34 条全部入隔离库；有害规则目标电缆在 fixture 与金标目标集中"
+  },
+  "model": {
+    "offline_model": "model_offline/bge-small-zh-v1.5",
+    "dim": 512,
+    "vector_enabled": true,
+    "load_cache_note": "沙箱评测子进程 main() 内 load_cache 失败自动 rebuild（与生产一致）"
+  },
+  "gate_report_from_full_pytest": {
+    "passed": true,
+    "targeted_count": 24,
+    "improved_count": 0,
+    "degraded_count": 0,
+    "degraded_from_top1": 0,
+    "reason": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条）",
+    "source": "doc/V0.1.5/evidence/m1_r01_full_pytest.log（harmful 原断言失败输出的 report 全文）"
+  },
+  "rank_observable_evidence": {
+    "test": "tests/test_flywheel_sandbox.py::test_sandbox_fixture_rank_observable",
+    "result": "PASSED（venv 全量日志同目录）",
+    "method": "直接调用真实评测入口 evaluate()（沙箱子进程同一链路）；同进程内注入/还原有害别名并 reload_normalizer_configs()",
+    "base_top1_hits": ">0 实测通过（fixture 播种使 rank 可观察，R04 空库 rank 恒 0 根因链断裂）",
+    "degraded_from_top1": ">0 实测通过（同进程注入后排风机用例 top1 恶化，配置差异真实生效）",
+    "neutral_unaffected": "实测通过（中性紫铜管子集 rank 保持，差异只作用于目标子集）",
+    "note": "同进程 evaluate() 不经向量缓存加载，与沙箱子进程（load_cache 后向量开启）存在通道差异；harmful 门禁断言失败保留，与 rank_observable 通过共存"
+  },
+  "score_breakdown_GT0313": {
+    "method": "模拟沙箱子进程环境（隔离布局+播种+load_cache 重建向量索引）对 GT-0313 基线/候选各跑 match_item",
+    "log": "doc/V0.1.5/evidence/m1_r01_diag_score_breakdown.log",
+    "baseline": {
+      "prepared_name": "排风机控制盒",
+      "top1": {
+        "code": "3.55.09.0012",
+        "name": "排风机控制盒",
+        "score": 88.8,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近"
+        ]
+      },
+      "harmful_cable_rank2": {
+        "code": "2.28.03.HARMFUL1",
+        "score": 6.7
+      }
+    },
+    "candidate": {
+      "prepared_name": "低压交联聚乙烯绝缘聚氯乙烯护套电力电缆控制盒",
+      "prepared_spec_kept_original": "名称:排风机控制盒\\n规格:定制,带排风机状态指示灯、启停按钮、紧急停止按钮（原文保留，向量编码文本含原文）",
+      "top1_still_correct": {
+        "code": "3.55.09.0012",
+        "name": "排风机控制盒",
+        "score": 50.7,
+        "reasons": [
+          "配电箱型匹配(ACP)"
+        ],
+        "note": "控制盒后缀经 extract_switchgear_params 提取命中 ACP，正确物料保住 top1 但分数 88.8→50.7"
+      },
+      "harmful_cable_rank2": {
+        "code": "2.28.03.HARMFUL1",
+        "score": 43.1,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近"
+        ],
+        "note": "6.7→43.1 大幅逼近但未反超"
+      }
+    },
+    "conclusion": "有害别名在完整生产管线（向量开启）不改变 top1 归属，但 top1 分数下降 38.1、有害目标分数上升 36.4；沙箱门禁仅按 rank 变化判定，捕获不了同分下降但 top1 保持的情形"
+  },
+  "handover": "门禁以 rank-only 指标放行有害规则属门禁设计缺陷（非 fixture 不足），按 R04 裁决条款保留 harmful 原断言失败并回交统筹裁决；开发不自行改门禁/算法"
+}

@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-22",
+  "generated_at": "2026-11-22T12:14:52.400557+08:00",
+  "role": "coordinator",
+  "version": "V0.2.0",
+  "scope": "V020-M3 R02 ruling + V0.2.0 Final Review (Approved Implementation, Selection, Regression & Conditional RC Scope)",
+  "verdict": "V020_FINAL_APPROVED_CONDITIONAL_RC",
+  "production_release_authorized": false,
+  "v021_authorized": false,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "r02_baseline_check": {
+    "total": 200,
+    "exact_match": 200,
+    "changed": {}
+  },
+  "r02_delivery_check": {
+    "total": 31,
+    "exact_match": 30,
+    "changed": {
+      "doc/V0.2.0/02_任务台账.md": {
+        "delivery": "333dadf80755d01f75fd8ea307f0807cb36a0c3b274c9a9d68db49d5abe27113",
+        "current": "96e480ed72c7aec1bd545715f9155fd7d0306fde57478b7ebdb9e50185e05e82"
+      }
+    },
+    "r02_audit_summary_sha256": "59dfd4a55c205f772dd15cd8ae1afa50a33e2b51d8d221e1e08216b7a4d01b2c"
+  },
+  "signed_timings_recheck": {
+    "keyword_single_n": 1220,
+    "keyword_single_p50_ms": 23.279,
+    "keyword_single_p95_ms": 235.053,
+    "vector_single_n": 1220,
+    "vector_single_p50_ms": 61.491,
+    "vector_single_p95_ms": 279.432
+  },
+  "coordinator_cross_package_pytest": {
+    "modules": [
+      "tests/test_v020_m0_feedback_ranker.py",
+      "tests/test_v020_m1_bom.py",
+      "tests/test_v020_m2_llm_decision.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_v017_m2_catalog_revision.py",
+      "tests/test_m3_hard_constraints.py",
+      "tests/test_m3_hard_constraints_http.py"
+    ],
+    "passed": 167,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "elapsed_seconds": 27.23,
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    }
+  },
+  "business_assets_check": {
+    "asset_count": 35,
+    "unchanged_during_run": true
+  },
+  "auto_binding_rules_content": "[]",
+  "all_10_switches_default_off": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false"
+  },
+  "a_m3_01_ruling": {
+    "status": "DEFERRED_AS_PRE_PROD_GATE",
+    "budget_relaxed": false,
+    "claimed_passed": false,
+    "reason": "Paired 200-item diagnosis proves V0.2.0 outperforms archived V0.1.9 under identical ranking warmup (zero code regression, 40 app/*.py unchanged); dev signed 1220 run passed 5/5 (EXIT=0) while audit rerun on same Windows host was uniformly 10-33% slower (EXIT=2) due to transient host variance; target deployment is Linux Docker (ENV-V017-01).",
+    "owner_and_deadline": "Mandatory pre-production gate paired with ENV-V017-01 on target Linux formal container before any production release authorization (plus optional V0.2.1 optimization).",
+    "guardrails": "Keep all 10 switches OFF, auto_binding_rules=[], V0.1.7 signed budgets intact, production release blocked until PRG-F11 + ENV-V017-01 + A-M3-01 target-Linux retest all pass."
+  },
+  "pre_production_mandatory_gates": [
+    "PRG-F11",
+    "ENV-V017-01",
+    "A-M3-01 (target Linux controlled retest)"
+  ]
+}

@@ -1,0 +1,32 @@
+﻿........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 84%]
+.......................................                                  [100%]
+============================== warnings summary ===============================
+tests/test_auto_binding.py::TestAutoBindingAndLearning::test_auto_binding_rules_matching
+  C:\Users\tlyer\project\ListTrans\app\vector_index.py:92: FutureWarning: The `get_sentence_embedding_dimension` method has been renamed to `get_embedding_dimension`.
+    self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
+
+tests/test_binding_decisions.py: 12 warnings
+tests/test_m3_hard_constraints_http.py: 32 warnings
+  C:\Users\tlyer\project\ListTrans\app\server.py:2814: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    _gate_export_row(it.dict(), current_user, request_scope)
+
+tests/test_binding_decisions.py: 3 warnings
+tests/test_m3_hard_constraints_http.py: 12 warnings
+  C:\Users\tlyer\project\ListTrans\app\server.py:2819: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    items_to_write = [it.dict() for it in req.items]
+
+tests/test_flywheel_end2end.py::test_flywheel_end_to_end_pipeline
+tests/test_flywheel_sandbox.py::test_sandbox_harmful_rule_rejected
+  C:\Users\tlyer\project\ListTrans\app\db_manager.py:486: Pandas4Warning: 'str' is not supported as a fill value for float64 dtype. In a future version, calling fillna with an incompatible value will raise. Explicitly cast to a common dtype before filling.
+    df_cleaned["brand"] = df_cleaned["brand"].fillna("").astype(str).str.strip()
+
+tests/test_flywheel_end2end.py::test_flywheel_end_to_end_pipeline
+tests/test_flywheel_sandbox.py::test_sandbox_harmful_rule_rejected
+  C:\Users\tlyer\project\ListTrans\app\db_manager.py:487: Pandas4Warning: 'str' is not supported as a fill value for float64 dtype. In a future version, calling fillna with an incompatible value will raise. Explicitly cast to a common dtype before filling.
+    df_cleaned["description"] = df_cleaned["description"].fillna("").astype(str).str.strip()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+255 passed, 64 warnings in 124.70s (0:02:04)
+FULL_EXIT=0 WALL_SECONDS=126.316

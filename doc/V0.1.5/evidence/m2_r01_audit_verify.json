@@ -1,0 +1,108 @@
+{
+  "task": "V015-M2 R01 审核独立复验汇总",
+  "date": "2026-11-14",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes_checked": 38,
+  "delivery_hashes_matched": 38,
+  "delivery_hash_mismatches": {},
+  "golden_last_run_exists_before": false,
+  "golden_last_run_exists_after": false,
+  "data_golden_last_run_exists_after": false,
+  "outer_snapshot_before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "outer_snapshot_after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "outer_snapshot_matches_dev": true,
+  "outer_snapshot_diff": [],
+  "residual_boundaries": [
+    "无本机 Node.js / 独立 JS 语法检查器或无头浏览器运行环境，web/app.js 经全量 3966 行人工代码走查与后端契约对齐核验，未做浏览器 DOM 自动化实测"
+  ],
+  "checks": {
+    "verify_isolation_before": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "sha256": "14a174919471723f5c500aa5814c7139567f0dfe58ec42e3f332eb889c53a79c"
+    },
+    "required_regressions_58": {
+      "exit_code": 0,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "warnings": 16,
+      "elapsed_sec": 13.5
+    },
+    "sandbox_boundaries_30": {
+      "exit_code": 0,
+      "passed": 30,
+      "failed": 0,
+      "deselected": 5,
+      "warnings": 3,
+      "elapsed_sec": 7.55
+    },
+    "real_dual_subprocess_3rules": {
+      "exit_code": 0,
+      "elapsed_sec": 53.914,
+      "report_sha256": "08f44084157a4130dc33895722fae330e68b99ba29239a17aa11350eb562a4e9",
+      "harmful": {
+        "passed": false,
+        "targeted": 24,
+        "violations": [
+          "target_score_decreased",
+          "margin_shrunk"
+        ],
+        "gt_0313_comparison": {
+          "id": "GT-0313",
+          "type": "score_protection",
+          "baseline": {
+            "target_codes": [
+              "3.55.09.0012"
+            ],
+            "T": 88.8,
+            "W": 6.7,
+            "margin": 82.1
+          },
+          "candidate": {
+            "target_codes": [
+              "3.55.09.0012"
+            ],
+            "T": 50.7,
+            "W": 43.1,
+            "margin": 7.600000000000001
+          },
+          "score_precision": {
+            "baseline": "raw",
+            "candidate": "raw"
+          },
+          "absolute_epsilon": 1e-06
+        }
+      },
+      "beneficial": {
+        "passed": true,
+        "targeted": 22,
+        "violations": []
+      },
+      "neutral": {
+        "passed": true,
+        "targeted": 16,
+        "violations": []
+      }
+    },
+    "full_pytest_146": {
+      "exit_code": 0,
+      "passed": 146,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "warnings": 20,
+      "warning_breakdown": {
+        "pydantic_dict_deprecated_server_py_2720_2725": 15,
+        "pandas4_fillna_db_manager_py_486_487": 4,
+        "sentence_transformer_embedding_dim_vector_index_py_92": 1
+      },
+      "elapsed_sec": 103.53
+    },
+    "verify_isolation_after": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "sha256": "42c261ed09a272403f5521cf5e1bbb7ebf03a2e22de27fd62e44429b77b0c43d"
+    }
+  }
+}

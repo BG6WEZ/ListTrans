@@ -1,0 +1,15 @@
+{
+  "reason": "Sandbox run stalled; separate approved outside-sandbox isolated rerun completed 269P.",
+  "stopped_pytest_children": [
+    {
+      "pid": 13420,
+      "elapsed_seconds": 477.631
+    },
+    {
+      "pid": 27592,
+      "elapsed_seconds": 477.621
+    }
+  ],
+  "log_preserved": "m5_r01_audit_full.log",
+  "outcome": "INTERRUPTED_NOT_PASS"
+}

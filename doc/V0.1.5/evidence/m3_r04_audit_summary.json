@@ -1,0 +1,483 @@
+{
+  "baseline": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "started": "2026-11-15 08:29:46",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "hashes_before": [
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "actual": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "actual": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "actual": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "actual": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pre_baseline_hashes.md",
+      "expected": "308a7b930a9ae849fa8a74973d48fcb7e4db2f464c541cff93e622fb0a05bbce",
+      "actual": "308a7b930a9ae849fa8a74973d48fcb7e4db2f464c541cff93e622fb0a05bbce",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_before.log",
+      "expected": "643b23a637ec5829154745fa9dbfe23618780cd43149d10029cba3f2456e2fa4",
+      "actual": "643b23a637ec5829154745fa9dbfe23618780cd43149d10029cba3f2456e2fa4",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_before.json",
+      "expected": "7cb7aade20be4b094704d1d1f3f3ac55a5390e3f75ae79b9b7f971d6afdb211a",
+      "actual": "7cb7aade20be4b094704d1d1f3f3ac55a5390e3f75ae79b9b7f971d6afdb211a",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_before.log",
+      "expected": "f322fb6865ec0ad5a71b7ac3012266672a70d3e6e7a110d356a551668f8b5944",
+      "actual": "f322fb6865ec0ad5a71b7ac3012266672a70d3e6e7a110d356a551668f8b5944",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_rerun.ps1",
+      "expected": "dd063f42122afa065d5e7fadb6f88fdef04138d499dddb88f34ca2fbe3a75263",
+      "actual": "dd063f42122afa065d5e7fadb6f88fdef04138d499dddb88f34ca2fbe3a75263",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_py_compile.log",
+      "expected": "2ff6c106cad0e7588a5f1d9a1b63addc36c4fed8b0ff602591d56c3447a40257",
+      "actual": "2ff6c106cad0e7588a5f1d9a1b63addc36c4fed8b0ff602591d56c3447a40257",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_m3.txt",
+      "expected": "56a4a018f07a1172c512dc781f01f8ba360e9ccd36e78e66d8b0583d9aacb29d",
+      "actual": "56a4a018f07a1172c512dc781f01f8ba360e9ccd36e78e66d8b0583d9aacb29d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_m0_m2_regression.txt",
+      "expected": "8534034ee0ee702664c5c42ee510bbad1b5a08f8284513511e6c277ed0a10e08",
+      "actual": "8534034ee0ee702664c5c42ee510bbad1b5a08f8284513511e6c277ed0a10e08",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_sandbox_30.txt",
+      "expected": "f29f3aa725c97e38789ff7a569c706a91310794865b46816a042b2beccafae7f",
+      "actual": "f29f3aa725c97e38789ff7a569c706a91310794865b46816a042b2beccafae7f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_capture_evidence.py",
+      "expected": "7be1b9a5dcfe22141983aadf0789f854680786a653303e28c7acfdf34449396d",
+      "actual": "7be1b9a5dcfe22141983aadf0789f854680786a653303e28c7acfdf34449396d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_gate_reports.json",
+      "expected": "cfe66732dd01053b49d3d5b4bcd906a8d0c469544cbb597f321ef0039b79a9fe",
+      "actual": "cfe66732dd01053b49d3d5b4bcd906a8d0c469544cbb597f321ef0039b79a9fe",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_3rule_gate.txt",
+      "expected": "b03c4a9d92791008a24547b68bb979e2deab4dd4cbddae6a6b3ad9fa34502b78",
+      "actual": "b03c4a9d92791008a24547b68bb979e2deab4dd4cbddae6a6b3ad9fa34502b78",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_r03_gate_compare.json",
+      "expected": "230221c73f056776938df0b230cba41a1371fe568d1de6f08d00e1d8e14fb7bf",
+      "actual": "230221c73f056776938df0b230cba41a1371fe568d1de6f08d00e1d8e14fb7bf",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_full.txt",
+      "expected": "724ba419ad4cd2941e31425b428e6cd43477404dd56c4c426e441ba448669885",
+      "actual": "724ba419ad4cd2941e31425b428e6cd43477404dd56c4c426e441ba448669885",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_after.json",
+      "expected": "200e1e77edfd3a0542f8803985f907eea61c6d1a4d069daf31a49cdc17c2deca",
+      "actual": "200e1e77edfd3a0542f8803985f907eea61c6d1a4d069daf31a49cdc17c2deca",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_after.log",
+      "expected": "de7647b5d9019d448817053c9751c865f4dae93eb4fdf694ccd2207e9cd6a301",
+      "actual": "de7647b5d9019d448817053c9751c865f4dae93eb4fdf694ccd2207e9cd6a301",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_after.log",
+      "expected": "87d05da204958cd25acf664dc600cd193b3fd288b1bc723eb9b0e10fd1855d37",
+      "actual": "87d05da204958cd25acf664dc600cd193b3fd288b1bc723eb9b0e10fd1855d37",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M3_R04_开发小结.md",
+      "expected": "6c41f6085918e9b35bf1a9f8c486cc2bb23a6dbad270b8e44730effed03c4825",
+      "actual": "6c41f6085918e9b35bf1a9f8c486cc2bb23a6dbad270b8e44730effed03c4825",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "cb66854f912f66d13d93ce20f005fc329d5b735392bc6b4eb330d2828e598d19",
+      "actual": "cb66854f912f66d13d93ce20f005fc329d5b735392bc6b4eb330d2828e598d19",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "62b8e77b4fa6a67993fe7b334535288466d54794adfa5dfe0819f1e4952da07e",
+      "actual": "62b8e77b4fa6a67993fe7b334535288466d54794adfa5dfe0819f1e4952da07e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "318c181c54a40327e1fb51bf483fc4ad2b35573199ee26e6f12dc4c8964fec97",
+      "actual": "318c181c54a40327e1fb51bf483fc4ad2b35573199ee26e6f12dc4c8964fec97",
+      "matches": true
+    }
+  ],
+  "backups": [
+    {
+      "file": "app/binding_decisions.py",
+      "backup_sha256": "82d6b2ed03fd0385e773cf35f1b29f551550f0c5cf8fa3d4054a4c36507d9593",
+      "current_sha256": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "changed": true
+    },
+    {
+      "file": "app/server.py",
+      "backup_sha256": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "current_sha256": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "changed": false
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "backup_sha256": "e0c182e7a95d48af7e937ad5e4bde0771f3eca40c79c0c4c25d3bef89e7440dd",
+      "current_sha256": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "changed": true,
+      "old_tests": 70,
+      "new_tests": 73,
+      "removed": [],
+      "modified_old": []
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "backup_sha256": "fc592be1c9d2e35509af741549682def38fcbbe0376cbdd8d0fc2547de406087",
+      "current_sha256": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "changed": true,
+      "old_tests": 25,
+      "new_tests": 26,
+      "removed": [],
+      "modified_old": []
+    }
+  ],
+  "steps": [
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r04_audit_verify_before.json"
+      ],
+      "exit": 0,
+      "seconds": 7.036,
+      "log": "m3_r04_audit_verify_before.log",
+      "sha256": "6c28a5afe6e0b81737f7b19940bdecfab5d542d4a8a780bf4f0e58dc0d5e2663"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m3_hard_constraints.py",
+        "tests/test_m3_hard_constraints_http.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 13.358,
+      "log": "m3_r04_audit_m3.log",
+      "sha256": "e5f7921f0e8564c0e4b3273dd7923981446e644b7e6c463665769a33f26866f1"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m0_isolation.py",
+        "tests/test_m0_guardrail_regression.py",
+        "tests/test_query_contract.py",
+        "tests/test_auto_binding.py",
+        "tests/test_binding_decisions.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 14.328,
+      "log": "m3_r04_audit_required.log",
+      "sha256": "105ad0f34fefddfb310c074a4b9ad4ed1ea0cc894998da036408b3309e7aad7d"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_flywheel_sandbox.py",
+        "-k",
+        "compare or nonzero",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 8.546,
+      "log": "m3_r04_audit_boundaries.log",
+      "sha256": "c548c6796d238e36eec1fb436f1212149c66e62cf4e302f17d97d67113da7dc9"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r04_audit_gate.py"
+      ],
+      "exit": 0,
+      "seconds": 55.37,
+      "log": "m3_r04_audit_gate.log",
+      "sha256": "55c67284e4a979dbaef7360a05c06dd838d2af7eb0a93f808d7a693f6ce6c1fb"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 103.153,
+      "log": "m3_r04_audit_full.log",
+      "sha256": "586a64884e50821b2919240832ebd2d3f4fda0d92ff193e789eb3d8649660255"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r04_audit_verify_after.json"
+      ],
+      "exit": 0,
+      "seconds": 7.008,
+      "log": "m3_r04_audit_verify_after.log",
+      "sha256": "1f9e3a6face5ebfce4ea4e12d7fb71d78847065429b45e3b695af9165a92b479"
+    }
+  ],
+  "snapshot_before": {
+    "file": "m3_r04_audit_snapshot_before.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "snapshot_after": {
+    "file": "m3_r04_audit_snapshot_after.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "hashes_after": [
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "actual": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "actual": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "actual": "81da3a23ccf2695d7987ad8912f96aaeff8267886745c2a258e97a619a920cea",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "actual": "ee1cb20cbbcaab86f009da3f3bbbaa2ca4552b9d047d04c56320b7a566ac2e1c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pre_baseline_hashes.md",
+      "expected": "308a7b930a9ae849fa8a74973d48fcb7e4db2f464c541cff93e622fb0a05bbce",
+      "actual": "308a7b930a9ae849fa8a74973d48fcb7e4db2f464c541cff93e622fb0a05bbce",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_before.log",
+      "expected": "643b23a637ec5829154745fa9dbfe23618780cd43149d10029cba3f2456e2fa4",
+      "actual": "643b23a637ec5829154745fa9dbfe23618780cd43149d10029cba3f2456e2fa4",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_before.json",
+      "expected": "7cb7aade20be4b094704d1d1f3f3ac55a5390e3f75ae79b9b7f971d6afdb211a",
+      "actual": "7cb7aade20be4b094704d1d1f3f3ac55a5390e3f75ae79b9b7f971d6afdb211a",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_before.log",
+      "expected": "f322fb6865ec0ad5a71b7ac3012266672a70d3e6e7a110d356a551668f8b5944",
+      "actual": "f322fb6865ec0ad5a71b7ac3012266672a70d3e6e7a110d356a551668f8b5944",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_rerun.ps1",
+      "expected": "dd063f42122afa065d5e7fadb6f88fdef04138d499dddb88f34ca2fbe3a75263",
+      "actual": "dd063f42122afa065d5e7fadb6f88fdef04138d499dddb88f34ca2fbe3a75263",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_py_compile.log",
+      "expected": "2ff6c106cad0e7588a5f1d9a1b63addc36c4fed8b0ff602591d56c3447a40257",
+      "actual": "2ff6c106cad0e7588a5f1d9a1b63addc36c4fed8b0ff602591d56c3447a40257",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_m3.txt",
+      "expected": "56a4a018f07a1172c512dc781f01f8ba360e9ccd36e78e66d8b0583d9aacb29d",
+      "actual": "56a4a018f07a1172c512dc781f01f8ba360e9ccd36e78e66d8b0583d9aacb29d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_m0_m2_regression.txt",
+      "expected": "8534034ee0ee702664c5c42ee510bbad1b5a08f8284513511e6c277ed0a10e08",
+      "actual": "8534034ee0ee702664c5c42ee510bbad1b5a08f8284513511e6c277ed0a10e08",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_sandbox_30.txt",
+      "expected": "f29f3aa725c97e38789ff7a569c706a91310794865b46816a042b2beccafae7f",
+      "actual": "f29f3aa725c97e38789ff7a569c706a91310794865b46816a042b2beccafae7f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_capture_evidence.py",
+      "expected": "7be1b9a5dcfe22141983aadf0789f854680786a653303e28c7acfdf34449396d",
+      "actual": "7be1b9a5dcfe22141983aadf0789f854680786a653303e28c7acfdf34449396d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_gate_reports.json",
+      "expected": "cfe66732dd01053b49d3d5b4bcd906a8d0c469544cbb597f321ef0039b79a9fe",
+      "actual": "cfe66732dd01053b49d3d5b4bcd906a8d0c469544cbb597f321ef0039b79a9fe",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_3rule_gate.txt",
+      "expected": "b03c4a9d92791008a24547b68bb979e2deab4dd4cbddae6a6b3ad9fa34502b78",
+      "actual": "b03c4a9d92791008a24547b68bb979e2deab4dd4cbddae6a6b3ad9fa34502b78",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_r03_gate_compare.json",
+      "expected": "230221c73f056776938df0b230cba41a1371fe568d1de6f08d00e1d8e14fb7bf",
+      "actual": "230221c73f056776938df0b230cba41a1371fe568d1de6f08d00e1d8e14fb7bf",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_pytest_full.txt",
+      "expected": "724ba419ad4cd2941e31425b428e6cd43477404dd56c4c426e441ba448669885",
+      "actual": "724ba419ad4cd2941e31425b428e6cd43477404dd56c4c426e441ba448669885",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_after.json",
+      "expected": "200e1e77edfd3a0542f8803985f907eea61c6d1a4d069daf31a49cdc17c2deca",
+      "actual": "200e1e77edfd3a0542f8803985f907eea61c6d1a4d069daf31a49cdc17c2deca",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_venv_verify_after.log",
+      "expected": "de7647b5d9019d448817053c9751c865f4dae93eb4fdf694ccd2207e9cd6a301",
+      "actual": "de7647b5d9019d448817053c9751c865f4dae93eb4fdf694ccd2207e9cd6a301",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r04_outer_snapshot_after.log",
+      "expected": "87d05da204958cd25acf664dc600cd193b3fd288b1bc723eb9b0e10fd1855d37",
+      "actual": "87d05da204958cd25acf664dc600cd193b3fd288b1bc723eb9b0e10fd1855d37",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M3_R04_开发小结.md",
+      "expected": "6c41f6085918e9b35bf1a9f8c486cc2bb23a6dbad270b8e44730effed03c4825",
+      "actual": "6c41f6085918e9b35bf1a9f8c486cc2bb23a6dbad270b8e44730effed03c4825",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "cb66854f912f66d13d93ce20f005fc329d5b735392bc6b4eb330d2828e598d19",
+      "actual": "cb66854f912f66d13d93ce20f005fc329d5b735392bc6b4eb330d2828e598d19",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "62b8e77b4fa6a67993fe7b334535288466d54794adfa5dfe0819f1e4952da07e",
+      "actual": "62b8e77b4fa6a67993fe7b334535288466d54794adfa5dfe0819f1e4952da07e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "318c181c54a40327e1fb51bf483fc4ad2b35573199ee26e6f12dc4c8964fec97",
+      "actual": "318c181c54a40327e1fb51bf483fc4ad2b35573199ee26e6f12dc4c8964fec97",
+      "matches": true
+    }
+  ],
+  "finished": "2026-11-15 08:33:15"
+}

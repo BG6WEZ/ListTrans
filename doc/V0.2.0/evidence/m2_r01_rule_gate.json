@@ -1,0 +1,170 @@
+{
+  "arm": "off",
+  "exit_code": 0,
+  "historical_score_delta_counts": {
+    "v015_m3_r04": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    },
+    "v015_m4_r03": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    },
+    "v015_m5_r04": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    },
+    "v016_m0_r03": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    },
+    "v016_m2_r01": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    },
+    "v016_m3_r01": {
+      "beneficial": 0,
+      "harmful": 0,
+      "neutral": 0
+    }
+  },
+  "passed_protected_probes": true,
+  "projected_asset_sha256": "0a0b53cfe4837f0810e22788ddd8ff9d784099282dfbb24d86acb4481ebd2723",
+  "protected_probes": {
+    "GT-0674": {
+      "T": 98.6,
+      "W": 98.5,
+      "decision_status": "recommended",
+      "export_blocked": true,
+      "full_rank": 1,
+      "hard_blocked": false,
+      "margin": 0.09999999999999432,
+      "recalled": true
+    },
+    "GT-0677": {
+      "T": 98.6,
+      "W": 98.5,
+      "decision_status": "recommended",
+      "export_blocked": true,
+      "full_rank": 1,
+      "hard_blocked": false,
+      "margin": 0.09999999999999432,
+      "recalled": true
+    },
+    "GT-0678": {
+      "T": 98.6,
+      "W": 98.5,
+      "decision_status": "recommended",
+      "export_blocked": true,
+      "full_rank": 1,
+      "hard_blocked": false,
+      "margin": 0.09999999999999432,
+      "recalled": true
+    }
+  },
+  "ranker_asset_sha256": null,
+  "rule_safety_unchanged": {
+    "beneficial": true,
+    "beneficial_constrained": true,
+    "empty": true,
+    "harmful": true,
+    "neutral": true
+  },
+  "rules": {
+    "beneficial": {
+      "benefit": "harmful",
+      "binding_checks_count": 40,
+      "binding_degraded_count": 17,
+      "cache_reused_files": [
+        "materials.index",
+        "materials_embeddings.npy",
+        "index_to_material.json",
+        "cache_metadata.json",
+        "cache_snapshot.zip"
+      ],
+      "failed_samples_count": 0,
+      "guard_count": 18,
+      "guard_passed": true,
+      "safety_passed": false,
+      "targeted_count": 22
+    },
+    "beneficial_constrained": {
+      "benefit": "improved",
+      "binding_checks_count": 40,
+      "binding_degraded_count": 0,
+      "cache_reused_files": [
+        "materials.index",
+        "materials_embeddings.npy",
+        "index_to_material.json",
+        "cache_metadata.json",
+        "cache_snapshot.zip"
+      ],
+      "failed_samples_count": 0,
+      "guard_count": 18,
+      "guard_passed": true,
+      "safety_passed": true,
+      "targeted_count": 22
+    },
+    "empty": {
+      "benefit": "invalid",
+      "binding_checks_count": 40,
+      "binding_degraded_count": 0,
+      "cache_reused_files": [
+        "materials.index",
+        "materials_embeddings.npy",
+        "index_to_material.json",
+        "cache_metadata.json",
+        "cache_snapshot.zip"
+      ],
+      "failed_samples_count": 0,
+      "guard_count": 40,
+      "guard_passed": true,
+      "safety_passed": false,
+      "targeted_count": 0
+    },
+    "harmful": {
+      "benefit": "harmful",
+      "binding_checks_count": 40,
+      "binding_degraded_count": 0,
+      "cache_reused_files": [
+        "materials.index",
+        "materials_embeddings.npy",
+        "index_to_material.json",
+        "cache_metadata.json",
+        "cache_snapshot.zip"
+      ],
+      "failed_samples_count": 0,
+      "guard_count": 16,
+      "guard_passed": true,
+      "safety_passed": false,
+      "targeted_count": 24
+    },
+    "neutral": {
+      "benefit": "neutral",
+      "binding_checks_count": 40,
+      "binding_degraded_count": 0,
+      "cache_reused_files": [
+        "materials.index",
+        "materials_embeddings.npy",
+        "index_to_material.json",
+        "cache_metadata.json",
+        "cache_snapshot.zip"
+      ],
+      "failed_samples_count": 0,
+      "guard_count": 24,
+      "guard_passed": true,
+      "safety_passed": true,
+      "targeted_count": 16
+    }
+  },
+  "source_sha256": {
+    "app/matcher.py": "9b285e6ecec524dd14a9a7ad0d86abae5c25178a745acd85ea9fd505d7387bca",
+    "app/server.py": "efe76b8645d375867756ad2c93b9d4e69c4f87629b46d70ea43805117d611b2d"
+  },
+  "subset_rows": 1060
+}

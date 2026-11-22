@@ -1,0 +1,11 @@
+{
+  "exit_code": 0,
+  "budget_checks": {
+    "health_p95": true,
+    "health_max": true,
+    "status_p95": true,
+    "match_wait_p95": true,
+    "received_429": true,
+    "zero_admitted": true
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "cases": {
+    "GT-1138": {
+      "attributes": {
+        "is_circular": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+        "半周长": "db58b6c40698d7371bbcff35d085e1bac5fa439d0de31eb8e0da7c47d27cb2a7",
+        "名称": "3b8e3aed6d6a9da1e0348a19557435f729e52225ec8438da888792c542c6c3d6",
+        "宽": "26c9a96ce053a14dd88a71a4830c9cbed7e1fed7e3f3f8a0b0b6a58f3f0f02e6",
+        "尺寸": "34dca0457268ccde2ed667c94243b22b3eed628aefec929732987cd178855172",
+        "尺寸_2d": "34dca0457268ccde2ed667c94243b22b3eed628aefec929732987cd178855172",
+        "形状": "6b3fb1c0653ed7f0b3de651abb0844038e83363ae8cace20936c73b2e0f4696a",
+        "材质": "fbc81572582a49dac515c7f0ca5975a2289bd69adff8ce609dad5f1f895b4b26",
+        "长": "26c9a96ce053a14dd88a71a4830c9cbed7e1fed7e3f3f8a0b0b6a58f3f0f02e6"
+      },
+      "domain": "decoration",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 45.0,
+          "code": "2.12.45.0002",
+          "full_rank": 2,
+          "max_score": 1.0,
+          "reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "recall_sources": [
+            "fts"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.12.45.0003",
+          "match_reasons": [
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 60.0
+        },
+        {
+          "code": "2.12.45.0002",
+          "match_reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 45.0
+        },
+        {
+          "code": "2.12.45.0004",
+          "match_reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 45.0
+        }
+      ]
+    },
+    "GT-1139": {
+      "attributes": {
+        "is_circular": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa",
+        "半周长": "db58b6c40698d7371bbcff35d085e1bac5fa439d0de31eb8e0da7c47d27cb2a7",
+        "名称": "3b8e3aed6d6a9da1e0348a19557435f729e52225ec8438da888792c542c6c3d6",
+        "宽": "26c9a96ce053a14dd88a71a4830c9cbed7e1fed7e3f3f8a0b0b6a58f3f0f02e6",
+        "尺寸": "34dca0457268ccde2ed667c94243b22b3eed628aefec929732987cd178855172",
+        "尺寸_2d": "34dca0457268ccde2ed667c94243b22b3eed628aefec929732987cd178855172",
+        "形状": "6b3fb1c0653ed7f0b3de651abb0844038e83363ae8cace20936c73b2e0f4696a",
+        "材质": "fbc81572582a49dac515c7f0ca5975a2289bd69adff8ce609dad5f1f895b4b26",
+        "长": "26c9a96ce053a14dd88a71a4830c9cbed7e1fed7e3f3f8a0b0b6a58f3f0f02e6"
+      },
+      "domain": "decoration",
+      "model_present": false,
+      "target_candidates": [
+        {
+          "T": 48.5,
+          "code": "2.12.45.0004",
+          "full_rank": 2,
+          "max_score": 1.0,
+          "reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "recall_sources": [
+            "fts"
+          ]
+        }
+      ],
+      "top_candidates": [
+        {
+          "code": "2.12.45.0003",
+          "match_reasons": [
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 63.5
+        },
+        {
+          "code": "2.12.45.0004",
+          "match_reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 48.5
+        },
+        {
+          "code": "2.12.45.0002",
+          "match_reasons": [
+            "必填属性缺失处罚: 材质",
+            "核心参数在公差范围内"
+          ],
+          "max_score": 1.0,
+          "recall_sources": [
+            "fts"
+          ],
+          "score": 48.5
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "mode": "keyword",
+  "version": "v018"
+}

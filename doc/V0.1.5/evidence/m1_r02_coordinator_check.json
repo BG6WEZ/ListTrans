@@ -1,0 +1,506 @@
+{
+  "task": "V015-M1",
+  "round": "R02",
+  "role": "coordinator",
+  "created_at": "2026-11-13T21:42:08.859829+08:00",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": [
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/flywheel_sandbox.py",
+      "manifest_line": 14,
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/eval_golden_set.py",
+      "manifest_line": 15,
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/test_flywheel_sandbox.py",
+      "manifest_line": 16,
+      "expected": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "actual": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/test_flywheel_end2end.py",
+      "manifest_line": 17,
+      "expected": "d47af7426ad2828d02725ac4589fc3325bbc30d8276e0b2699c074efb48c18c6",
+      "actual": "d47af7426ad2828d02725ac4589fc3325bbc30d8276e0b2699c074efb48c18c6",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/README.md",
+      "manifest_line": 18,
+      "expected": "82b82d27b33667291e6d9d766c8635fdfdd7170d0a4a3e7332064d9ad320723a",
+      "actual": "82b82d27b33667291e6d9d766c8635fdfdd7170d0a4a3e7332064d9ad320723a",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/app/matcher.py",
+      "manifest_line": 24,
+      "expected": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "actual": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/conftest.py",
+      "manifest_line": 25,
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/fixtures/sandbox_materials_v1.json",
+      "manifest_line": 26,
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/tests/fixtures/golden_set_v1.json",
+      "manifest_line": 27,
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/.local-archive/business_snapshot.py",
+      "manifest_line": 28,
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/.trae/attachments/m1_r02_capture_evidence.py",
+      "manifest_line": 29,
+      "expected": "9c6136724d4d585ff24e44f8550ed4c67a2e297e5af1c64a1077fec440888e92",
+      "actual": "9c6136724d4d585ff24e44f8550ed4c67a2e297e5af1c64a1077fec440888e92",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_gate_reports.json",
+      "manifest_line": 36,
+      "expected": "5fa119d13e74f78495dc4055e99a795ab8dd19ea338df1acbc49768a8789aa9b",
+      "actual": "5fa119d13e74f78495dc4055e99a795ab8dd19ea338df1acbc49768a8789aa9b",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_gate_reports_capture_closed.log",
+      "manifest_line": 37,
+      "expected": "021bb490e5695f4b7369122bdff86a00d499cc61b6f4878cf8e0a8c34154d554",
+      "actual": "021bb490e5695f4b7369122bdff86a00d499cc61b6f4878cf8e0a8c34154d554",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_compare_boundaries_closed.log",
+      "manifest_line": 38,
+      "expected": "434cdf90f317483db1565849b9e83704a5e43f32b2b3b35a13ca25cee553bcde",
+      "actual": "434cdf90f317483db1565849b9e83704a5e43f32b2b3b35a13ca25cee553bcde",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_sandbox_final.log",
+      "manifest_line": 39,
+      "expected": "057f927751da99a44d19589584645d3e3c3b95013eebdc17c787465db9a9e0d6",
+      "actual": "057f927751da99a44d19589584645d3e3c3b95013eebdc17c787465db9a9e0d6",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_required_regressions.log",
+      "manifest_line": 40,
+      "expected": "d8726beeef97be97d725dba3d78b7308ee0d19c634489f4ed0fa49f9a4663e61",
+      "actual": "d8726beeef97be97d725dba3d78b7308ee0d19c634489f4ed0fa49f9a4663e61",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_end2end_seeded.log",
+      "manifest_line": 41,
+      "expected": "61398e293f3fec39dbdb1ceb4b68f5a446c7c7b0d7d9ecb93c6c8f08b03ca60f",
+      "actual": "61398e293f3fec39dbdb1ceb4b68f5a446c7c7b0d7d9ecb93c6c8f08b03ca60f",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_full_pytest_final.log",
+      "manifest_line": 42,
+      "expected": "3636d3786baf7670defc690c00acf9a1f862dbb5dd6613394eb7afac60723266",
+      "actual": "3636d3786baf7670defc690c00acf9a1f862dbb5dd6613394eb7afac60723266",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_venv_verify.json",
+      "manifest_line": 43,
+      "expected": "0d566f739628a602479c4b5ced8c0f112c4885a9c2b70fc6f907eaf6d0803014",
+      "actual": "0d566f739628a602479c4b5ced8c0f112c4885a9c2b70fc6f907eaf6d0803014",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_verify_after.json",
+      "manifest_line": 44,
+      "expected": "069c59be18996d87abe34c3b0e9fd683863272de0e32c1cedef95f4d2e030f7f",
+      "actual": "069c59be18996d87abe34c3b0e9fd683863272de0e32c1cedef95f4d2e030f7f",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_verify_after.log",
+      "manifest_line": 45,
+      "expected": "cd9877045015f53d234a0e70bd9172964952c2233b71f0a1a99ccb3edddfcc0e",
+      "actual": "cd9877045015f53d234a0e70bd9172964952c2233b71f0a1a99ccb3edddfcc0e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_outer_snapshot_before.json",
+      "manifest_line": 46,
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_outer_snapshot_after.json",
+      "manifest_line": 47,
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_full_pytest.log",
+      "manifest_line": 53,
+      "expected": "477bbcefe00ac5e951faec7819fe80bf89c75404ec3b05412260ab8ba33194d5",
+      "actual": "477bbcefe00ac5e951faec7819fe80bf89c75404ec3b05412260ab8ba33194d5",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_gate_reports_capture.log",
+      "manifest_line": 54,
+      "expected": "99f049e07222d8cdbb95afea9bc54ef56c79d62e9ee8ef2a45c604460d02718a",
+      "actual": "99f049e07222d8cdbb95afea9bc54ef56c79d62e9ee8ef2a45c604460d02718a",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_gate_reports_capture_final.log",
+      "manifest_line": 55,
+      "expected": "51b5985872fe9a8e0432689386f1b50eee5712e59b091e4d42d327f98450c608",
+      "actual": "51b5985872fe9a8e0432689386f1b50eee5712e59b091e4d42d327f98450c608",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_compare_boundaries.log",
+      "manifest_line": 56,
+      "expected": "5df4ce094409d087855afe7f1a5213e74753a6cd3623f59a352ab3a01bb71abd",
+      "actual": "5df4ce094409d087855afe7f1a5213e74753a6cd3623f59a352ab3a01bb71abd",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_compare_boundaries_rerun.log",
+      "manifest_line": 57,
+      "expected": "34a708cbda45ce06ca5e4f65d8ecf8305b11e850ca15a8d94e2a2069aa033920",
+      "actual": "34a708cbda45ce06ca5e4f65d8ecf8305b11e850ca15a8d94e2a2069aa033920",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_compare_boundaries_fixed.log",
+      "manifest_line": 58,
+      "expected": "d1ceaca6e330397e26d0e198e13464cbc135d629ad726d76dc441c5d4f46addf",
+      "actual": "d1ceaca6e330397e26d0e198e13464cbc135d629ad726d76dc441c5d4f46addf",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_compare_boundaries_final.log",
+      "manifest_line": 59,
+      "expected": "6f2f131860ce17ed8d3fce3c1edae66d3243583c41d1bef89214bb8291fc0578",
+      "actual": "6f2f131860ce17ed8d3fce3c1edae66d3243583c41d1bef89214bb8291fc0578",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/m1_r02_sandbox_run1.log",
+      "manifest_line": 60,
+      "expected": "291080c25351eebd5d3a98ecabcdb24e08d6da1316859d70edcfcd2f9b9a01c3",
+      "actual": "291080c25351eebd5d3a98ecabcdb24e08d6da1316859d70edcfcd2f9b9a01c3",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/rounds/V015-M1_R02_开发小结.md",
+      "manifest_line": 66,
+      "expected": "f0056cbb330444bc26016323e62b25a9f6cb187e36aafb75737b68996e24f7bc",
+      "actual": "f0056cbb330444bc26016323e62b25a9f6cb187e36aafb75737b68996e24f7bc",
+      "matches": true
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/02_任务台账.md",
+      "manifest_line": 67,
+      "expected": "07f8b6e1e65b8fc096a5b75d0d301430d5fe8d0cfa4759417afbf622394b1576",
+      "actual": "5eb4a12fbc398d152247541b1601b7691c29e128e2fc5d8d233297b94d77f24f",
+      "matches": false
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/rounds/README.md",
+      "manifest_line": 68,
+      "expected": "e51a3ed4aab9421e3086fede318a1df2ec6a2cbb12873c975aa41e29a2d1793f",
+      "actual": "0079c4cabf21db60cb9aa73550ef674ab1d3da72d4bf04f072887a454658acef",
+      "matches": false
+    },
+    {
+      "file": "C:/Users/tlyer/project/ListTrans/doc/V0.1.5/evidence/README.md",
+      "manifest_line": 69,
+      "expected": "d5a357c021b66d753316212d7d0e00068a581e089e59cc6da45e20a49f31c4be",
+      "actual": "ace79293a01fda839f481322b31a318089f98d213f73ca37572a61d2d9908766",
+      "matches": false
+    }
+  ],
+  "matched": 32,
+  "total": 35,
+  "audit_summary_sha256": "662c4483d749ac5474a189d8f61878f679b520f362a2313f28bf7b4f3c1a03ae",
+  "audit_gate_reports_sha256": "2c9aebb422d44a826c34fcbe32a5e9ee97836032e492f5a86a6f988a5d4c8c03",
+  "audit_real_rule_results": {
+    "harmful": {
+      "passed": false,
+      "targeted_count": 24,
+      "violations": [
+        {
+          "id": "GT-0313",
+          "type": "target_score_decreased",
+          "base_T": 88.8,
+          "cand_T": 50.7,
+          "delta": -38.1
+        },
+        {
+          "id": "GT-0313",
+          "type": "margin_shrunk",
+          "base_margin": 82.1,
+          "cand_margin": 7.6,
+          "delta": -74.5,
+          "base_T": 88.8,
+          "cand_T": 50.7
+        }
+      ],
+      "integrity_errors": [],
+      "snapshot_errors": []
+    },
+    "beneficial": {
+      "passed": true,
+      "targeted_count": 22,
+      "violations": [],
+      "integrity_errors": [],
+      "snapshot_errors": []
+    },
+    "neutral": {
+      "passed": true,
+      "targeted_count": 16,
+      "violations": [],
+      "integrity_errors": [],
+      "snapshot_errors": []
+    }
+  },
+  "comparator_runtime_probes": {
+    "same_rank_score_margin_decrease": {
+      "passed": false,
+      "violations": [
+        {
+          "id": "coordinator_synthetic",
+          "type": "target_score_decreased",
+          "base_T": 100.0,
+          "cand_T": 90.0,
+          "delta": -10.0
+        },
+        {
+          "id": "coordinator_synthetic",
+          "type": "margin_shrunk",
+          "base_margin": 80.0,
+          "cand_margin": 50.0,
+          "delta": -30.0,
+          "base_T": 100.0,
+          "cand_T": 90.0
+        }
+      ],
+      "reason": "门禁拦截：2 例触发逐例得分/领先间隔零退化保护（正确目标得分或领先间隔下降，或结果不可比）"
+    },
+    "neutral": {
+      "passed": true,
+      "violations": [],
+      "reason": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条，逐例得分/间隔零退化）"
+    },
+    "score_margin_increase": {
+      "passed": true,
+      "violations": [],
+      "reason": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条，逐例得分/间隔零退化）"
+    }
+  },
+  "comparator_scope": "Controlled finite score values run against actual comparison function; no models/services/DB writes; supplemental evidence, not a rerun of the independently audited real dual subprocess tests or full suite.",
+  "business_snapshot_before": {
+    "files": {
+      "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "app/auth.db-wal": null,
+      "app/auth.db-shm": null,
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "870bb62925f7dc973dccf98cafefdc69b4138666f303aaedb57794eeb07a01f9"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_snapshot_after": {
+    "files": {
+      "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "app/auth.db-wal": null,
+      "app/auth.db-shm": null,
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "870bb62925f7dc973dccf98cafefdc69b4138666f303aaedb57794eeb07a01f9"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_changes": [],
+  "business_snapshot_matches_audit": true,
+  "golden_last_run_exists": false,
+  "hash_evidence_boundary": "test_flywheel_end2end.py has a current hash but no trustworthy R02 pre-change hash; not reconstructed.",
+  "probe_execution": {
+    "command": "python - (standard-library importlib source loading; actual _compare_sandbox_rows on the following controlled inputs)",
+    "python": "3.12.10",
+    "exit_code": 0,
+    "baseline": [
+      {
+        "id": "coordinator_synthetic",
+        "rank": 1,
+        "target_codes": [
+          "coordinator_target"
+        ],
+        "candidates": [
+          {
+            "code": "coordinator_target",
+            "score": 100.0
+          },
+          {
+            "code": "coordinator_other",
+            "score": 20.0
+          }
+        ]
+      }
+    ],
+    "candidate_score_pairs": {
+      "same_rank_score_margin_decrease": [
+        90.0,
+        40.0
+      ],
+      "neutral": [
+        100.0,
+        20.0
+      ],
+      "score_margin_increase": [
+        101.0,
+        19.0
+      ]
+    },
+    "note": "Pairs are target/non-target scores in the same row. No model/service invocation or writes to business paths."
+  }
+}

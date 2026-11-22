@@ -1,0 +1,2768 @@
+--- pre/app/flywheel_db.py
+
++++ app/flywheel_db.py
+
+@@ -39,6 +39,7 @@
+
+     ("collection_boundary", "TEXT DEFAULT 'legacy'"),
+     ("is_stale_arrival", "INTEGER DEFAULT 0"),
+     ("contract_version", "TEXT DEFAULT ''"),
++    ("created_at", "TIMESTAMP"),
+ )
+ 
+ 
+@@ -310,11 +311,13 @@
+
+ 
+         # Effective final trusted view for M0 consumers and M1 miner interface
+         cur.execute("DROP VIEW IF EXISTS flywheel_effective_records;")
+-        cur.execute("""
++        cur.execute(
++            f"""
+         CREATE VIEW flywheel_effective_records AS
+         SELECT * FROM flywheel_records
+-        WHERE trust_level = 'trusted' AND superseded = 0;
+-        """)
++        WHERE {trusted_flywheel_where_clause()};
++        """
++        )
+ 
+         # 2. Rule suggestions table
+         cur.execute("""
+@@ -323,22 +326,57 @@
+
+             suggestion_type TEXT NOT NULL,
+             source_pattern TEXT NOT NULL,
+             target_value TEXT NOT NULL,
+-            discipline TEXT DEFAULT '通用',
++            discipline TEXT DEFAULT '',
+ 
+             support_count INTEGER DEFAULT 1,
+             distinct_users INTEGER DEFAULT 1,
+             consistency REAL DEFAULT 1.0,
+             sample_ids_json TEXT DEFAULT '[]',
++            source_origin TEXT NOT NULL DEFAULT 'trusted_miner',
++            rule_context_json TEXT DEFAULT '{}',
+ 
+             status TEXT DEFAULT 'pending',
+             applied_rule_id TEXT DEFAULT '',
+             reviewer_id TEXT DEFAULT '',
+             reviewed_at TIMESTAMP,
++            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+         );
+         """)
++        sug_cols = {
++            row["name"]
++            for row in cur.execute("PRAGMA table_info(flywheel_rule_suggestions)").fetchall()
++        }
++        sug_source_origin_added = False
++        for col_name, col_def in (
++            ("source_origin", "TEXT DEFAULT 'trusted_miner'"),
++            ("rule_context_json", "TEXT DEFAULT '{}'"),
++            ("updated_at", "TIMESTAMP"),
++        ):
++            if col_name not in sug_cols:
++                cur.execute(f"ALTER TABLE flywheel_rule_suggestions ADD COLUMN {col_name} {col_def}")
++                migrated_columns.append(f"flywheel_rule_suggestions.{col_name}")
++                if col_name == "source_origin":
++                    sug_source_origin_added = True
++        if sug_source_origin_added:
++            # Preserve pre-M1 suggestions without auto-upgrading unscoped rows to trusted universal rules.
++            cur.execute("""
++            UPDATE flywheel_rule_suggestions
++            SET source_origin = CASE
++                WHEN COALESCE(discipline, '') IN ('', '通用', '全部', 'all', 'universal')
++                THEN 'legacy_unscoped'
++                ELSE 'legacy_pre_m1'
++            END,
++            updated_at = COALESCE(updated_at, created_at, CURRENT_TIMESTAMP)
++            """)
+         cur.execute("CREATE INDEX IF NOT EXISTS idx_fws_status ON flywheel_rule_suggestions(status);")
+         cur.execute("CREATE INDEX IF NOT EXISTS idx_fws_pattern ON flywheel_rule_suggestions(source_pattern);")
++        cur.execute(
++            "CREATE INDEX IF NOT EXISTS idx_fws_scope_key "
++            "ON flywheel_rule_suggestions(suggestion_type, source_pattern, target_value, discipline, source_origin);"
++        )
++        if _migration_hook:
++            _migration_hook("after_migrate_rule_suggestions", cur)
+ 
+         # 3. Configuration snapshot table for LIFO stack rollback
+         cur.execute("""
+@@ -360,25 +398,131 @@
+
+         """)
+         cur.execute("CREATE INDEX IF NOT EXISTS idx_snap_active ON flywheel_config_snapshots(is_active, created_at);")
+ 
+-        # 4. Pattern aggregates summary table for historical archive
+-        cur.execute("""
+-        CREATE TABLE IF NOT EXISTS flywheel_pattern_aggregates (
++        # 4. Authoritative Pattern Aggregates table (separates archived history from live recompute)
++        agg_tbl_row = cur.execute(
++            "SELECT sql FROM sqlite_master WHERE type='table' AND name='flywheel_pattern_aggregates'"
++        ).fetchone()
++        agg_cols = {
++            row["name"]
++            for row in cur.execute("PRAGMA table_info(flywheel_pattern_aggregates)").fetchall()
++        } if agg_tbl_row else set()
++        required_agg_cols = {
++            "id", "source_pattern", "suggestion_type", "target_value", "discipline",
++            "source_origin", "archived_support", "archived_distinct_users",
++            "active_support", "active_distinct_users", "total_support",
++            "param_adjust_count", "dominant_target_code", "sample_ids_json",
++            "context_summary_json", "updated_at",
++        }
++        agg_ddl_sql = str(agg_tbl_row["sql"] or "") if agg_tbl_row else ""
++        has_scoped_unique = (
++            "discipline" in agg_ddl_sql
++            and "source_origin" in agg_ddl_sql
++            and "UNIQUE" in agg_ddl_sql.upper()
++        )
++        agg_create_sql = """
++        CREATE TABLE {table_name} (
+             id INTEGER PRIMARY KEY AUTOINCREMENT,
+             source_pattern TEXT NOT NULL,
+             suggestion_type TEXT NOT NULL,
+-            target_value TEXT NOT NULL,
+-            archived_support INTEGER DEFAULT 0,
+-            archived_distinct_users INTEGER DEFAULT 0,
++            target_value TEXT NOT NULL DEFAULT '',
++            discipline TEXT NOT NULL DEFAULT '',
++            source_origin TEXT NOT NULL DEFAULT 'trusted_recompute',
++            archived_support INTEGER NOT NULL DEFAULT 0,
++            archived_distinct_users INTEGER NOT NULL DEFAULT 0,
++            active_support INTEGER NOT NULL DEFAULT 0,
++            active_distinct_users INTEGER NOT NULL DEFAULT 0,
++            total_support INTEGER NOT NULL DEFAULT 0,
++            param_adjust_count INTEGER NOT NULL DEFAULT 0,
++            dominant_target_code TEXT NOT NULL DEFAULT '',
++            sample_ids_json TEXT NOT NULL DEFAULT '[]',
++            context_summary_json TEXT NOT NULL DEFAULT '{}',
+             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+-            UNIQUE(source_pattern, suggestion_type, target_value)
+-        );
+-        """)
++            UNIQUE(source_pattern, suggestion_type, target_value, discipline, source_origin)
++        );
++        """
++        if not agg_tbl_row:
++            cur.execute(agg_create_sql.replace("{table_name}", "flywheel_pattern_aggregates"))
++        elif not required_agg_cols.issubset(agg_cols) or not has_scoped_unique:
++            cur.execute("DROP TABLE IF EXISTS flywheel_pattern_aggregates_new;")
++            cur.execute(agg_create_sql.replace("{table_name}", "flywheel_pattern_aggregates_new"))
++            old_rows = cur.execute("SELECT * FROM flywheel_pattern_aggregates ORDER BY id ASC").fetchall()
++            seen_keys = set()
++            for r in old_rows:
++                rd = dict(r)
++                if "source_pattern" in rd and rd.get("source_pattern") is not None:
++                    src_pat = str(rd.get("source_pattern") or "")
++                    sug_type = str(rd.get("suggestion_type") or "PARAM_ADJUST")
++                    tgt_val = str(rd.get("target_value") or "")
++                    disc = str(rd.get("discipline") or "").strip()
++                    origin = str(rd.get("source_origin") or "").strip() or "legacy_archive"
++                    arch_sup = int(rd.get("archived_support") or 0)
++                    arch_users = int(rd.get("archived_distinct_users") or 0)
++                    act_sup = int(rd.get("active_support") or 0)
++                    act_users = int(rd.get("active_distinct_users") or 0)
++                    pa_cnt = int(rd.get("param_adjust_count") or 0)
++                    dom_code = str(rd.get("dominant_target_code") or "")
++                    sids_json = str(rd.get("sample_ids_json") or "[]")
++                    ctx_json = str(rd.get("context_summary_json") or "{}")
++                    upd_at = rd.get("updated_at")
++                else:
++                    # Legacy pattern_key schema variant: preserve data & mark unknown provenance
++                    src_pat = str(rd.get("pattern_key") or "")
++                    sug_type = "PARAM_ADJUST"
++                    tgt_val = ""
++                    disc = str(rd.get("discipline") or "").strip()
++                    origin = "legacy_unknown"
++                    pa_cnt = int(rd.get("param_adjust_count") or 0)
++                    arch_sup = int(rd.get("total_count") or pa_cnt or 0)
++                    arch_users = 0
++                    act_sup = 0
++                    act_users = 0
++                    dom_code = str(rd.get("dominant_target_code") or "")
++                    sids_json = str(rd.get("sample_ids_json") or "[]")
++                    ctx_json = "{}"
++                    upd_at = rd.get("updated_at")
++
++                key = (src_pat, sug_type, tgt_val, disc, origin)
++                if key in seen_keys:
++                    origin = f"{origin}_dup_{rd.get('id', 0)}"
++                    key = (src_pat, sug_type, tgt_val, disc, origin)
++                seen_keys.add(key)
++
++                cur.execute(
++                    """
++                    INSERT INTO flywheel_pattern_aggregates_new (
++                        source_pattern, suggestion_type, target_value, discipline, source_origin,
++                        archived_support, archived_distinct_users, active_support, active_distinct_users,
++                        total_support, param_adjust_count, dominant_target_code, sample_ids_json,
++                        context_summary_json, updated_at
++                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))
++                    """,
++                    (
++                        src_pat, sug_type, tgt_val, disc, origin,
++                        arch_sup, arch_users, act_sup, act_users,
++                        arch_sup + act_sup, pa_cnt, dom_code, sids_json,
++                        ctx_json, upd_at,
++                    ),
++                )
++            cur.execute("DROP TABLE flywheel_pattern_aggregates;")
++            cur.execute("ALTER TABLE flywheel_pattern_aggregates_new RENAME TO flywheel_pattern_aggregates;")
++            migrated_columns.append("flywheel_pattern_aggregates.schema_v1")
++        cur.execute(
++            "CREATE INDEX IF NOT EXISTS idx_fwpa_scope "
++            "ON flywheel_pattern_aggregates(discipline, suggestion_type, source_pattern);"
++        )
++        if _migration_hook:
++            _migration_hook("after_migrate_pattern_aggregates", cur)
+ 
+         cur.execute("""
+         INSERT INTO flywheel_schema_meta (key, value, updated_at)
+         VALUES ('contract_version', ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP
+         """, (FLYWHEEL_CONTRACT_VERSION,))
++        cur.execute("""
++        INSERT INTO flywheel_schema_meta (key, value, updated_at)
++        VALUES ('aggregates_schema_version', 'v0.1.6-m1-v1', CURRENT_TIMESTAMP)
++        ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP
++        """)
+         if _migration_hook:
+             _migration_hook("after_schema_meta", cur)
+ 
+@@ -398,10 +542,39 @@
+
+         conn.close()
+ 
+ 
+-def trusted_flywheel_where_clause(table_alias: str = "") -> str:
++def trusted_flywheel_where_clause(table_alias: str = "", include_effective_only: bool = True) -> str:
+     """Shared M0->M1 SQL predicate restricting reads to verified trusted effective records."""
+     prefix = f"{table_alias}." if table_alias else ""
+-    return f"{prefix}trust_level = 'trusted' AND {prefix}superseded = 0"
++    clauses = [
++        f"{prefix}trust_level = 'trusted'",
++        f"{prefix}actor_user_id IS NOT NULL",
++        f"{prefix}actor_user_id > 0",
++        f"COALESCE({prefix}actor_account_epoch, '') != ''",
++        f"COALESCE({prefix}document_id, '') != ''",
++        f"COALESCE({prefix}sheet_id, '') != ''",
++        f"COALESCE({prefix}source_row_id, '') != ''",
++        f"COALESCE({prefix}payload_digest, '') != ''",
++        f"{prefix}session_id != 'default_session'",
++        f"{prefix}user_id != 'legacy_anonymous'",
++        (
++            f"EXISTS (SELECT 1 FROM flywheel_documents _fwd "
++            f"WHERE _fwd.document_id = {prefix}document_id "
++            f"AND _fwd.actor_user_id = {prefix}actor_user_id "
++            f"AND _fwd.actor_account_epoch = {prefix}actor_account_epoch)"
++        ),
++        (
++            f"EXISTS (SELECT 1 FROM flywheel_source_rows _fwsr "
++            f"WHERE _fwsr.source_row_id = {prefix}source_row_id "
++            f"AND _fwsr.document_id = {prefix}document_id "
++            f"AND _fwsr.sheet_id = {prefix}sheet_id)"
++        ),
++    ]
++    if include_effective_only:
++        clauses.extend([
++            f"{prefix}superseded = 0",
++            f"COALESCE({prefix}is_stale_arrival, 0) = 0",
++        ])
++    return " AND ".join(clauses)
+ 
+ 
+ if __name__ == "__main__":
+--- pre/app/feedback_miner.py
+
++++ app/feedback_miner.py
+
+@@ -1,21 +1,29 @@
+
+ # -*- coding: utf-8 -*-
+ """
+ Smart Mining Engine for Data Flywheel (app/feedback_miner.py).
+-Implements two-phase scanning, domain dictionary alignment, abbreviation support,
+-multi-candidate conflict handling, and multi-tier statistical gating (Support, Distinct Users, Consistency).
++Implements single-transaction incremental discovery, strict trusted-effective collection
++boundary, discipline-scoped rule context isolation, and unified parameter aggregation.
+ """
+-import os
++from collections import Counter
+ import json
++import logging
+ import re
+-import logging
+-from typing import Dict, Any, List, Tuple, Set, Optional
+-from app.db_manager import get_db_cursor
+-from app.normalizer import alias_dict, material_dict, connection_dict, flags_dict
+-from app.preprocessor import clean_text
++import sqlite3
++import threading
++from typing import Any, Callable, Dict, List, Optional, Set, Tuple
++
++from app.flywheel_db import (
++    init_flywheel_tables,
++    open_flywheel_tx_connection,
++    trusted_flywheel_where_clause,
++)
++from app.normalizer import alias_dict, connection_dict, flags_dict, material_dict, to_half_width
++from app.rule_context import DYNAMIC_UNIVERSAL_TOKENS, RuleContext
+ 
+ logger = logging.getLogger("listtrans_app")
+-
+-# Load domain dictionary keywords
++_MINING_LOCK = threading.Lock()
++
++
+ def get_domain_vocab() -> Set[str]:
+     vocab = set()
+     for d in [alias_dict, material_dict, connection_dict, flags_dict]:
+@@ -23,18 +31,17 @@
+
+             for k in d.keys():
+                 if isinstance(k, str) and len(k) >= 2:
+                     vocab.add(k.strip())
+-    # Add common engineering material terms
+     common_terms = [
+         "排风机", "送风机", "新风机组", "风机箱", "离心风机", "轴流风机", "混流风机",
+         "防火阀", "调节阀", "止回阀", "蝶阀", "闸阀", "截止阀", "球阀", "减压阀", "安全阀",
+         "风口", "百叶风口", "散流器", "旋流风口", "消声器", "静压箱", "过滤器", "高效过滤器",
+         "配电箱", "控制箱", "动力箱", "照明箱", "电缆", "电线", "桥架", "母线槽",
+-        "无缝钢管", "镀锌钢管", "焊接钢管", "紫铜管", "不锈钢管", "PPR管", "PVC管", "UPVC管"
++        "无缝钢管", "镀锌钢管", "焊接钢管", "紫铜管", "不锈钢管", "PPR管", "PVC管", "UPVC管",
+     ]
+     vocab.update(common_terms)
+     return vocab
+ 
+-# Maximum forward matching tokenizer based on domain vocabulary
++
+ def domain_tokenize(text: str, vocab: Set[str]) -> List[str]:
+     if not text:
+         return []
+@@ -45,15 +52,14 @@
+
+     while i < len(text):
+         matched = False
+         for l in range(min(max_len, len(text) - i), 1, -1):
+-            chunk = text[i:i+l]
++            chunk = text[i:i + l]
+             if chunk in vocab:
+                 tokens.append(chunk)
+                 i += l
+                 matched = True
+                 break
+         if not matched:
+-            # Check for English abbreviation / code token (e.g. AP-1, PAF, AL, DN50)
+-            m = re.match(r'^[a-zA-Z0-9\-]+', text[i:])
++            m = re.match(r"^[a-zA-Z0-9\-]+", text[i:])
+             if m:
+                 tokens.append(m.group(0))
+                 i += len(m.group(0))
+@@ -62,280 +68,613 @@
+
+                 i += 1
+     return tokens
+ 
+-from app.normalizer import to_half_width
+-
+-# Extract candidate diff pairs
++
+ def extract_alias_candidate(raw_name: str, target_name: str, vocab: Set[str]) -> Optional[Tuple[str, str]]:
+     raw_norm = to_half_width(raw_name).strip()
+     target_norm = to_half_width(target_name).strip()
+     if not raw_norm or not target_norm or raw_norm.lower() == target_norm.lower():
+         return None
+-    
+-    # 1. Check if raw_name is an English device abbreviation (e.g. "AP-1", "PAF", "ACP", "AL")
+-    abbrev_match = re.match(r'^[a-zA-Z0-9\-]{2,12}$', raw_norm)
++
++    abbrev_match = re.match(r"^[a-zA-Z0-9\-]{2,12}$", raw_norm)
+     if abbrev_match:
+         token = abbrev_match.group(0)
+-        # Filter pure numeric or pure DN specs
+-        if not re.match(r'^\d+$', token) and not re.match(r'^(dn|de|mm|kw|pa)\d+$', token, re.IGNORECASE):
++        if not re.match(r"^\d+$", token) and not re.match(r"^(dn|de|mm|kw|pa)\d+$", token, re.IGNORECASE):
+             return (token, target_name)
+-            
+-    # 2. Token alignment
++
+     raw_tokens = domain_tokenize(raw_norm, vocab)
+     target_tokens = domain_tokenize(target_norm, vocab)
+-    
+-    # Find distinct difference
++
+     diff_raw = [t for t in raw_tokens if t not in target_tokens]
+     diff_target = [t for t in target_tokens if t not in raw_tokens]
+-    
++
+     if len(diff_raw) == 1 and len(diff_target) == 1:
+         src = diff_raw[0]
+         dst = diff_target[0]
+-        if 2 <= len(src) <= 12 and not re.match(r'^\d+$', src) and not re.match(r'^(个|米|台|套|kg|m|mm|dn)$', src, re.IGNORECASE):
++        if 2 <= len(src) <= 12 and not re.match(r"^\d+$", src) and not re.match(r"^(个|米|台|套|kg|m|mm|dn)$", src, re.IGNORECASE):
+             return (src, dst)
+-            
+-    # Fallback to concise meaningful nouns (length 2~16, non-numeric)
+-    if 2 <= len(raw_norm) <= 16 and not re.match(r'^\d+$', raw_norm) and not re.match(r'^(dn|de|mm|kw|pa)\d+$', raw_norm, re.IGNORECASE):
++
++    if 2 <= len(raw_norm) <= 16 and not re.match(r"^\d+$", raw_norm) and not re.match(r"^(dn|de|mm|kw|pa)\d+$", raw_norm, re.IGNORECASE):
+         return (raw_norm, target_name)
+-        
++
+     return None
+ 
++
++def _parse_json_field(raw_val: Any, expected_type: type, record_id: Any, field_name: str) -> Any:
++    if raw_val is None or raw_val == "":
++        return expected_type()
++    if isinstance(raw_val, expected_type):
++        return raw_val
++    try:
++        parsed = json.loads(raw_val)
++    except Exception as exc:
++        raise ValueError(f"flywheel_records id={record_id} {field_name} JSON 解析失败") from exc
++    if not isinstance(parsed, expected_type):
++        raise ValueError(f"flywheel_records id={record_id} {field_name} 类型非法: 期望 {expected_type.__name__}")
++    return parsed
++
++
++def _actor_identity_key(row: sqlite3.Row) -> str:
++    actor_uid = row["actor_user_id"]
++    actor_epoch = str(row["actor_account_epoch"] or "").strip()
++    if actor_uid is None or int(actor_uid) <= 0 or not actor_epoch:
++        raise ValueError(f"flywheel_records id={row['id']} 缺少服务端不可变 actor 身份")
++    return f"{int(actor_uid)}:{actor_epoch}"
++
++
++def _resolve_record_rule_context(row: sqlite3.Row) -> Optional[RuleContext]:
++    raw_disc = str(row["discipline"] or row["source_professional"] or "").strip()
++    ctx = RuleContext.from_fields(
++        professional=raw_disc,
++        material_category=str(row["raw_category"] or "").strip(),
++        name=str(row["raw_name"] or "").strip(),
++        raw_name=str(row["raw_name"] or "").strip(),
++        stage="mining",
++    )
++    disc = ctx.normalized_professional
++    if not disc or disc.lower() in DYNAMIC_UNIVERSAL_TOKENS or disc == "其它":
++        return None
++    return ctx
++
++
+ class FlywheelMiner:
+-    """Core mining engine implementing two-phase scan, multi-candidate tracking and statistical aggregation."""
+-    
++    """Core mining engine implementing atomic transaction, trusted boundary, and RuleContext isolation."""
++
+     def __init__(self):
+         self.vocab = get_domain_vocab()
+ 
+-    def run_mining(self) -> Dict[str, Any]:
+-        """Execute incremental discovery and full-table statistical aggregation with transactional safety."""
+-        unprocessed_ids = []
+-        try:
+-            # 1. Phase 1: Incremental scan to discover candidate patterns
+-            with get_db_cursor(commit=True) as cur:
+-                cur.execute("""
+-                SELECT id, raw_name, raw_name_norm, action_type, final_targets_json
+-                FROM flywheel_records
+-                WHERE is_processed = 0 AND superseded = 0
+-                """)
+-                rows = cur.fetchall()
+-                for r in rows:
+-                    unprocessed_ids.append(r["id"])
+-                    
++    def run_mining(
++        self,
++        db_path: Optional[str] = None,
++        _tx_hook: Optional[Callable[[str, sqlite3.Cursor], None]] = None,
++    ) -> Dict[str, Any]:
++        """Execute incremental discovery and full-table statistical aggregation in one atomic transaction."""
++        init_flywheel_tables(db_path=db_path)
++
++        with _MINING_LOCK:
++            conn = open_flywheel_tx_connection(db_path=db_path)
++            unprocessed_ids: List[int] = []
++            try:
++                conn.execute("BEGIN IMMEDIATE")
++                cur = conn.cursor()
++                trusted_where = trusted_flywheel_where_clause("fr")
++
++                # 1. Incremental scan over verified trusted effective records only
++                cur.execute(
++                    f"""
++                    SELECT fr.id
++                    FROM flywheel_records fr
++                    JOIN flywheel_source_rows sr
++                      ON sr.source_row_id = fr.source_row_id
++                     AND sr.document_id = fr.document_id
++                     AND sr.sheet_id = fr.sheet_id
++                    WHERE fr.is_processed = 0 AND {trusted_where}
++                    ORDER BY fr.id ASC
++                    """
++                )
++                unprocessed_ids = [int(r["id"]) for r in cur.fetchall()]
++
++                # 2. Consistent full-table read over the exact same trusted effective boundary
++                cur.execute(
++                    f"""
++                    SELECT fr.id, fr.discipline, fr.raw_name, fr.raw_name_norm, fr.raw_spec,
++                           fr.raw_category, fr.extracted_params, fr.action_type,
++                           fr.final_targets_json, fr.actor_user_id, fr.actor_account_epoch,
++                           sr.professional AS source_professional
++                    FROM flywheel_records fr
++                    JOIN flywheel_source_rows sr
++                      ON sr.source_row_id = fr.source_row_id
++                     AND sr.document_id = fr.document_id
++                     AND sr.sheet_id = fr.sheet_id
++                    WHERE {trusted_where}
++                    ORDER BY fr.id ASC
++                    """
++                )
++                effective_rows = cur.fetchall()
++
++                grouped_patterns: Dict[Tuple[str, str], List[sqlite3.Row]] = {}
++                param_adjust_groups: Dict[Tuple[str, str], List[sqlite3.Row]] = {}
++                skipped_missing_discipline = 0
++
++                for row in effective_rows:
++                    rule_ctx = _resolve_record_rule_context(row)
++                    if rule_ctx is None:
++                        skipped_missing_discipline += 1
++                        continue
++                    disc = rule_ctx.normalized_professional
++                    raw_norm = str(row["raw_name_norm"] or "").strip()
++                    if not raw_norm:
++                        continue
++                    key = (raw_norm, disc)
++                    grouped_patterns.setdefault(key, []).append(row)
++                    if row["action_type"] == "PARAM_ADJUST":
++                        param_adjust_groups.setdefault(key, []).append(row)
++
++                active_patterns = [key for key, recs in grouped_patterns.items() if len(recs) >= 2]
++                first_suggestion_hook_fired = False
++                active_suggestion_keys: Set[Tuple[str, str, str, str]] = set()
++                all_computed_suggestions: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
++
++                for raw_norm, disc in sorted(grouped_patterns.keys()):
++                    recs = grouped_patterns[(raw_norm, disc)]
++                    alias_stats = self._compute_alias_stats(recs, disc)
++                    binding_stats = self._compute_binding_stats(recs, disc)
++
++                    for s_key, info in alias_stats.items():
++                        all_computed_suggestions[s_key] = info
++                    for s_key, info in binding_stats.items():
++                        all_computed_suggestions[s_key] = info
++
++                    if len(recs) < 2:
++                        continue
++
++                    for s_key, info in alias_stats.items():
++                        if info["status"] is None:
++                            continue
++                        self._upsert_suggestion(cur, info)
++                        active_suggestion_keys.add(s_key)
++                        if _tx_hook and not first_suggestion_hook_fired:
++                            first_suggestion_hook_fired = True
++                            _tx_hook("after_first_suggestion_write", cur)
++                        if _tx_hook:
++                            _tx_hook("after_alias_suggestion_write", cur)
++
++                    for s_key, info in binding_stats.items():
++                        if info["status"] is None:
++                            continue
++                        self._upsert_suggestion(cur, info)
++                        active_suggestion_keys.add(s_key)
++                        if _tx_hook and not first_suggestion_hook_fired:
++                            first_suggestion_hook_fired = True
++                            _tx_hook("after_first_suggestion_write", cur)
++                        if _tx_hook:
++                            _tx_hook("after_binding_suggestion_write", cur)
++
++                # Reconcile previously mined suggestions whose effective support fell below threshold
++                self._reconcile_stale_suggestions(cur, active_suggestion_keys, all_computed_suggestions)
++
++                # 3. Aggregate parameter adjustments into unified flywheel_pattern_aggregates
++                param_groups_count = self._aggregate_parameter_adjustments(
++                    cur, param_adjust_groups, _tx_hook=_tx_hook
++                )
++
++                # 4. Mark processed inside the exact same transaction
+                 if unprocessed_ids:
+-                    cur.execute(f"UPDATE flywheel_records SET is_processed = 1 WHERE id IN ({','.join(['?']*len(unprocessed_ids))})", unprocessed_ids)
+-            
+-            # 2. Phase 2: Full-table statistics for active records
+-            with get_db_cursor(commit=True) as cur:
+-                cur.execute("""
+-                SELECT raw_name_norm, COUNT(*) as total_actions
+-                FROM flywheel_records
+-                WHERE superseded = 0
+-                GROUP BY raw_name_norm
+-                HAVING total_actions >= 2
+-                """)
+-                active_patterns = [row["raw_name_norm"] for row in cur.fetchall()]
+-                
+-                for raw_norm in active_patterns:
+-                    # Analyze ALIAS suggestions
+-                    self._mine_alias_suggestions(cur, raw_norm)
+-                    # Analyze BINDING_RULE suggestions
+-                    self._mine_binding_suggestions(cur, raw_norm)
+-                    
+-                # 3. Aggregate parameter adjustments into aggregates table (P1-4 & P1-5)
+-                self._aggregate_parameter_adjustments(cur)
+-                    
+-            return {
+-                "processed_records_count": len(unprocessed_ids),
+-                "analyzed_patterns_count": len(active_patterns),
+-                "status": "success"
+-            }
+-        except Exception as e:
+-            logger.error(f"Error during flywheel mining execution: {e}")
+-            # Reset is_processed flags on failure (P2-4)
+-            if unprocessed_ids:
++                    placeholders = ",".join(["?"] * len(unprocessed_ids))
++                    cur.execute(
++                        f"UPDATE flywheel_records SET is_processed = 1 WHERE id IN ({placeholders})",
++                        unprocessed_ids,
++                    )
++
++                if _tx_hook:
++                    _tx_hook("before_commit", cur)
++
++                conn.execute("COMMIT")
++                return {
++                    "processed_records_count": len(unprocessed_ids),
++                    "analyzed_patterns_count": len(active_patterns),
++                    "param_adjust_groups_count": param_groups_count,
++                    "skipped_missing_discipline_count": skipped_missing_discipline,
++                    "status": "success",
++                }
++            except Exception as exc:
+                 try:
+-                    with get_db_cursor(commit=True) as reset_cur:
+-                        reset_cur.execute(f"UPDATE flywheel_records SET is_processed = 0 WHERE id IN ({','.join(['?']*len(unprocessed_ids))})", unprocessed_ids)
+-                except Exception as re_err:
+-                    logger.error(f"Failed to reset is_processed flags: {re_err}")
+-            raise e
+-
+-    def _mine_alias_suggestions(self, cur, raw_norm: str):
+-        """Aggregate alias mapping candidates for a specific raw_name_norm."""
+-        cur.execute("""
+-        SELECT COUNT(*) as denom
+-        FROM flywheel_records
+-        WHERE raw_name_norm = ? AND superseded = 0 AND action_type IN ('MANUAL_REPLACE', 'PICK_CANDIDATE')
+-        """, (raw_norm,))
+-        denom_row = cur.fetchone()
+-        denominator = denom_row["denom"] if denom_row else 0
++                    conn.execute("ROLLBACK")
++                except Exception:
++                    pass
++                logger.error("Error during flywheel mining execution (%s): %s", type(exc).__name__, exc)
++                raise
++            finally:
++                conn.close()
++
++    def _compute_alias_stats(
++        self, recs: List[sqlite3.Row], disc: str
++    ) -> Dict[Tuple[str, str, str, str], Dict[str, Any]]:
++        alias_recs = [r for r in recs if r["action_type"] in ("MANUAL_REPLACE", "PICK_CANDIDATE")]
++        denominator = len(alias_recs)
+         if denominator == 0:
+-            return
+-
+-        cur.execute("""
+-        SELECT raw_name, final_targets_json, user_id, id
+-        FROM flywheel_records
+-        WHERE raw_name_norm = ? AND superseded = 0 AND action_type IN ('MANUAL_REPLACE', 'PICK_CANDIDATE')
+-        """, (raw_norm,))
+-        records = cur.fetchall()
+-
+-        target_stats: Dict[str, Dict[str, Any]] = {}
+-        for r in records:
+-            targets = json.loads(r["final_targets_json"] or "[]")
++            return {}
++
++        target_stats: Dict[Tuple[str, str], Dict[str, Any]] = {}
++        for r in alias_recs:
++            targets = _parse_json_field(r["final_targets_json"], list, r["id"], "final_targets_json")
+             if not targets:
+                 continue
+-            primary_target = targets[0]
+-            target_name = primary_target.get("name", "").strip()
++            primary_target = targets[0] if isinstance(targets[0], dict) else {}
++            target_name = str(primary_target.get("name", "") or "").strip()
+             if not target_name:
+                 continue
+-                
+             pair = extract_alias_candidate(r["raw_name"], target_name, self.vocab)
+             if not pair:
+                 continue
+             src_pattern, target_val = pair
+-            
+-            key = f"{src_pattern}__->_{target_val}"
+-            if key not in target_stats:
+-                target_stats[key] = {
++            actor_key = _actor_identity_key(r)
++            stat_key = (src_pattern, target_val)
++            if stat_key not in target_stats:
++                target_stats[stat_key] = {
+                     "src": src_pattern,
+                     "target": target_val,
+                     "count": 0,
+                     "users": set(),
+-                    "sample_ids": []
++                    "sample_ids": [],
+                 }
+-            target_stats[key]["count"] += 1
+-            if r["user_id"] != "legacy_anonymous":
+-                target_stats[key]["users"].add(r["user_id"])
+-            target_stats[key]["sample_ids"].append(r["id"])
+-
++            target_stats[stat_key]["count"] += 1
++            target_stats[stat_key]["users"].add(actor_key)
++            target_stats[stat_key]["sample_ids"].append(int(r["id"]))
++
++        out: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
+         for stat in target_stats.values():
+             support = stat["count"]
+-            distinct_users = len(stat["users"]) if stat["users"] else 1
++            distinct_users = len(stat["users"])
+             consistency = round(float(support) / float(denominator), 4)
+-            
+-            status = None
++            status: Optional[str] = None
+             if support >= 3 and distinct_users >= 2 and consistency >= 0.80:
+                 status = "pending"
+             elif support >= 2:
+                 status = "observing"
+-                
+-            if status:
+-                self._upsert_suggestion(
+-                    cur,
+-                    suggestion_type="ALIAS",
+-                    source_pattern=stat["src"],
+-                    target_value=stat["target"],
+-                    discipline="通用",
+-                    support_count=support,
+-                    distinct_users=distinct_users,
+-                    consistency=consistency,
+-                    sample_ids=stat["sample_ids"],
+-                    status=status
+-                )
+-
+-    def _mine_binding_suggestions(self, cur, raw_norm: str):
+-        """Aggregate 1-to-N binding rules."""
+-        cur.execute("""
+-        SELECT COUNT(*) as denom
+-        FROM flywheel_records
+-        WHERE raw_name_norm = ? AND superseded = 0 AND action_type = 'BIND_MULTI'
+-        """, (raw_norm,))
+-        denom_row = cur.fetchone()
+-        denominator = denom_row["denom"] if denom_row else 0
+-        if denominator < 2:
+-            return
+-
+-        cur.execute("""
+-        SELECT raw_name, final_targets_json, user_id, id
+-        FROM flywheel_records
+-        WHERE raw_name_norm = ? AND superseded = 0 AND action_type = 'BIND_MULTI'
+-        """, (raw_norm,))
+-        records = cur.fetchall()
+-
+-        binding_groups: Dict[str, Dict[str, Any]] = {}
+-        for r in records:
+-            targets = json.loads(r["final_targets_json"] or "[]")
++
++            rule_ctx = RuleContext.from_fields(
++                professional=disc,
++                name=stat["src"],
++                raw_name=stat["src"],
++                stage="mining",
++            )
++            s_key = ("ALIAS", stat["src"], stat["target"], disc)
++            out[s_key] = {
++                "suggestion_type": "ALIAS",
++                "source_pattern": stat["src"],
++                "target_value": stat["target"],
++                "discipline": disc,
++                "support_count": support,
++                "distinct_users": distinct_users,
++                "consistency": consistency,
++                "sample_ids": sorted(stat["sample_ids"]),
++                "status": status,
++                "rule_context": rule_ctx.to_scope_dict(),
++            }
++        return out
++
++    def _compute_binding_stats(
++        self, recs: List[sqlite3.Row], disc: str
++    ) -> Dict[Tuple[str, str, str, str], Dict[str, Any]]:
++        bind_recs = [r for r in recs if r["action_type"] == "BIND_MULTI"]
++        denominator = len(bind_recs)
++        if denominator == 0:
++            return {}
++
++        binding_groups: Dict[Tuple[str, str], Dict[str, Any]] = {}
++        for r in bind_recs:
++            targets = _parse_json_field(r["final_targets_json"], list, r["id"], "final_targets_json")
+             if len(targets) <= 1:
+                 continue
+-            sorted_targets = sorted(targets, key=lambda x: x.get("code", ""))
++            sorted_targets = sorted(
++                (t for t in targets if isinstance(t, dict)),
++                key=lambda x: str(x.get("code", "") or ""),
++            )
++            if len(sorted_targets) <= 1:
++                continue
+             serialized = json.dumps(sorted_targets, ensure_ascii=False)
+-            
+-            if serialized not in binding_groups:
+-                binding_groups[serialized] = {
+-                    "raw_name": r["raw_name"],
++            actor_key = _actor_identity_key(r)
++            bg_key = (str(r["raw_name"]), serialized)
++            if bg_key not in binding_groups:
++                binding_groups[bg_key] = {
++                    "raw_name": str(r["raw_name"]),
+                     "targets_json": serialized,
+                     "count": 0,
+                     "users": set(),
+-                    "sample_ids": []
++                    "sample_ids": [],
+                 }
+-            binding_groups[serialized]["count"] += 1
+-            if r["user_id"] != "legacy_anonymous":
+-                binding_groups[serialized]["users"].add(r["user_id"])
+-            binding_groups[serialized]["sample_ids"].append(r["id"])
+-
++            binding_groups[bg_key]["count"] += 1
++            binding_groups[bg_key]["users"].add(actor_key)
++            binding_groups[bg_key]["sample_ids"].append(int(r["id"]))
++
++        out: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
+         for bg in binding_groups.values():
+             support = bg["count"]
+-            distinct_users = len(bg["users"]) if bg["users"] else 1
++            distinct_users = len(bg["users"])
+             consistency = round(float(support) / float(denominator), 4)
+-            
+-            status = "pending" if (support >= 3 and distinct_users >= 2 and consistency >= 0.80) else "observing"
+-            
+-            self._upsert_suggestion(
+-                cur,
+-                suggestion_type="BINDING_RULE",
+-                source_pattern=bg["raw_name"],
+-                target_value=bg["targets_json"],
+-                discipline="通用",
+-                support_count=support,
+-                distinct_users=distinct_users,
+-                consistency=consistency,
+-                sample_ids=bg["sample_ids"],
+-                status=status
+-            )
+-
+-    def _aggregate_parameter_adjustments(self, cur):
+-        """Aggregate parameter adjustment trends for long-term tracking (P1-4, P1-5)."""
+-        cur.execute("""
+-        SELECT raw_name_norm, extracted_params, COUNT(*) as cnt
+-        FROM flywheel_records
+-        WHERE action_type = 'PARAM_ADJUST' AND superseded = 0
+-        GROUP BY raw_name_norm
+-        HAVING cnt >= 2
+-        """)
+-        rows = cur.fetchall()
+-        for r in rows:
+-            cur.execute("""
+-            INSERT OR REPLACE INTO flywheel_pattern_aggregates (
+-                pattern_key, discipline, total_count, correct_count, manual_replace_count,
+-                param_adjust_count, dominant_target_code, sample_ids_json
+-            ) VALUES (?, '通用', ?, 0, 0, ?, '', '[]')
+-            """, (r["raw_name_norm"], r["cnt"], r["cnt"]))
+-
+-    def _upsert_suggestion(self, cur, suggestion_type: str, source_pattern: str, target_value: str,
+-                           discipline: str, support_count: int, distinct_users: int, consistency: float,
+-                           sample_ids: List[int], status: str):
+-        """Insert or update rule suggestions table with multi-candidate tracking (P2-2)."""
+-        cur.execute("""
+-        SELECT id, status, support_count FROM flywheel_rule_suggestions
+-        WHERE suggestion_type = ? AND source_pattern = ? AND target_value = ?
+-        """, (suggestion_type, source_pattern, target_value))
++            status: Optional[str] = None
++            if support >= 3 and distinct_users >= 2 and consistency >= 0.80:
++                status = "pending"
++            elif support >= 2 and denominator >= 2:
++                status = "observing"
++
++            rule_ctx = RuleContext.from_fields(
++                professional=disc,
++                name=bg["raw_name"],
++                raw_name=bg["raw_name"],
++                stage="mining",
++            )
++            s_key = ("BINDING_RULE", bg["raw_name"], bg["targets_json"], disc)
++            out[s_key] = {
++                "suggestion_type": "BINDING_RULE",
++                "source_pattern": bg["raw_name"],
++                "target_value": bg["targets_json"],
++                "discipline": disc,
++                "support_count": support,
++                "distinct_users": distinct_users,
++                "consistency": consistency,
++                "sample_ids": sorted(bg["sample_ids"]),
++                "status": status,
++                "rule_context": rule_ctx.to_scope_dict(),
++            }
++        return out
++
++    def _reconcile_stale_suggestions(
++        self,
++        cur: sqlite3.Cursor,
++        active_suggestion_keys: Set[Tuple[str, str, str, str]],
++        all_computed_suggestions: Dict[Tuple[str, str, str, str], Dict[str, Any]],
++    ) -> None:
++        existing_rows = cur.execute(
++            """
++            SELECT id, suggestion_type, source_pattern, target_value, discipline, status
++            FROM flywheel_rule_suggestions
++            WHERE source_origin = 'trusted_miner'
++            """
++        ).fetchall()
++        for row in existing_rows:
++            s_key = (
++                str(row["suggestion_type"]),
++                str(row["source_pattern"]),
++                str(row["target_value"]),
++                str(row["discipline"] or ""),
++            )
++            if s_key in active_suggestion_keys:
++                continue
++            actual = all_computed_suggestions.get(s_key)
++            if actual:
++                sup = int(actual["support_count"])
++                d_users = int(actual["distinct_users"])
++                cons = float(actual["consistency"])
++                sids_json = json.dumps(actual["sample_ids"])
++            else:
++                sup = 0
++                d_users = 0
++                cons = 0.0
++                sids_json = "[]"
++
++            cur_status = str(row["status"] or "")
++            new_status = cur_status if cur_status in ("accepted", "rejected", "rolled_back") else "superseded"
++            cur.execute(
++                """
++                UPDATE flywheel_rule_suggestions
++                SET support_count = ?, distinct_users = ?, consistency = ?,
++                    sample_ids_json = ?, status = ?, updated_at = CURRENT_TIMESTAMP
++                WHERE id = ?
++                """,
++                (sup, d_users, cons, sids_json, new_status, int(row["id"])),
++            )
++
++    def _aggregate_parameter_adjustments(
++        self,
++        cur: sqlite3.Cursor,
++        param_adjust_groups: Dict[Tuple[str, str], List[sqlite3.Row]],
++        _tx_hook: Optional[Callable[[str, sqlite3.Cursor], None]] = None,
++    ) -> int:
++        """Aggregate parameter adjustment trends into authoritative flywheel_pattern_aggregates."""
++        active_agg_keys: Set[Tuple[str, str]] = set()
++        for (raw_norm, disc), recs in sorted(param_adjust_groups.items()):
++            if len(recs) < 2:
++                continue
++            active_agg_keys.add((raw_norm, disc))
++            summary_payload = self._build_param_adjust_summary(recs, disc)
++            cur.execute(
++                """
++                INSERT INTO flywheel_pattern_aggregates (
++                    source_pattern, suggestion_type, target_value, discipline, source_origin,
++                    archived_support, archived_distinct_users,
++                    active_support, active_distinct_users, total_support,
++                    param_adjust_count, dominant_target_code, sample_ids_json, context_summary_json,
++                    updated_at
++                ) VALUES (?, 'PARAM_ADJUST', '', ?, 'trusted_recompute', 0, 0, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
++                ON CONFLICT(source_pattern, suggestion_type, target_value, discipline, source_origin)
++                DO UPDATE SET
++                    active_support = excluded.active_support,
++                    active_distinct_users = excluded.active_distinct_users,
++                    total_support = flywheel_pattern_aggregates.archived_support + excluded.active_support,
++                    param_adjust_count = excluded.param_adjust_count,
++                    dominant_target_code = excluded.dominant_target_code,
++                    sample_ids_json = excluded.sample_ids_json,
++                    context_summary_json = excluded.context_summary_json,
++                    updated_at = CURRENT_TIMESTAMP
++                """,
++                (
++                    raw_norm,
++                    disc,
++                    summary_payload["active_support"],
++                    summary_payload["active_distinct_users"],
++                    summary_payload["active_support"],
++                    summary_payload["active_support"],
++                    summary_payload["dominant_target_code"],
++                    summary_payload["sample_ids_json"],
++                    summary_payload["context_summary_json"],
++                ),
++            )
++            if _tx_hook:
++                _tx_hook("after_param_aggregate_write", cur)
++
++        # Reconcile stale trusted_recompute rows whose active support dropped below 2
++        existing_agg_rows = cur.execute(
++            """
++            SELECT id, source_pattern, discipline
++            FROM flywheel_pattern_aggregates
++            WHERE suggestion_type = 'PARAM_ADJUST' AND source_origin = 'trusted_recompute'
++            """
++        ).fetchall()
++        for agg_row in existing_agg_rows:
++            agg_key = (str(agg_row["source_pattern"]), str(agg_row["discipline"] or ""))
++            if agg_key in active_agg_keys:
++                continue
++            leftover = param_adjust_groups.get(agg_key, [])
++            if leftover:
++                summary_payload = self._build_param_adjust_summary(leftover, agg_key[1])
++            else:
++                summary_payload = {
++                    "active_support": 0,
++                    "active_distinct_users": 0,
++                    "dominant_target_code": "",
++                    "sample_ids_json": "[]",
++                    "context_summary_json": json.dumps(
++                        {"professional": agg_key[1], "adjusted_params": {}}, ensure_ascii=False
++                    ),
++                }
++            cur.execute(
++                """
++                UPDATE flywheel_pattern_aggregates
++                SET active_support = ?,
++                    active_distinct_users = ?,
++                    total_support = archived_support + ?,
++                    param_adjust_count = ?,
++                    dominant_target_code = ?,
++                    sample_ids_json = ?,
++                    context_summary_json = ?,
++                    updated_at = CURRENT_TIMESTAMP
++                WHERE id = ?
++                """,
++                (
++                    summary_payload["active_support"],
++                    summary_payload["active_distinct_users"],
++                    summary_payload["active_support"],
++                    summary_payload["active_support"],
++                    summary_payload["dominant_target_code"],
++                    summary_payload["sample_ids_json"],
++                    summary_payload["context_summary_json"],
++                    int(agg_row["id"]),
++                ),
++            )
++        return len(active_agg_keys)
++
++    @staticmethod
++    def _build_param_adjust_summary(recs: List[sqlite3.Row], disc: str) -> Dict[str, Any]:
++        users: Set[str] = set()
++        sample_ids: List[int] = []
++        target_codes: Counter = Counter()
++        param_trends: Dict[str, Counter] = {}
++
++        for r in recs:
++            users.add(_actor_identity_key(r))
++            sample_ids.append(int(r["id"]))
++            targets = _parse_json_field(r["final_targets_json"], list, r["id"], "final_targets_json")
++            if targets and isinstance(targets[0], dict):
++                t_code = str(targets[0].get("code", "") or "").strip()
++                if t_code:
++                    target_codes[t_code] += 1
++            ext = _parse_json_field(r["extracted_params"], dict, r["id"], "extracted_params")
++            adj = ext.get("client_adjusted_params") if isinstance(ext.get("client_adjusted_params"), dict) else {}
++            if not adj and ext:
++                adj = {k: v for k, v in ext.items() if k not in ("parsed_spec", "client_adjusted_params")}
++            for pk, pv in adj.items():
++                val_str = json.dumps(pv, ensure_ascii=False) if isinstance(pv, (dict, list)) else str(pv)
++                param_trends.setdefault(str(pk), Counter())[val_str] += 1
++
++        dominant_target_code = target_codes.most_common(1)[0][0] if target_codes else ""
++        trend_summary = {
++            pk: {"count": sum(cnt.values()), "values": dict(cnt)}
++            for pk, cnt in sorted(param_trends.items())
++        }
++        return {
++            "active_support": len(recs),
++            "active_distinct_users": len(users),
++            "dominant_target_code": dominant_target_code,
++            "sample_ids_json": json.dumps(sorted(sample_ids)),
++            "context_summary_json": json.dumps(
++                {
++                    "professional": disc,
++                    "scope_level": "discipline",
++                    "scope_target": disc,
++                    "adjusted_params": trend_summary,
++                },
++                ensure_ascii=False,
++            ),
++        }
++
++    def _upsert_suggestion(self, cur: sqlite3.Cursor, info: Dict[str, Any]) -> None:
++        """Insert or update rule suggestions scoped by (type, source, target, discipline, source_origin)."""
++        suggestion_type = info["suggestion_type"]
++        source_pattern = info["source_pattern"]
++        target_value = info["target_value"]
++        discipline = info["discipline"]
++        support_count = info["support_count"]
++        distinct_users = info["distinct_users"]
++        consistency = info["consistency"]
++        sample_ids = info["sample_ids"]
++        status = info["status"]
++        rule_ctx_json = json.dumps(info["rule_context"], ensure_ascii=False)
++
++        cur.execute(
++            """
++            SELECT id, status FROM flywheel_rule_suggestions
++            WHERE suggestion_type = ? AND source_pattern = ? AND target_value = ?
++              AND discipline = ? AND source_origin = 'trusted_miner'
++            """,
++            (suggestion_type, source_pattern, target_value, discipline),
++        )
+         exact_existing = cur.fetchone()
+-        
++
+         sample_ids_json = json.dumps(sample_ids)
+         if exact_existing:
+             current_status = exact_existing["status"]
+-            new_status = current_status if current_status in ("accepted", "rejected") else status
+-            cur.execute("""
+-            UPDATE flywheel_rule_suggestions
+-            SET support_count = ?, distinct_users = ?, consistency = ?,
+-                sample_ids_json = ?, status = ?
+-            WHERE id = ?
+-            """, (support_count, distinct_users, consistency, sample_ids_json, new_status, exact_existing["id"]))
++            new_status = current_status if current_status in ("accepted", "rejected", "rolled_back") else status
++            cur.execute(
++                """
++                UPDATE flywheel_rule_suggestions
++                SET support_count = ?, distinct_users = ?, consistency = ?,
++                    sample_ids_json = ?, status = ?, rule_context_json = ?,
++                    updated_at = CURRENT_TIMESTAMP
++                WHERE id = ?
++                """,
++                (
++                    support_count,
++                    distinct_users,
++                    consistency,
++                    sample_ids_json,
++                    new_status,
++                    rule_ctx_json,
++                    int(exact_existing["id"]),
++                ),
++            )
+         else:
+-            cur.execute("""
+-            INSERT INTO flywheel_rule_suggestions (
+-                suggestion_type, source_pattern, target_value, discipline,
+-                support_count, distinct_users, consistency, sample_ids_json, status
+-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+-            """, (suggestion_type, source_pattern, target_value, discipline, support_count, distinct_users, consistency, sample_ids_json, status))
++            cur.execute(
++                """
++                INSERT INTO flywheel_rule_suggestions (
++                    suggestion_type, source_pattern, target_value, discipline,
++                    support_count, distinct_users, consistency, sample_ids_json,
++                    source_origin, rule_context_json, status, updated_at
++                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'trusted_miner', ?, ?, CURRENT_TIMESTAMP)
++                """,
++                (
++                    suggestion_type,
++                    source_pattern,
++                    target_value,
++                    discipline,
++                    support_count,
++                    distinct_users,
++                    consistency,
++                    sample_ids_json,
++                    rule_ctx_json,
++                    status,
++                ),
++            )
++
+ 
+ miner = FlywheelMiner()
+--- pre/app/normalizer.py
+
++++ app/normalizer.py
+
+@@ -4,103 +4,16 @@
+
+ import re
+ import json
+ from typing import Dict, Any, List, Optional, Tuple
++from app.rule_context import (
++    PROFESSIONAL_ALIASES,
++    DYNAMIC_UNIVERSAL_TOKENS,
++    RuleContext,
++    normalize_professional_category,
++    dynamic_scope_matches,
++    dynamic_rule_matches_query,
++)
+ 
+ logger = logging.getLogger(__name__)
+-
+-# V015-M3 R03：专业别名与动态规则作用域匹配单一事实源（无环底层，供 matcher/query_preprocessor/normalizer 共用）
+-PROFESSIONAL_ALIASES = {
+-    "医气": "医气",
+-    "医用气体": "医气",
+-    "医疗气体": "医气",
+-    "气体": "医气",
+-}
+-DYNAMIC_UNIVERSAL_TOKENS = {"通用", "全部", "all", "universal"}
+-
+-
+-def normalize_professional_category(value: Any) -> str:
+-    """专业枚举归一：展示名/别名统一到枚举值；空值返回 ''，未知值原样返回。"""
+-    if value is None:
+-        return ""
+-    text = str(value).strip()
+-    if not text:
+-        return ""
+-    return PROFESSIONAL_ALIASES.get(text, text)
+-
+-
+-def dynamic_scope_matches(scope_tgt: str, candidate_names: List[Any]) -> bool:
+-    """按目标串及展示别名比较候选名称列表，不做任何跨专业默认值兜底。"""
+-    if not scope_tgt:
+-        return True
+-    raw_targets = [t.strip() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-    targets: List[str] = []
+-    for t in raw_targets:
+-        t_low = t.lower()
+-        if t_low not in targets:
+-            targets.append(t_low)
+-        norm_t = normalize_professional_category(t).lower()
+-        if norm_t and norm_t not in targets:
+-            targets.append(norm_t)
+-    for c in candidate_names:
+-        if not c:
+-            continue
+-        c_str = str(c).strip()
+-        if not c_str:
+-            continue
+-        c_low = c_str.lower()
+-        c_norm = normalize_professional_category(c_str).lower()
+-        for cand in (c_low, c_norm):
+-            if cand and any(t in cand or cand in t for t in targets):
+-                return True
+-    return False
+-
+-
+-def dynamic_rule_matches_query(rule: Dict[str, Any], query_info: Dict[str, Any]) -> bool:
+-    """A-M3-05：按查询真实专业、名称及显式 universal/通用 契约判定动态规则作用域。"""
+-    scope_lvl = str(rule.get("scope_level") or "category").strip().lower()
+-    scope_tgt = str(rule.get("scope_target") or "").strip()
+-    if scope_lvl == "universal" or not scope_tgt:
+-        return True
+-
+-    targets = [t.strip() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-    if scope_lvl == "discipline" and any(t.lower() in DYNAMIC_UNIVERSAL_TOKENS for t in targets):
+-        return True
+-
+-    q_prof = str(
+-        query_info.get("professional", "") or query_info.get("original_category", "") or ""
+-    ).strip()
+-    if q_prof:
+-        q_prof = re.sub(r'^\d+[\.．\s]*', '', q_prof).strip()
+-    raw_profs = [
+-        query_info.get("category", ""),
+-        query_info.get("original_category", ""),
+-        q_prof,
+-        query_info.get("domain", ""),
+-        query_info.get("discipline", ""),
+-    ]
+-    prof_candidates: List[str] = []
+-    for val in raw_profs:
+-        s = str(val or "").strip()
+-        if not s:
+-            continue
+-        if s not in prof_candidates:
+-            prof_candidates.append(s)
+-        stripped = re.sub(r'^\d+[\.．\s]*', '', s).strip()
+-        if stripped and stripped not in prof_candidates:
+-            prof_candidates.append(stripped)
+-        norm = normalize_professional_category(stripped or s)
+-        if norm and norm not in prof_candidates:
+-            prof_candidates.append(norm)
+-
+-    name_candidates = [
+-        query_info.get("name", ""),
+-        query_info.get("raw_name", ""),
+-        query_info.get("original_name", ""),
+-    ]
+-    if scope_lvl == "discipline":
+-        return dynamic_scope_matches(scope_tgt, prof_candidates)
+-    if scope_lvl == "category":
+-        return dynamic_scope_matches(scope_tgt, name_candidates)
+-    return dynamic_scope_matches(scope_tgt, name_candidates + prof_candidates)
+ 
+ CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "config"))
+ 
+@@ -172,54 +85,164 @@
+
+         result.append(chr(code))
+     return "".join(result)
+ 
+-def _cleaning_rule_in_scope(rule: Dict[str, Any], discipline: Optional[str], category: Optional[str]) -> bool:
+-    scope_lvl = str(rule.get("scope_level") or "universal").strip().lower()
+-    scope_tgt = str(rule.get("scope_target") or "").strip()
+-    if scope_lvl == "universal" or not scope_tgt:
+-        return True
+-    tokens = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-    if scope_lvl == "discipline":
+-        if any(t in DYNAMIC_UNIVERSAL_TOKENS for t in tokens):
+-            return True
+-        if discipline:
+-            return dynamic_scope_matches(scope_tgt, [discipline])
+-        return True
+-    if scope_lvl == "category" and category:
+-        return dynamic_scope_matches(scope_tgt, [category])
+-    return True
++def _build_cleaning_rule_context(
++    discipline: Optional[str],
++    category: Optional[str],
++    rule_context: Optional[RuleContext] = None,
++) -> RuleContext:
++    if rule_context is not None:
++        return rule_context
++    return RuleContext.from_fields(
++        professional=discipline or "",
++        material_category=category or "",
++        stage="cleaning",
++    )
++
++
++def _cleaning_rule_in_scope(
++    rule: Dict[str, Any],
++    discipline: Optional[str],
++    category: Optional[str],
++    *,
++    rule_context: Optional[RuleContext] = None,
++) -> bool:
++    ctx = _build_cleaning_rule_context(discipline, category, rule_context)
++    return ctx.matches_rule(rule)
+ 
+ 
+ def _apply_dynamic_cleaning_pass(
+-    text: str, discipline: Optional[str], category: Optional[str], phase: str
+-) -> str:
++    text: str,
++    discipline: Optional[str],
++    category: Optional[str],
++    phase: str,
++    *,
++    rule_context: Optional[RuleContext] = None,
++    raise_on_error: bool = False,
++) -> Tuple[str, Dict[str, Any]]:
++    ctx = _build_cleaning_rule_context(discipline, category, rule_context)
++    diagnostics: Dict[str, Any] = {
++        "stage": phase,
++        "context": ctx.to_scope_dict(),
++        "applied_rules": [],
++        "skipped_rules": [],
++        "errors": [],
++        "degraded": False,
++    }
++    if not text:
++        return text, diagnostics
++
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+         active_rules = LLMRuleManager.get_active_rules()
+-        for r in active_rules:
+-            if not _cleaning_rule_in_scope(r, discipline, category):
++    except Exception as exc:
++        logger.error("Dynamic %s cleaning rules load failed (%s): %s", phase, type(exc).__name__, exc)
++        diagnostics["errors"].append({
++            "rule_id": "*",
++            "phase": phase,
++            "error_type": type(exc).__name__,
++            "message": str(exc),
++        })
++        diagnostics["degraded"] = True
++        if raise_on_error:
++            raise
++        return text, diagnostics
++
++    for r in active_rules:
++        rid = str(r.get("rule_id") or r.get("id") or "?")
++        try:
++            scope_res = ctx.evaluate_rule(r)
++            if not scope_res.matched:
++                diagnostics["skipped_rules"].append({
++                    "rule_id": rid,
++                    "phase": phase,
++                    "reason": scope_res.reason,
++                })
+                 continue
+-            dsl = r.get("parsed_dsl", {})
++            dsl = r.get("parsed_dsl")
++            if dsl is None:
++                dsl = {}
++            if not isinstance(dsl, dict):
++                raise ValueError(f"动态清洗规则 {rid} parsed_dsl 结构非法")
+             cleaning_rules = dsl.get("cleaning_rules", [])
++            if cleaning_rules is None:
++                cleaning_rules = []
++            if not isinstance(cleaning_rules, list):
++                raise ValueError(f"动态清洗规则 {rid} cleaning_rules 结构非法")
+             if cleaning_rules:
+                 text_before = text
+                 text, _actions = DynamicRuleInterpreter.apply_cleaning_rules(text, cleaning_rules)
++                diagnostics["applied_rules"].append({"rule_id": rid, "phase": phase})
+                 if text != text_before and r.get("rule_id"):
+                     RuleHitStatsTracker().record_hit(r["rule_id"])
+-    except Exception as exc:
+-        logger.warning(f"Dynamic {phase} cleaning rules skipped on normalization: {exc}")
+-    return text
+-
+-
+-def clean_text_standard(text: str, discipline: Optional[str] = None, category: Optional[str] = None) -> str:
+-    """
+-    Apply character cleaning, full-to-half conversion, lowercase normalization,
+-    and alias synonym replacements on raw text.
+-    """
++        except Exception as exc:
++            logger.error("Dynamic %s cleaning rule %s failed (%s): %s", phase, rid, type(exc).__name__, exc)
++            diagnostics["errors"].append({
++                "rule_id": rid,
++                "phase": phase,
++                "error_type": type(exc).__name__,
++                "message": str(exc),
++            })
++            diagnostics["degraded"] = True
++            if raise_on_error:
++                raise
++    return text, diagnostics
++
++
++def apply_dynamic_cleaning_rules_with_context(
++    text: str,
++    *,
++    rule_context: RuleContext,
++    phase: str = "spec-cleaning",
++    raise_on_error: bool = False,
++) -> Tuple[str, Dict[str, Any]]:
++    """Apply ONLY dynamic DSL cleaning rules under an explicit RuleContext (no static dict mutation)."""
+     if not text or not isinstance(text, str):
+-        return ""
++        return "", {
++            "stage": phase,
++            "context": rule_context.to_scope_dict(),
++            "applied_rules": [],
++            "skipped_rules": [],
++            "errors": [],
++            "degraded": False,
++        }
++    return _apply_dynamic_cleaning_pass(
++        text,
++        None,
++        None,
++        phase,
++        rule_context=rule_context,
++        raise_on_error=raise_on_error,
++    )
++
++
++def clean_text_standard_with_diagnostics(
++    text: str,
++    discipline: Optional[str] = None,
++    category: Optional[str] = None,
++    *,
++    rule_context: Optional[RuleContext] = None,
++    raise_on_error: bool = False,
++) -> Tuple[str, Dict[str, Any]]:
++    """Standardize text and return both cleaned string and RuleContext execution diagnostics."""
++    ctx = _build_cleaning_rule_context(discipline, category, rule_context)
++    merged_diag: Dict[str, Any] = {
++        "context": ctx.to_scope_dict(),
++        "applied_rules": [],
++        "skipped_rules": [],
++        "errors": [],
++        "degraded": False,
++    }
++    if not text or not isinstance(text, str):
++        return "", merged_diag
+ 
+     # 0. Apply dynamic LLM DSL cleaning rules on raw structured input (e.g. multi-line manifests)
+-    text = _apply_dynamic_cleaning_pass(text, discipline, category, "pre-normalization")
++    text, pre_diag = _apply_dynamic_cleaning_pass(
++        text, discipline, category, "pre-normalization",
++        rule_context=ctx, raise_on_error=raise_on_error,
++    )
++    for k in ("applied_rules", "skipped_rules", "errors"):
++        merged_diag[k].extend(pre_diag[k])
++    merged_diag["degraded"] = merged_diag["degraded"] or pre_diag["degraded"]
+ 
+     # 1. Full-width to half-width & remove invisible control characters (except \n and \r)
+     text = to_half_width(text)
+@@ -251,9 +274,37 @@
+
+     text = re.sub(r'[ \t]+', ' ', text)
+ 
+     # 7. Apply dynamic LLM DSL cleaning rules (post-normalization pass)
+-    text = _apply_dynamic_cleaning_pass(text, discipline, category, "post-normalization")
+-
+-    return text.strip()
++    text, post_diag = _apply_dynamic_cleaning_pass(
++        text, discipline, category, "post-normalization",
++        rule_context=ctx, raise_on_error=raise_on_error,
++    )
++    for k in ("applied_rules", "skipped_rules", "errors"):
++        merged_diag[k].extend(post_diag[k])
++    merged_diag["degraded"] = merged_diag["degraded"] or post_diag["degraded"]
++
++    return text.strip(), merged_diag
++
++
++def clean_text_standard(
++    text: str,
++    discipline: Optional[str] = None,
++    category: Optional[str] = None,
++    *,
++    rule_context: Optional[RuleContext] = None,
++    raise_on_error: bool = False,
++) -> str:
++    """
++    Apply character cleaning, full-to-half conversion, lowercase normalization,
++    and alias synonym replacements on raw text.
++    """
++    cleaned, _diag = clean_text_standard_with_diagnostics(
++        text,
++        discipline=discipline,
++        category=category,
++        rule_context=rule_context,
++        raise_on_error=raise_on_error,
++    )
++    return cleaned
+ 
+ def reload_normalizer_configs():
+     global CONFIG_DIR, alias_dict, material_dict, connection_dict, flags_dict, unit_rules
+--- pre/app/query_preprocessor.py
+
++++ app/query_preprocessor.py
+
+@@ -3,7 +3,15 @@
+
+ import re
+ from typing import Dict, Any, Tuple, Optional, List
+ 
+-from app.normalizer import clean_text_standard, to_half_width, convert_de_to_dn, dynamic_rule_matches_query
++from app.normalizer import (
++    clean_text_standard,
++    clean_text_standard_with_diagnostics,
++    apply_dynamic_cleaning_rules_with_context,
++    to_half_width,
++    convert_de_to_dn,
++    dynamic_rule_matches_query,
++)
++from app.rule_context import RuleContext
+ from app.domain_router import route_domain
+ from app.domain_extractors import ConfigDrivenExtractor, parse_numeric_complex, detect_three_state_flag
+ 
+@@ -695,23 +703,58 @@
+
+ 
+     return clean_attrs
+ 
+-def extract_query_params(name: str, specification: str, category: str) -> Dict[str, Any]:
++def extract_query_params(
++    name: str,
++    specification: str,
++    category: str,
++    *,
++    material_category: str = "",
++    strict_rules: bool = False,
++) -> Dict[str, Any]:
+     """
+     Main entry point for extracting structured parameters from raw query manifests.
++    `category` is the historical professional/discipline parameter; `material_category`
++    holds the distinct material category column without cross-contaminating `professional`.
+     """
+     # 1. Decouple name and spec if spec is embedded in name
+     effective_name, effective_spec = decouple_name_and_spec(name, specification)
+-    cat_clean = (category or "").strip()
+-    name_clean = clean_text_standard(
+-        effective_name or "", discipline=cat_clean, category=cat_clean
+-    ).strip()
++    prof_clean = (category or "").strip()
++    mat_cat_clean = (material_category or "").strip()
++    clean_ctx = RuleContext.from_fields(
++        professional=prof_clean,
++        material_category=mat_cat_clean,
++        name=effective_name or name or "",
++        raw_name=effective_name or name or "",
++        original_name=name or "",
++        stage="cleaning",
++    )
++    name_clean, name_clean_diag = clean_text_standard_with_diagnostics(
++        effective_name or "",
++        rule_context=clean_ctx,
++        raise_on_error=strict_rules,
++    )
++    name_clean = name_clean.strip()
+     spec_raw = (effective_spec or "").strip()
+ 
+-    # 2. Determine domain using route_domain
+-    domain = route_domain(cat_clean, name_clean, spec_raw)
+-
+-    # 3. Slice sections & parse KV blocks
++    # 2. Determine domain using route_domain (distinct from RuleContext.professional)
++    domain = route_domain(prof_clean or mat_cat_clean, name_clean, spec_raw, prof_clean)
++
++    # 3. Slice sections & parse KV blocks (apply ONLY dynamic cleaning rules on spec block)
+     material_block, noise_block = slice_query_sections(spec_raw)
++    material_block, spec_clean_diag = apply_dynamic_cleaning_rules_with_context(
++        material_block,
++        rule_context=RuleContext.from_fields(
++            professional=prof_clean,
++            material_category=mat_cat_clean,
++            domain=domain,
++            name=name_clean or effective_name or name or "",
++            raw_name=effective_name or name or "",
++            original_name=name or "",
++            stage="cleaning",
++        ),
++        phase="spec-cleaning",
++        raise_on_error=strict_rules,
++    )
+     kv_dict = parse_query_kv_blocks(material_block)
+ 
+     # Combine name and material block
+@@ -791,42 +834,104 @@
+
+     canonical_attrs = canonicalize_query_attrs(domain, attrs, combined_text)
+     normalized_attrs = normalize_unit_scales(canonical_attrs)
+ 
+-    # 8. Apply dynamic LLM extraction rules
++    # 8. Apply dynamic LLM extraction rules under unified RuleContext
++    ext_ctx = RuleContext.from_fields(
++        professional=prof_clean,
++        material_category=mat_cat_clean,
++        domain=domain,
++        name=final_name,
++        raw_name=name_clean or effective_name or name or "",
++        original_name=name or "",
++        stage="extraction",
++    )
++    ext_diag: Dict[str, Any] = {
++        "stage": "extraction",
++        "context": ext_ctx.to_scope_dict(),
++        "applied_rules": [],
++        "skipped_rules": [],
++        "errors": [],
++        "degraded": False,
++    }
+     try:
+-        from app.llm_rule_engine import LLMRuleManager
++        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
+         active_rules = LLMRuleManager.get_active_rules()
+-        q_scope_info = {
+-            "name": final_name,
+-            "raw_name": name_clean,
+-            "original_name": name_clean,
+-            "professional": cat_clean,
+-            "category": cat_clean,
+-            "domain": domain,
+-        }
+-        from app.llm_rule_engine import DynamicRuleInterpreter
+         for r in active_rules:
+-            if not dynamic_rule_matches_query(r, q_scope_info):
+-                continue
+-            dsl = r.get("parsed_dsl", {})
+-            extraction_rules = dsl.get("extraction_rules", [])
+-            if extraction_rules:
+-                dyn_extracted = DynamicRuleInterpreter.apply_extraction_rules(combined_text, extraction_rules)
+-                for k, v in dyn_extracted.items():
+-                    if v is not None:
+-                        normalized_attrs[k] = v
+-                        if k in ["name", "名称"]:
+-                            normalized_attrs["名称"] = str(v)
+-                        elif k in ["material", "材质"]:
+-                            normalized_attrs["材质"] = str(v)
+-                        elif k in ["specification", "规格", "dn_val", "口径", "管径"]:
+-                            m_dn = re.search(r'DN\s*(\d+)', str(v), re.IGNORECASE)
+-                            if m_dn:
+-                                normalized_attrs["管径"] = float(m_dn.group(1))
+-                                normalized_attrs["dn_val"] = float(m_dn.group(1))
+-                            else:
+-                                normalized_attrs["规格"] = str(v)
++            rid = str(r.get("rule_id") or r.get("id") or "?")
++            try:
++                scope_res = ext_ctx.evaluate_rule(r)
++                if not scope_res.matched:
++                    ext_diag["skipped_rules"].append({
++                        "rule_id": rid,
++                        "phase": "extraction",
++                        "reason": scope_res.reason,
++                    })
++                    continue
++                dsl = r.get("parsed_dsl")
++                if dsl is None:
++                    dsl = {}
++                if not isinstance(dsl, dict):
++                    raise ValueError(f"动态提取规则 {rid} parsed_dsl 结构非法")
++                extraction_rules = dsl.get("extraction_rules", [])
++                if extraction_rules is None:
++                    extraction_rules = []
++                if not isinstance(extraction_rules, list):
++                    raise ValueError(f"动态提取规则 {rid} extraction_rules 结构非法")
++                if extraction_rules:
++                    dyn_extracted = DynamicRuleInterpreter.apply_extraction_rules(combined_text, extraction_rules)
++                    ext_diag["applied_rules"].append({"rule_id": rid, "phase": "extraction"})
++                    for k, v in dyn_extracted.items():
++                        if v is not None:
++                            normalized_attrs[k] = v
++                            if k in ["name", "名称"]:
++                                normalized_attrs["名称"] = str(v)
++                            elif k in ["material", "材质"]:
++                                normalized_attrs["材质"] = str(v)
++                            elif k in ["specification", "规格", "dn_val", "口径", "管径"]:
++                                m_dn = re.search(r'DN\s*(\d+)', str(v), re.IGNORECASE)
++                                if m_dn:
++                                    normalized_attrs["管径"] = float(m_dn.group(1))
++                                    normalized_attrs["dn_val"] = float(m_dn.group(1))
++                                else:
++                                    normalized_attrs["规格"] = str(v)
++            except Exception as rule_exc:
++                logging.getLogger(__name__).error(
++                    "Dynamic extraction rule %s failed (%s): %s", rid, type(rule_exc).__name__, rule_exc
++                )
++                ext_diag["errors"].append({
++                    "rule_id": rid,
++                    "phase": "extraction",
++                    "error_type": type(rule_exc).__name__,
++                    "message": str(rule_exc),
++                })
++                ext_diag["degraded"] = True
++                if strict_rules:
++                    raise
+     except Exception as exc:
+-        logging.getLogger(__name__).warning(f"Dynamic extraction rules skipped: {exc}")
++        logging.getLogger(__name__).error(
++            "Dynamic extraction rules load failed (%s): %s", type(exc).__name__, exc
++        )
++        ext_diag["errors"].append({
++            "rule_id": "*",
++            "phase": "extraction",
++            "error_type": type(exc).__name__,
++            "message": str(exc),
++        })
++        ext_diag["degraded"] = True
++        if strict_rules:
++            raise
++
++    rule_diagnostics = {
++        "context": ext_ctx.to_scope_dict(),
++        "cleaning": {
++            "applied_rules": name_clean_diag["applied_rules"] + spec_clean_diag["applied_rules"],
++            "skipped_rules": name_clean_diag["skipped_rules"] + spec_clean_diag["skipped_rules"],
++            "errors": name_clean_diag["errors"] + spec_clean_diag["errors"],
++            "degraded": bool(name_clean_diag["degraded"] or spec_clean_diag["degraded"]),
++        },
++        "extraction": ext_diag,
++        "errors": name_clean_diag["errors"] + spec_clean_diag["errors"] + ext_diag["errors"],
++        "degraded": bool(name_clean_diag["degraded"] or spec_clean_diag["degraded"] or ext_diag["degraded"]),
++    }
+ 
+     return {
+         "domain": domain,
+@@ -839,30 +944,25 @@
+
+         "spec": material_block,
+         "clean_text": material_block,
+         "noise_text": noise_block,
+-        "kv_dict": kv_dict
++        "kv_dict": kv_dict,
++        "rule_diagnostics": rule_diagnostics,
+     }
+ 
+ 
+ def prepare_query(name: str, specification: str, professional: str,
+                   category: str = "", brand: str = "", unit: str = "",
+-                  preserve_original: bool = True) -> Dict[str, Any]:
+-    """V015-M1 统一 Query 输入契约。
+-
+-    上传批量、/api/batch_match、/api/match（单条/重算）、/api/rematch 与黄金集
+-    评测共用本入口，保证同一输入在所有入口产出一致的规范字段：
+-      - name/specification：清洗后的规范名称与清洗文本（施工噪声已隔离进
+-        parsed_info["noise_text"]，不进入编码文本）；
+-      - parsed_spec：完整解析结果（含规范名称、clean_text、attrs）；
+-      - category/brand/professional：规范维度；甲供材品类与专业保持
+-        "品类 -> 专业 -> 名称" 回退链（与既有 batch 行为一致）；
+-      - unit：清单原始单位（F13：matcher 硬检查依赖 query_info["unit"]）；
+-      - original_*：仅当 preserve_original 为真时保留原始输入，供导出与追溯。
+-
+-    兼容性：返回结构为既有 query_info 的超集；matcher/hybrid_recall 读取的
+-    name/specification/parsed_spec/category/brand/professional 键值语义不变。
+-    """
++                  preserve_original: bool = True,
++                  strict_rules: bool = False) -> Dict[str, Any]:
++    """V015-M1 统一 Query 输入契约 + V016-M1 RuleContext 字段隔离。"""
+     prof = (professional or "").strip()
+-    parsed = extract_query_params(name, specification, prof)
++    mat_cat = (category or "").strip()
++    parsed = extract_query_params(
++        name,
++        specification,
++        prof,
++        material_category=mat_cat,
++        strict_rules=strict_rules,
++    )
+ 
+     spec_name = str(parsed.get("name") or parsed.get("attrs", {}).get("名称") or "").strip()
+     clean_text = str(parsed.get("clean_text") or "").strip()
+@@ -870,7 +970,8 @@
+
+     query_info: Dict[str, Any] = {
+         "name": spec_name or (name or "").strip(),
+         "specification": clean_text or (specification or "").strip(),
+-        "category": (category or "").strip() or prof or spec_name,
++        "category": mat_cat or prof or spec_name,
++        "material_category": mat_cat,
+         "brand": (brand or "").strip(),
+         "professional": prof,
+         "unit": (unit or "").strip(),
+--- pre/app/matcher.py
+
++++ app/matcher.py
+
+@@ -17,9 +17,10 @@
+
+     detect_pump_state,
+     check_pump_conflict,
+ )
+-# V015-M3 R03：专业别名归一化与动态规则作用域匹配收敛到 app.normalizer 单一事实源（无环依赖）
+-from app.normalizer import (
++# V015-M3 R03 / V016-M1：专业别名归一化与动态规则作用域匹配收敛到 app.rule_context 单一事实源（无环依赖）
++from app.rule_context import (
+     PROFESSIONAL_ALIASES,
++    RuleContext,
+     normalize_professional_category,
+     dynamic_scope_matches as _dyn_scope_matches,
+     dynamic_rule_matches_query as _dyn_rule_matches_query,
+@@ -673,10 +674,13 @@
+
+     ctx.q_spec_text = q_info.get("specification", "")
+     ctx.q_category = q_info.get("category", "")
+     
+-    # V015-M1：fallback 解析第三参语义统一为专业（extract_query_params 的
+-    # 实际入参语义），优先取 query_info["professional"]，与 prepare_query 对齐。
++    # V015-M1 / V016-M1：fallback 解析第三参严格保持专业语义，材料品类单独传入 material_category，避免混作 professional
+     ctx.q_parsed = q_info.get("parsed_spec") or extract_query_params(
+-        ctx.q_name, ctx.q_spec_text, q_info.get("professional") or ctx.q_category)
++        ctx.q_name,
++        ctx.q_spec_text,
++        q_info.get("professional") or "",
++        material_category=q_info.get("material_category") or q_info.get("original_category") or ctx.q_category or "",
++    )
+     ctx.q_attrs = ctx.q_parsed.get("attrs", {}) if isinstance(ctx.q_parsed, dict) else {}
+     ctx.q_model = ctx.q_parsed.get("model", "") or ctx.q_attrs.get("型号", "") or ""
+     
+@@ -1170,12 +1174,35 @@
+
+         # V015-M3：局部 cap 同步收口不可逆上限，后置动态/系列加分只能收口不能突破
+         ctx.max_score = min(ctx.max_score, 0.85)
+         
+-    # Check exact string matches using clean_text_standard
+-    from app.normalizer import clean_text_standard
+-    q_norm_full = clean_text_standard(f"{ctx.q_name} {ctx.q_spec_text}")
+-    c_norm_full = clean_text_standard(f"{ctx.c_name} {ctx.c_full_spec}")
+-    q_norm_spec = clean_text_standard(ctx.q_spec_text)
+-    c_norm_spec = clean_text_standard(ctx.c_full_spec)
++    # Check exact string matches using clean_text_standard under unified RuleContext
++    from app.normalizer import clean_text_standard_with_diagnostics
++    q_clean_ctx = RuleContext.from_query(ctx.query_info, stage="cleaning")
++    c_prof_val = ctx.c_prof if (ctx.c_prof and ctx.c_prof != "其它") else ""
++    c_clean_ctx = RuleContext.from_candidate(
++        ctx.candidate,
++        name=ctx.c_name,
++        domain=ctx.domain,
++        professional=c_prof_val,
++        stage="cleaning",
++    )
++    q_norm_full, q_diag_full = clean_text_standard_with_diagnostics(
++        f"{ctx.q_name} {ctx.q_spec_text}", rule_context=q_clean_ctx
++    )
++    c_norm_full, c_diag_full = clean_text_standard_with_diagnostics(
++        f"{ctx.c_name} {ctx.c_full_spec}", rule_context=c_clean_ctx
++    )
++    q_norm_spec, q_diag_spec = clean_text_standard_with_diagnostics(
++        ctx.q_spec_text, rule_context=q_clean_ctx
++    )
++    c_norm_spec, c_diag_spec = clean_text_standard_with_diagnostics(
++        ctx.c_full_spec, rule_context=c_clean_ctx
++    )
++    for _cdiag in (q_diag_full, c_diag_full, q_diag_spec, c_diag_spec):
++        if _cdiag.get("degraded") and _cdiag.get("errors"):
++            ctx.blocked = True
++            ctx.max_score = 0.0
++            ctx.reasons.append(f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {_cdiag['errors'][0].get('message', '清洗规则异常')}")
++            break
+     ctx.q_norm_full = q_norm_full
+     ctx.c_norm_full = c_norm_full
+     ctx.q_norm_spec = q_norm_spec
+@@ -1946,30 +1973,28 @@
+
+ 
+ 
+ def evaluate_dynamic_exclusions(row_or_query: Dict[str, Any], candidate: Dict[str, Any]) -> List[str]:
+-    """V015-M3 R03：与 _apply_dynamic_rules 同源的动态硬排除判定；规则不可用/损坏时 fail-closed 返回阻断原因。"""
++    """V015-M3 R03 / V016-M1：与 _apply_dynamic_rules 同源的动态硬排除判定；规则不可用/损坏时 fail-closed 返回阻断原因。"""
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
+         active_rules = LLMRuleManager.get_active_rules()
+     except Exception as exc:
+-        logger.error("动态规则读取失败，按 fail-closed 阻断: %s", exc)
++        logger.error("动态规则读取失败，按 fail-closed 阻断: %s", type(exc).__name__)
+         return [f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {exc}"]
+     if not active_rules:
+         return []
+     q_spec = str(row_or_query.get("spec", "") or row_or_query.get("original_spec", "") or "")
+     cand_text = _dyn_candidate_text(candidate)
++    rule_ctx = RuleContext.from_query(row_or_query, stage="matching")
+     excl_reasons: List[str] = []
+     for r in active_rules:
+         try:
+             dsl = r.get("parsed_dsl")
+             if dsl is None:
+                 dsl = {}
+-            if not isinstance(dsl, dict):
+-                raise ValueError(f"动态规则 {r.get('id', '?')} parsed_dsl 结构非法")
++            if not rule_ctx.matches_rule(r):
++                continue
++            DynamicRuleInterpreter.validate_rule_stages(dsl, rule_id=r.get("rule_id") or r.get("id", "?"))
+             matching_rules = dsl.get("matching_rules")
+-            if matching_rules is not None and not isinstance(matching_rules, dict):
+-                raise ValueError(f"动态规则 {r.get('id', '?')} matching_rules 结构非法")
+-            if not _dyn_rule_matches_query(r, row_or_query):
+-                continue
+             if not matching_rules:
+                 continue
+             is_excl, _boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+@@ -1978,7 +2003,7 @@
+
+             if is_excl:
+                 excl_reasons.extend(dyn_reasons)
+         except Exception as exc:
+-            logger.error("动态规则判定异常，按 fail-closed 阻断: %s", exc)
++            logger.error("动态规则判定异常，按 fail-closed 阻断: %s", type(exc).__name__)
+             excl_reasons.append(f"{DYNAMIC_RULE_UNAVAILABLE_PREFIX}: {exc}")
+     return excl_reasons
+ 
+@@ -1993,18 +2018,16 @@
+
+         query_scope_info = dict(ctx.query_info)
+         if ctx.q_name and not query_scope_info.get("original_name"):
+             query_scope_info["original_name"] = ctx.q_name
++        rule_ctx = RuleContext.from_query(query_scope_info, stage="matching")
+ 
+         for r in active_rules:
+             dsl = r.get("parsed_dsl")
+             if dsl is None:
+                 dsl = {}
+-            if not isinstance(dsl, dict):
+-                raise ValueError(f"动态规则 {r.get('id', '?')} parsed_dsl 结构非法")
++            if not rule_ctx.matches_rule(r):
++                continue
++            DynamicRuleInterpreter.validate_rule_stages(dsl, rule_id=r.get("rule_id") or r.get("id", "?"))
+             matching_rules = dsl.get("matching_rules")
+-            if matching_rules is not None and not isinstance(matching_rules, dict):
+-                raise ValueError(f"动态规则 {r.get('id', '?')} matching_rules 结构非法")
+-            if not _dyn_rule_matches_query(r, query_scope_info):
+-                continue
+             if matching_rules:
+                 is_excl, boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+                     ctx.q_spec_text, cand_text, matching_rules
+@@ -2023,7 +2046,7 @@
+
+                     if r.get("rule_id"):
+                         RuleHitStatsTracker().record_hit(r["rule_id"])
+     except Exception as e:
+-        logger.error(f"Error evaluating dynamic matching rules: {e}")
++        logger.error("Error evaluating dynamic matching rules (%s): %s", type(e).__name__, e)
+         # V015-M3 R03：规则读取/解析失败按 fail-closed 阻断自动接受，禁止退化成无规则通过
+         ctx.blocked = True
+         ctx.max_score = 0.0
+@@ -2177,7 +2200,11 @@
+
+     # 旧路径走 fallback，且统一到 extract_query_params（专业语义），不再使用
+     # 另一套 preprocessor.extract_params 管线，消除解析器分裂。
+     q_parsed = query_info.get("parsed_spec") or extract_query_params(
+-        q_name, q_spec_text, query_info.get("professional") or q_category)
++        q_name,
++        q_spec_text,
++        query_info.get("professional") or "",
++        material_category=query_info.get("material_category") or query_info.get("original_category") or q_category or "",
++    )
+     q_model = q_parsed.get("model", "")
+     
+     # 1. Path A1: Model search via FTS5 (avoiding disk table scan)
+@@ -2190,7 +2217,10 @@
+
+ 
+     # 2. Path A2: SQLite FTS5 search (Top 1000)
+     from app.normalizer import clean_text_standard
+-    clean_keyword = clean_text_standard(q_name)
++    clean_keyword = clean_text_standard(
++        q_name,
++        rule_context=RuleContext.from_query(query_info, stage="cleaning"),
++    )
+     if not clean_keyword:
+         clean_keyword = q_name
+     clean_keyword = re.sub(r'[-_][a-zA-Z0-9]+', ' ', clean_keyword).strip()
+@@ -2380,8 +2410,15 @@
+
+     # Pre-parse specs to inject into query info
+     # V015-M1：第三参统一为专业语义（prepare_query 契约），professional 优先
+     if "parsed_spec" not in query_info:
+-        query_info["parsed_spec"] = extract_query_params(
+-            q_name, q_spec_text, query_info.get("professional") or q_category)
++        computed_spec = extract_query_params(
++            q_name,
++            q_spec_text,
++            query_info.get("professional") or "",
++            material_category=query_info.get("material_category") or query_info.get("original_category") or q_category or "",
++        )
++        if (computed_spec.get("rule_diagnostics") or {}).get("degraded"):
++            query_info = dict(query_info)
++        query_info["parsed_spec"] = computed_spec
+         
+     q_model = query_info["parsed_spec"].get("model", "")
+     
+--- pre/app/preprocessor.py
+
++++ app/preprocessor.py
+
+@@ -79,12 +79,23 @@
+
+         result.append(chr(code))
+     return "".join(result)
+ 
+-def clean_text(text: str) -> str:
+-    """
+-    Standardize text: delegate to normalizer.py
++def clean_text(
++    text: str,
++    discipline: Optional[str] = None,
++    category: Optional[str] = None,
++    *,
++    rule_context=None,
++) -> str:
++    """
++    Standardize text: delegate to normalizer.py with optional RuleContext.
+     """
+     from app.normalizer import clean_text_standard
+-    return clean_text_standard(text)
++    return clean_text_standard(
++        text,
++        discipline=discipline,
++        category=category,
++        rule_context=rule_context,
++    )
+ 
+ def extract_model(text: str) -> str:
+     """
+@@ -320,19 +331,26 @@
+
+     from app.domain_router import route_domain
+     from app.normalizer import clean_text_standard
+     from app.domain_extractors import extract_parameters_by_domain
++    from app.rule_context import RuleContext
+ 
+     if not text:
+         return {"model": "", "attrs": {}}
+ 
+     # Clean construction info on raw text to preserve newlines
+     text_no_const = remove_construction_info(text)
+-    text_clean = clean_text_standard(text_no_const)
++    name_extracted = extract_device_name(text_no_const, category_hint)
++    clean_ctx = RuleContext.from_fields(
++        material_category=category_hint,
++        name=name_extracted,
++        raw_name=name_extracted,
++        stage="cleaning",
++    )
++    text_clean = clean_text_standard(text_no_const, rule_context=clean_ctx)
+     
+     # 1. Run legacy dynamic general parameter extraction on raw text (preserving original casing/units)
+     attrs = extract_general_params(text_no_const)
+     
+     # 2. Route to domain
+-    name_extracted = extract_device_name(text_no_const, category_hint)
+     domain = route_domain(category_hint, name_extracted, text_clean, category_hint)
+     
+     # 3. Extract domain-specific attributes using the routed domain's extractor
+--- pre/app/db_manager.py
+
++++ app/db_manager.py
+
+@@ -1050,8 +1050,17 @@
+
+         
+         if llm_enabled:
+             # Check if any must keys are missing
++            from app.rule_context import RuleContext
+             name_extracted = extract_device_name(full_spec, row['category'])
+-            text_clean = clean_text_standard(full_spec)
++            text_clean = clean_text_standard(
++                full_spec,
++                rule_context=RuleContext.from_fields(
++                    material_category=row['category'],
++                    name=row['name'] or name_extracted,
++                    raw_name=row['name'],
++                    stage="cleaning",
++                ),
++            )
+             domain = route_domain(row['category'], name_extracted, text_clean, row['category'])
+             domain_config = domain_schema.get(domain, {})
+             must_keys = [field["key"] for field in domain_config.get("must", [])]
+@@ -1340,8 +1349,17 @@
+
+         records.append([code, category, name, specification, unit, brand, description, tokens, parsed_params_str, 2])
+         
+         if llm_enabled:
++            from app.rule_context import RuleContext
+             name_extracted = extract_device_name(full_spec, category)
+-            text_clean = clean_text_standard(full_spec)
++            text_clean = clean_text_standard(
++                full_spec,
++                rule_context=RuleContext.from_fields(
++                    material_category=category,
++                    name=name or name_extracted,
++                    raw_name=name,
++                    stage="cleaning",
++                ),
++            )
+             domain = route_domain(category, name_extracted, text_clean, category)
+             domain_config = domain_schema.get(domain, {})
+             must_keys = [field["key"] for field in domain_config.get("must", [])]
+@@ -1567,8 +1585,17 @@
+
+         updated_records.append([tokens, parsed_params_str, 2, code])
+         
+         if llm_enabled:
++            from app.rule_context import RuleContext
+             name_extracted = extract_device_name(full_spec, cat)
+-            text_clean = clean_text_standard(full_spec)
++            text_clean = clean_text_standard(
++                full_spec,
++                rule_context=RuleContext.from_fields(
++                    material_category=cat,
++                    name=name or name_extracted,
++                    raw_name=name,
++                    stage="cleaning",
++                ),
++            )
+             domain = route_domain(cat, name_extracted, text_clean, cat)
+             domain_config = domain_schema.get(domain, {})
+             must_keys = [field["key"] for field in domain_config.get("must", [])]
+@@ -1667,8 +1694,16 @@
+
+                 time.sleep(1.0)
+                 
+                 # Route domain
++                from app.rule_context import RuleContext
+                 name_extracted = extract_device_name(full_spec, category)
+-                text_clean = clean_text_standard(full_spec)
++                text_clean = clean_text_standard(
++                    full_spec,
++                    rule_context=RuleContext.from_fields(
++                        material_category=category,
++                        name=name_extracted,
++                        stage="cleaning",
++                    ),
++                )
+                 domain = route_domain(category, name_extracted, text_clean, category)
+                 
+                 domain_config = domain_schema.get(domain, {})
+--- pre/app/llm_rule_engine.py
+
++++ app/llm_rule_engine.py
+
+@@ -65,6 +65,25 @@
+
+ # 已完成惰性建表的数据库路径（每路径仅初始化一次），替代原模块导入期无条件建表
+ _initialized_db_paths = set()
+ _init_lock = threading.Lock()
++
++
++def _open_read_conn() -> sqlite3.Connection:
++    """Open a read-only SQLite connection for active rules without triggering DDL BEGIN IMMEDIATE locks."""
++    db_path = _resolve_db_path()
++    if os.getenv("TESTING") == "1":
++        prod_db = os.path.join(BASE_DIR, "app", "materials.db")
++        if os.path.abspath(db_path) == os.path.abspath(prod_db):
++            raise RuntimeError(
++                "测试隔离护栏触发：llm_rule_engine 在 TESTING=1 下解析到业务库 "
++                f"{db_path}，请先由 tests/conftest.py 注入 MATERIALS_DB_PATH 隔离路径。"
++            )
++    conn = sqlite3.connect(db_path, timeout=30.0)
++    conn.row_factory = sqlite3.Row
++    try:
++        conn.execute("PRAGMA busy_timeout=5000;")
++    except Exception:
++        pass
++    return conn
+ 
+ 
+ def get_db_conn():
+@@ -532,6 +551,61 @@
+
+ 
+ class DynamicRuleInterpreter:
+     """Interprets and executes compiled JSON Rule DSLs locally in < 2ms."""
++
++    @staticmethod
++    def _compile_cleaning_regex(pat: str) -> re.Pattern:
++        """Compile cleaning regex with full-width punctuation adaptation, failing explicitly on invalid patterns."""
++        adapted_pat = pat.replace("：", "[：:]").replace("（", "[（\\(]").replace("）", "[）\\)]")
++        if "[^：]+" in adapted_pat:
++            adapted_pat = adapted_pat.replace("[^：]+", "[^：:\\r\\n]+")
++        elif "[^:]+" in adapted_pat:
++            adapted_pat = adapted_pat.replace("[^:]+", "[^：:\\r\\n]+")
++        try:
++            return re.compile(adapted_pat, flags=re.IGNORECASE)
++        except re.error:
++            try:
++                return re.compile(pat, flags=re.IGNORECASE)
++            except re.error as exc:
++                raise DynamicRuleUnavailableError(f"动态清洗规则正则非法: {exc}") from exc
++
++    @staticmethod
++    def validate_rule_stages(dsl: Any, rule_id: Any = "?") -> Dict[str, Any]:
++        """Validate cleaning, extraction, and matching stages of a Rule DSL without silent swallow."""
++        if not isinstance(dsl, dict):
++            raise DynamicRuleUnavailableError(f"动态规则 {rule_id} parsed_dsl 结构非法: 期望 dict")
++
++        cleaning_rules = dsl.get("cleaning_rules")
++        if cleaning_rules is not None:
++            if not isinstance(cleaning_rules, list):
++                raise DynamicRuleUnavailableError(f"动态规则 {rule_id} cleaning_rules 结构非法: 期望 list")
++            for idx, item in enumerate(cleaning_rules):
++                if not isinstance(item, dict):
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} cleaning_rules[{idx}] 结构非法: 期望 dict"
++                    )
++                if item.get("action") == "regex_replace" and item.get("pattern"):
++                    DynamicRuleInterpreter._compile_cleaning_regex(str(item.get("pattern")))
++
++        extraction_rules = dsl.get("extraction_rules")
++        if extraction_rules is not None:
++            if not isinstance(extraction_rules, list):
++                raise DynamicRuleUnavailableError(f"动态规则 {rule_id} extraction_rules 结构非法: 期望 list")
++            for idx, item in enumerate(extraction_rules):
++                if not isinstance(item, dict):
++                    raise DynamicRuleUnavailableError(
++                        f"动态规则 {rule_id} extraction_rules[{idx}] 结构非法: 期望 dict"
++                    )
++                pat = item.get("pattern")
++                if pat:
++                    try:
++                        re.compile(str(pat), re.IGNORECASE)
++                    except re.error as exc:
++                        key = item.get("key") or f"#{idx}"
++                        raise DynamicRuleUnavailableError(f"动态提取规则({key})正则非法: {exc}") from exc
++
++        if "matching_rules" in dsl:
++            DynamicRuleInterpreter.validate_matching_rules(dsl.get("matching_rules"), rule_id=rule_id)
++        return dsl
+     
+     @staticmethod
+     def apply_cleaning_rules(text: str, rules_list: List[Dict[str, Any]]) -> Tuple[str, List[str]]:
+@@ -544,25 +618,14 @@
+
+                 pat = r.get("pattern", "")
+                 rep = r.get("replacement", "")
+                 if pat:
+-                    # Adapt full-width punctuation and prevent swallowing newlines
+-                    adapted_pat = pat.replace("：", "[：:]").replace("（", "[（\\(]").replace("）", "[）\\)]")
+-                    if "[^：]+" in adapted_pat:
+-                        adapted_pat = adapted_pat.replace("[^：]+", "[^：:\\r\\n]+")
+-                    elif "[^:]+" in adapted_pat:
+-                        adapted_pat = adapted_pat.replace("[^:]+", "[^：:\\r\\n]+")
++                    compiled = DynamicRuleInterpreter._compile_cleaning_regex(pat)
+                     try:
+-                        new_text = re.sub(adapted_pat, rep, cleaned, flags=re.IGNORECASE)
++                        new_text = compiled.sub(rep, cleaned)
+                         if new_text != cleaned:
+                             applied_actions.append(f"正则替换 [{pat}] -> [{rep}]")
+                             cleaned = new_text
+-                    except Exception:
+-                        try:
+-                            new_text = re.sub(pat, rep, cleaned, flags=re.IGNORECASE)
+-                            if new_text != cleaned:
+-                                applied_actions.append(f"正则替换 [{pat}] -> [{rep}]")
+-                                cleaned = new_text
+-                        except Exception:
+-                            pass
++                    except Exception as exc:
++                        raise DynamicRuleUnavailableError(f"动态清洗规则执行异常: {type(exc).__name__}") from exc
+             elif action == "synonym_replace":
+                 target = r.get("target", "")
+                 rep = r.get("replacement", "")
+@@ -596,7 +659,12 @@
+
+             pat = r.get("pattern")
+             if not key or not pat:
+                 continue
+-            match = re.search(pat, text, re.IGNORECASE)
++            try:
++                match = re.search(pat, text, re.IGNORECASE)
++            except re.error as exc:
++                raise DynamicRuleUnavailableError(f"动态提取规则({key})正则非法: {exc}") from exc
++            except Exception as exc:
++                raise DynamicRuleUnavailableError(f"动态提取规则({key})执行异常: {type(exc).__name__}") from exc
+             if match:
+                 groups = match.groups()
+                 if len(groups) >= 2:
+@@ -771,15 +839,10 @@
+
+     def _validate_rule_payload(cls, dsl: Any, scope_level: str) -> Tuple[bool, str, str]:
+         if scope_level not in ("universal", "discipline", "category"):
+             return False, f"非法作用层级 '{scope_level}'。", ""
+-        if not isinstance(dsl, dict):
+-            return False, "规则 DSL 必须为 JSON 对象（dict）。", ""
+-        if "matching_rules" in dsl:
+-            try:
+-                DynamicRuleInterpreter.validate_matching_rules(
+-                    dsl.get("matching_rules"), rule_id="draft_validation"
+-                )
+-            except DynamicRuleUnavailableError as exc:
+-                return False, str(exc), ""
++        try:
++            DynamicRuleInterpreter.validate_rule_stages(dsl, rule_id="draft_validation")
++        except DynamicRuleUnavailableError as exc:
++            return False, str(exc), ""
+         return True, "ok", json.dumps(dsl, ensure_ascii=False)
+ 
+     @classmethod
+@@ -790,7 +853,7 @@
+
+ 
+             conn = None
+             try:
+-                conn = get_db_conn()
++                conn = _open_read_conn()
+                 cursor = conn.cursor()
+                 cursor.execute("SELECT * FROM llm_rules WHERE status = 'published' ORDER BY priority ASC")
+                 rows = cursor.fetchall()
+@@ -946,35 +1009,91 @@
+
+             }
+ 
+     @classmethod
+-    def test_rule_execution(cls, dsl_json: Dict[str, Any], sample_text: str, candidate_sample: str = "") -> Dict[str, Any]:
+-        """Executes DynamicRuleInterpreter against sample text."""
+-        cleaning_rules = dsl_json.get("cleaning_rules", [])
+-        extraction_rules = dsl_json.get("extraction_rules", [])
+-        matching_rules = dsl_json.get("matching_rules", {})
+-
+-        cleaned_text, cleaning_logs = DynamicRuleInterpreter.apply_cleaning_rules(sample_text, cleaning_rules)
+-        extracted_params = DynamicRuleInterpreter.apply_extraction_rules(cleaned_text, extraction_rules)
+-        
+-        match_result = None
+-        if candidate_sample:
+-            is_excluded, score_adj, match_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
+-                cleaned_text, candidate_sample, matching_rules
+-            )
+-            match_result = {
+-                "candidate": candidate_sample,
+-                "is_excluded": is_excluded,
+-                "score_adjustment": score_adj,
+-                "reasons": match_reasons
++    def test_rule_execution(
++        cls,
++        dsl_json: Dict[str, Any],
++        sample_text: str,
++        candidate_sample: str = "",
++        *,
++        scope_level: Optional[str] = None,
++        scope_target: Optional[str] = None,
++        professional: Optional[str] = None,
++        material_category: Optional[str] = None,
++        sample_name: Optional[str] = None,
++    ) -> Dict[str, Any]:
++        """Executes DynamicRuleInterpreter against sample text with optional RuleContext scope evaluation."""
++        from app.rule_context import RuleContext
++
++        scope_result = None
++        if scope_level is not None or professional is not None or material_category is not None or sample_name is not None:
++            ctx = RuleContext.from_fields(
++                professional=professional or "",
++                material_category=material_category or "",
++                name=sample_name or "",
++                raw_name=sample_name or "",
++                original_name=sample_name or "",
++                stage="test_preview",
++            )
++            rule_stub = {
++                "scope_level": scope_level or "universal",
++                "scope_target": scope_target or "",
++                "discipline": professional or "",
+             }
+-
+-        return {
+-            "success": True,
+-            "original_text": sample_text,
+-            "cleaned_text": cleaned_text,
+-            "cleaning_logs": cleaning_logs,
+-            "extracted_params": extracted_params,
+-            "match_eval": match_result
+-        }
++            scope_result = ctx.evaluate_rule(rule_stub)
++            if not scope_result.matched:
++                return {
++                    "success": True,
++                    "in_scope": False,
++                    "scope_reason": scope_result.reason,
++                    "context": ctx.to_scope_dict(),
++                    "original_text": sample_text,
++                    "cleaned_text": sample_text,
++                    "cleaning_logs": [],
++                    "extracted_params": {},
++                    "match_eval": None,
++                }
++
++        try:
++            if not isinstance(dsl_json, dict):
++                raise DynamicRuleUnavailableError("规则 DSL 必须为 JSON 对象（dict）。")
++            cleaning_rules = dsl_json.get("cleaning_rules", [])
++            extraction_rules = dsl_json.get("extraction_rules", [])
++            matching_rules = dsl_json.get("matching_rules", {})
++
++            cleaned_text, cleaning_logs = DynamicRuleInterpreter.apply_cleaning_rules(sample_text, cleaning_rules)
++            extracted_params = DynamicRuleInterpreter.apply_extraction_rules(cleaned_text, extraction_rules)
++
++            match_result = None
++            if candidate_sample:
++                is_excluded, score_adj, match_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
++                    cleaned_text, candidate_sample, matching_rules
++                )
++                match_result = {
++                    "candidate": candidate_sample,
++                    "is_excluded": is_excluded,
++                    "score_adjustment": score_adj,
++                    "reasons": match_reasons,
++                }
++
++            return {
++                "success": True,
++                "in_scope": True if scope_result is None else scope_result.matched,
++                "scope_reason": "unscoped_preview" if scope_result is None else scope_result.reason,
++                "original_text": sample_text,
++                "cleaned_text": cleaned_text,
++                "cleaning_logs": cleaning_logs,
++                "extracted_params": extracted_params,
++                "match_eval": match_result,
++            }
++        except Exception as exc:
++            logger.error("Rule test execution failed (%s): %s", type(exc).__name__, exc)
++            return {
++                "success": False,
++                "error_type": type(exc).__name__,
++                "error": str(exc),
++                "in_scope": True if scope_result is None else scope_result.matched,
++                "scope_reason": "unscoped_preview" if scope_result is None else scope_result.reason,
++            }
+ 
+     @classmethod
+     def save_rule_draft(cls, rule_data: Dict[str, Any], user_info: Dict[str, Any]) -> Dict[str, Any]:
+--- pre/app/rule_api.py
+
++++ app/rule_api.py
+
+@@ -21,6 +21,11 @@
+
+     parsed_dsl: Dict[str, Any]
+     sample_text: str
+     candidate_sample: Optional[str] = ""
++    scope_level: Optional[str] = None
++    scope_target: Optional[str] = None
++    professional: Optional[str] = None
++    material_category: Optional[str] = None
++    sample_name: Optional[str] = None
+ 
+ class RuleAuditRequest(BaseModel):
+     action: str = Field(..., pattern="^(approve|reject|deprecate)$")
+@@ -55,11 +60,16 @@
+
+ 
+ @router.post("/test")
+ async def test_rule(req: RuleTestRequest, current_user: dict = Depends(require_employee)):
+-    """Test rule DSL against sample raw text."""
++    """Test rule DSL against sample raw text with optional RuleContext evaluation."""
+     res = LLMRuleManager.test_rule_execution(
+         dsl_json=req.parsed_dsl,
+         sample_text=req.sample_text,
+-        candidate_sample=req.candidate_sample
++        candidate_sample=req.candidate_sample,
++        scope_level=req.scope_level,
++        scope_target=req.scope_target,
++        professional=req.professional,
++        material_category=req.material_category,
++        sample_name=req.sample_name,
+     )
+     return res
+ 
+--- pre/app/binding_decisions.py
+
++++ app/binding_decisions.py
+
+@@ -307,9 +307,16 @@
+
+             ):
+                 return "单位非1倍率工程量未按目标单位换算阻断"
+ 
+-    # 查询侧与候选侧参数同源抽取（候选侧 parsed_params 优先，缺值/坏 JSON 回退原文抽取）
++    # 查询侧与候选侧参数同源抽取（严格区分 professional 与 material_category）
+     q_parsed = extract_query_params(
+-        q_name, q_spec, row.get("professional") or row.get("original_category") or "")
++        q_name,
++        q_spec,
++        row.get("professional") or "",
++        material_category=row.get("original_category") or "",
++    )
++    q_diag = q_parsed.get("rule_diagnostics") if isinstance(q_parsed, dict) else None
++    if isinstance(q_diag, dict) and q_diag.get("degraded") and q_diag.get("errors"):
++        return f"动态规则不可用阻断: {q_diag['errors'][0].get('message', '预处理规则异常')}"
+     q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+     c_attrs = resolve_material_attrs(material)
+ 
+--- pre/app/server.py
+
++++ app/server.py
+
+@@ -90,7 +90,7 @@
+
+         except asyncio.CancelledError:
+             break
+         except Exception as e:
+-            logger.error(f"Error in daily flywheel mining loop: {e}")
++            logger.error("Error in daily flywheel mining loop (%s): %s", type(e).__name__, e)
+             await asyncio.sleep(3600)
+ 
+ @asynccontextmanager
+@@ -2104,7 +2104,7 @@
+
+         name = payload.get("name", "") or extract_device_name(text)
+         category = payload.get("category", "")
+         brand = payload.get("brand", "")
+-        professional = payload.get("professional", "暖通")
++        professional = payload.get("professional") if ("professional" in payload and payload.get("professional") is not None) else "暖通"
+         unit = payload.get("unit", "")
+ 
+         # V015-M1：单条/重算与上传批量共用 prepare_query 契约，保证同一输入
+@@ -2178,14 +2178,14 @@
+
+         auth_brand = str(src_row.get("raw_brand") or "")
+         auth_unit = str(src_row.get("raw_unit") or "")
+     else:
+-        professional = req.professional or "暖通"
++        professional = req.professional if req.professional is not None else "暖通"
+         auth_name = extract_device_name(req.text)
+         auth_spec = req.text
+         auth_category = req.category or ""
+         auth_brand = req.brand or ""
+         auth_unit = req.unit or ""
+ 
+-    parsed = extract_query_params(auth_name, auth_spec, professional)
++    parsed = extract_query_params(auth_name, auth_spec, professional, material_category=auth_category)
+ 
+     # Overwrite extracted params with user manually entered attributes based on professional category
+     if professional == "强电":
+@@ -2440,19 +2440,21 @@
+
+ @app.get("/api/flywheel/statistics", dependencies=[Depends(require_manager)])
+ async def api_flywheel_statistics():
+     from app.db_manager import get_db_cursor
+-    from app.flywheel_db import init_flywheel_tables
++    from app.flywheel_db import init_flywheel_tables, trusted_flywheel_where_clause
+     init_flywheel_tables()
++    trusted_all = trusted_flywheel_where_clause(include_effective_only=False)
++    trusted_eff = trusted_flywheel_where_clause(include_effective_only=True)
+     with get_db_cursor() as cur:
+-        cur.execute("SELECT COUNT(*) as total FROM flywheel_records WHERE trust_level = 'trusted'")
++        cur.execute(f"SELECT COUNT(*) as total FROM flywheel_records WHERE {trusted_all}")
+         total_records = cur.fetchone()["total"]
+ 
+-        cur.execute("SELECT COUNT(*) as legacy_total FROM flywheel_records WHERE COALESCE(trust_level, 'legacy_untrusted') != 'trusted'")
++        cur.execute(f"SELECT COUNT(*) as legacy_total FROM flywheel_records WHERE NOT ({trusted_all})")
+         legacy_untrusted_records = cur.fetchone()["legacy_total"]
+ 
+-        cur.execute("SELECT action_type, COUNT(*) as cnt FROM flywheel_records WHERE trust_level = 'trusted' AND superseded = 0 GROUP BY action_type")
++        cur.execute(f"SELECT action_type, COUNT(*) as cnt FROM flywheel_records WHERE {trusted_eff} GROUP BY action_type")
+         action_counts = {r["action_type"]: r["cnt"] for r in cur.fetchall()}
+ 
+-        cur.execute("SELECT COUNT(DISTINCT actor_user_id || ':' || actor_account_epoch) as users FROM flywheel_records WHERE trust_level = 'trusted' AND actor_user_id IS NOT NULL")
++        cur.execute(f"SELECT COUNT(DISTINCT actor_user_id || ':' || actor_account_epoch) as users FROM flywheel_records WHERE {trusted_all}")
+         active_users = cur.fetchone()["users"]
+ 
+         cur.execute("SELECT status, COUNT(*) as cnt FROM flywheel_rule_suggestions GROUP BY status")
+@@ -2460,6 +2462,9 @@
+
+ 
+         cur.execute("SELECT COUNT(*) as snap_cnt FROM flywheel_config_snapshots WHERE is_active = 1")
+         active_snapshots = cur.fetchone()["snap_cnt"]
++
++        cur.execute("SELECT COUNT(*) as agg_cnt FROM flywheel_pattern_aggregates")
++        pattern_aggregates_count = cur.fetchone()["agg_cnt"]
+ 
+     return JSONResponse(content={
+         "total_records": total_records,
+@@ -2467,27 +2472,64 @@
+
+         "action_counts": action_counts,
+         "active_users": active_users,
+         "suggestion_counts": suggestion_counts,
+-        "active_snapshots": active_snapshots
++        "active_snapshots": active_snapshots,
++        "pattern_aggregates_count": pattern_aggregates_count,
+     })
+ 
+ @app.get("/api/flywheel/suggestions", dependencies=[Depends(require_manager)])
+-async def api_flywheel_suggestions(status: Optional[str] = None):
++async def api_flywheel_suggestions(status: Optional[str] = None, discipline: Optional[str] = None):
+     from app.db_manager import get_db_cursor
++    from app.flywheel_db import init_flywheel_tables
++    from app.rule_context import canonicalize_professional
++    init_flywheel_tables()
++    where_parts = []
++    params: List[Any] = []
++    if status:
++        where_parts.append("status = ?")
++        params.append(status)
++    if discipline:
++        where_parts.append("discipline = ?")
++        params.append(canonicalize_professional(discipline))
++    where_sql = ("WHERE " + " AND ".join(where_parts)) if where_parts else ""
++    order_sql = (
++        "ORDER BY support_count DESC, consistency DESC, id DESC"
++        if status
++        else "ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'observing' THEN 2 WHEN 'accepted' THEN 3 ELSE 4 END, support_count DESC, consistency DESC, id DESC"
++    )
+     with get_db_cursor() as cur:
+-        if status:
+-            cur.execute("""
+-            SELECT * FROM flywheel_rule_suggestions
+-            WHERE status = ?
+-            ORDER BY support_count DESC, consistency DESC, id DESC
+-            """, (status,))
+-        else:
+-            cur.execute("""
+-            SELECT * FROM flywheel_rule_suggestions
+-            ORDER BY CASE status WHEN 'pending' THEN 1 WHEN 'observing' THEN 2 WHEN 'accepted' THEN 3 ELSE 4 END,
+-                     support_count DESC, consistency DESC
+-            """)
++        cur.execute(f"SELECT * FROM flywheel_rule_suggestions {where_sql} {order_sql}", params)
+         rows = [dict(r) for r in cur.fetchall()]
+     return JSONResponse(content={"suggestions": rows})
++
++@app.get("/api/flywheel/aggregates", dependencies=[Depends(require_manager)])
++async def api_flywheel_aggregates(
++    suggestion_type: Optional[str] = None,
++    discipline: Optional[str] = None,
++    source_origin: Optional[str] = None,
++):
++    from app.db_manager import get_db_cursor
++    from app.flywheel_db import init_flywheel_tables
++    from app.rule_context import canonicalize_professional
++    init_flywheel_tables()
++    where_parts = []
++    params: List[Any] = []
++    if suggestion_type:
++        where_parts.append("suggestion_type = ?")
++        params.append(suggestion_type)
++    if discipline is not None and discipline != "":
++        where_parts.append("discipline = ?")
++        params.append(canonicalize_professional(discipline))
++    if source_origin:
++        where_parts.append("source_origin = ?")
++        params.append(source_origin)
++    where_sql = ("WHERE " + " AND ".join(where_parts)) if where_parts else ""
++    with get_db_cursor() as cur:
++        cur.execute(
++            f"SELECT * FROM flywheel_pattern_aggregates {where_sql} ORDER BY total_support DESC, id DESC",
++            params,
++        )
++        rows = [dict(r) for r in cur.fetchall()]
++    return JSONResponse(content={"aggregates": rows})
+ 
+ @app.post("/api/flywheel/suggestions/eval")
+ async def api_flywheel_eval_suggestion(req: FlywheelEvalRequest, current_user: dict = Depends(require_admin)):
+@@ -2733,25 +2775,32 @@
+
+ async def api_flywheel_run_miner():
+     """Trigger manual mining run."""
+     from app.feedback_miner import miner
+-    res = miner.run_mining()
+-    return {"code": 0, "result": res, "msg": "数据挖掘与规则聚类完成"}
++    try:
++        loop = asyncio.get_running_loop()
++        res = await loop.run_in_executor(executor, miner.run_mining)
++        return {"code": 0, "result": res, "msg": "数据挖掘与规则聚类完成"}
++    except Exception as exc:
++        logger.error("Manual flywheel mining failed (%s): %s", type(exc).__name__, exc)
++        raise HTTPException(status_code=500, detail=f"数据挖掘执行失败: {type(exc).__name__}")
+ 
+ @app.get("/api/flywheel/export/benchmark", dependencies=[Depends(require_admin)])
+ async def api_flywheel_export_benchmark():
+     """Export golden evaluation set with flywheel_auto isolated cases (excluding legacy/untrusted and already matched aliases)."""
+     from app.db_manager import get_db_cursor
++    from app.flywheel_db import init_flywheel_tables, trusted_flywheel_where_clause
+     from app.normalizer import alias_dict
+-    from app.flywheel_db import init_flywheel_tables
+     init_flywheel_tables()
++    trusted_eff = trusted_flywheel_where_clause()
+     with get_db_cursor() as cur:
+-        cur.execute("""
++        cur.execute(
++            f"""
+         SELECT raw_name, raw_spec, final_targets_json, action_type, discipline
+         FROM flywheel_records
+         WHERE action_type IN ('CONFIRM_TOP1', 'MANUAL_REPLACE')
+-          AND superseded = 0
+-          AND trust_level = 'trusted'
++          AND {trusted_eff}
+         LIMIT 500
+-        """)
++        """
++        )
+         rows = cur.fetchall()
+ 
+     items = []
+@@ -2783,18 +2832,20 @@
+
+ async def api_flywheel_export_triplets():
+     """Export BGE contrastive triplets (Anchor, Positive, Hard Negative) from trusted effective records only."""
+     from app.db_manager import get_db_cursor
+-    from app.flywheel_db import init_flywheel_tables
++    from app.flywheel_db import init_flywheel_tables, trusted_flywheel_where_clause
+     init_flywheel_tables()
++    trusted_eff = trusted_flywheel_where_clause()
+     with get_db_cursor() as cur:
+-        cur.execute("""
++        cur.execute(
++            f"""
+         SELECT raw_name, raw_spec, auto_top1_name, final_targets_json
+         FROM flywheel_records
+         WHERE action_type = 'MANUAL_REPLACE'
+           AND auto_top1_name != ''
+-          AND superseded = 0
+-          AND trust_level = 'trusted'
++          AND {trusted_eff}
+         LIMIT 500
+-        """)
++        """
++        )
+         rows = cur.fetchall()
+ 
+     triplets = []

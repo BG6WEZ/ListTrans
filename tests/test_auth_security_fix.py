@@ -2,7 +2,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.server import app
-from app.auth_manager import create_access_token, get_auth_connection
+from app.auth_manager import init_auth_db, issue_token_for_user, get_auth_connection, get_user_by_username
+from app.session_manager import init_session_db
+from app.flywheel_db import init_flywheel_tables
 
 client = TestClient(app)
 
@@ -30,16 +32,22 @@ def test_unauthenticated_request_rejected_401():
 
 def test_rbac_system_reset_permission():
     """Verify that only admin role can execute system reset."""
-    employee_token = create_access_token(data={"sub": "employee_user", "role": "employee"})
-    admin_token = create_access_token(data={"sub": "admin_user", "role": "admin"})
-    
-    # Ensure test user accounts exist in DB so get_current_user finds them
+    # A-M0-05: 按实际依赖初始化隔离账号库/会话表/飞轮表。
+    # init_auth_db 创建 users/login_attempts；init_session_db 创建 api_system_reset
+    # 会 DELETE 的 work_sessions；init_flywheel_tables 创建其会 DELETE 的 4 张飞轮表。
+    # 随后用合成测试账号替代业务库已有数据，保证空库可重复执行。
+    init_auth_db()
+    init_session_db()
+    init_flywheel_tables()
     conn = get_auth_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active) VALUES ('employee_user', 'hash', '员工用户', 'employee', 1)")
-    cursor.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active) VALUES ('admin_user', 'hash', '管理员用户', 'admin', 1)")
+    cursor.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active, must_change_password, account_epoch) VALUES ('employee_user', 'hash', '员工用户', 'employee', 1, 0, 'ep-emp-1')")
+    cursor.execute("INSERT OR IGNORE INTO users (username, password_hash, name, role, is_active, must_change_password, account_epoch) VALUES ('admin_user', 'hash', '管理员用户', 'admin', 1, 0, 'ep-adm-1')")
     conn.commit()
     conn.close()
+
+    employee_token = issue_token_for_user(get_user_by_username("employee_user"))
+    admin_token = issue_token_for_user(get_user_by_username("admin_user"))
 
     # Employee tries to reset -> 403 Forbidden
     res = client.delete("/api/system/reset", headers={"Authorization": f"Bearer {employee_token}"})

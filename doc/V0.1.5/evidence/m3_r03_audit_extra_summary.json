@@ -1,0 +1,225 @@
+{
+  "snapshot_before": {
+    "file": "m3_r03_audit_snapshot_before_probes.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "steps": [
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-u",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r03_audit_probes.py"
+      ],
+      "exit": 0,
+      "seconds": 9.257,
+      "log": "m3_r03_audit_probes.log",
+      "sha256": "bede1cde3b34d3d00e488a4a638c78d328486a3073c8945bcb5f945d01f758f1"
+    }
+  ],
+  "snapshot_after": {
+    "file": "m3_r03_audit_snapshot_after_probes.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "hashes_after": [
+    {
+      "file": "app/normalizer.py",
+      "expected": "a89ceb48e883ef9e31925abc31617f7379378109db4f19088cf82a12e792fae3",
+      "actual": "a89ceb48e883ef9e31925abc31617f7379378109db4f19088cf82a12e792fae3",
+      "matches": true
+    },
+    {
+      "file": "app/query_preprocessor.py",
+      "expected": "f537f584604bf837fd0472ca35d013e6f57525ec0ab9f092087ac0e406993221",
+      "actual": "f537f584604bf837fd0472ca35d013e6f57525ec0ab9f092087ac0e406993221",
+      "matches": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "expected": "fce79ce5204ff00266b6974c7492225bb5488486c190b8270bfc72edb20a9f86",
+      "actual": "fce79ce5204ff00266b6974c7492225bb5488486c190b8270bfc72edb20a9f86",
+      "matches": true
+    },
+    {
+      "file": "app/matcher.py",
+      "expected": "6ebb305fe2afa94a01e252c248e103d330717caf47ea03e3310c32ce1bf25659",
+      "actual": "6ebb305fe2afa94a01e252c248e103d330717caf47ea03e3310c32ce1bf25659",
+      "matches": true
+    },
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "82d6b2ed03fd0385e773cf35f1b29f551550f0c5cf8fa3d4054a4c36507d9593",
+      "actual": "82d6b2ed03fd0385e773cf35f1b29f551550f0c5cf8fa3d4054a4c36507d9593",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "actual": "9f5bf79e9fa8523c20424da3aac284a0ab1726b2b9ad81363c50ca2ec766b6b6",
+      "matches": true
+    },
+    {
+      "file": "app/domain_extractors.py",
+      "expected": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "actual": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "e0c182e7a95d48af7e937ad5e4bde0771f3eca40c79c0c4c25d3bef89e7440dd",
+      "actual": "e0c182e7a95d48af7e937ad5e4bde0771f3eca40c79c0c4c25d3bef89e7440dd",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "fc592be1c9d2e35509af741549682def38fcbbe0376cbdd8d0fc2547de406087",
+      "actual": "fc592be1c9d2e35509af741549682def38fcbbe0376cbdd8d0fc2547de406087",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_pre_baseline_hashes.md",
+      "expected": "52fc06f2a689205d693f9ea196ca8b8438e9c06295c94013ae0ceb959331aec0",
+      "actual": "52fc06f2a689205d693f9ea196ca8b8438e9c06295c94013ae0ceb959331aec0",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_outer_snapshot_before.log",
+      "expected": "5d7526387cedf71f57c96e7c23345f31bbab9fb281e0c9e7d028941d04a12078",
+      "actual": "5d7526387cedf71f57c96e7c23345f31bbab9fb281e0c9e7d028941d04a12078",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_venv_verify_before.json",
+      "expected": "798801424e780c0facb0f5019324d63cd7acca1c7fcb95f5d6e29da9d1a45293",
+      "actual": "798801424e780c0facb0f5019324d63cd7acca1c7fcb95f5d6e29da9d1a45293",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_venv_verify_before.log",
+      "expected": "072bbd72450b3b81a83c40a35747fca0cafdb5f0fae786ab3415bf328d3a1eb8",
+      "actual": "072bbd72450b3b81a83c40a35747fca0cafdb5f0fae786ab3415bf328d3a1eb8",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_rerun.ps1",
+      "expected": "f788a565eee4ebc6db4780919ec205bb1fa006f87bccda77fc4ca11e1a981e0c",
+      "actual": "f788a565eee4ebc6db4780919ec205bb1fa006f87bccda77fc4ca11e1a981e0c",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_py_compile.log",
+      "expected": "ca49c0d6e1147c2d96ad06a096e4eec61eb2fe4b88d0ba1c2f0e75b910432427",
+      "actual": "ca49c0d6e1147c2d96ad06a096e4eec61eb2fe4b88d0ba1c2f0e75b910432427",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_pytest_m3.txt",
+      "expected": "118d9890edc86d88eb0c0b53d24791ed3c10f8d1200844129f678a6e5c306966",
+      "actual": "118d9890edc86d88eb0c0b53d24791ed3c10f8d1200844129f678a6e5c306966",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_pytest_m0_m2_regression.txt",
+      "expected": "5d00919a0214c07d9df67d1cae69fe75060a11966a0104fcc662c10d64230b54",
+      "actual": "5d00919a0214c07d9df67d1cae69fe75060a11966a0104fcc662c10d64230b54",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_pytest_sandbox_30.txt",
+      "expected": "d791d4d84ca20cb15a5ad6db0b7f7e4f6a9f5c79ab3ea02baba761c31f3b351d",
+      "actual": "d791d4d84ca20cb15a5ad6db0b7f7e4f6a9f5c79ab3ea02baba761c31f3b351d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_capture_evidence.py",
+      "expected": "d756245dc58c273ffa754b7c947fc2f40fc21ffe1005a11fb4c3cffaf1f482a5",
+      "actual": "d756245dc58c273ffa754b7c947fc2f40fc21ffe1005a11fb4c3cffaf1f482a5",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_gate_reports.json",
+      "expected": "88d2b6ba9a31fd87dff5c5fc53baeaa70eae3c2f123ba6c984332f05610fdbab",
+      "actual": "88d2b6ba9a31fd87dff5c5fc53baeaa70eae3c2f123ba6c984332f05610fdbab",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_3rule_gate.txt",
+      "expected": "e301cff84e33e88a52b3556b182a11e40c357ecde198a80f389a68a3a15d64a9",
+      "actual": "e301cff84e33e88a52b3556b182a11e40c357ecde198a80f389a68a3a15d64a9",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_r02_gate_compare.json",
+      "expected": "efd7c664900787d3cb2aa14edacc977180b844e86a04655f8877fa564fcdda04",
+      "actual": "efd7c664900787d3cb2aa14edacc977180b844e86a04655f8877fa564fcdda04",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_pytest_full.txt",
+      "expected": "fee8f3382b72d23e52f4c1ba3757af9c3891ea5bbc8fc01c64927999b5c3c664",
+      "actual": "fee8f3382b72d23e52f4c1ba3757af9c3891ea5bbc8fc01c64927999b5c3c664",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_venv_verify_after.json",
+      "expected": "6c42a23b87b86c28d99d5114a7fbaa86f1c99285925bcbed14e234a0c9f2c7f2",
+      "actual": "6c42a23b87b86c28d99d5114a7fbaa86f1c99285925bcbed14e234a0c9f2c7f2",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_venv_verify_after.log",
+      "expected": "c77736e040ca00b64636839b24d2b1e897dcfd0370749523dcf26bd745f16bab",
+      "actual": "c77736e040ca00b64636839b24d2b1e897dcfd0370749523dcf26bd745f16bab",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m3_r03_outer_snapshot_after.log",
+      "expected": "1d70c78ad83635b4abcf7d8c592b5f4ecae327fece428bd2a70278b37f5b0b8e",
+      "actual": "1d70c78ad83635b4abcf7d8c592b5f4ecae327fece428bd2a70278b37f5b0b8e",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/V015-M3_R03_开发小结.md",
+      "expected": "923bf9bd76af64837717bdca94d51d48641edffc417ed6bfdbcca7de25a8be9f",
+      "actual": "923bf9bd76af64837717bdca94d51d48641edffc417ed6bfdbcca7de25a8be9f",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "0169f030deea8a6644e70fbd6bf29c02d3e8bd73bbe48b332a630fc7e3195790",
+      "actual": "0169f030deea8a6644e70fbd6bf29c02d3e8bd73bbe48b332a630fc7e3195790",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "98dff654d5fc4b72ff6630ed99621d8c3fca73ac7025f100877c85fe8bd24f3d",
+      "actual": "98dff654d5fc4b72ff6630ed99621d8c3fca73ac7025f100877c85fe8bd24f3d",
+      "matches": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "297688c0900856a431f4c4b5cf9d1db6b25063e0d93dcfe5f82d1be75b013f49",
+      "actual": "297688c0900856a431f4c4b5cf9d1db6b25063e0d93dcfe5f82d1be75b013f49",
+      "matches": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-17",
+  "role": "coordinator",
+  "decision": "ACCEPT_CURRENT_STATUS_DOCUMENTS_WITH_RECORDED_DIFFERENCES",
+  "initial_integrity_verdict": "FAIL",
+  "reviewed_preexisting_changes": {
+    "doc/00_项目管理/进度总表.md": "e89837efb2a1227b4dbb6300b034a99a3cdfa318a340efd203fd7fdbe896c1d0",
+    "doc/README.md": "251f9906b97bb86ac85156ff3518147fd989b63a095109142713573ca802ff44"
+  },
+  "reason": "两份当前状态文档在2026-11-17新增TMP-MAT-SYNC主线外方案登记，进度表更新日期；其主线状态仍为V015终审通过、V016未下发。现有全部内容已读，临时任务登记原文保留。本轮不能取得旧字节作逐字差异归因，不宣称旧22项全部一致；旧清单20/22一致及首次FAIL报告原样保留。",
+  "supporting_checks": "HEAD一致、100份source_hashes/29份model_hashes/70份fixed_evidence_hashes无失配、业务快照一致。签署的V015终审裁决和审核证据未变。",
+  "scope": "仅接受这两份现存导航/进度文档作为本轮管理更新起点；不授权临时任务开发、不修改其方案、不改变原审核结论。"
+}

@@ -1,0 +1,4 @@
+{"stage":"targeted","exit_code":0,"seconds":27.4177501}
+{"stage":"rules","exit_code":0,"seconds":123.2881825}
+{"stage":"full","exit_code":0,"seconds":542.3746356}
+{"stage":"isolation_after","exit_code":0,"seconds":7.0097154}

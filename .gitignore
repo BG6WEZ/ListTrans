@@ -25,6 +25,10 @@ logs/
 *_out.txt
 .system_generated/
 scratch/
+.local-archive/
+.screenshots/
+tests/fixtures/golden_last_run.json
+doc/audits/*/*_rerun_results.json
 
 # Local environment configs & IDE
 .env
@@ -46,3 +50,9 @@ python_local/
 *.csv
 doc/sample/
 doc/服务器交接文档_192.168.20.213.md
+
+# Sensitive local snapshots, internal credentials & local tool artifacts
+scripts/cloud_users_snapshot.json
+doc/物料库/物资明细视图说明.md
+.workbuddy/
+/--out

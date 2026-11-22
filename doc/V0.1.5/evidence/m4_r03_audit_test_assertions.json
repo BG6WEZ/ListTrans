@@ -1,0 +1,8 @@
+[
+  {
+    "path": "tests/test_m4_auth_lifecycle.py",
+    "before": 110,
+    "after": 141,
+    "old_assertions_missing": 0
+  }
+]

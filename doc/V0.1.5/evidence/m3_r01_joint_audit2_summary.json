@@ -1,0 +1,869 @@
+{
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "started": "2026-11-14 22:12:32",
+  "baseline": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "hashes_before": [
+    {
+      "file": "app\\matcher.py",
+      "expected": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "actual": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "matches": true
+    },
+    {
+      "file": "app\\binding_decisions.py",
+      "expected": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "actual": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "matches": true
+    },
+    {
+      "file": "app\\server.py",
+      "expected": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "actual": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "matches": true
+    },
+    {
+      "file": "app\\query_preprocessor.py",
+      "expected": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "actual": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "matches": true
+    },
+    {
+      "file": "app\\domain_extractors.py",
+      "expected": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "actual": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m3_hard_constraints.py",
+      "expected": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "actual": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m3_hard_constraints_http.py",
+      "expected": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "actual": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "matches": true
+    },
+    {
+      "file": "app\\db_manager.py",
+      "expected": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "actual": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "matches": true
+    },
+    {
+      "file": "app\\report_generator.py",
+      "expected": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "actual": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "matches": true
+    },
+    {
+      "file": "app\\flywheel_sandbox.py",
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "app\\llm_rule_engine.py",
+      "expected": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "actual": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "matches": true
+    },
+    {
+      "file": "app\\session_manager.py",
+      "expected": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "actual": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "matches": true
+    },
+    {
+      "file": "web\\app.js",
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "matches": true
+    },
+    {
+      "file": "tests\\conftest.py",
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "tests\\verify_isolation.py",
+      "expected": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "actual": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m0_isolation.py",
+      "expected": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "actual": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m0_guardrail_regression.py",
+      "expected": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "actual": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_query_contract.py",
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_auto_binding.py",
+      "expected": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "actual": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_binding_decisions.py",
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_flywheel_sandbox.py",
+      "expected": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "actual": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "matches": true
+    },
+    {
+      "file": "tests\\eval_golden_set.py",
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "tests\\fixtures\\golden_set_v1.json",
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "tests\\fixtures\\sandbox_materials_v1.json",
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "config\\auto_binding_rules.json",
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "matches": true
+    },
+    {
+      "file": "config\\model_config.json",
+      "expected": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "actual": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "matches": true
+    },
+    {
+      "file": "config\\llm_config.json",
+      "expected": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "actual": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "matches": true
+    },
+    {
+      "file": ".local-archive\\business_snapshot.py",
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun.ps1",
+      "expected": "63b4fddca78385ac8d8ed72ac37f9cd94a4ff016316a277d3fc5fae0b966c5d7",
+      "actual": "63b4fddca78385ac8d8ed72ac37f9cd94a4ff016316a277d3fc5fae0b966c5d7",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_m3_cases.log",
+      "expected": "0f86b93a81e0481ec7fa6b2af275820121947829acdb9fb0bf196ed4833a397a",
+      "actual": "0f86b93a81e0481ec7fa6b2af275820121947829acdb9fb0bf196ed4833a397a",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_required_regressions.log",
+      "expected": "b996d1d945b049ed59d0ede3c5d8b20079c406b8fd9063966846ef308c267fa2",
+      "actual": "b996d1d945b049ed59d0ede3c5d8b20079c406b8fd9063966846ef308c267fa2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_compare_boundaries.log",
+      "expected": "32b869e34973b25513424894ad08fe3beb0de74e8f67686d1a19a392535662b2",
+      "actual": "32b869e34973b25513424894ad08fe3beb0de74e8f67686d1a19a392535662b2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_capture_evidence.py",
+      "expected": "5cc397a4b1e78686dc0bce1ec1995b16c72c84f4b1ea94c69970906f58613e35",
+      "actual": "5cc397a4b1e78686dc0bce1ec1995b16c72c84f4b1ea94c69970906f58613e35",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_gate_reports.json",
+      "expected": "2bd151ce6d7762de064b9f397a782d5f29f28faab8833aefff87b0d16373773a",
+      "actual": "2bd151ce6d7762de064b9f397a782d5f29f28faab8833aefff87b0d16373773a",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_gate_reports_capture.log",
+      "expected": "aaf7aee0fe3e13f9a06734e82b1b582670813b8b1a5319c67d2e22bf31e5353b",
+      "actual": "aaf7aee0fe3e13f9a06734e82b1b582670813b8b1a5319c67d2e22bf31e5353b",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_full_pytest.log",
+      "expected": "c3ba27dba052fbcb3ffb334d729a736b51a28e5bcff2c2e6aaf928d2df5333aa",
+      "actual": "c3ba27dba052fbcb3ffb334d729a736b51a28e5bcff2c2e6aaf928d2df5333aa",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_before.json",
+      "expected": "bd1c0b32dbc1da0ef809dd59563cf272927e7fd125201dbc95f9a5a01bfb11ee",
+      "actual": "bd1c0b32dbc1da0ef809dd59563cf272927e7fd125201dbc95f9a5a01bfb11ee",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_before.log",
+      "expected": "a9fb3ca514e89b981be74f93231bbe4cded3fce5f928347350fb72f94593c45f",
+      "actual": "a9fb3ca514e89b981be74f93231bbe4cded3fce5f928347350fb72f94593c45f",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_after.json",
+      "expected": "1390c5b2710cf40ebb5b1424e803ff01d7a63d41a5216a207dba9401299de8cb",
+      "actual": "1390c5b2710cf40ebb5b1424e803ff01d7a63d41a5216a207dba9401299de8cb",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_after.log",
+      "expected": "0612f1ce833b48beecad1ee5eca421dabd3e3c4f4ea330d5a4573e922aeae8ac",
+      "actual": "0612f1ce833b48beecad1ee5eca421dabd3e3c4f4ea330d5a4573e922aeae8ac",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_before.log",
+      "expected": "56fa89592e3b05c769eba0e157547d97c52ad9bfec2f02a13fa20b69c03a2bc0",
+      "actual": "56fa89592e3b05c769eba0e157547d97c52ad9bfec2f02a13fa20b69c03a2bc0",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_after.log",
+      "expected": "d1fcf86c843f8d23dc65c4bfe679fb716f8fd5097d0ea2d6180117fd3cf23d3d",
+      "actual": "d1fcf86c843f8d23dc65c4bfe679fb716f8fd5097d0ea2d6180117fd3cf23d3d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_post_compare.py",
+      "expected": "ce0d8e7b9bae59250a8834a61952c9618d43559961c130b9fbe9da21649dfb63",
+      "actual": "ce0d8e7b9bae59250a8834a61952c9618d43559961c130b9fbe9da21649dfb63",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_post_compare.json",
+      "expected": "d56f5bc36ab74e92a80ab96f097430b04cad871479a8545c6c8243bdbdd2d21c",
+      "actual": "d56f5bc36ab74e92a80ab96f097430b04cad871479a8545c6c8243bdbdd2d21c",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_score_shift_diag.py",
+      "expected": "07b76c47f6f1e35472126258131b98f13d70d79896d5ff4722ba88af60864bb6",
+      "actual": "07b76c47f6f1e35472126258131b98f13d70d79896d5ff4722ba88af60864bb6",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_score_shift_diag.log",
+      "expected": "edc665b7f3d20e1bf1881c15c58dad627746d2215bda6b47cd8fe57d11066d1b",
+      "actual": "edc665b7f3d20e1bf1881c15c58dad627746d2215bda6b47cd8fe57d11066d1b",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_baseline_hashes.md",
+      "expected": "9547fd24f6d4578ea5c9b1122b4777bc868d664dd8398b849c711c226f3e2888",
+      "actual": "9547fd24f6d4578ea5c9b1122b4777bc868d664dd8398b849c711c226f3e2888",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_before.log",
+      "expected": "ee9f76e8e54451d409529a52be5982d43431678ccc785b235c9e9a4dfd5a6ae2",
+      "actual": "ee9f76e8e54451d409529a52be5982d43431678ccc785b235c9e9a4dfd5a6ae2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_after.log",
+      "expected": "4f4024aee42cf70a4cd6e72c6f7f80eea6e4d5082e10e8c19a041e33c41a3305",
+      "actual": "4f4024aee42cf70a4cd6e72c6f7f80eea6e4d5082e10e8c19a041e33c41a3305",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_required_regressions.log",
+      "expected": "4cdd019c03485cbaf76f7b0f1c9d15c203c0f86e5f3f7e39127584f521029aea",
+      "actual": "4cdd019c03485cbaf76f7b0f1c9d15c203c0f86e5f3f7e39127584f521029aea",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_full_pytest.log",
+      "expected": "b4fefe940fdad5a7330275bba2c8288e5c122db8c0e110642be1d5352ea45734",
+      "actual": "b4fefe940fdad5a7330275bba2c8288e5c122db8c0e110642be1d5352ea45734",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_venv_verify_after.json",
+      "expected": "4f1a79af3cb4cfd28b8963741c7ba368d3833e859a2c6142a81977068ca7b5c0",
+      "actual": "4f1a79af3cb4cfd28b8963741c7ba368d3833e859a2c6142a81977068ca7b5c0",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_venv_verify_after.log",
+      "expected": "b0cc671a209eb2333c69294d33695d3aac03c40e1342a69bb210f4edb4835b5c",
+      "actual": "b0cc671a209eb2333c69294d33695d3aac03c40e1342a69bb210f4edb4835b5c",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\V015-M3_R01_开发小结.md",
+      "expected": "45e35102409f7030c2fdeb17b6121cff853cd7dea7260e1636a399a264f91a16",
+      "actual": "45e35102409f7030c2fdeb17b6121cff853cd7dea7260e1636a399a264f91a16",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\V015-M3_R01_开发交接说明.md",
+      "expected": "c28bd7aa75b188788b8f841ec0a0716d042735b6b1d48d9743167798a98b53c2",
+      "actual": "c28bd7aa75b188788b8f841ec0a0716d042735b6b1d48d9743167798a98b53c2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\02_任务台账.md",
+      "expected": "939339218f5eeefa0e9aca48d0c8408efa724b8ca6d08c70fa0e4a69a4b9788d",
+      "actual": "939339218f5eeefa0e9aca48d0c8408efa724b8ca6d08c70fa0e4a69a4b9788d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\README.md",
+      "expected": "ec3b02909a4ab4d4425f7a48d8d007510927b2787d292abfd13dd5e73eff444d",
+      "actual": "ec3b02909a4ab4d4425f7a48d8d007510927b2787d292abfd13dd5e73eff444d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\README.md",
+      "expected": "c0c719b71cebe5087000f93153bd04cd571b8a6a93df07c77d3921ba7ec56be0",
+      "actual": "c0c719b71cebe5087000f93153bd04cd571b8a6a93df07c77d3921ba7ec56be0",
+      "matches": true
+    }
+  ],
+  "steps": [
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r01_joint_audit2_verify_before.json"
+      ],
+      "exit": 0,
+      "seconds": 7.706,
+      "log": "m3_r01_joint_audit2_verify_before.log",
+      "log_sha256": "53d7eb27ef22fdf6ece3fec6e602b0c5a795a394fc8e9cfecd857190550af164"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m3_hard_constraints.py",
+        "tests/test_m3_hard_constraints_http.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 11.193,
+      "log": "m3_r01_joint_audit2_m3.log",
+      "log_sha256": "bb23d3351732846c989f6c17c17d7d0446d43d304ef3287169b942c73cca4a96"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_m0_isolation.py",
+        "tests/test_m0_guardrail_regression.py",
+        "tests/test_query_contract.py",
+        "tests/test_auto_binding.py",
+        "tests/test_binding_decisions.py",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 15.512,
+      "log": "m3_r01_joint_audit2_required.log",
+      "log_sha256": "993f8a283aebe9d7f034179bd2f014a38e3e6434eee119f980b468d3aa9409b9"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/test_flywheel_sandbox.py",
+        "-k",
+        "compare or nonzero",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 9.241,
+      "log": "m3_r01_joint_audit2_boundaries.log",
+      "log_sha256": "006d6d0b0a52aeb69da91b869623d2b4571fdd47be086cd3f7915bff598248c7"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r01_joint_audit2_gate.py"
+      ],
+      "exit": 0,
+      "seconds": 60.617,
+      "log": "m3_r01_joint_audit2_gate.log",
+      "log_sha256": "552347d44675e4b1fb47a7364625a14ebebc242f3984c2874960d62e87816f45"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/",
+        "-q",
+        "--tb=short"
+      ],
+      "exit": 0,
+      "seconds": 110.185,
+      "log": "m3_r01_joint_audit2_full.log",
+      "log_sha256": "87c1029873f4613b77751c09efe8ae88a9c4e9b6154f544c43ef0fd555e66936"
+    },
+    {
+      "command": [
+        "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+        "tests/verify_isolation.py",
+        "--out",
+        "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r01_joint_audit2_verify_after.json"
+      ],
+      "exit": 0,
+      "seconds": 7.905,
+      "log": "m3_r01_joint_audit2_verify_after.log",
+      "log_sha256": "4d0e8017713b49a7650594db6cd2c2d381318e686e0c34bf8d986c2056b8b1a0"
+    }
+  ],
+  "snapshot_before": {
+    "file": "m3_r01_joint_audit2_snapshot_before.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "snapshot_after": {
+    "file": "m3_r01_joint_audit2_snapshot_after.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "hashes_after": [
+    {
+      "file": "app\\matcher.py",
+      "expected": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "actual": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "matches": true
+    },
+    {
+      "file": "app\\binding_decisions.py",
+      "expected": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "actual": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "matches": true
+    },
+    {
+      "file": "app\\server.py",
+      "expected": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "actual": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "matches": true
+    },
+    {
+      "file": "app\\query_preprocessor.py",
+      "expected": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "actual": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "matches": true
+    },
+    {
+      "file": "app\\domain_extractors.py",
+      "expected": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "actual": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m3_hard_constraints.py",
+      "expected": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "actual": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m3_hard_constraints_http.py",
+      "expected": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "actual": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "matches": true
+    },
+    {
+      "file": "app\\db_manager.py",
+      "expected": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "actual": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "matches": true
+    },
+    {
+      "file": "app\\report_generator.py",
+      "expected": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "actual": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "matches": true
+    },
+    {
+      "file": "app\\flywheel_sandbox.py",
+      "expected": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "actual": "c4bc5e0ff9b6875208ead853ad1cf291717be128ab719fdfb13a4278057ca0d4",
+      "matches": true
+    },
+    {
+      "file": "app\\llm_rule_engine.py",
+      "expected": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "actual": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "matches": true
+    },
+    {
+      "file": "app\\session_manager.py",
+      "expected": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "actual": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "matches": true
+    },
+    {
+      "file": "web\\app.js",
+      "expected": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "actual": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+      "matches": true
+    },
+    {
+      "file": "tests\\conftest.py",
+      "expected": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "actual": "207a7cf79afd6335170cc270e42302303057b59c1de88c9077711f96466b4033",
+      "matches": true
+    },
+    {
+      "file": "tests\\verify_isolation.py",
+      "expected": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "actual": "090ba89a25813f42910bd245b1bd2cd05bf580ffdc888ce3fe19ec523ad1eb62",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m0_isolation.py",
+      "expected": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "actual": "92c97d4e7b7d6b68490986feeb79a32e317b7211914258d942d638130acafa3a",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_m0_guardrail_regression.py",
+      "expected": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "actual": "ece380d56a8899b0c1f9f735f7ed28823470036d7ac32fbe00b784877e55839c",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_query_contract.py",
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_auto_binding.py",
+      "expected": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "actual": "0b32c687486edbe85bb0383c2435968526fa4db9fc594d97b60c53d611c8629e",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_binding_decisions.py",
+      "expected": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "actual": "adb13a41e2a9cd0ed152164e86eb3e8debb43567299b10880a2ac5dda6f05878",
+      "matches": true
+    },
+    {
+      "file": "tests\\test_flywheel_sandbox.py",
+      "expected": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "actual": "8b56971b34c26d0a83d0f9da07419ad99e0699c0e1e0048b67902c65ded87901",
+      "matches": true
+    },
+    {
+      "file": "tests\\eval_golden_set.py",
+      "expected": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "actual": "8b22c3b950c4accac9c57f9d05c8eeb02eb035aaf75d4bf3171c0751acce6584",
+      "matches": true
+    },
+    {
+      "file": "tests\\fixtures\\golden_set_v1.json",
+      "expected": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "actual": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+      "matches": true
+    },
+    {
+      "file": "tests\\fixtures\\sandbox_materials_v1.json",
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true
+    },
+    {
+      "file": "config\\auto_binding_rules.json",
+      "expected": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "actual": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "matches": true
+    },
+    {
+      "file": "config\\model_config.json",
+      "expected": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "actual": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "matches": true
+    },
+    {
+      "file": "config\\llm_config.json",
+      "expected": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "actual": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "matches": true
+    },
+    {
+      "file": ".local-archive\\business_snapshot.py",
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun.ps1",
+      "expected": "63b4fddca78385ac8d8ed72ac37f9cd94a4ff016316a277d3fc5fae0b966c5d7",
+      "actual": "63b4fddca78385ac8d8ed72ac37f9cd94a4ff016316a277d3fc5fae0b966c5d7",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_m3_cases.log",
+      "expected": "0f86b93a81e0481ec7fa6b2af275820121947829acdb9fb0bf196ed4833a397a",
+      "actual": "0f86b93a81e0481ec7fa6b2af275820121947829acdb9fb0bf196ed4833a397a",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_required_regressions.log",
+      "expected": "b996d1d945b049ed59d0ede3c5d8b20079c406b8fd9063966846ef308c267fa2",
+      "actual": "b996d1d945b049ed59d0ede3c5d8b20079c406b8fd9063966846ef308c267fa2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_compare_boundaries.log",
+      "expected": "32b869e34973b25513424894ad08fe3beb0de74e8f67686d1a19a392535662b2",
+      "actual": "32b869e34973b25513424894ad08fe3beb0de74e8f67686d1a19a392535662b2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_capture_evidence.py",
+      "expected": "5cc397a4b1e78686dc0bce1ec1995b16c72c84f4b1ea94c69970906f58613e35",
+      "actual": "5cc397a4b1e78686dc0bce1ec1995b16c72c84f4b1ea94c69970906f58613e35",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_gate_reports.json",
+      "expected": "2bd151ce6d7762de064b9f397a782d5f29f28faab8833aefff87b0d16373773a",
+      "actual": "2bd151ce6d7762de064b9f397a782d5f29f28faab8833aefff87b0d16373773a",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_gate_reports_capture.log",
+      "expected": "aaf7aee0fe3e13f9a06734e82b1b582670813b8b1a5319c67d2e22bf31e5353b",
+      "actual": "aaf7aee0fe3e13f9a06734e82b1b582670813b8b1a5319c67d2e22bf31e5353b",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_full_pytest.log",
+      "expected": "c3ba27dba052fbcb3ffb334d729a736b51a28e5bcff2c2e6aaf928d2df5333aa",
+      "actual": "c3ba27dba052fbcb3ffb334d729a736b51a28e5bcff2c2e6aaf928d2df5333aa",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_before.json",
+      "expected": "bd1c0b32dbc1da0ef809dd59563cf272927e7fd125201dbc95f9a5a01bfb11ee",
+      "actual": "bd1c0b32dbc1da0ef809dd59563cf272927e7fd125201dbc95f9a5a01bfb11ee",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_before.log",
+      "expected": "a9fb3ca514e89b981be74f93231bbe4cded3fce5f928347350fb72f94593c45f",
+      "actual": "a9fb3ca514e89b981be74f93231bbe4cded3fce5f928347350fb72f94593c45f",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_after.json",
+      "expected": "1390c5b2710cf40ebb5b1424e803ff01d7a63d41a5216a207dba9401299de8cb",
+      "actual": "1390c5b2710cf40ebb5b1424e803ff01d7a63d41a5216a207dba9401299de8cb",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_venv_verify_after.log",
+      "expected": "0612f1ce833b48beecad1ee5eca421dabd3e3c4f4ea330d5a4573e922aeae8ac",
+      "actual": "0612f1ce833b48beecad1ee5eca421dabd3e3c4f4ea330d5a4573e922aeae8ac",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_before.log",
+      "expected": "56fa89592e3b05c769eba0e157547d97c52ad9bfec2f02a13fa20b69c03a2bc0",
+      "actual": "56fa89592e3b05c769eba0e157547d97c52ad9bfec2f02a13fa20b69c03a2bc0",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_rerun_outer_snapshot_after.log",
+      "expected": "d1fcf86c843f8d23dc65c4bfe679fb716f8fd5097d0ea2d6180117fd3cf23d3d",
+      "actual": "d1fcf86c843f8d23dc65c4bfe679fb716f8fd5097d0ea2d6180117fd3cf23d3d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_post_compare.py",
+      "expected": "ce0d8e7b9bae59250a8834a61952c9618d43559961c130b9fbe9da21649dfb63",
+      "actual": "ce0d8e7b9bae59250a8834a61952c9618d43559961c130b9fbe9da21649dfb63",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_post_compare.json",
+      "expected": "d56f5bc36ab74e92a80ab96f097430b04cad871479a8545c6c8243bdbdd2d21c",
+      "actual": "d56f5bc36ab74e92a80ab96f097430b04cad871479a8545c6c8243bdbdd2d21c",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_score_shift_diag.py",
+      "expected": "07b76c47f6f1e35472126258131b98f13d70d79896d5ff4722ba88af60864bb6",
+      "actual": "07b76c47f6f1e35472126258131b98f13d70d79896d5ff4722ba88af60864bb6",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_score_shift_diag.log",
+      "expected": "edc665b7f3d20e1bf1881c15c58dad627746d2215bda6b47cd8fe57d11066d1b",
+      "actual": "edc665b7f3d20e1bf1881c15c58dad627746d2215bda6b47cd8fe57d11066d1b",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_pre_baseline_hashes.md",
+      "expected": "9547fd24f6d4578ea5c9b1122b4777bc868d664dd8398b849c711c226f3e2888",
+      "actual": "9547fd24f6d4578ea5c9b1122b4777bc868d664dd8398b849c711c226f3e2888",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_before.log",
+      "expected": "ee9f76e8e54451d409529a52be5982d43431678ccc785b235c9e9a4dfd5a6ae2",
+      "actual": "ee9f76e8e54451d409529a52be5982d43431678ccc785b235c9e9a4dfd5a6ae2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_outer_snapshot_after.log",
+      "expected": "4f4024aee42cf70a4cd6e72c6f7f80eea6e4d5082e10e8c19a041e33c41a3305",
+      "actual": "4f4024aee42cf70a4cd6e72c6f7f80eea6e4d5082e10e8c19a041e33c41a3305",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_required_regressions.log",
+      "expected": "4cdd019c03485cbaf76f7b0f1c9d15c203c0f86e5f3f7e39127584f521029aea",
+      "actual": "4cdd019c03485cbaf76f7b0f1c9d15c203c0f86e5f3f7e39127584f521029aea",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_full_pytest.log",
+      "expected": "b4fefe940fdad5a7330275bba2c8288e5c122db8c0e110642be1d5352ea45734",
+      "actual": "b4fefe940fdad5a7330275bba2c8288e5c122db8c0e110642be1d5352ea45734",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_venv_verify_after.json",
+      "expected": "4f1a79af3cb4cfd28b8963741c7ba368d3833e859a2c6142a81977068ca7b5c0",
+      "actual": "4f1a79af3cb4cfd28b8963741c7ba368d3833e859a2c6142a81977068ca7b5c0",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\m3_r01_venv_verify_after.log",
+      "expected": "b0cc671a209eb2333c69294d33695d3aac03c40e1342a69bb210f4edb4835b5c",
+      "actual": "b0cc671a209eb2333c69294d33695d3aac03c40e1342a69bb210f4edb4835b5c",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\V015-M3_R01_开发小结.md",
+      "expected": "45e35102409f7030c2fdeb17b6121cff853cd7dea7260e1636a399a264f91a16",
+      "actual": "45e35102409f7030c2fdeb17b6121cff853cd7dea7260e1636a399a264f91a16",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\V015-M3_R01_开发交接说明.md",
+      "expected": "c28bd7aa75b188788b8f841ec0a0716d042735b6b1d48d9743167798a98b53c2",
+      "actual": "c28bd7aa75b188788b8f841ec0a0716d042735b6b1d48d9743167798a98b53c2",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\02_任务台账.md",
+      "expected": "939339218f5eeefa0e9aca48d0c8408efa724b8ca6d08c70fa0e4a69a4b9788d",
+      "actual": "939339218f5eeefa0e9aca48d0c8408efa724b8ca6d08c70fa0e4a69a4b9788d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\rounds\\README.md",
+      "expected": "ec3b02909a4ab4d4425f7a48d8d007510927b2787d292abfd13dd5e73eff444d",
+      "actual": "ec3b02909a4ab4d4425f7a48d8d007510927b2787d292abfd13dd5e73eff444d",
+      "matches": true
+    },
+    {
+      "file": "doc\\V0.1.5\\evidence\\README.md",
+      "expected": "c0c719b71cebe5087000f93153bd04cd571b8a6a93df07c77d3921ba7ec56be0",
+      "actual": "c0c719b71cebe5087000f93153bd04cd571b8a6a93df07c77d3921ba7ec56be0",
+      "matches": true
+    }
+  ],
+  "finished": "2026-11-14 22:16:15"
+}

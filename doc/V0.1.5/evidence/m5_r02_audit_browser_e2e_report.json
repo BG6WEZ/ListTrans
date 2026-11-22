@@ -1,0 +1,394 @@
+{
+  "ruling_reference": "doc/V0.1.5/rounds/V015-M5_R01_统筹裁决.md#A-M5-05",
+  "steps": {
+    "ui_accept_and_guide_verified": {
+      "xlsxAccept": ".xlsx",
+      "dbAccept": ".xlsx,.xls",
+      "guideHtml": true
+    },
+    "client_xls_rejected": {
+      "alerts": [
+        "工程清单上传仅支持标准 .xlsx 文件，旧版 .xls 文件请先另存为 .xlsx 后再上传。"
+      ],
+      "itemCount": 0,
+      "inputVal": ""
+    },
+    "xlsx_upload_and_match": [
+      {
+        "name": "止回阀",
+        "code": "",
+        "status": "recommended"
+      },
+      {
+        "name": "防爆检修电源箱",
+        "code": "",
+        "status": "recommended"
+      }
+    ],
+    "preconfirm_export_422_no_download": {
+      "alerts": [
+        "导出失败: 第 1 行「止回阀」：未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+      ],
+      "net": [
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        }
+      ]
+    },
+    "dom_confirm_baseline": {
+      "pill": "已确认",
+      "state": {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 2,
+        "matched_code": ""
+      }
+    },
+    "dom_delete_binding_invalidates": {
+      "state": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "绑定已修改，请重新确认",
+        "is_exact": false,
+        "binding_count": 0,
+        "first_qty": null,
+        "matched_code": ""
+      },
+      "pill": "未匹配"
+    },
+    "dom_candidate_rebind_invalidates": {
+      "decision_status": "recommended",
+      "decision_source": "matcher",
+      "decision_reason": "绑定已修改，请重新确认",
+      "is_exact": false,
+      "binding_count": 1,
+      "first_qty": 2,
+      "matched_code": "M5-UI-001"
+    },
+    "dom_qty_edit_invalidates": {
+      "state": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "数量已修改，请重新确认",
+        "is_exact": false,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      },
+      "pill": "待确认"
+    },
+    "post_edit_export_422": {
+      "alerts": [
+        "导出失败: 第 1 行「止回阀」：未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+      ],
+      "net": [
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        }
+      ]
+    },
+    "dom_reconfirm_after_edit": {
+      "pill": "已确认",
+      "state": {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      }
+    },
+    "reject_real_dom_request": {
+      "result": {
+        "ok": true,
+        "http_status": 200,
+        "body": {
+          "code": 0,
+          "msg": "已拒绝当前推荐",
+          "decision": {
+            "decision_status": "rejected",
+            "decision_source": "manual_reject",
+            "decision_reason": "人工拒绝推荐",
+            "decision_codes": [
+              "M5-UI-001"
+            ],
+            "row_fingerprint": "274c1efa99cd5dabbc4f0f4eb9783d29846986cc82d0efda6edf2aff0af6020e",
+            "binding_fingerprint": "b4b09124d235f651a6f416e57b17e06ba862227500788e3ec97a71bd6be062b6"
+          }
+        }
+      },
+      "net": [
+        {
+          "url": "/api/binding/reject",
+          "method": "POST",
+          "status": 200
+        }
+      ],
+      "local_state_before_click": {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      },
+      "local_state_after_click_untouched": {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      }
+    },
+    "reject_export_422_human_reject": {
+      "alerts": [
+        "导出失败: 第 1 行「止回阀」：人工拒绝：须重新选材并显式确认后方可导出"
+      ],
+      "net": [
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        }
+      ]
+    },
+    "named_session_saved": {
+      "net": [
+        {
+          "url": "/api/session/save",
+          "method": "POST",
+          "status": 200
+        }
+      ]
+    },
+    "restore_server_authority_rejected": {
+      "state": {
+        "decision_status": "rejected",
+        "decision_source": "manual_reject",
+        "decision_reason": "已恢复服务端人工拒绝，须重新选材并确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      },
+      "pill": "已拒绝",
+      "net": [
+        {
+          "url": "/api/session/annotate",
+          "method": "POST",
+          "status": 200
+        }
+      ]
+    },
+    "both_rows_confirmed": [
+      {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 4,
+        "matched_code": "M5-UI-001"
+      },
+      {
+        "decision_status": "manual_confirmed",
+        "decision_source": "manual",
+        "decision_reason": "人工显式确认",
+        "is_exact": true,
+        "binding_count": 1,
+        "first_qty": 1,
+        "matched_code": ""
+      }
+    ],
+    "legacy_annotate_downgrade_supplement": {
+      "downgraded": 2,
+      "restored_statuses": [
+        "recommended",
+        "recommended"
+      ]
+    },
+    "export_xlsx_reread": {
+      "filename": "m5_ui_query_已匹配.xlsx",
+      "size_bytes": 5797,
+      "sha256": "c8b233e880158b737800162d4bfb6e269693ea0d699b607a322943b27b46a093",
+      "check_valve_original_row": [
+        "1.1",
+        "材料费",
+        "手动录入",
+        null,
+        "030701001",
+        "止回阀",
+        "公称直径 DN100 PN16 法兰连接",
+        "台",
+        2,
+        1,
+        null
+      ],
+      "check_valve_binding_row": [
+        null,
+        "材料费",
+        "手动录入",
+        "阀门",
+        "M5-UI-001",
+        "止回阀",
+        "DN100 PN16 法兰连接",
+        "台",
+        4,
+        1,
+        "埃美柯"
+      ],
+      "exproof_original_row": [
+        "1.2",
+        "材料费",
+        "手动录入",
+        null,
+        "030401002",
+        "防爆检修电源箱",
+        "380V AC220V 防爆",
+        "台",
+        1,
+        1,
+        null
+      ],
+      "exproof_binding_row": [
+        null,
+        "材料费",
+        "手动录入",
+        "防爆电气",
+        "3.50.29.0200",
+        "防爆检修电源箱",
+        "ExdIICT4 380V",
+        "台",
+        1,
+        1,
+        "华荣"
+      ]
+    },
+    "admin_health_live": {
+      "employee_forbidden_status": 403,
+      "status": "healthy",
+      "metrics_available": true
+    },
+    "network_hook_summary": {
+      "reject_calls": [
+        {
+          "url": "/api/binding/reject",
+          "method": "POST",
+          "status": 200
+        }
+      ],
+      "export_calls": [
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 422
+        },
+        {
+          "url": "/api/export",
+          "method": "POST",
+          "status": 200
+        }
+      ],
+      "annotate_calls": [
+        {
+          "url": "/api/session/annotate",
+          "method": "POST",
+          "status": 200
+        },
+        {
+          "url": "/api/session/annotate",
+          "method": "POST",
+          "status": 200
+        }
+      ],
+      "upload_calls": [
+        {
+          "url": "/api/upload",
+          "method": "POST",
+          "status": 200
+        }
+      ],
+      "upload_status_polls": [
+        {
+          "url": "/api/upload/status?task_id=655ddef0-b911-467b-b2b2-b95351ce2f40",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    }
+  },
+  "gates": {
+    "g_xls_client_reject": true,
+    "g_upload_two_rows": true,
+    "g_preconfirm_export_422_zero_download": true,
+    "g_dom_confirm_then_pill": true,
+    "g_dom_delete_binding_invalidates": true,
+    "g_dom_candidate_rebind_invalidates": true,
+    "g_dom_qty_edit_invalidates": true,
+    "g_post_edit_export_422": true,
+    "g_reconfirm_after_edit": true,
+    "g_reject_dom_button_real_request_200": true,
+    "g_reject_no_test_state_assignment": true,
+    "g_reject_export_422_human_reject": true,
+    "g_save_restore_server_authority_rejected": true,
+    "g_rejected_pill_dom": true,
+    "g_recovery_reconfirm_overwrites_reject": true,
+    "g_row2_confirm": true,
+    "g_legacy_downgrade": true,
+    "g_export_200_download": true,
+    "g_export_xlsx_field_unit_qty_reread": true,
+    "g_admin_health": true,
+    "g_network_hook_completeness": true,
+    "g_r01_evidence_untouched": true
+  },
+  "r01_evidence_preserved": {
+    "before": {
+      "m5_r01_browser_e2e.py": "a65cc55fc2faf6d8c882d8936b85ea93ba770cd6ad802100d43e3dc28601d4ad",
+      "m5_r01_browser_e2e_report.json": "fb788a7613fc0352581427faa70c53b39efb51702d1e7956f63198e507cbaa33"
+    },
+    "after": {
+      "m5_r01_browser_e2e.py": "a65cc55fc2faf6d8c882d8936b85ea93ba770cd6ad802100d43e3dc28601d4ad",
+      "m5_r01_browser_e2e_report.json": "fb788a7613fc0352581427faa70c53b39efb51702d1e7956f63198e507cbaa33"
+    },
+    "overwritten": false
+  },
+  "passed": true,
+  "elapsed_seconds": 30.974,
+  "temp_context_cleanup_verified": true
+}

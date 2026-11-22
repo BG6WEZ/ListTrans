@@ -1,0 +1,10 @@
+{
+  "pytest": 1,
+  "legacy_gate": 1,
+  "calibrated_gate": 1,
+  "v017_keyword": 1,
+  "v017_vector": 0,
+  "comparison": 0,
+  "isolation_after": 0,
+  "asset_guard": 1
+}

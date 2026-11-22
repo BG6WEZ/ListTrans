@@ -1,0 +1,80 @@
+{
+  "fixture": "synthetic only; no downloads; scratch bases; no containers or remote connections",
+  "production_dockerfile_sha256": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+  "dockerignore_sha256": "d37c2ec4512f4e016c8d665ced63761127e00346f710c34760994c0443617d74",
+  "production_image_build_executed": false,
+  "probes": {
+    "context": {
+      "command": [
+        "docker",
+        "build",
+        "--network=none",
+        "--pull=false",
+        "--no-cache",
+        "-t",
+        "listtrans:m4-r01-audit-context-1794737408",
+        "C:\\Users\\tlyer\\AppData\\Local\\Temp\\m4_audit_docker_canary_bd3ez16a"
+      ],
+      "tag": "listtrans:m4-r01-audit-context-1794737408",
+      "build_exit": 0,
+      "save_exit": 0,
+      "files_in_layers": [
+        "context/.dockerignore",
+        "context/Dockerfile",
+        "context/app/auth.db.backup",
+        "context/app/main.py",
+        "context/config/alias_dict.json",
+        "context/config/runtime_credentials.json",
+        "context/data/audit_disabled_materials.csv",
+        "context/requirements.txt",
+        "context/web/index.html"
+      ],
+      "sensitive_canaries_present": {
+        ".env": false,
+        ".env.production": false,
+        "app/auth.db": false,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": true,
+        "data/audit_disabled_materials.csv": true,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": true
+      },
+      "archive_sha256": "270961213993010a5974e2eee5f3d68535ff2b971570430f3ba92366f4dd2cbe"
+    },
+    "copy_patterns": {
+      "command": [
+        "docker",
+        "build",
+        "--network=none",
+        "--pull=false",
+        "--no-cache",
+        "-t",
+        "listtrans:m4-r01-audit-copy-patterns-1794737413",
+        "C:\\Users\\tlyer\\AppData\\Local\\Temp\\m4_audit_docker_canary_bd3ez16a"
+      ],
+      "tag": "listtrans:m4-r01-audit-copy-patterns-1794737413",
+      "build_exit": 0,
+      "save_exit": 0,
+      "files_in_layers": [
+        "app/app/main.py",
+        "app/config/alias_dict.json",
+        "app/config/runtime_credentials.json",
+        "app/requirements.txt",
+        "app/web/index.html"
+      ],
+      "sensitive_canaries_present": {
+        ".env": false,
+        ".env.production": false,
+        "app/auth.db": false,
+        "app/auth.db-wal": false,
+        "app/auth.db.backup": false,
+        "data/audit_disabled_materials.csv": false,
+        "doc/personnel.xls": false,
+        "scripts/cloud_users_snapshot.json": false,
+        "config/runtime_credentials.json": true
+      },
+      "archive_sha256": "b2d0df62f33c81526972c9339f6ad898c4c77ddf6f7552ebffcd6b837af057b0"
+    }
+  }
+}

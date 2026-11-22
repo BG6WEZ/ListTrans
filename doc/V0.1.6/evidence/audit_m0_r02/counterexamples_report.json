@@ -1,0 +1,228 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_v016_m0_r02_ce_8e7fo0do",
+  "cases": {
+    "CE1_no_actor_trusted_direct_write": {
+      "outcome": "REJECTED",
+      "error": "ValueError: Feedback submission requires authenticated actor_user and verified document/sheet/source_row identity.",
+      "file_record_count": 0,
+      "forged_record_persisted_as_trusted": false
+    },
+    "CE2_forged_full_identity_json_into_suggestions": {
+      "suggestion_count": 0,
+      "ce1_raw_text_in_suggestions": false,
+      "ce2_raw_text_in_suggestions": false,
+      "matching_suggestions": []
+    },
+    "CE3_db_commit_json_sync_failure": {
+      "first_http_status": 500,
+      "first_http_detail": "injected_ce3_sync_failure",
+      "db_row_committed": [
+        {
+          "client_event_id": "ce3_sync_385d80c1",
+          "trust_level": "trusted",
+          "event_seq": 1,
+          "superseded": 0
+        }
+      ],
+      "event_in_file_before_retry": false,
+      "retry_http_status": 200,
+      "retry_idempotent_replay": true,
+      "event_in_file_after_retry": true,
+      "divergence_self_healed": true
+    },
+    "CE4_rematch_context_tampering": {
+      "source_row_before": [
+        {
+          "raw_name": "排风机",
+          "raw_spec": "风量：1000m3/h",
+          "professional": "暖通"
+        }
+      ],
+      "rematch_http_status": 422,
+      "rematch_snapshot": [],
+      "match_http_status": 422,
+      "match_snapshot": [],
+      "row_a_revisions_before": [
+        {
+          "revision": 1,
+          "professional": "暖通"
+        }
+      ],
+      "row_a_revisions_after": [
+        {
+          "revision": 1,
+          "professional": "暖通"
+        }
+      ],
+      "rev1_unchanged": true
+    },
+    "CE5_legacy_draft_overwrite": {
+      "legacy_draft_id": "4a8e1cc6-c6c7-49b6-8b4c-346ee181d9eb",
+      "drafts_before": [
+        {
+          "id": "4a8e1cc6-c6c7-49b6-8b4c-346ee181d9eb",
+          "trust_level": "legacy_untrusted",
+          "owner_account_epoch": "",
+          "document_id": "",
+          "items_json": "LEGACY_ITEMS_JSON"
+        }
+      ],
+      "trusted_save_http_status": 200,
+      "trusted_save_body": {
+        "success": true,
+        "draft_id": "f3b7bd1a-a26f-4e53-b461-1bdc6b50f728",
+        "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+        "work_session_id": "ws_0e23a9b2479b4e99a251897159a35cd7",
+        "trust_level": "trusted"
+      },
+      "drafts_after": [
+        {
+          "id": "4a8e1cc6-c6c7-49b6-8b4c-346ee181d9eb",
+          "trust_level": "legacy_untrusted",
+          "owner_account_epoch": "",
+          "document_id": "",
+          "items_json": "LEGACY_ITEMS_JSON",
+          "updated_at": "2026-11-17 19:13:23"
+        },
+        {
+          "id": "f3b7bd1a-a26f-4e53-b461-1bdc6b50f728",
+          "trust_level": "trusted",
+          "owner_account_epoch": "ep-ce_u1_6ff046-0488ac48",
+          "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+          "items_json": "NEW_TRUSTED_ITEMS_JSON",
+          "updated_at": "2026-11-17 19:13:23"
+        }
+      ],
+      "legacy_row_reused_and_upgraded": false,
+      "legacy_items_preserved": true,
+      "draft_row_count_after": 2
+    },
+    "CE6_event_seq_strictness": {
+      "http": {
+        "float_fraction_1_5": {
+          "sent_event_seq": 1.5,
+          "status_code": 422,
+          "detail": [
+            {
+              "type": "int_type",
+              "loc": [
+                "body",
+                "event_seq"
+              ],
+              "msg": "Input should be a valid integer",
+              "input": 1.5
+            }
+          ],
+          "idempotent_replay": null
+        },
+        "float_whole_1_0": {
+          "sent_event_seq": 1.0,
+          "status_code": 422,
+          "detail": [
+            {
+              "type": "int_type",
+              "loc": [
+                "body",
+                "event_seq"
+              ],
+              "msg": "Input should be a valid integer",
+              "input": 1.0
+            }
+          ],
+          "idempotent_replay": null
+        },
+        "string_2": {
+          "sent_event_seq": "2",
+          "status_code": 422,
+          "detail": [
+            {
+              "type": "int_type",
+              "loc": [
+                "body",
+                "event_seq"
+              ],
+              "msg": "Input should be a valid integer",
+              "input": "2"
+            }
+          ],
+          "idempotent_replay": null
+        },
+        "bool_true": {
+          "sent_event_seq": true,
+          "status_code": 422,
+          "detail": [
+            {
+              "type": "int_type",
+              "loc": [
+                "body",
+                "event_seq"
+              ],
+              "msg": "Input should be a valid integer",
+              "input": true
+            }
+          ],
+          "idempotent_replay": null
+        },
+        "zero": {
+          "sent_event_seq": 0,
+          "status_code": 422,
+          "detail": {
+            "error": "invalid_event_seq",
+            "message": "event_seq 必须大于等于 1。"
+          },
+          "idempotent_replay": null
+        },
+        "negative_minus_3": {
+          "sent_event_seq": -3,
+          "status_code": 422,
+          "detail": {
+            "error": "invalid_event_seq",
+            "message": "event_seq 必须大于等于 1。"
+          },
+          "idempotent_replay": null
+        },
+        "missing": {
+          "status_code": 422,
+          "detail": {
+            "error": "missing_event_seq",
+            "message": "缺少单调递增事件序号 event_seq。"
+          }
+        }
+      },
+      "direct_float_1_5": {
+        "outcome": "REJECTED",
+        "status_code": 422,
+        "code": null
+      }
+    }
+  },
+  "setup": {
+    "materials_imported": 35,
+    "u1_user_id": 2,
+    "u1_epoch": "ep-ce_u1_6ff046-0488ac48",
+    "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+    "rows": [
+      {
+        "tag": "row_a",
+        "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+        "sheet_id": "sht_e79dcca57f984495",
+        "source_row_id": "row_f71d62d6d16e4573",
+        "recommendation_snapshot_id": "snap_f79301c4a8b44deb"
+      },
+      {
+        "tag": "row_b",
+        "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+        "sheet_id": "sht_e79dcca57f984495",
+        "source_row_id": "row_8bac66a641444fbb",
+        "recommendation_snapshot_id": "snap_4644952da5da41fc"
+      },
+      {
+        "tag": "row_c",
+        "document_id": "doc_7323a3d56b5c49de86ce18bd6199207c",
+        "sheet_id": "sht_2f41b66819644905",
+        "source_row_id": "row_5319198bf8df4bf0",
+        "recommendation_snapshot_id": "snap_bc923007388f4cfe"
+      }
+    ]
+  }
+}

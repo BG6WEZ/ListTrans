@@ -1,0 +1,24 @@
+{
+  "phase": "cold",
+  "started_at": "2026-11-18T20:05:12.959246+08:00",
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-u",
+    "-m",
+    "pytest",
+    "tests/test_v0_0_8_llm_rules.py",
+    "-v",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_cold_brjy4zz0\\pytest"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "native_temp_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_cold_brjy4zz0",
+  "explicit_test_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_cold_brjy4zz0",
+  "dotenv_disabled": true,
+  "llm_enabled": false,
+  "cold_parent_cache_initial_files": 0,
+  "exit_code": 0,
+  "elapsed_sec": 45.0
+}

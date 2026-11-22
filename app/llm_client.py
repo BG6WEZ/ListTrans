@@ -16,8 +16,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # Constants & Paths
-DB_PATH = os.path.join(BASE_DIR, "app", "materials.db")
+# F25/A-M0-01: 与 db_manager、llm_rule_engine 同口径，物料库路径可经 MATERIALS_DB_PATH 注入
+_DEFAULT_DB_PATH = os.path.join(BASE_DIR, "app", "materials.db")
+DB_PATH = os.getenv("MATERIALS_DB_PATH", _DEFAULT_DB_PATH)
 CONFIG_DIR = os.getenv("CONFIG_DIR", os.path.join(BASE_DIR, "config"))
+
+
+def _resolve_db_path() -> str:
+    """实时解析物料库路径，保证 conftest 在模块导入后注入的环境变量同样生效。"""
+    return os.getenv("MATERIALS_DB_PATH", _DEFAULT_DB_PATH)
 
 class QwenLLMClient:
     _instance = None
@@ -86,7 +93,7 @@ class QwenLLMClient:
     def init_cache_table(self):
         conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            conn = sqlite3.connect(_resolve_db_path(), timeout=30.0)
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS llm_cache (
@@ -143,7 +150,7 @@ class QwenLLMClient:
     def get_cache(self, key: str) -> Optional[Dict[str, Any]]:
         conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            conn = sqlite3.connect(_resolve_db_path(), timeout=30.0)
             cursor = conn.cursor()
             cursor.execute("SELECT result_json FROM llm_cache WHERE cache_key = ?", (key,))
             row = cursor.fetchone()
@@ -160,7 +167,7 @@ class QwenLLMClient:
     def set_cache(self, key: str, value: Dict[str, Any]):
         conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=30.0)
+            conn = sqlite3.connect(_resolve_db_path(), timeout=30.0)
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT OR REPLACE INTO llm_cache (cache_key, result_json) VALUES (?, ?)",
@@ -421,5 +428,19 @@ class QwenLLMClient:
             "circuit_breaker_trips": self.stats["circuit_breaker_trips"]
         }
 
-# Singleton instance export
-llm_client = QwenLLMClient()
+# A-M0-01: 惰性单例——模块导入不再实例化客户端、不再触发建表写库；
+# 首次访问 llm_client 时才构造。现有调用方均为函数内导入/访问，行为兼容。
+_singleton: Optional["QwenLLMClient"] = None
+
+
+def _get_llm_client() -> "QwenLLMClient":
+    global _singleton
+    if _singleton is None:
+        _singleton = QwenLLMClient()
+    return _singleton
+
+
+def __getattr__(name):
+    if name == "llm_client":
+        return _get_llm_client()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

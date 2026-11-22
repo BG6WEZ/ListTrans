@@ -1,0 +1,38 @@
+{
+  "harmful": {
+    "passed": [
+      false,
+      false
+    ],
+    "targeted": [
+      24,
+      24
+    ],
+    "score_comparison_diffs": [],
+    "snapshot_errors": []
+  },
+  "beneficial": {
+    "passed": [
+      true,
+      true
+    ],
+    "targeted": [
+      22,
+      22
+    ],
+    "score_comparison_diffs": [],
+    "snapshot_errors": []
+  },
+  "neutral": {
+    "passed": [
+      true,
+      true
+    ],
+    "targeted": [
+      16,
+      16
+    ],
+    "score_comparison_diffs": [],
+    "snapshot_errors": []
+  }
+}

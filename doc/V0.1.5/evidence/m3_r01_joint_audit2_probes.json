@@ -1,0 +1,996 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_test_o4a7v_km",
+  "llm_enabled": "false",
+  "results": [
+    {
+      "label": "UNIT-KM",
+      "query": {
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "km"
+      },
+      "material": {
+        "code": "AUDIT-UNIT-KM",
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "description": "",
+        "category": "暖通",
+        "unit": "m",
+        "brand": "",
+        "parsed_params": "{\"attrs\":{\"dn_val\":15}}"
+      },
+      "binding": {
+        "code": "AUDIT-UNIT-KM",
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "unit": "m",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1000.0,
+      "matcher": {
+        "score": 100.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "km",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-UNIT-KM",
+          "镀锌钢管",
+          "DN15",
+          "m",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "bindings": [
+          {
+            "code": "AUDIT-UNIT-KM",
+            "name": "镀锌钢管",
+            "specification": "DN15",
+            "unit": "m",
+            "brand": "",
+            "category": "暖通",
+            "qty": 10.0,
+            "qty_ratio": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "label": "UNIT-CONTROL",
+      "query": {
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "米"
+      },
+      "material": {
+        "code": "AUDIT-UNIT-CONTROL",
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "description": "",
+        "category": "暖通",
+        "unit": "m",
+        "brand": "",
+        "parsed_params": "{\"attrs\":{\"dn_val\":15}}"
+      },
+      "binding": {
+        "code": "AUDIT-UNIT-CONTROL",
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "unit": "m",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 100.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "米",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-UNIT-CONTROL",
+          "镀锌钢管",
+          "DN15",
+          "m",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "bindings": [
+          {
+            "code": "AUDIT-UNIT-CONTROL",
+            "name": "镀锌钢管",
+            "specification": "DN15",
+            "unit": "m",
+            "brand": "",
+            "category": "暖通",
+            "qty": 10.0,
+            "qty_ratio": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "label": "DN-EMPTY",
+      "query": {
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "米"
+      },
+      "material": {
+        "code": "AUDIT-DN-EMPTY",
+        "name": "镀锌钢管",
+        "specification": "DN20",
+        "description": "",
+        "category": "暖通",
+        "unit": "米",
+        "brand": "",
+        "parsed_params": ""
+      },
+      "binding": {
+        "code": "AUDIT-DN-EMPTY",
+        "name": "镀锌钢管",
+        "specification": "DN20",
+        "unit": "米",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径冲突拦截",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "镀锌钢管",
+          "DN15",
+          "米",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-DN-EMPTY",
+          "镀锌钢管",
+          "DN20",
+          "米",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "bindings": [
+          {
+            "code": "AUDIT-DN-EMPTY",
+            "name": "镀锌钢管",
+            "specification": "DN20",
+            "unit": "米",
+            "brand": "",
+            "category": "暖通",
+            "qty": 10.0,
+            "qty_ratio": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "label": "DN-CONTROL",
+      "query": {
+        "name": "镀锌钢管",
+        "specification": "DN15",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "米"
+      },
+      "material": {
+        "code": "AUDIT-DN-CONTROL",
+        "name": "镀锌钢管",
+        "specification": "DN20",
+        "description": "",
+        "category": "暖通",
+        "unit": "米",
+        "brand": "",
+        "parsed_params": "{\"attrs\":{\"dn_val\":20}}"
+      },
+      "binding": {
+        "code": "AUDIT-DN-CONTROL",
+        "name": "镀锌钢管",
+        "specification": "DN20",
+        "unit": "米",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_status": 409,
+      "confirm_detail": {
+        "error": "binding_hard_conflict",
+        "message": "绑定目标与清单行存在硬冲突，不允许人工确认",
+        "conflicts": [
+          {
+            "code": "AUDIT-DN-CONTROL",
+            "reason": "管径口径冲突阻断"
+          }
+        ]
+      },
+      "export_status": 422,
+      "export_detail": {
+        "error": "export_blocked",
+        "row": {
+          "original_row_idx": 0,
+          "original_name": "镀锌钢管",
+          "original_spec": "DN15",
+          "reason": "未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+        }
+      },
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "rejected",
+        "decision_source": "matcher",
+        "decision_reason": "top1 AUDIT-DN-CONTROL 管径口径冲突阻断，不预绑定",
+        "bindings": []
+      }
+    },
+    {
+      "label": "GRADE-EMPTY",
+      "query": {
+        "name": "不锈钢管",
+        "specification": "304",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "米"
+      },
+      "material": {
+        "code": "AUDIT-GRADE-EMPTY",
+        "name": "不锈钢管",
+        "specification": "316L 不锈钢管",
+        "description": "",
+        "category": "暖通",
+        "unit": "米",
+        "brand": "",
+        "parsed_params": ""
+      },
+      "binding": {
+        "code": "AUDIT-GRADE-EMPTY",
+        "name": "不锈钢管",
+        "specification": "316L 不锈钢管",
+        "unit": "米",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "不锈钢牌号冲突硬隔离(304/316L)"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "不锈钢管",
+          "304",
+          "米",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-GRADE-EMPTY",
+          "不锈钢管",
+          "316L 不锈钢管",
+          "米",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+        "bindings": []
+      }
+    },
+    {
+      "label": "DYNAMIC",
+      "query": {
+        "name": "排风机",
+        "specification": "EXCL专用",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "台"
+      },
+      "material": {
+        "code": "AUDIT-DYNAMIC",
+        "name": "排风机",
+        "specification": "EXCL专用",
+        "description": "",
+        "category": "暖通",
+        "unit": "台",
+        "brand": "",
+        "parsed_params": ""
+      },
+      "binding": {
+        "code": "AUDIT-DYNAMIC",
+        "name": "排风机",
+        "specification": "EXCL专用",
+        "unit": "台",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 0.0,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "规格型号完全一致",
+          "包含排除词 [EXCL]"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "排风机",
+          "EXCL专用",
+          "台",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-DYNAMIC",
+          "排风机",
+          "EXCL专用",
+          "台",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "无有效候选或匹配得分为 0，不预绑定",
+        "bindings": []
+      }
+    },
+    {
+      "label": "PUMP-REVERSE",
+      "query": {
+        "name": "风机盘管",
+        "specification": "带提升泵",
+        "professional": "暖通",
+        "category": "暖通",
+        "unit": "台"
+      },
+      "material": {
+        "code": "AUDIT-PUMP-REVERSE",
+        "name": "风机盘管",
+        "specification": "不带提升泵",
+        "description": "",
+        "category": "暖通",
+        "unit": "台",
+        "brand": "",
+        "parsed_params": ""
+      },
+      "binding": {
+        "code": "AUDIT-PUMP-REVERSE",
+        "name": "风机盘管",
+        "specification": "不带提升泵",
+        "unit": "台",
+        "category": "暖通",
+        "brand": "",
+        "qty": 10,
+        "qty_ratio": 1
+      },
+      "multiplier": 1.0,
+      "matcher": {
+        "score": 85.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 机组类型",
+          "语义高度相近",
+          "分类精准匹配"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85
+      },
+      "confirm_status": 200,
+      "confirm_detail": null,
+      "export_status": 200,
+      "xlsx_rows": [
+        [
+          "*序号",
+          "*费用类型",
+          "*清单类型",
+          "*材料类型",
+          "*清单编码",
+          "*清单名称",
+          "*特征/规格型号",
+          "单位",
+          "*工程量",
+          "材料损耗",
+          "品牌",
+          "竞聘系数",
+          "单价(无税)",
+          "备注",
+          "专业",
+          null
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          1,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "暖通",
+          null
+        ],
+        [
+          "1.1",
+          "材料费",
+          "手动录入",
+          "暖通",
+          null,
+          "风机盘管",
+          "带提升泵",
+          "台",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ],
+        [
+          null,
+          "材料费",
+          "手动录入",
+          "暖通",
+          "AUDIT-PUMP-REVERSE",
+          "风机盘管",
+          "不带提升泵",
+          "台",
+          10,
+          0,
+          null,
+          null,
+          null,
+          "标段一",
+          "暖通",
+          null
+        ]
+      ],
+      "batch_status": 200,
+      "batch": {
+        "decision_status": "recommended",
+        "decision_source": "matcher",
+        "decision_reason": "matcher 算法推荐，需人工确认",
+        "bindings": [
+          {
+            "code": "AUDIT-PUMP-REVERSE",
+            "name": "风机盘管",
+            "specification": "不带提升泵",
+            "unit": "台",
+            "brand": "",
+            "category": "暖通",
+            "qty": 10.0,
+            "qty_ratio": 1.0
+          }
+        ]
+      }
+    }
+  ]
+}

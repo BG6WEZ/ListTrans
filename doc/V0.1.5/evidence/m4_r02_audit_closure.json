@@ -1,0 +1,435 @@
+{
+  "role": "independent auditor and coordinator; no implementation changes",
+  "audit_conclusion": "RETURN_FOR_REWORK",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "head_unchanged": true,
+  "protected_inputs_checked": 154,
+  "expected_active_document_changes": [
+    "doc/README.md",
+    "doc/00_项目管理/进度总表.md",
+    "doc/V0.1.5/02_任务台账.md",
+    "doc/V0.1.5/rounds/README.md",
+    "doc/V0.1.5/evidence/README.md"
+  ],
+  "unexpected_protected_changes": [],
+  "development_delivery_checked": 74,
+  "development_delivery_checks": [
+    {
+      "path": "app/auth_manager.py",
+      "expected": "4d774c0016e3ad7f91345275a05dbcf61f0fa2e40664da5aba04dc65ee11b711",
+      "actual": "4d774c0016e3ad7f91345275a05dbcf61f0fa2e40664da5aba04dc65ee11b711"
+    },
+    {
+      "path": "app/server.py",
+      "expected": "aaeba6ff6981d4f57b279fe78d70c277a130a11c1e3a8f76a2eb240ada25e891",
+      "actual": "aaeba6ff6981d4f57b279fe78d70c277a130a11c1e3a8f76a2eb240ada25e891"
+    },
+    {
+      "path": "app/flywheel_sandbox.py",
+      "expected": "29f3152a2b0029a014e7b173743433a1e60321abf490305fcfc2a58b650ea843",
+      "actual": "29f3152a2b0029a014e7b173743433a1e60321abf490305fcfc2a58b650ea843"
+    },
+    {
+      "path": ".dockerignore",
+      "expected": "4c40a6755581f7b0feb276d27dc25c8b9118304f55df7c47e2edc0f86dd243e1",
+      "actual": "4c40a6755581f7b0feb276d27dc25c8b9118304f55df7c47e2edc0f86dd243e1"
+    },
+    {
+      "path": "tests/test_m4_auth_lifecycle.py",
+      "expected": "17583fbde0666263fcffd38b3f157b7ff88add535af42e918541192acfff710e",
+      "actual": "17583fbde0666263fcffd38b3f157b7ff88add535af42e918541192acfff710e"
+    },
+    {
+      "path": "tests/test_m4_permissions_and_tasks.py",
+      "expected": "5f258a8ac742f73830a94d93c40d2389157c6cd3947e91be6740eca6a4587abf",
+      "actual": "5f258a8ac742f73830a94d93c40d2389157c6cd3947e91be6740eca6a4587abf"
+    },
+    {
+      "path": "tests/test_auto_binding.py",
+      "expected": "d86af2d39f30aa91ab33d67f5da7749b2a3aa084385aaf39f3748099e4556b58",
+      "actual": "d86af2d39f30aa91ab33d67f5da7749b2a3aa084385aaf39f3748099e4556b58"
+    },
+    {
+      "path": "tests/test_binding_decisions.py",
+      "expected": "9e9f18061ab8ce2840e378dcbc3660ff0fdeae2027f6ca069d2b2f6f3970026d",
+      "actual": "9e9f18061ab8ce2840e378dcbc3660ff0fdeae2027f6ca069d2b2f6f3970026d"
+    },
+    {
+      "path": "tests/test_m3_hard_constraints.py",
+      "expected": "dac079439b10592e5713af4319b0063ddfb511aaca294a9d1196b26fba1546c4",
+      "actual": "dac079439b10592e5713af4319b0063ddfb511aaca294a9d1196b26fba1546c4"
+    },
+    {
+      "path": "tests/test_m3_hard_constraints_http.py",
+      "expected": "5af49d4c85f01901f5573a9aeb73c42197cc9873cf42ff83f667ce580e8ddc8d",
+      "actual": "5af49d4c85f01901f5573a9aeb73c42197cc9873cf42ff83f667ce580e8ddc8d"
+    },
+    {
+      "path": "tests/test_v0_0_8_llm_rules.py",
+      "expected": "558efc9a9876f0662b0d2fbef4819497aa226a77b0ab1dce217de0e837664a5a",
+      "actual": "558efc9a9876f0662b0d2fbef4819497aa226a77b0ab1dce217de0e837664a5a"
+    },
+    {
+      "path": "doc/V0.1.5/02_任务台账.md",
+      "expected": "71c82b1b0e806b6a3dae042d307146b4a49d9632c2104b7127cf70ec094f29fb",
+      "actual": "9022899602de95f31604140ff1e431e1e137ec0b42ace33a8a9d5d9888d9ec8f"
+    },
+    {
+      "path": "doc/V0.1.5/rounds/README.md",
+      "expected": "54302304d8894b8a05df0ecbd104a770f3ae59875cbff38598734cb3f9664b8a",
+      "actual": "2fe5e96159b85fc7d52b03b35309b7699fbc82b592fd4c5e72323c60768ee2de"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/README.md",
+      "expected": "04193864919ac0b4e5d040826e49f6341ff355f33748510b4724122542265bf5",
+      "actual": "95e843d0decac986e6fab5bedaeacaf73cc378a0a584332ee4c809cfbf9ff49a"
+    },
+    {
+      "path": ".env.example",
+      "expected": "2cf00504fd013eee4f357d7081625b1d151b59e4bddc621e83a99ebc3742342d",
+      "actual": "2cf00504fd013eee4f357d7081625b1d151b59e4bddc621e83a99ebc3742342d"
+    },
+    {
+      "path": "Dockerfile",
+      "expected": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+      "actual": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a"
+    },
+    {
+      "path": "app/admin_api.py",
+      "expected": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc",
+      "actual": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc"
+    },
+    {
+      "path": "app/auth_middleware.py",
+      "expected": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+      "actual": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3"
+    },
+    {
+      "path": "app/llm_rule_engine.py",
+      "expected": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813",
+      "actual": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813"
+    },
+    {
+      "path": "app/rule_api.py",
+      "expected": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c",
+      "actual": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c"
+    },
+    {
+      "path": "deploy_guide.md",
+      "expected": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b",
+      "actual": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b"
+    },
+    {
+      "path": "docker-compose.yml",
+      "expected": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7",
+      "actual": "dc74a02b00e64e598ce675d0a1fe9214ef803d1022551e775d47e4eef557efc7"
+    },
+    {
+      "path": "scripts/_deploy_env.py",
+      "expected": "a9aa895e54885242d53fc1398a95bc91acd28c82062f55ad983eb8770d260f6d",
+      "actual": "a9aa895e54885242d53fc1398a95bc91acd28c82062f55ad983eb8770d260f6d"
+    },
+    {
+      "path": "scripts/check_cloud_status.py",
+      "expected": "78819b5b8e157b491521a383b9ac2051bfed6c9303b35d9c811980e6d1d5179c",
+      "actual": "78819b5b8e157b491521a383b9ac2051bfed6c9303b35d9c811980e6d1d5179c"
+    },
+    {
+      "path": "scripts/deploy_cloud.py",
+      "expected": "f1a7580878839eb84a84c49704fefe99b3d8eb5493c8caf29efe19f906f239fd",
+      "actual": "f1a7580878839eb84a84c49704fefe99b3d8eb5493c8caf29efe19f906f239fd"
+    },
+    {
+      "path": "scripts/deploy_to_cloud_safe.py",
+      "expected": "81b7d84d0ff05621da63f723facf1d9a39d17f742618b9a0acca584ceb4976b8",
+      "actual": "81b7d84d0ff05621da63f723facf1d9a39d17f742618b9a0acca584ceb4976b8"
+    },
+    {
+      "path": "scripts/probe_servers.py",
+      "expected": "c1de9c53ffcc7aaf11382a9d16743ce67c67cfe9b51ea15a2fe2315fd12c6d54",
+      "actual": "c1de9c53ffcc7aaf11382a9d16743ce67c67cfe9b51ea15a2fe2315fd12c6d54"
+    },
+    {
+      "path": "tests/test_admin_dashboard.py",
+      "expected": "64d599e0645c75c8660d160df8845344fa9399846328d815646cc7e8421ae872",
+      "actual": "64d599e0645c75c8660d160df8845344fa9399846328d815646cc7e8421ae872"
+    },
+    {
+      "path": "tests/test_auth_security_fix.py",
+      "expected": "664a36b0a2a614bec22fdc7c18ce1fdb836cd0fee7e257c67b6de1bfcc150e6b",
+      "actual": "664a36b0a2a614bec22fdc7c18ce1fdb836cd0fee7e257c67b6de1bfcc150e6b"
+    },
+    {
+      "path": "tests/test_flywheel_end2end.py",
+      "expected": "e14c024960314eb47ab633d9a9b2c91d57109e6e1e0f111a2422e7b2ae58a84b",
+      "actual": "e14c024960314eb47ab633d9a9b2c91d57109e6e1e0f111a2422e7b2ae58a84b"
+    },
+    {
+      "path": "tests/test_phase0_phase1.py",
+      "expected": "1cdf4e055183990d14990007f339098a8a718fb827e8e0ceccca41eba8af1d34",
+      "actual": "1cdf4e055183990d14990007f339098a8a718fb827e8e0ceccca41eba8af1d34"
+    },
+    {
+      "path": "web/admin.html",
+      "expected": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669",
+      "actual": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669"
+    },
+    {
+      "path": "web/app.js",
+      "expected": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c",
+      "actual": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c"
+    },
+    {
+      "path": "web/index.html",
+      "expected": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae",
+      "actual": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae"
+    },
+    {
+      "path": "web/login.html",
+      "expected": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+      "actual": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5"
+    },
+    {
+      "path": "doc/V0.1.5/rounds/V015-M4_R02_开发小结.md",
+      "expected": "fb9684b20ae760b95c5c3d6866a5f992332d4431252dabdee5c8f839b3f6072c",
+      "actual": "fb9684b20ae760b95c5c3d6866a5f992332d4431252dabdee5c8f839b3f6072c"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_01_forced_pwd_change.png",
+      "expected": "99e85bdc51b7749094c7204a78563673c8c042448327978e436e42ace82df6af",
+      "actual": "99e85bdc51b7749094c7204a78563673c8c042448327978e436e42ace82df6af"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_02_employee_forbidden.png",
+      "expected": "0f4e6b2f88203f8483ae53d20ec12b355e7257594790568b43c4f36c58429e67",
+      "actual": "0f4e6b2f88203f8483ae53d20ec12b355e7257594790568b43c4f36c58429e67"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_03_dual_approval_and_isolation.png",
+      "expected": "c9b2f8722cd70c2e4c100d78770215bfe8e303666b3ec4ebf6d7f24c394004f0",
+      "actual": "c9b2f8722cd70c2e4c100d78770215bfe8e303666b3ec4ebf6d7f24c394004f0"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_3rule_check.json",
+      "expected": "8f7054b812d461b43ec73815f2bf90237b81f9647da693d960176103e48e6340",
+      "actual": "8f7054b812d461b43ec73815f2bf90237b81f9647da693d960176103e48e6340"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_3rule_gate.log",
+      "expected": "0f74bacca5982979b5269c20aca12d3286606c5d6b24273935f432bebf010dda",
+      "actual": "0f74bacca5982979b5269c20aca12d3286606c5d6b24273935f432bebf010dda"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_assert_check.log",
+      "expected": "13b76bc56e26ba0b76b2fac3e96267c4fb926c07a02157c4364ba90a7e6b9dce",
+      "actual": "13b76bc56e26ba0b76b2fac3e96267c4fb926c07a02157c4364ba90a7e6b9dce"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_assert_check.py",
+      "expected": "0a03414fbb60d88a967800678fd9cdeb08a9c7d6921cd1d9ba68b3060404e493",
+      "actual": "0a03414fbb60d88a967800678fd9cdeb08a9c7d6921cd1d9ba68b3060404e493"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_browser_check.py",
+      "expected": "552724de159709cc6bcf65f93e1871f37b5bf1f04591942f9af8c9d9e96e5b04",
+      "actual": "552724de159709cc6bcf65f93e1871f37b5bf1f04591942f9af8c9d9e96e5b04"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_browser_e2e.json",
+      "expected": "25ee4cd4f4f0a83fd3fe818f115e194bda7f84878619cc5411983df87ff706f7",
+      "actual": "25ee4cd4f4f0a83fd3fe818f115e194bda7f84878619cc5411983df87ff706f7"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_browser_e2e.log",
+      "expected": "99d2ce7c325cc1f4750ddea096723566bd29dcf52f74e6cf183630533d1bd796",
+      "actual": "99d2ce7c325cc1f4750ddea096723566bd29dcf52f74e6cf183630533d1bd796"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_capture_evidence.py",
+      "expected": "65ea3657c333c647949a89d2011d464449793f996015b2960d71d46da6c618ce",
+      "actual": "65ea3657c333c647949a89d2011d464449793f996015b2960d71d46da6c618ce"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_docker_check.log",
+      "expected": "719baf0a5512ae358007739201c6a18331d011419ff0d7965fdd53f144778f53",
+      "actual": "719baf0a5512ae358007739201c6a18331d011419ff0d7965fdd53f144778f53"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_docker_probe.py",
+      "expected": "9a0a596a058a6d15da4998f65dd00b9fe0ce52fce29211ce228b3ec283d61ef8",
+      "actual": "9a0a596a058a6d15da4998f65dd00b9fe0ce52fce29211ce228b3ec283d61ef8"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_docker_probe_stdout.log",
+      "expected": "ddbc48b126244f10c1014e5cf4291d727563db67e7c672d05d47e1c5a8e17b45",
+      "actual": "ddbc48b126244f10c1014e5cf4291d727563db67e7c672d05d47e1c5a8e17b45"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_docker_probes.json",
+      "expected": "9c21e85d8efe5b3827f0dfc5c53fbc3f53ef38b6a8b41f8c53dc4383b51883a9",
+      "actual": "9c21e85d8efe5b3827f0dfc5c53fbc3f53ef38b6a8b41f8c53dc4383b51883a9"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_f11_rotation_runbook.md",
+      "expected": "293be2d02db5c431067c44697fe262892ff9c8b47822b76f27328722399068cf",
+      "actual": "293be2d02db5c431067c44697fe262892ff9c8b47822b76f27328722399068cf"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_full_pytest.log",
+      "expected": "eb4c49b1428f6defb0437599094dddef65dc710f9084ddf9857f46d904b723e0",
+      "actual": "eb4c49b1428f6defb0437599094dddef65dc710f9084ddf9857f46d904b723e0"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_gate_reports.json",
+      "expected": "02fb19543f74f53f3a30309f40b4a2876805aa1f0f10e2ed17f490a9963d7fe4",
+      "actual": "02fb19543f74f53f3a30309f40b4a2876805aa1f0f10e2ed17f490a9963d7fe4"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_isolation_verify.json",
+      "expected": "9b3c223fee8b72870fb1fdd9ca2dc28e9f808d876014c2ca7b9f8ba3c4b1e240",
+      "actual": "9b3c223fee8b72870fb1fdd9ca2dc28e9f808d876014c2ca7b9f8ba3c4b1e240"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_isolation_verify.log",
+      "expected": "335517bd54570375d2492f610c30ee2e3df6cd30474803a62f076f8721656832",
+      "actual": "335517bd54570375d2492f610c30ee2e3df6cd30474803a62f076f8721656832"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_isolation_verify_before.json",
+      "expected": "93f1067f933dac9a7364401c2101ee060ebc83ec3366002914e46e7bcea023a2",
+      "actual": "93f1067f933dac9a7364401c2101ee060ebc83ec3366002914e46e7bcea023a2"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_isolation_verify_before.log",
+      "expected": "d9fceb8c8b6990856e57780d4002fead2b46aad9dcc97ec84b41b814da62a7b3",
+      "actual": "d9fceb8c8b6990856e57780d4002fead2b46aad9dcc97ec84b41b814da62a7b3"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_m0_m2_regression.log",
+      "expected": "cb57a712fe2778231b2decfbf37c1573ca263f04bfc3d0825415ea9c4088e731",
+      "actual": "cb57a712fe2778231b2decfbf37c1573ca263f04bfc3d0825415ea9c4088e731"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_m3_regression.log",
+      "expected": "d7e82f315048d7e1bcde2c584feaebf24a92489f2eb5a3dc0a694c141e9d5568",
+      "actual": "d7e82f315048d7e1bcde2c584feaebf24a92489f2eb5a3dc0a694c141e9d5568"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_pre_baseline_hashes.md",
+      "expected": "6a5320346889558c2e849b2538934c69bfa112f5690545be4d956726b9c39e43",
+      "actual": "6a5320346889558c2e849b2538934c69bfa112f5690545be4d956726b9c39e43"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_probes.json",
+      "expected": "943f77daf6980667fa5390bc933734e6a93f1de06d13d8f2c98037a6dbb11c1b",
+      "actual": "943f77daf6980667fa5390bc933734e6a93f1de06d13d8f2c98037a6dbb11c1b"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_probes.log",
+      "expected": "30576fe033a2e129f5d670bd68e51615057228f2225c41dbae80550a63323361",
+      "actual": "30576fe033a2e129f5d670bd68e51615057228f2225c41dbae80550a63323361"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_probes.py",
+      "expected": "c95f77c899c683bf1abecc268cabe13a85d619440469ed8092d92bd994f5c85d",
+      "actual": "c95f77c899c683bf1abecc268cabe13a85d619440469ed8092d92bd994f5c85d"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_py_compile.log",
+      "expected": "b32d879a6fa23e0c0e624722f4735b2ec063da62e190baef0f865b5539ac5967",
+      "actual": "b32d879a6fa23e0c0e624722f4735b2ec063da62e190baef0f865b5539ac5967"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_pytest.log",
+      "expected": "63e7c832932119cbee463a53a66f00afc3d2affc777d0760cf423a75676ea447",
+      "actual": "63e7c832932119cbee463a53a66f00afc3d2affc777d0760cf423a75676ea447"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_rerun.ps1",
+      "expected": "2508a7e5cb83d18e238eb997e8ec8c70d30504b7c332321f00a4748f2af80da4",
+      "actual": "2508a7e5cb83d18e238eb997e8ec8c70d30504b7c332321f00a4748f2af80da4"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_sandbox_regression.log",
+      "expected": "a305271eb3fa20cd58fcb5827d3480b4e26b3b78978d97c284c274caf3119854",
+      "actual": "a305271eb3fa20cd58fcb5827d3480b4e26b3b78978d97c284c274caf3119854"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_snapshot_after.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_snapshot_after.log",
+      "expected": "4645df937b9e3c2f4eca15e71b6d049d71bb8daa74eb3d38bad145eacd079448",
+      "actual": "4645df937b9e3c2f4eca15e71b6d049d71bb8daa74eb3d38bad145eacd079448"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_snapshot_before.json",
+      "expected": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_snapshot_before.log",
+      "expected": "c2b67cbb14ed30dd8cf3c06813a6969470f3419a0d9df4759cf8c226e374b8b5",
+      "actual": "c2b67cbb14ed30dd8cf3c06813a6969470f3419a0d9df4759cf8c226e374b8b5"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_snapshot_diff.txt",
+      "expected": "0b0135e3fb19f92b01a52fe3da9e407c9cf7dfb5006b968a902d5177bf4c5755",
+      "actual": "0b0135e3fb19f92b01a52fe3da9e407c9cf7dfb5006b968a902d5177bf4c5755"
+    },
+    {
+      "path": "doc/V0.1.5/evidence/m4_r02_test_assertions_check.json",
+      "expected": "8eb23410f381aecc9c9ad3e8dc2494029add787d56362324a744232ed0efe718",
+      "actual": "8eb23410f381aecc9c9ad3e8dc2494029add787d56362324a744232ed0efe718"
+    }
+  ],
+  "expected_mutable_delivery_documents": [
+    "doc/V0.1.5/02_任务台账.md",
+    "doc/V0.1.5/rounds/README.md",
+    "doc/V0.1.5/evidence/README.md"
+  ],
+  "unexpected_development_delivery_changes": [],
+  "business_snapshot_equal": true,
+  "business_snapshot_before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "business_snapshot_after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "verify": {
+    "before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "hard_errors": []
+    },
+    "after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "hard_errors": []
+    }
+  },
+  "golden_last_run_exists": {
+    "tests/fixtures/golden_last_run.json": false,
+    "data/golden_last_run.json": false
+  },
+  "open_findings": {
+    "A-M4-05": "P1"
+  },
+  "closed_original_findings": [
+    "A-M4-01",
+    "A-M4-02",
+    "A-M4-03",
+    "A-M4-04"
+  ],
+  "f04_f21_scope": "verified in V0.1.5 scope; package remains rejected",
+  "pending": [
+    "full production dependency image build/layer validation",
+    "authorized actual credential rotation evidence"
+  ],
+  "docker_scope": "two actual offline scratch builds: 10 canaries excluded and 16 configs retained; actual production Dockerfile failed offline pip; not a full production image pass",
+  "next_package": "V015-M4 R03 only; M5 and future versions locked",
+  "broken_current_task_links": [],
+  "integrity_verdict": "PASS"
+}

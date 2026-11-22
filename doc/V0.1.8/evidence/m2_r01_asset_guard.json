@@ -1,0 +1,48 @@
+{
+  "unchanged_from_m1_effective_baseline": 159,
+  "modified_from_m1_effective_baseline": [
+    {
+      "path": "app/matcher.py",
+      "before": "add2ef11733ed070acd38688f2f868e3bd25f50d33e6fda64a961e1d17f2886c",
+      "after": "6da1f4a96919cbf1de3f28b708b0590da71f20d114cc0e2e9c2a2c2dd65e032b"
+    },
+    {
+      "path": "app/vector_index.py",
+      "before": "8a19336d09de7a8535f7a3b86667ffac91a556bd6e356bbf71812c1bf2f058fe",
+      "after": "a025dea272fafea5a03d8e0dd2fc748c3a3e952c3bf74502d13f7634f8e1c684"
+    }
+  ],
+  "frozen_checked_count": 0,
+  "frozen_mismatches": [],
+  "isolation_before_verdict": "PASS",
+  "isolation_after_verdict": "PASS",
+  "cross_isolation_diffs": [],
+  "sqlite_sidecars_on_disk": {
+    "app/materials.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/materials.db-shm": {
+      "exists": true,
+      "size": 32768
+    },
+    "app/auth.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/auth.db-shm": {
+      "exists": true,
+      "size": 32768
+    }
+  },
+  "delivery_sha256": {
+    "app/vector_fusion.py": "30335e011151067662e342331e8951e9d16f4a8b9075d52ee9fa66abdc0181c9",
+    "app/vector_index.py": "a025dea272fafea5a03d8e0dd2fc748c3a3e952c3bf74502d13f7634f8e1c684",
+    "app/matcher.py": "6da1f4a96919cbf1de3f28b708b0590da71f20d114cc0e2e9c2a2c2dd65e032b",
+    "tests/test_v018_m2_vector_fusion.py": "51c884e4adb9eaee30d30d579665af95bd4289c54e2614df3bd4fbe722e9f126",
+    "doc/V0.1.8/evidence/m2_r01_eval.py": "7efeffe72ae3bc41246dfb38072ce672f269ea360bcbbbecd8a939fd908fbe2f",
+    "doc/V0.1.8/evidence/m2_r01_ablation_summary.json": "3008a4f799f1aadf9404e0a7356e910932d6a137581fa2d947b0a5bd0247684f",
+    "doc/V0.1.8/evidence/m2_r01_gate_final.json": "9b1139b6b8b103fa9e53b11fbe06c6bfac0989d507d383b5e1349bd33f14dc87"
+  },
+  "verdict": "PASS"
+}

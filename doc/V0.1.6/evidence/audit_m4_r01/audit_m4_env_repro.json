@@ -1,0 +1,28 @@
+{
+  "observation": "ENV-M4-01 audit reproduction",
+  "native_temp_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_env_iahwwpgw",
+  "checks": {
+    "inside_repo": {
+      "returncode": 0,
+      "requires_secret_in_error": false,
+      "secret_value_leaked": false
+    },
+    "outside_repo": {
+      "returncode": 1,
+      "requires_secret_in_error": true,
+      "secret_value_leaked": false
+    },
+    "inside_repo_dotenv_disabled": {
+      "returncode": 1,
+      "requires_secret_in_error": true,
+      "secret_value_leaked": false
+    }
+  },
+  "audit_assertions": {
+    "inside_repo_dotenv_ancestor_discovery": true,
+    "outside_repo_fail_closed": true,
+    "dotenv_disabled_fail_closed": true,
+    "no_secret_value_printed": true
+  },
+  "all_pass": true
+}

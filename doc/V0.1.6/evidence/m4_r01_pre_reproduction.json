@@ -1,0 +1,15 @@
+{
+  "baseline_head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "backup_sha256": {
+    "app/matcher.py": "e67d49f3daafe1fee642be031f65c15bc3126009336c1cfadb7b86f54415ea08",
+    "app/server.py": "372b7689a25b4066423b744766c8b77af8352f4fe9ba0b002eaeb22314cf848d"
+  },
+  "old_explicit_non_top_rollback_allowed": true,
+  "old_higher_snapshot_left_active": [
+    "pre_snap2"
+  ],
+  "old_match_diagnostics_absent": true,
+  "controlled_export_before_count": 1,
+  "controlled_export_after_count": 0,
+  "isolated": true
+}

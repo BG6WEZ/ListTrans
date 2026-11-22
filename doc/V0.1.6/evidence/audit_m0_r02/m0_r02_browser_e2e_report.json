@@ -1,0 +1,456 @@
+{
+  "gates": {
+    "g_alice_upload_identity": true,
+    "g_alice_candidate_feedback_200": true,
+    "g_alice_rematch_revision_preserved_initial": true,
+    "g_alice_confirm_and_flywheel_200": true,
+    "g_alice_reload_and_named_restore": true,
+    "g_bob_independent_context_and_identity": true,
+    "g_sqlite_cross_user_isolation_and_snapshots": true
+  },
+  "alice": {
+    "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+    "sheet_id": "sht_6800b7e9538a48af",
+    "source_row_id": "row_d2f8940683fc43f7",
+    "initial_snapshot_id": "snap_1102faf91f3c428f",
+    "restored_max_event_seq": 3,
+    "captured_flywheel_requests": [
+      {
+        "pathname": "/api/feedback/submit",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "c03b7e91-3f58-4fc0-834f-f261e1f837a2",
+          "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+          "sheet_id": "sht_6800b7e9538a48af",
+          "source_row_id": "row_d2f8940683fc43f7",
+          "event_seq": 1,
+          "recommendation_snapshot_id": "snap_1102faf91f3c428f",
+          "row_id": 1,
+          "raw_text": "公称直径 DN100 PN16 法兰连接",
+          "auto_code": "M0-UI-001",
+          "manual_code": "M0-UI-002",
+          "is_correct": false
+        }
+      },
+      {
+        "pathname": "/api/flywheel/record",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "cae00aae-6088-490c-a7f5-422e94275149",
+          "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+          "work_session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "saved_session_id": "",
+          "session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "sheet_id": "sht_6800b7e9538a48af",
+          "source_row_id": "row_d2f8940683fc43f7",
+          "row_idx": 1,
+          "event_seq": 1,
+          "recommendation_snapshot_id": "snap_1102faf91f3c428f",
+          "recommendation_revision": 1,
+          "discipline": "暖通",
+          "professional": "暖通",
+          "raw_name": "止回阀",
+          "raw_spec": "公称直径 DN100 PN16 法兰连接",
+          "raw_unit": "台",
+          "raw_category": "",
+          "parsed_spec": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "extracted_params": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "auto_top1_code": "M0-UI-001",
+          "auto_top1_score": 30,
+          "auto_top1_name": "止回阀",
+          "auto_candidates": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "score": 30
+            },
+            {
+              "code": "M0-UI-002",
+              "name": "法兰止回阀",
+              "score": 30
+            },
+            {
+              "code": "3.50.29.0199",
+              "name": "防爆检修电源箱",
+              "score": 0
+            }
+          ],
+          "algo_version": "listtrans-0.1.6-m0|0d81abac38ab",
+          "model_version": "bge-small-zh-v1.5|loaded",
+          "config_version": "cfg:35f5e0729f8bdf0d",
+          "action_type": "PICK_CANDIDATE",
+          "final_targets": [
+            {
+              "code": "M0-UI-002",
+              "name": "法兰止回阀",
+              "spec": "DN100 PN16",
+              "unit": "台",
+              "brand": "埃美柯",
+              "category": "阀门",
+              "qty_ratio": 1
+            }
+          ]
+        }
+      },
+      {
+        "pathname": "/api/feedback/submit",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "ebe33b41-90ef-46eb-94dd-f8a182cdc210",
+          "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+          "sheet_id": "sht_6800b7e9538a48af",
+          "source_row_id": "row_d2f8940683fc43f7",
+          "event_seq": 2,
+          "recommendation_snapshot_id": "snap_f455c52f0a214e16",
+          "row_id": 1,
+          "raw_text": "公称直径 DN100 PN16 法兰连接",
+          "auto_code": "M0-UI-001",
+          "manual_code": "M0-UI-001",
+          "is_correct": true
+        }
+      },
+      {
+        "pathname": "/api/flywheel/record",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "0a0a84db-2f34-4839-a8c1-c81bae0ac323",
+          "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+          "work_session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "saved_session_id": "",
+          "session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "sheet_id": "sht_6800b7e9538a48af",
+          "source_row_id": "row_d2f8940683fc43f7",
+          "row_idx": 1,
+          "event_seq": 2,
+          "recommendation_snapshot_id": "snap_f455c52f0a214e16",
+          "recommendation_revision": 2,
+          "discipline": "暖通",
+          "professional": "暖通",
+          "raw_name": "止回阀",
+          "raw_spec": "公称直径 DN100 PN16 法兰连接",
+          "raw_unit": "台",
+          "raw_category": "",
+          "parsed_spec": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "extracted_params": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "auto_top1_code": "M0-UI-001",
+          "auto_top1_score": 30,
+          "auto_top1_name": "止回阀",
+          "auto_candidates": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "score": 30
+            },
+            {
+              "code": "M0-UI-002",
+              "name": "法兰止回阀",
+              "score": 30
+            },
+            {
+              "code": "3.50.29.0199",
+              "name": "防爆检修电源箱",
+              "score": 0
+            }
+          ],
+          "algo_version": "listtrans-0.1.6-m0|0d81abac38ab",
+          "model_version": "bge-small-zh-v1.5|loaded",
+          "config_version": "cfg:35f5e0729f8bdf0d",
+          "action_type": "PICK_CANDIDATE",
+          "final_targets": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "spec": "DN100 PN16 法兰连接",
+              "unit": "台",
+              "brand": "埃美柯",
+              "category": "阀门",
+              "qty_ratio": 1
+            }
+          ]
+        }
+      },
+      {
+        "pathname": "/api/flywheel/record",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "a9de879c-7193-4632-b2e4-d90026005065",
+          "document_id": "doc_d97f4f8abc114e4592d4b8dfeb119730",
+          "work_session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "saved_session_id": "",
+          "session_id": "ws_785c6210a6e84c9998c3bd9219b29916",
+          "sheet_id": "sht_6800b7e9538a48af",
+          "source_row_id": "row_d2f8940683fc43f7",
+          "row_idx": 1,
+          "event_seq": 3,
+          "recommendation_snapshot_id": "snap_f455c52f0a214e16",
+          "recommendation_revision": 2,
+          "discipline": "暖通",
+          "professional": "暖通",
+          "raw_name": "止回阀",
+          "raw_spec": "公称直径 DN100 PN16 法兰连接",
+          "raw_unit": "台",
+          "raw_category": "",
+          "parsed_spec": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "extracted_params": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "auto_top1_code": "M0-UI-001",
+          "auto_top1_score": 30,
+          "auto_top1_name": "止回阀",
+          "auto_candidates": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "score": 30
+            },
+            {
+              "code": "M0-UI-002",
+              "name": "法兰止回阀",
+              "score": 30
+            },
+            {
+              "code": "3.50.29.0199",
+              "name": "防爆检修电源箱",
+              "score": 0
+            }
+          ],
+          "algo_version": "listtrans-0.1.6-m0|0d81abac38ab",
+          "model_version": "bge-small-zh-v1.5|loaded",
+          "config_version": "cfg:35f5e0729f8bdf0d",
+          "action_type": "CONFIRM_TOP1",
+          "final_targets": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "spec": "DN100 PN16 法兰连接",
+              "unit": "台",
+              "brand": "埃美柯",
+              "category": "阀门",
+              "qty_ratio": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "bob": {
+    "document_id": "doc_c1ec4a891657406ba4b4310fcedcba56",
+    "sheet_id": "sht_fd882fd8e77540f5",
+    "source_row_id": "row_94965818348b4ba8",
+    "captured_flywheel_requests": [
+      {
+        "pathname": "/api/flywheel/record",
+        "status": 200,
+        "reqBody": {
+          "client_event_id": "de517809-b86f-4bb9-bd62-e3d0c8641d74",
+          "document_id": "doc_c1ec4a891657406ba4b4310fcedcba56",
+          "work_session_id": "ws_b2f44699b1f343c38199625284710b2b",
+          "saved_session_id": "",
+          "session_id": "ws_b2f44699b1f343c38199625284710b2b",
+          "sheet_id": "sht_fd882fd8e77540f5",
+          "source_row_id": "row_94965818348b4ba8",
+          "row_idx": 1,
+          "event_seq": 1,
+          "recommendation_snapshot_id": "snap_3e1f9f22fed643f2",
+          "recommendation_revision": 1,
+          "discipline": "暖通",
+          "professional": "暖通",
+          "raw_name": "止回阀",
+          "raw_spec": "公称直径 DN100 PN16 法兰连接",
+          "raw_unit": "台",
+          "raw_category": "",
+          "parsed_spec": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "extracted_params": {
+            "domain": "valve_water",
+            "attrs": {
+              "阀型": "止回阀",
+              "管径": "DN100",
+              "连接方式": "法兰",
+              "压力": 16,
+              "名称": "止回阀",
+              "形状": "圆形",
+              "is_circular": true,
+              "dn_val": 100
+            },
+            "model": "",
+            "name": "止回阀",
+            "spec": "公称直径 DN100 PN16 法兰连接",
+            "clean_text": "公称直径 DN100 PN16 法兰连接",
+            "noise_text": "",
+            "kv_dict": {}
+          },
+          "auto_top1_code": "M0-UI-001",
+          "auto_top1_score": 30,
+          "auto_top1_name": "止回阀",
+          "auto_candidates": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "score": 30
+            },
+            {
+              "code": "M0-UI-002",
+              "name": "法兰止回阀",
+              "score": 30
+            },
+            {
+              "code": "3.50.29.0199",
+              "name": "防爆检修电源箱",
+              "score": 0
+            }
+          ],
+          "algo_version": "listtrans-0.1.6-m0|0d81abac38ab",
+          "model_version": "bge-small-zh-v1.5|loaded",
+          "config_version": "cfg:35f5e0729f8bdf0d",
+          "action_type": "CONFIRM_TOP1",
+          "final_targets": [
+            {
+              "code": "M0-UI-001",
+              "name": "止回阀",
+              "spec": "DN100 PN16 法兰连接",
+              "unit": "台",
+              "brand": "埃美柯",
+              "category": "阀门",
+              "qty_ratio": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "sqlite": {
+    "alice_records_count": 3,
+    "bob_records_count": 1,
+    "alice_snapshots_revisions": [
+      1,
+      2
+    ],
+    "feedback_samples_count": 2
+  },
+  "passed": true,
+  "elapsed_seconds": 29.636
+}

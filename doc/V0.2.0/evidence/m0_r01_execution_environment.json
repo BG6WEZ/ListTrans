@@ -1,0 +1,46 @@
+{
+  "version": "V0.2.0",
+  "task": "V020-M0/R01",
+  "initial_default_sandbox": {
+    "operation": "keyword/OFF, then minimal FastAPI TestClient",
+    "outcome": "interrupted before route evaluation",
+    "minimal_reproduction_exit_code": 79,
+    "stack": [
+      "socket.accept",
+      "socket._fallback_socketpair",
+      "asyncio.proactor_events._make_self_pipe",
+      "anyio.from_thread.start_blocking_portal",
+      "starlette.testclient.TestClient.__enter__"
+    ],
+    "reported_metrics": 0
+  },
+  "native_windows_probe": {
+    "application": "minimal FastAPI TestClient route",
+    "status_code": 200,
+    "exit_code": 0
+  },
+  "local_versions": {
+    "python": "3.12.10",
+    "pytest": "9.2.0",
+    "fastapi": "0.162.5",
+    "starlette": "1.10.0",
+    "anyio": "4.16.0",
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "pandas": "3.1.1",
+    "torch": "2.15.0",
+    "transformers": "5.22.2",
+    "sentence-transformers": "6.3.0",
+    "psutil": "7.2.2",
+    "openpyxl": "3.1.5"
+  },
+  "successful_replay_environment": {
+    "network": "Native Windows loopback for the event loop; replay audit hook rejects outbound network",
+    "TESTING": "1",
+    "LLM_ENABLED": "false",
+    "AUTH_DEV_MODE": "false",
+    "PYTHON_DOTENV_DISABLED": "1",
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1"
+  }
+}

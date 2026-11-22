@@ -1,0 +1,151 @@
+{
+  "probe": "frontend_event_id_seq_retry_semantics",
+  "app_js": {
+    "path": "web/app.js",
+    "bytes": 188965,
+    "sha256": "e551c4b29b9bdc55c0535336bab309feecb5d2626621bdabbcfc5c468637aed1"
+  },
+  "extracted_lines": {
+    "generateClientEventId": 94,
+    "reportFlywheelAction": 1844,
+    "submitFeedbackSample": 1919
+  },
+  "semantics_assertions": {
+    "every_call_generates_new_uuid": true,
+    "seq_increments_before_response_and_is_consumed_on_failure": true,
+    "no_in_built_retry_same_event_id": true,
+    "failures_swallowed_no_throw": true
+  },
+  "flywheel": [
+    {
+      "mode": "network_error",
+      "item_event_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "21f99998-82c4-439a-b314-d4fdf5e6104e",
+        "1db64abb-90f2-4203-84d8-7e66a1db8e7e"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "http_409",
+      "item_event_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "fdf238b7-1053-4223-9941-2ce7c5ca7314",
+        "9dbbda9f-977a-4482-af2a-73ba0907dfea"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "http_500",
+      "item_event_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "40d306ab-01a9-4945-a515-3724459e48fd",
+        "e6fff16a-dffd-49c0-af65-c29b5e3e33b0"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "ok",
+      "item_event_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "0d5a801e-7d4e-4d64-823e-6782b9f8ccaa",
+        "198d3603-c05c-4456-a243-dec1bd01d8d7"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    }
+  ],
+  "feedback": [
+    {
+      "mode": "network_error",
+      "item_feedback_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "a3fac685-82dc-446d-90ca-5c6c6f3dbde4",
+        "04b537e9-43cc-4c85-a9ea-3a3b681ca978"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "http_409",
+      "item_feedback_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "c38191a9-5df1-446d-93bd-d428dd0f664e",
+        "a10740e1-0491-49eb-94dd-fe3619c9e484"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "http_500",
+      "item_feedback_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "eb92b17b-1f41-4ee4-8ab5-1e6c1eb7ca6d",
+        "401c1d9a-fa74-42bd-8eff-0cbde01390da"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    },
+    {
+      "mode": "ok",
+      "item_feedback_seq_after": 2,
+      "post_attempts": 2,
+      "event_ids": [
+        "82285297-595f-418e-ac4b-50696f368d0e",
+        "ff153133-bf88-4df8-9b0a-5be97639143c"
+      ],
+      "event_seqs": [
+        1,
+        2
+      ],
+      "ids_unique": true,
+      "ids_same_as_retry_key": false,
+      "thrown_errors": []
+    }
+  ]
+}

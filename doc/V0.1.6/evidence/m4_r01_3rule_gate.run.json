@@ -1,0 +1,19 @@
+{
+  "phase": "gate",
+  "started_at": "2026-11-18T20:05:57.956795+08:00",
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-u",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.6\\evidence\\m4_r01_3rule_gate.py",
+    "--out",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.6\\evidence\\m4_r01_gate_reports.json"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "native_temp_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt_m4_gate_fdfwkp39",
+  "explicit_test_root": null,
+  "dotenv_disabled": true,
+  "llm_enabled": false,
+  "cold_parent_cache_initial_files": 0,
+  "exit_code": 0,
+  "elapsed_sec": 165.58
+}

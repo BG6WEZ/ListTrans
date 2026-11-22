@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-16",
+  "role": "coordinator",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "decision": "V015-M5 R02 RETURN_FOR_REWORK; ISSUE R03",
+  "closed": [
+    "A-M5-03",
+    "A-M5-04",
+    "A-M5-05"
+  ],
+  "open_P1": [
+    "A-M5-01",
+    "A-M5-02"
+  ],
+  "changes": {
+    "source_hashes": [],
+    "fixed_evidence_hashes": []
+  },
+  "business_snapshot_equal": true,
+  "snapshot_reference_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "broken_assignment_links": [],
+  "production_operations": false,
+  "application_tests_rerun": false,
+  "PRG_F11": "OPEN",
+  "future_versions": "LOCKED",
+  "integrity_verdict": "PASS"
+}

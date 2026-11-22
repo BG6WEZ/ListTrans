@@ -1,0 +1,24 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "-u",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.7\\evidence\\m0_r01_benchmark.py",
+    "--mode",
+    "vector",
+    "--root",
+    "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_vector_9lzpbpxj\\benchmark",
+    "--out",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.7\\evidence\\m0_r01_validation_vector_m1_r01.json"
+  ],
+  "cwd": "C:\\Users\\tlyer\\project\\ListTrans",
+  "dotenv_disabled": true,
+  "exit_code": 0,
+  "explicit_test_root": null,
+  "llm": false,
+  "native_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\lt017_vector_9lzpbpxj",
+  "seconds": 371.016,
+  "started_at": "2026-11-19T01:46:29.819765+08:00"
+}

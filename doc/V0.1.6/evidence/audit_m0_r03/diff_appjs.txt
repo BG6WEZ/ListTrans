@@ -1,0 +1,781 @@
+﻿diff --git a/.local-archive/v016_m0_r03_pre_backup/web/app.js b/web/app.js
+index 3296e61..e09d958 100644
+--- a/.local-archive/v016_m0_r03_pre_backup/web/app.js
++++ b/web/app.js
+@@ -10,10 +10,62 @@ function escapeHtml(val) {
+ }
+ 
+ let _isHandling401 = false;
+-const AUTH_STORAGE_KEYS = ['token', 'username', 'name', 'position', 'role', 'employee_no', 'dept1', 'must_change_password'];
++const AUTH_STORAGE_KEYS = ['token', 'username', 'name', 'position', 'role', 'employee_no', 'dept1', 'must_change_password', 'user_id', 'account_epoch', 'actor_token_ref'];
++const PENDING_FEEDBACK_STORAGE_KEY = 'listtrans_pending_feedback_v1';
++
++let currentActorUserId = null;
++let currentActorEpoch = '';
++let _actorIdentityPromise = null;
++let pendingFeedbackEvents = [];
++
++function _syncActorVarsFromStorage() {
++    try {
++        const tok = localStorage.getItem('token') || '';
++        const tokRef = localStorage.getItem('actor_token_ref') || '';
++        if (tok && tokRef && tok !== tokRef) {
++            currentActorUserId = null;
++            currentActorEpoch = '';
++            return;
++        }
++        const uidRaw = localStorage.getItem('user_id');
++        currentActorUserId = (uidRaw !== null && uidRaw !== '' && !Number.isNaN(Number(uidRaw))) ? Number(uidRaw) : null;
++        currentActorEpoch = String(localStorage.getItem('account_epoch') || '').trim();
++    } catch (_) {
++        currentActorUserId = null;
++        currentActorEpoch = '';
++    }
++}
++_syncActorVarsFromStorage();
++
++function loadPendingFeedbackEventsFromStorage() {
++    try {
++        const raw = localStorage.getItem(PENDING_FEEDBACK_STORAGE_KEY);
++        if (!raw) return [];
++        const parsed = JSON.parse(raw);
++        return Array.isArray(parsed) ? parsed : [];
++    } catch (_) {
++        return [];
++    }
++}
++
++function savePendingFeedbackEventsToStorage() {
++    try {
++        const toPersist = pendingFeedbackEvents.filter(rec => rec && rec.status !== 'delivered');
++        localStorage.setItem(PENDING_FEEDBACK_STORAGE_KEY, JSON.stringify(toPersist));
++    } catch (_) {}
++}
++
++pendingFeedbackEvents = loadPendingFeedbackEventsFromStorage();
+ 
+ function clearAuthStorage() {
+     AUTH_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
++    currentActorUserId = null;
++    currentActorEpoch = '';
++    pendingFeedbackEvents = [];
++    try { localStorage.removeItem(PENDING_FEEDBACK_STORAGE_KEY); } catch (_) {}
++    if (typeof renderFeedbackDeliveryBanner === 'function') {
++        renderFeedbackDeliveryBanner();
++    }
+ }
+ 
+ // Intercept all fetch requests to inject authentication headers and handle token expiration
+@@ -124,6 +176,185 @@ function renderLegacyIsolationBanner(legacyCount) {
+     banner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i><span>旧草稿/未绑定可核验服务端文档身份（' + Number(legacyCount) + ' 条），已隔离为只读复核；不会上报可信飞轮反馈，如需采集新反馈请重新上传清单。</span>';
+ }
+ 
++function _actorMatchesRecord(rec, userId = currentActorUserId, epoch = currentActorEpoch) {
++    if (!rec) return false;
++    if (userId !== null && userId !== undefined && Number(rec.actor_user_id) !== Number(userId)) {
++        return false;
++    }
++    if (epoch && String(rec.actor_account_epoch || '') !== String(epoch)) {
++        return false;
++    }
++    if (userId === null && !epoch && (rec.actor_user_id !== null || rec.actor_account_epoch)) {
++        return false;
++    }
++    return true;
++}
++
++function purgePendingEventsExcept(userId, accountEpoch) {
++    pendingFeedbackEvents = pendingFeedbackEvents.filter(rec =>
++        rec && rec.status !== 'delivered' && _actorMatchesRecord(rec, userId, accountEpoch)
++    );
++    savePendingFeedbackEventsToStorage();
++    renderFeedbackDeliveryBanner();
++}
++
++function purgePendingEventsForDocument(documentId) {
++    if (!documentId) return;
++    pendingFeedbackEvents = pendingFeedbackEvents.filter(rec =>
++        rec && rec.document_id !== documentId
++    );
++    savePendingFeedbackEventsToStorage();
++    renderFeedbackDeliveryBanner();
++}
++
++function applyVerifiedActorIdentity(userId, accountEpoch) {
++    const nextId = (userId !== undefined && userId !== null && userId !== '') ? Number(userId) : null;
++    const nextEpoch = String(accountEpoch || '').trim();
++    const prevId = currentActorUserId;
++    const prevEpoch = currentActorEpoch;
++    if ((prevId !== null && nextId !== null && prevId !== nextId) ||
++        (prevEpoch && nextEpoch && prevEpoch !== nextEpoch)) {
++        purgePendingEventsExcept(nextId, nextEpoch);
++    }
++    currentActorUserId = nextId;
++    currentActorEpoch = nextEpoch;
++    try {
++        if (nextId !== null && !Number.isNaN(nextId)) localStorage.setItem('user_id', String(nextId));
++        if (nextEpoch) localStorage.setItem('account_epoch', nextEpoch);
++        const tok = localStorage.getItem('token') || '';
++        if (tok) localStorage.setItem('actor_token_ref', tok);
++    } catch (_) {}
++    renderFeedbackDeliveryBanner();
++}
++
++async function ensureVerifiedActorIdentity() {
++    if (currentActorUserId !== null && currentActorEpoch) {
++        return { actor_user_id: currentActorUserId, actor_account_epoch: currentActorEpoch };
++    }
++    if (_actorIdentityPromise) return _actorIdentityPromise;
++    _actorIdentityPromise = (async () => {
++        try {
++            const token = (typeof localStorage !== 'undefined') ? localStorage.getItem('token') : '';
++            const res = await fetch(`${backendUrl}/api/auth/me`, {
++                headers: token ? { 'Authorization': `Bearer ${token}` } : {}
++            });
++            if (res && res.ok) {
++                const u = await res.json().catch(() => null);
++                if (u && u.id !== undefined && u.id !== null) {
++                    applyVerifiedActorIdentity(u.id, u.account_epoch || '');
++                }
++            }
++        } catch (_) {}
++        return { actor_user_id: currentActorUserId, actor_account_epoch: currentActorEpoch };
++    })();
++    try {
++        return await _actorIdentityPromise;
++    } finally {
++        _actorIdentityPromise = null;
++    }
++}
++
++function getActivePendingFeedbackEvents() {
++    if (!currentDocumentId || !Array.isArray(items) || items.length === 0) {
++        return [];
++    }
++    return pendingFeedbackEvents.filter(rec => {
++        if (!rec || rec.status === 'delivered') return false;
++        if (!_actorMatchesRecord(rec)) return false;
++        if (rec.document_id !== currentDocumentId) return false;
++        return items.some(it =>
++            it && it.feedback_eligible !== false &&
++            it.document_id === rec.document_id &&
++            it.sheet_id === rec.sheet_id &&
++            it.source_row_id === rec.source_row_id
++        );
++    });
++}
++
++function reconcilePendingFeedbackForDocument() {
++    if (!Array.isArray(items) || items.length === 0) {
++        renderFeedbackDeliveryBanner();
++        return;
++    }
++    const active = getActivePendingFeedbackEvents();
++    items.forEach(it => {
++        if (!it || it.feedback_eligible === false) return;
++        const rowEvents = active.filter(rec =>
++            rec.document_id === it.document_id &&
++            rec.sheet_id === it.sheet_id &&
++            rec.source_row_id === it.source_row_id
++        );
++        const maxPendingFw = rowEvents
++            .filter(r => r.kind === 'flywheel')
++            .reduce((mx, r) => Math.max(mx, Number(r.event_seq || 0)), 0);
++        const maxPendingFb = rowEvents
++            .filter(r => r.kind === 'feedback')
++            .reduce((mx, r) => Math.max(mx, Number(r.event_seq || 0)), 0);
++        it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0), maxPendingFw);
++        it._feedback_seq = Math.max(Number(it._feedback_seq || 0), Number(it.max_feedback_seq || 0), maxPendingFb);
++    });
++    renderFeedbackDeliveryBanner();
++}
++
++function renderFeedbackDeliveryBanner() {
++    if (typeof document === 'undefined') return;
++    const existing = document.getElementById('feedback-delivery-banner');
++    const active = getActivePendingFeedbackEvents();
++    if (!active.length) {
++        if (existing) existing.remove();
++        return;
++    }
++    const workbench = document.getElementById('workbench');
++    if (!workbench || !workbench.parentNode) return;
++    let banner = existing;
++    if (!banner) {
++        banner = document.createElement('div');
++        banner.id = 'feedback-delivery-banner';
++        workbench.parentNode.insertBefore(banner, workbench);
++    }
++    const retryable = active.filter(r => ['pending', 'retrying', 'failed_retryable'].includes(r.status));
++    const blocked = active.filter(r => ['blocked_conflict', 'blocked_invalid'].includes(r.status));
++    const isBlockedOnly = retryable.length === 0 && blocked.length > 0;
++    banner.style.cssText = isBlockedOnly
++        ? 'background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:8px 14px;font-size:12px;border-radius:6px;margin:8px 16px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;'
++        : 'background:#fff1f2;border:1px solid #fda4af;color:#9f1239;padding:8px 14px;font-size:12px;border-radius:6px;margin:8px 16px 0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;';
++
++    const sampleErr = (retryable[0] || blocked[0]);
++    const errText = sampleErr && sampleErr.last_error_message
++        ? `${sampleErr.last_http_status ? 'HTTP ' + sampleErr.last_http_status : '网络异常'}: ${sampleErr.last_error_message}`
++        : '等待重试';
++    const parts = [];
++    if (retryable.length > 0) {
++        parts.push(`<strong>${retryable.length} 条反馈/飞轮事件投递失败待重试</strong>（已保留原事件ID与序号；${escapeHtml(errText)}）`);
++    }
++    if (blocked.length > 0) {
++        parts.push(`<strong>${blocked.length} 条事件被服务端拒绝（409/422 已停止自动重试）</strong>（${escapeHtml(blocked[0].last_error_message || blocked[0].last_error_code)}；不影响当前确认/导出状态）`);
++    }
++    const buttonsHtml = [];
++    if (retryable.length > 0) {
++        buttonsHtml.push('<button type="button" id="retry-pending-feedback-btn" class="btn btn-warning" style="padding:4px 10px;font-size:11px;">重试待投递反馈</button>');
++    }
++    if (blocked.length > 0) {
++        buttonsHtml.push('<button type="button" id="dismiss-blocked-feedback-btn" class="btn" style="padding:4px 10px;font-size:11px;">清除冲突/无效提示</button>');
++    }
++    banner.innerHTML = `<span><i class="fa-solid fa-circle-exclamation"></i> ${parts.join('；')}</span><div style="display:flex;gap:8px;flex-shrink:0;">${buttonsHtml.join('')}</div>`;
++    const retryBtn = document.getElementById('retry-pending-feedback-btn');
++    if (retryBtn) {
++        retryBtn.addEventListener('click', () => {
++            retryPendingFeedbackEvents();
++        });
++    }
++    const dismissBtn = document.getElementById('dismiss-blocked-feedback-btn');
++    if (dismissBtn) {
++        dismissBtn.addEventListener('click', () => {
++            const activeIds = new Set(blocked.map(b => b.event_id));
++            pendingFeedbackEvents = pendingFeedbackEvents.filter(rec => !activeIds.has(rec.event_id));
++            savePendingFeedbackEventsToStorage();
++            renderFeedbackDeliveryBanner();
++        });
++    }
++}
++
+ // Pagination variables
+ let currentPage = 1;
+ const pageSize = 50;
+@@ -295,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
+             headers: { 'Authorization': `Bearer ${token}` }
+         }).then(r => r.ok ? r.json() : null).then(userData => {
+             if (userData) {
++                applyVerifiedActorIdentity(userData.id, userData.account_epoch || '');
+                 if (userData.username) {
+                     localStorage.setItem('username', userData.username);
+                 }
+@@ -913,11 +1145,11 @@ function initEventListeners() {
+                 throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+             }
+ 
+-            // Report to Data Flywheel
++            // Report to Data Flywheel (do not revoke binding_decisions/export status if flywheel delivery fails)
+             const actionType = (selectedItem.bindings && selectedItem.bindings.length > 1)
+                 ? 'BIND_MULTI'
+                 : 'CONFIRM_TOP1';
+-            reportFlywheelAction(selectedItem, actionType);
++            await reportFlywheelAction(selectedItem, actionType);
+ 
+             // V015-M2：以服务端返回的决策凭据为准，不再本地自填 is_exact。
+             const dec = respData.decision || {};
+@@ -1182,12 +1414,14 @@ function hideLoading() {
+ 
+ // Task lifecycle control: End and reset current workbench task
+ async function resetAndEndTask() {
++    const endingDocumentId = currentDocumentId;
+     items = [];
+     originalFileName = '';
+     activeSessionId = null;
+     currentDocumentId = '';
+     currentUploadTaskId = '';
+     currentWorkSessionId = '';
++    purgePendingEventsForDocument(endingDocumentId);
+     renderLegacyIsolationBanner(0);
+     searchQuery = '';
+     currentFilter = 'all';
+@@ -1364,6 +1598,7 @@ function processUploadResult(resultItems, fileName, taskState = null) {
+     currentUploadTaskId = (firstItem && firstItem.upload_task_id) || '';
+     currentWorkSessionId = (taskState && taskState.work_session_id) || (firstItem && firstItem.work_session_id) || '';
+     renderLegacyIsolationBanner(0);
++    reconcilePendingFeedbackForDocument();
+ 
+     // Cache initial matching codes and sequence counters (never overwrite server initial_auto_code)
+     items.forEach(item => {
+@@ -1810,7 +2045,7 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
+     }
+     
+     const wasCorrected = selectedItem.initial_auto_code !== cand.code;
+-    submitFeedbackSample(selectedItem, selectedItem.initial_auto_code, cand.code, !wasCorrected);
++    const fbDeliveryPromise = submitFeedbackSample(selectedItem, selectedItem.initial_auto_code, cand.code, !wasCorrected);
+     
+     const newBound = {
+         code: cand.code,
+@@ -1828,7 +2063,7 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
+     invalidateItemDecision(selectedItem, '绑定已修改，请重新确认');
+     
+     // Report action to Data Flywheel
+-    reportFlywheelAction(selectedItem, actionType, [newBound]);
++    const fwDeliveryPromise = reportFlywheelAction(selectedItem, actionType, [newBound]);
+     
+     // Update matched_code to be comma-separated list of bound codes
+     selectedItem.matched_code = selectedItem.bindings.map(x => x.code).join(",");
+@@ -1838,111 +2073,341 @@ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
+     renderCandidates();
+     renderTable();
+     updateProgress();
++    await Promise.all([fbDeliveryPromise, fwDeliveryPromise]);
+ }
+ 
+-// Helper to submit Data Flywheel action logs asynchronously with keepalive
+-async function reportFlywheelAction(item, actionType, customFinalTargets = null) {
+-    if (!item) return;
+-    if (item.feedback_eligible === false || !item.document_id || !item.sheet_id || !item.source_row_id) {
+-        console.info('Skip flywheel record for isolated legacy/unverified row.');
+-        return;
++function _parseFeedbackApiError(respJson, httpStatus) {
++    const d = respJson && respJson.detail;
++    if (d && typeof d === 'object' && !Array.isArray(d)) {
++        return {
++            code: String(d.error || d.code || `http_${httpStatus}`),
++            message: String(d.message || JSON.stringify(d))
++        };
+     }
+-    try {
+-        const clientEventId = generateClientEventId('fwevent');
+-        item._event_seq = Number(item._event_seq || item.max_event_seq || 0) + 1;
+-        const eventSeq = item._event_seq;
+-
+-        const targets = (customFinalTargets || item.bindings || []).map(b => ({
+-            code: b.code,
+-            name: b.name,
+-            spec: b.specification || b.spec || '',
+-            unit: b.unit || '',
+-            brand: b.brand || '',
+-            category: b.category || '',
+-            qty_ratio: b.qty_ratio !== undefined && b.qty_ratio !== null
+-                ? Number(b.qty_ratio)
+-                : ((item.original_qty && Number(item.original_qty) > 0) ? (Number(b.qty) / Number(item.original_qty)) : 1.0)
+-        }));
+-
+-        const candidates = (item.candidates || item.top_candidates || []).slice(0, 3).map(c => ({
+-            code: c.code,
+-            name: c.name,
+-            score: c.score || 0.0
+-        }));
+-
+-        const top1 = candidates && candidates.length > 0 ? candidates[0] : null;
+-        const prof = item.professional || '暖通';
+-
+-        const payload = {
+-            client_event_id: clientEventId,
+-            document_id: item.document_id,
+-            work_session_id: item.work_session_id || currentWorkSessionId || '',
+-            saved_session_id: activeSessionId || '',
+-            session_id: item.work_session_id || currentWorkSessionId || item.document_id,
+-            sheet_id: item.sheet_id,
+-            source_row_id: item.source_row_id,
+-            row_idx: item.original_row_idx || 0,
+-            event_seq: eventSeq,
+-            recommendation_snapshot_id: item.recommendation_snapshot_id || item.initial_snapshot_id || '',
+-            recommendation_revision: item.recommendation_revision || 1,
+-            discipline: prof,
+-            professional: prof,
+-            raw_name: item.original_name || item.raw_name || item.name || '',
+-            raw_spec: item.original_spec || item.spec || '',
+-            raw_unit: item.original_unit || item.unit || '',
+-            raw_category: item.original_category || item.category || '',
+-            parsed_spec: item.parsed_spec || {},
+-            extracted_params: item.extracted_params || item.parsed_spec || {},
+-            auto_top1_code: top1 ? top1.code : (item.initial_auto_code || ''),
+-            auto_top1_score: top1 ? top1.score : 0.0,
+-            auto_top1_name: top1 ? top1.name : '',
+-            auto_candidates: candidates,
+-            algo_version: item.algo_version || '',
+-            model_version: item.model_version || '',
+-            config_version: item.config_version || '',
+-            action_type: actionType,
+-            final_targets: targets
++    if (Array.isArray(d) && d.length > 0) {
++        return {
++            code: `http_${httpStatus}`,
++            message: d.map(x => (x && x.msg) ? x.msg : JSON.stringify(x)).join('; ')
+         };
++    }
++    if (typeof d === 'string' && d) {
++        return { code: `http_${httpStatus}`, message: d };
++    }
++    return { code: `http_${httpStatus}`, message: `HTTP ${httpStatus}` };
++}
+ 
+-        fetch(`${backendUrl}/api/flywheel/record`, {
+-            method: 'POST',
+-            headers: { 'Content-Type': 'application/json' },
+-            body: JSON.stringify(payload),
+-            keepalive: true
+-        }).catch(err => console.warn('Flywheel record silent error:', err));
+-    } catch (e) {
+-        console.warn('Failed to dispatch flywheel action:', e);
++function _getRetryPolicy() {
++    const custom = (typeof window !== 'undefined' && window.__M0_FEEDBACK_RETRY_CONFIG) || {};
++    return {
++        maxAutoRetries: Number.isInteger(custom.maxAutoRetries) ? Math.max(0, custom.maxAutoRetries) : 1,
++        retryDelayMs: (typeof custom.retryDelayMs === 'number' && custom.retryDelayMs >= 0) ? custom.retryDelayMs : 120
++    };
++}
++
++function _findWorkbenchItemForRecord(rec) {
++    if (!rec || !Array.isArray(items)) return null;
++    return items.find(it =>
++        it && it.document_id === rec.document_id &&
++        it.sheet_id === rec.sheet_id &&
++        it.source_row_id === rec.source_row_id
++    ) || null;
++}
++
++function _syncItemDeliveryState(item, rec, result) {
++    const targetItem = item || _findWorkbenchItemForRecord(rec);
++    if (!targetItem) return;
++    const summary = {
++        status: rec.status,
++        event_id: rec.event_id,
++        event_seq: rec.event_seq,
++        http_status: rec.last_http_status,
++        error_code: rec.last_error_code,
++        error_message: rec.last_error_message,
++        idempotent_replay: Boolean(result && result.idempotent_replay),
++        attempts: rec.attempts
++    };
++    if (rec.kind === 'flywheel') {
++        targetItem._last_flywheel_delivery = summary;
++        targetItem.max_event_seq = Math.max(Number(targetItem.max_event_seq || 0), rec.status === 'delivered' ? rec.event_seq : 0);
++    } else {
++        targetItem._last_feedback_delivery = summary;
++        targetItem.max_feedback_seq = Math.max(Number(targetItem.max_feedback_seq || 0), rec.status === 'delivered' ? rec.event_seq : 0);
+     }
+ }
+ 
+-// Helper to submit feedback logs
++async function _dispatchSingleFeedbackRecord(rec, opts = {}) {
++    if (!rec) return { ok: false, retryable: false, error_code: 'missing_record', error_message: '事件记录缺失' };
++    if (!_actorMatchesRecord(rec)) {
++        rec.status = 'blocked_invalid';
++        rec.last_error_code = 'actor_mismatch';
++        rec.last_error_message = '当前登录主体或会话代际已变更，已阻断旧主体待投递事件。';
++        savePendingFeedbackEventsToStorage();
++        renderFeedbackDeliveryBanner();
++        return { ok: false, retryable: false, event_id: rec.event_id, event_seq: rec.event_seq, error_code: rec.last_error_code, error_message: rec.last_error_message };
++    }
++    const policy = _getRetryPolicy();
++    const maxExtra = opts.skipAutoRetry ? 0 : policy.maxAutoRetries;
++    let lastOutcome = null;
++
++    for (let retryIdx = 0; retryIdx <= maxExtra; retryIdx++) {
++        if (retryIdx > 0 && policy.retryDelayMs > 0) {
++            await new Promise(resolve => setTimeout(resolve, policy.retryDelayMs));
++        }
++        rec.attempts = Number(rec.attempts || 0) + 1;
++        rec.status = 'retrying';
++        rec.updated_at = Date.now();
++        try {
++            const fetchOpts = {
++                method: 'POST',
++                headers: getAuthHeaders(),
++                body: JSON.stringify(rec.payload)
++            };
++            if (rec.kind === 'flywheel') fetchOpts.keepalive = true;
++            const res = await fetch(`${backendUrl}${rec.endpoint}`, fetchOpts);
++            const respJson = await res.json().catch(() => ({}));
++            if (res && res.ok) {
++                rec.status = 'delivered';
++                rec.last_http_status = res.status;
++                rec.last_error_code = '';
++                rec.last_error_message = '';
++                rec.updated_at = Date.now();
++                pendingFeedbackEvents = pendingFeedbackEvents.filter(x => x.event_id !== rec.event_id);
++                savePendingFeedbackEventsToStorage();
++                lastOutcome = {
++                    ok: true,
++                    retryable: false,
++                    status: res.status,
++                    event_id: rec.event_id,
++                    event_seq: rec.event_seq,
++                    idempotent_replay: Boolean(respJson && respJson.idempotent_replay),
++                    data: respJson
++                };
++                _syncItemDeliveryState(opts.item, rec, lastOutcome);
++                renderFeedbackDeliveryBanner();
++                return lastOutcome;
++            }
++            const httpStatus = res ? res.status : 0;
++            const parsedErr = _parseFeedbackApiError(respJson, httpStatus);
++            rec.last_http_status = httpStatus;
++            rec.last_error_code = parsedErr.code;
++            rec.last_error_message = parsedErr.message;
++            rec.updated_at = Date.now();
++
++            const isRetryableStatus = (httpStatus === 0 || httpStatus >= 500 || httpStatus === 429 || httpStatus === 408);
++            if (!isRetryableStatus) {
++                rec.status = (httpStatus === 409) ? 'blocked_conflict' : 'blocked_invalid';
++                savePendingFeedbackEventsToStorage();
++                lastOutcome = {
++                    ok: false,
++                    retryable: false,
++                    status: httpStatus,
++                    event_id: rec.event_id,
++                    event_seq: rec.event_seq,
++                    error_code: parsedErr.code,
++                    error_message: parsedErr.message
++                };
++                _syncItemDeliveryState(opts.item, rec, lastOutcome);
++                renderFeedbackDeliveryBanner();
++                return lastOutcome;
++            }
++            rec.status = 'failed_retryable';
++            lastOutcome = {
++                ok: false,
++                retryable: true,
++                status: httpStatus,
++                event_id: rec.event_id,
++                event_seq: rec.event_seq,
++                error_code: parsedErr.code,
++                error_message: parsedErr.message
++            };
++        } catch (networkErr) {
++            rec.status = 'failed_retryable';
++            rec.last_http_status = 0;
++            rec.last_error_code = 'network_error';
++            rec.last_error_message = String((networkErr && networkErr.message) || networkErr || '网络异常');
++            rec.updated_at = Date.now();
++            lastOutcome = {
++                ok: false,
++                retryable: true,
++                status: 0,
++                event_id: rec.event_id,
++                event_seq: rec.event_seq,
++                error_code: 'network_error',
++                error_message: rec.last_error_message
++            };
++        }
++    }
++    savePendingFeedbackEventsToStorage();
++    _syncItemDeliveryState(opts.item, rec, lastOutcome);
++    renderFeedbackDeliveryBanner();
++    return lastOutcome;
++}
++
++async function retryPendingFeedbackEvents() {
++    await ensureVerifiedActorIdentity();
++    const candidates = getActivePendingFeedbackEvents()
++        .filter(r => ['pending', 'failed_retryable'].includes(r.status))
++        .sort((a, b) => (Number(a.event_seq || 0) - Number(b.event_seq || 0)) || (Number(a.created_at || 0) - Number(b.created_at || 0)));
++    const results = [];
++    for (const rec of candidates) {
++        const outcome = await _dispatchSingleFeedbackRecord(rec, { skipAutoRetry: true });
++        results.push(outcome);
++    }
++    return results;
++}
++
++// Helper to create an immutable Flywheel event once and deliver with bounded same-event retry
++async function reportFlywheelAction(item, actionType, customFinalTargets = null) {
++    if (!item) return { ok: false, skipped: true, reason: 'missing_item' };
++    if (item.feedback_eligible === false || !item.document_id || !item.sheet_id || !item.source_row_id) {
++        console.info('Skip flywheel record for isolated legacy/unverified row.');
++        return { ok: false, skipped: true, reason: 'legacy_untrusted' };
++    }
++    const actorCtx = await ensureVerifiedActorIdentity();
++    const clientEventId = generateClientEventId('fwevent');
++    item._event_seq = Number(item._event_seq || item.max_event_seq || 0) + 1;
++    const eventSeq = item._event_seq;
++
++    const targets = (customFinalTargets || item.bindings || []).map(b => ({
++        code: b.code,
++        name: b.name,
++        spec: b.specification || b.spec || '',
++        unit: b.unit || '',
++        brand: b.brand || '',
++        category: b.category || '',
++        qty_ratio: b.qty_ratio !== undefined && b.qty_ratio !== null
++            ? Number(b.qty_ratio)
++            : ((item.original_qty && Number(item.original_qty) > 0) ? (Number(b.qty) / Number(item.original_qty)) : 1.0)
++    }));
++
++    const candidates = (item.candidates || item.top_candidates || []).slice(0, 3).map(c => ({
++        code: c.code,
++        name: c.name,
++        score: c.score || 0.0
++    }));
++
++    const top1 = candidates && candidates.length > 0 ? candidates[0] : null;
++    const prof = item.professional || '暖通';
++    const recSnapId = item.recommendation_snapshot_id || item.initial_snapshot_id || '';
++
++    const payload = Object.freeze({
++        client_event_id: clientEventId,
++        document_id: item.document_id,
++        work_session_id: item.work_session_id || currentWorkSessionId || '',
++        saved_session_id: activeSessionId || '',
++        session_id: item.work_session_id || currentWorkSessionId || item.document_id,
++        sheet_id: item.sheet_id,
++        source_row_id: item.source_row_id,
++        row_idx: item.original_row_idx || 0,
++        event_seq: eventSeq,
++        recommendation_snapshot_id: recSnapId,
++        recommendation_revision: item.recommendation_revision || 1,
++        discipline: prof,
++        professional: prof,
++        raw_name: item.original_name || item.raw_name || item.name || '',
++        raw_spec: item.original_spec || item.spec || '',
++        raw_unit: item.original_unit || item.unit || '',
++        raw_category: item.original_category || item.category || '',
++        parsed_spec: item.parsed_spec || {},
++        extracted_params: item.extracted_params || item.parsed_spec || {},
++        auto_top1_code: top1 ? top1.code : (item.initial_auto_code || ''),
++        auto_top1_score: top1 ? top1.score : 0.0,
++        auto_top1_name: top1 ? top1.name : '',
++        auto_candidates: candidates,
++        algo_version: item.algo_version || '',
++        model_version: item.model_version || '',
++        config_version: item.config_version || '',
++        action_type: actionType,
++        final_targets: targets
++    });
++
++    const record = {
++        event_id: clientEventId,
++        kind: 'flywheel',
++        endpoint: '/api/flywheel/record',
++        actor_user_id: actorCtx.actor_user_id,
++        actor_account_epoch: actorCtx.actor_account_epoch,
++        document_id: item.document_id,
++        sheet_id: item.sheet_id,
++        source_row_id: item.source_row_id,
++        recommendation_snapshot_id: recSnapId,
++        event_seq: eventSeq,
++        payload: JSON.parse(JSON.stringify(payload)),
++        status: 'pending',
++        attempts: 0,
++        last_http_status: null,
++        last_error_code: '',
++        last_error_message: '',
++        created_at: Date.now(),
++        updated_at: Date.now()
++    };
++    pendingFeedbackEvents.push(record);
++    savePendingFeedbackEventsToStorage();
++    return await _dispatchSingleFeedbackRecord(record, { item });
++}
++
++// Helper to create an immutable feedback sample event once and deliver with bounded same-event retry
+ async function submitFeedbackSample(item, autoCode, manualCode, isCorrect) {
+     if (!item || item.feedback_eligible === false || !item.document_id || !item.sheet_id || !item.source_row_id) {
+-        return;
+-    }
+-    try {
+-        const clientEventId = generateClientEventId('fbevent');
+-        item._feedback_seq = Number(item._feedback_seq || item.max_feedback_seq || 0) + 1;
+-        await fetch(`${backendUrl}/api/feedback/submit`, {
+-            method: 'POST',
+-            headers: { 'Content-Type': 'application/json' },
+-            body: JSON.stringify({
+-                client_event_id: clientEventId,
+-                document_id: item.document_id,
+-                sheet_id: item.sheet_id,
+-                source_row_id: item.source_row_id,
+-                event_seq: item._feedback_seq,
+-                recommendation_snapshot_id: item.recommendation_snapshot_id || item.initial_snapshot_id || '',
+-                row_id: item.original_row_idx || 0,
+-                raw_text: item.original_spec || '',
+-                auto_code: autoCode || '',
+-                manual_code: manualCode || '',
+-                is_correct: Boolean(isCorrect)
+-            })
+-        });
+-    } catch (e) {
+-        console.error("Failed to submit matching feedback log", e);
+-    }
++        return { ok: false, skipped: true, reason: 'legacy_untrusted' };
++    }
++    const actorCtx = await ensureVerifiedActorIdentity();
++    const clientEventId = generateClientEventId('fbevent');
++    item._feedback_seq = Number(item._feedback_seq || item.max_feedback_seq || 0) + 1;
++    const eventSeq = item._feedback_seq;
++    const recSnapId = item.recommendation_snapshot_id || item.initial_snapshot_id || '';
++
++    const payload = Object.freeze({
++        client_event_id: clientEventId,
++        document_id: item.document_id,
++        sheet_id: item.sheet_id,
++        source_row_id: item.source_row_id,
++        event_seq: eventSeq,
++        recommendation_snapshot_id: recSnapId,
++        row_id: item.original_row_idx || 0,
++        raw_text: item.original_spec || '',
++        auto_code: autoCode || '',
++        manual_code: manualCode || '',
++        is_correct: Boolean(isCorrect)
++    });
++
++    const record = {
++        event_id: clientEventId,
++        kind: 'feedback',
++        endpoint: '/api/feedback/submit',
++        actor_user_id: actorCtx.actor_user_id,
++        actor_account_epoch: actorCtx.actor_account_epoch,
++        document_id: item.document_id,
++        sheet_id: item.sheet_id,
++        source_row_id: item.source_row_id,
++        recommendation_snapshot_id: recSnapId,
++        event_seq: eventSeq,
++        payload: JSON.parse(JSON.stringify(payload)),
++        status: 'pending',
++        attempts: 0,
++        last_http_status: null,
++        last_error_code: '',
++        last_error_message: '',
++        created_at: Date.now(),
++        updated_at: Date.now()
++    };
++    pendingFeedbackEvents.push(record);
++    savePendingFeedbackEventsToStorage();
++    return await _dispatchSingleFeedbackRecord(record, { item });
++}
++
++if (typeof window !== 'undefined') {
++    window.retryPendingFeedbackEvents = retryPendingFeedbackEvents;
++    window.getActivePendingFeedbackEvents = getActivePendingFeedbackEvents;
++    window.reportFlywheelAction = reportFlywheelAction;
++    window.submitFeedbackSample = submitFeedbackSample;
++    window.applyVerifiedActorIdentity = applyVerifiedActorIdentity;
++    window.annotateRestoredItems = annotateRestoredItems;
++    window.__m0SetWorkbenchItems = (newItems, docId, wsId) => {
++        items = Array.isArray(newItems) ? newItems : [];
++        if (docId !== undefined) currentDocumentId = docId;
++        if (wsId !== undefined) currentWorkSessionId = wsId;
++    };
+ }
+ 
+ // 6. Manual Global Database Search
+@@ -2085,7 +2550,7 @@ async function runParamRematch() {
+             power: power,
+             dn: dn
+         };
+-        reportFlywheelAction(selectedItem, 'PARAM_ADJUST');
++        await reportFlywheelAction(selectedItem, 'PARAM_ADJUST');
+ 
+         selectRow(selectedItem);
+         renderTable();
+@@ -3274,6 +3739,9 @@ async function annotateRestoredItems() {
+         });
+         const data = await res.json().catch(() => ({}));
+         if (res.ok && data.items) {
++            if (data.actor_user_id !== undefined && data.actor_user_id !== null) {
++                applyVerifiedActorIdentity(data.actor_user_id, data.actor_account_epoch || '');
++            }
+             items = data.items;
+             items.forEach(it => {
+                 it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0));
+@@ -3285,6 +3753,7 @@ async function annotateRestoredItems() {
+                 currentWorkSessionId = firstVerified.work_session_id || currentWorkSessionId;
+             }
+             renderLegacyIsolationBanner(data.legacy_untrusted_count || 0);
++            reconcilePendingFeedbackForDocument();
+             if (data.downgraded > 0) {
+                 alert(`已载入进度：${data.downgraded} 条记录的旧绑定/确认状态无法核验或已失效，已统一降为「待确认」，请逐项复核后再导出。`);
+             }

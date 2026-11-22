@@ -1,0 +1,17 @@
+{
+  "cmd": [
+    "python",
+    "tests/eval_golden_set.py",
+    "--eval-mode",
+    "sandbox_v2"
+  ],
+  "layout": [
+    "app",
+    "web",
+    "config"
+  ],
+  "exit": 2,
+  "stderr": "C:\\Users\\tlyer\\AppData\\Local\\Programs\\Python\\Python312\\python.exe: can't open file 'C:\\\\Users\\\\tlyer\\\\AppData\\\\Local\\\\Packages\\\\openai.codex_2p2nqsd0c76g0\\\\AC\\\\#!sandbox.{9a97ab69-bd96-4929-890f-ae0c0ffcbe31}\\\\Temp\\\\m3_pre_73p_ayir\\\\tests\\\\eval_golden_set.py': [Errno 2] No such file or directory",
+  "golden_exists": false,
+  "template_exists": false
+}

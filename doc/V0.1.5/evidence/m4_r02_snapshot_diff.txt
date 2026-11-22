@@ -1,0 +1,6 @@
+r01_before_sha256=5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e
+r02_before_sha256=5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e
+r02_after_sha256=5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e
+item_count=8
+diffs_before_vs_after=[]
+diffs_r01_vs_r02_after=[]

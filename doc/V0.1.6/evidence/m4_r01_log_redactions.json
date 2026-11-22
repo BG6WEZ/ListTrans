@@ -1,0 +1,7 @@
+{
+  "path": "doc/V0.1.6/evidence/m4_r01_special_local.log",
+  "synthetic_fixture_repr_lines_redacted": 4,
+  "reason": "Remove test authentication token fragments from failure fixture repr; preserve assertions and outcomes",
+  "before_sha256": "04df82de248e08dd6fbadbf94a6e1427e6266f1f20f0240383f9740719c09a9f",
+  "after_sha256": "37cc193a66540a034477fab7b15121bf0a1fbcb6858afaba28aca760f79a4d2c"
+}

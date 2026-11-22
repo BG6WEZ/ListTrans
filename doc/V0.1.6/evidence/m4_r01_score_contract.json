@@ -1,0 +1,10 @@
+{
+  "method": "AST comparison after removing only declared additive diagnostic statements/fields",
+  "all_other_matcher_statements_identical": true,
+  "recall_selection_and_order_identical": true,
+  "scoring_sort_tie_adjustment_threshold_and_existing_return_semantics_identical": true,
+  "score_candidate_two_value_wrapper_identical": true,
+  "before_sha256": "e67d49f3daafe1fee642be031f65c15bc3126009336c1cfadb7b86f54415ea08",
+  "after_sha256": "3571ff2b1805bb1ba30e347a99611ddb443f193fb0750abe6483c616ac103072",
+  "limitation": "Structural audit supplements, and does not replace, runtime six-baseline regression and service tests"
+}

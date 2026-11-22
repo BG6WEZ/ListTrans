@@ -1,0 +1,38 @@
+{
+  "gate": "V-M4-01",
+  "verdict": "PASS",
+  "image_id": "sha256:e9ea5a79518560605b4135616f0be17b172f3882872167c8adb9d1de1449c86e",
+  "technical_checks": {
+    "layer_digests_verified": true,
+    "source_48_files": true,
+    "all_layers_canaries_excluded": true,
+    "app_forbidden_absent": true,
+    "exact_16_configs": true,
+    "image_env_history_clean": true,
+    "fail_closed": true,
+    "http_auth_flow": true,
+    "single_worker": true,
+    "runtime_isolated": true
+  },
+  "candidate_classification_checks": {
+    "exact_private_marker_paths_identified": true,
+    "public_ecdsa_source_verified": true,
+    "all_outside_candidates_classified": true,
+    "system_ca_public": true,
+    "credential_named_modules_are_distribution_code": true,
+    "workspace_source_still_frozen": true
+  },
+  "classification_summary": {
+    "public_dependency_csv_files": 35,
+    "public_certifi_ca_bundles": 2,
+    "system_public_ca_paths": 149,
+    "credential_named_code_files": 24,
+    "public_test_bytecode_files_with_key_samples": 2
+  },
+  "raw_scanner_report_preserved": "m4_r03_vm401_audit_result.json",
+  "scope": "No project/business/operations credentials found. Public dependency fixture material is explicitly classified, not claimed absent.",
+  "production_credential_rotation_verified": false,
+  "V-M4-02": "PENDING_VERIFY",
+  "F11": "OPEN",
+  "M4": "PENDING_VERIFY"
+}

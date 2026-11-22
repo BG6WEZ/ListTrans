@@ -1,0 +1,103 @@
+{
+  "r01_generated": "2026-11-14 16:20:24",
+  "r02_generated": "2026-11-14 23:02:51",
+  "cases": {
+    "harmful": {
+      "r01_passed": false,
+      "r02_passed": false,
+      "r01_counts": [
+        24,
+        0,
+        0,
+        0
+      ],
+      "r02_counts": [
+        24,
+        0,
+        0,
+        0
+      ],
+      "r01_violations": [
+        {
+          "id": "GT-0313",
+          "type": "target_score_decreased",
+          "base_T": 85.0,
+          "cand_T": 50.7,
+          "delta": -34.3
+        },
+        {
+          "id": "GT-0313",
+          "type": "margin_shrunk",
+          "base_margin": 78.3,
+          "cand_margin": 7.6,
+          "delta": -70.7,
+          "base_T": 85.0,
+          "cand_T": 50.7
+        }
+      ],
+      "r02_violations": [
+        {
+          "id": "GT-0313",
+          "type": "target_score_decreased",
+          "base_T": 85.0,
+          "cand_T": 50.7,
+          "delta": -34.3
+        },
+        {
+          "id": "GT-0313",
+          "type": "margin_shrunk",
+          "base_margin": 78.3,
+          "cand_margin": 7.6,
+          "delta": -70.7,
+          "base_T": 85.0,
+          "cand_T": 50.7
+        }
+      ],
+      "r01_snapshot_errors": [],
+      "r02_snapshot_errors": [],
+      "score_comparison_diffs": []
+    },
+    "beneficial": {
+      "r01_passed": true,
+      "r02_passed": true,
+      "r01_counts": [
+        22,
+        0,
+        0,
+        0
+      ],
+      "r02_counts": [
+        22,
+        0,
+        0,
+        0
+      ],
+      "r01_violations": [],
+      "r02_violations": [],
+      "r01_snapshot_errors": [],
+      "r02_snapshot_errors": [],
+      "score_comparison_diffs": []
+    },
+    "neutral": {
+      "r01_passed": true,
+      "r02_passed": true,
+      "r01_counts": [
+        16,
+        0,
+        0,
+        0
+      ],
+      "r02_counts": [
+        16,
+        0,
+        0,
+        0
+      ],
+      "r01_violations": [],
+      "r02_violations": [],
+      "r01_snapshot_errors": [],
+      "r02_snapshot_errors": [],
+      "score_comparison_diffs": []
+    }
+  }
+}

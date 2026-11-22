@@ -1,0 +1,1722 @@
+{
+  "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "evaluation_seconds": 149.413,
+  "golden_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+  "governance_sha256": "738a7edc60ed5fe26951d83f55f3157a8acc7aac000d56b924c70296652a8e43",
+  "hardware": {
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "logical_cores": 20,
+    "os": "Windows-11-10.0.26300-SP0",
+    "physical_cores": 14,
+    "python": "3.12.10",
+    "ram_mib": 16068.73828125
+  },
+  "latency": {
+    "batch_http_50rows": {
+      "max_ms": 32117.115,
+      "n": 21,
+      "p50_ms": 6430.956,
+      "p95_ms": 12042.443
+    },
+    "single_http": {
+      "max_ms": 1006.443,
+      "n": 1060,
+      "p50_ms": 82.464,
+      "p95_ms": 357.759
+    }
+  },
+  "mode": "vector",
+  "phases": {
+    "batch_http": {
+      "process_peak_working_set_mib": 1793.265625,
+      "sampled_peak_rss_mib": 1381.1875,
+      "seconds": 165.5329724000003
+    },
+    "full_rank_replay": {
+      "process_peak_working_set_mib": 1793.265625,
+      "sampled_peak_rss_mib": 1788.703125,
+      "seconds": 149.5166416000011
+    },
+    "single_http": {
+      "process_peak_working_set_mib": 1793.265625,
+      "sampled_peak_rss_mib": 1277.20703125,
+      "seconds": 136.02601759999925
+    },
+    "startup_prepare": {
+      "process_peak_working_set_mib": 482.65234375,
+      "sampled_peak_rss_mib": 482.6484375,
+      "seconds": 7.133064800000284
+    },
+    "warmup": {
+      "process_peak_working_set_mib": 779.19921875,
+      "sampled_peak_rss_mib": 774.10546875,
+      "seconds": 4.515765300000567
+    }
+  },
+  "semantic_rows": 1060,
+  "sparse_recall": {
+    "alias_config_version": "v018-m1-alias-candidates-v1",
+    "cross_domain_blocklist_count": 5,
+    "default_enabled": false,
+    "suppressed_over_specific_count": 25,
+    "version": "v018-m1-sparse-v1"
+  },
+  "splits": {
+    "dev": {
+      "avg_irrelevant_candidates": 72.01,
+      "avg_pool_size": 72.95,
+      "counts": {
+        "core_answerable": 122,
+        "core_negative": 38,
+        "core_pending": 20,
+        "core_total": 180,
+        "total": 218
+      },
+      "exclusive_channel_slots": {
+        "fts": 7,
+        "semantic": 12
+      },
+      "gt_guard_status": {
+        "GT-0674": "recommended",
+        "GT-0677": "recommended",
+        "GT-0678": "recommended"
+      },
+      "max_pool_size": 189,
+      "rank": {
+        "all": {
+          "candidate_recall": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "candidate_recall@100": {
+            "d": 122,
+            "n": 113,
+            "pct": 92.623
+          },
+          "candidate_recall@200": {
+            "d": 122,
+            "n": 114,
+            "pct": 93.4426
+          },
+          "candidate_recall@50": {
+            "d": 122,
+            "n": 106,
+            "pct": 86.8852
+          },
+          "channel_target_slot_counts": {
+            "fts": 73,
+            "fts_extracted_name": 11,
+            "fts_zh": 11,
+            "model_match": 3,
+            "semantic": 105,
+            "sparse_alias": 5,
+            "sparse_name_param": 12,
+            "sparse_param_fallback": 49,
+            "sparse_phrase_split": 11,
+            "structured_model": 3,
+            "structured_recall": 23
+          },
+          "hit@1": {
+            "d": 122,
+            "n": 32,
+            "pct": 26.2295
+          },
+          "hit@10": {
+            "d": 122,
+            "n": 69,
+            "pct": 56.5574
+          },
+          "hit@3": {
+            "d": 122,
+            "n": 48,
+            "pct": 39.3443
+          },
+          "hit@5": {
+            "d": 122,
+            "n": 55,
+            "pct": 45.082
+          },
+          "mrr_at_10": 0.347505,
+          "mrr_full": 0.363733,
+          "rows": 122,
+          "stage_counts": {
+            "hard_blocked": 23,
+            "not_in_catalog": 0,
+            "not_recalled": 8,
+            "ranked_gt10": 22,
+            "top10_hit": 69
+          },
+          "target_slots": 122
+        },
+        "domains": {
+          "暖通": {
+            "candidate_recall": {
+              "d": 6,
+              "n": 6,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 6,
+              "n": 6,
+              "pct": 100.0
+            },
+            "candidate_recall@200": {
+              "d": 6,
+              "n": 6,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 6,
+              "n": 6,
+              "pct": 100.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 6,
+              "semantic": 5,
+              "sparse_param_fallback": 5
+            },
+            "hit@1": {
+              "d": 6,
+              "n": 3,
+              "pct": 50.0
+            },
+            "hit@10": {
+              "d": 6,
+              "n": 5,
+              "pct": 83.3333
+            },
+            "hit@3": {
+              "d": 6,
+              "n": 3,
+              "pct": 50.0
+            },
+            "hit@5": {
+              "d": 6,
+              "n": 3,
+              "pct": 50.0
+            },
+            "mrr_at_10": 0.5375,
+            "mrr_full": 0.540104,
+            "rows": 6,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 5
+            },
+            "target_slots": 6
+          },
+          "装饰": {
+            "candidate_recall": {
+              "d": 111,
+              "n": 103,
+              "pct": 92.7928
+            },
+            "candidate_recall@100": {
+              "d": 111,
+              "n": 102,
+              "pct": 91.8919
+            },
+            "candidate_recall@200": {
+              "d": 111,
+              "n": 103,
+              "pct": 92.7928
+            },
+            "candidate_recall@50": {
+              "d": 111,
+              "n": 95,
+              "pct": 85.5856
+            },
+            "channel_target_slot_counts": {
+              "fts": 63,
+              "fts_extracted_name": 10,
+              "fts_zh": 10,
+              "semantic": 95,
+              "sparse_alias": 5,
+              "sparse_name_param": 8,
+              "sparse_param_fallback": 41,
+              "sparse_phrase_split": 9,
+              "structured_recall": 22
+            },
+            "hit@1": {
+              "d": 111,
+              "n": 26,
+              "pct": 23.4234
+            },
+            "hit@10": {
+              "d": 111,
+              "n": 60,
+              "pct": 54.0541
+            },
+            "hit@3": {
+              "d": 111,
+              "n": 41,
+              "pct": 36.9369
+            },
+            "hit@5": {
+              "d": 111,
+              "n": 48,
+              "pct": 43.2432
+            },
+            "mrr_at_10": 0.321357,
+            "mrr_full": 0.338833,
+            "rows": 111,
+            "stage_counts": {
+              "hard_blocked": 21,
+              "not_in_catalog": 0,
+              "not_recalled": 8,
+              "ranked_gt10": 22,
+              "top10_hit": 60
+            },
+            "target_slots": 111
+          },
+          "设备": {
+            "candidate_recall": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@200": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 4,
+              "fts_extracted_name": 1,
+              "fts_zh": 1,
+              "model_match": 3,
+              "semantic": 5,
+              "sparse_name_param": 4,
+              "sparse_param_fallback": 3,
+              "sparse_phrase_split": 2,
+              "structured_model": 3,
+              "structured_recall": 1
+            },
+            "hit@1": {
+              "d": 5,
+              "n": 3,
+              "pct": 60.0
+            },
+            "hit@10": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "hit@3": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "hit@5": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "mrr_at_10": 0.7,
+            "mrr_full": 0.704878,
+            "rows": 5,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 4
+            },
+            "target_slots": 5
+          }
+        }
+      },
+      "single_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 122,
+          "n": 32,
+          "pct": 26.2295
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": null,
+        "assessed_rows": 160,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 160,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": null,
+        "auto_accepted_coverage": {
+          "d": 180,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": null,
+        "explicit_rejection_rate": null,
+        "matcher_is_exact_hint_rate": {
+          "d": 180,
+          "n": 64,
+          "pct": 35.5556
+        },
+        "negative_no_binding_rate": null,
+        "rows": 180,
+        "status_counts": {
+          "no_decision_exposed": 180
+        }
+      },
+      "upload_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 122,
+          "n": 33,
+          "pct": 27.0492
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": {
+          "d": 160,
+          "n": 66,
+          "pct": 41.25
+        },
+        "assessed_rows": 160,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 160,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": {
+          "d": 160,
+          "n": 51,
+          "pct": 31.875
+        },
+        "auto_accepted_coverage": {
+          "d": 180,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": {
+          "d": 38,
+          "n": 14,
+          "pct": 36.8421
+        },
+        "explicit_rejection_rate": {
+          "d": 180,
+          "n": 94,
+          "pct": 52.2222
+        },
+        "matcher_is_exact_hint_rate": {
+          "d": 180,
+          "n": 64,
+          "pct": 35.5556
+        },
+        "negative_no_binding_rate": {
+          "d": 38,
+          "n": 14,
+          "pct": 36.8421
+        },
+        "rows": 180,
+        "status_counts": {
+          "recommended": 86,
+          "rejected": 94
+        }
+      }
+    },
+    "train": {
+      "avg_irrelevant_candidates": 146.06,
+      "avg_pool_size": 147.04,
+      "counts": {
+        "core_answerable": 529,
+        "core_negative": 77,
+        "core_pending": 148,
+        "core_total": 754,
+        "total": 842
+      },
+      "exclusive_channel_slots": {
+        "fts": 24,
+        "model_match": 3,
+        "semantic": 35,
+        "sparse_alias": 2,
+        "sparse_name_param": 4,
+        "sparse_phrase_split": 8,
+        "structured_recall": 4,
+        "v018_m0_m1_only": 22,
+        "v018_m1_only": 1
+      },
+      "gt_guard_status": {
+        "GT-0674": "recommended",
+        "GT-0677": "recommended",
+        "GT-0678": "recommended"
+      },
+      "max_pool_size": 836,
+      "rank": {
+        "all": {
+          "candidate_recall": {
+            "d": 529,
+            "n": 500,
+            "pct": 94.518
+          },
+          "candidate_recall@100": {
+            "d": 529,
+            "n": 484,
+            "pct": 91.4934
+          },
+          "candidate_recall@200": {
+            "d": 529,
+            "n": 499,
+            "pct": 94.3289
+          },
+          "candidate_recall@50": {
+            "d": 529,
+            "n": 425,
+            "pct": 80.3403
+          },
+          "channel_target_slot_counts": {
+            "fts": 254,
+            "fts_extracted_name": 52,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 63,
+            "model_match": 33,
+            "semantic": 389,
+            "sparse_alias": 58,
+            "sparse_name_param": 115,
+            "sparse_param_fallback": 79,
+            "sparse_phrase_split": 101,
+            "structured_model": 34,
+            "structured_recall": 122
+          },
+          "hit@1": {
+            "d": 529,
+            "n": 121,
+            "pct": 22.8733
+          },
+          "hit@10": {
+            "d": 529,
+            "n": 288,
+            "pct": 54.4423
+          },
+          "hit@3": {
+            "d": 529,
+            "n": 181,
+            "pct": 34.2155
+          },
+          "hit@5": {
+            "d": 529,
+            "n": 225,
+            "pct": 42.5331
+          },
+          "mrr_at_10": 0.311859,
+          "mrr_full": 0.329991,
+          "rows": 529,
+          "stage_counts": {
+            "hard_blocked": 76,
+            "not_in_catalog": 0,
+            "not_recalled": 29,
+            "ranked_gt10": 147,
+            "top10_hit": 277
+          },
+          "target_slots": 529
+        },
+        "domains": {
+          "医用气体": {
+            "candidate_recall": {
+              "d": 112,
+              "n": 103,
+              "pct": 91.9643
+            },
+            "candidate_recall@100": {
+              "d": 112,
+              "n": 101,
+              "pct": 90.1786
+            },
+            "candidate_recall@200": {
+              "d": 112,
+              "n": 103,
+              "pct": 91.9643
+            },
+            "candidate_recall@50": {
+              "d": 112,
+              "n": 86,
+              "pct": 76.7857
+            },
+            "channel_target_slot_counts": {
+              "fts": 58,
+              "fts_extracted_name": 16,
+              "fts_zh": 17,
+              "model_match": 3,
+              "semantic": 82,
+              "sparse_alias": 6,
+              "sparse_name_param": 17,
+              "sparse_param_fallback": 18,
+              "sparse_phrase_split": 14,
+              "structured_model": 3,
+              "structured_recall": 35
+            },
+            "hit@1": {
+              "d": 112,
+              "n": 19,
+              "pct": 16.9643
+            },
+            "hit@10": {
+              "d": 112,
+              "n": 55,
+              "pct": 49.1071
+            },
+            "hit@3": {
+              "d": 112,
+              "n": 26,
+              "pct": 23.2143
+            },
+            "hit@5": {
+              "d": 112,
+              "n": 36,
+              "pct": 32.1429
+            },
+            "mrr_at_10": 0.238223,
+            "mrr_full": 0.255205,
+            "rows": 112,
+            "stage_counts": {
+              "hard_blocked": 15,
+              "not_in_catalog": 0,
+              "not_recalled": 9,
+              "ranked_gt10": 35,
+              "top10_hit": 53
+            },
+            "target_slots": 112
+          },
+          "弱电": {
+            "candidate_recall": {
+              "d": 112,
+              "n": 110,
+              "pct": 98.2143
+            },
+            "candidate_recall@100": {
+              "d": 112,
+              "n": 107,
+              "pct": 95.5357
+            },
+            "candidate_recall@200": {
+              "d": 112,
+              "n": 110,
+              "pct": 98.2143
+            },
+            "candidate_recall@50": {
+              "d": 112,
+              "n": 97,
+              "pct": 86.6071
+            },
+            "channel_target_slot_counts": {
+              "fts": 55,
+              "fts_extracted_name": 24,
+              "fts_zh": 33,
+              "model_match": 3,
+              "semantic": 90,
+              "sparse_alias": 27,
+              "sparse_name_param": 32,
+              "sparse_param_fallback": 28,
+              "sparse_phrase_split": 9,
+              "structured_model": 12,
+              "structured_recall": 15
+            },
+            "hit@1": {
+              "d": 112,
+              "n": 25,
+              "pct": 22.3214
+            },
+            "hit@10": {
+              "d": 112,
+              "n": 62,
+              "pct": 55.3571
+            },
+            "hit@3": {
+              "d": 112,
+              "n": 40,
+              "pct": 35.7143
+            },
+            "hit@5": {
+              "d": 112,
+              "n": 53,
+              "pct": 47.3214
+            },
+            "mrr_at_10": 0.321584,
+            "mrr_full": 0.340767,
+            "rows": 112,
+            "stage_counts": {
+              "hard_blocked": 31,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 26,
+              "top10_hit": 53
+            },
+            "target_slots": 112
+          },
+          "强电": {
+            "candidate_recall": {
+              "d": 202,
+              "n": 186,
+              "pct": 92.0792
+            },
+            "candidate_recall@100": {
+              "d": 202,
+              "n": 185,
+              "pct": 91.5842
+            },
+            "candidate_recall@200": {
+              "d": 202,
+              "n": 186,
+              "pct": 92.0792
+            },
+            "candidate_recall@50": {
+              "d": 202,
+              "n": 162,
+              "pct": 80.198
+            },
+            "channel_target_slot_counts": {
+              "fts": 66,
+              "fts_extracted_name": 9,
+              "fts_zh": 10,
+              "model_match": 22,
+              "semantic": 138,
+              "sparse_alias": 18,
+              "sparse_name_param": 46,
+              "sparse_param_fallback": 14,
+              "sparse_phrase_split": 68,
+              "structured_model": 13,
+              "structured_recall": 27
+            },
+            "hit@1": {
+              "d": 202,
+              "n": 50,
+              "pct": 24.7525
+            },
+            "hit@10": {
+              "d": 202,
+              "n": 113,
+              "pct": 55.9406
+            },
+            "hit@3": {
+              "d": 202,
+              "n": 74,
+              "pct": 36.6337
+            },
+            "hit@5": {
+              "d": 202,
+              "n": 90,
+              "pct": 44.5545
+            },
+            "mrr_at_10": 0.332455,
+            "mrr_full": 0.349534,
+            "rows": 202,
+            "stage_counts": {
+              "hard_blocked": 19,
+              "not_in_catalog": 0,
+              "not_recalled": 16,
+              "ranked_gt10": 54,
+              "top10_hit": 113
+            },
+            "target_slots": 202
+          },
+          "暖通": {
+            "candidate_recall": {
+              "d": 86,
+              "n": 84,
+              "pct": 97.6744
+            },
+            "candidate_recall@100": {
+              "d": 86,
+              "n": 75,
+              "pct": 87.2093
+            },
+            "candidate_recall@200": {
+              "d": 86,
+              "n": 83,
+              "pct": 96.5116
+            },
+            "candidate_recall@50": {
+              "d": 86,
+              "n": 66,
+              "pct": 76.7442
+            },
+            "channel_target_slot_counts": {
+              "fts": 67,
+              "fts_extracted_name": 3,
+              "fts_hvac_1360": 1,
+              "fts_hvac_8000": 2,
+              "fts_hvac_净化新风机组 8000": 1,
+              "fts_hvac_制冷量KW 12": 1,
+              "fts_hvac_制冷量KW 2.2": 1,
+              "fts_hvac_制冷量KW 40": 1,
+              "fts_hvac_制冷量KW 7.1": 1,
+              "fts_hvac_医用离心式排风机 3000": 1,
+              "fts_hvac_医用离心式排风机 8000": 1,
+              "fts_hvac_卡式 风机盘管": 1,
+              "fts_hvac_厚度 0.5mm": 2,
+              "fts_hvac_厚度 0.6mm": 1,
+              "fts_hvac_厚度 0.75mm": 1,
+              "fts_hvac_厚度 1mm": 1,
+              "fts_hvac_多联式空调室内机": 4,
+              "fts_hvac_多联式空调室内机 2.2": 1,
+              "fts_hvac_多联式空调室内机 7.1": 1,
+              "fts_hvac_离心风机 3000": 1,
+              "fts_hvac_离心风机 8000": 1,
+              "fts_hvac_离心风机 镀锌 非防爆": 2,
+              "fts_hvac_镀锌钢板风管": 5,
+              "fts_hvac_镀锌钢板风管 1": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_风机盘管": 9,
+              "fts_hvac_风机盘管 1360": 1,
+              "fts_hvac_风管": 5,
+              "fts_zh": 3,
+              "semantic": 74,
+              "sparse_alias": 5,
+              "sparse_name_param": 8,
+              "sparse_param_fallback": 19,
+              "sparse_phrase_split": 10,
+              "structured_recall": 43
+            },
+            "hit@1": {
+              "d": 86,
+              "n": 23,
+              "pct": 26.7442
+            },
+            "hit@10": {
+              "d": 86,
+              "n": 52,
+              "pct": 60.4651
+            },
+            "hit@3": {
+              "d": 86,
+              "n": 35,
+              "pct": 40.6977
+            },
+            "hit@5": {
+              "d": 86,
+              "n": 40,
+              "pct": 46.5116
+            },
+            "mrr_at_10": 0.354097,
+            "mrr_full": 0.37436,
+            "rows": 86,
+            "stage_counts": {
+              "hard_blocked": 0,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 32,
+              "top10_hit": 52
+            },
+            "target_slots": 86
+          },
+          "自控": {
+            "candidate_recall": {
+              "d": 17,
+              "n": 17,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 17,
+              "n": 16,
+              "pct": 94.1176
+            },
+            "candidate_recall@200": {
+              "d": 17,
+              "n": 17,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 17,
+              "n": 14,
+              "pct": 82.3529
+            },
+            "channel_target_slot_counts": {
+              "fts": 8,
+              "model_match": 5,
+              "semantic": 5,
+              "sparse_alias": 2,
+              "sparse_name_param": 12,
+              "structured_model": 6,
+              "structured_recall": 2
+            },
+            "hit@1": {
+              "d": 17,
+              "n": 4,
+              "pct": 23.5294
+            },
+            "hit@10": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "hit@3": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "hit@5": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "mrr_at_10": 0.27451,
+            "mrr_full": 0.29505,
+            "rows": 17,
+            "stage_counts": {
+              "hard_blocked": 11,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 6
+            },
+            "target_slots": 17
+          }
+        }
+      },
+      "single_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 529,
+          "n": 121,
+          "pct": 22.8733
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": null,
+        "assessed_rows": 606,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 606,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": null,
+        "auto_accepted_coverage": {
+          "d": 754,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": null,
+        "explicit_rejection_rate": null,
+        "matcher_is_exact_hint_rate": {
+          "d": 754,
+          "n": 460,
+          "pct": 61.008
+        },
+        "negative_no_binding_rate": null,
+        "rows": 754,
+        "status_counts": {
+          "no_decision_exposed": 754
+        }
+      },
+      "upload_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 529,
+          "n": 121,
+          "pct": 22.8733
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": {
+          "d": 606,
+          "n": 479,
+          "pct": 79.0429
+        },
+        "assessed_rows": 606,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 606,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": {
+          "d": 606,
+          "n": 384,
+          "pct": 63.3663
+        },
+        "auto_accepted_coverage": {
+          "d": 754,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": {
+          "d": 77,
+          "n": 11,
+          "pct": 14.2857
+        },
+        "explicit_rejection_rate": {
+          "d": 754,
+          "n": 135,
+          "pct": 17.9045
+        },
+        "matcher_is_exact_hint_rate": {
+          "d": 754,
+          "n": 460,
+          "pct": 61.008
+        },
+        "negative_no_binding_rate": {
+          "d": 77,
+          "n": 11,
+          "pct": 14.2857
+        },
+        "rows": 754,
+        "status_counts": {
+          "recommended": 619,
+          "rejected": 135
+        }
+      }
+    },
+    "train_dev": {
+      "avg_irrelevant_candidates": 132.18,
+      "avg_pool_size": 133.16,
+      "counts": {
+        "core_answerable": 651,
+        "core_negative": 115,
+        "core_pending": 168,
+        "core_total": 934,
+        "total": 1060
+      },
+      "exclusive_channel_slots": {
+        "fts": 31,
+        "model_match": 3,
+        "semantic": 47,
+        "sparse_alias": 2,
+        "sparse_name_param": 4,
+        "sparse_phrase_split": 8,
+        "structured_recall": 4,
+        "v018_m0_m1_only": 22,
+        "v018_m1_only": 1
+      },
+      "gt_guard_status": {
+        "GT-0674": "recommended",
+        "GT-0677": "recommended",
+        "GT-0678": "recommended"
+      },
+      "max_pool_size": 836,
+      "rank": {
+        "all": {
+          "candidate_recall": {
+            "d": 651,
+            "n": 614,
+            "pct": 94.3164
+          },
+          "candidate_recall@100": {
+            "d": 651,
+            "n": 597,
+            "pct": 91.7051
+          },
+          "candidate_recall@200": {
+            "d": 651,
+            "n": 613,
+            "pct": 94.1628
+          },
+          "candidate_recall@50": {
+            "d": 651,
+            "n": 531,
+            "pct": 81.5668
+          },
+          "channel_target_slot_counts": {
+            "fts": 327,
+            "fts_extracted_name": 63,
+            "fts_hvac_1360": 1,
+            "fts_hvac_8000": 2,
+            "fts_hvac_净化新风机组 8000": 1,
+            "fts_hvac_制冷量KW 12": 1,
+            "fts_hvac_制冷量KW 2.2": 1,
+            "fts_hvac_制冷量KW 40": 1,
+            "fts_hvac_制冷量KW 7.1": 1,
+            "fts_hvac_医用离心式排风机 3000": 1,
+            "fts_hvac_医用离心式排风机 8000": 1,
+            "fts_hvac_卡式 风机盘管": 1,
+            "fts_hvac_厚度 0.5mm": 2,
+            "fts_hvac_厚度 0.6mm": 1,
+            "fts_hvac_厚度 0.75mm": 1,
+            "fts_hvac_厚度 1mm": 1,
+            "fts_hvac_多联式空调室内机": 4,
+            "fts_hvac_多联式空调室内机 2.2": 1,
+            "fts_hvac_多联式空调室内机 7.1": 1,
+            "fts_hvac_离心风机 3000": 1,
+            "fts_hvac_离心风机 8000": 1,
+            "fts_hvac_离心风机 镀锌 非防爆": 2,
+            "fts_hvac_镀锌钢板风管": 5,
+            "fts_hvac_镀锌钢板风管 1": 1,
+            "fts_hvac_防火阀": 1,
+            "fts_hvac_风机盘管": 9,
+            "fts_hvac_风机盘管 1360": 1,
+            "fts_hvac_风管": 5,
+            "fts_zh": 74,
+            "model_match": 36,
+            "semantic": 494,
+            "sparse_alias": 63,
+            "sparse_name_param": 127,
+            "sparse_param_fallback": 128,
+            "sparse_phrase_split": 112,
+            "structured_model": 37,
+            "structured_recall": 145
+          },
+          "hit@1": {
+            "d": 651,
+            "n": 153,
+            "pct": 23.5023
+          },
+          "hit@10": {
+            "d": 651,
+            "n": 357,
+            "pct": 54.8387
+          },
+          "hit@3": {
+            "d": 651,
+            "n": 229,
+            "pct": 35.1767
+          },
+          "hit@5": {
+            "d": 651,
+            "n": 280,
+            "pct": 43.0108
+          },
+          "mrr_at_10": 0.318539,
+          "mrr_full": 0.336315,
+          "rows": 651,
+          "stage_counts": {
+            "hard_blocked": 99,
+            "not_in_catalog": 0,
+            "not_recalled": 37,
+            "ranked_gt10": 169,
+            "top10_hit": 346
+          },
+          "target_slots": 651
+        },
+        "domains": {
+          "医用气体": {
+            "candidate_recall": {
+              "d": 112,
+              "n": 103,
+              "pct": 91.9643
+            },
+            "candidate_recall@100": {
+              "d": 112,
+              "n": 101,
+              "pct": 90.1786
+            },
+            "candidate_recall@200": {
+              "d": 112,
+              "n": 103,
+              "pct": 91.9643
+            },
+            "candidate_recall@50": {
+              "d": 112,
+              "n": 86,
+              "pct": 76.7857
+            },
+            "channel_target_slot_counts": {
+              "fts": 58,
+              "fts_extracted_name": 16,
+              "fts_zh": 17,
+              "model_match": 3,
+              "semantic": 82,
+              "sparse_alias": 6,
+              "sparse_name_param": 17,
+              "sparse_param_fallback": 18,
+              "sparse_phrase_split": 14,
+              "structured_model": 3,
+              "structured_recall": 35
+            },
+            "hit@1": {
+              "d": 112,
+              "n": 19,
+              "pct": 16.9643
+            },
+            "hit@10": {
+              "d": 112,
+              "n": 55,
+              "pct": 49.1071
+            },
+            "hit@3": {
+              "d": 112,
+              "n": 26,
+              "pct": 23.2143
+            },
+            "hit@5": {
+              "d": 112,
+              "n": 36,
+              "pct": 32.1429
+            },
+            "mrr_at_10": 0.238223,
+            "mrr_full": 0.255205,
+            "rows": 112,
+            "stage_counts": {
+              "hard_blocked": 15,
+              "not_in_catalog": 0,
+              "not_recalled": 9,
+              "ranked_gt10": 35,
+              "top10_hit": 53
+            },
+            "target_slots": 112
+          },
+          "弱电": {
+            "candidate_recall": {
+              "d": 112,
+              "n": 110,
+              "pct": 98.2143
+            },
+            "candidate_recall@100": {
+              "d": 112,
+              "n": 107,
+              "pct": 95.5357
+            },
+            "candidate_recall@200": {
+              "d": 112,
+              "n": 110,
+              "pct": 98.2143
+            },
+            "candidate_recall@50": {
+              "d": 112,
+              "n": 97,
+              "pct": 86.6071
+            },
+            "channel_target_slot_counts": {
+              "fts": 55,
+              "fts_extracted_name": 24,
+              "fts_zh": 33,
+              "model_match": 3,
+              "semantic": 90,
+              "sparse_alias": 27,
+              "sparse_name_param": 32,
+              "sparse_param_fallback": 28,
+              "sparse_phrase_split": 9,
+              "structured_model": 12,
+              "structured_recall": 15
+            },
+            "hit@1": {
+              "d": 112,
+              "n": 25,
+              "pct": 22.3214
+            },
+            "hit@10": {
+              "d": 112,
+              "n": 62,
+              "pct": 55.3571
+            },
+            "hit@3": {
+              "d": 112,
+              "n": 40,
+              "pct": 35.7143
+            },
+            "hit@5": {
+              "d": 112,
+              "n": 53,
+              "pct": 47.3214
+            },
+            "mrr_at_10": 0.321584,
+            "mrr_full": 0.340767,
+            "rows": 112,
+            "stage_counts": {
+              "hard_blocked": 31,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 26,
+              "top10_hit": 53
+            },
+            "target_slots": 112
+          },
+          "强电": {
+            "candidate_recall": {
+              "d": 202,
+              "n": 186,
+              "pct": 92.0792
+            },
+            "candidate_recall@100": {
+              "d": 202,
+              "n": 185,
+              "pct": 91.5842
+            },
+            "candidate_recall@200": {
+              "d": 202,
+              "n": 186,
+              "pct": 92.0792
+            },
+            "candidate_recall@50": {
+              "d": 202,
+              "n": 162,
+              "pct": 80.198
+            },
+            "channel_target_slot_counts": {
+              "fts": 66,
+              "fts_extracted_name": 9,
+              "fts_zh": 10,
+              "model_match": 22,
+              "semantic": 138,
+              "sparse_alias": 18,
+              "sparse_name_param": 46,
+              "sparse_param_fallback": 14,
+              "sparse_phrase_split": 68,
+              "structured_model": 13,
+              "structured_recall": 27
+            },
+            "hit@1": {
+              "d": 202,
+              "n": 50,
+              "pct": 24.7525
+            },
+            "hit@10": {
+              "d": 202,
+              "n": 113,
+              "pct": 55.9406
+            },
+            "hit@3": {
+              "d": 202,
+              "n": 74,
+              "pct": 36.6337
+            },
+            "hit@5": {
+              "d": 202,
+              "n": 90,
+              "pct": 44.5545
+            },
+            "mrr_at_10": 0.332455,
+            "mrr_full": 0.349534,
+            "rows": 202,
+            "stage_counts": {
+              "hard_blocked": 19,
+              "not_in_catalog": 0,
+              "not_recalled": 16,
+              "ranked_gt10": 54,
+              "top10_hit": 113
+            },
+            "target_slots": 202
+          },
+          "暖通": {
+            "candidate_recall": {
+              "d": 92,
+              "n": 90,
+              "pct": 97.8261
+            },
+            "candidate_recall@100": {
+              "d": 92,
+              "n": 81,
+              "pct": 88.0435
+            },
+            "candidate_recall@200": {
+              "d": 92,
+              "n": 89,
+              "pct": 96.7391
+            },
+            "candidate_recall@50": {
+              "d": 92,
+              "n": 72,
+              "pct": 78.2609
+            },
+            "channel_target_slot_counts": {
+              "fts": 73,
+              "fts_extracted_name": 3,
+              "fts_hvac_1360": 1,
+              "fts_hvac_8000": 2,
+              "fts_hvac_净化新风机组 8000": 1,
+              "fts_hvac_制冷量KW 12": 1,
+              "fts_hvac_制冷量KW 2.2": 1,
+              "fts_hvac_制冷量KW 40": 1,
+              "fts_hvac_制冷量KW 7.1": 1,
+              "fts_hvac_医用离心式排风机 3000": 1,
+              "fts_hvac_医用离心式排风机 8000": 1,
+              "fts_hvac_卡式 风机盘管": 1,
+              "fts_hvac_厚度 0.5mm": 2,
+              "fts_hvac_厚度 0.6mm": 1,
+              "fts_hvac_厚度 0.75mm": 1,
+              "fts_hvac_厚度 1mm": 1,
+              "fts_hvac_多联式空调室内机": 4,
+              "fts_hvac_多联式空调室内机 2.2": 1,
+              "fts_hvac_多联式空调室内机 7.1": 1,
+              "fts_hvac_离心风机 3000": 1,
+              "fts_hvac_离心风机 8000": 1,
+              "fts_hvac_离心风机 镀锌 非防爆": 2,
+              "fts_hvac_镀锌钢板风管": 5,
+              "fts_hvac_镀锌钢板风管 1": 1,
+              "fts_hvac_防火阀": 1,
+              "fts_hvac_风机盘管": 9,
+              "fts_hvac_风机盘管 1360": 1,
+              "fts_hvac_风管": 5,
+              "fts_zh": 3,
+              "semantic": 79,
+              "sparse_alias": 5,
+              "sparse_name_param": 8,
+              "sparse_param_fallback": 24,
+              "sparse_phrase_split": 10,
+              "structured_recall": 43
+            },
+            "hit@1": {
+              "d": 92,
+              "n": 26,
+              "pct": 28.2609
+            },
+            "hit@10": {
+              "d": 92,
+              "n": 57,
+              "pct": 61.9565
+            },
+            "hit@3": {
+              "d": 92,
+              "n": 38,
+              "pct": 41.3043
+            },
+            "hit@5": {
+              "d": 92,
+              "n": 43,
+              "pct": 46.7391
+            },
+            "mrr_at_10": 0.366058,
+            "mrr_full": 0.385169,
+            "rows": 92,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 2,
+              "ranked_gt10": 32,
+              "top10_hit": 57
+            },
+            "target_slots": 92
+          },
+          "自控": {
+            "candidate_recall": {
+              "d": 17,
+              "n": 17,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 17,
+              "n": 16,
+              "pct": 94.1176
+            },
+            "candidate_recall@200": {
+              "d": 17,
+              "n": 17,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 17,
+              "n": 14,
+              "pct": 82.3529
+            },
+            "channel_target_slot_counts": {
+              "fts": 8,
+              "model_match": 5,
+              "semantic": 5,
+              "sparse_alias": 2,
+              "sparse_name_param": 12,
+              "structured_model": 6,
+              "structured_recall": 2
+            },
+            "hit@1": {
+              "d": 17,
+              "n": 4,
+              "pct": 23.5294
+            },
+            "hit@10": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "hit@3": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "hit@5": {
+              "d": 17,
+              "n": 6,
+              "pct": 35.2941
+            },
+            "mrr_at_10": 0.27451,
+            "mrr_full": 0.29505,
+            "rows": 17,
+            "stage_counts": {
+              "hard_blocked": 11,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 6
+            },
+            "target_slots": 17
+          },
+          "装饰": {
+            "candidate_recall": {
+              "d": 111,
+              "n": 103,
+              "pct": 92.7928
+            },
+            "candidate_recall@100": {
+              "d": 111,
+              "n": 102,
+              "pct": 91.8919
+            },
+            "candidate_recall@200": {
+              "d": 111,
+              "n": 103,
+              "pct": 92.7928
+            },
+            "candidate_recall@50": {
+              "d": 111,
+              "n": 95,
+              "pct": 85.5856
+            },
+            "channel_target_slot_counts": {
+              "fts": 63,
+              "fts_extracted_name": 10,
+              "fts_zh": 10,
+              "semantic": 95,
+              "sparse_alias": 5,
+              "sparse_name_param": 8,
+              "sparse_param_fallback": 41,
+              "sparse_phrase_split": 9,
+              "structured_recall": 22
+            },
+            "hit@1": {
+              "d": 111,
+              "n": 26,
+              "pct": 23.4234
+            },
+            "hit@10": {
+              "d": 111,
+              "n": 60,
+              "pct": 54.0541
+            },
+            "hit@3": {
+              "d": 111,
+              "n": 41,
+              "pct": 36.9369
+            },
+            "hit@5": {
+              "d": 111,
+              "n": 48,
+              "pct": 43.2432
+            },
+            "mrr_at_10": 0.321357,
+            "mrr_full": 0.338833,
+            "rows": 111,
+            "stage_counts": {
+              "hard_blocked": 21,
+              "not_in_catalog": 0,
+              "not_recalled": 8,
+              "ranked_gt10": 22,
+              "top10_hit": 60
+            },
+            "target_slots": 111
+          },
+          "设备": {
+            "candidate_recall": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@100": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@200": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "candidate_recall@50": {
+              "d": 5,
+              "n": 5,
+              "pct": 100.0
+            },
+            "channel_target_slot_counts": {
+              "fts": 4,
+              "fts_extracted_name": 1,
+              "fts_zh": 1,
+              "model_match": 3,
+              "semantic": 5,
+              "sparse_name_param": 4,
+              "sparse_param_fallback": 3,
+              "sparse_phrase_split": 2,
+              "structured_model": 3,
+              "structured_recall": 1
+            },
+            "hit@1": {
+              "d": 5,
+              "n": 3,
+              "pct": 60.0
+            },
+            "hit@10": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "hit@3": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "hit@5": {
+              "d": 5,
+              "n": 4,
+              "pct": 80.0
+            },
+            "mrr_at_10": 0.7,
+            "mrr_full": 0.704878,
+            "rows": 5,
+            "stage_counts": {
+              "hard_blocked": 1,
+              "not_in_catalog": 0,
+              "not_recalled": 0,
+              "ranked_gt10": 0,
+              "top10_hit": 4
+            },
+            "target_slots": 5
+          }
+        }
+      },
+      "single_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 651,
+          "n": 153,
+          "pct": 23.5023
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": null,
+        "assessed_rows": 766,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 766,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": null,
+        "auto_accepted_coverage": {
+          "d": 934,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": null,
+        "explicit_rejection_rate": null,
+        "matcher_is_exact_hint_rate": {
+          "d": 934,
+          "n": 524,
+          "pct": 56.1028
+        },
+        "negative_no_binding_rate": null,
+        "rows": 934,
+        "status_counts": {
+          "no_decision_exposed": 934
+        }
+      },
+      "upload_decisions": {
+        "answerable_top1_code_rate": {
+          "d": 651,
+          "n": 154,
+          "pct": 23.6559
+        },
+        "assessed_auto_accepted_accuracy": {
+          "d": 0,
+          "n": 0,
+          "pct": null
+        },
+        "assessed_proposed_binding_rate": {
+          "d": 766,
+          "n": 545,
+          "pct": 71.1488
+        },
+        "assessed_rows": 766,
+        "assessed_wrong_auto_binding_rate": {
+          "d": 766,
+          "n": 0,
+          "pct": 0.0
+        },
+        "assessed_wrong_proposed_binding_rate": {
+          "d": 766,
+          "n": 435,
+          "pct": 56.7885
+        },
+        "auto_accepted_coverage": {
+          "d": 934,
+          "n": 0,
+          "pct": 0.0
+        },
+        "correct_rejection_rate": {
+          "d": 115,
+          "n": 25,
+          "pct": 21.7391
+        },
+        "explicit_rejection_rate": {
+          "d": 934,
+          "n": 229,
+          "pct": 24.5182
+        },
+        "matcher_is_exact_hint_rate": {
+          "d": 934,
+          "n": 524,
+          "pct": 56.1028
+        },
+        "negative_no_binding_rate": {
+          "d": 115,
+          "n": 25,
+          "pct": 21.7391
+        },
+        "rows": 934,
+        "status_counts": {
+          "recommended": 705,
+          "rejected": 229
+        }
+      }
+    }
+  },
+  "started_at": "2026-11-19T19:22:05.209697+08:00",
+  "structured_index": {
+    "db_revision": 0,
+    "default_enabled": false,
+    "loaded": true,
+    "material_count": 26863,
+    "version": "v018-m0-struct-idx-v1"
+  },
+  "v018_m0_enabled": true,
+  "v018_m1_enabled": true,
+  "vector_index": {
+    "dimension": 512,
+    "enabled": true,
+    "faiss": false,
+    "rows": 26863
+  }
+}

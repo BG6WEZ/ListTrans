@@ -1,0 +1,49 @@
+{
+  "unchanged_from_m0_count": 77,
+  "modified_from_m0": [
+    {
+      "path": "app/db_manager.py",
+      "before": "b3ca00f1eed7a06052e0378a1d726b0c27371d791d211e124b260f6106959aeb",
+      "after": "fefebb24125717e225a6588fa01c60e8f27d49c3fab31a13a102e0df08ddac88"
+    },
+    {
+      "path": "app/matcher.py",
+      "before": "d8f29761c992b3ee7d24c0fb8da8c921e353464db5cda8a3b579eab2e24a0225",
+      "after": "add2ef11733ed070acd38688f2f868e3bd25f50d33e6fda64a961e1d17f2886c"
+    }
+  ],
+  "frozen_checked_count": 0,
+  "frozen_mismatches": [],
+  "isolation_before_verdict": "PASS",
+  "isolation_after_verdict": "PASS",
+  "cross_isolation_diffs": [],
+  "sqlite_sidecars_on_disk": {
+    "app/materials.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/materials.db-shm": {
+      "exists": true,
+      "size": 32768
+    },
+    "app/auth.db-wal": {
+      "exists": true,
+      "size": 0
+    },
+    "app/auth.db-shm": {
+      "exists": true,
+      "size": 32768
+    }
+  },
+  "delivery_sha256": {
+    "app/sparse_recall.py": "7aeb4a121b922df35f279f51655e9e5dfe6f4eb4cc2a8b6ab531d039f7fcaa1c",
+    "app/recall_candidates/v018_m1_aliases.json": "9c69c06ba5d245b44192c5f572f78ed18d003a79d103065db0e32f5c413055f0",
+    "app/db_manager.py": "fefebb24125717e225a6588fa01c60e8f27d49c3fab31a13a102e0df08ddac88",
+    "app/matcher.py": "add2ef11733ed070acd38688f2f868e3bd25f50d33e6fda64a961e1d17f2886c",
+    "tests/test_v018_m1_sparse_recall.py": "d074cb59aae4bd145a8627d72b44ec7ee9a82137eef4f1f45645eceaa4db2f0d",
+    "doc/V0.1.8/evidence/m1_r01_eval.py": "f9e08c440a49b80af8217a20ee36164397f8dcf6fa0efaea8c1c7c0a92052b20",
+    "doc/V0.1.8/evidence/m1_r01_comparison.json": "cc5ccf55d9cda7fde22421f10da8d1e5e6fd1f88d2201e2231dba4067f141697",
+    "doc/V0.1.8/evidence/m1_r01_gate_exact.json": "d4b0faee01fed8ff6df4e3efd9ba52160ce348a95be133555980f89c861de761"
+  },
+  "verdict": "PASS"
+}

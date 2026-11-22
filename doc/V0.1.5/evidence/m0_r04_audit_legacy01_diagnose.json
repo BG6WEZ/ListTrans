@@ -1,0 +1,73 @@
+{
+ "golden_targeted_by_filter": 25,
+ "golden_hits_sample": [
+  {
+   "id": "GT-0217",
+   "name": "空调自控系统",
+   "specification": "1.名称：洁净型空调机组自动化控制系统\n2.规格：包含自控柜体及柜体内所有配置材",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0313",
+   "name": "排风机控制盒",
+   "specification": "1.名称：排风机控制盒\n2.规格：定制，带排风机状态指示灯、启停按钮、紧急停止按",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0576",
+   "name": "电力电缆头",
+   "specification": "1.名称：电力电缆终端头\n2.规格、型号：截面150/185/240mm2\n3.",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0664",
+   "name": "医用静音型排风机",
+   "specification": "1.名称：医用静音型排风机\n2.规格：风量：1000m3/h；机外余压：250p",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0665",
+   "name": "医用静音型排风机",
+   "specification": "1.名称：医用静音型排风机\n2.规格：风量：1200m3/h；机外余压：250p",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0666",
+   "name": "医用静音型排风机",
+   "specification": "1.名称：医用静音型排风机\n2.规格：风量：1500m3/h；机外余压：300p",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0667",
+   "name": "医用静音型排风机",
+   "specification": "1.名称：医用静音型排风机\n2.规格：风量：1500m3/h；机外余压：400p",
+   "target_name": ""
+  },
+  {
+   "id": "GT-0668",
+   "name": "医用静音型排风机",
+   "specification": "1.名称：医用静音型排风机\n2.规格：风量：1500m3/h；机外余压：600p",
+   "target_name": ""
+  }
+ ],
+ "harmful_target_in_golden": false,
+ "materials_rows_after_init_db": 0,
+ "materials_matching_target_prefix": 0,
+ "db_path": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_legacy01_1975f9o1\\db\\materials.db",
+ "config_dir": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_legacy01_1975f9o1\\config",
+ "golden_path": "C:\\Users\\tlyer\\project\\ListTrans\\tests\\fixtures\\golden_set_v1.json",
+ "model_dir": "C:\\Users\\tlyer\\project\\ListTrans\\model_offline",
+ "vector_index_enabled": true,
+ "sandbox_status": "completed",
+ "sandbox_passed": true,
+ "sandbox_report": {
+  "passed": true,
+  "targeted_count": 24,
+  "improved_count": 0,
+  "degraded_count": 0,
+  "degraded_from_top1": 0,
+  "details": [],
+  "reason": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条）"
+ },
+ "sandbox_message": "门禁通过：稳态无退化（改善: 0 条, 恶化: 0 条）"
+}

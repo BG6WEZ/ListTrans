@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.server import app
-from app.auth_manager import create_access_token, get_user_by_username
+from app.auth_manager import init_auth_db, issue_token_for_user, get_user_by_username
+from app.session_manager import init_session_db
 from app.audit_manager import (
     init_audit_tables, log_audit_event, record_heartbeat,
     get_online_and_active_users, get_server_hardware_metrics,
@@ -21,12 +22,23 @@ client = TestClient(app)
 
 @pytest.fixture(scope="module")
 def admin_token():
+    # A-M0-05: 按实际依赖初始化隔离账号库与审计表，不依赖业务库已有数据或其他模块副作用。
+    # init_auth_db 创建 users/login_attempts 并写入合成默认 admin；init_audit_tables 创建
+    # audit_logs/active_heartbeats/load_alert_snapshots/system_stats_summary；init_session_db
+    # 创建 get_aggregated_statistics 依赖的 work_sessions。均使用 conftest 注入的隔离 AUTH_DB_PATH。
+    init_auth_db()
     init_audit_tables()
+    init_session_db()
     admin_user = get_user_by_username("admin")
-    token = create_access_token(data={"sub": "admin", "role": "admin"})
+    assert admin_user is not None, "init_auth_db 后必须存在合成默认 admin 账号"
+    token = issue_token_for_user(admin_user)
     return token
 
 def test_audit_manager_direct():
+    # A-M0-05: log_audit_event 未传 user_id 时回查 users 表、get_aggregated_statistics
+    # 依赖 login_attempts/work_sessions，按实际依赖补齐初始化（隔离 AUTH_DB_PATH 内）。
+    init_auth_db()
+    init_session_db()
     init_audit_tables()
     
     # 1. Test logging audit event

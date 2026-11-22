@@ -1,0 +1,7 @@
+{"check":"rules/off","exit_code":0,"seconds":153.5305505}
+{"check":"rules/on","exit_code":0,"seconds":133.797456}
+{"check":"pytest/specialist","exit_code":0,"seconds":24.6043952}
+{"check":"pytest/full","exit_code":4,"seconds":0.5009128}
+{"check":"isolation/after","exit_code":0,"seconds":8.0080728}
+{"check":"pytest/full_retry","exit_code":0,"seconds":562.8252654}
+{"check":"isolation/after_full","exit_code":0,"seconds":7.2031513}

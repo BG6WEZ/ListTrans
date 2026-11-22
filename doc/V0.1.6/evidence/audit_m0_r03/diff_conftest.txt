@@ -1,0 +1,117 @@
+﻿diff --git a/.local-archive/v016_m0_r03_pre_backup/tests/conftest.py b/tests/conftest.py
+index d21b28b..99ff997 100644
+--- a/.local-archive/v016_m0_r03_pre_backup/tests/conftest.py
++++ b/tests/conftest.py
+@@ -23,8 +23,10 @@ V015-M0 测试隔离与可复验环境（pytest 全局 conftest）。
+ """
+ import os
+ import sys
++import socket
+ import shutil
+ import tempfile
++import ipaddress
+ import importlib
+ from pathlib import Path
+ 
+@@ -105,8 +107,10 @@ def _apply_env(layout: dict) -> None:
+         "BINDING_FEEDBACK_FILE": str(layout["binding_feedback_file"]),
+         "FEEDBACK_SAMPLES_FILE": str(layout["feedback_samples_file"]),
+         "GOLDEN_DETAIL_FILE": str(layout["golden_detail_file"]),
+-        # 测试默认关闭 LLM 付费调用与开发态鉴权绕过
+-        "LLM_ENABLED": os.getenv("LLM_ENABLED", "false"),
++        # 测试默认关闭 LLM 付费调用与开发态鉴权绕过（防止 .env 透传真实 Key）
++        "LLM_ENABLED": "false",
++        "DASHSCOPE_API_KEY": "",
++        "DEEPSEEK_API_KEY": "",
+         "AUTH_DEV_MODE": os.getenv("AUTH_DEV_MODE", "false"),
+         "TESTING": "1",
+     }
+@@ -203,6 +207,88 @@ def _isolation_guardrails():
+     os.environ["LISTTRANS_GUARDRAIL_CHECKED"] = _format_checks(post_check)
+ 
+ 
++BLOCKED_EXTERNAL_ATTEMPTS = []
++
++
++def _is_loopback_target(address) -> bool:
++    if address is None:
++        return True
++    if isinstance(address, tuple) and len(address) >= 1:
++        host = str(address[0] or "").strip().lower()
++    elif isinstance(address, str):
++        host = address.strip().lower()
++    else:
++        return True
++    if host in ("", "localhost", "127.0.0.1", "::1"):
++        return True
++    try:
++        return ipaddress.ip_address(host).is_loopback
++    except ValueError:
++        return False
++
++
++@pytest.fixture(scope="session", autouse=True)
++def _offline_network_and_llm_guard():
++    """C-M0-09: 会话级离线护栏，阻断非回环外呼与未 mock 的 LLM API 调用（含 daemon 线程）。"""
++    orig_socket = socket.socket
++    orig_create_connection = socket.create_connection
++    orig_completions_create = None
++    completions_cls = None
++
++    if getattr(orig_socket, "_is_offline_guard", False):
++        yield
++        return
++
++    class _OfflineTestSocket(orig_socket):
++        _is_offline_guard = True
++
++        def connect(self, address):
++            if self.family in (socket.AF_INET, socket.AF_INET6) and not _is_loopback_target(address):
++                msg = f"Offline test sandbox blocked external socket connect to {address!r}"
++                BLOCKED_EXTERNAL_ATTEMPTS.append(msg)
++                raise RuntimeError(msg)
++            return super().connect(address)
++
++        def connect_ex(self, address):
++            if self.family in (socket.AF_INET, socket.AF_INET6) and not _is_loopback_target(address):
++                msg = f"Offline test sandbox blocked external socket connect_ex to {address!r}"
++                BLOCKED_EXTERNAL_ATTEMPTS.append(msg)
++                raise RuntimeError(msg)
++            return super().connect_ex(address)
++
++    def _guarded_create_connection(address, *args, **kwargs):
++        if not _is_loopback_target(address):
++            msg = f"Offline test sandbox blocked external create_connection to {address!r}"
++            BLOCKED_EXTERNAL_ATTEMPTS.append(msg)
++            raise RuntimeError(msg)
++        return orig_create_connection(address, *args, **kwargs)
++
++    socket.socket = _OfflineTestSocket
++    socket.create_connection = _guarded_create_connection
++
++    try:
++        from openai.resources.chat.completions import Completions as _Completions
++        completions_cls = _Completions
++        orig_completions_create = _Completions.create
++
++        def _guarded_completions_create(self, *args, **kwargs):
++            msg = "Offline test sandbox blocked unmocked LLM Completions.create call"
++            BLOCKED_EXTERNAL_ATTEMPTS.append(msg)
++            raise RuntimeError(msg)
++
++        _Completions.create = _guarded_completions_create
++    except Exception:
++        completions_cls = None
++
++    try:
++        yield
++    finally:
++        socket.socket = orig_socket
++        socket.create_connection = orig_create_connection
++        if completions_cls is not None and orig_completions_create is not None:
++            completions_cls.create = orig_completions_create
++
++
+ @pytest.fixture()
+ def isolated_layout():
+     """暴露隔离布局给需要断言路径的测试。"""

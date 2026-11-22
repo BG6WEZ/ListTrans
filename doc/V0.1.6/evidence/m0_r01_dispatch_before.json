@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-17",
+  "role": "coordinator",
+  "phase": "before",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "previous_delivery_checked": 22,
+  "previous_delivery_changed": [
+    "doc/00_项目管理/进度总表.md",
+    "doc/README.md"
+  ],
+  "unexpected_previous_delivery_changes": [
+    "doc/00_项目管理/进度总表.md",
+    "doc/README.md"
+  ],
+  "protected": {
+    "source_hashes": {
+      "checked": 100,
+      "mismatches": []
+    },
+    "model_hashes": {
+      "checked": 29,
+      "mismatches": []
+    },
+    "fixed_evidence_hashes": {
+      "checked": 70,
+      "mismatches": []
+    }
+  },
+  "business_snapshot_equal": true,
+  "reference_snapshot_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "document_hashes": {
+    "doc/README.md": "251f9906b97bb86ac85156ff3518147fd989b63a095109142713573ca802ff44",
+    "doc/00_项目管理/版本路线图.md": "27159769bfe8b78875982c11ca3ebcac1a622ae38e0aef4d8189c8e240c60133",
+    "doc/00_项目管理/进度总表.md": "e89837efb2a1227b4dbb6300b034a99a3cdfa318a340efd203fd7fdbe896c1d0",
+    "doc/00_项目管理/问题与版本归属总台账.md": "d4469cce33ec2ce9fdecf5eacc15447bfa066817bfd66510c6c17a238ec212f7",
+    "doc/V0.1.5/03_终审与版本准入.md": "7612a791e1ac6b831f247afb69d635a5e85d6b3552acb49a286a64d3bc9451cf",
+    "doc/V0.1.6/01_实施方案与任务包.md": "07f2dab3daacab508bb341571e06da41140a5761046e42314d6faa0c24b5cfe7",
+    "doc/V0.1.6/02_任务台账.md": "2fe07b8a9ff9a307e6bfd3f05e6d69a6aa1c9e94c9b8e246f4823381fa5b8eb0",
+    "doc/V0.1.6/03_终审与版本准入.md": "0e91d5faadd92fd66d4ff86b987829d382b7de4983bccff17c6698d32706a133",
+    "doc/V0.1.6/rounds/README.md": "d4ef1ee45e2bf5be2ff25bcc5292213fbf94a49d82f9263ac3f5b114d7c91d19",
+    "doc/V0.1.6/evidence/README.md": "a649e08b730dc6906bb01e795ed1ffe53c6d2c9e83a69df8b472e35409966bfa",
+    "doc/V0.1.6/rounds/V016-M0_R01_统筹下发.md": null
+  },
+  "previous_manifest_sha256": "47d65b4bc6f66a601d868b774602d0611f6ad2b43cde3836b5dc923f1d307aaa",
+  "tests_rerun": false,
+  "production_operations": false,
+  "integrity_verdict": "FAIL"
+}

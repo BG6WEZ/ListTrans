@@ -1,0 +1,25 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_test_e45r29r1",
+  "f06": {
+    "param_adjust_error": "OperationalError: table flywheel_pattern_aggregates has no column named pattern_key",
+    "is_processed_after_failure": [
+      0,
+      0
+    ],
+    "legacy_untrusted_mined": {
+      "suggestion_type": "ALIAS",
+      "source_pattern": "复现旧别名",
+      "target_value": "复现标准设备",
+      "discipline": "通用",
+      "support_count": 2,
+      "status": "observing"
+    }
+  },
+  "f27": {
+    "missing_ctx_clean_leaked_plumb_rule": true,
+    "missing_prof_with_category_leaked_extraction": false,
+    "missing_prof_with_category_leaked_matching": true,
+    "category_cleaning_skipped_when_prof_passed_as_cat": true,
+    "invalid_regex_swallowed_in_cleaning": true
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_count": 200,
+  "effective_baseline_differences": [
+    "README.md",
+    "deploy_guide.md"
+  ],
+  "unchanged_effective_baseline": 198,
+  "local_profile_prefixes_redacted": 194,
+  "checkpoints": {
+    "current": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_serial_before_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_serial_before_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_serial_after_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_serial_after_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_followup_before_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_followup_before_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_followup_after_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_followup_after_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_repeat_before_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_repeat_before_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_repeat_after_before": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    },
+    "m3_r01_repeat_after_after": {
+      "business_assets": 35,
+      "business_differences": [],
+      "auto_binding_rules": []
+    }
+  },
+  "restore_matches": {
+    "README.md": "7b73eb23e1f89fec2d568eb566fbcfcdd5197e6af0343d825843d1b0bc569d72",
+    "deploy_guide.md": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b",
+    "doc/V0.2.0/02_任务台账.md": "6a61370147c912045877fc6071e213b1c48fa81e85d63f5735f4997a8f93859d"
+  },
+  "rollback_patch_sha256": "ae47b79c0ab84917f983ea5eb4c4c699837e86733f8e568d719fb35661489449",
+  "reverse_apply_checked": true,
+  "replay_location": "outside workspace"
+}

@@ -1,0 +1,33 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\tlyer\project\ListTrans\venv\Scripts\python.exe
+cachedir: .pytest_cache
+LISTTRANS 测试隔离根目录: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_6taxbew0
+物料库: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_6taxbew0\db\materials.db
+账号库: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_6taxbew0\db\auth.db
+缺失核心依赖: 无
+缺失鉴权依赖: 无
+缺失向量依赖: 无
+rootdir: C:\Users\tlyer\project\ListTrans
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 10 items
+
+tests/test_m4_auth_lifecycle.py::test_fail_closed_production_secret_and_admin_password PASSED [ 10%]
+tests/test_m4_auth_lifecycle.py::test_testing_blocks_dev_mode_and_auto_excel_import PASSED [ 20%]
+tests/test_m4_auth_lifecycle.py::test_legacy_auth_db_idempotent_and_transactional_migration PASSED [ 30%]
+tests/test_m4_auth_lifecycle.py::test_temp_passwords_must_change_and_token_invalidation_http PASSED [ 40%]
+tests/test_m4_auth_lifecycle.py::test_concurrent_login_vs_password_change_race PASSED [ 50%]
+tests/test_m4_permissions_and_tasks.py::test_f04_rule_state_machine_spoof_isolation_and_publish_gate PASSED [ 60%]
+tests/test_m4_permissions_and_tasks.py::test_f04_legacy_rule_migration_and_disabled_re_enable_blocked PASSED [ 70%]
+tests/test_m4_permissions_and_tasks.py::test_f04_binding_rules_admin_only_while_row_confirm_stays_working PASSED [ 80%]
+tests/test_m4_permissions_and_tasks.py::test_f21_task_ownership_across_upload_db_and_flywheel_eval PASSED [ 90%]
+tests/test_m4_permissions_and_tasks.py::test_f11_deploy_fail_closed_zero_hardcoded_secrets_and_docker_boundary PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_m4_permissions_and_tasks.py::test_f04_rule_state_machine_spoof_isolation_and_publish_gate
+  C:\Users\tlyer\project\ListTrans\app\vector_index.py:92: FutureWarning: The `get_sentence_embedding_dimension` method has been renamed to `get_embedding_dimension`.
+    self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 10 passed, 1 warning in 20.95s ========================
+M4_CASES_EXIT=0 WALL_SECONDS=22.464

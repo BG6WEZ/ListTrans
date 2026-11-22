@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/",
+    "-q",
+    "-o",
+    "faulthandler_timeout=45"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 151.547
+}

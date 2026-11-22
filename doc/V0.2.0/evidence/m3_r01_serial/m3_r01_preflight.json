@@ -1,0 +1,28 @@
+{
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_count": 200,
+  "effective_baseline_drift": [],
+  "archive_entries_verified": 72,
+  "editable_original_sha256": {
+    "README.md": "7b73eb23e1f89fec2d568eb566fbcfcdd5197e6af0343d825843d1b0bc569d72",
+    "deploy_guide.md": "c35df24850a940bb13c4e100324495c4ec708b0e544073b5360cb736b335276b",
+    "doc/V0.2.0/02_任务台账.md": "6a61370147c912045877fc6071e213b1c48fa81e85d63f5735f4997a8f93859d"
+  },
+  "business_assets": 35,
+  "business_differences": [],
+  "auto_binding_rules": [],
+  "native_root": "%USERPROFILE%\\AppData\\Local\\Temp\\listtrans_v020_m3_t37xh2qy",
+  "dispatch_sha256": "c989cef3224496470db147fabcf5ac8d730f81895e8012b5118cae7eefb7c87d",
+  "switches": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LLM_ENABLED": "false",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off"
+  }
+}

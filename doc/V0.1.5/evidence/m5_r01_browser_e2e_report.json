@@ -1,0 +1,55 @@
+{
+  "steps": {
+    "ui_accept_and_guide_verified": {
+      "xlsxAccept": ".xlsx",
+      "dbAccept": ".xlsx,.xls",
+      "guideHtml": true
+    },
+    "client_xls_rejected": {
+      "alerts": [
+        "工程清单上传仅支持标准 .xlsx 文件，旧版 .xls 文件请先另存为 .xlsx 后再上传。"
+      ],
+      "itemCount": 0,
+      "inputVal": ""
+    },
+    "xlsx_upload_and_match": [
+      {
+        "name": "止回阀",
+        "code": "",
+        "status": "recommended"
+      },
+      {
+        "name": "防爆检修电源箱",
+        "code": "",
+        "status": "recommended"
+      }
+    ],
+    "blocked_export_422_no_download": {
+      "alerts": [
+        "导出失败: 第 1 行「止回阀」：未确认：须显式人工确认或满足带约束的自动接受规则后方可导出"
+      ],
+      "download_count": 0
+    },
+    "save_session_and_legacy_downgrade": {
+      "downgraded": 2
+    },
+    "history_restore_verified": true,
+    "valid_export_download": {
+      "filename": "m5_ui_query_已匹配.xlsx",
+      "size_bytes": 5793,
+      "sha256": "cd3001846a66acfc0bb1025c1decbec1a3a64a71aef5ff6b2644197feeb1545e",
+      "row_count": 7,
+      "verified_codes": [
+        "M5-UI-001",
+        "3.50.29.0199/0200"
+      ]
+    },
+    "admin_health_live": {
+      "employee_forbidden_status": 403,
+      "status": "healthy",
+      "metrics_available": true,
+      "memory_total_gb": 15.69
+    }
+  },
+  "passed": true
+}

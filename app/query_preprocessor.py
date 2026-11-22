@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 from typing import Dict, Any, Tuple, Optional, List
 
-from app.normalizer import clean_text_standard, to_half_width, convert_de_to_dn
-from app.domain_router import route_domain
-from app.domain_extractors import ConfigDrivenExtractor, parse_numeric_complex
+from app.normalizer import (
+    clean_text_standard,
+    clean_text_standard_with_diagnostics,
+    apply_dynamic_cleaning_rules_with_context,
+    to_half_width,
+    convert_de_to_dn,
+    dynamic_rule_matches_query,
+)
+from app.rule_context import RuleContext
+from app.domain_router import route_domain, route_domain_with_confidence
+from app.domain_extractors import ConfigDrivenExtractor, parse_numeric_complex, detect_three_state_flag
 
 # Keywords that indicate noise/work description sections in query manifests
 NOISE_SECTION_KEYWORDS = [
@@ -542,9 +551,15 @@ def extract_query_hvac_specific_params(combined_text: str, kv_dict: Dict[str, An
             hvac_attrs["结构形式"] = "卧式暗装"
             hvac_attrs["卧式"] = True
 
-    if any(k in t_clean for k in ["自带提升泵", "带提升泵", "提升泵", "冷凝水提升泵", "带冷凝水提升泵"]):
+    # V015-M3：提升泵三态——否定前缀优先（"不带冷凝水提升泵" 不再因子串命中肯定词）；
+    # 明确肯定保留旧字符串键与布尔键，明确否定写 False，未说明留缺省(unknown)
+    pump_state = detect_three_state_flag(
+        t_clean, ["自带提升泵", "带提升泵", "提升泵", "冷凝水提升泵", "带冷凝水提升泵"])
+    if pump_state is True:
         hvac_attrs["带冷凝水提升泵"] = "带冷凝水提升泵"
         hvac_attrs["提升泵"] = True
+    elif pump_state is False:
+        hvac_attrs["提升泵"] = False
 
     # 4. Multi-split VRF indoor unit cooling capacity
     if any(k in t_clean for k in ["多联机", "多联式", "VRV", "VRF"]):
@@ -557,9 +572,13 @@ def extract_query_hvac_specific_params(combined_text: str, kv_dict: Dict[str, An
                 pass
 
     # 5. Fan explosion-proof & noise reduction
-    if any(k in t_clean for k in ["防爆", "防爆型", "防爆风机", "EX", "BT4", "CT4"]):
+    # V015-M3：防爆三态——否定前缀优先，修复"非防爆"先命中肯定词而永远置 True 的倒置；
+    # 明确否定写 False、肯定写 True、未说明留缺省(unknown)
+    ex_state = detect_three_state_flag(
+        t_clean, ["防爆", "防爆型", "防爆风机", "EX", "BT4", "CT4"])
+    if ex_state is True:
         hvac_attrs["防爆"] = True
-    elif "非防爆" in t_clean:
+    elif ex_state is False:
         hvac_attrs["防爆"] = False
 
     if "静音" in t_clean or "消声" in t_clean:
@@ -583,11 +602,23 @@ def extract_query_hvac_specific_params(combined_text: str, kv_dict: Dict[str, An
 
     # Shape detection for dampers & terminals
     dim_2d = re.search(r'(\d+(?:\.\d+)?)\s*[*x×]\s*(\d+(?:\.\d+)?)', t_clean)
-    phi_match = re.search(r'[φΦ直径DNdeDe]\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean)
+    # V015-M3：DN 与 De/φ/直径 前缀拆分——DN 只写管径字段，严禁把 DN 数值写入外径；
+    # De 归外径族（与 domain_extractors 管材 De/φ 约定一致），不再共用单字符类误吞 N/e
+    dn_dim_match = re.search(r'DN\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean, re.IGNORECASE)
+    phi_match = re.search(r'(?:φ|Φ|⌀|Ф|直径|De)\s*[:：]?\s*(\d+(?:\.\d+)?)', t_clean, re.IGNORECASE)
     if dim_2d:
         hvac_attrs["形状"] = "矩形"
         hvac_attrs["尺寸_2d"] = f"{dim_2d.group(1)}*{dim_2d.group(2)}"
         hvac_attrs["is_circular"] = False
+    elif dn_dim_match:
+        hvac_attrs["形状"] = "圆形"
+        hvac_attrs["is_circular"] = True
+        try:
+            dn_num = float(dn_dim_match.group(1))
+            hvac_attrs["dn_val"] = dn_num
+            hvac_attrs["管径"] = f"DN{dn_dim_match.group(1)}"
+        except Exception:
+            pass
     elif phi_match:
         hvac_attrs["形状"] = "圆形"
         hvac_attrs["is_circular"] = True
@@ -672,21 +703,65 @@ def canonicalize_query_attrs(domain: str, attrs: Dict[str, Any], raw_text: str) 
 
     return clean_attrs
 
-def extract_query_params(name: str, specification: str, category: str) -> Dict[str, Any]:
+def extract_query_params(
+    name: str,
+    specification: str,
+    category: str,
+    *,
+    material_category: str = "",
+    strict_rules: bool = False,
+) -> Dict[str, Any]:
     """
     Main entry point for extracting structured parameters from raw query manifests.
+    `category` is the historical professional/discipline parameter; `material_category`
+    holds the distinct material category column without cross-contaminating `professional`.
     """
     # 1. Decouple name and spec if spec is embedded in name
     effective_name, effective_spec = decouple_name_and_spec(name, specification)
-    name_clean = clean_text_standard(effective_name or "").strip()
+    prof_clean = (category or "").strip()
+    mat_cat_clean = (material_category or "").strip()
+    clean_ctx = RuleContext.from_fields(
+        professional=prof_clean,
+        material_category=mat_cat_clean,
+        name=effective_name or name or "",
+        raw_name=effective_name or name or "",
+        original_name=name or "",
+        stage="cleaning",
+    )
+    name_clean, name_clean_diag = clean_text_standard_with_diagnostics(
+        effective_name or "",
+        rule_context=clean_ctx,
+        raise_on_error=strict_rules,
+    )
+    name_clean = name_clean.strip()
     spec_raw = (effective_spec or "").strip()
-    cat_clean = (category or "").strip()
 
-    # 2. Determine domain using route_domain
-    domain = route_domain(cat_clean, name_clean, spec_raw)
-
-    # 3. Slice sections & parse KV blocks
+    # 2. Slice sections before routing so work-content noise ("工作内容：接线、穿引线") does not poison domain routing
     material_block, noise_block = slice_query_sections(spec_raw)
+
+    # 3. Determine domain & confidence using route_domain_with_confidence (distinct from RuleContext.professional)
+    domain, domain_confidence, domain_tier = route_domain_with_confidence(
+        prof_clean or mat_cat_clean,
+        name_clean,
+        material_block or spec_raw,
+        prof_clean,
+    )
+
+    # 4. Parse KV blocks (apply ONLY dynamic cleaning rules on spec block)
+    material_block, spec_clean_diag = apply_dynamic_cleaning_rules_with_context(
+        material_block,
+        rule_context=RuleContext.from_fields(
+            professional=prof_clean,
+            material_category=mat_cat_clean,
+            domain=domain,
+            name=name_clean or effective_name or name or "",
+            raw_name=effective_name or name or "",
+            original_name=name or "",
+            stage="cleaning",
+        ),
+        phase="spec-cleaning",
+        raise_on_error=strict_rules,
+    )
     kv_dict = parse_query_kv_blocks(material_block)
 
     # Combine name and material block
@@ -766,57 +841,211 @@ def extract_query_params(name: str, specification: str, category: str) -> Dict[s
     canonical_attrs = canonicalize_query_attrs(domain, attrs, combined_text)
     normalized_attrs = normalize_unit_scales(canonical_attrs)
 
-    # 8. Apply dynamic LLM extraction rules
+    # V017-M1 / M1-C02：Query 端位号/型号分离（与 Material 端一致）。
+    # 工程设备位号（AHU-J-01/PAU-D301）与箱号（AP-1/AL-2）归 tag_id/box_type，
+    # 真实产品型号（RAU-Q-D301）归 model，避免位号差异误触发 model_conflict。
+    from app.preprocessor import extract_model, extract_device_tag, is_device_tag
+    from app.domain_extractors import extract_switchgear_params
+    _q_device_tag = extract_device_tag(combined_text)
+    if _q_device_tag:
+        normalized_attrs["tag_id"] = _q_device_tag
+    _q_box = extract_switchgear_params(combined_text).get("box_type")
+    if _q_box:
+        normalized_attrs["box_type"] = _q_box
+    _q_model = extract_model(combined_text)
+    # V017-M1 / M1-C02：仅当 extract_model 提取到"真实产品型号"时才回填/覆盖 型号；
+    # 这是位号/型号分离的真实目标。对电缆/电线规格（WDZYJY-5*10、YJV-4*120+1*70、
+    # WDZB-BYJR-10mm²），extract_model 只能得到含阻燃等级前缀的型号主体（WDZB-BYJR），
+    # 而 cable_params 已提取出可泛化召回/打分的型号族（BYJR / YJV），无条件覆盖会
+    # 引入 WDZB vs WDZA 这类阻燃等级误冲突，破坏 M0 既有型号族匹配（F26 回归红线）。
+    # 电缆/电线型号前缀统一按 extract_cable_params 的型号族集合识别，命中则不覆盖。
+    _CABLE_MODEL_PREFIXES = (
+        "WDZ", "WDZN", "WDZB", "WDZA", "WDZC", "NH", "ZR",
+        "YJV", "YJY", "YJY22", "YJV22", "BV", "BVR", "BYJ", "BYJR", "BLV",
+        "KVV", "KVVP", "KVVP2", "RVV", "RVVP", "RYJ", "RYJS", "RYSP", "RYY", "RYYP",
+    )
+    _existing_model = normalized_attrs.get("型号", "")
+    _q_model_upper = _q_model.upper() if _q_model else ""
+    _is_cable_model = any(
+        _q_model_upper == p or _q_model_upper.startswith(p + "-") or _q_model_upper.startswith(p + " ")
+        for p in _CABLE_MODEL_PREFIXES
+    )
+    _is_compound_model = bool(re.search(r'^[A-Z]+-[A-Z]', _q_model)) if _q_model else False
+    if _q_model and not is_device_tag(_q_model) and not _is_cable_model and (_is_compound_model or not _existing_model):
+        normalized_attrs["型号"] = _q_model
+
+    # 8. Apply dynamic LLM extraction rules under unified RuleContext
+    ext_ctx = RuleContext.from_fields(
+        professional=prof_clean,
+        material_category=mat_cat_clean,
+        domain=domain,
+        name=final_name,
+        raw_name=name_clean or effective_name or name or "",
+        original_name=name or "",
+        stage="extraction",
+    )
+    ext_diag: Dict[str, Any] = {
+        "stage": "extraction",
+        "context": ext_ctx.to_scope_dict(),
+        "applied_rules": [],
+        "skipped_rules": [],
+        "errors": [],
+        "degraded": False,
+    }
+    # V017-M1 / M1-C01：动态规则抽取的字段 key 属受控规则产物，视为白名单字段，
+    # 不因未登记在 domain_schema 白名单而被误隔离（区别于自由文本噪声）。
+    dynamic_rule_keys: set = set()
     try:
         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
         active_rules = LLMRuleManager.get_active_rules()
-        
-        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
-            if not scope_tgt:
-                return True
-            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
-            for c in candidate_names:
-                if not c:
-                    continue
-                c_low = str(c).lower()
-                if any(t in c_low or c_low in t for t in targets):
-                    return True
-            return False
-
         for r in active_rules:
-            scope_lvl = r.get("scope_level", "category")
-            scope_tgt = r.get("scope_target", "")
-            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [cat_clean, domain, discipline, "给排水", "通用"]):
-                continue
-            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [name_clean, final_name, combined_text]):
-                continue
-            dsl = r.get("parsed_dsl", {})
-            extraction_rules = dsl.get("extraction_rules", [])
-            if extraction_rules:
-                dyn_extracted = DynamicRuleInterpreter.apply_extraction_rules(combined_text, extraction_rules)
-                for k, v in dyn_extracted.items():
-                    if v is not None:
-                        normalized_attrs[k] = v
-                        if k in ["name", "名称"]:
-                            normalized_attrs["名称"] = str(v)
-                        elif k in ["material", "材质"]:
-                            normalized_attrs["材质"] = str(v)
-                        elif k in ["specification", "规格", "dn_val", "口径", "管径"]:
-                            m_dn = re.search(r'DN\s*(\d+)', str(v), re.IGNORECASE)
-                            if m_dn:
-                                normalized_attrs["管径"] = float(m_dn.group(1))
-                                normalized_attrs["dn_val"] = float(m_dn.group(1))
-                            else:
-                                normalized_attrs["规格"] = str(v)
-    except Exception:
-        pass
+            rid = str(r.get("rule_id") or r.get("id") or "?")
+            try:
+                scope_res = ext_ctx.evaluate_rule(r)
+                if not scope_res.matched:
+                    ext_diag["skipped_rules"].append({
+                        "rule_id": rid,
+                        "phase": "extraction",
+                        "reason": scope_res.reason,
+                    })
+                    continue
+                dsl = r.get("parsed_dsl")
+                if dsl is None:
+                    dsl = {}
+                if not isinstance(dsl, dict):
+                    raise ValueError(f"动态提取规则 {rid} parsed_dsl 结构非法")
+                extraction_rules = dsl.get("extraction_rules", [])
+                if extraction_rules is None:
+                    extraction_rules = []
+                if not isinstance(extraction_rules, list):
+                    raise ValueError(f"动态提取规则 {rid} extraction_rules 结构非法")
+                if extraction_rules:
+                    from app.llm_rule_engine import RuleHitStatsTracker
+                    dyn_extracted = DynamicRuleInterpreter.apply_extraction_rules(combined_text, extraction_rules)
+                    ext_diag["applied_rules"].append({"rule_id": rid, "phase": "extraction"})
+                    if dyn_extracted and r.get("rule_id"):
+                        RuleHitStatsTracker().record_hit(r["rule_id"])
+                    for k, v in dyn_extracted.items():
+                        if v is not None:
+                            normalized_attrs[k] = v
+                            dynamic_rule_keys.add(k)
+                            if k in ["name", "名称"]:
+                                normalized_attrs["名称"] = str(v)
+                            elif k in ["material", "材质"]:
+                                normalized_attrs["材质"] = str(v)
+                            elif k in ["specification", "规格", "dn_val", "口径", "管径"]:
+                                m_dn = re.search(r'DN\s*(\d+)', str(v), re.IGNORECASE)
+                                if m_dn:
+                                    normalized_attrs["管径"] = float(m_dn.group(1))
+                                    normalized_attrs["dn_val"] = float(m_dn.group(1))
+                                else:
+                                    normalized_attrs["规格"] = str(v)
+            except Exception as rule_exc:
+                logging.getLogger(__name__).error(
+                    "Dynamic extraction rule %s failed (%s): %s", rid, type(rule_exc).__name__, rule_exc
+                )
+                ext_diag["errors"].append({
+                    "rule_id": rid,
+                    "phase": "extraction",
+                    "error_type": type(rule_exc).__name__,
+                    "message": str(rule_exc),
+                })
+                ext_diag["degraded"] = True
+                if strict_rules:
+                    raise
+    except Exception as exc:
+        logging.getLogger(__name__).error(
+            "Dynamic extraction rules load failed (%s): %s", type(exc).__name__, exc
+        )
+        ext_diag["errors"].append({
+            "rule_id": "*",
+            "phase": "extraction",
+            "error_type": type(exc).__name__,
+            "message": str(exc),
+        })
+        ext_diag["degraded"] = True
+        if strict_rules:
+            raise
+
+    rule_diagnostics = {
+        "context": ext_ctx.to_scope_dict(),
+        "cleaning": {
+            "applied_rules": name_clean_diag["applied_rules"] + spec_clean_diag["applied_rules"],
+            "skipped_rules": name_clean_diag["skipped_rules"] + spec_clean_diag["skipped_rules"],
+            "errors": name_clean_diag["errors"] + spec_clean_diag["errors"],
+            "degraded": bool(name_clean_diag["degraded"] or spec_clean_diag["degraded"]),
+        },
+        "extraction": ext_diag,
+        "errors": name_clean_diag["errors"] + spec_clean_diag["errors"] + ext_diag["errors"],
+        "degraded": bool(name_clean_diag["degraded"] or spec_clean_diag["degraded"] or ext_diag["degraded"]),
+    }
+
+    # V017-M1 / M1-C01：统一类型化字段与字段白名单（Query 端）。
+    # 与 Material 端一致：白名单过滤 + typed_attrs 并行结构，非白名单键隔离。
+    # 动态规则抽取字段 key 视为受控白名单，不误隔离。
+    from app.typed_fields import build_typed_attrs, partition_whitelisted_attrs
+
+    whitelisted_attrs, unwhitelisted_attrs = partition_whitelisted_attrs(normalized_attrs)
+    # 回填动态规则字段（受控规则产物，属于白名单）
+    for dk in dynamic_rule_keys:
+        if dk in unwhitelisted_attrs:
+            whitelisted_attrs[dk] = unwhitelisted_attrs.pop(dk)
+    typed_attrs = build_typed_attrs(whitelisted_attrs, raw_text=combined_text, domain=domain)
 
     return {
         "domain": domain,
-        "attrs": normalized_attrs,
+        "domain_confidence": domain_confidence,
+        "domain_tier": domain_tier,
+        "attrs": whitelisted_attrs,
+        "typed_attrs": typed_attrs,
+        "unwhitelisted_attrs": unwhitelisted_attrs,
+        "schema_version": 3,
         "model": normalized_attrs.get("型号", "") or attrs.get("型号", ""),
+        # V015-M1 / F01：规范名称与清洗文本提升为顶层键。
+        # 此前仅存在于 attrs["名称"] / clean_text，生产端 get("name") 恒回退原始名，
+        # 导致向量编码文本为未清洗原文（施工噪声进入编码）。
+        "name": str(whitelisted_attrs.get("名称", "") or final_name or ""),
+        "spec": material_block,
         "clean_text": material_block,
         "noise_text": noise_block,
-        "kv_dict": kv_dict
+        "kv_dict": kv_dict,
+        "rule_diagnostics": rule_diagnostics,
     }
+
+
+def prepare_query(name: str, specification: str, professional: str,
+                  category: str = "", brand: str = "", unit: str = "",
+                  preserve_original: bool = True,
+                  strict_rules: bool = False) -> Dict[str, Any]:
+    """V015-M1 统一 Query 输入契约 + V016-M1 RuleContext 字段隔离。"""
+    prof = (professional or "").strip()
+    mat_cat = (category or "").strip()
+    parsed = extract_query_params(
+        name,
+        specification,
+        prof,
+        material_category=mat_cat,
+        strict_rules=strict_rules,
+    )
+
+    spec_name = str(parsed.get("name") or parsed.get("attrs", {}).get("名称") or "").strip()
+    clean_text = str(parsed.get("clean_text") or "").strip()
+
+    query_info: Dict[str, Any] = {
+        "name": spec_name or (name or "").strip(),
+        "specification": clean_text or (specification or "").strip(),
+        "category": mat_cat or prof or spec_name,
+        "material_category": mat_cat,
+        "brand": (brand or "").strip(),
+        "professional": prof,
+        "unit": (unit or "").strip(),
+        "parsed_spec": parsed,
+    }
+    if preserve_original:
+        query_info["original_name"] = name or ""
+        query_info["original_spec"] = specification or ""
+        query_info["original_unit"] = unit or ""
+        query_info["original_brand"] = brand or ""
+        query_info["original_category"] = category or ""
+    return query_info
 

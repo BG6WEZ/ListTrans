@@ -1,0 +1,14 @@
+{
+  "task": "V015-M2",
+  "round": "R01",
+  "role": "coordinator",
+  "date": "2026-11-14",
+  "timezone": "Asia/Shanghai",
+  "file": "web/app.js",
+  "sha256": "4a8eb6204c5e3f27cf7c81081e93dfbd71f3040ba1dea0dfdc86720e3caadc09",
+  "engine": "Node REPL V8 parser",
+  "command": "new vm.Script(source, {filename: appJsPath})",
+  "verdict": "PASS",
+  "scope": "JavaScript syntax parsing only. No DOM, browser interaction, server request, or production app execution.",
+  "browser_validation": "not executed; remains an explicit residual boundary"
+}

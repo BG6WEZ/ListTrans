@@ -1,0 +1,19 @@
+{
+  "suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "497",
+    "time": "628.469",
+    "timestamp": "2026-11-22T09:40:09.218652+08:00"
+  },
+  "exit_code": 0,
+  "flywheel": [
+    {
+      "classname": "tests.test_flywheel_end2end",
+      "name": "test_flywheel_end_to_end_pipeline",
+      "time": "43.168"
+    }
+  ]
+}

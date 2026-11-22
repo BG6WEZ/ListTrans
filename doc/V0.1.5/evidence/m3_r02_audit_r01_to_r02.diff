@@ -1,0 +1,1534 @@
+--- R01/app/binding_decisions.py
++++ R02/app/binding_decisions.py
+@@ -22,17 +22,21 @@
+ from app.auth_manager import get_auth_connection
+ from app.db_manager import get_db_connection
+ from app.matcher import (
++    _to_finite_float,
+     check_unit_compatibility,
+     get_unit_multiplier,
+     standardize_brand,
+     get_professional_category,
+     normalize_professional_category,
+     resolve_material_brand,
++    resolve_material_attrs,
+     parse_material_attrs,
+     normalize_material_grade,
+     KNOWN_MATERIAL_GRADES,
+     check_dn_od_conflicts,
+     detect_three_state_flag,
++    check_pump_conflict,
++    evaluate_dynamic_exclusions,
+     extract_query_params,
+ )
+ 
+@@ -219,21 +223,33 @@
+ # ---------------------------------------------------------------------------
+ # 硬冲突安全复核（服务层复用 matcher 纯函数，不改 matcher）
+ # ---------------------------------------------------------------------------
+-def evaluate_hard_conflicts(row: Dict[str, Any], material: Dict[str, Any]) -> Optional[str]:
++def evaluate_hard_conflicts(
++    row: Dict[str, Any],
++    material: Dict[str, Any],
++    binding: Optional[Dict[str, Any]] = None,
++    allow_unit_conversion: bool = False,
++) -> Optional[str]:
+     """对单个目标物料做硬冲突复核，返回阻断原因；无冲突返回 None。
+ 
+-    V015-M3：与 matcher 初始硬冲突门及评分管线同源，全部经 app.matcher 重导出的
+-    共享纯函数判定，推荐/规则接受/人工确认/导出四链路复用同一语义，不读取/修改
+-    ScoringContext 内部状态，不改 matcher 的权重/召回/阈值/金标：
++    V015-M3 / R02：与 matcher 初始硬冲突门、评分管线及动态规则同源，全部经
++    app.matcher 重导出的共享纯函数判定，推荐/规则接受/人工确认/恢复/导出全链路复用：
+     1. 专业：别名归一后比较（医用气体=医气），候选“其它”/查询“全部、其它”不臆断；
+     2. 品牌：品牌列空时解析 parsed_params.attrs.品牌 真实字符串，缺值/坏 JSON 为 unknown；
+-    3. 单位：物理维度隔离（米/平方米不兼容）；跨名单位须有可靠倍率，否则阻断静默接受；
+-    4. DN/外径分字段、304/316L 材质枚举、防爆/提升泵否定三态；任一侧未说明=unknown 不阻断。
++    3. 单位：物理维度隔离；跨名单位无可靠倍率阻断；非1倍率工程量在自动规则（静默接受）
++       与未按倍率换算时一律阻断（防 10 km→10 m 原数照搬）；允许显式换算的人工/恢复/导出
++       链路在服务端严格核验目标单位及 qty/qty_ratio；
++    4. DN/外径分字段（缺/坏 parsed_params 同源回退原文抽取）、304/316L 材质枚举、
++       提升泵双向互斥（不带泵 vs 带泵 及 带泵 vs 不带泵）、防爆双向互斥；
++    5. 动态规则硬排除（must_not_contain / must_contain）：与 matcher 同源全链路不可逆阻断。
+     """
+     q_name = str(row.get("original_name", "") or "")
+     q_spec = str(row.get("original_spec", "") or "")
+     q_text = f"{q_name} {q_spec}".strip()
+-    c_text = f"{material.get('specification', '') or ''} {material.get('description', '') or ''}".strip()
++    c_name = str(material.get("name", "") or "")
++    c_spec = str(material.get("specification", "") or "")
++    c_desc = str(material.get("description", "") or "")
++    c_text = f"{c_spec} {c_desc}".strip()
++    c_pump_text = f"{c_name} {c_text}".strip()
+ 
+     # 1. 专业冲突：编号前缀剥离 + 别名归一，与 matcher._check_initial_hard_conflicts 同源
+     q_prof = str(row.get("professional", "") or "").strip()
+@@ -253,20 +269,45 @@
+         if q_brand_std and c_brand_std and q_brand_std != c_brand_std:
+             return "品牌冲突阻断"
+ 
+-    # 3. 单位：先判物理维度，再判可靠倍率；跨名且无可靠倍率时阻断静默自动接受
++    # 3. 单位：物理维度隔离 + 可靠倍率校验 + 非1倍率防原数照搬服务端工程量核验
+     q_unit = str(row.get("original_unit", "") or "").strip()
+     c_unit = str(material.get("unit", "") or "").strip()
+     if q_unit and c_unit:
+         if not check_unit_compatibility(q_unit, c_unit):
+             return "单位不可换算阻断"
+-        if get_unit_multiplier(q_unit, c_unit) is None:
++        mult = get_unit_multiplier(q_unit, c_unit)
++        if mult is None:
+             return "单位倍率不可靠阻断"
+-
+-    # 查询侧结构化参数复用 matcher 同款抽取入口；候选侧取 parsed_params.attrs（坏 JSON={}）
++        if binding is not None:
++            b_unit = str(binding.get("unit", "") or "").strip()
++            if b_unit:
++                b_mult = get_unit_multiplier(b_unit, c_unit)
++                if b_mult is None or abs(b_mult - 1.0) > 1e-6:
++                    return "绑定目标单位与实时物料单位不一致阻断"
++        if abs(mult - 1.0) > 1e-9:
++            if not allow_unit_conversion or binding is None:
++                return "单位非1倍率工程量需按目标单位显式换算复核阻断"
++            orig_qty = _to_finite_float(row.get("original_qty"))
++            if orig_qty is None:
++                orig_qty = _to_finite_float(row.get("qty"))
++            if orig_qty is None or orig_qty <= 0:
++                return "单位非1倍率原行工程量无效阻断"
++            b_qty = _to_finite_float(binding.get("qty"))
++            b_ratio = _to_finite_float(binding.get("qty_ratio"))
++            if b_qty is None or b_ratio is None:
++                return "单位非1倍率工程量未按目标单位换算阻断"
++            expected_qty = orig_qty * mult
++            if (
++                abs(b_ratio - mult) > 1e-6 * max(1.0, abs(mult))
++                or abs(b_qty - expected_qty) > 1e-6 * max(1.0, abs(expected_qty))
++            ):
++                return "单位非1倍率工程量未按目标单位换算阻断"
++
++    # 查询侧与候选侧参数同源抽取（候选侧 parsed_params 优先，缺值/坏 JSON 回退原文抽取）
+     q_parsed = extract_query_params(
+         q_name, q_spec, row.get("professional") or row.get("original_category") or "")
+     q_attrs = q_parsed.get("attrs", {}) if isinstance(q_parsed, dict) else {}
+-    c_attrs = parse_material_attrs(material)
++    c_attrs = resolve_material_attrs(material)
+ 
+     # 4. DN/外径分字段硬约束（跨字段不比、缺值 unknown 不阻断、15=15.0 数值归一）
+     dn_od_reason = check_dn_od_conflicts(q_attrs, c_attrs)
+@@ -282,12 +323,10 @@
+         if q_grade in KNOWN_MATERIAL_GRADES and c_grade in KNOWN_MATERIAL_GRADES and q_grade != c_grade:
+             return "不锈钢牌号冲突硬隔离(304/316L)"
+ 
+-    # 6. 提升泵否定三态：仅“明确不带泵 vs 候选带泵”硬隔离，未说明不加分也不阻断
+-    q_pump_state = detect_three_state_flag(
+-        q_text, ["提升泵", "带提升泵", "冷凝水提升泵", "泵"])
+-    c_pump_state = detect_three_state_flag(c_text, ["提升泵", "冷凝水提升泵"])
+-    if q_pump_state is False and c_pump_state is True:
+-        return "提升泵否定冲突硬隔离(不带泵/带泵)"
++    # 6. 提升泵双向否定/要求三态（不带泵 vs 带泵，以及 带泵 vs 不带泵；unknown 不阻断）
++    pump_conflict = check_pump_conflict(q_text, c_pump_text, q_attrs, c_attrs)
++    if pump_conflict:
++        return pump_conflict
+ 
+     # 7. 防爆否定三态：抽取布尔优先、文本判定兜底；真肯定/否定互斥硬隔离，未说明 unknown
+     q_ex_attr = q_attrs.get("防爆")
+@@ -304,11 +343,19 @@
+     if q_ex_state is False and c_ex_state is True:
+         return "非防爆要求vs防爆硬隔离"
+ 
++    # 8. 动态规则硬排除（must_not_contain / must_contain 与 matcher 评分管线同源）
++    dyn_reasons = evaluate_dynamic_exclusions(row, material)
++    if dyn_reasons:
++        return f"动态规则硬排除: {'; '.join(dyn_reasons)}"
++
+     return None
+ 
+ 
+ def validate_bindings_against_row(
+-    row: Dict[str, Any], bindings: List[Dict[str, Any]]
++    row: Dict[str, Any],
++    bindings: List[Dict[str, Any]],
++    allow_unit_conversion: bool = True,
++    saved_bindings: Optional[List[Dict[str, Any]]] = None,
+ ) -> Dict[str, Any]:
+     """对整组绑定做新鲜有效性 + 硬冲突复核。
+ 
+@@ -317,11 +364,32 @@
+     invalid_codes = validate_binding_codes(bindings)
+     conflicts: List[Dict[str, str]] = []
+     live = fetch_live_material_map([b.get("code", "") for b in (bindings or [])])
++    saved_units: Dict[str, str] = {}
++    for sb in (saved_bindings or []):
++        sc = str(sb.get("code", "")).strip()
++        su = str(sb.get("unit", "") or "").strip()
++        if sc and su and sc not in saved_units:
++            saved_units[sc] = su
++
+     for b in (bindings or []):
+         code = str(b.get("code", "")).strip()
+         if not code or code in invalid_codes:
+             continue
+-        reason = evaluate_hard_conflicts(row, live[code])
++        reason = evaluate_hard_conflicts(
++            row, live[code], binding=b, allow_unit_conversion=allow_unit_conversion
++        )
++        if not reason and code in saved_units:
++            saved_unit = saved_units[code]
++            live_unit = str(live[code].get("unit", "") or "").strip()
++            if live_unit:
++                s_mult = get_unit_multiplier(saved_unit, live_unit)
++                if s_mult is None or abs(s_mult - 1.0) > 1e-6:
++                    reason = "确认后物料目标单位发生漂移阻断"
++            req_unit = str(b.get("unit", "") or "").strip()
++            if not reason and req_unit:
++                u_mult = get_unit_multiplier(req_unit, saved_unit)
++                if u_mult is None or abs(u_mult - 1.0) > 1e-6:
++                    reason = "绑定目标单位与确认记录不一致阻断"
+         if reason:
+             conflicts.append({"code": code, "reason": reason})
+     return {
+@@ -431,3 +499,16 @@
+ 
+ def has_confirmed_decision(user_id: int, scope_key: str, row: Dict[str, Any], bindings: List[Dict[str, Any]]) -> bool:
+     return get_decision(user_id, scope_key, row, bindings) is not None
++
++
++def extract_saved_bindings(record: Optional[Dict[str, Any]]) -> Optional[List[Dict[str, Any]]]:
++    """从 binding_decisions 记录的 payload_json 中解析确认时保存的绑定列表。"""
++    if not record or not record.get("payload_json"):
++        return None
++    try:
++        payload = json.loads(record["payload_json"])
++    except (TypeError, ValueError):
++        return None
++    if isinstance(payload, dict) and isinstance(payload.get("bindings"), list):
++        return payload["bindings"]
++    return None
+--- R01/app/domain_extractors.py
++++ R02/app/domain_extractors.py
+@@ -17,6 +17,17 @@
+ # 否定判定永远先于肯定词，避免 "非防爆" 因子串命中 "防爆"、"不带泵" 被 "泵" 吞掉
+ # ---------------------------------------------------------------------------
+ NEGATION_PREFIXES = ("不带", "非", "无", "不含", "未配", "无配", "不具有", "没有")
++
++# V015-M3 R02：提升泵双向互斥单一事实源（推荐/规则/确认/恢复/导出共用）
++PUMP_NEGATION_TARGETS = (
++    "自带提升泵", "带提升泵", "带冷凝水提升泵", "冷凝水提升泵",
++    "提升泵", "冷凝水泵", "排水泵", "泵",
++)
++PUMP_POSITIVE_KEYWORDS = (
++    "自带提升泵", "带提升泵", "带冷凝水提升泵", "冷凝水提升泵",
++    "提升泵", "含提升泵", "配提升泵", "带排水泵", "带冷凝水泵",
++    "带泵", "含泵", "配泵",
++)
+ 
+ 
+ def detect_three_state_flag(text: str, positive_keywords: List[str]) -> Optional[bool]:
+@@ -33,6 +44,43 @@
+     for pos in positive_keywords:
+         if pos and pos in t:
+             return True
++    return None
++
++
++def detect_pump_state(text: str, attrs: Optional[Dict[str, Any]] = None) -> Optional[bool]:
++    """提升泵三态判定：明确否定 False / 明确肯定 True / 未说明 None（unknown）。
++
++    显式否定前缀+泵词（含"不带泵"/"无泵"/"不带提升泵"）永远优先于肯定词与其它文本片段；
++    结构化布尔 attrs["提升泵"] 作为布尔补充；通用水泵名称如"离心水泵"不会误命中。
++    """
++    t = str(text or "")
++    if t:
++        for target in PUMP_NEGATION_TARGETS:
++            for prefix in NEGATION_PREFIXES:
++                if f"{prefix}{target}" in t:
++                    return False
++    if isinstance(attrs, dict) and isinstance(attrs.get("提升泵"), bool):
++        return attrs.get("提升泵")
++    if t:
++        for pos in PUMP_POSITIVE_KEYWORDS:
++            if pos in t:
++                return True
++    return None
++
++
++def check_pump_conflict(
++    q_text: str,
++    c_text: str,
++    q_attrs: Optional[Dict[str, Any]] = None,
++    c_attrs: Optional[Dict[str, Any]] = None,
++) -> Optional[str]:
++    """双向提升泵硬冲突判定：不带泵 vs 带泵，以及 带泵 vs 不带泵 均硬隔离；unknown 不阻断。"""
++    q_pump = detect_pump_state(q_text, q_attrs)
++    c_pump = detect_pump_state(c_text, c_attrs)
++    if q_pump is False and c_pump is True:
++        return "提升泵否定冲突硬隔离(不带泵/带泵)"
++    if q_pump is True and c_pump is False:
++        return "提升泵要求冲突硬隔离(带泵/不带泵)"
+     return None
+ 
+ 
+@@ -227,11 +275,20 @@
+             attrs["尺寸"] = attrs["尺寸"].replace('×', '*').replace('x', '*').replace(' ', '').strip()
+ 
+         # Materials post-processing fallback
+-        if "材质" not in attrs:
+-            for mat in ["不锈钢304", "不锈钢316L", "不锈钢", "碳钢", "镀锌钢板", "玻璃钢", "PP", "PPH", "UPVC", "PE", "铜"]:
+-                if mat in text:
+-                    attrs["材质"] = mat
+-                    break
++        if "材质" not in attrs or str(attrs.get("材质", "")).strip() == "不锈钢":
++            grade_m = re.search(
++                r'(?<![a-zA-Z0-9])(316L|S31603|06Cr19Ni10|304|S30408)(?![a-zA-Z0-9])',
++                text,
++                re.IGNORECASE,
++            )
++            if grade_m and ("不锈钢" in text or self.domain in ("pipe_ss", "pipe_steel")):
++                raw_g = grade_m.group(1).upper()
++                attrs["材质"] = "不锈钢316L" if raw_g in ("316L", "S31603") else "不锈钢304"
++            elif "材质" not in attrs:
++                for mat in ["不锈钢304", "不锈钢316L", "不锈钢", "碳钢", "镀锌钢板", "玻璃钢", "PP", "PPH", "UPVC", "PE", "铜"]:
++                    if mat.lower() in text.lower():
++                        attrs["材质"] = mat
++                        break
+ 
+         # 4. Cable specific extraction override to maintain legacy string format (like "5" and "2.5" or "3+2" and "185+95")
+         if self.domain in ["cable_power", "cable_control", "wire"]:
+--- R01/app/llm_rule_engine.py
++++ R02/app/llm_rule_engine.py
+@@ -599,13 +599,17 @@
+         with cls._cache_lock:
+             if cls._active_rules_cache is not None:
+                 return cls._active_rules_cache
+-            
++
+             conn = get_db_conn()
+-            cursor = conn.cursor()
+-            cursor.execute("SELECT * FROM llm_rules WHERE status = 'approved' ORDER BY priority ASC")
+-            rows = cursor.fetchall()
+-            conn.close()
+-            
++            try:
++                cursor = conn.cursor()
++                cursor.execute("SELECT * FROM llm_rules WHERE status = 'approved' ORDER BY priority ASC")
++                rows = cursor.fetchall()
++            except sqlite3.OperationalError:
++                return []
++            finally:
++                conn.close()
++
+             rules = []
+             for r in rows:
+                 item = dict(r)
+@@ -614,7 +618,7 @@
+                 except Exception:
+                     item["parsed_dsl"] = {}
+                 rules.append(item)
+-                
++
+             cls._active_rules_cache = rules
+             return rules
+ 
+@@ -788,6 +792,7 @@
+         
+         conn.commit()
+         conn.close()
++        cls.clear_active_cache()
+         return {"success": True, "rule_id": rule_id, "detail": "规则草稿保存成功。"}
+ 
+     @classmethod
+--- R01/app/matcher.py
++++ R02/app/matcher.py
+@@ -11,7 +11,12 @@
+ from app.query_preprocessor import extract_query_params
+ # V015-M3：三态否定单一事实源在 domain_extractors（无环低层），此处导入即重导出，
+ # binding_decisions 等模块仍可经 app.matcher 复用同一套语义
+-from app.domain_extractors import NEGATION_PREFIXES, detect_three_state_flag
++from app.domain_extractors import (
++    NEGATION_PREFIXES,
++    detect_three_state_flag,
++    detect_pump_state,
++    check_pump_conflict,
++)
+ 
+ logger = logging.getLogger(__name__)
+ 
+@@ -393,6 +398,109 @@
+     return {}
+ 
+ 
++_MATERIAL_GRADE_RE = re.compile(
++    r'(?<![a-zA-Z0-9])(316L|S31603|06Cr19Ni10|304|S30408)(?![a-zA-Z0-9])',
++    re.IGNORECASE,
++)
++_EXPLICIT_DN_RE = re.compile(r'(?:DN|公称直径)\s*[:：]?\s*(\d+(?:\.\d+)?)', re.IGNORECASE)
++_EXPLICIT_OD_RE = re.compile(r'(?:De|de|[φΦФ⌀]|外径)\s*[:：]?\s*(\d+(?:\.\d+)?)')
++_EXPLICIT_DIM_RE = re.compile(r'\d+(?:\.\d+)?\s*[*x×]\s*\d+(?:\.\d+)?')
++
++
++def _extract_fallback_material_attrs(material: Dict[str, Any]) -> Dict[str, Any]:
++    """缺失/坏 JSON 候选解析缓存时，从候选原文回退抽取物理参数。
++
++    严格遵守 DN 与外径分字段约定（De 不暗转为 dn_val，DN 不写外径），并兼容
++    304/316L 不锈钢牌号与 matcher 同源的抽取语义。
++    """
++    if not material:
++        return {}
++    c_name = str(material.get("name", "") or "").strip()
++    c_spec = str(material.get("specification", "") or "").strip()
++    c_desc = str(material.get("description", "") or "").strip()
++    c_cat = str(material.get("category", "") or "").strip()
++    c_raw = " ".join(p for p in (c_name, c_spec, c_desc) if p).strip()
++    if not c_raw:
++        return {}
++
++    parsed = extract_params(c_raw, c_cat)
++    fallback = dict(parsed.get("attrs", {})) if isinstance(parsed, dict) else {}
++
++    dn_match = _EXPLICIT_DN_RE.search(c_raw)
++    od_match = _EXPLICIT_OD_RE.search(c_raw)
++    has_od = bool(od_match or _EXPLICIT_DIM_RE.search(c_raw))
++
++    if dn_match:
++        try:
++            dn_num = float(dn_match.group(1))
++            fallback["dn_val"] = int(dn_num) if dn_num.is_integer() else dn_num
++            fallback.setdefault("管径", f"DN{dn_match.group(1)}")
++        except (TypeError, ValueError):
++            pass
++        if not has_od:
++            fallback.pop("外径", None)
++            fallback.pop("de_val", None)
++    elif has_od or fallback.get("外径") is not None:
++        # 仅见 De/φ/外径 而无显式 DN 时，禁止保留由 convert_de_to_dn 派生的 dn_val/管径
++        for dn_key in ("dn_val", "管径", "口径", "DN"):
++            fallback.pop(dn_key, None)
++        if od_match and fallback.get("外径") is None:
++            try:
++                fallback["外径"] = float(od_match.group(1))
++            except (TypeError, ValueError):
++                pass
++
++    cur_grade = normalize_material_grade(fallback.get("材质"))
++    if cur_grade not in KNOWN_MATERIAL_GRADES:
++        gm = _MATERIAL_GRADE_RE.search(c_raw)
++        if gm and (
++            any(k in c_raw for k in ("不锈钢", "管", "板", "箱", "阀"))
++            or gm.group(1).upper() in ("316L", "S31603", "S30408", "06CR19NI10")
++        ):
++            raw_g = gm.group(1).upper()
++            fallback["材质"] = "不锈钢316L" if raw_g in ("316L", "S31603") else "不锈钢304"
++
++    return fallback
++
++
++def resolve_material_attrs(material: Dict[str, Any]) -> Dict[str, Any]:
++    """V015-M3 R02：候选物理参数同源读取（parsed_params 优先，缺值/坏 JSON 回退原文抽取）。
++
++    保留 parse_material_attrs 在坏 JSON 返回 {} 与品牌未知契约不变，同时保证
++    DN/外径/304/316L 等物理硬约束在缺失 parsed_params 时在推荐与复核端得到一致事实。
++    """
++    if not material:
++        return {}
++    cached = dict(parse_material_attrs(material))
++    fallback = _extract_fallback_material_attrs(material)
++    if not cached:
++        return fallback
++
++    merged = dict(fallback)
++    merged.update(cached)
++
++    # 若缓存材质仅含泛称 "不锈钢"，而规格原文可确定明确牌号，则补足明确牌号；
++    # 若缓存本身已明确给出 304/316L（含 DB 漂移测试场景），以缓存为准。
++    cached_mat = str(cached.get("材质", "") or "").strip()
++    if cached_mat == "不锈钢" and normalize_material_grade(fallback.get("材质")) in KNOWN_MATERIAL_GRADES:
++        merged["材质"] = fallback["材质"]
++
++    # 若缓存仅显式给出外径且无 DN，原文亦无 DN，不带入派生的 dn_val/管径
++    c_raw = " ".join(
++        str(material.get(k, "") or "").strip() for k in ("name", "specification", "description")
++    ).strip()
++    if (
++        ("外径" in cached or "de_val" in cached)
++        and "dn_val" not in cached
++        and "管径" not in cached
++        and not _EXPLICIT_DN_RE.search(c_raw)
++    ):
++        for dn_key in ("dn_val", "管径", "口径", "DN"):
++            merged.pop(dn_key, None)
++
++    return merged
++
++
+ def resolve_material_brand(cand: Dict[str, Any]) -> str:
+     """解析候选物料的真实品牌值。
+ 
+@@ -659,7 +767,10 @@
+         c_parsed = extract_params(f"{ctx.c_name} {ctx.c_full_spec}", ctx.c_category)
+         
+     ctx.c_parsed = c_parsed
+-    ctx.c_attrs = c_parsed.get("attrs", {}) if isinstance(c_parsed, dict) else {}
++    cand_for_attrs = cand
++    if ctx.c_full_spec and not cand.get("description") and not cand.get("specification"):
++        cand_for_attrs = {**cand, "specification": ctx.c_full_spec}
++    ctx.c_attrs = resolve_material_attrs(cand_for_attrs)
+     ctx.c_model = c_parsed.get("model", "") or ctx.c_attrs.get("型号", "") or ""
+ 
+ 
+@@ -1615,16 +1726,11 @@
+ 
+         # V015-M3：提升泵三态——"不带泵/无提升泵" 否定组合先于肯定词命中；
+         # 明确否定 vs 候选带泵升级硬隔离，未说明(unknown)不加分也不惩罚
+-        q_pump_state = detect_three_state_flag(
+-            f"{q_name} {q_spec_text}", ["提升泵", "带提升泵", "冷凝水提升泵", "泵"])
+-        c_pump_state = detect_three_state_flag(c_full_spec, ["提升泵", "冷凝水提升泵"])
++        q_pump_state = detect_pump_state(f"{q_name} {q_spec_text}", q_attrs)
++        c_pump_state = detect_pump_state(f"{c_name} {c_full_spec}", c_attrs)
+         if q_pump_state is True and c_pump_state is True:
+             base_score += 0.20
+             ctx.reasons.append("冷凝水提升泵匹配")
+-        elif q_pump_state is False and c_pump_state is True:
+-            base_score = min(base_score, 0.15)
+-            ctx.max_score = min(ctx.max_score, 0.15)
+-            ctx.reasons.append("提升泵否定冲突硬隔离(不带泵/带泵)")
+ 
+         q_fcu_vol = q_attrs.get("风量") or q_attrs.get("送风量")
+         if q_fcu_vol:
+@@ -1819,7 +1925,97 @@
+             base_score -= 0.50
+             ctx.reasons.append("非风管品类冲突")
+ 
++    pump_conflict = check_pump_conflict(
++        f"{q_name} {q_spec_text}", f"{c_name} {c_full_spec}", q_attrs, c_attrs
++    )
++    if pump_conflict:
++        base_score = min(base_score, 0.15)
++        ctx.max_score = min(ctx.max_score, 0.15)
++        ctx.reasons.append(pump_conflict)
++
+     ctx.base_score = base_score
++
++
++def _dyn_scope_matches(scope_tgt: str, candidate_names: List[Any]) -> bool:
++    if not scope_tgt:
++        return True
++    targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
++    for c in candidate_names:
++        if not c:
++            continue
++        c_low = str(c).lower()
++        if any(t in c_low or c_low in t for t in targets):
++            return True
++    return False
++
++
++def _dyn_rule_matches_query(rule: Dict[str, Any], query_info: Dict[str, Any]) -> bool:
++    scope_lvl = rule.get("scope_level", "category")
++    scope_tgt = rule.get("scope_target", "")
++    if scope_lvl == "universal" or not scope_tgt:
++        return True
++    q_prof = str(query_info.get("professional", "") or query_info.get("original_category", "") or "").strip()
++    if q_prof:
++        q_prof = re.sub(r'^\d+[\.．\s]*', '', q_prof).strip()
++    prof_candidates = [
++        query_info.get("category", ""),
++        query_info.get("original_category", ""),
++        q_prof,
++        normalize_professional_category(q_prof) if q_prof else "",
++        query_info.get("domain", ""),
++        query_info.get("discipline", ""),
++        "给排水",
++        "通用",
++    ]
++    name_candidates = [
++        query_info.get("name", ""),
++        query_info.get("raw_name", ""),
++        query_info.get("original_name", ""),
++    ]
++    if scope_lvl == "discipline":
++        return _dyn_scope_matches(scope_tgt, prof_candidates)
++    if scope_lvl == "category":
++        return _dyn_scope_matches(scope_tgt, name_candidates)
++    return _dyn_scope_matches(scope_tgt, name_candidates + prof_candidates)
++
++
++def _dyn_candidate_text(candidate: Dict[str, Any], c_name: str = "", c_full_spec: str = "") -> str:
++    name_part = c_name or str(candidate.get("name", "") or "")
++    spec_part = c_full_spec or f"{candidate.get('specification', '') or ''} {candidate.get('description', '') or ''}".strip()
++    raw_name = str(candidate.get("name", "") or "")
++    parts = [raw_name]
++    if name_part and name_part != raw_name:
++        parts.append(name_part)
++    parts.append(spec_part)
++    parts.append(str(candidate.get("category", "") or ""))
++    parts.append(str(candidate.get("code", "") or ""))
++    return " ".join(parts)
++
++
++def evaluate_dynamic_exclusions(row_or_query: Dict[str, Any], candidate: Dict[str, Any]) -> List[str]:
++    """V015-M3 R02：与 _apply_dynamic_rules 同源的动态硬排除判定（推荐/规则/确认/恢复/导出共用）。"""
++    try:
++        from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter
++        active_rules = LLMRuleManager.get_active_rules()
++    except Exception:
++        return []
++    if not active_rules:
++        return []
++    q_spec = str(row_or_query.get("spec", "") or row_or_query.get("original_spec", "") or "")
++    cand_text = _dyn_candidate_text(candidate)
++    excl_reasons: List[str] = []
++    for r in active_rules:
++        if not _dyn_rule_matches_query(r, row_or_query):
++            continue
++        matching_rules = (r.get("parsed_dsl", {}) or {}).get("matching_rules", {})
++        if not matching_rules:
++            continue
++        is_excl, _boost_val, dyn_reasons = DynamicRuleInterpreter.evaluate_matching_filters(
++            q_spec, cand_text, matching_rules
++        )
++        if is_excl:
++            excl_reasons.extend(dyn_reasons)
++    return excl_reasons
+ 
+ 
+ def _apply_dynamic_rules(ctx: ScoringContext):
+@@ -1828,27 +2024,13 @@
+     try:
+         from app.llm_rule_engine import LLMRuleManager, DynamicRuleInterpreter, RuleHitStatsTracker
+         active_rules = LLMRuleManager.get_active_rules()
+-        cand_text = f"{ctx.c_name} {ctx.c_full_spec} {ctx.candidate.get('category', '')} {ctx.candidate.get('code', '')}"
+-        q_category = ctx.query_info.get("category", "")
+-        
+-        def scope_matches(scope_tgt: str, candidate_names: list) -> bool:
+-            if not scope_tgt:
+-                return True
+-            targets = [t.strip().lower() for t in re.split(r'[/,，、|\s]+', scope_tgt) if t.strip()]
+-            for c in candidate_names:
+-                if not c:
+-                    continue
+-                c_low = str(c).lower()
+-                if any(t in c_low or c_low in t for t in targets):
+-                    return True
+-            return False
++        cand_text = _dyn_candidate_text(ctx.candidate, ctx.c_name, ctx.c_full_spec)
++        query_scope_info = dict(ctx.query_info)
++        if ctx.q_name and not query_scope_info.get("original_name"):
++            query_scope_info["original_name"] = ctx.q_name
+ 
+         for r in active_rules:
+-            scope_lvl = r.get("scope_level", "category")
+-            scope_tgt = r.get("scope_target", "")
+-            if scope_lvl == "discipline" and scope_tgt and not scope_matches(scope_tgt, [q_category, ctx.query_info.get("domain", ""), ctx.query_info.get("discipline", ""), "给排水", "通用"]):
+-                continue
+-            if scope_lvl == "category" and scope_tgt and not scope_matches(scope_tgt, [ctx.q_name, ctx.query_info.get("name", ""), ctx.query_info.get("raw_name", "")]):
++            if not _dyn_rule_matches_query(r, query_scope_info):
+                 continue
+             dsl = r.get("parsed_dsl", {})
+             matching_rules = dsl.get("matching_rules", {})
+--- R01/app/server.py
++++ R02/app/server.py
+@@ -186,6 +186,7 @@
+     record_decision,
+     get_decision,
+     get_row_decision,
++    extract_saved_bindings,
+ )
+ from app.audit_manager import (
+     init_audit_tables, log_audit_event, record_heartbeat, 
+@@ -594,7 +595,12 @@
+                     user_id=current_user["id"], scope_key=scope_key,
+                     row=row, bindings=binds,
+                 )
+-                validation = validate_bindings_against_row(row, binds) if record else None
++                validation = (
++                    validate_bindings_against_row(
++                        row, binds, saved_bindings=extract_saved_bindings(record)
++                    )
++                    if record else None
++                )
+                 if record and validation["ok"]:
+                     status = STATUS_MANUAL_CONFIRMED
+                     source = SOURCE_MANUAL
+@@ -1013,7 +1019,8 @@
+     if not _row_matches_rule_constraints(item, rule):
+         return _annotate_decision(row, bindings, STATUS_RECOMMENDED, SOURCE_RULE,
+                                   "当前行规格/专业不满足规则约束，需人工确认")
+-    check = validate_bindings_against_row(row, bindings)
++    # V015-M3 R02：自动规则不得在跨非1倍率单位时静默自动接受，阻断并提示按目标单位复核
++    check = validate_bindings_against_row(row, bindings, allow_unit_conversion=False)
+     if check["invalid_codes"]:
+         return _annotate_decision(row, bindings, STATUS_RECOMMENDED, SOURCE_RULE,
+                                   f"规则绑定编码已失效: {','.join(check['invalid_codes'])}")
+@@ -2690,7 +2697,9 @@
+         bindings=binds,
+     )
+     if record:
+-        validation = validate_bindings_against_row(item, binds)
++        validation = validate_bindings_against_row(
++            item, binds, saved_bindings=extract_saved_bindings(record)
++        )
+         if validation["invalid_codes"]:
+             deny("确认后物料编码已失效", invalid_codes=validation["invalid_codes"])
+         if validation["conflicts"]:
+--- R01/tests/test_m3_hard_constraints.py
++++ R02/tests/test_m3_hard_constraints.py
+@@ -29,7 +29,12 @@
+ 
+ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ 
+-from app.domain_extractors import NEGATION_PREFIXES, detect_three_state_flag
++from app.domain_extractors import (
++    NEGATION_PREFIXES,
++    detect_three_state_flag,
++    detect_pump_state,
++    check_pump_conflict,
++)
+ from app.matcher import (
+     KNOWN_MATERIAL_GRADES,
+     NEGATION_PREFIXES as MATCHER_NEGATION_PREFIXES,
+@@ -37,16 +42,18 @@
+     check_dn_od_conflicts,
+     check_series_match,
+     check_unit_compatibility,
++    evaluate_dynamic_exclusions,
+     get_unit_multiplier,
+     normalize_material_grade,
+     normalize_professional_category,
+     parse_material_attrs,
++    resolve_material_attrs,
+     resolve_material_brand,
+     score_candidate,
+     score_candidate_with_detail,
+     match_item,
+ )
+-from app.binding_decisions import evaluate_hard_conflicts
++from app.binding_decisions import evaluate_hard_conflicts, validate_bindings_against_row
+ from app.query_preprocessor import prepare_query
+ from app.llm_rule_engine import LLMRuleManager
+ 
+@@ -572,5 +579,431 @@
+                 self.assertLessEqual(cand["score"], cand["max_score"] * 100.0 + 1e-9)
+ 
+ 
++# ---------------------------------------------------------------------------
++# V015-M3 R02 新增纯函数/轻依赖回归：关闭 A-M3-01 ~ A-M3-04
++# ---------------------------------------------------------------------------
++
++class TestR02UnitMultiplierQuantityGate(unittest.TestCase):
++    """A-M3-01：非1倍率单位换算与确认/规则/漂移工程量安全门控。"""
++
++    def setUp(self):
++        from app.db_manager import init_db, get_db_connection, _search_materials_keyword_cached
++        init_db()
++        self._seeded = []
++        conn = get_db_connection()
++        for code, unit in (("R02-UNIT-M", "m"), ("R02-UNIT-G", "g")):
++            self._seeded.append(code)
++            conn.execute(
++                "INSERT OR REPLACE INTO materials "
++                "(code, category, name, specification, unit, brand, description, search_tokens, "
++                "parsed_params, parsed_schema_version) VALUES (?,?,?,?,?,?,?,?,?,2)",
++                (code, "暖通", "镀锌钢管" if unit == "m" else "不锈钢焊丝", "DN15", unit, "", "",
++                 "镀锌钢管 DN15", json.dumps({"attrs": {"dn_val": 15}}, ensure_ascii=False)),
++            )
++        conn.commit()
++        conn.close()
++        _search_materials_keyword_cached.cache_clear()
++
++    def tearDown(self):
++        from app.db_manager import get_db_connection, _search_materials_keyword_cached
++        if self._seeded:
++            conn = get_db_connection()
++            marks = ",".join("?" * len(self._seeded))
++            conn.execute(f"DELETE FROM materials WHERE code IN ({marks})", tuple(self._seeded))
++            conn.commit()
++            conn.close()
++            _search_materials_keyword_cached.cache_clear()
++
++    def test_non_one_multiplier_blocked_without_explicit_conversion(self):
++        for orig_qty, orig_unit, cand_unit in ((10, "km", "m"), (10, "kg", "g")):
++            row = _row(
++                original_name="镀锌钢管",
++                original_spec="DN15",
++                original_qty=orig_qty,
++                original_unit=orig_unit,
++                professional="暖通",
++            )
++            mat = _material(
++                code="R02-UNIT-M",
++                category="暖通",
++                name="镀锌钢管",
++                specification="DN15",
++                unit=cand_unit,
++                parsed_params=json.dumps({"attrs": {"dn_val": 15}}),
++            )
++            self.assertEqual(
++                evaluate_hard_conflicts(row, mat),
++                "单位非1倍率工程量需按目标单位显式换算复核阻断",
++            )
++            self.assertEqual(
++                evaluate_hard_conflicts(
++                    row, mat,
++                    binding={"code": "R02-UNIT-M", "unit": cand_unit, "qty": 10000, "qty_ratio": 1000},
++                    allow_unit_conversion=False,
++                ),
++                "单位非1倍率工程量需按目标单位显式换算复核阻断",
++            )
++
++    def test_raw_copy_non_one_multiplier_rejected_even_when_conversion_allowed(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++        )
++        mat = _material(
++            code="R02-UNIT-M",
++            category="暖通",
++            name="镀锌钢管",
++            specification="DN15",
++            unit="m",
++            parsed_params=json.dumps({"attrs": {"dn_val": 15}}),
++        )
++        raw_copy = {"code": "R02-UNIT-M", "unit": "m", "qty": 10, "qty_ratio": 1}
++        self.assertEqual(
++            evaluate_hard_conflicts(row, mat, binding=raw_copy, allow_unit_conversion=True),
++            "单位非1倍率工程量未按目标单位换算阻断",
++        )
++
++    def test_explicit_converted_binding_passes_when_unit_and_qty_match(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++        )
++        mat = _material(
++            code="R02-UNIT-M",
++            category="暖通",
++            name="镀锌钢管",
++            specification="DN15",
++            unit="m",
++            parsed_params=json.dumps({"attrs": {"dn_val": 15}}),
++        )
++        converted = {"code": "R02-UNIT-M", "unit": "m", "qty": 10000, "qty_ratio": 1000}
++        self.assertIsNone(
++            evaluate_hard_conflicts(row, mat, binding=converted, allow_unit_conversion=True)
++        )
++
++        # 绑定目标单位与实时物料单位不一致仍阻断
++        spoofed_unit = {"code": "R02-UNIT-M", "unit": "km", "qty": 10000, "qty_ratio": 1000}
++        self.assertEqual(
++            evaluate_hard_conflicts(row, mat, binding=spoofed_unit, allow_unit_conversion=True),
++            "绑定目标单位与实时物料单位不一致阻断",
++        )
++
++    def test_unit_multiplier_one_and_one_to_many_ratio_preserved(self):
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="米",
++            professional="暖通",
++        )
++        mat = _material(
++            code="R02-UNIT-M",
++            category="暖通",
++            name="镀锌钢管",
++            specification="DN15",
++            unit="m",
++            parsed_params=json.dumps({"attrs": {"dn_val": 15}}),
++        )
++        self.assertIsNone(evaluate_hard_conflicts(row, mat, allow_unit_conversion=False))
++        self.assertIsNone(
++            evaluate_hard_conflicts(
++                row, mat,
++                binding={"code": "R02-UNIT-M", "unit": "m", "qty": 15, "qty_ratio": 1.5},
++                allow_unit_conversion=True,
++            )
++        )
++
++    def test_validate_bindings_rule_deny_and_saved_unit_drift(self):
++        from app.db_manager import get_db_connection, _search_materials_keyword_cached
++
++        row = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="km",
++            professional="暖通",
++        )
++        converted = [{"code": "R02-UNIT-M", "unit": "m", "qty": 10000, "qty_ratio": 1000}]
++        # 规则模式 (allow_unit_conversion=False) 即使带换算量也不静默自动接受
++        res_rule = validate_bindings_against_row(row, converted, allow_unit_conversion=False)
++        self.assertFalse(res_rule["ok"])
++        self.assertEqual(res_rule["conflicts"][0]["reason"], "单位非1倍率工程量需按目标单位显式换算复核阻断")
++
++        # 确认时 unit=m，随后库内漂移为 km：saved_bindings 独立抓出目标单位漂移与客户端不一致
++        conn = get_db_connection()
++        conn.execute("UPDATE materials SET unit='km' WHERE code='R02-UNIT-M'")
++        conn.commit()
++        conn.close()
++        _search_materials_keyword_cached.cache_clear()
++
++        row_m = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="米",
++            professional="暖通",
++        )
++        res_drift = validate_bindings_against_row(
++            row_m,
++            [{"code": "R02-UNIT-M", "unit": "km", "qty": 10, "qty_ratio": 1}],
++            allow_unit_conversion=True,
++            saved_bindings=[{"code": "R02-UNIT-M", "unit": "m", "qty": 10, "qty_ratio": 1}],
++        )
++        self.assertFalse(res_drift["ok"])
++        self.assertEqual(res_drift["conflicts"][0]["reason"], "单位倍率不可靠阻断")
++        row_no_unit = _row(
++            original_name="镀锌钢管",
++            original_spec="DN15",
++            original_qty=10,
++            original_unit="",
++            professional="暖通",
++        )
++        res_saved_drift = validate_bindings_against_row(
++            row_no_unit,
++            [{"code": "R02-UNIT-M", "unit": "km", "qty": 10, "qty_ratio": 1}],
++            allow_unit_conversion=True,
++            saved_bindings=[{"code": "R02-UNIT-M", "unit": "m", "qty": 10, "qty_ratio": 1}],
++        )
++        self.assertFalse(res_saved_drift["ok"])
++        self.assertEqual(res_saved_drift["conflicts"][0]["reason"], "确认后物料目标单位发生漂移阻断")
++
++
++class TestR02DynamicExclusionParity(unittest.TestCase):
++    """A-M3-02：动态规则作用域、must_not_contain / must_contain 跨链路同源及缓存生命周期。"""
++
++    def setUp(self):
++        from app.db_manager import init_db
++        init_db()
++        LLMRuleManager.clear_active_cache()
++        LLMRuleManager._active_rules_cache = []
++        self._draft_rule_ids = []
++
++    def tearDown(self):
++        if self._draft_rule_ids:
++            from app.llm_rule_engine import get_db_conn
++            conn = get_db_conn()
++            for rid in self._draft_rule_ids:
++                conn.execute("DELETE FROM llm_rules WHERE rule_id = ?", (rid,))
++                conn.execute("DELETE FROM rule_audit_logs WHERE rule_id = ?", (rid,))
++            conn.commit()
++            conn.close()
++        LLMRuleManager.clear_active_cache()
++
++    def test_must_not_contain_and_must_contain_parity_across_scopes(self):
++        rules = [
++            {
++                "rule_id": "r02-cat-empty",
++                "scope_level": "category",
++                "scope_target": "",
++                "parsed_dsl": {"matching_rules": {"must_not_contain": ["EXCL"]}},
++            },
++            {
++                "rule_id": "r02-cat-pipe",
++                "scope_level": "category",
++                "scope_target": "钢管",
++                "parsed_dsl": {"matching_rules": {"must_contain": ["304"]}},
++            },
++            {
++                "rule_id": "r02-univ",
++                "scope_level": "universal",
++                "scope_target": "任意不生效目标",
++                "parsed_dsl": {"matching_rules": {"must_not_contain": ["UNIVBAD"]}},
++            },
++        ]
++        LLMRuleManager._active_rules_cache = rules
++
++        q = prepare_query("镀锌钢管", "DN15 304", "暖通")
++        row = _row(original_name="镀锌钢管", original_spec="DN15 304", professional="暖通")
++
++        # 命中 must_not_contain
++        cand_excl = _material(code="C-EXCL", category="暖通", name="镀锌钢管", specification="DN15 304 EXCL")
++        score_e, reasons_e, detail_e = score_candidate_with_detail(q, cand_excl)
++        self.assertTrue(detail_e["hard_blocked"])
++        self.assertEqual(score_e, 0.0)
++        self.assertEqual(detail_e["max_score"], 0.0)
++        self.assertIn("包含排除词 [EXCL]", reasons_e)
++        self.assertIn("包含排除词 [EXCL]", evaluate_dynamic_exclusions(row, cand_excl))
++        self.assertIn("动态规则硬排除: 包含排除词 [EXCL]", evaluate_hard_conflicts(row, cand_excl))
++
++        # 缺失 must_contain
++        cand_missing = _material(code="C-MISS", category="暖通", name="镀锌钢管", specification="DN15")
++        score_m, reasons_m, detail_m = score_candidate_with_detail(q, cand_missing)
++        self.assertTrue(detail_m["hard_blocked"])
++        self.assertEqual(score_m, 0.0)
++        self.assertEqual(detail_m["max_score"], 0.0)
++        self.assertIn("缺少必含词 [304]", reasons_m)
++        self.assertIn("缺少必含词 [304]", evaluate_dynamic_exclusions(row, cand_missing))
++        self.assertIn("动态规则硬排除: 缺少必含词 [304]", evaluate_hard_conflicts(row, cand_missing))
++
++        # universal scope 命中
++        cand_univ = _material(code="C-UNIV", category="暖通", name="镀锌钢管", specification="DN15 304 UNIVBAD")
++        self.assertIn("包含排除词 [UNIVBAD]", evaluate_dynamic_exclusions(row, cand_univ))
++
++        # 满足 must_contain 且无排除词放行
++        cand_ok = _material(code="C-OK", category="暖通", name="镀锌钢管", specification="DN15 304")
++        self.assertEqual(evaluate_dynamic_exclusions(row, cand_ok), [])
++        self.assertIsNone(evaluate_hard_conflicts(row, cand_ok))
++
++        # 不匹配作用域 (阀门 != 钢管) 不触发 must_contain=[304]
++        LLMRuleManager._active_rules_cache = [rules[1]]
++        valve_row = _row(original_name="闸阀", original_spec="DN15", professional="暖通")
++        valve_cand = _material(code="C-VALVE", category="暖通", name="闸阀", specification="DN15 铸铁")
++        self.assertEqual(evaluate_dynamic_exclusions(valve_row, valve_cand), [])
++        self.assertIsNone(evaluate_hard_conflicts(valve_row, valve_cand))
++
++    def test_get_active_rules_missing_table_safe_and_draft_clears_cache(self):
++        import sqlite3
++        LLMRuleManager.clear_active_cache()
++        with patch("app.llm_rule_engine.get_db_conn", return_value=sqlite3.connect(":memory:")):
++            self.assertEqual(LLMRuleManager.get_active_rules(), [])
++
++        LLMRuleManager._active_rules_cache = [{"rule_id": "stale"}]
++        self._draft_rule_ids.append("R02-DRAFT-CLEAR")
++        res = LLMRuleManager.save_rule_draft(
++            {
++                "rule_id": "R02-DRAFT-CLEAR",
++                "rule_name": "R02清理测试",
++                "parsed_dsl": {"matching_rules": {"must_not_contain": ["X"]}},
++            },
++            {"id": 9001, "username": "r02tester", "role": "employee"},
++        )
++        self.assertTrue(res["success"])
++        self.assertIsNone(LLMRuleManager._active_rules_cache)
++
++
++class TestR02CandidateFallbackAttrsParity(unittest.TestCase):
++    """A-M3-03：候选缺 parsed_params 或坏 JSON 时与 matcher 同源物理参数抽取及分字段隔离。"""
++
++    def setUp(self):
++        LLMRuleManager.clear_active_cache()
++        LLMRuleManager._active_rules_cache = []
++
++    def tearDown(self):
++        LLMRuleManager.clear_active_cache()
++
++    def test_bad_json_strict_contracts_preserved(self):
++        self.assertEqual(parse_material_attrs({"parsed_params": "{bad"}), {})
++        self.assertEqual(resolve_material_brand({"brand": "", "parsed_params": "{bad"}), "")
++
++    def test_dn_and_grade_fallback_parity_when_parsed_params_empty_or_bad(self):
++        for bad_cache in ("", "{损坏json"):
++            # DN15 vs DN20
++            q_dn = prepare_query("镀锌钢管", "DN15", "暖通")
++            r_dn = _row(original_name="镀锌钢管", original_spec="DN15", professional="暖通")
++            c_dn = _material(
++                name="镀锌钢管", specification="DN20", category="暖通", parsed_params=bad_cache
++            )
++            c_dn_attrs = resolve_material_attrs(c_dn)
++            self.assertEqual(_to_finite_float(c_dn_attrs.get("dn_val")), 20.0)
++            score_dn, _, detail_dn = score_candidate_with_detail(q_dn, c_dn)
++            self.assertFalse(detail_dn["hard_blocked"])
++            self.assertAlmostEqual(detail_dn["max_score"], 0.15, places=6)
++            self.assertLessEqual(score_dn, 15.0 + 1e-6)
++            self.assertEqual(evaluate_hard_conflicts(r_dn, c_dn), "管径口径冲突阻断")
++
++            # 304 vs 316L
++            q_mat = prepare_query("不锈钢管", "304", "暖通")
++            r_mat = _row(original_name="不锈钢管", original_spec="304", professional="暖通")
++            c_mat = _material(
++                name="不锈钢管", specification="316L 不锈钢管", category="暖通", parsed_params=bad_cache
++            )
++            self.assertEqual(normalize_material_grade(resolve_material_attrs(c_mat).get("材质")), "不锈钢316L")
++            score_m, _, detail_m = score_candidate_with_detail(q_mat, c_mat)
++            self.assertAlmostEqual(detail_m["max_score"], 0.15, places=6)
++            self.assertLessEqual(score_m, 15.0 + 1e-6)
++            self.assertEqual(evaluate_hard_conflicts(r_mat, c_mat), "不锈钢牌号冲突硬隔离(304/316L)")
++
++            # 06Cr19Ni10 / S30408 别名识别为 304，与 304 兼容而与 316L 冲突
++            c_304_alias = _material(
++                name="不锈钢管", specification="06Cr19Ni10 不锈钢管", category="暖通", parsed_params=bad_cache
++            )
++            self.assertEqual(normalize_material_grade(resolve_material_attrs(c_304_alias).get("材质")), "不锈钢304")
++            self.assertIsNone(evaluate_hard_conflicts(r_mat, c_304_alias))
++
++    def test_dn_and_od_fields_never_cross_contaminate_on_fallback(self):
++        c_de = _material(name="PPR给水管", specification="De25", category="给排水", parsed_params="")
++        c_de_attrs = resolve_material_attrs(c_de)
++        self.assertEqual(_to_finite_float(c_de_attrs.get("外径")), 25.0)
++        self.assertIsNone(c_de_attrs.get("dn_val"))
++
++        # DN15 vs De25：分字段不跨比
++        r_dn = _row(original_name="给水管", original_spec="DN15", professional="给排水")
++        self.assertIsNone(evaluate_hard_conflicts(r_dn, c_de))
++
++        # De20 vs De25：同为外径且超 10% 阈值阻断
++        r_de = _row(original_name="PPR给水管", original_spec="De20", professional="给排水")
++        self.assertEqual(evaluate_hard_conflicts(r_de, c_de), "管材外径冲突阻断")
++
++    def test_cached_parsed_params_overrides_text_on_drift(self):
++        r_mat = _row(original_name="不锈钢管", original_spec="304", professional="暖通")
++        drifted = _material(
++            name="不锈钢管",
++            specification="304 不锈钢管",
++            category="暖通",
++            parsed_params=json.dumps({"attrs": {"材质": "316L"}}, ensure_ascii=False),
++        )
++        self.assertEqual(evaluate_hard_conflicts(r_mat, drifted), "不锈钢牌号冲突硬隔离(304/316L)")
++
++
++class TestR02LiftPumpBidirectionalGate(unittest.TestCase):
++    """A-M3-04：提升泵双向互斥（带泵↔不带泵/无提升泵/无泵；unknown 不阻断）。"""
++
++    def setUp(self):
++        LLMRuleManager.clear_active_cache()
++        LLMRuleManager._active_rules_cache = []
++
++    def tearDown(self):
++        LLMRuleManager.clear_active_cache()
++
++    def test_detect_pump_state_and_check_conflict_bidirectional(self):
++        for neg in ("不带提升泵", "无提升泵", "不带冷凝水提升泵", "无泵"):
++            self.assertIs(detect_pump_state(f"风机盘管 {neg}"), False, neg)
++            self.assertEqual(
++                check_pump_conflict("带提升泵", neg),
++                "提升泵要求冲突硬隔离(带泵/不带泵)",
++            )
++        for pos in ("带提升泵", "含提升泵", "配提升泵"):
++            self.assertIs(detect_pump_state(f"风机盘管 {pos}"), True, pos)
++            self.assertEqual(
++                check_pump_conflict("不带提升泵", pos),
++                "提升泵否定冲突硬隔离(不带泵/带泵)",
++            )
++        # 通用水泵名不误判；未说明保持 None (unknown)
++        self.assertIsNone(detect_pump_state("风机盘管 FP-68"))
++        self.assertIsNone(check_pump_conflict("带提升泵", "风机盘管 FP-68"))
++        self.assertIsNone(check_pump_conflict("风机盘管 FP-68", "不带提升泵"))
++
++    def test_pump_required_vs_no_pump_full_chain_parity(self):
++        q = prepare_query("风机盘管", "带提升泵", "暖通")
++        r = _row(original_name="风机盘管", original_spec="带提升泵", professional="暖通")
++
++        for mat_kw in (
++            {"specification": "不带提升泵", "description": "", "parsed_params": ""},
++            {"specification": "无泵", "description": "", "parsed_params": ""},
++            {"specification": "FP-68", "description": "无提升泵", "parsed_params": ""},
++            {"specification": "FP-68", "description": "", "parsed_params": json.dumps({"attrs": {"提升泵": False}}, ensure_ascii=False)},
++        ):
++            cand = _material(category="暖通", name="风机盘管", **mat_kw)
++            score, reasons, detail = score_candidate_with_detail(q, cand)
++            self.assertFalse(detail["hard_blocked"])
++            self.assertAlmostEqual(detail["max_score"], 0.15, places=6)
++            self.assertLessEqual(score, 15.0 + 1e-6)
++            self.assertIn("提升泵要求冲突硬隔离(带泵/不带泵)", reasons)
++            self.assertEqual(
++                evaluate_hard_conflicts(r, cand),
++                "提升泵要求冲突硬隔离(带泵/不带泵)",
++            )
++
++        # 对称正向：带泵 vs 带泵不冲突；带泵 vs unknown 不冲突
++        self.assertIsNone(evaluate_hard_conflicts(r, _material(category="暖通", name="风机盘管", specification="带提升泵")))
++        self.assertIsNone(evaluate_hard_conflicts(r, _material(category="暖通", name="风机盘管", specification="FP-68")))
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)
+--- R01/tests/test_m3_hard_constraints_http.py
++++ R02/tests/test_m3_hard_constraints_http.py
+@@ -19,11 +19,13 @@
+ 缓存均隔离，AUTH_DEV_MODE=false，不调付费 LLM、不下载模型、不做任何 git/线上操作。
+ 动态规则一律经 LLMRuleManager._active_rules_cache 类缓存注入，不写库、不调 LLM。
+ """
++import io
+ import json
+ import os
+ import unittest
+ from unittest.mock import patch
+ 
++import openpyxl
+ from fastapi.testclient import TestClient
+ 
+ from app.db_manager import get_db_connection, init_db
+@@ -615,5 +617,378 @@
+         self.assertEqual(result["bindings"], [])
+ 
+ 
++# ---------------------------------------------------------------------------
++# 4. V015-M3 R02 审计复现四项 P1 端到端 HTTP 闭环（含恢复降级与 XLSX 重读）
++# ---------------------------------------------------------------------------
++
++class TestM3R02AuditCounterexamplesHttp(M3HttpBase):
++    """覆盖 /api/match、/api/batch_match 约束规则、/api/binding/submit、/api/session/annotate、/api/export。"""
++
++    SCOPE = "m3r02http.xlsx"
++
++    def _set_constrained_rule(self, original_name, original_spec, professional, bound_mat, qty_ratio=1.0):
++        srv.save_auto_binding_rules([{
++            "original_name": original_name,
++            "original_spec": original_spec,
++            "professional": professional,
++            "bound_materials": [dict(bound_mat, qty_ratio=qty_ratio)],
++        }])
++
++    def _post_export(self, row, binds, status="manual_confirmed", decision_source="manual"):
++        item = self._export_item(row, binds, status=status)
++        item["decision_source"] = decision_source
++        return self.client.post(
++            "/api/export",
++            json={"items": [item], "scope_filename": self.SCOPE},
++            headers=self.auth,
++        )
++
++    def _post_annotate(self, row, binds, status="manual_confirmed", decision_source="manual"):
++        item = self._export_item(row, binds, status=status)
++        item["decision_source"] = decision_source
++        return self.client.post(
++            "/api/session/annotate",
++            json={"items": [item], "scope_filename": self.SCOPE},
++            headers=self.auth,
++        )
++
++    def test_r02_a_m3_01_unit_multiplier_km_to_m_and_control(self):
++        self._seed(
++            "AUDIT-UNIT-KM", "镀锌钢管", "DN15", "m", "暖通",
++            parsed_params=json.dumps({"attrs": {"dn_val": 15}}, ensure_ascii=False),
++        )
++        bound_mat = {
++            "code": "AUDIT-UNIT-KM", "name": "镀锌钢管", "specification": "DN15",
++            "unit": "m", "brand": "", "category": "暖通",
++        }
++
++        # 1) 约束规则模式：即使 rule 自带 qty_ratio=1 或 qty_ratio=1000，非 1 倍率不得静默 auto_accepted
++        for ratio in (1.0, 1000.0):
++            self._set_constrained_rule("镀锌钢管 DN15", "DN15", "暖通", bound_mat, qty_ratio=ratio)
++            batch_resp = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{
++                    "id": 1, "text": "镀锌钢管 DN15", "unit": "km", "qty": 10,
++                    "category": "暖通", "professional": "暖通",
++                }]},
++                headers=self.auth,
++            )
++            self.assertEqual(batch_resp.status_code, 200, batch_resp.text)
++            res = batch_resp.json()["results"][0]
++            self.assertEqual(res["decision_status"], "rejected")
++            self.assertIn("单位非1倍率", res["decision_reason"])
++
++        row_km = self._row(name="镀锌钢管", specification="DN15", unit="km", qty=10)
++        # 2) 原数照搬 (qty=10, qty_ratio=1) 人工确认 -> 409，导出 -> 422
++        raw_binds = [self._bind(
++            "AUDIT-UNIT-KM", name="镀锌钢管", specification="DN15",
++            unit="m", category="暖通", qty=10, qty_ratio=1,
++        )]
++        c_raw = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row_km, raw_binds, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(c_raw.status_code, 409, c_raw.text)
++        self.assertEqual(c_raw.json()["detail"]["error"], "binding_hard_conflict")
++        self.assertEqual(self._post_export(row_km, raw_binds).status_code, 422)
++
++        # 3) 显式换算后确认 (qty=10000, qty_ratio=1000, unit="m") -> 200，恢复维持确认，导出 200 且 XLSX 数量为 10000
++        conv_binds = [self._bind(
++            "AUDIT-UNIT-KM", name="镀锌钢管", specification="DN15",
++            unit="m", category="暖通", qty=10000, qty_ratio=1000,
++        )]
++        c_ok = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row_km, conv_binds, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(c_ok.status_code, 200, c_ok.text)
++        ann_ok = self._post_annotate(row_km, conv_binds)
++        self.assertEqual(ann_ok.status_code, 200, ann_ok.text)
++        self.assertEqual(ann_ok.json()["downgraded"], 0)
++        self.assertEqual(ann_ok.json()["items"][0]["decision_status"], "manual_confirmed")
++
++        exp_ok = self._post_export(row_km, conv_binds)
++        self.assertEqual(exp_ok.status_code, 200, exp_ok.text)
++        wb = openpyxl.load_workbook(io.BytesIO(exp_ok.content), data_only=True)
++        ws_rows = list(wb.active.iter_rows(values_only=True))
++        self.assertEqual(ws_rows[3][7], "km")
++        self.assertEqual(float(ws_rows[3][8]), 10.0)
++        self.assertEqual(ws_rows[4][4], "AUDIT-UNIT-KM")
++        self.assertEqual(ws_rows[4][7], "m")
++        self.assertEqual(float(ws_rows[4][8]), 10000.0)
++
++        # 4) 确认后物料库 unit 从 m 漂移为 km：草稿恢复降级且导出 422
++        conn = get_db_connection()
++        conn.execute("UPDATE materials SET unit='km' WHERE code='AUDIT-UNIT-KM'")
++        conn.commit()
++        conn.close()
++        ann_drift = self._post_annotate(row_km, conv_binds)
++        self.assertEqual(ann_drift.status_code, 200, ann_drift.text)
++        self.assertEqual(ann_drift.json()["items"][0]["decision_status"], "recommended")
++        self.assertGreaterEqual(ann_drift.json()["downgraded"], 1)
++        exp_drift = self._post_export(row_km, conv_binds)
++        self.assertEqual(exp_drift.status_code, 422, exp_drift.text)
++
++        # 5) 1 倍率正例对照 (10 米 -> 10 m)：约束规则 auto_accepted -> 导出 200，确认 200 -> 导出 200
++        self._seed(
++            "AUDIT-UNIT-CTRL", "镀锌钢管", "DN15", "m", "暖通",
++            parsed_params=json.dumps({"attrs": {"dn_val": 15}}, ensure_ascii=False),
++        )
++        ctrl_mat = {
++            "code": "AUDIT-UNIT-CTRL", "name": "镀锌钢管", "specification": "DN15",
++            "unit": "m", "brand": "", "category": "暖通",
++        }
++        self._set_constrained_rule("镀锌钢管 DN15", "DN15", "暖通", ctrl_mat, qty_ratio=1.0)
++        batch_ctrl = self.client.post(
++            "/api/batch_match",
++            json={"rows": [{
++                "id": 2, "text": "镀锌钢管 DN15", "unit": "米", "qty": 10,
++                "category": "暖通", "professional": "暖通",
++            }]},
++            headers=self.auth,
++        )
++        self.assertEqual(batch_ctrl.status_code, 200, batch_ctrl.text)
++        ctrl_res = batch_ctrl.json()["results"][0]
++        self.assertEqual(ctrl_res["decision_status"], "auto_accepted")
++        exp_auto = self.client.post(
++            "/api/export", json={"items": [ctrl_res], "scope_filename": self.SCOPE}, headers=self.auth
++        )
++        self.assertEqual(exp_auto.status_code, 200, exp_auto.text)
++
++    def test_r02_a_m3_02_dynamic_exclusion_all_chains_and_restore(self):
++        self._seed("AUDIT-DYNAMIC", "镀锌钢管", "DN15 304 EXCL专用", "米", "暖通")
++        self._seed("AUDIT-DYNAMIC-MISS", "镀锌钢管", "DN15 普通", "米", "暖通")
++
++        # 无动态规则时先确认 AUDIT-DYNAMIC 一次，随后再启用动态排除规则，检验恢复降级+导出 422
++        row = self._row(name="镀锌钢管", specification="DN15 304", unit="米")
++        binds_excl = [self._bind("AUDIT-DYNAMIC", name="镀锌钢管", specification="DN15 304 EXCL专用", unit="米")]
++        c_pre = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row, binds_excl, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(c_pre.status_code, 200, c_pre.text)
++
++        # 启用动态规则：must_not_contain=["EXCL"] & must_contain=["304"]
++        LLMRuleManager._active_rules_cache = [
++            self._dynamic_rule({"must_not_contain": ["EXCL"], "must_contain": ["304"]}, rule_id="r02h-dyn")
++        ]
++
++        # /api/match 推荐链路双归零不可逆
++        cand_stub = {
++            "code": "AUDIT-DYNAMIC", "name": "镀锌钢管", "specification": "DN15 304 EXCL专用",
++            "category": "暖通", "unit": "米", "brand": "", "description": "", "parsed_params": "", "semantic_score": 0.0,
++        }
++        with patch("app.matcher.hybrid_recall", return_value=[cand_stub]):
++            m_resp = self.client.post(
++                "/api/match",
++                json={"name": "镀锌钢管", "text": "DN15 304", "category": "暖通", "professional": "暖通", "unit": "米"},
++                headers=self.auth,
++            )
++        self.assertEqual(m_resp.status_code, 200, m_resp.text)
++        top = m_resp.json()["top_candidates"][0]
++        self.assertTrue(top["hard_blocked"])
++        self.assertEqual(top["score"], 0.0)
++        self.assertEqual(top["max_score"], 0.0)
++
++        # 草稿恢复因新规则生效降为 recommended；导出被 422 阻断
++        ann = self._post_annotate(row, binds_excl)
++        self.assertEqual(ann.status_code, 200, ann.text)
++        self.assertEqual(ann.json()["items"][0]["decision_status"], "recommended")
++        self.assertGreaterEqual(ann.json()["downgraded"], 1)
++        exp = self._post_export(row, binds_excl)
++        self.assertEqual(exp.status_code, 422, exp.text)
++        self.assertIn("动态规则硬排除", str(exp.json()["detail"]))
++
++        # 重新人工确认 (EXCL 和 缺失304) -> 409；约束规则 /api/batch_match -> rejected
++        for code, spec, expected_substr in (
++            ("AUDIT-DYNAMIC", "DN15 304 EXCL专用", "包含排除词 [EXCL]"),
++            ("AUDIT-DYNAMIC-MISS", "DN15 普通", "缺少必含词 [304]"),
++        ):
++            binds = [self._bind(code, name="镀锌钢管", specification=spec, unit="米")]
++            sub = self.client.post(
++                "/api/binding/submit", json=self._confirm_payload(row, binds, self.SCOPE), headers=self.auth
++            )
++            self.assertEqual(sub.status_code, 409, sub.text)
++            self.assertIn(expected_substr, str(sub.json()["detail"]))
++
++            self._set_constrained_rule(
++                "镀锌钢管 DN15 304", "DN15 304", "暖通",
++                {"code": code, "name": "镀锌钢管", "specification": spec, "unit": "米", "brand": "", "category": "暖通"},
++            )
++            bm = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 3, "text": "镀锌钢管 DN15 304", "unit": "米", "qty": 10, "category": "暖通", "professional": "暖通"}]},
++                headers=self.auth,
++            )
++            self.assertEqual(bm.status_code, 200, bm.text)
++            bm_res = bm.json()["results"][0]
++            self.assertEqual(bm_res["decision_status"], "rejected")
++            self.assertIn("动态规则硬排除", bm_res["decision_reason"])
++            self.assertIn(expected_substr, bm_res["decision_reason"])
++
++    def test_r02_a_m3_03_empty_and_bad_parsed_params_dn_and_grade(self):
++        self._seed("AUDIT-DN-EMPTY", "镀锌钢管", "DN20", "米", "暖通", parsed_params="")
++        self._seed("AUDIT-DN-BAD", "镀锌钢管", "DN20", "米", "暖通", parsed_params="{badjson")
++        self._seed(
++            "AUDIT-DN-CONTROL", "镀锌钢管", "DN20", "米", "暖通",
++            parsed_params=json.dumps({"attrs": {"dn_val": 20}}, ensure_ascii=False),
++        )
++        self._seed("AUDIT-DN-OK", "镀锌钢管", "DN15", "米", "暖通", parsed_params="")
++
++        row_dn = self._row(name="镀锌钢管", specification="DN15", unit="米")
++        for code in ("AUDIT-DN-EMPTY", "AUDIT-DN-BAD", "AUDIT-DN-CONTROL"):
++            binds = [self._bind(code, name="镀锌钢管", specification="DN20", unit="米")]
++            self.assertEqual(
++                self.client.post(
++                    "/api/binding/submit", json=self._confirm_payload(row_dn, binds, self.SCOPE), headers=self.auth
++                ).status_code,
++                409,
++            )
++            self.assertEqual(self._post_export(row_dn, binds).status_code, 422)
++
++            self._set_constrained_rule(
++                "镀锌钢管 DN15", "DN15", "暖通",
++                {"code": code, "name": "镀锌钢管", "specification": "DN20", "unit": "米", "brand": "", "category": "暖通"},
++            )
++            bm = self.client.post(
++                "/api/batch_match",
++                json={"rows": [{"id": 4, "text": "镀锌钢管 DN15", "unit": "米", "qty": 10, "category": "暖通", "professional": "暖通"}]},
++                headers=self.auth,
++            )
++            bm_res = bm.json()["results"][0]
++            self.assertEqual(bm_res["decision_status"], "rejected")
++            self.assertIn("管径口径冲突阻断", bm_res["decision_reason"])
++
++        # 同规格空缓存正例 200 + 导出 200
++        ok_dn_binds = [self._bind("AUDIT-DN-OK", name="镀锌钢管", specification="DN15", unit="米")]
++        self.assertEqual(
++            self.client.post(
++                "/api/binding/submit", json=self._confirm_payload(row_dn, ok_dn_binds, self.SCOPE), headers=self.auth
++            ).status_code,
++            200,
++        )
++        self.assertEqual(self._post_export(row_dn, ok_dn_binds).status_code, 200)
++
++        # 304 vs 316L 空缓存反例与 06Cr19Ni10 正例对照
++        self._seed("AUDIT-GRADE-EMPTY", "不锈钢管", "316L 不锈钢管", "米", "暖通", parsed_params="")
++        self._seed("AUDIT-GRADE-OK", "不锈钢管", "06Cr19Ni10 不锈钢管", "米", "暖通", parsed_params="")
++        row_grade = self._row(name="不锈钢管", specification="304", unit="米")
++        bad_g_binds = [self._bind("AUDIT-GRADE-EMPTY", name="不锈钢管", specification="316L 不锈钢管", unit="米")]
++        sub_g = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row_grade, bad_g_binds, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(sub_g.status_code, 409, sub_g.text)
++        self.assertIn("不锈钢牌号冲突硬隔离(304/316L)", str(sub_g.json()["detail"]))
++        self.assertEqual(self._post_export(row_grade, bad_g_binds).status_code, 422)
++
++        self._set_constrained_rule(
++            "不锈钢管 304", "304", "暖通",
++            {"code": "AUDIT-GRADE-EMPTY", "name": "不锈钢管", "specification": "316L 不锈钢管", "unit": "米", "brand": "", "category": "暖通"},
++        )
++        bm_g = self.client.post(
++            "/api/batch_match",
++            json={"rows": [{"id": 5, "text": "不锈钢管 304", "unit": "米", "qty": 10, "category": "暖通", "professional": "暖通"}]},
++            headers=self.auth,
++        )
++        self.assertEqual(bm_g.json()["results"][0]["decision_status"], "rejected")
++        self.assertIn("不锈钢牌号冲突硬隔离(304/316L)", bm_g.json()["results"][0]["decision_reason"])
++
++        ok_g_binds = [self._bind("AUDIT-GRADE-OK", name="不锈钢管", specification="06Cr19Ni10 不锈钢管", unit="米")]
++        self.assertEqual(
++            self.client.post(
++                "/api/binding/submit", json=self._confirm_payload(row_grade, ok_g_binds, self.SCOPE), headers=self.auth
++            ).status_code,
++            200,
++        )
++        self.assertEqual(self._post_export(row_grade, ok_g_binds).status_code, 200)
++
++    def test_r02_a_m3_04_pump_bidirectional_and_drift_restore(self):
++        self._seed("AUDIT-PUMP-REVERSE", "风机盘管", "不带提升泵", "台", "暖通", parsed_params="")
++        self._seed("AUDIT-PUMP-POS", "风机盘管", "带提升泵", "台", "暖通", parsed_params="")
++
++        # /api/match 推荐层反向（要求带泵 vs 不带泵）压到 0.15 cap
++        stub_neg = {
++            "code": "AUDIT-PUMP-REVERSE", "name": "风机盘管", "specification": "不带提升泵",
++            "category": "暖通", "unit": "台", "brand": "", "description": "", "parsed_params": "", "semantic_score": 0.0,
++        }
++        with patch("app.matcher.hybrid_recall", return_value=[stub_neg]):
++            m_rev = self.client.post(
++                "/api/match",
++                json={"name": "风机盘管", "text": "带提升泵", "category": "暖通", "professional": "暖通", "unit": "台"},
++                headers=self.auth,
++            )
++        self.assertEqual(m_rev.status_code, 200, m_rev.text)
++        top_rev = m_rev.json()["top_candidates"][0]
++        self.assertFalse(top_rev["hard_blocked"])
++        self.assertAlmostEqual(top_rev["max_score"], 0.15, places=6)
++        self.assertLessEqual(top_rev["score"], 15.0 + 1e-6)
++
++        # 确认 409 + 规则 rejected + 导出 422
++        row_req_pump = self._row(name="风机盘管", specification="带提升泵", unit="台")
++        neg_binds = [self._bind("AUDIT-PUMP-REVERSE", name="风机盘管", specification="不带提升泵", unit="台")]
++        sub_rev = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row_req_pump, neg_binds, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(sub_rev.status_code, 409, sub_rev.text)
++        self.assertIn("提升泵要求冲突硬隔离(带泵/不带泵)", str(sub_rev.json()["detail"]))
++        self.assertEqual(self._post_export(row_req_pump, neg_binds).status_code, 422)
++
++        self._set_constrained_rule(
++            "风机盘管 带提升泵", "带提升泵", "暖通",
++            {"code": "AUDIT-PUMP-REVERSE", "name": "风机盘管", "specification": "不带提升泵", "unit": "台", "brand": "", "category": "暖通"},
++        )
++        bm_rev = self.client.post(
++            "/api/batch_match",
++            json={"rows": [{"id": 6, "text": "风机盘管 带提升泵", "unit": "台", "qty": 10, "category": "暖通", "professional": "暖通"}]},
++            headers=self.auth,
++        )
++        self.assertEqual(bm_rev.json()["results"][0]["decision_status"], "rejected")
++        self.assertIn("提升泵要求冲突硬隔离(带泵/不带泵)", bm_rev.json()["results"][0]["decision_reason"])
++
++        # 正向对照 + DB 规格漂移为无泵后的恢复降级 & 导出 422
++        pos_binds = [self._bind("AUDIT-PUMP-POS", name="风机盘管", specification="带提升泵", unit="台")]
++        self.assertEqual(
++            self.client.post(
++                "/api/binding/submit", json=self._confirm_payload(row_req_pump, pos_binds, self.SCOPE), headers=self.auth
++            ).status_code,
++            200,
++        )
++        self.assertEqual(self._post_export(row_req_pump, pos_binds).status_code, 200)
++
++        conn = get_db_connection()
++        conn.execute("UPDATE materials SET specification='无泵' WHERE code='AUDIT-PUMP-POS'")
++        conn.commit()
++        conn.close()
++        ann_p_drift = self._post_annotate(row_req_pump, pos_binds)
++        self.assertEqual(ann_p_drift.status_code, 200, ann_p_drift.text)
++        self.assertEqual(ann_p_drift.json()["items"][0]["decision_status"], "recommended")
++        self.assertGreaterEqual(ann_p_drift.json()["downgraded"], 1)
++        exp_p_drift = self._post_export(row_req_pump, pos_binds)
++        self.assertEqual(exp_p_drift.status_code, 422, exp_p_drift.text)
++        self.assertIn("提升泵要求冲突硬隔离(带泵/不带泵)", str(exp_p_drift.json()["detail"]))
++
++        # 正向（不带提升泵 查询 vs 带提升泵 候选）：/api/match 同等压到 0.15 cap，确认 409
++        stub_pos = {
++            "code": "AUDIT-PUMP-FWD", "name": "风机盘管", "specification": "带提升泵",
++            "category": "暖通", "unit": "台", "brand": "", "description": "", "parsed_params": "", "semantic_score": 0.0,
++        }
++        with patch("app.matcher.hybrid_recall", return_value=[stub_pos]):
++            m_fwd = self.client.post(
++                "/api/match",
++                json={"name": "风机盘管", "text": "不带提升泵", "category": "暖通", "professional": "暖通", "unit": "台"},
++                headers=self.auth,
++            )
++        self.assertEqual(m_fwd.status_code, 200, m_fwd.text)
++        top_fwd = m_fwd.json()["top_candidates"][0]
++        self.assertFalse(top_fwd["hard_blocked"])
++        self.assertAlmostEqual(top_fwd["max_score"], 0.15, places=6)
++        self.assertLessEqual(top_fwd["score"], 15.0 + 1e-6)
++        row_no_pump = self._row(name="风机盘管", specification="不带提升泵", unit="台")
++        self._seed("AUDIT-PUMP-FWD", "风机盘管", "带提升泵", "台", "暖通", parsed_params="")
++        fwd_binds = [self._bind("AUDIT-PUMP-FWD", name="风机盘管", specification="带提升泵", unit="台")]
++        sub_fwd = self.client.post(
++            "/api/binding/submit", json=self._confirm_payload(row_no_pump, fwd_binds, self.SCOPE), headers=self.auth
++        )
++        self.assertEqual(sub_fwd.status_code, 409, sub_fwd.text)
++        self.assertIn("提升泵否定冲突硬隔离(不带泵/带泵)", str(sub_fwd.json()["detail"]))
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)

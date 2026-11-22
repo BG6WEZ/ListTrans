@@ -1,0 +1,48 @@
+{
+  "database_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+  "open_mode": "mode=ro&immutable=1",
+  "active_rule_count": 0,
+  "rules_config_sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+  "checked_catalog_code_count": 4,
+  "variants": [
+    {
+      "condition": "DN25 D25.4 304",
+      "catalog_rows": [
+        {
+          "code": "2.17.05.0628",
+          "name": "304薄壁不锈钢管",
+          "specification": "DN25，D25.4*1.0",
+          "unit": "m",
+          "category": "不锈钢管"
+        },
+        {
+          "code": "2.17.05.0479",
+          "name": "304薄壁不锈钢管（保温）",
+          "specification": "DN25，D25.4×1.0",
+          "unit": "m",
+          "category": "不锈钢管"
+        }
+      ]
+    },
+    {
+      "condition": "DN50 D50.8 304",
+      "catalog_rows": [
+        {
+          "code": "2.17.05.0631",
+          "name": "304薄壁不锈钢管",
+          "specification": "DN50，D50.8*1.2",
+          "unit": "m",
+          "category": "不锈钢管"
+        },
+        {
+          "code": "2.17.05.0482",
+          "name": "304薄壁不锈钢管（保温）",
+          "specification": "DN50，D50.8×1.2",
+          "unit": "m",
+          "category": "不锈钢管"
+        }
+      ]
+    }
+  ],
+  "exit_code": 0
+}

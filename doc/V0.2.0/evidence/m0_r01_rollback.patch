@@ -1,0 +1,632 @@
+--- a/app/matcher.py
++++ b/app/matcher.py
+@@ -2805,13 +2805,6 @@
+     capped_codes = set() if calibration_groups is not None else None
+     rerank_profile = os.getenv("LISTTRANS_V019_M1_RERANK", "off")
+     rerank_enabled = rerank_profile not in ("", "0", "off")
+-    feedback_model = None
+-    if (os.getenv("LISTTRANS_V020_M0_RANKER") == "on" and profile == "legacy"
+-            and not rerank_enabled and calibration_groups is None):
+-        from app.feedback_ranker import active_ranker
+-
+-        feedback_model = active_ranker()
+-    feedback_inputs = {}
+     scored_candidates = []
+     for cand in candidates:
+         if profile == "legacy":
+@@ -2893,8 +2886,6 @@
+             scored_candidates[-1]["_rerank_inputs"] = (
+                 max_score_base, cand["semantic_score"], c_parsed or {},
+             )
+-        if feedback_model is not None:
+-            feedback_inputs[cand["code"]] = (max_score_base, c_parsed or {})
+         
+     # Check if query has specified wall thickness
+     q_parsed = query_info.get("parsed_spec", {}) if query_info else {}
+@@ -3001,13 +2992,6 @@
+         rerank_detail = rerank(query_info, scored_candidates, rerank_profile, exact_threshold=exact_threshold)
+         for candidate in scored_candidates:
+             candidate.pop("_rerank_inputs")
+-
+-    if feedback_model is not None:
+-        from app.feedback_ranker import rerank as rerank_feedback
+-
+-        moved = rerank_feedback(query_info, scored_candidates, feedback_inputs, feedback_model,
+-                                exact_threshold=exact_threshold)
+-        rerank_detail = {"profile": "v020-m0", "model_sha256": feedback_model[1], "moved_count": moved}
+ 
+     # Threshold for 100% exact match
+     is_exact = False
+diff --git a/app/feedback_ranker.py b/app/feedback_ranker.py
+deleted file mode 100644
+--- a/app/feedback_ranker.py
++++ /dev/null
+@@ -1,126 +0,0 @@
+-"""V020-M0 offline experiment. Ordering never changes a business score or cap."""
+-from functools import lru_cache
+-import hashlib
+-import json
+-import math
+-import os
+-from pathlib import Path
+-import re
+-import unicodedata
+-
+-from app.candidate_reranker import _known_value
+-from app.domain_extractors import detect_pump_state, detect_three_state_flag
+-
+-FIELDS = (
+-    "管径", "外径", "材质", "型号", "防爆", "提升泵",
+-    "厚度", "尺寸", "额定电流", "电压", "主芯数", "主截面",
+-)
+-VERSION = "v020-m0-hard-negative-v1"
+-DEPTH = 20
+-_SAFETY_TEXT = re.compile(r"防爆|(?<![a-z0-9])EX(?![a-z0-9])|(?:提升|冷凝水|排水)泵|不带泵|带泵|无泵", re.I)
+-_SAFETY_NAMES = ("风机", "室内机", "多联机", "空调箱")
+-_GRADE = re.compile(r"(?<![a-z0-9])(?:sus|s)?(316l|304)(?![a-z0-9])", re.I)
+-_MODEL_FAMILY = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)-[a-z0-9]+$")
+-
+-
+-def normalized(value):
+-    return "".join(unicodedata.normalize("NFKC", str(value or "")).split()).casefold()
+-
+-
+-def structured_values(name, specification, parsed):
+-    text = f"{name or ''} {specification or ''}"
+-    values = {key: _known_value(parsed, key) for key in FIELDS}
+-    grade = _GRADE.search(str(values["材质"] or ""))
+-    if grade is None:
+-        grade = _GRADE.search(text) if "不锈钢" in text or re.search(r"\bSUS", text, re.I) else None
+-    if grade:
+-        values["材质"] = grade[1].casefold()
+-    values["型号"] = normalized(parsed.get("model")) or None
+-    values["防爆"] = detect_three_state_flag(text, ["防爆"]) if "未知" not in text else None
+-    values["提升泵"] = detect_pump_state(text, parsed.get("attrs"))
+-    return values
+-
+-
+-def differences(left, right):
+-    return tuple(key for key in FIELDS if left[key] is not None and right[key] is not None
+-                 and (left[key] != right[key] or isinstance(left[key], bool) != isinstance(right[key], bool)))
+-
+-
+-def model_suffix_differs(left, right):
+-    first, second = (_MODEL_FAMILY.fullmatch(value or "") for value in (left, right))
+-    return bool(first and second and first[1] == second[1] and left != right)
+-
+-
+-def features(query_values, candidate_values):
+-    mismatches = set(differences(query_values, candidate_values))
+-    return tuple(0 if query_values[key] is None or candidate_values[key] is None else
+-                 -1 if key in mismatches else 1 for key in FIELDS)
+-
+-
+-def _protected(name, specification, parsed):
+-    return (parsed.get("domain") in {"fan", "ahu", "fcu"}
+-            or any(term in str(name or "") for term in _SAFETY_NAMES)
+-            or bool(_SAFETY_TEXT.search(f"{name or ''} {specification or ''}")))
+-
+-
+-@lru_cache(maxsize=4)
+-def _load_weights(path, expected_digest):
+-    try:
+-        raw = Path(path).read_bytes()
+-        digest = hashlib.sha256(raw).hexdigest()
+-        if digest != expected_digest:
+-            return None
+-        asset = json.loads(raw)
+-        if asset["version"] != VERSION or tuple(asset["fields"]) != FIELDS:
+-            return None
+-        weights = tuple(asset["weights"])
+-        if (len(weights) != len(FIELDS)
+-                or any(type(value) not in (int, float) or not math.isfinite(value) or value < 0
+-                       for value in weights)
+-                or not 0 < sum(weights) <= 6):
+-            return None
+-        return weights, digest
+-    except (OSError, ValueError, KeyError, TypeError, OverflowError):
+-        return None
+-
+-
+-def active_ranker():
+-    if os.getenv("LISTTRANS_V020_M0_RANKER") != "on":
+-        return None
+-    path = os.getenv("LISTTRANS_V020_M0_RANKER_ASSET", "")
+-    digest = os.getenv("LISTTRANS_V020_M0_RANKER_SHA256", "")
+-    if not path or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+-        return None
+-    # Invalid assets can be provisioned before a subsequent request.
+-    if not Path(path).is_file():
+-        return None
+-    return _load_weights(path, digest)
+-
+-
+-def rerank(query, candidates, parsed_candidates, model, *, exact_threshold):
+-    """Reorder only unblocked, uncapped slots within their original score band."""
+-    parsed = query.get("parsed_spec") or {}
+-    if (_protected(query.get("name"), query.get("specification"), parsed)
+-            or any("exact_code" in candidate["recall_sources"] for candidate in candidates)):
+-        return 0
+-    weights, _ = model
+-    query_values = structured_values(query.get("name"), query.get("specification"), parsed)
+-    bands = {False: [], True: []}
+-    for index, candidate in enumerate(candidates[:DEPTH]):
+-        cap, candidate_parsed = parsed_candidates[candidate["code"]]
+-        score = candidate["score"]
+-        if (candidate["hard_blocked"] or cap != 1 or score <= 0
+-                or _protected(candidate["name"], candidate["specification"], candidate_parsed)):
+-            continue
+-        values = structured_values(candidate["name"], candidate["specification"], candidate_parsed)
+-        preference = score + sum(weight * value for weight, value in
+-                                 zip(weights, features(query_values, values), strict=True))
+-        bands[score >= exact_threshold].append((index, preference))
+-    originals = candidates[:DEPTH]
+-    moved = 0
+-    for band in bands.values():
+-        ranked = sorted(band, key=lambda row: row[1], reverse=True)
+-        for (slot, _), (source, _) in zip(band, ranked, strict=True):
+-            candidates[slot] = originals[source]
+-            moved += slot != source
+-    return moved
+diff --git a/scripts/v020_feedback_audit.py b/scripts/v020_feedback_audit.py
+deleted file mode 100644
+--- a/scripts/v020_feedback_audit.py
++++ /dev/null
+@@ -1,215 +0,0 @@
+-"""Audit a checkpointed flywheel SQLite snapshot. Output contains opaque references only."""
+-import argparse
+-from collections import Counter, defaultdict
+-from contextlib import closing
+-from dataclasses import dataclass
+-from datetime import datetime, timezone
+-import hashlib
+-from itertools import combinations
+-import json
+-from pathlib import Path
+-import re
+-import sqlite3
+-
+-SPLITS = ("train", "dev", "holdout")
+-
+-
+-def reference(value):
+-    return hashlib.sha256(str(value).encode()).hexdigest()
+-
+-
+-def utc(value):
+-    instant = datetime.fromisoformat(value)
+-    # SQLite CURRENT_TIMESTAMP is stored as naive UTC.
+-    return (instant if instant.tzinfo else instant.replace(tzinfo=timezone.utc)).astimezone(timezone.utc)
+-
+-
+-@dataclass(frozen=True)
+-class Provenance:
+-    project: str
+-    source: str
+-    content: str
+-    collected_at: datetime
+-    label_at: datetime
+-
+-
+-def assert_isolated_splits(splits):
+-    if set(splits) != set(SPLITS) or any(not splits[split] for split in SPLITS):
+-        raise ValueError("train/dev/holdout must all be populated")
+-    for group in splits.values():
+-        for row in group:
+-            if (not all(isinstance(key, str) and key.strip() for key in
+-                        (row.project, row.source, row.content)) or not row.collected_at.tzinfo
+-                    or not row.label_at.tzinfo or row.collected_at > row.label_at):
+-                raise ValueError("invalid project/source/time provenance")
+-    for early, late in combinations(SPLITS, 2):
+-        left, right = splits[early], splits[late]
+-        for key in ("project", "source", "content"):
+-            if {getattr(row, key) for row in left} & {getattr(row, key) for row in right}:
+-                raise ValueError(f"{key} crosses {early}/{late}")
+-        if max(row.label_at for row in left) >= min(row.collected_at for row in right):
+-            raise ValueError(f"time crosses {early}/{late}")
+-
+-
+-def chronological_split(rows, train_end, dev_end):
+-    if train_end >= dev_end:
+-        raise ValueError("time cutoffs must be ordered")
+-    splits = {split: [] for split in SPLITS}
+-    for row in rows:
+-        split = "train" if row.collected_at < train_end else "dev" if row.collected_at < dev_end else "holdout"
+-        cutoff = {"train": train_end, "dev": dev_end}.get(split)
+-        if cutoff and row.label_at >= cutoff:
+-            raise ValueError(f"label arrives at or after the {split} cutoff")
+-        splits[split].append(row)
+-    assert_isolated_splits(splits)
+-    return splits
+-
+-
+-def check_checkpoint(path):
+-    for suffix in ("-wal", "-journal"):
+-        sidecar = path.with_name(path.name + suffix)
+-        if sidecar.exists() and sidecar.stat().st_size:
+-            raise ValueError("use a checkpointed, stable SQLite snapshot")
+-
+-
+-def snapshot_digest(path):
+-    with path.open("rb") as stream:
+-        return hashlib.file_digest(stream, "sha256").hexdigest()
+-
+-
+-def _review_sample(row, review_book):
+-    event = reference(row["client_event_id"])
+-    manual, auto = (str(row[key] or "").strip() for key in ("manual_code", "auto_code"))
+-    judgments = review_book.get(event, {})
+-    if not isinstance(judgments, dict) or any(
+-        not isinstance(reviewer, str) or not reviewer.strip() or not isinstance(label, str) or not label.strip()
+-        for reviewer, label in judgments.items()
+-    ):
+-        raise ValueError("review book requires distinct reviewer IDs mapped to nonblank material codes")
+-    labels = set(judgments.values())
+-    findings = []
+-    if not row["verified_document"] or not row["verified_row"] or not row["verified_snapshot"] or not row["initial"]:
+-        findings.append("invalid_source_or_snapshot")
+-    if not manual or not row["material_exists"]:
+-        findings.append("unknown_manual_code")
+-    if (row["auto_code"] != row["verified_auto"] or row["is_correct"] not in (0, 1)
+-            or bool(row["is_correct"]) != bool(auto and auto == manual)):
+-        findings.append("inconsistent_recommendation_label")
+-    if len(labels) > 1 or (labels and labels != {manual}):
+-        findings.append("review_disagreement")
+-    elif len(judgments) < 2:
+-        findings.append("awaiting_independent_review")
+-    return {
+-        "event_ref": event, "document_ref": reference(row["document_id"]),
+-        "review_votes": {reference(reviewer): reference(label) for reviewer, label in sorted(judgments.items())},
+-        "recorded_label_ref": reference(manual), "findings": findings,
+-    }
+-
+-
+-def audit(path, *, provenance=None, reviews=None, cutoffs=None):
+-    """Review trusted current events without importing the app or opening a write connection."""
+-    path = Path(path).resolve(strict=True)
+-    check_checkpoint(path)
+-    digest = snapshot_digest(path)
+-    provenance, reviews = provenance or {}, reviews or {}
+-    with closing(sqlite3.connect(path.as_uri() + "?mode=ro&immutable=1", uri=True)) as db:
+-        db.row_factory = sqlite3.Row
+-        names = ("flywheel_feedback_samples", "flywheel_records", "flywheel_documents",
+-                 "flywheel_source_rows", "flywheel_rule_suggestions", "flywheel_pattern_aggregates")
+-        counts = {name: db.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0] for name in names}
+-        rows = db.execute("""
+-            SELECT f.*, d.document_id AS verified_document, d.file_sha256, d.created_at AS uploaded_at,
+-                   s.sheet_index, r.source_row_num, r.source_row_id AS verified_row,
+-                   n.snapshot_id AS verified_snapshot, i.snapshot_id AS initial,
+-                   COALESCE(NULLIF(n.auto_top1_code, ''), i.auto_top1_code, '') AS verified_auto,
+-                   (m.code IS NOT NULL) AS material_exists
+-            FROM flywheel_feedback_samples f
+-            LEFT JOIN flywheel_documents d
+-                ON d.document_id=f.document_id AND d.actor_user_id=f.actor_user_id
+-                AND d.actor_account_epoch=f.actor_account_epoch AND d.collection_boundary='server_upload'
+-            LEFT JOIN flywheel_sheets s ON s.sheet_id=f.sheet_id AND s.document_id=d.document_id
+-            LEFT JOIN flywheel_source_rows r ON r.source_row_id=f.source_row_id
+-                AND r.sheet_id=s.sheet_id AND r.document_id=d.document_id
+-            LEFT JOIN flywheel_recommendation_snapshots i ON i.snapshot_id=f.initial_snapshot_id
+-                AND i.source_row_id=r.source_row_id AND i.sheet_id=s.sheet_id AND i.document_id=d.document_id
+-                AND i.is_initial=1
+-            LEFT JOIN flywheel_recommendation_snapshots n ON n.snapshot_id=f.recommendation_snapshot_id
+-                AND n.source_row_id=r.source_row_id AND n.sheet_id=s.sheet_id AND n.document_id=d.document_id
+-            LEFT JOIN materials m ON m.code=f.manual_code
+-            WHERE f.trust_level='trusted' AND f.superseded=0 AND f.is_stale_arrival=0 AND f.event_seq>0
+-            ORDER BY f.id
+-        """).fetchall()
+-    check_checkpoint(path)
+-    if snapshot_digest(path) != digest:
+-        raise RuntimeError("SQLite snapshot changed during extraction")
+-
+-    reviewed, by_origin, eligible = [], defaultdict(list), []
+-    for row in rows:
+-        trace = _review_sample(row, reviews)
+-        reviewed.append(trace)
+-        if row["verified_row"] and re.fullmatch(r"[0-9a-f]{64}", row["file_sha256"] or ""):
+-            by_origin[row["file_sha256"], row["sheet_index"], row["source_row_num"]].append((row, trace))
+-        else:
+-            trace["findings"].append("unverified_source_content")
+-    for copies in by_origin.values():
+-        if len({row["manual_code"] for row, _ in copies}) > 1:
+-            for _, trace in copies:
+-                trace["findings"].append("conflicting_labels_for_source_row")
+-            continue
+-        valid = [(row, trace) for row, trace in copies if not trace["findings"]]
+-        if not valid:
+-            continue
+-        row, trace = valid[0]
+-        for _, duplicate in valid[1:]:
+-            duplicate["findings"].append("duplicate_source_row")
+-        metadata = provenance.get(trace["document_ref"], {})
+-        try:
+-            collected = utc(metadata["collected_at"])
+-            available = utc(row["created_at"])
+-            if not collected <= utc(row["uploaded_at"]) <= available:
+-                raise ValueError("inconsistent source and label chronology")
+-            project, source = metadata["project"], metadata["source"]
+-            if not all(isinstance(v, str) and v.strip() and v == v.strip() for v in (project, source)):
+-                raise ValueError("missing source/project key")
+-            eligible.append(Provenance(project, source, row["file_sha256"], collected, available))
+-        except (KeyError, TypeError, ValueError):
+-            trace["findings"].append("missing_or_invalid_project_time_provenance")
+-
+-    split_counts = None
+-    split_status = "insufficient_reviewed_feedback"
+-    if eligible:
+-        split_status = "missing_frozen_cutoffs"
+-        if cutoffs:
+-            try:
+-                splits = chronological_split(eligible, *cutoffs)
+-                split_counts = {name: len(samples) for name, samples in splits.items()}
+-                split_status = "pending_sample_size_approval"
+-            except ValueError as exc:
+-                split_status = str(exc)
+-    return {
+-        "snapshot_sha256": digest, "flywheel_counts": counts, "trusted_current_events": len(rows),
+-        "review_eligible": len(eligible), "split_status": split_status, "split_counts": split_counts,
+-        "online_automatic_training": False, "offline_benchmark_is_distinct": True,
+-        "finding_counts": dict(Counter(finding for trace in reviewed for finding in trace["findings"])),
+-        "trace": reviewed,
+-    }
+-
+-
+-def main():
+-    parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument("--snapshot", type=Path, required=True)
+-    parser.add_argument("--reviews", type=Path)
+-    parser.add_argument("--provenance", type=Path)
+-    parser.add_argument("--cutoffs", nargs=2, type=utc, metavar=("TRAIN_END", "DEV_END"))
+-    parser.add_argument("--out", type=Path, required=True)
+-    args = parser.parse_args()
+-    inputs = [json.loads(path.read_text(encoding="utf-8")) if path else {} for path in
+-              (args.provenance, args.reviews)]
+-    report = audit(args.snapshot, provenance=inputs[0], reviews=inputs[1], cutoffs=args.cutoffs)
+-    with args.out.open("x", encoding="utf-8") as stream:
+-        json.dump(report, stream, ensure_ascii=False, indent=2)
+-        stream.write("\n")
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/tests/test_v020_m0_feedback_ranker.py b/tests/test_v020_m0_feedback_ranker.py
+deleted file mode 100644
+--- a/tests/test_v020_m0_feedback_ranker.py
++++ /dev/null
+@@ -1,237 +0,0 @@
+-"""Feedback training gates, hard negatives, and ranker safety."""
+-from dataclasses import replace
+-from contextlib import closing
+-import hashlib
+-import importlib.util
+-import json
+-from pathlib import Path
+-import sqlite3
+-import sys
+-
+-import pytest
+-
+-from app import feedback_ranker as ranking
+-from app.flywheel_db import init_flywheel_tables
+-from scripts.v020_feedback_audit import Provenance, audit, chronological_split, reference, utc
+-
+-
+-def _snapshot(path):
+-    init_flywheel_tables(db_path=str(path))
+-    with closing(sqlite3.connect(path)) as db, db:
+-        db.execute("CREATE TABLE materials (code TEXT PRIMARY KEY)")
+-        db.execute("INSERT INTO materials VALUES ('M1')")
+-        db.execute("""INSERT INTO flywheel_documents
+-          (document_id, upload_task_id, work_session_id, actor_user_id, actor_account_epoch,
+-           original_filename, file_sha256, contract_version, created_at)
+-          VALUES ('d','task','session',1,'epoch','synthetic.xlsx',?,'v', '2026-01-01')""", ("a" * 64,))
+-        db.execute("INSERT INTO flywheel_sheets (sheet_id,document_id,sheet_index,sheet_name) VALUES ('s','d',0,'synthetic')")
+-        db.execute("""INSERT INTO flywheel_source_rows
+-          (source_row_id,document_id,sheet_id,source_row_num,display_row_idx,raw_name,raw_name_norm)
+-          VALUES ('r','d','s',2,0,'synthetic','synthetic')""")
+-        db.execute("""INSERT INTO flywheel_recommendation_snapshots
+-          (snapshot_id,document_id,sheet_id,source_row_id,revision,is_initial,professional,parsed_spec_json,
+-           auto_top1_code,algo_version,model_version,config_version,config_digest_full)
+-          VALUES ('snap','d','s','r',1,1,'warm','{}','AUTO','a','m','c','hash')""")
+-        insert = """INSERT INTO flywheel_feedback_samples
+-          (client_event_id,payload_digest,actor_user_id,actor_account_epoch,document_id,sheet_id,
+-           source_row_id,event_seq,initial_snapshot_id,recommendation_snapshot_id,manual_code,auto_code,
+-           superseded,is_stale_arrival,trust_level,created_at)
+-          VALUES (?, 'digest', 1, 'epoch','d','s','r',?,'snap','snap','M1',?,?,?,?,'2026-01-02')"""
+-        db.executemany(insert, [
+-            ("old", 1, "AUTO", 1, 0, "trusted"), ("stale", 2, "AUTO", 0, 1, "trusted"),
+-            ("untrusted", 3, "AUTO", 0, 0, "legacy_untrusted"), ("live", 4, "AUTO", 0, 0, "trusted"),
+-        ])
+-        db.commit()
+-        db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+-
+-
+-def test_audit_real_schema_quarantines_disagreements_and_preserves_snapshot(tmp_path):
+-    path = tmp_path / "synthetic-only.db"
+-    _snapshot(path)
+-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+-    event = reference("live")
+-    provenance = {reference("d"): {"project": "project-a", "source": "list-a", "collected_at": "2025-12-31"}}
+-    disputed = audit(path, provenance=provenance, reviews={event: {"A": "M1", "B": "M2"}})
+-    assert disputed["flywheel_counts"]["flywheel_feedback_samples"] == 4
+-    assert disputed["trusted_current_events"] == 1
+-    assert disputed["review_eligible"] == 0
+-    assert disputed["trace"][0]["event_ref"] == event
+-    assert len(disputed["trace"][0]["review_votes"]) == 2
+-    assert disputed["finding_counts"] == {"review_disagreement": 1}
+-    verified = audit(path, provenance=provenance, reviews={event: {"A": "M1", "B": "M1"}})
+-    assert verified["review_eligible"] == 1
+-    assert verified["split_status"] == "missing_frozen_cutoffs"
+-    assert not verified["online_automatic_training"]
+-    assert hashlib.sha256(path.read_bytes()).hexdigest() == digest
+-
+-
+-def test_audit_empty_and_inconsistent_feedback(tmp_path):
+-    path = tmp_path / "empty.db"
+-    _snapshot(path)
+-    with closing(sqlite3.connect(path)) as db, db:
+-        db.execute("UPDATE flywheel_feedback_samples SET auto_code='forged' WHERE client_event_id='live'")
+-    assert "inconsistent_recommendation_label" in audit(path)["finding_counts"]
+-    with closing(sqlite3.connect(path)) as db, db:
+-        db.execute("DELETE FROM flywheel_feedback_samples")
+-    report = audit(path)
+-    assert report["trusted_current_events"] == report["review_eligible"] == 0
+-    assert report["split_status"] == "insufficient_reviewed_feedback"
+-
+-
+-def test_project_source_duplicate_file_and_time_leaks_rejected():
+-    first = Provenance("P1", "S1", "F1", utc("2026-01-01"), utc("2026-01-02"))
+-    second = Provenance("P2", "S2", "F2", utc("2026-02-01"), utc("2026-02-02"))
+-    third = Provenance("P3", "S3", "F3", utc("2026-03-01"), utc("2026-03-02"))
+-    cutoffs = utc("2026-02-01"), utc("2026-03-01")
+-    assert chronological_split([first, second, third], *cutoffs) == {
+-        "train": [first], "dev": [second], "holdout": [third],
+-    }
+-    for key in ("project", "source", "content"):
+-        with pytest.raises(ValueError, match=f"{key} crosses"):
+-            chronological_split([first, second, replace(third, **{key: getattr(first, key)})], *cutoffs)
+-    with pytest.raises(ValueError, match="label arrives"):
+-        chronological_split([replace(first, label_at=cutoffs[0]), second, third], *cutoffs)
+-
+-
+-def test_missing_invalid_asset_and_default_switch(monkeypatch, tmp_path):
+-    path = tmp_path / "weights.json"
+-    monkeypatch.setenv("LISTTRANS_V020_M0_RANKER_ASSET", str(path))
+-    for switch in (None, "", "off", "ON", "invalid"):
+-        if switch is None:
+-            monkeypatch.delenv("LISTTRANS_V020_M0_RANKER", raising=False)
+-        else:
+-            monkeypatch.setenv("LISTTRANS_V020_M0_RANKER", switch)
+-        assert ranking.active_ranker() is None
+-    monkeypatch.setenv("LISTTRANS_V020_M0_RANKER", "on")
+-    monkeypatch.setenv("LISTTRANS_V020_M0_RANKER_SHA256", "0" * 64)
+-    assert ranking.active_ranker() is None
+-    payload = {"version": ranking.VERSION, "fields": ranking.FIELDS, "weights": [1] + [0] * (len(ranking.FIELDS) - 1)}
+-    for weights in ([float("nan")] * len(ranking.FIELDS), [5] * len(ranking.FIELDS), payload["weights"]):
+-        raw = json.dumps({**payload, "weights": weights}).encode()
+-        path.write_bytes(raw)
+-        assert ranking.active_ranker() is None
+-        digest = hashlib.sha256(raw).hexdigest()
+-        monkeypatch.setenv("LISTTRANS_V020_M0_RANKER_SHA256", digest)
+-        if weights == payload["weights"]:
+-            assert ranking.active_ranker() == (tuple(weights), digest)
+-        else:
+-            assert ranking.active_ranker() is None
+-
+-
+-def test_rerank_keeps_hard_blocked_capped_threshold_and_protected_slots():
+-    def row(code, score, blocked=False, name="三通"):
+-        return {"code": code, "name": name, "specification": "", "score": score, "hard_blocked": blocked,
+-                "recall_sources": []}
+-
+-    candidates = [row("a", 80), row("cap", 79), row("b", 78), row("low", 74),
+-                  row("fan", 73, name="防爆风机"), row("block", 0, True)]
+-    inputs = {r["code"]: (0.8 if r["code"] == "cap" else 1, {"attrs": {"管径": 20 if r["code"] == "a" else 15}})
+-              for r in candidates}
+-    query = {"name": "三通", "parsed_spec": {"attrs": {"管径": 15}}}
+-    model = ((5,) + (0,) * (len(ranking.FIELDS) - 1), "synthetic")
+-    scores = {r["code"]: r["score"] for r in candidates}
+-    assert ranking.rerank(query, candidates, inputs, model, exact_threshold=75) == 2
+-    assert [r["code"] for r in candidates] == ["b", "cap", "a", "low", "fan", "block"]
+-    assert {r["code"]: r["score"] for r in candidates} == scores
+-    assert ranking.rerank({**query, "name": "排风机", "specification": "防爆要求未知"},
+-                          candidates, inputs, model, exact_threshold=75) == 0
+-    candidates[0]["recall_sources"] = ["exact_code"]
+-    assert ranking.rerank(query, candidates, inputs, model, exact_threshold=75) == 0
+-
+-
+-def test_matcher_bypasses_experiment_for_other_profiles_and_calibration(monkeypatch):
+-    from app import matcher
+-
+-    observed = []
+-    monkeypatch.setattr(ranking, "active_ranker", lambda: observed.append("load"))
+-    monkeypatch.setattr(matcher, "hybrid_recall", lambda *args: [])
+-    monkeypatch.setenv("LISTTRANS_V020_M0_RANKER", "on")
+-    monkeypatch.setenv("LISTTRANS_V019_M1_RERANK", "off")
+-    monkeypatch.setenv("LISTTRANS_V019_M0_SCORING", "legacy")
+-    query = {"name": "三通", "parsed_spec": {}}
+-    matcher.match_item(query, calibration_groups={})
+-    assert not observed
+-    monkeypatch.setenv("LISTTRANS_V019_M0_SCORING", "dedup")
+-    matcher.match_item(query)
+-    assert not observed
+-    monkeypatch.setenv("LISTTRANS_V019_M0_SCORING", "legacy")
+-    matcher.match_item(query)
+-    assert observed == ["load"]
+-
+-
+-@pytest.fixture
+-def experiment_data(monkeypatch):
+-    evidence = Path(__file__).resolve().parents[1] / "doc/V0.2.0/evidence/m0_r01_data.py"
+-    spec = importlib.util.spec_from_file_location("v020_data", evidence)
+-    data = importlib.util.module_from_spec(spec)
+-    monkeypatch.setattr(sys, "path", sys.path.copy())
+-    spec.loader.exec_module(data)
+-    return data
+-
+-
+-def test_same_name_structured_negative_categories(experiment_data):
+-    left = ranking.structured_values("合成对照", "不锈钢 SUS304 非防爆 不带提升泵", {
+-        "model": "INV-01-A", "attrs": {"管径": 20, "外径": 27, "厚度": 2, "额定电流": 16},
+-    })
+-    right = ranking.structured_values("合成对照", "不锈钢 SUS316L 防爆 带提升泵", {
+-        "model": "INV-01-B", "attrs": {"管径": 25, "外径": 34, "厚度": 4, "额定电流": 20},
+-    })
+-    common = {"管径", "外径", "304_vs_316L", "型号尾缀", "防爆", "提升泵"}
+-    assert set(experiment_data.contrast_fields(left, right, "装饰")) == common | {"装饰/厚度"}
+-    assert set(experiment_data.contrast_fields(left, right, "强电")) == common | {"强电/额定电流"}
+-
+-
+-@pytest.mark.parametrize("name,domain,positive,negative,expected", [
+-    ("石膏板", "装饰", "1200×2400×12mm", "1200×2400×9mm", "装饰/厚度"),
+-    ("风机盘管", "暖通", "FP-20-A 不带提升泵", "FP-20-B 带提升泵", "提升泵"),
+-])
+-def test_train_pair_builder_on_synthetic_catalog(
+-    experiment_data, name, domain, positive, negative, expected,
+-):
+-    item = {"id": "synthetic-train", "name": name, "specification": positive, "professional": domain,
+-            "supply_category": name, "unit": "个", "label_type": "1to1", "target_codes": ["ok"],
+-            "ambiguous": False, "qc_suspect": False, "query_source": "raw"}
+-    labels = {item["id"]: {"split": "train", "status": "answerable", "target_alternatives": {"ok": ["ok"]}}}
+-    catalog = [
+-        {"code": code, "name": name, "specification": spec, "category": name}
+-        for code, spec in (("ok", positive), ("conflict", negative))
+-    ]
+-    pairs = experiment_data.build_pairs([item], labels, catalog)
+-    assert len(pairs) == 1 and pairs[0]["negative"] == "conflict"
+-    assert expected in pairs[0]["contrasts"]
+-    labels[item["id"]]["split"] = "dev"
+-    with pytest.raises(ValueError, match="only Train"):
+-        experiment_data.build_pairs([item], labels, catalog)
+-
+-
+-def test_current_feedback_audit_rejects_live_wal(tmp_path):
+-    path = tmp_path / "checkpoint-required.db"
+-    _snapshot(path)
+-    with closing(sqlite3.connect(path)) as db:
+-        db.execute("PRAGMA wal_autocheckpoint=0")
+-        db.execute("UPDATE flywheel_feedback_samples SET auto_code='changed'")
+-        db.commit()
+-        with pytest.raises(ValueError, match="checkpointed"):
+-            audit(path)
+-
+-
+-def test_projection_never_deserializes_heldout_payload(experiment_data, monkeypatch, tmp_path):
+-    governance_items = [
+-        '    "GT-1": {\n      "split": "train",\n      "status": "answerable"\n    }',
+-        '    "GT-2": {\n      "split": "test",\n      <invalid heldout label>\n    }',
+-        '    "GT-3": {\n      "split": "dev",\n      "status": "answerable"\n    }',
+-    ]
+-    gold_items = [
+-        '  {\n   "id": "GT-1",\n   "name": "train"\n  }',
+-        '  {\n   "id": "GT-2",\n   <invalid heldout text>\n  }',
+-        '  {\n   "id": "GT-3",\n   "name": "dev"\n  }',
+-    ]
+-    governance = tmp_path / "synthetic-governance.json"
+-    golden = tmp_path / "synthetic-golden.json"
+-    governance.write_text('{\n  "samples": {\n' + ",\n".join(governance_items) + '\n  }\n}', encoding="utf-8")
+-    golden.write_text('{\n "items": [\n' + ",\n".join(gold_items) + '\n ]\n}', encoding="utf-8")
+-    monkeypatch.setattr(experiment_data, "GOVERNANCE", governance)
+-    monkeypatch.setattr(experiment_data, "GOLDEN", golden)
+-    monkeypatch.setattr(experiment_data, "DATA_COUNTS", {"train": 1, "dev": 1})
+-    items, labels = experiment_data.read_projection()
+-    assert [item["id"] for item in items] == list(labels) == ["GT-1", "GT-3"]

@@ -1,0 +1,34 @@
+{
+  "image_id": "sha256:80d2583b5b6fbd702b0f48aea13854174e66cf2e59ec70c0ef2bdb8f47749a5d",
+  "layer_count": 11,
+  "cmd": [
+    "uvicorn",
+    "app.server:app",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "18080",
+    "--workers",
+    "1"
+  ],
+  "env": [
+    "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "LANG=C.UTF-8",
+    "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+    "PYTHON_VERSION=3.11.18",
+    "PYTHON_SHA256=9120e0a653868f6e3698d36cdd99e5a58903ec9469e448f21d98f7b16d8fa290",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "PYTHONUNBUFFERED=1",
+    "HF_ENDPOINT=https://hf-mirror.com"
+  ],
+  "in_image_file_count": 49,
+  "host_mismatches": [],
+  "forbidden_hits": [],
+  "history_secret_canary_hits": [],
+  "fail_closed_no_secret_rc": 1,
+  "fail_closed_msg_ok": false,
+  "http_chk": {
+    "login_html_status": 200,
+    "psutil": "7.2.2"
+  }
+}

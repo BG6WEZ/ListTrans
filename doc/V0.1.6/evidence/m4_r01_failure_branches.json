@@ -1,0 +1,418 @@
+{
+  "nonzero": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_c7cd8c6bbbae",
+      "eval_id": "eval_c7cd8c6bbbae",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "failed",
+      "progress": 100,
+      "message": "基线评测子进程非零退出(rc=2): controlled_failure",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "invalid",
+      "report": null,
+      "error_code": "eval_baseline_nonzero"
+    },
+    "database": {
+      "eval_id": "eval_c7cd8c6bbbae",
+      "status": "failed",
+      "safety_passed": 0,
+      "benefit_class": "invalid",
+      "failed_samples_count": 0,
+      "skipped_samples_count": 0,
+      "baseline_process_exit": 2,
+      "candidate_process_exit": null,
+      "result_summary_json": "{\"passed\": false, \"safety_passed\": false, \"benefit\": \"invalid\", \"error_code\": \"eval_baseline_nonzero\", \"reason\": \"基线评测子进程非零退出(rc=2): controlled_failure\"}",
+      "error_message": "基线评测子进程非零退出(rc=2): controlled_failure"
+    }
+  },
+  "missing": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_0c3dd8bd5f64",
+      "eval_id": "eval_0c3dd8bd5f64",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "failed",
+      "progress": 100,
+      "message": "评测子进程未生成输出结果: controlled_failure",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "invalid",
+      "report": null,
+      "error_code": "eval_output_missing"
+    },
+    "database": {
+      "eval_id": "eval_0c3dd8bd5f64",
+      "status": "failed",
+      "safety_passed": 0,
+      "benefit_class": "invalid",
+      "failed_samples_count": 0,
+      "skipped_samples_count": 0,
+      "baseline_process_exit": 0,
+      "candidate_process_exit": 0,
+      "result_summary_json": "{\"passed\": false, \"safety_passed\": false, \"benefit\": \"invalid\", \"error_code\": \"eval_output_missing\", \"reason\": \"评测子进程未生成输出结果: controlled_failure\"}",
+      "error_message": "评测子进程未生成输出结果: controlled_failure"
+    }
+  },
+  "corrupt": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_cdd2af6b7523",
+      "eval_id": "eval_cdd2af6b7523",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "failed",
+      "progress": 100,
+      "message": "评测输出 JSON 损坏或不可解析: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "invalid",
+      "report": null,
+      "error_code": "eval_corrupt_json"
+    },
+    "database": {
+      "eval_id": "eval_cdd2af6b7523",
+      "status": "failed",
+      "safety_passed": 0,
+      "benefit_class": "invalid",
+      "failed_samples_count": 0,
+      "skipped_samples_count": 0,
+      "baseline_process_exit": 0,
+      "candidate_process_exit": 0,
+      "result_summary_json": "{\"passed\": false, \"safety_passed\": false, \"benefit\": \"invalid\", \"error_code\": \"eval_corrupt_json\", \"reason\": \"评测输出 JSON 损坏或不可解析: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)\"}",
+      "error_message": "评测输出 JSON 损坏或不可解析: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+    }
+  },
+  "timeout_real_child": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_2d66966d7215",
+      "eval_id": "eval_2d66966d7215",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "failed",
+      "progress": 100,
+      "message": "基线评测子进程超时（超过 300s），已终止并回收。",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "invalid",
+      "report": null,
+      "error_code": "eval_baseline_timeout"
+    },
+    "database": {
+      "eval_id": "eval_2d66966d7215",
+      "status": "failed",
+      "safety_passed": 0,
+      "benefit_class": "invalid",
+      "failed_samples_count": 0,
+      "skipped_samples_count": 0,
+      "baseline_process_exit": null,
+      "candidate_process_exit": null,
+      "result_summary_json": "{\"passed\": false, \"safety_passed\": false, \"benefit\": \"invalid\", \"error_code\": \"eval_baseline_timeout\", \"reason\": \"基线评测子进程超时（超过 300s），已终止并回收。\"}",
+      "error_message": "基线评测子进程超时（超过 300s），已终止并回收。"
+    }
+  },
+  "guard_sample_exception": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_0fe96481a56f",
+      "eval_id": "eval_0fe96481a56f",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "completed",
+      "progress": 100,
+      "message": "门禁拦截（全局保护退化）：门禁拦截：2 例触发逐例得分/领先间隔零退化保护（正确目标得分或领先间隔下降，或结果不可比）",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "harmful",
+      "report": {
+        "passed": false,
+        "targeted_count": 1,
+        "improved_count": 0,
+        "degraded_count": 0,
+        "degraded_from_top1": 0,
+        "details": [
+          {
+            "id": "target",
+            "type": "score_protection",
+            "baseline": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "candidate": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "score_precision": {
+              "baseline": "raw",
+              "candidate": "raw"
+            },
+            "absolute_epsilon": 1e-06
+          }
+        ],
+        "score_comparisons": [
+          {
+            "id": "target",
+            "type": "score_protection",
+            "baseline": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "candidate": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "score_precision": {
+              "baseline": "raw",
+              "candidate": "raw"
+            },
+            "absolute_epsilon": 1e-06
+          }
+        ],
+        "violations": [],
+        "integrity_errors": [],
+        "reason": "门禁拦截（全局保护退化）：门禁拦截：2 例触发逐例得分/领先间隔零退化保护（正确目标得分或领先间隔下降，或结果不可比）",
+        "snapshot": {
+          "baseline": {
+            "materials_db_sha256": "35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a",
+            "golden_set_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+            "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+            "golden_set_item_count": 1,
+            "vector_channel": {},
+            "budget": {}
+          },
+          "candidate": {
+            "materials_db_sha256": "35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a",
+            "golden_set_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+            "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+            "golden_set_item_count": 1,
+            "vector_channel": {},
+            "budget": {}
+          },
+          "errors": []
+        },
+        "safety_passed": false,
+        "benefit": "harmful",
+        "guard_count": 1,
+        "guard_passed": false,
+        "guard_degraded_count": 0,
+        "guard_violations": [
+          {
+            "id": "guard",
+            "type": "eval_error",
+            "side": "baseline",
+            "error": "controlled_guard_failure"
+          },
+          {
+            "id": "guard",
+            "type": "eval_error",
+            "side": "candidate",
+            "error": "controlled_guard_failure"
+          }
+        ],
+        "binding_checks_count": 0,
+        "binding_improved_count": 0,
+        "binding_degraded_count": 0,
+        "binding_violations": [],
+        "rule_execution_hits": 1,
+        "failed_samples_count": 1,
+        "skipped_samples_count": 7,
+        "baseline_metrics": {},
+        "candidate_metrics": {},
+        "baseline_guard_metrics": {},
+        "candidate_guard_metrics": {},
+        "candidate_diagnostics": [],
+        "cache_reused_files": [],
+        "skipped_samples": []
+      }
+    },
+    "database": {
+      "eval_id": "eval_0fe96481a56f",
+      "status": "completed",
+      "safety_passed": 0,
+      "benefit_class": "harmful",
+      "failed_samples_count": 1,
+      "skipped_samples_count": 7,
+      "baseline_process_exit": 0,
+      "candidate_process_exit": 0,
+      "result_summary_json": "{\"passed\": false, \"targeted_count\": 1, \"improved_count\": 0, \"degraded_count\": 0, \"degraded_from_top1\": 0, \"details\": [{\"id\": \"target\", \"type\": \"score_protection\", \"baseline\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"candidate\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"score_precision\": {\"baseline\": \"raw\", \"candidate\": \"raw\"}, \"absolute_epsilon\": 1e-06}], \"score_comparisons\": [{\"id\": \"target\", \"type\": \"score_protection\", \"baseline\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"candidate\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"score_precision\": {\"baseline\": \"raw\", \"candidate\": \"raw\"}, \"absolute_epsilon\": 1e-06}], \"violations\": [], \"integrity_errors\": [], \"reason\": \"门禁拦截（全局保护退化）：门禁拦截：2 例触发逐例得分/领先间隔零退化保护（正确目标得分或领先间隔下降，或结果不可比）\", \"snapshot\": {\"baseline\": {\"materials_db_sha256\": \"35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a\", \"golden_set_sha256\": \"c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5\", \"model_version\": \"bge-small-zh-v1.5|unavailable:keyword_only\", \"golden_set_item_count\": 1, \"vector_channel\": {}, \"budget\": {}}, \"candidate\": {\"materials_db_sha256\": \"35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a\", \"golden_set_sha256\": \"c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5\", \"model_version\": \"bge-small-zh-v1.5|unavailable:keyword_only\", \"golden_set_item_count\": 1, \"vector_channel\": {}, \"budget\": {}}, \"errors\": []}, \"safety_passed\": false, \"benefit\": \"harmful\", \"guard_count\": 1, \"guard_passed\": false, \"guard_degraded_count\": 0, \"guard_violations\": [{\"id\": \"guard\", \"type\": \"eval_error\", \"side\": \"baseline\", \"error\": \"controlled_guard_failure\"}, {\"id\": \"guard\", \"type\": \"eval_error\", \"side\": \"candidate\", \"error\": \"controlled_guard_failure\"}], \"binding_checks_count\": 0, \"binding_improved_count\": 0, \"binding_degraded_count\": 0, \"binding_violations\": [], \"rule_execution_hits\": 1, \"failed_samples_count\": 1, \"skipped_samples_count\": 7, \"baseline_metrics\": {}, \"candidate_metrics\": {}, \"baseline_guard_metrics\": {}, \"candidate_guard_metrics\": {}, \"candidate_diagnostics\": [], \"cache_reused_files\": [], \"skipped_samples\": []}",
+      "error_message": "门禁拦截（全局保护退化）：门禁拦截：2 例触发逐例得分/领先间隔零退化保护（正确目标得分或领先间隔下降，或结果不可比）"
+    }
+  },
+  "binding_sample_exception": {
+    "regression_assertions_passed": true,
+    "state": {
+      "task_id": "eval_d31d5f9e7779",
+      "eval_id": "eval_d31d5f9e7779",
+      "owner_user_id": 4,
+      "owner_account_epoch": "m2-ep-m2_adm",
+      "rule_source": "flywheel_alias",
+      "rule_key": "direct:排风机",
+      "rule_revision": 1,
+      "payload_digest": "469bc16ef74ef92da81dd88168a4ecd0b5166e9de67f4c3f4b2dafbcb7a73ad9",
+      "status": "completed",
+      "progress": 100,
+      "message": "门禁拦截（无效/未命中）：绑定求值异常 (baseline/guard): controlled_binding_failure；绑定求值异常 (candidate/guard): controlled_binding_failure",
+      "passed": false,
+      "safety_passed": false,
+      "benefit": "invalid",
+      "report": {
+        "passed": false,
+        "targeted_count": 1,
+        "improved_count": 0,
+        "degraded_count": 0,
+        "degraded_from_top1": 0,
+        "details": [
+          {
+            "id": "target",
+            "type": "score_protection",
+            "baseline": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "candidate": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "score_precision": {
+              "baseline": "raw",
+              "candidate": "raw"
+            },
+            "absolute_epsilon": 1e-06
+          }
+        ],
+        "score_comparisons": [
+          {
+            "id": "target",
+            "type": "score_protection",
+            "baseline": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "candidate": {
+              "target_codes": [
+                "A"
+              ],
+              "T": 90.0,
+              "W": 50.0,
+              "margin": 40.0
+            },
+            "score_precision": {
+              "baseline": "raw",
+              "candidate": "raw"
+            },
+            "absolute_epsilon": 1e-06
+          }
+        ],
+        "violations": [],
+        "integrity_errors": [
+          "绑定求值异常 (baseline/guard): controlled_binding_failure",
+          "绑定求值异常 (candidate/guard): controlled_binding_failure"
+        ],
+        "reason": "门禁拦截（无效/未命中）：绑定求值异常 (baseline/guard): controlled_binding_failure；绑定求值异常 (candidate/guard): controlled_binding_failure",
+        "snapshot": {
+          "baseline": {
+            "materials_db_sha256": "35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a",
+            "golden_set_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+            "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+            "golden_set_item_count": 1,
+            "vector_channel": {},
+            "budget": {}
+          },
+          "candidate": {
+            "materials_db_sha256": "35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a",
+            "golden_set_sha256": "c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5",
+            "model_version": "bge-small-zh-v1.5|unavailable:keyword_only",
+            "golden_set_item_count": 1,
+            "vector_channel": {},
+            "budget": {}
+          },
+          "errors": []
+        },
+        "safety_passed": false,
+        "benefit": "invalid",
+        "guard_count": 1,
+        "guard_passed": true,
+        "guard_degraded_count": 0,
+        "guard_violations": [],
+        "binding_checks_count": 1,
+        "binding_improved_count": 0,
+        "binding_degraded_count": 0,
+        "binding_violations": [],
+        "rule_execution_hits": 1,
+        "failed_samples_count": 1,
+        "skipped_samples_count": 7,
+        "baseline_metrics": {},
+        "candidate_metrics": {},
+        "baseline_guard_metrics": {},
+        "candidate_guard_metrics": {},
+        "candidate_diagnostics": [],
+        "cache_reused_files": [],
+        "skipped_samples": []
+      }
+    },
+    "database": {
+      "eval_id": "eval_d31d5f9e7779",
+      "status": "completed",
+      "safety_passed": 0,
+      "benefit_class": "invalid",
+      "failed_samples_count": 1,
+      "skipped_samples_count": 7,
+      "baseline_process_exit": 0,
+      "candidate_process_exit": 0,
+      "result_summary_json": "{\"passed\": false, \"targeted_count\": 1, \"improved_count\": 0, \"degraded_count\": 0, \"degraded_from_top1\": 0, \"details\": [{\"id\": \"target\", \"type\": \"score_protection\", \"baseline\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"candidate\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"score_precision\": {\"baseline\": \"raw\", \"candidate\": \"raw\"}, \"absolute_epsilon\": 1e-06}], \"score_comparisons\": [{\"id\": \"target\", \"type\": \"score_protection\", \"baseline\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"candidate\": {\"target_codes\": [\"A\"], \"T\": 90.0, \"W\": 50.0, \"margin\": 40.0}, \"score_precision\": {\"baseline\": \"raw\", \"candidate\": \"raw\"}, \"absolute_epsilon\": 1e-06}], \"violations\": [], \"integrity_errors\": [\"绑定求值异常 (baseline/guard): controlled_binding_failure\", \"绑定求值异常 (candidate/guard): controlled_binding_failure\"], \"reason\": \"门禁拦截（无效/未命中）：绑定求值异常 (baseline/guard): controlled_binding_failure；绑定求值异常 (candidate/guard): controlled_binding_failure\", \"snapshot\": {\"baseline\": {\"materials_db_sha256\": \"35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a\", \"golden_set_sha256\": \"c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5\", \"model_version\": \"bge-small-zh-v1.5|unavailable:keyword_only\", \"golden_set_item_count\": 1, \"vector_channel\": {}, \"budget\": {}}, \"candidate\": {\"materials_db_sha256\": \"35:16fc4cc70cc31d9214fd6c9ece6757585fb1a78529fb200d3fce3e9ef5935f9a\", \"golden_set_sha256\": \"c8909a21b34fc12fd45ee96d625dec5798f670cdd725988beb99b2f2f216eae5\", \"model_version\": \"bge-small-zh-v1.5|unavailable:keyword_only\", \"golden_set_item_count\": 1, \"vector_channel\": {}, \"budget\": {}}, \"errors\": []}, \"safety_passed\": false, \"benefit\": \"invalid\", \"guard_count\": 1, \"guard_passed\": true, \"guard_degraded_count\": 0, \"guard_violations\": [], \"binding_checks_count\": 1, \"binding_improved_count\": 0, \"binding_degraded_count\": 0, \"binding_violations\": [], \"rule_execution_hits\": 1, \"failed_samples_count\": 1, \"skipped_samples_count\": 7, \"baseline_metrics\": {}, \"candidate_metrics\": {}, \"baseline_guard_metrics\": {}, \"candidate_guard_metrics\": {}, \"candidate_diagnostics\": [], \"cache_reused_files\": [], \"skipped_samples\": []}",
+      "error_message": "门禁拦截（无效/未命中）：绑定求值异常 (baseline/guard): controlled_binding_failure；绑定求值异常 (candidate/guard): controlled_binding_failure"
+    }
+  }
+}

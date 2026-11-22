@@ -1,0 +1,66 @@
+{
+  "coordinator_78_sample_rerun": "78 passed / 0 warnings in 138.58s, EXIT=0 (11 files covering M4 12, test_v0_0_8_llm_rules 4, M3 8, M2 5, M1 7, miner 2, M0 15, LLM/isolation/guardrails 25; isolated Windows native root C:\\Users\\tlyer\\AppData\\Local\\Temp\\coord_m4_r01_809y1_4e)",
+  "isolation_verify_after": {
+    "verdict": "PASS",
+    "exit_code": 0,
+    "business_hash_unchanged": true
+  },
+  "checks": {
+    "business_equal_to_m2_final": true,
+    "business_equal_to_m3_final": true,
+    "business_equal_after_to_final": true,
+    "delivery_matches_before": "121/122 (only doc/V0.1.6/02_任务台账.md updated by Auditor before Coordinator opening)",
+    "protected_changes_after_pytest": [],
+    "protected_changes_final": [
+      "doc/V0.1.6/rounds/V016-M4_R01_统筹裁决.md"
+    ],
+    "pre_backup_hashes_match": "6/6",
+    "asset_hashes_unchanged_vs_m3": 43,
+    "eval_asset_hashes_unchanged_vs_m3": 4,
+    "audit_dir_evidence_count": 26,
+    "container_audit_files_count": 6,
+    "gate_comparisons_equal": true,
+    "gate_r_m3_01_equal": true,
+    "image_id": "sha256:9517cc2a941cf9eebb662f2c833cdf88046709131a98380410b3b8b7a877e1b3",
+    "image_layers_equal": true,
+    "image_workspace_mismatches": [],
+    "readonly_db_check": {
+      "materials_db_counts": {
+        "materials": 26863,
+        "materials_fts": 26863,
+        "materials_metadata": 5,
+        "llm_rules": 4,
+        "rule_audit_logs": 3,
+        "rule_eval_runs": 0,
+        "flywheel_rule_suggestions": 0,
+        "flywheel_config_snapshots": 0,
+        "flywheel_records": 0
+      },
+      "auth_db_counts": {
+        "users": 186,
+        "audit_logs": 0,
+        "work_sessions": 0,
+        "active_heartbeats": 0,
+        "issued_temp_credentials": 0,
+        "revoked_tokens": 0
+      },
+      "residual_audit_users": 0
+    },
+    "new_rounds": [
+      "doc/V0.1.6/rounds/V016-M4_R01_统筹裁决.md"
+    ],
+    "updated_management_files": [
+      "doc/00_项目管理/版本路线图.md",
+      "doc/00_项目管理/进度总表.md",
+      "doc/00_项目管理/问题与版本归属总台账.md",
+      "doc/README.md",
+      "doc/V0.1.6/01_实施方案与任务包.md",
+      "doc/V0.1.6/02_任务台账.md",
+      "doc/V0.1.6/03_终审与版本准入.md"
+    ],
+    "checked_relative_links": 252,
+    "broken_relative_links": [],
+    "relative_document_links_valid": true,
+    "all_passed": true
+  }
+}

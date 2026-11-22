@@ -15,8 +15,15 @@ RUN pip install --no-cache-dir --upgrade pip --default-timeout=120 -i https://mi
     pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --default-timeout=120 && \
     pip install --no-cache-dir -r requirements.txt --default-timeout=120 -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
-# Copy project files
-COPY . /app/
+# Allow-list copy ONLY clean application source, web assets, and baseline configs
+# (sensitive files, .env variants, DBs/WAL/SHM, personnel lists, and runtime state must NEVER enter any image layer)
+COPY app/*.py /app/app/
+COPY app/eval_assets/golden_runtime_v1.json app/eval_assets/report_template_v1.json app/eval_assets/smoke_materials_v1.json /app/app/eval_assets/
+COPY web/ /app/web/
+COPY config/ /app/config/
+
+# Ensure runtime mount/writable directories exist empty in the image
+RUN mkdir -p /app/app/uploads /app/app/vector_cache /app/logs /app/model_offline
 
 # Expose port 18080
 EXPOSE 18080

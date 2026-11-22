@@ -3,7 +3,9 @@ import os
 import copy
 from typing import List, Dict, Any, Optional
 from openpyxl.styles import Font, PatternFill
+from openpyxl.comments import Comment
 from app.db_manager import query_by_code
+from app.runtime_eval_assets import load_report_template
 
 def build_historical_price_map(template_path: str) -> Dict[str, float]:
     """
@@ -79,18 +81,13 @@ def generate_standard_report(matched_items: List[Dict[str, Any]], template_path:
             wb = None
 
     if wb is None:
-        # Build built-in template dynamically
+        # Generate the standard sheet from the verified synthetic template.
+        template, _ = load_report_template()
         wb = openpyxl.Workbook()
         sheet = wb.active
-        sheet.title = "模板"
-        
-        headers = [
-            '*序号', '*费用类型', '*清单类型', '*材料类型', '*清单编码', 
-            '*清单名称', '*特征/规格型号', '单位', '*工程量', '材料损耗', 
-            '品牌', '竞聘系数', '单价(无税)', '备注', '专业'
-        ]
+        sheet.title = template["sheet"]
         # Set headers styling
-        for col_idx, header in enumerate(headers, start=1):
+        for col_idx, header in enumerate(template["headers"], start=1):
             cell = sheet.cell(1, col_idx)
             cell.value = header
             cell.font = Font(name="微软雅黑", size=11, bold=True)
@@ -215,6 +212,10 @@ def generate_standard_report(matched_items: List[Dict[str, Any]], template_path:
                         if style_templates:
                             apply_style_dict(cell, style_templates[c - 1])
                         cell.fill = no_fill
+                    if b.get("qty_ratio") is not None:
+                        sheet.cell(current_row, 9).comment = Comment(
+                            f"绑定比例：{b['qty_ratio']}", "ListTrans",
+                        )
                     current_row += 1
             else:
                 # Fallback to single item match if any code is present

@@ -1,0 +1,147 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T12:48:09.444289+08:00",
+  "role": "coordinator",
+  "task": "V019-M0/R01",
+  "decision": "RELEASED_PACKAGE_WITH_EXPERIMENTAL_SCORING_OFF",
+  "next_dispatch": "V019-M1/R01",
+  "v019_final_review": false,
+  "v020_approved": false,
+  "production_release_authorized": false,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "dispatch_baseline_check": {
+    "total": 174,
+    "matched": 172,
+    "changed": {
+      "app/matcher.py": {
+        "dispatch_baseline": "e5770958399ef537f4c6d0fda873285b57476b5a893ceb4712c3c873afb68dac",
+        "current": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e"
+      },
+      "app/server.py": {
+        "dispatch_baseline": "e2f6b20774742ce01cd79afe768688c440e31ae0fe039fb460240c5ed5f588f3",
+        "current": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7"
+      }
+    }
+  },
+  "delivery_manifest_check": {
+    "total": 45,
+    "matched": 44,
+    "changed": {
+      "doc/V0.1.9/02_任务台账.md": {
+        "delivery_frozen": "519626b19b2ca318d4f6f7fb37149c149b9f73462698513a4241266fb1c692be",
+        "current": "3644511caef2e30b6efe501a00c6614da528fe02533235a84e4582806fced3e1"
+      }
+    },
+    "note": "doc/V0.1.9/02_任务台账.md updated by audit AI upon recording R01 review verdict and OBS-A-M0-01..03; all 44 other delivery files exact match."
+  },
+  "audit_summary_sha256": "ce0dfcfd2b8d6719b8ba3ca27defbd8badcd8b5466230b38f629ed464c75a327",
+  "rollback_archive_check": {
+    "path": ".local-archive/v018_final_v019_m0_source_baseline.zip",
+    "archive_sha256_matched": true,
+    "archive_sha256": "238595cf17ecfb8ae934e2dadcda31cb5c6cccc759f691dd55cb8546cb3eead5",
+    "entries_checked": 88,
+    "mismatches": []
+  },
+  "frozen_assets_check": {
+    "catalog_matched": true,
+    "catalog_sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "legacy_vector_cache_all_matched": true,
+    "legacy_vector_cache_candidates_dir_exists": false,
+    "legacy_vector_cache": {
+      "app/vector_cache/cache_metadata.json": {
+        "matched": true,
+        "sha256": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6"
+      },
+      "app/vector_cache/db_timestamp.txt": {
+        "matched": true,
+        "sha256": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7"
+      },
+      "app/vector_cache/index_to_material.json": {
+        "matched": true,
+        "sha256": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d"
+      },
+      "app/vector_cache/materials.index": {
+        "matched": true,
+        "sha256": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5"
+      },
+      "app/vector_cache/materials_embeddings.npy": {
+        "matched": true,
+        "sha256": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+      }
+    },
+    "offline_models_inventory": [
+      "bge-small-zh-v1.5",
+      "paraphrase-multilingual-MiniLM-L12-v2"
+    ],
+    "cross_encoder_offline_present": false
+  },
+  "default_switches_probe": {
+    "v019_m0_scoring_default": "legacy",
+    "v019_m0_invalid_profile_fallback": "legacy",
+    "v018_m0_recall_enabled_default": false
+  },
+  "coord_spot_check_pytest": {
+    "modules": [
+      "tests/test_v019_m0_ranking.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_v018_m0_structured_recall.py",
+      "tests/test_v018_m1_sparse_recall.py",
+      "tests/test_v018_m2_vector_fusion.py",
+      "tests/test_v018_m3_selection_degradation.py",
+      "tests/test_v017_m2_catalog_revision.py",
+      "tests/test_v016_m2_publish_gate.py"
+    ],
+    "passed": 54,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_s": 86.84,
+    "isolated_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_m0_coord_b18eb6422d3e46998a099a103d23da17",
+    "independent_audit_full_suite": {
+      "passed": 447,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "duration_s": 742.4,
+      "source": "doc/V0.1.9/rounds/V019-M0_R01_审核小结.md"
+    }
+  },
+  "isolation_and_snapshot_check": {
+    "coord_before_verdict": "PASS",
+    "coord_after_verdict": "PASS",
+    "business_snapshot_slots": 35,
+    "diffs_coord_before_vs_m0_start": [],
+    "diffs_coord_after_vs_m0_start": []
+  },
+  "observations_rulings": {
+    "OBS-A-M0-01": {
+      "severity": "P3",
+      "status": "open_tracked",
+      "ruling": "Do not relax signed 300ms keyword single-request P95 budget. Calibrated scoring remains default OFF so default path is unaffected (295.377ms <= 300ms). Any candidate proposed for default enablement in M1/M3 must meet all signed budgets.",
+      "owner_package": "V019-M1 / V019-M3"
+    },
+    "OBS-A-M0-02": {
+      "severity": "P3",
+      "status": "ruling_recorded_tracked",
+      "ruling": "Accept raw score-scale differences (116 harmful / 107 unconstrained-binding score field diffs across 6 legacy references) only for experimental scoring profiles; do not modify legacy references. Legacy 18-group zero-diff remains mandatory while legacy is default. Experimental profiles must preserve 100% 5-class rule safety classification, constrained-binding gate, 0 hard-conflict auto-bind, and GT-0674/0677/0678 recommended + 422 export block. GT-0674/0677/0678 margin shift (+0.1 to -0.1) is logged as risk evidence, with full acceptance/rejection closure remaining under V019-M2 (F20/R-M3-01).",
+      "owner_package": "V019-M2 / V019-M3"
+    },
+    "OBS-A-M0-03": {
+      "severity": "P3",
+      "status": "open_tracked",
+      "ruling": "Endorse non-adoption (default OFF). Calibrated scoring improves BGE Train/Dev Hit@1 (+13) and strong-electric Hit@3 (+13) but degrades decoration Hit@1 (keyword 21->17, BGE 26->25) and Dev Hit@1 (-4.10pp keyword / -0.82pp BGE). No candidate with Dev degradation or below-baseline domain Hit@1 may be enabled by default without explicit coordinator sign-off.",
+      "owner_package": "V019-M1 / V019-M3"
+    },
+    "OBS-COORD-M0-01": {
+      "severity": "P3",
+      "status": "attributed_tracked",
+      "ruling": "Same-split V0.1.7 reproduction and root-cause attribution (decoration GT-1138/1139 +15 competitor shift; BGE strong-electric 7 switchgear routing shifts) completed and verified; default OFF reproduces V0.1.8 identically. Full-set ranking/wrong-suggestion gap vs V0.1.7 signed gates remains open for V019-M1/M2/M3 closure.",
+      "owner_package": "V019-M1 / V019-M2 / V019-M3"
+    }
+  },
+  "m1_effective_source_baseline_sha256": {
+    "app/matcher.py": "48cd9536f3f9bc78e9b9204aed5e6988e8a82b4901bfc00b90f1b30fe2ab785e",
+    "app/server.py": "5849f33c2bcfa37434f99920dc19a65d05bf51e5ffb2cc8c5d46492750874de7",
+    "tests/test_v019_m0_ranking.py": "adac33bbbe64bb26b5a0474f58597b65fad0ad8f3039a2561ecfcdcd08ddc47f"
+  }
+}

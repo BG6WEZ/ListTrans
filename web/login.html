@@ -49,7 +49,7 @@
             <div class="input-group">
                 <label for="password">密码</label>
                 <div class="input-wrapper">
-                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入密码 (默认 hkjj@12345)">
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="请输入登录密码">
                 </div>
             </div>
             <button type="submit" id="submit-btn" class="login-btn">
@@ -105,7 +105,8 @@
                 localStorage.setItem('name', data.name || data.username);
                 localStorage.setItem('position', data.position || '');
                 localStorage.setItem('role', data.role);
-                
+                localStorage.setItem('must_change_password', data.must_change_password ? '1' : '0');
+
                 // Redirect
                 window.location.href = 'index.html';
             } catch (err) {

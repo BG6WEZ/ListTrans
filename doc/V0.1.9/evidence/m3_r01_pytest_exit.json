@@ -1,0 +1,14 @@
+{
+  "exit_code": 0,
+  "source_sha256": {
+    "app/binding_decisions.py": "05bc4c724b37c99204cd3751e007167e3e43c2d6aa2900e5fc05fce55d6e800e",
+    "app/server.py": "28ba7171c5f14cb55497291e44702b8eeba2a9cf231768c002e7bfc12dd30fcb",
+    "app/report_generator.py": "0832d4883f0a13a96de605d8a45873af1c7b6ea261863f696e52f1a92090b9fd",
+    "web/app.js": "77e79aee7887c03d8c2727d24324fe289c18313251628896648f6d718e0bb00c",
+    "web/index.html": "c5df77ac493474cd371c3d7516cb89cda86ed4316c9fb4c9fc17684020d7eed3",
+    "web/index.css": "c1d4d6160fa17591fa35702e0d478b13bbe4def727c5a625289e40bc51ca9b64",
+    "tests/test_v019_m3_review.py": "5cde70d0b51f11993ec1505b8593070c5e95349eff3f77878e14247103fd1629",
+    "Dockerfile": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466"
+  },
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\v019_m3_suite_retry_c96ee60ebd744e16b0138a43efd9fadf"
+}

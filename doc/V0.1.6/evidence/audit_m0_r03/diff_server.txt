@@ -1,0 +1,21 @@
+﻿diff --git a/.local-archive/v016_m0_r03_pre_backup/app/server.py b/app/server.py
+index be8cdc3..cb89caa 100644
+--- a/.local-archive/v016_m0_r03_pre_backup/app/server.py
++++ b/app/server.py
+@@ -378,6 +378,7 @@ async def api_get_me(current_user: dict = Depends(get_current_user_allow_passwor
+     return {
+         "id": current_user["id"],
+         "username": current_user["username"],
++        "account_epoch": str(current_user.get("account_epoch") or ""),
+         "name": display_name,
+         "position": position,
+         "dept1": current_user.get("dept1") or "",
+@@ -765,6 +766,8 @@ async def api_annotate_session(
+         raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+     return {
+         "code": 0,
++        "actor_user_id": current_user["id"],
++        "actor_account_epoch": str(current_user.get("account_epoch") or ""),
+         "items": items,
+         "downgraded": downgraded,
+         "legacy_untrusted_count": legacy_untrusted_count,

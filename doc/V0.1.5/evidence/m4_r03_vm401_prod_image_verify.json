@@ -1,0 +1,534 @@
+{
+  "gate": "V-M4-01",
+  "baseline_head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "frozen_source_binding": {
+    "dockerfile_sha256": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+    "dockerignore_sha256": "4c40a6755581f7b0feb276d27dc25c8b9118304f55df7c47e2edc0f86dd243e1",
+    "requirements_sha256": "15373ba1b0a47d7fac4fccbabbae39997f7133459ac72a561038f49a39fa1c39",
+    "total_source_files_bound": 50,
+    "source_hashes": {
+      "Dockerfile": "bc5e8d54fb8758fd4f0ebdbb7c586d3c6d68cf5386ff570b17b7c7154259413a",
+      ".dockerignore": "4c40a6755581f7b0feb276d27dc25c8b9118304f55df7c47e2edc0f86dd243e1",
+      "requirements.txt": "15373ba1b0a47d7fac4fccbabbae39997f7133459ac72a561038f49a39fa1c39",
+      "app/admin_api.py": "ea4cd0998e6a812a18282004e9d45931b63b079bc081b96924ef3b6f7f2245bc",
+      "app/audit_manager.py": "412b3d99be88b10acb1f58b52c32fc979f8035da234636f841140fdf3d43e437",
+      "app/auth_manager.py": "3b8e9f97c12db0092396bb0fc4bee5bf2480759f3413e0ea9e75c30783da8485",
+      "app/auth_middleware.py": "3c09aa6b339743581d5d6e6c38f2318b737f7caae6e6f18b0cd8b388c206eef3",
+      "app/binding_decisions.py": "d0c7ed77a1a3903109fadc35e1e3710d80e3d737251c036b0286019a088e8716",
+      "app/db_manager.py": "47ed0b50957b8fdcf2d9d58a0ad377447bd05f2e81949c26b3202e940d3dec2c",
+      "app/domain_extractors.py": "0620b5b46030a29972e2f98bc0db814d2f35fb0e80b6ef5e5bf3df63933bb20c",
+      "app/domain_router.py": "262b3c44b54e24e1332de553495c83fd5322acf743a20b864aca93d6360a8b1e",
+      "app/feedback_miner.py": "981bede1183da115c6e5b1b8b951f688c9ce442b6ac14e56f82bb5e83fed2ecb",
+      "app/feedback_train.py": "b13ac9eff30ac0143cad1e51c02a6c893e79f4298f3dedaec0fe07e1df736cbf",
+      "app/flywheel_db.py": "fb7e262ac643587209b2c749fe3b220f7917795fb04c186d305660d9e5b18044",
+      "app/flywheel_sandbox.py": "29f3152a2b0029a014e7b173743433a1e60321abf490305fcfc2a58b650ea843",
+      "app/llm_client.py": "e4971eb95647c6c0e1b606145f1f76e120c7ad0d126b17339041001e4859c51b",
+      "app/llm_rule_engine.py": "bcf17254b356d87d433536171b5e55c861f23c32aa1e6db4cccb62648398d813",
+      "app/matcher.py": "6ebb305fe2afa94a01e252c248e103d330717caf47ea03e3310c32ce1bf25659",
+      "app/normalizer.py": "a89ceb48e883ef9e31925abc31617f7379378109db4f19088cf82a12e792fae3",
+      "app/preprocessor.py": "2e04f3022d5a658a87c6de4da9ddb125c8a5ff0d3fd0bc9db0df1cb6c89a7ac5",
+      "app/query_preprocessor.py": "f537f584604bf837fd0472ca35d013e6f57525ec0ab9f092087ac0e406993221",
+      "app/report_generator.py": "54ae14d36d894bfc4bcddb428728ac445da3f5158a64acfa6f0746a20d416e07",
+      "app/rule_api.py": "f83c22b3368e948267ceb0e7b4507457d5b872d4ddcbec6b4bf4259cd0e47c9c",
+      "app/server.py": "aaeba6ff6981d4f57b279fe78d70c277a130a11c1e3a8f76a2eb240ada25e891",
+      "app/session_manager.py": "2a8f7269101127739b395a89749aacdebfaea7de223063285c01217cc3630842",
+      "app/vector_index.py": "58cc76e35dbae01d3354f58684d5f7b74be72c279ab0fcf72c9cb47a4f95748d",
+      "web/admin.html": "ed1a3eeb9c6ef09683c16924a0c436966fa91de7020767b7cb198dedacea0669",
+      "web/app.js": "3b37776865e1328f85158c4d138ab799ada290c13675c7330e79ae650860f35c",
+      "web/index.css": "8b924cacbd07d82e43906ec9e3958908f7ab6fa1f84205a6c40faf1340cd0417",
+      "web/index.html": "9794bf2c45aa4441ecf29510542e27ed50dd46703324f82629ea55a9a95f5cae",
+      "web/login.css": "20bf8b2f52ffd9c0cac59d0979604d1ad4b6ec1ba7f676388ba0c9db1f726acd",
+      "web/login.html": "f8fe49b0a1315ca5bdf86c79c85d7a78a4111af42880cec1cd3520c8a5af9cb5",
+      "web/logo.png": "886da7965a5f07b8525ba921b11d9d3e2df02303efed5de90e482557b88be539",
+      "web/logo500.png": "7d71cef49bf5db0c71727daea3c75895cc114a4bc32aa5f4b47c5fd8516dcb00",
+      "config/alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "config/auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "config/boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "config/category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "config/connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "config/domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "config/flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "config/llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "config/llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "config/material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "config/model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "config/stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "config/tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "config/unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "config/unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "config/weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+    }
+  },
+  "base_image": {
+    "tag": "python:3.11-slim",
+    "id": "sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535",
+    "repo_digests": [
+      "python@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535"
+    ]
+  },
+  "build": {
+    "command": "docker build --pull=false --no-cache -t listtrans:m4-r03-vm401-prod <TMP/prod_ctx>",
+    "offline_flag_used": false,
+    "runtime_overlay_substituted": false,
+    "scratch_substituted": false,
+    "exit_code": 0,
+    "wall_seconds": 147.36,
+    "image_tag": "listtrans:m4-r03-vm401-prod",
+    "image_id": "sha256:e9ea5a79518560605b4135616f0be17b172f3882872167c8adb9d1de1449c86e",
+    "rootfs_layers_count": 11,
+    "rootfs_layers": [
+      "sha256:dd57f90311a2567b55ff22eeacff1602fd04ad7566e315957731359eab173b90",
+      "sha256:cd9a29aa43e014bda7a7815521ab51a3ababf2bceb4de66302701ac217ff26fb",
+      "sha256:961adfab8c074ba37b3fa0c54bb96911f8648a1788176a864bfb0750cfdef155",
+      "sha256:688ef2053b5da5e0048efd435dace328a25d5d4c8cb5e2cd1a7a92c697c586d5",
+      "sha256:23959dbae3c56705336e72806243d7c6c4291cd533ef8c533f571d97f5f1196b",
+      "sha256:4e1553e6c32319837541fa1f55f2df74348e4a87c78758dad586e953c90e2de3",
+      "sha256:84e4435d6a8da47af19e409ce9eae86d3bf4f054a55f1b87ca96074397398221",
+      "sha256:48d92772d70681d70dac5b252920a7fe4def92d1f31a1cf9b78646b656ee3bd9",
+      "sha256:f62d716604e5fdde2e890d90d704b47d7ca6f4c944d6f963ce420db15540ee13",
+      "sha256:c7e6d88eaf7989259e4d62af0c4daa72e9a05356f4cf1c296849a86f2daad452",
+      "sha256:8796a44fe1d4c1c8c55b97096cff667475d136ac0ebdccfb7402fb52cd19bdc5"
+    ],
+    "config_cmd": [
+      "uvicorn",
+      "app.server:app",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "18080",
+      "--workers",
+      "1"
+    ],
+    "config_env": [
+      "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG=C.UTF-8",
+      "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+      "PYTHON_VERSION=3.11.18",
+      "PYTHON_SHA256=9120e0a653868f6e3698d36cdd99e5a58903ec9469e448f21d98f7b16d8fa290",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONUNBUFFERED=1",
+      "HF_ENDPOINT=https://hf-mirror.com"
+    ],
+    "exposed_ports": [
+      "18080/tcp"
+    ],
+    "pip_freeze_count": 69,
+    "pip_freeze": [
+      "annotated-doc==0.0.6",
+      "annotated-types==0.8.0",
+      "anyio==4.16.0",
+      "bcrypt==5.0.0",
+      "cffi==2.1.1",
+      "click==8.5.1",
+      "cloudpickle==3.1.2",
+      "cryptography==50.0.2",
+      "ecdsa==0.19.2",
+      "et_xmlfile==2.0.0",
+      "faiss-cpu==1.16.0",
+      "fastapi==0.163.0",
+      "filelock==4.2.4",
+      "fsspec==2026.9.0",
+      "h11==0.16.0",
+      "hf-xet==1.8.0",
+      "httpcore2==2.16.0",
+      "httpx2==2.16.0",
+      "huggingface_hub==2.4.0",
+      "idna==3.20",
+      "Jinja2==3.1.6",
+      "jiter==0.19.0",
+      "joblib==1.6.0",
+      "markdown-it-py==4.3.0",
+      "MarkupSafe==3.0.3",
+      "mdurl==0.1.2",
+      "mpmath==1.3.0",
+      "narwhals==2.28.0",
+      "networkx==3.6.1",
+      "numpy==2.4.6",
+      "openai==3.51.0",
+      "openpyxl==3.1.5",
+      "opentelemetry-api==1.45.2",
+      "packaging==26.3",
+      "pandas==3.1.1",
+      "passlib==1.7.4",
+      "pyasn1==0.6.5",
+      "pycparser==3.12",
+      "pydantic==2.14.3",
+      "pydantic_core==2.50.4",
+      "Pygments==2.21.0",
+      "python-dateutil==4.0.0",
+      "python-dotenv==1.2.4",
+      "python-jose==3.5.0",
+      "python-multipart==0.0.33",
+      "PyYAML==6.0.3",
+      "regex==2026.11.9",
+      "rich==15.0.0",
+      "rsa==4.9.1",
+      "safetensors==0.8.0",
+      "scikit-learn==1.9.1",
+      "scipy==1.17.1",
+      "sentence-transformers==6.3.0",
+      "shellingham==1.5.4",
+      "six==1.17.0",
+      "sniffio==1.3.1",
+      "starlette==1.10.0",
+      "sympy==1.14.0",
+      "threadpoolctl==3.8.0",
+      "tokenizers==0.23.3",
+      "torch==2.15.0+cpu",
+      "tqdm==4.70.1",
+      "transformers==5.23.0",
+      "truststore==0.10.5",
+      "typer==0.29.1",
+      "typing-inspection==0.4.5",
+      "typing_extensions==4.16.0",
+      "tzdata==2026.6",
+      "uvicorn==0.54.0"
+    ],
+    "build_log": "doc/V0.1.5/evidence/m4_r03_vm401_prod_image_build.log"
+  },
+  "all_layer_scan": {
+    "total_layers_scanned": 11,
+    "layers": [
+      {
+        "layer_index": 0,
+        "blob": "blobs/sha256/37fb86c2a767b88d500c6872195f88078f64765fe0d2f9cc375cc2efbd4c0a41",
+        "file_count": 2678,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 1,
+        "blob": "blobs/sha256/53daecf7856e9b7235583f1ec326387aae7d29af3d5cd2efc20246259ab817cc",
+        "file_count": 202,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 2,
+        "blob": "blobs/sha256/7efbce397249e9202b070b8e638baff71160948c640b9a44f2226419a71f410d",
+        "file_count": 2111,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 3,
+        "blob": "blobs/sha256/bbe7053e6def9842d628414346e26f25e499463adb6ca48c0c8932e036e44000",
+        "file_count": 0,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 4,
+        "blob": "blobs/sha256/d3c8400fe9c5f3864cec27f7ba830032158b3a90b50328be315d9ced1eeb9c6b",
+        "file_count": 0,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 5,
+        "blob": "blobs/sha256/58ab6ba7a24cf7cb83fc5b66ec5920a7324817f31e4b91f8d3ea647b28d5d14d",
+        "file_count": 1,
+        "app_file_count": 1,
+        "app_files_sample": [
+          "app/requirements.txt"
+        ],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 6,
+        "blob": "blobs/sha256/85f3480f6b145481ff7e5eeb45abc7e940e459baad39976fd7371600ec540dd6",
+        "file_count": 45127,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 7,
+        "blob": "blobs/sha256/69c566985648765469d195959793c1c08264256e135d895f40de412149f50fac",
+        "file_count": 23,
+        "app_file_count": 23,
+        "app_files_sample": [
+          "app/app/admin_api.py",
+          "app/app/audit_manager.py",
+          "app/app/auth_manager.py",
+          "app/app/auth_middleware.py",
+          "app/app/binding_decisions.py",
+          "app/app/db_manager.py",
+          "app/app/domain_extractors.py",
+          "app/app/domain_router.py",
+          "app/app/feedback_miner.py",
+          "app/app/feedback_train.py",
+          "app/app/flywheel_db.py",
+          "app/app/flywheel_sandbox.py",
+          "app/app/llm_client.py",
+          "app/app/llm_rule_engine.py",
+          "app/app/matcher.py",
+          "app/app/normalizer.py",
+          "app/app/preprocessor.py",
+          "app/app/query_preprocessor.py",
+          "app/app/report_generator.py",
+          "app/app/rule_api.py",
+          "app/app/server.py",
+          "app/app/session_manager.py",
+          "app/app/vector_index.py"
+        ],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 8,
+        "blob": "blobs/sha256/c08c0e3fb0d0ce9e40f040122b71a26453e01d37bf9c1d1ebacad9caa571ec50",
+        "file_count": 8,
+        "app_file_count": 8,
+        "app_files_sample": [
+          "app/web/admin.html",
+          "app/web/app.js",
+          "app/web/index.css",
+          "app/web/index.html",
+          "app/web/login.css",
+          "app/web/login.html",
+          "app/web/logo.png",
+          "app/web/logo500.png"
+        ],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 9,
+        "blob": "blobs/sha256/df3585a603478cbf6eef626c5587a9eb3998dadda982bb70c80162aea89cfeab",
+        "file_count": 16,
+        "app_file_count": 16,
+        "app_files_sample": [
+          "app/config/alias_dict.json",
+          "app/config/auto_binding_rules.json",
+          "app/config/boost_rules.json",
+          "app/config/category_domain_map.json",
+          "app/config/connection_dict.json",
+          "app/config/domain_schema.json",
+          "app/config/flags_dict.json",
+          "app/config/llm_config.json",
+          "app/config/llm_prompts.json",
+          "app/config/material_dict.json",
+          "app/config/model_config.json",
+          "app/config/stop_words.json",
+          "app/config/tolerance_rules.json",
+          "app/config/unit_norm.json",
+          "app/config/unit_rules.json",
+          "app/config/weight_rules.json"
+        ],
+        "canary_content_hits": []
+      },
+      {
+        "layer_index": 10,
+        "blob": "blobs/sha256/205940bc45b90aaeaed0d813d000badb3b4fcc16d0ecbfc6f9c8438588b151cd",
+        "file_count": 0,
+        "app_file_count": 0,
+        "app_files_sample": [],
+        "canary_content_hits": []
+      }
+    ],
+    "canary_path_hits": {
+      ".env": false,
+      ".env.production": false,
+      "app/auth.db": false,
+      "app/auth.db-wal": false,
+      "app/auth.db.backup": false,
+      "data/audit_disabled_materials.csv": false,
+      "doc/personnel.xls": false,
+      "scripts/cloud_users_snapshot.json": false,
+      "config/runtime_credentials.json": false,
+      "config/unlisted_runtime.json": false
+    },
+    "all_10_canaries_excluded": true,
+    "canary_content_hits_across_all_layers": [],
+    "zero_canary_content_in_all_layers": true,
+    "app_forbidden_hits": [],
+    "zero_forbidden_files_under_app": true,
+    "outside_app_pattern_hits_count": 35,
+    "outside_app_pattern_hits_sample": [
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arccos.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arccosh.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arcsin.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arcsinh.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arctan.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-arctanh.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-cbrt.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-cos.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-cosh.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-exp.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-exp2.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-expm1.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-log.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-log10.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-log1p.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-log2.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-sin.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-sinh.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-tan.csv"
+      },
+      {
+        "layer_index": 6,
+        "path": "usr/local/lib/python3.11/site-packages/numpy/_core/tests/data/umath-validation-set-tanh.csv"
+      }
+    ],
+    "config_files_in_image": [
+      "app/config/alias_dict.json",
+      "app/config/auto_binding_rules.json",
+      "app/config/boost_rules.json",
+      "app/config/category_domain_map.json",
+      "app/config/connection_dict.json",
+      "app/config/domain_schema.json",
+      "app/config/flags_dict.json",
+      "app/config/llm_config.json",
+      "app/config/llm_prompts.json",
+      "app/config/material_dict.json",
+      "app/config/model_config.json",
+      "app/config/stop_words.json",
+      "app/config/tolerance_rules.json",
+      "app/config/unit_norm.json",
+      "app/config/unit_rules.json",
+      "app/config/weight_rules.json"
+    ],
+    "exact_16_allowed_configs_in_image": true,
+    "expected_app_files_checked": 48,
+    "app_source_sha256_mismatches": [],
+    "all_app_source_hashes_match": true
+  },
+  "config_history_leaks": [],
+  "fail_closed_check": {
+    "exit_code": 1,
+    "rejected_nonzero": true,
+    "fatal_security_error_present": true,
+    "output_tail": "_gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1176, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1147, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 690, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 940, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 241, in _call_with_frames_removed\n  File \"/app/app/server.py\", line 152, in <module>\n    from app.auth_middleware import (\n  File \"/app/app/auth_middleware.py\", line 5, in <module>\n    from app.auth_manager import verify_token_session, is_testing_env\n  File \"/app/app/auth_manager.py\", line 153, in <module>\n    raise RuntimeError(\nRuntimeError: FATAL SECURITY ERROR: Production startup requires a strong non-placeholder SECRET_KEY environment variable.\n"
+  },
+  "isolated_startup_check": {
+    "start_exit": 0,
+    "port": 52283,
+    "login_html_status": 200,
+    "unauth_me_status": 401,
+    "wrong_password_login_status": 400,
+    "admin_initial_login_status": 200,
+    "admin_initial_must_change_password": false,
+    "admin_me_status": 200,
+    "admin_llm_rules_status": 200,
+    "employee_create_status": 200,
+    "employee_create_must_change_password": 1,
+    "employee_temp_password_len": 20,
+    "employee_temp_login_status": 200,
+    "employee_temp_must_change_password": true,
+    "employee_me_before_change_status": 200,
+    "employee_llm_rules_before_change_status": 403,
+    "employee_llm_rules_before_change_detail": "MUST_CHANGE_PASSWORD: 首次登录或密码重置后必须先修改密码。",
+    "employee_profile_change_status": 200,
+    "employee_profile_must_change_password": false,
+    "employee_old_token_after_change_status": 401,
+    "employee_old_temp_password_login_status": 400,
+    "employee_new_login_status": 200,
+    "employee_new_must_change_password": false,
+    "employee_me_after_change_status": 200,
+    "employee_llm_rules_after_change_status": 200,
+    "admin_profile_rotate_status": 200,
+    "admin_old_token_after_rotate_status": 401,
+    "admin_old_password_login_status": 400,
+    "admin_new_password_login_status": 200,
+    "uvicorn_cmdlines": [
+      "/usr/local/bin/python3.11 /usr/local/bin/uvicorn app.server:app --host 0.0.0.0 --port 18080 --workers 1"
+    ],
+    "workers_1_cmd_present": true,
+    "uvicorn_process_count": 1,
+    "container_config_files": [
+      "alias_dict.json",
+      "auto_binding_rules.json",
+      "boost_rules.json",
+      "category_domain_map.json",
+      "connection_dict.json",
+      "domain_schema.json",
+      "flags_dict.json",
+      "llm_config.json",
+      "llm_prompts.json",
+      "material_dict.json",
+      "model_config.json",
+      "stop_words.json",
+      "tolerance_rules.json",
+      "unit_norm.json",
+      "unit_rules.json",
+      "weight_rules.json"
+    ],
+    "exact_16_container_configs": true,
+    "app_dir_db_files": [],
+    "zero_db_files_under_app_dir": true
+  },
+  "checks": {
+    "build_succeeded": true,
+    "all_10_canaries_excluded": true,
+    "zero_canary_content_in_all_layers": true,
+    "zero_forbidden_files_under_app": true,
+    "exact_16_allowed_configs_in_image": true,
+    "all_app_source_hashes_match": true,
+    "zero_config_or_history_leaks": true,
+    "fail_closed_missing_secret_key": true,
+    "isolated_startup_and_auth_flows_passed": true,
+    "single_worker_verified": true,
+    "container_runtime_dir_clean": true
+  },
+  "overall_verdict": "PASS"
+}

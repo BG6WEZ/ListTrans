@@ -1,0 +1,325 @@
+{
+  "task": "V015-M1",
+  "round": "R01",
+  "role": "coordinator",
+  "created_at": "2026-11-13T15:04:17.683356+08:00",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": [
+    {
+      "file": "app/query_preprocessor.py",
+      "manifest_line": 12,
+      "expected": "8ec776bf186851248fad6e7468edab85d3870b0fde2318f77f2eb53974ffda2e",
+      "actual": "8ec776bf186851248fad6e7468edab85d3870b0fde2318f77f2eb53974ffda2e",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "app/server.py",
+      "manifest_line": 13,
+      "expected": "9ce124244f724e7f9fb46173afab8572c3084720791adc0bcf1a5cd3df34e690",
+      "actual": "9ce124244f724e7f9fb46173afab8572c3084720791adc0bcf1a5cd3df34e690",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "app/matcher.py",
+      "manifest_line": 14,
+      "expected": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "actual": "48780dfe4bd799535472b92116139da35a3ac01a87a5ab6803100390e5f1e796",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "web/app.js",
+      "manifest_line": 15,
+      "expected": "c8cafc92684ffd71aca135e7a263472a75acdcfcc405ce47807bf72a6a6c0041",
+      "actual": "c8cafc92684ffd71aca135e7a263472a75acdcfcc405ce47807bf72a6a6c0041",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/eval_golden_set.py",
+      "manifest_line": 16,
+      "expected": "6e1d27caf8ea8f24d826980a93b461530c9112af9089723833e0297e0f4dd4ae",
+      "actual": "6e1d27caf8ea8f24d826980a93b461530c9112af9089723833e0297e0f4dd4ae",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/test_flywheel_sandbox.py",
+      "manifest_line": 17,
+      "expected": "b88e666045078f03b51e34bdf5b0e6f60b6277b8738fac8ad72045c9337d8db9",
+      "actual": "b88e666045078f03b51e34bdf5b0e6f60b6277b8738fac8ad72045c9337d8db9",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/test_auto_binding.py",
+      "manifest_line": 18,
+      "expected": "ab4749f2b75336abc75e57ec42ae6091685e1454a60cc0923656f11f31e049c5",
+      "actual": "ab4749f2b75336abc75e57ec42ae6091685e1454a60cc0923656f11f31e049c5",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/test_query_contract.py",
+      "manifest_line": 19,
+      "expected": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "actual": "b080c7bf69f376ee46482c8466b1e75eab44419c95d86fd86e5c10ad691a9704",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/fixtures/gen_standard_template.py",
+      "manifest_line": 20,
+      "expected": "a66f32f3f3fd432d58ffe310a1612d0658021f122613c875324925250675eb93",
+      "actual": "a66f32f3f3fd432d58ffe310a1612d0658021f122613c875324925250675eb93",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/fixtures/sandbox_materials_v1.json",
+      "manifest_line": 21,
+      "expected": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "actual": "f4fb0d678d38e717d41f2140df1327edeb432f99c03e1f53d6b84a22abf036f4",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "tests/README.md",
+      "manifest_line": 22,
+      "expected": "da591eb12b6a7393eca5e9e68acd915c5b562a56b1202862d7b629457ffe6d09",
+      "actual": "da591eb12b6a7393eca5e9e68acd915c5b562a56b1202862d7b629457ffe6d09",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": ".local-archive/business_snapshot.py",
+      "manifest_line": 28,
+      "expected": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "actual": "12b2133dd0bb1dd5b30c72a5702f24f5a4d4565cde886a5f9d552df3e28393a7",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": ".local-archive/diag_score_breakdown.py",
+      "manifest_line": 29,
+      "expected": "a7e3244ba40010bdb3d84a4e7b8d8ebcfed7b516cc8f78bd122d67376a156d04",
+      "actual": "a7e3244ba40010bdb3d84a4e7b8d8ebcfed7b516cc8f78bd122d67376a156d04",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": ".local-archive/m1_r01_make_legacy01_evidence.py",
+      "manifest_line": 30,
+      "expected": "106b7954c92f365419f62d2c138f9e79c0e0d1cac29e0abffcf3c2a7c3352935",
+      "actual": "106b7954c92f365419f62d2c138f9e79c0e0d1cac29e0abffcf3c2a7c3352935",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": ".local-archive/m1_r01_glr_polluted_backup.json",
+      "manifest_line": 31,
+      "expected": "3580dec6771ef6133b7e478ca08f285935c1bc148bab23982fab492679769e92",
+      "actual": "3580dec6771ef6133b7e478ca08f285935c1bc148bab23982fab492679769e92",
+      "matches": true,
+      "is_evidence": false,
+      "one_character_omitted": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_pre_baseline_hashes.md",
+      "manifest_line": 37,
+      "expected": "907cf521083a6bf1e71be5a6e3dff252ae28d6aa30e4a840d7c25ce0ff29df9",
+      "actual": "907cf521083a6bf1e71be5a6e3dff252aef28d6aa30e4a840d7c25ce0ff29df9",
+      "matches": false,
+      "is_evidence": true,
+      "one_character_omitted": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_outer_snapshot_before.json",
+      "manifest_line": 38,
+      "expected": "5768bdabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": false,
+      "is_evidence": true,
+      "one_character_omitted": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_outer_snapshot_after.json",
+      "manifest_line": 39,
+      "expected": "5768bdabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "actual": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "matches": false,
+      "is_evidence": true,
+      "one_character_omitted": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_venv_verify.json",
+      "manifest_line": 40,
+      "expected": "0c68ff9f097c9de17cda615fc4593d38b312f013b84600eabef58e681a7c94f3",
+      "actual": "0c68ff9f097c9de17cda615fc4593d38b312f013b84600eabef58e681a7c94f3",
+      "matches": true,
+      "is_evidence": true,
+      "one_character_omitted": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_verify_after.json",
+      "manifest_line": 41,
+      "expected": "464bf67db4a851b4a63295ecd6473b6ae2d069c9b752f71c2cffdb19fcae373",
+      "actual": "464bf67db4a851b4a63295ecd6473b6ae2d069c9b752f71c2cffd5b19fcae373",
+      "matches": false,
+      "is_evidence": true,
+      "one_character_omitted": true
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_full_pytest.log",
+      "manifest_line": 42,
+      "expected": "06a2817fbaccd0dd88fe44907ea64a67c8e419a88244e4b2068bde94e22be9bc",
+      "actual": "06a2817fbaccd0dd88fe44907ea64a67c8e419a88244e4b2068bde94e22be9bc",
+      "matches": true,
+      "is_evidence": true,
+      "one_character_omitted": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_guardrail_smoke.log",
+      "manifest_line": 43,
+      "expected": "7d1755dfd929d1d643d3099417463e7c508b5a896f3044927ce0a3c531bd5756",
+      "actual": "7d1755dfd929d1d643d3099417463e7c508b5a896f3044927ce0a3c531bd5756",
+      "matches": true,
+      "is_evidence": true,
+      "one_character_omitted": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_diag_score_breakdown.log",
+      "manifest_line": 44,
+      "expected": "ba256e97228ba16c58ccfcc40da654d1f0420d2e6a3744c406bb5fd56cfe795f",
+      "actual": "ba256e97228ba16c58ccfcc40da654d1f0420d2e6a3744c406bb5fd56cfe795f",
+      "matches": true,
+      "is_evidence": true,
+      "one_character_omitted": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/m1_r01_legacy01_evidence.json",
+      "manifest_line": 45,
+      "expected": "f9126c649930c9dfec8391cad8e98d3ffbddf929bac74ffb15321ab989d018ae",
+      "actual": "f9126c649930c9dfec8391cad8e98d3ffbddf929bac74ffb15321ab989d018ae",
+      "matches": true,
+      "is_evidence": true,
+      "one_character_omitted": false
+    }
+  ],
+  "code_script_matched": 15,
+  "code_script_total": 15,
+  "evidence_matched": 5,
+  "evidence_total": 9,
+  "audit_summary_sha256": "f190d9de43a6a05e44c6e1e2fa9a57a043ebc80478092f583492fd3d0bd36d46",
+  "runs": [
+    {
+      "command": [
+        "venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "tests/test_query_contract.py",
+        "tests/test_auto_binding.py",
+        "tests/test_m0_guardrail_regression.py",
+        "tests/test_m0_isolation.py",
+        "-q"
+      ],
+      "status": "TIMEOUT",
+      "timeout_seconds": 90,
+      "wrapper_exit_code": 1,
+      "test_exit_code": null,
+      "stdout_log_available": false,
+      "reason": "subprocess.TimeoutExpired; result must not be counted as passed"
+    }
+  ],
+  "venv_verify_spotcheck": "not executed after combined-command timeout; R01 independent reviewer reports retained as reference",
+  "business_snapshot_reference": "doc/V0.1.5/evidence/m1_r01_audit_verify_after.json:business_snapshot_after",
+  "business_snapshot_current": {
+    "files": {
+      "app/materials.db": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "app/auth.db-wal": null,
+      "app/auth.db-shm": null,
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "870bb62925f7dc973dccf98cafefdc69b4138666f303aaedb57794eeb07a01f9"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "business_changes_from_audit": [],
+  "golden_last_run_exists": false,
+  "scope": "Read-only hash verification and code/evidence spot check. Coordinator combined runtime check timed out; no new runtime PASS is claimed. M1 remains blocked pending R02.",
+  "post_timeout_process_check": {
+    "cim_query": "unavailable: CIM resource inaccessible; no process mutation attempted",
+    "fallback": "psutil command-line match on all four test filenames",
+    "matching_test_processes": []
+  }
+}

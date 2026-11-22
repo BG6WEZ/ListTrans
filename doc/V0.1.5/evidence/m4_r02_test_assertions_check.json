@@ -1,0 +1,47 @@
+{
+  "files": {
+    "tests/test_auto_binding.py": {
+      "old_count": 36,
+      "new_count": 36,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_binding_decisions.py": {
+      "old_count": 88,
+      "new_count": 88,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_m3_hard_constraints.py": {
+      "old_count": 251,
+      "new_count": 251,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_m3_hard_constraints_http.py": {
+      "old_count": 192,
+      "new_count": 192,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_v0_0_8_llm_rules.py": {
+      "old_count": 18,
+      "new_count": 18,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_m4_auth_lifecycle.py": {
+      "old_count": 72,
+      "new_count": 110,
+      "missing_count": 0,
+      "missing_samples": []
+    },
+    "tests/test_m4_permissions_and_tasks.py": {
+      "old_count": 89,
+      "new_count": 103,
+      "missing_count": 0,
+      "missing_samples": []
+    }
+  },
+  "old_assertions_missing": 0
+}

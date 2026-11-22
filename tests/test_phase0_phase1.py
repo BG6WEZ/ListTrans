@@ -11,7 +11,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from app.server import app, atomic_write_json_config, trigger_all_config_reloads
 from app.db_manager import get_db_cursor, init_db
 from app.flywheel_db import init_flywheel_tables
-from app.auth_manager import create_access_token, init_auth_db
+from app.auth_manager import issue_token_for_user, get_user_by_username, init_auth_db
 
 client = TestClient(app)
 
@@ -41,36 +41,70 @@ def test_atomic_write_and_hot_reload(tmp_path):
     # Test full reload trigger
     trigger_all_config_reloads()
 
+import io
 import uuid
+import openpyxl
+
+
+def _upload_test_workbook(headers, rows):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "暖通"
+    ws.append(["项目编码", "项目名称", "项目特征描述", "计量单位", "工程量"])
+    for r in rows:
+        ws.append(r)
+    buf = io.BytesIO()
+    wb.save(buf)
+    wb.close()
+    buf.seek(0)
+    up = client.post(
+        "/api/upload",
+        headers=headers,
+        files={"file": ("phase0_test.xlsx", buf.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+    )
+    assert up.status_code == 200, up.text
+    task_id = up.json()["task_id"]
+    st = client.get(f"/api/upload/status?task_id={task_id}", headers=headers)
+    assert st.status_code == 200, st.text
+    data = st.json()
+    assert data["status"] == "completed", data
+    return data["result"]
+
 
 def test_flywheel_record_idempotency_and_superseded():
     """Verify POST /api/flywheel/record handles idempotency and superseded flag correctly."""
-    token = create_access_token(data={"sub": "admin", "role": "admin"})
+    admin_user = get_user_by_username("admin")
+    assert admin_user is not None
+    token = issue_token_for_user(admin_user)
     headers = {"Authorization": f"Bearer {token}"}
 
+    uploaded_rows = _upload_test_workbook(
+        headers,
+        [["030101", "测试排风机组AP-1", "风量1000m3/h", "台", 1]],
+    )
+    row_ctx = uploaded_rows[0]
+
     uid = uuid.uuid4().hex[:8]
-    session_id = f"test_session_{uid}"
-    row_idx = 101
     event_id_1 = f"test_event_{uid}_v1"
-    
+
     payload1 = {
         "client_event_id": event_id_1,
-        "session_id": session_id,
-        "row_idx": row_idx,
-        "discipline": "暖通",
-        "raw_name": "测试排风机组AP-1",
-        "raw_spec": "风量1000m3/h",
+        "document_id": row_ctx["document_id"],
+        "sheet_id": row_ctx["sheet_id"],
+        "source_row_id": row_ctx["source_row_id"],
+        "recommendation_snapshot_id": row_ctx["recommendation_snapshot_id"],
+        "event_seq": 1,
         "action_type": "MANUAL_REPLACE",
         "final_targets": [{"code": "TEST.001", "name": "标准排风机", "spec": "1000m3/h", "qty_ratio": 1.0}]
     }
 
     # First insert
     res1 = client.post("/api/flywheel/record", json=payload1, headers=headers)
-    assert res1.status_code == 200
+    assert res1.status_code == 200, res1.text
 
     # Idempotent re-insert with same event_id
     res_dup = client.post("/api/flywheel/record", json=payload1, headers=headers)
-    assert res_dup.status_code == 200
+    assert res_dup.status_code == 200, res_dup.text
 
     # Verify only 1 record exists
     with get_db_cursor() as cur:
@@ -80,24 +114,28 @@ def test_flywheel_record_idempotency_and_superseded():
         assert rows[0]["superseded"] == 0
         rec_id_1 = rows[0]["id"]
 
-    # Second user action on the same row (new UUID)
+    # Second user action on the same row (new UUID + incremented event_seq)
     event_id_2 = f"test_event_{uid}_v2"
     payload2 = {
         "client_event_id": event_id_2,
-        "session_id": session_id,
-        "row_idx": row_idx,
-        "discipline": "暖通",
-        "raw_name": "测试排风机组AP-1",
-        "raw_spec": "风量1000m3/h",
+        "document_id": row_ctx["document_id"],
+        "sheet_id": row_ctx["sheet_id"],
+        "source_row_id": row_ctx["source_row_id"],
+        "recommendation_snapshot_id": row_ctx["recommendation_snapshot_id"],
+        "event_seq": 2,
         "action_type": "CONFIRM_TOP1",
         "final_targets": [{"code": "TEST.002", "name": "标准排风机组B", "spec": "1000m3/h", "qty_ratio": 1.0}]
     }
     res2 = client.post("/api/flywheel/record", json=payload2, headers=headers)
-    assert res2.status_code == 200
+    assert res2.status_code == 200, res2.text
 
     # Verify record 1 is now superseded=1, and record 2 is superseded=0
     with get_db_cursor() as cur:
-        cur.execute("SELECT id, client_event_id, superseded FROM flywheel_records WHERE session_id = ? AND row_idx = ? ORDER BY id ASC", (session_id, row_idx))
+        cur.execute(
+            "SELECT id, client_event_id, superseded FROM flywheel_records "
+            "WHERE document_id = ? AND sheet_id = ? AND source_row_id = ? ORDER BY id ASC",
+            (row_ctx["document_id"], row_ctx["sheet_id"], row_ctx["source_row_id"]),
+        )
         rows = cur.fetchall()
         assert len(rows) == 2
         assert rows[0]["id"] == rec_id_1

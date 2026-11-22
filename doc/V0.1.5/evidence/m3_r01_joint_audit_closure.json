@@ -1,0 +1,212 @@
+{
+  "role": "user-authorized reviewer/coordinator, no implementation changes",
+  "baseline": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "verdict": "退回整改",
+  "next_package": "V015-M3 R02 only",
+  "initial_delivery_hashes": {
+    "matched": 62,
+    "total": 62
+  },
+  "stable_hashes_after": {
+    "matched": 59,
+    "expected_live_document_changes": [
+      {
+        "file": "doc\\V0.1.5\\02_任务台账.md",
+        "expected": "939339218f5eeefa0e9aca48d0c8408efa724b8ca6d08c70fa0e4a69a4b9788d",
+        "actual": "777e687c1a55de5edf40e1db18aa8e4c7e08e6d60a14c5bbcdf992d7c58512ba",
+        "matches": false
+      },
+      {
+        "file": "doc\\V0.1.5\\rounds\\README.md",
+        "expected": "ec3b02909a4ab4d4425f7a48d8d007510927b2787d292abfd13dd5e73eff444d",
+        "actual": "02dcecc9937751e874a96e730ecbd77e3313c1d135a3d15ec0620f38936aa891",
+        "matches": false
+      },
+      {
+        "file": "doc\\V0.1.5\\evidence\\README.md",
+        "expected": "c0c719b71cebe5087000f93153bd04cd571b8a6a93df07c77d3921ba7ec56be0",
+        "actual": "5202daf896e3aa8a0f25a063b682ff2df547d81f023c23818bddded7bdf83267",
+        "matches": false
+      }
+    ],
+    "unexpected_changes": []
+  },
+  "snapshot_after_rules": {
+    "file": "m3_r01_joint_audit2_snapshot_after_rules.json",
+    "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "golden_paths": {
+      "tests/fixtures/golden_last_run.json": false,
+      "data/golden_last_run.json": false
+    }
+  },
+  "all_snapshot_sha256": [
+    "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e"
+  ],
+  "counterexample_matrix": [
+    {
+      "case": "UNIT-KM",
+      "matcher": {
+        "score": 100.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    },
+    {
+      "case": "UNIT-CONTROL",
+      "matcher": {
+        "score": 100.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "名称与规格完全一致"
+        ],
+        "hard_blocked": false,
+        "max_score": 1.0
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    },
+    {
+      "case": "DN-EMPTY",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径冲突拦截",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    },
+    {
+      "case": "DN-CONTROL",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 管径",
+          "必填属性缺失处罚: 材质",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "管径口径冲突阻断"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_http": 409,
+      "manual_export_http": 422,
+      "rule_status": "rejected",
+      "rule_export_http": 422
+    },
+    {
+      "case": "GRADE-EMPTY",
+      "matcher": {
+        "score": 15.0,
+        "reasons": [
+          "品类名称一致",
+          "语义高度相近",
+          "分类精准匹配",
+          "不锈钢牌号冲突硬隔离(304/316L)"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.15
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    },
+    {
+      "case": "DYNAMIC",
+      "matcher": {
+        "score": 0.0,
+        "reasons": [
+          "品类名称一致",
+          "核心参数在公差范围内",
+          "语义高度相近",
+          "分类精准匹配",
+          "规格型号完全一致",
+          "包含排除词 [EXCL]"
+        ],
+        "hard_blocked": true,
+        "max_score": 0.0
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    },
+    {
+      "case": "PUMP-REVERSE",
+      "matcher": {
+        "score": 85.0,
+        "reasons": [
+          "品类名称一致",
+          "必填属性缺失处罚: 机组类型",
+          "语义高度相近",
+          "分类精准匹配"
+        ],
+        "hard_blocked": false,
+        "max_score": 0.85
+      },
+      "confirm_http": 200,
+      "manual_export_http": 200,
+      "rule_status": "auto_accepted",
+      "rule_export_http": 200
+    }
+  ],
+  "execution": {
+    "main_runner": "venv/Scripts/python.exe -u doc/V0.1.5/evidence/m3_r01_joint_audit_runner.py",
+    "extra_runner": "venv/Scripts/python.exe -u doc/V0.1.5/evidence/m3_r01_joint_audit_finalize.py",
+    "rule_probes": "venv/Scripts/python.exe -u doc/V0.1.5/evidence/m3_r01_joint_audit_rule_probes.py",
+    "rule_probe_exit_observed": 0,
+    "rule_probe_log_encoding": "cp936, retained as original bytes; JSON evidence uses UTF-8",
+    "sandbox_attempts": "interrupted; stack showed asyncio socketpair accept blocking; not counted as passes",
+    "completed_execution_environment": "auto-reviewed require_escalated; all writable app paths still isolated; offline model; LLM false"
+  },
+  "risks": {
+    "P1": [
+      "A-M3-01",
+      "A-M3-02",
+      "A-M3-03",
+      "A-M3-04"
+    ],
+    "P2": [
+      "R-M3-01"
+    ],
+    "version_final_review": "not started",
+    "M4_M5": "not issued",
+    "V016_to_V020": "locked"
+  }
+}

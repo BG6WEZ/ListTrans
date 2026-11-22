@@ -1,0 +1,142 @@
+﻿diff --git a/.local-archive/v016_m0_r03_pre_backup/tests/test_llm_integration.py b/tests/test_llm_integration.py
+index 1a1012b..0505a7f 100644
+--- a/.local-archive/v016_m0_r03_pre_backup/tests/test_llm_integration.py
++++ b/tests/test_llm_integration.py
+@@ -13,17 +13,33 @@ from app.llm_client import llm_client, QwenLLMClient
+ 
+ class TestLLMIntegration(unittest.TestCase):
+ 
+-    def setUp(self):
+-        # Reset llm_client status for test consistency
++    _ENV_KEYS = ("LLM_ENABLED", "DASHSCOPE_API_KEY", "DEEPSEEK_API_KEY")
++
++    @staticmethod
++    def _snapshot_env():
++        return {k: os.environ.get(k) for k in TestLLMIntegration._ENV_KEYS}
++
++    @staticmethod
++    def _restore_env(saved):
++        for k, v in saved.items():
++            if v is None:
++                os.environ.pop(k, None)
++            else:
++                os.environ[k] = v
++
++    @staticmethod
++    def _reset_llm_client_state():
+         llm_client.consecutive_failures = 0
+         llm_client.circuit_broken_until = 0.0
+-        # Clear stats
+         for k in llm_client.stats:
+-            if isinstance(llm_client.stats[k], float):
+-                llm_client.stats[k] = 0.0
+-            else:
+-                llm_client.stats[k] = 0
+-                
++            llm_client.stats[k] = 0.0 if isinstance(llm_client.stats[k], float) else 0
++
++    def setUp(self):
++        self._saved_env = self._snapshot_env()
++        self.addCleanup(self._restore_env, self._saved_env)
++        self.addCleanup(self._reset_llm_client_state)
++        self._reset_llm_client_state()
++
+         # A-M0-01: 只允许操作 conftest 注入的隔离物料库，禁止硬编码业务 app/materials.db
+         db_path = os.environ.get("MATERIALS_DB_PATH")
+         self.assertTrue(
+@@ -90,17 +106,14 @@ class TestLLMIntegration(unittest.TestCase):
+         })))]
+         mock_create.return_value = mock_response
+ 
+-        # Mock env vars
+-        os.environ["LLM_ENABLED"] = "true"
+-        os.environ["DASHSCOPE_API_KEY"] = "sk-mock-key"
++        with patch.dict(os.environ, {"LLM_ENABLED": "true", "DASHSCOPE_API_KEY": "sk-mock-key"}):
++            # Parameters for extraction
++            must_keys = ["风量", "机外余压"]
++            should_keys = ["功率"]
++            flags = ["防爆"]
+ 
+-        # Parameters for extraction
+-        must_keys = ["风量", "机外余压"]
+-        should_keys = ["功率"]
+-        flags = ["防爆"]
++            res = llm_client.extract_params_by_llm("新风机 FD-100 风量1000m3/h", "fan", must_keys, should_keys, flags)
+ 
+-        res = llm_client.extract_params_by_llm("新风机 FD-100 风量1000m3/h", "fan", must_keys, should_keys, flags)
+-        
+         self.assertIsNotNone(res)
+         self.assertEqual(res["model"], "FD-100")
+         # "风量" and "机外余压" should be present, "非法字段" should be whitelisted out
+@@ -118,10 +131,6 @@ class TestLLMIntegration(unittest.TestCase):
+         })))]
+         mock_create.return_value = mock_response
+ 
+-        # Mock env vars
+-        os.environ["LLM_ENABLED"] = "true"
+-        os.environ["DASHSCOPE_API_KEY"] = "sk-mock-key"
+-
+         query_info = {"name": "防爆轴流风机", "specification": "T35-11-4.0", "category": "通风机"}
+         candidates = [
+             {"code": "C1", "name": "轴流风机", "specification": "T35-11-3.0"},
+@@ -129,7 +138,9 @@ class TestLLMIntegration(unittest.TestCase):
+             {"code": "C3", "name": "管道风机", "specification": "GD30-10"}
+         ]
+ 
+-        res = llm_client.check_match_by_llm(query_info, candidates)
++        with patch.dict(os.environ, {"LLM_ENABLED": "true", "DASHSCOPE_API_KEY": "sk-mock-key"}):
++            res = llm_client.check_match_by_llm(query_info, candidates)
++
+         self.assertIsNotNone(res)
+         self.assertEqual(res["chosen_code"], "C2")
+         self.assertEqual(res["chosen_index"], 1)
+@@ -139,13 +150,43 @@ class TestLLMIntegration(unittest.TestCase):
+         # Setup circuit broken
+         llm_client.consecutive_failures = llm_client.config.get("max_consecutive_failures", 5)
+         llm_client.circuit_broken_until = 9999999999.0
+-        
+-        # Enabled but circuit broken
+-        os.environ["LLM_ENABLED"] = "true"
+-        os.environ["DASHSCOPE_API_KEY"] = "sk-mock-key"
+-        
+-        res = llm_client.check_match_by_llm({}, [{"code": "C1"}])
++
++        with patch.dict(os.environ, {"LLM_ENABLED": "true", "DASHSCOPE_API_KEY": "sk-mock-key"}):
++            res = llm_client.check_match_by_llm({}, [{"code": "C1"}])
+         self.assertIsNone(res)
+ 
++    def test_post_mock_env_restored_and_daemon_external_llm_blocked(self):
++        """C-M0-09: after mock scope exits, env/singleton stay clean and external LLM calls stay blocked even in daemon threads."""
++        import threading
++
++        # Mock scope exited -> env & is_enabled must remain disabled/empty
++        self.assertEqual(os.environ.get("LLM_ENABLED", "false").lower(), "false")
++        self.assertEqual(os.environ.get("DASHSCOPE_API_KEY", ""), "")
++        self.assertFalse(llm_client.is_enabled())
++
++        conftest_mod = sys.modules.get("conftest") or sys.modules.get("tests.conftest")
++        self.assertIsNotNone(conftest_mod)
++        before_blocks = len(conftest_mod.BLOCKED_EXTERNAL_ATTEMPTS)
++        thread_errors = []
++
++        def leaked_daemon():
++            try:
++                with patch.dict(os.environ, {"DASHSCOPE_API_KEY": "sk-leaked-daemon-key"}):
++                    res = llm_client._call_qwen_api("sys", "user", "qwen-plus")
++                    thread_errors.append(("returned", res))
++            except Exception as exc:
++                thread_errors.append(("raised", repr(exc)))
++
++        t = threading.Thread(target=leaked_daemon, daemon=True)
++        t.start()
++        t.join(timeout=5.0)
++        self.assertFalse(t.is_alive())
++        self.assertGreater(len(conftest_mod.BLOCKED_EXTERNAL_ATTEMPTS), before_blocks)
++        new_blocks = conftest_mod.BLOCKED_EXTERNAL_ATTEMPTS[before_blocks:]
++        self.assertTrue(
++            any("Blocked external" in item or "Offline test sandbox" in item for item in new_blocks),
++            new_blocks,
++        )
++
+ if __name__ == "__main__":
+     unittest.main()

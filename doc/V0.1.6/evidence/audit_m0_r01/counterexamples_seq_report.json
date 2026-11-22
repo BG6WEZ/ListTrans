@@ -1,0 +1,67 @@
+{
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_audit_v016_m0_r01_seq_lsz49nx8",
+  "S1_http_string_5": {
+    "status": 200,
+    "body": {
+      "code": 0,
+      "msg": "操作流水已成功记录",
+      "idempotent_replay": false,
+      "record_id": 1,
+      "document_id": "doc_d27c3d22057f488c921fa1af6f641e48",
+      "sheet_id": "sht_abaa71bbfba549e4",
+      "source_row_id": "row_cd931862cf9540e4",
+      "event_seq": 5,
+      "superseded": 0,
+      "is_stale_arrival": 0,
+      "effective_record_id": 1,
+      "effective_event_seq": 5,
+      "initial_snapshot_id": "snap_216ac250e9d34552",
+      "recommendation_snapshot_id": "snap_216ac250e9d34552",
+      "recommendation_revision": 1,
+      "algo_version": "listtrans-0.1.6-m0|0d81abac38ab",
+      "model_version": "bge-small-zh-v1.5|loaded",
+      "config_version": "cfg:35f5e0729f8bdf0d",
+      "config_digest_full": "35f5e0729f8bdf0d0c335a08e9267ed7b9c2c030537fdcab4619097249b78be7",
+      "contract_version": "v0.1.6-m0-v1"
+    },
+    "stored": {
+      "event_seq": 5,
+      "trust_level": "trusted",
+      "superseded": 0
+    }
+  },
+  "S2_http_bool_true": {
+    "status": 200,
+    "detail": null,
+    "stored": {
+      "event_seq": 1,
+      "trust_level": "trusted",
+      "superseded": 0
+    }
+  },
+  "S3_http_bool_false": {
+    "status": 422,
+    "detail": {
+      "error": "invalid_event_seq",
+      "message": "event_seq 必须大于等于 1。"
+    },
+    "stored": null
+  },
+  "S4_direct_float_2_9": {
+    "outcome": "ACCEPTED",
+    "returned_event_seq": 2,
+    "stored": {
+      "event_seq": 2,
+      "trust_level": "trusted",
+      "superseded": 0
+    }
+  },
+  "S5_direct_bool_true": {
+    "outcome": "REJECTED",
+    "status": 422,
+    "detail": {
+      "error": "missing_event_seq",
+      "message": "缺少单调递增事件序号 event_seq。"
+    }
+  }
+}

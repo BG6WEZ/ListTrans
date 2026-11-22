@@ -1,0 +1,19 @@
+{
+  "observation": "ENV-M4-01",
+  "cause": "python -c dotenv discovery walks repository ancestors from an in-repository basetemp",
+  "checks": {
+    "inside_repo": {
+      "returncode": 0,
+      "requires_secret_in_error": false
+    },
+    "outside_repo": {
+      "returncode": 1,
+      "requires_secret_in_error": true
+    },
+    "inside_repo_dotenv_disabled": {
+      "returncode": 1,
+      "requires_secret_in_error": true
+    }
+  },
+  "resolution": "Use native system-temp fixed roots and PYTHON_DOTENV_DISABLED=1; no code or test assertion changed"
+}

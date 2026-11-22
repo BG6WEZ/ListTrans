@@ -1,0 +1,94 @@
+[
+  {
+    "check": "compile",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "-W",
+      "error",
+      "-m",
+      "py_compile",
+      "app/auth_manager.py",
+      "app/auth_middleware.py",
+      "app/admin_api.py",
+      "app/rule_api.py",
+      "app/llm_rule_engine.py",
+      "app/server.py",
+      "app/flywheel_sandbox.py",
+      "scripts/_deploy_env.py",
+      "scripts/deploy_cloud.py",
+      "scripts/deploy_to_cloud_safe.py",
+      "scripts/check_cloud_status.py",
+      "scripts/probe_servers.py"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 0.156
+  },
+  {
+    "check": "m3",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "tests/test_m3_hard_constraints.py",
+      "tests/test_m3_hard_constraints_http.py",
+      "-q",
+      "--tb=short"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 14.141
+  },
+  {
+    "check": "required",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "tests/test_m0_isolation.py",
+      "tests/test_m0_guardrail_regression.py",
+      "tests/test_query_contract.py",
+      "tests/test_auto_binding.py",
+      "tests/test_binding_decisions.py",
+      "-q",
+      "--tb=short"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 14.609
+  },
+  {
+    "check": "boundaries",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "tests/test_flywheel_sandbox.py",
+      "-k",
+      "compare or nonzero",
+      "-q",
+      "--tb=short"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 8.594
+  },
+  {
+    "check": "full",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "tests/",
+      "-q",
+      "--tb=short"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 117.703
+  },
+  {
+    "check": "probes",
+    "command": [
+      "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+      "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m4_r01_audit_probes.py"
+    ],
+    "exit_code": 0,
+    "wall_seconds": 10.406
+  }
+]

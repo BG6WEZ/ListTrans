@@ -1,0 +1,86 @@
+{
+  "task": "V015-M1 R02 审核独立复验汇总",
+  "date": "2026-11-13",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes_checked": 35,
+  "delivery_hashes_matched": 35,
+  "delivery_hash_mismatches": {},
+  "golden_last_run_exists_before": false,
+  "golden_last_run_exists_after": false,
+  "outer_snapshot_before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "outer_snapshot_after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+  "outer_snapshot_matches_dev": true,
+  "outer_snapshot_diff": [],
+  "checks": {
+    "verify_isolation_before": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "sha256": "8f0973ca6db1386d691c6aa259dbe3d12cb7b1f8f850a5b4b208c8754a84a1b7"
+    },
+    "sandbox_boundaries_30": {
+      "exit_code": 0,
+      "passed": 30,
+      "failed": 0,
+      "deselected": 5,
+      "warnings": 3,
+      "elapsed_sec": 9.02
+    },
+    "required_regressions_32": {
+      "exit_code": 0,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "warnings": 1,
+      "elapsed_sec": 12.15
+    },
+    "full_pytest_120": {
+      "exit_code": 0,
+      "passed": 120,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "warnings": 5,
+      "elapsed_sec": 104.32
+    },
+    "real_dual_subprocess_3rules": {
+      "exit_code": 0,
+      "elapsed_sec": 59.625,
+      "report_sha256": "2c9aebb422d44a826c34fcbe32a5e9ee97836032e492f5a86a6f988a5d4c8c03",
+      "harmful": {
+        "passed": false,
+        "targeted": 24,
+        "violations": [
+          "target_score_decreased",
+          "margin_shrunk"
+        ],
+        "gt_0313_T": [
+          88.8,
+          50.7
+        ],
+        "gt_0313_W": [
+          6.7,
+          43.1
+        ],
+        "gt_0313_margin": [
+          82.1,
+          7.6
+        ]
+      },
+      "beneficial": {
+        "passed": true,
+        "targeted": 22,
+        "violations": []
+      },
+      "neutral": {
+        "passed": true,
+        "targeted": 16,
+        "violations": []
+      }
+    },
+    "verify_isolation_after": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "sha256": "9d6cf9489f60b158e2ddf92de45a973a453bd239567ea52d246df13538499569"
+    }
+  }
+}

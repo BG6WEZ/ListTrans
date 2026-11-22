@@ -1,0 +1,171 @@
+{
+  "gate": "V-M4-02",
+  "generated_at": "2026-11-15 22:17:56",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "mode": "read_only_workspace_audit_and_isolated_v014_v015_rehearsal",
+  "workspace_targets_audit": {
+    "local_env": {
+      "exists": true,
+      "sha256": "889a6bd2ebf47943ed0cd174bddb337dcc21dd9be95ec2ec738a9d5ab788598b",
+      "matches_audit_protected_baseline": true,
+      "variable_names": [
+        "SECRET_KEY",
+        "ALGORITHM",
+        "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "ADMIN_USERNAME",
+        "ADMIN_PASSWORD",
+        "ENABLE_DOCS",
+        "ALLOWED_ORIGINS",
+        "LLM_ENABLED",
+        "DASHSCOPE_API_KEY"
+      ],
+      "variable_count": 9,
+      "mutated_in_workspace": false
+    },
+    "local_auth_db": {
+      "exists": true,
+      "sha256": "b0eb34acdf3625b131f9d155bc6bb927de403aae0e8518d6f0ca27f92ca0ac80",
+      "tables": [
+        "active_heartbeats",
+        "audit_logs",
+        "load_alert_snapshots",
+        "login_attempts",
+        "sqlite_sequence",
+        "system_stats_summary",
+        "users",
+        "work_sessions"
+      ],
+      "users_columns": [
+        "id",
+        "username",
+        "password_hash",
+        "role",
+        "is_active",
+        "created_at",
+        "last_login",
+        "name",
+        "dept1",
+        "dept2",
+        "dept3",
+        "employee_no",
+        "position",
+        "phone",
+        "need_emp_no_setup"
+      ],
+      "is_frozen_v014_15col_schema": true,
+      "role_counts": {
+        "admin": 3,
+        "director": 3,
+        "employee": 157,
+        "manager": 23
+      },
+      "total_accounts": 186,
+      "mutated_in_workspace": false
+    },
+    "deploy_ssh": {
+      "scripts_checked": [
+        "scripts/_deploy_env.py",
+        "scripts/deploy_cloud.py",
+        "scripts/deploy_to_cloud_safe.py",
+        "scripts/check_cloud_status.py",
+        "scripts/probe_servers.py"
+      ],
+      "all_scripts_match_audit_baseline": true,
+      "env_vars_configured_for_v015": false,
+      "remote_deployment_enabled": false
+    },
+    "llm_provider_config": {
+      "materials_db_sha256": "9b7be8c2bd8f420f25b12a5394e8470cc2910dd363da875eafd04c1385b78927",
+      "provider_metadata_flags": [
+        {
+          "provider_id": "qwen-max-default",
+          "is_active": 1
+        },
+        {
+          "provider_id": "qwen-plus-fallback",
+          "is_active": 1
+        },
+        {
+          "provider_id": "deepseek-v3-fallback",
+          "is_active": 0
+        }
+      ],
+      "external_llm_calls_in_v015_verification": false
+    }
+  },
+  "isolated_rotation_rehearsal": {
+    "isolated_rehearsal_only": true,
+    "workspace_db_touched": false,
+    "phase_a_migration_and_pre_rotation": {
+      "migrated_user_count": 4,
+      "admin_must_change_after_migration": 0,
+      "director_must_change_after_migration": 0,
+      "manager_must_change_after_migration": 0,
+      "weak_emp_flagged_must_change_after_migration": 1,
+      "emp_id": 4,
+      "admin_login_v1_status": 200,
+      "admin_me_v1_status": 200,
+      "weak_emp_login_v1_must_change": true,
+      "weak_emp_rules_blocked_status": 403
+    },
+    "phase_b_rotation_verification": {
+      "env_only_admin_pwd_rejected_status": 400,
+      "old_secret_jwt_me_status": 401,
+      "new_secret_jwt_me_status": 200,
+      "emp_reset_status": 200,
+      "emp_temp_pwd_unique_generated": true,
+      "emp_old_pwd_rejected_status": 400,
+      "emp_old_tok_rejected_status": 401,
+      "emp_temp_rules_blocked_status": 403,
+      "emp_force_change_status": 200,
+      "emp_temp_pwd_rejected_status": 400,
+      "emp_temp_tok_revoked_status": 401,
+      "emp_new_login_status": 200,
+      "emp_new_must_change": false,
+      "emp_new_me_status": 200,
+      "emp_new_rules_status": 200,
+      "admin_rotate_status": 200,
+      "admin_rotate_relogin_required": true,
+      "admin_old_pwd_rejected_status": 400,
+      "admin_old_tok_me_rejected_status": 401,
+      "admin_old_tok_rules_rejected_status": 401,
+      "admin_new_login_status": 200,
+      "admin_new_must_change": false,
+      "admin_new_me_status": 200,
+      "admin_new_rules_status": 200
+    },
+    "phase_c_restart_persistence_and_fail_closed": {
+      "admin_old_pwd_after_restart_status": 400,
+      "admin_old_tok_after_restart_status": 401,
+      "admin_new_tok_after_restart_status": 200,
+      "ssh_load_failed_closed": true,
+      "probe_targets_failed_closed": true,
+      "llm_is_enabled_under_offline_flag": false,
+      "missing_secret_key_fail_closed": true
+    }
+  },
+  "integrity_verification": {
+    "business_snapshot_equal": true,
+    "snapshot_before_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "snapshot_after_sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+    "protected_checked": 284,
+    "protected_mismatches": [],
+    "vm401_delivery_checked": 28,
+    "vm401_delivery_mismatches": []
+  },
+  "checks": {
+    "workspace_env_unchanged": true,
+    "workspace_auth_db_v014_frozen": true,
+    "deploy_scripts_match_baseline": true,
+    "v014_to_v015_migration_idempotent_4_roles": true,
+    "secret_key_rotation_invalidates_old_jwt": true,
+    "admin_password_env_does_not_mutate_existing_db": true,
+    "persistent_admin_rotation_Verified_400_401_200": true,
+    "employee_reset_and_forced_change_verified_400_401_403_200": true,
+    "ssh_deploy_fails_closed_when_unconfigured": true,
+    "llm_disabled_under_offline_flag": true,
+    "business_snapshot_and_vm401_delivery_intact": true
+  },
+  "overall_verdict": "PASS",
+  "note": "Workspace .env, app/auth.db, and app/materials.db were NOT mutated because they are frozen under the V015 audit snapshot and baseline rules. External SSH and live LLM API keys are disabled/not applicable in V0.1.5 local development pending Pre-Release Deployment Gate."
+}

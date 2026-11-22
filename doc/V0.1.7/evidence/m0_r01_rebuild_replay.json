@@ -1,0 +1,19 @@
+{
+  "command": [
+    "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.7\\evidence\\m0_r01_build_governance.py",
+    "--asset",
+    "C:\\Users\\tlyer\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{e18f6ff0-b2c3-467a-8e2f-b0d633371493}\\Temp\\lt017_rebuild_r7vo9z1p\\asset.json",
+    "--report",
+    "C:\\Users\\tlyer\\AppData\\Local\\Packages\\openai.codex_2p2nqsd0c76g0\\AC\\#!sandbox.{e18f6ff0-b2c3-467a-8e2f-b0d633371493}\\Temp\\lt017_rebuild_r7vo9z1p\\report.json"
+  ],
+  "exit_code": 0,
+  "seconds": 17.64,
+  "matches": {
+    "tests/fixtures/golden_governance_v1.json": true,
+    "doc/V0.1.7/evidence/m0_r01_reconciliation.json": true
+  }
+}

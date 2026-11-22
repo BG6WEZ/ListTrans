@@ -1,0 +1,126 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\tlyer\project\ListTrans\venv\Scripts\python.exe
+cachedir: .pytest_cache
+LISTTRANS 测试隔离根目录: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_ihj5b89p
+物料库: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_ihj5b89p\db\materials.db
+账号库: C:\Users\tlyer\AppData\Local\Temp\listtrans_test_ihj5b89p\db\auth.db
+缺失核心依赖: 无
+缺失鉴权依赖: 无
+缺失向量依赖: 无
+rootdir: C:\Users\tlyer\project\ListTrans
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 95 items
+
+tests/test_m3_hard_constraints.py::TestThreeStateFlag::test_explicit_positive PASSED [  1%]
+tests/test_m3_hard_constraints.py::TestThreeStateFlag::test_negation_precedence_over_positive PASSED [  2%]
+tests/test_m3_hard_constraints.py::TestThreeStateFlag::test_negation_table_single_source PASSED [  3%]
+tests/test_m3_hard_constraints.py::TestThreeStateFlag::test_unknown_returns_none PASSED [  4%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_cross_dimension_blocked PASSED [  5%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_multiplier_registered_pairs PASSED [  6%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_multiplier_same_and_synonym PASSED [  7%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_multiplier_unknown_inputs_none PASSED [  8%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_same_dimension_compatible_but_multiplier_gated PASSED [  9%]
+tests/test_m3_hard_constraints.py::TestUnitDualGates::test_unknown_unit_tolerant PASSED [ 10%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_dn_and_od_never_cross_compared PASSED [ 11%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_dn_conflict_blocked PASSED [ 12%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_dn_numeric_equivalence_15_vs_15_0 PASSED [ 13%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_dn_string_form_from_real_extractor PASSED [ 14%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_missing_side_is_unknown PASSED [ 15%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_outer_diameter_10_percent_threshold PASSED [ 16%]
+tests/test_m3_hard_constraints.py::TestFiniteFloatAndDnOd::test_to_finite_float_rejects_abnormal PASSED [ 17%]
+tests/test_m3_hard_constraints.py::TestMaterialAndProfessionalEnums::test_known_grades_set_locked PASSED [ 18%]
+tests/test_m3_hard_constraints.py::TestMaterialAndProfessionalEnums::test_material_grade_alias_normalization PASSED [ 20%]
+tests/test_m3_hard_constraints.py::TestMaterialAndProfessionalEnums::test_professional_medical_gas_alias PASSED [ 21%]
+tests/test_m3_hard_constraints.py::TestMaterialAndProfessionalEnums::test_professional_unknown_and_empty PASSED [ 22%]
+tests/test_m3_hard_constraints.py::TestMaterialAndProfessionalEnums::test_unknown_grade_not_fabricated PASSED [ 23%]
+tests/test_m3_hard_constraints.py::TestResolveMaterialBrand::test_bad_json_is_unknown PASSED [ 24%]
+tests/test_m3_hard_constraints.py::TestResolveMaterialBrand::test_bool_brand_never_true PASSED [ 25%]
+tests/test_m3_hard_constraints.py::TestResolveMaterialBrand::test_brand_column_priority PASSED [ 26%]
+tests/test_m3_hard_constraints.py::TestResolveMaterialBrand::test_brand_from_parsed_params_dict PASSED [ 27%]
+tests/test_m3_hard_constraints.py::TestResolveMaterialBrand::test_brand_from_parsed_params_json_string PASSED [ 28%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate1_medical_gas_alias_compatible PASSED [ 29%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate1_other_category_tolerant PASSED [ 30%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate1_true_cross_professional_blocked PASSED [ 31%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate2_bad_json_and_bool_unknown PASSED [ 32%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate2_brand_conflict_blocked PASSED [ 33%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate2_same_brand_via_parsed_params PASSED [ 34%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate3_dimension_blocked PASSED [ 35%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate3_same_unit_pass PASSED [ 36%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate3_unreliable_multiplier_blocked PASSED [ 37%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate4_outer_diameter_conflict_full_chain PASSED [ 38%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate4_outer_diameter_within_tolerance_pass PASSED [ 40%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate5_grade_304_vs_316l_blocked PASSED [ 41%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate5_grade_alias_equal_pass PASSED [ 42%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate6_pump_negation_blocked PASSED [ 43%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate6_pump_unknown_no_block PASSED [ 44%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate7_ex_requirement_vs_non_ex_material PASSED [ 45%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate7_ex_unknown_no_block PASSED [ 46%]
+tests/test_m3_hard_constraints.py::TestEvaluateHardConflictsSevenGates::test_gate7_non_ex_requirement_vs_ex_material PASSED [ 47%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_blocked_irreversible_by_later_boost PASSED [ 48%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_conflict_cap_sets_max_score_03 PASSED [ 49%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_dynamic_exclusion_double_zero PASSED [ 50%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_force_boost_100_cannot_break_cap PASSED [ 51%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_missing_must_contain_double_zero PASSED [ 52%]
+tests/test_m3_hard_constraints.py::TestScoreCapAndDynamicBoost::test_score_candidate_two_tuple_contract_kept PASSED [ 53%]
+tests/test_m3_hard_constraints.py::TestMatchItemSeriesGuard::test_series_boost_not_revive_hard_blocked PASSED [ 54%]
+tests/test_m3_hard_constraints.py::TestR02UnitMultiplierQuantityGate::test_explicit_converted_binding_passes_when_unit_and_qty_match PASSED [ 55%]
+tests/test_m3_hard_constraints.py::TestR02UnitMultiplierQuantityGate::test_non_one_multiplier_blocked_without_explicit_conversion PASSED [ 56%]
+tests/test_m3_hard_constraints.py::TestR02UnitMultiplierQuantityGate::test_raw_copy_non_one_multiplier_rejected_even_when_conversion_allowed PASSED [ 57%]
+tests/test_m3_hard_constraints.py::TestR02UnitMultiplierQuantityGate::test_unit_multiplier_one_and_one_to_many_ratio_preserved PASSED [ 58%]
+tests/test_m3_hard_constraints.py::TestR02UnitMultiplierQuantityGate::test_validate_bindings_rule_deny_and_saved_unit_drift PASSED [ 60%]
+tests/test_m3_hard_constraints.py::TestR02DynamicExclusionParity::test_get_active_rules_missing_table_safe_and_draft_clears_cache PASSED [ 61%]
+tests/test_m3_hard_constraints.py::TestR02DynamicExclusionParity::test_must_not_contain_and_must_contain_parity_across_scopes PASSED [ 62%]
+tests/test_m3_hard_constraints.py::TestR02CandidateFallbackAttrsParity::test_bad_json_strict_contracts_preserved PASSED [ 63%]
+tests/test_m3_hard_constraints.py::TestR02CandidateFallbackAttrsParity::test_cached_parsed_params_overrides_text_on_drift PASSED [ 64%]
+tests/test_m3_hard_constraints.py::TestR02CandidateFallbackAttrsParity::test_dn_and_grade_fallback_parity_when_parsed_params_empty_or_bad PASSED [ 65%]
+tests/test_m3_hard_constraints.py::TestR02CandidateFallbackAttrsParity::test_dn_and_od_fields_never_cross_contaminate_on_fallback PASSED [ 66%]
+tests/test_m3_hard_constraints.py::TestR02LiftPumpBidirectionalGate::test_detect_pump_state_and_check_conflict_bidirectional PASSED [ 67%]
+tests/test_m3_hard_constraints.py::TestR02LiftPumpBidirectionalGate::test_pump_required_vs_no_pump_full_chain_parity PASSED [ 68%]
+tests/test_m3_hard_constraints.py::TestM3R03AuditClosureUnit::test_a_m3_01_non_one_multiplier_rejects_missing_target_unit PASSED [ 69%]
+tests/test_m3_hard_constraints.py::TestM3R03AuditClosureUnit::test_a_m3_01_saved_unit_evidence_drift_and_tamper_checks PASSED [ 70%]
+tests/test_m3_hard_constraints.py::TestM3R03AuditClosureUnit::test_a_m3_02_get_active_rules_distinguishes_missing_table_vs_errors_and_recovers PASSED [ 71%]
+tests/test_m3_hard_constraints.py::TestM3R03AuditClosureUnit::test_a_m3_02_rule_unavailability_fails_closed_across_pure_chains_and_recovers PASSED [ 72%]
+tests/test_m3_hard_constraints.py::TestM3R03AuditClosureUnit::test_a_m3_05_discipline_scope_isolation_and_universal_or_alias_rules PASSED [ 73%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_304_alias_normalization_pass PASSED [ 74%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_304_vs_316l_grade_blocked PASSED [ 75%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_brand_conflict_via_parsed_params_blocked PASSED [ 76%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_cross_professional_blocked PASSED [ 77%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_dn_15_vs_15_dot_0_numeric_pass PASSED [ 78%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_dn_caliber_conflict_blocked PASSED [ 80%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_medical_gas_alias_pass PASSED [ 81%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_meter_vs_square_meter_blocked PASSED [ 82%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_no_pump_vs_pump_blocked PASSED [ 83%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_non_ex_vs_ex_blocked PASSED [ 84%]
+tests/test_m3_hard_constraints_http.py::TestM3ConfirmHardConflictGate::test_same_brand_via_parsed_params_pass PASSED [ 85%]
+tests/test_m3_hard_constraints_http.py::TestM3ExportHardConflictGate::test_confirmed_valid_export_200 PASSED [ 86%]
+tests/test_m3_hard_constraints_http.py::TestM3ExportHardConflictGate::test_grade_drift_via_parsed_params_blocks_export PASSED [ 87%]
+tests/test_m3_hard_constraints_http.py::TestM3ExportHardConflictGate::test_unit_drift_after_confirm_blocks_export PASSED [ 88%]
+tests/test_m3_hard_constraints_http.py::TestM3HttpMatcherGuards::test_dynamic_exclusion_double_zero_over_http PASSED [ 89%]
+tests/test_m3_hard_constraints_http.py::TestM3HttpMatcherGuards::test_force_boost_100_cannot_break_cap_over_http PASSED [ 90%]
+tests/test_m3_hard_constraints_http.py::TestM3HttpMatcherGuards::test_series_boost_never_revives_hard_blocked_over_http PASSED [ 91%]
+tests/test_m3_hard_constraints_http.py::TestM3HttpMatcherGuards::test_top1_hard_conflict_rejected_no_prebind_over_http PASSED [ 92%]
+tests/test_m3_hard_constraints_http.py::TestM3R02AuditCounterexamplesHttp::test_r02_a_m3_01_unit_multiplier_km_to_m_and_control PASSED [ 93%]
+tests/test_m3_hard_constraints_http.py::TestM3R02AuditCounterexamplesHttp::test_r02_a_m3_02_dynamic_exclusion_all_chains_and_restore PASSED [ 94%]
+tests/test_m3_hard_constraints_http.py::TestM3R02AuditCounterexamplesHttp::test_r02_a_m3_03_empty_and_bad_parsed_params_dn_and_grade PASSED [ 95%]
+tests/test_m3_hard_constraints_http.py::TestM3R02AuditCounterexamplesHttp::test_r02_a_m3_04_pump_bidirectional_and_drift_restore PASSED [ 96%]
+tests/test_m3_hard_constraints_http.py::TestM3R03AuditClosureHttp::test_r03_a_m3_01_empty_target_unit_drift_and_legacy_records_blocked PASSED [ 97%]
+tests/test_m3_hard_constraints_http.py::TestM3R03AuditClosureHttp::test_r03_a_m3_02_rule_db_failure_fails_closed_on_real_http_endpoints_and_recovers PASSED [ 98%]
+tests/test_m3_hard_constraints_http.py::TestM3R03AuditClosureHttp::test_r03_a_m3_05_plumbing_rule_does_not_leak_to_hvac_http_e2e_and_universal_works PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_m3_hard_constraints.py::TestMatchItemSeriesGuard::test_series_boost_not_revive_hard_blocked
+  C:\Users\tlyer\project\ListTrans\app\vector_index.py:92: FutureWarning: The `get_sentence_embedding_dimension` method has been renamed to `get_embedding_dimension`.
+    self.embedding_dim = int(self.model.get_sentence_embedding_dimension())
+
+tests/test_m3_hard_constraints_http.py: 29 warnings
+  C:\Users\tlyer\project\ListTrans\app\server.py:2766: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    _gate_export_row(it.dict(), current_user, request_scope)
+
+tests/test_m3_hard_constraints_http.py: 10 warnings
+  C:\Users\tlyer\project\ListTrans\app\server.py:2771: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.14/migration/
+    items_to_write = [it.dict() for it in req.items]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 95 passed, 40 warnings in 11.75s =======================
+M3_CASES_EXIT=0 WALL_SECONDS=13.129

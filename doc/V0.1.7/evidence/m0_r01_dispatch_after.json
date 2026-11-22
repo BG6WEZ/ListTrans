@@ -1,0 +1,43 @@
+{
+  "time": "2026-11-18T21:53:16.727670+08:00",
+  "role": "coordinator",
+  "phase": "after",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "head_matches_v016_final": true,
+  "v016_protected_checked": 633,
+  "v016_protected_mismatches": [],
+  "offline_assets_checked": 43,
+  "offline_assets_mismatches": [],
+  "eval_assets_checked": 4,
+  "eval_assets_mismatches": [],
+  "v016_delivery_checked": 24,
+  "v016_delivery_changed": [
+    "doc/00_项目管理/版本路线图.md",
+    "doc/00_项目管理/进度总表.md",
+    "doc/00_项目管理/问题与版本归属总台账.md",
+    "doc/README.md",
+    "doc/V0.1.6/03_终审与版本准入.md"
+  ],
+  "unexpected_v016_delivery_changes": [],
+  "business_snapshot_equal": true,
+  "document_hashes": {
+    "doc/README.md": "0210767f3a9368ffa64671685ff63037ecb6f035f6cfe352219a608ceff9b9d5",
+    "doc/00_项目管理/版本路线图.md": "3d55da78402bb8d0858f1d8f76390984d133db1a13de1af31a3a969208d459ed",
+    "doc/00_项目管理/进度总表.md": "d17327c11cfa26110a1051c89a65e6395922318d76d4ab407dfca813de45a7e1",
+    "doc/00_项目管理/问题与版本归属总台账.md": "485b3816a43c69d013ff7c38ca7b048a56c2f5c8f55bec3cf002ad449125dbd9",
+    "doc/V0.1.6/03_终审与版本准入.md": "3d8990b3edd025d8a4e4b9923953f320345b2494f2c8582372e57d8571d2d0b7",
+    "doc/V0.1.7/01_实施方案与任务包.md": "045a6a9d916a3dc8e459eb015097e7aacc22e73d392f29cb18bdcb67131b5de3",
+    "doc/V0.1.7/02_任务台账.md": "4dae90cb2294cadef5644b10098c5f58d36ac252b4528233f9e355d24d57fbda",
+    "doc/V0.1.7/03_终审与版本准入.md": "4d294715e3c7c1c584f688c30bd8d7ea7ac02ece0e2f2f383272061cbd6431c6",
+    "doc/V0.1.7/rounds/V017-M0_R01_统筹下发.md": "d58966d4e560ab5a7f1ff52342f4cc2f5c6b2e5bd2ea4e7512c11619b7b64551"
+  },
+  "v016_delivery_manifest_sha256": "4bea732e75f659b7d18452170f6334e2510939b223b7188b07e5389fdb6221a9",
+  "tests_rerun": false,
+  "production_operations": false,
+  "before_verdict": "PASS",
+  "v016_delivery_manifest_unchanged": true,
+  "documents_missing": [],
+  "checked_relative_links": 204,
+  "broken_links": [],
+  "integrity_verdict": "PASS"
+}

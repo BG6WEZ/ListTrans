@@ -1,0 +1,2418 @@
+{
+  "field_f1": 1.0,
+  "field_fn": 0,
+  "field_fp": 0,
+  "field_precision": 1.0,
+  "field_recall": 1.0,
+  "field_tp": 35,
+  "fixture": "tests\\fixtures\\structured_extraction_eval_v1.json",
+  "noise_blocked": 7,
+  "noise_present": 7,
+  "noise_rejection_rate": 1.0,
+  "per_entry": [
+    {
+      "actual_attrs": {
+        "dn_val": 20.0,
+        "is_circular": true,
+        "名称": "UPVC球阀",
+        "形状": "圆形",
+        "材质": "UPVC",
+        "管径": "DN20",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "medical_gas",
+      "expected_fields": {
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0003",
+      "must_not_fields": [
+        "工作内容"
+      ],
+      "noise_blocked": 1,
+      "professional": "医用气体",
+      "routing_ok": false,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "dn_val",
+        "is_circular",
+        "名称",
+        "形状",
+        "材质",
+        "管径",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "de_val": 32.0,
+        "is_circular": true,
+        "名称": "加厚UPVC",
+        "外径": 32.0,
+        "形状": "圆形",
+        "材质": "UPVC"
+      },
+      "actual_domain": "pipe_plastic",
+      "expected_domain": "pipe_plastic",
+      "expected_fields": {
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0004",
+      "must_not_fields": [
+        "dn_val",
+        "管径",
+        "口径"
+      ],
+      "noise_blocked": 3,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "de_val",
+        "is_circular",
+        "名称",
+        "外径",
+        "形状",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "不锈钢总控球阀",
+        "材质": "不锈钢316L",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "材质": "不锈钢316L"
+      },
+      "id": "GT-0008",
+      "must_not_fields": [
+        "压力",
+        "型号"
+      ],
+      "noise_blocked": 2,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn_val": 15.0,
+        "is_circular": true,
+        "名称": "医用不锈钢球阀",
+        "形状": "圆形",
+        "材质": "不锈钢",
+        "管径": "DN15",
+        "连接方式": "焊接",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0012",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "dn_val",
+        "is_circular",
+        "名称",
+        "形状",
+        "材质",
+        "管径",
+        "连接方式",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 22.0,
+        "名称": "脱脂无缝不锈钢304管",
+        "壁厚": 2.0,
+        "外径": 20.0,
+        "宽": 2.0,
+        "尺寸": "20*2.0",
+        "尺寸_2d": "20*2.0",
+        "形状": "矩形",
+        "无缝": true,
+        "材质": "不锈钢304",
+        "管径": 20.0,
+        "脱脂": true,
+        "连接方式": "氩弧焊",
+        "长": 20.0
+      },
+      "actual_domain": "pipe_ss",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "材质": {
+          "any": true
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0054",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "壁厚",
+        "外径",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "无缝",
+        "材质",
+        "管径",
+        "脱脂",
+        "连接方式",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "介质": "空压",
+        "名称": "一体式无油涡旋空气压缩机(内置冷冻式干燥机、储气罐)"
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {
+        "介质": {
+          "any": true
+        }
+      },
+      "id": "GT-0005",
+      "must_not_fields": [
+        "工作内容"
+      ],
+      "noise_blocked": 1,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "介质",
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn_val": 20.0,
+        "is_circular": true,
+        "名称": "医用不锈钢球阀",
+        "形状": "圆形",
+        "材质": "不锈钢",
+        "管径": "DN20",
+        "连接方式": "焊接",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0013",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "dn_val",
+        "is_circular",
+        "名称",
+        "形状",
+        "材质",
+        "管径",
+        "连接方式",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn_val": 20.0,
+        "is_circular": true,
+        "压力": 20.0,
+        "名称": "医用不锈钢球阀",
+        "形状": "圆形",
+        "材质": "不锈钢",
+        "管径": "DN20",
+        "连接方式": "焊接",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0014",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "dn_val",
+        "is_circular",
+        "压力",
+        "名称",
+        "形状",
+        "材质",
+        "管径",
+        "连接方式",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn_val": 20.0,
+        "is_circular": true,
+        "压力": 20.0,
+        "名称": "医用不锈钢维修阀",
+        "形状": "圆形",
+        "材质": "不锈钢",
+        "管径": "DN20",
+        "连接方式": "焊接"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {
+        "dn_val": {
+          "type": "number"
+        },
+        "管径": {
+          "any": true
+        }
+      },
+      "id": "GT-0015",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "dn_val",
+        "is_circular",
+        "压力",
+        "名称",
+        "形状",
+        "材质",
+        "管径",
+        "连接方式"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 27.0,
+        "名称": "脱脂无缝不锈钢304管",
+        "壁厚": 2.0,
+        "外径": 25.0,
+        "宽": 2.0,
+        "尺寸": "25*2.0",
+        "尺寸_2d": "25*2.0",
+        "形状": "矩形",
+        "无缝": true,
+        "材质": "不锈钢304",
+        "管径": 25.0,
+        "脱脂": true,
+        "连接方式": "氩弧焊",
+        "长": 25.0
+      },
+      "actual_domain": "pipe_ss",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0055",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "壁厚",
+        "外径",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "无缝",
+        "材质",
+        "管径",
+        "脱脂",
+        "连接方式",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 68.0,
+        "名称": "脱脂无缝不锈钢304管",
+        "壁厚": 3.0,
+        "外径": 65.0,
+        "宽": 3.0,
+        "尺寸": "65*3.0",
+        "尺寸_2d": "65*3.0",
+        "形状": "矩形",
+        "无缝": true,
+        "材质": "不锈钢304",
+        "管径": 65.0,
+        "脱脂": true,
+        "连接方式": "氩弧焊",
+        "长": 65.0
+      },
+      "actual_domain": "pipe_ss",
+      "expected_domain": "pipe_ss",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "管径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0056",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "壁厚",
+        "外径",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "无缝",
+        "材质",
+        "管径",
+        "脱脂",
+        "连接方式",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 13.2,
+        "名称": "磷酸脱氧紫铜",
+        "壁厚": 1.2,
+        "外径": 12.0,
+        "宽": 1.2,
+        "尺寸": "12*1.2",
+        "尺寸_2d": "12*1.2",
+        "形状": "矩形",
+        "无缝": true,
+        "材质": "脱脂紫铜",
+        "脱脂": true,
+        "长": 12.0
+      },
+      "actual_domain": "pipe_copper",
+      "expected_domain": "pipe_copper",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0057",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "壁厚",
+        "外径",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "无缝",
+        "材质",
+        "脱脂",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 16.2,
+        "名称": "磷酸脱氧紫铜",
+        "壁厚": 1.2,
+        "外径": 15.0,
+        "宽": 1.2,
+        "尺寸": "15*1.2",
+        "尺寸_2d": "15*1.2",
+        "形状": "矩形",
+        "无缝": true,
+        "材质": "脱脂紫铜",
+        "脱脂": true,
+        "长": 15.0
+      },
+      "actual_domain": "pipe_copper",
+      "expected_domain": "pipe_copper",
+      "expected_fields": {
+        "壁厚": {
+          "type": "number"
+        },
+        "外径": {
+          "type": "number"
+        }
+      },
+      "id": "GT-0058",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "壁厚",
+        "外径",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "无缝",
+        "材质",
+        "脱脂",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "半数字呼叫-IP网络医护主机（15．6英寸）"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0001",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "UPS系统（含电池）",
+        "型号": "TG-BOX"
+      },
+      "actual_domain": "ups",
+      "expected_domain": "ups",
+      "expected_fields": {},
+      "id": "GT-0002",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "型号"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "一氧化碳浓度仪"
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0006",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "三气报警面板(含传感器)"
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0007",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "压力报警传感器",
+        "材质": "不锈钢316L"
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0019",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "终端控制球阀",
+        "材质": "不锈钢316L",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0021",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "终端控制球阀",
+        "材质": "不锈钢316L",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0022",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "终端控制球阀",
+        "材质": "不锈钢316L",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0023",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "终端控制球阀",
+        "材质": "不锈钢316L",
+        "阀型": "球阀"
+      },
+      "actual_domain": "valve_water",
+      "expected_domain": "valve_water",
+      "expected_fields": {},
+      "id": "GT-0024",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "材质",
+        "阀型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 12.0,
+        "名称": "终端减压器",
+        "宽": 10.0,
+        "尺寸": "2*10",
+        "尺寸_2d": "2*10",
+        "形状": "矩形",
+        "材质": "不锈钢304",
+        "长": 2.0
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0029",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "材质",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "医用初级过滤器",
+        "控制方式": "电动",
+        "材质": "PP",
+        "电动": true
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0033",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "控制方式",
+        "材质",
+        "电动"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "介质": "空压",
+        "名称": "医用压缩空气二级减压箱",
+        "流量": 20.0,
+        "流量_base": 20.0,
+        "流量_op": "<="
+      },
+      "actual_domain": "medical_gas",
+      "expected_domain": "medical_gas",
+      "expected_fields": {},
+      "id": "GT-0037",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "医用气体",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "介质",
+        "名称",
+        "流量"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "32寸商显一体机"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0148",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "半数字呼叫-IP网络医护主机（15．6英寸）",
+        "接口数": 60,
+        "控制方式": "电动",
+        "电动": true
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0149",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "接口数",
+        "控制方式",
+        "电动"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "上位机控制电脑"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0150",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "8口千兆交换机",
+        "接口数": 8
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0152",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "接口数"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "7寸可视门禁室内机"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0153",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "人脸门禁一体机电源"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0154",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "4口光纤终端盒",
+        "接口数": 4
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "cable_power",
+      "expected_fields": {},
+      "id": "GT-0155",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": false,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "接口数"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "GJPFJV型8芯单模室内光缆"
+      },
+      "actual_domain": "weak_current",
+      "expected_domain": "weak_current",
+      "expected_fields": {},
+      "id": "GT-0156",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "弱电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 900.0,
+        "名称": "医用LED平板灯",
+        "宽": 600.0,
+        "尺寸": "300*600",
+        "尺寸_2d": "300*600",
+        "形状": "矩形",
+        "长": 300.0
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0291",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1200.0,
+        "吊装": true,
+        "名称": "医用LED平板灯",
+        "安装形式": "吊装",
+        "宽": 600.0,
+        "尺寸": "600*600",
+        "尺寸_2d": "600*600",
+        "形状": "矩形",
+        "长": 600.0
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0292",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "吊装",
+        "名称",
+        "安装形式",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1200.0,
+        "吊装": true,
+        "名称": "医用LED平板灯",
+        "安装形式": "吊装",
+        "宽": 600.0,
+        "尺寸": "600*600",
+        "尺寸_2d": "600*600",
+        "形状": "矩形",
+        "长": 600.0
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0293",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "吊装",
+        "名称",
+        "安装形式",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1200.0,
+        "名称": "医用LED平板灯",
+        "宽": 600.0,
+        "尺寸": "600*600",
+        "尺寸_2d": "600*600",
+        "形状": "矩形",
+        "长": 600.0
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0294",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1200.0,
+        "名称": "医用LED平板灯",
+        "宽": 600.0,
+        "尺寸": "600*600",
+        "尺寸_2d": "600*600",
+        "形状": "矩形",
+        "长": 600.0
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0295",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1200.0,
+        "名称": "LED防爆扣板灯",
+        "宽": 600.0,
+        "尺寸": "600*600",
+        "尺寸_2d": "600*600",
+        "形状": "矩形",
+        "长": 600.0,
+        "防爆": true
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0296",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长",
+        "防爆"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "LED防爆灯",
+        "防爆": true
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0297",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "防爆"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "一体化LED筒灯",
+        "类型": "筒灯"
+      },
+      "actual_domain": "lighting",
+      "expected_domain": "lighting",
+      "expected_fields": {},
+      "id": "GT-0298",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "名称",
+        "类型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1300.0,
+        "名称": "70℃常开防火阀",
+        "宽": 300.0,
+        "尺寸": "1000*300",
+        "尺寸_2d": "1000*300",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 1000.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0579",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 280.0,
+        "名称": "70℃常开防火阀",
+        "宽": 120.0,
+        "尺寸": "160*120",
+        "尺寸_2d": "160*120",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 160.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0580",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 400.0,
+        "名称": "70℃常开防火阀",
+        "宽": 200.0,
+        "尺寸": "200*200",
+        "尺寸_2d": "200*200",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 200.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0581",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 520.0,
+        "名称": "70℃常开防火阀",
+        "宽": 200.0,
+        "尺寸": "320*200",
+        "尺寸_2d": "320*200",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 320.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0582",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 640.0,
+        "名称": "70℃常开防火阀",
+        "宽": 320.0,
+        "尺寸": "320*320",
+        "尺寸_2d": "320*320",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 320.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0583",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 820.0,
+        "名称": "70℃常开防火阀",
+        "宽": 500.0,
+        "尺寸": "320*500",
+        "尺寸_2d": "320*500",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 320.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0584",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 820.0,
+        "名称": "70℃常开防火阀",
+        "宽": 320.0,
+        "尺寸": "500*320",
+        "尺寸_2d": "500*320",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 500.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0585",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 900.0,
+        "名称": "70℃常开防火阀",
+        "宽": 400.0,
+        "尺寸": "500*400",
+        "尺寸_2d": "500*400",
+        "形状": "矩形",
+        "控制方式": "常开熔断",
+        "材质": "镀锌钢板",
+        "熔断温度": 70,
+        "电动": false,
+        "长": 500.0,
+        "防火": true
+      },
+      "actual_domain": "damper",
+      "expected_domain": "damper",
+      "expected_fields": {},
+      "id": "GT-0586",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "控制方式",
+        "材质",
+        "熔断温度",
+        "电动",
+        "长",
+        "防火"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0960",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0961",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0962",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0963",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0964",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "主截面": 1.0,
+        "主芯数": 7,
+        "半周长": 8.0,
+        "名称": "WDZB-RYY 7*1",
+        "宽": 1.0,
+        "尺寸": "7*1",
+        "尺寸_2d": "7*1",
+        "形状": "矩形",
+        "截面积": "1",
+        "芯数": "7",
+        "长": 7.0
+      },
+      "actual_domain": "cable_control",
+      "expected_domain": "cable_control",
+      "expected_fields": {},
+      "id": "GT-0965",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "自控",
+      "routing_ok": true,
+      "source": "golden_train",
+      "typed_attrs_keys": [
+        "is_circular",
+        "主截面",
+        "主芯数",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "截面积",
+        "芯数",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "厚度": 0.7,
+        "名称": "聚乙烯丙纶卷材"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0981",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "厚度",
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 2400.0,
+        "名称": "2个单开传递门",
+        "宽": 600.0,
+        "尺寸": "1800*600*1400",
+        "尺寸_2d": "1800*600",
+        "形状": "矩形",
+        "长": 1800.0,
+        "长度": 1400.0,
+        "高": 1400.0
+      },
+      "actual_domain": "purification",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-0982",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长",
+        "长度",
+        "高"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "ABS防撞带"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0983",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1900.0,
+        "名称": "VHD检修口",
+        "宽": 400.0,
+        "尺寸": "1500*400",
+        "尺寸_2d": "1500*400",
+        "形状": "矩形",
+        "材质": "镀锌钢板",
+        "长": 1500.0
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0985",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "材质",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "不锈钢包边(洁净窗)",
+        "材质": "不锈钢"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0986",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "不锈钢包边(物流井道)",
+        "材质": "不锈钢"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0987",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "不锈钢包边(电梯)",
+        "材质": "不锈钢"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0988",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "不锈钢包边(防火门)",
+        "材质": "不锈钢"
+      },
+      "actual_domain": "decoration",
+      "expected_domain": "decoration",
+      "expected_fields": {},
+      "id": "GT-0989",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "装饰",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称",
+        "材质"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "单臂机械麻醉吊塔"
+      },
+      "actual_domain": "purification",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-1214",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "名称"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1740.0,
+        "名称": "洁净工作台",
+        "型号": "CJV1000-Y",
+        "宽": 740.0,
+        "尺寸": "1000*740*1620",
+        "尺寸_2d": "1000*740",
+        "形状": "矩形",
+        "设备类型": "工作台",
+        "长": 1000.0,
+        "长度": 1620.0,
+        "高": 1620.0
+      },
+      "actual_domain": "purification",
+      "expected_domain": "purification",
+      "expected_fields": {},
+      "id": "GT-1215",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "型号",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "设备类型",
+        "长",
+        "长度",
+        "高"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn": 1100,
+        "is_circular": false,
+        "model": "SC",
+        "公称直径DN": 1100,
+        "半周长": 1930.0,
+        "名称": "生物安全柜",
+        "型号": "BSC1000-",
+        "壁厚": 830.0,
+        "外径mm": 1100,
+        "宽": 830.0,
+        "尺寸": "1100*830*2200",
+        "尺寸_2d": "1100*830",
+        "形状": "矩形",
+        "管代号": "SC",
+        "管型代码": "SC",
+        "管型名称": "热镀锌焊接厚壁钢管",
+        "规格数字": 1100,
+        "长": 1100.0,
+        "长度": 2200.0,
+        "高": 2200.0
+      },
+      "actual_domain": "conduit",
+      "expected_domain": "conduit",
+      "expected_fields": {},
+      "id": "GT-1216",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "dn",
+        "is_circular",
+        "model",
+        "公称直径DN",
+        "半周长",
+        "名称",
+        "型号",
+        "壁厚",
+        "外径mm",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "管代号",
+        "管型代码",
+        "管型名称",
+        "规格数字",
+        "长",
+        "长度",
+        "高"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "dn": 1100,
+        "is_circular": false,
+        "model": "SC",
+        "公称直径DN": 1100,
+        "半周长": 1930.0,
+        "名称": "生物安全柜",
+        "型号": "BSC1000-",
+        "壁厚": 830.0,
+        "外径mm": 1100,
+        "宽": 830.0,
+        "尺寸": "1100*830*2200",
+        "尺寸_2d": "1100*830",
+        "形状": "矩形",
+        "管代号": "SC",
+        "管型代码": "SC",
+        "管型名称": "热镀锌焊接厚壁钢管",
+        "规格数字": 1100,
+        "长": 1100.0,
+        "长度": 2200.0,
+        "高": 2200.0
+      },
+      "actual_domain": "conduit",
+      "expected_domain": "conduit",
+      "expected_fields": {},
+      "id": "GT-1217",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "dn",
+        "is_circular",
+        "model",
+        "公称直径DN",
+        "半周长",
+        "名称",
+        "型号",
+        "壁厚",
+        "外径mm",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "管代号",
+        "管型代码",
+        "管型名称",
+        "规格数字",
+        "长",
+        "长度",
+        "高"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 2350.0,
+        "名称": "钢木实验中央台",
+        "宽": 850.0,
+        "尺寸": "1500*850",
+        "尺寸_2d": "1500*850",
+        "形状": "矩形",
+        "长": 1500.0
+      },
+      "actual_domain": "generic",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1218",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 2000.0,
+        "名称": "钢木实验转角台",
+        "宽": 1000.0,
+        "尺寸": "1000*1000*850",
+        "尺寸_2d": "1000*1000",
+        "形状": "矩形",
+        "长": 1000.0,
+        "长度": 850.0,
+        "高": 850.0
+      },
+      "actual_domain": "generic",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1219",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长",
+        "长度",
+        "高"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "is_circular": false,
+        "半周长": 1450.0,
+        "名称": "钢木实验边台",
+        "宽": 850.0,
+        "尺寸": "600*850",
+        "尺寸_2d": "600*850",
+        "形状": "矩形",
+        "长": 600.0
+      },
+      "actual_domain": "generic",
+      "expected_domain": "generic",
+      "expected_fields": {},
+      "id": "GT-1220",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "设备",
+      "routing_ok": true,
+      "source": "golden_dev",
+      "typed_attrs_keys": [
+        "is_circular",
+        "半周长",
+        "名称",
+        "宽",
+        "尺寸",
+        "尺寸_2d",
+        "形状",
+        "长"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "tag_id": "AHU-J-01",
+        "名称": "组合式空调机组 AHU-J-01",
+        "机外余压": 400.0,
+        "机组类型": "组合式空气处理机组",
+        "组合式": true,
+        "风量": 2000.0
+      },
+      "actual_domain": "ahu",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "tag_id": "AHU-J-01",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-001",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "synthetic",
+      "typed_attrs_keys": [
+        "tag_id",
+        "名称",
+        "机外余压",
+        "机组类型",
+        "组合式",
+        "风量"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "tag_id": "PAU-D301",
+        "名称": "新风预处理机组 PAU-D301",
+        "机组类型": "新风预处理机组",
+        "风量": 3000.0
+      },
+      "actual_domain": "ahu",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "tag_id": "PAU-D301",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-002",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "synthetic",
+      "typed_attrs_keys": [
+        "tag_id",
+        "名称",
+        "机组类型",
+        "风量"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "box_type": "AP",
+        "tag_id": "AP-1",
+        "名称": "动力配电箱 AP-1",
+        "回路数": 6,
+        "类型": "配电箱"
+      },
+      "actual_domain": "switchgear",
+      "expected_domain": "switchgear",
+      "expected_fields": {
+        "box_type": {
+          "any": true
+        },
+        "tag_id": {
+          "any": true
+        }
+      },
+      "id": "SYN-TAG-003",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "synthetic",
+      "typed_attrs_keys": [
+        "box_type",
+        "tag_id",
+        "名称",
+        "回路数",
+        "类型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "box_type": "AL",
+        "tag_id": "AL-2",
+        "名称": "照明配电箱 AL-2",
+        "回路数": 8,
+        "类型": "配电箱"
+      },
+      "actual_domain": "switchgear",
+      "expected_domain": "switchgear",
+      "expected_fields": {
+        "box_type": {
+          "any": true
+        },
+        "tag_id": {
+          "any": true
+        }
+      },
+      "id": "SYN-TAG-004",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "强电",
+      "routing_ok": true,
+      "source": "synthetic",
+      "typed_attrs_keys": [
+        "box_type",
+        "tag_id",
+        "名称",
+        "回路数",
+        "类型"
+      ],
+      "unwhitelisted_attrs": {}
+    },
+    {
+      "actual_attrs": {
+        "名称": "回风循环空气处理机组 RAU-Q-D301",
+        "型号": "RAU-Q-D301",
+        "机组类型": "回风循环空气处理机组",
+        "风量": 4000.0
+      },
+      "actual_domain": "ahu",
+      "expected_domain": "ahu",
+      "expected_fields": {
+        "型号": "RAU-Q-D301",
+        "风量": {
+          "type": "number"
+        }
+      },
+      "id": "SYN-TAG-005",
+      "must_not_fields": [],
+      "noise_blocked": null,
+      "professional": "暖通",
+      "routing_ok": true,
+      "source": "synthetic",
+      "typed_attrs_keys": [
+        "名称",
+        "型号",
+        "机组类型",
+        "风量"
+      ],
+      "unwhitelisted_attrs": {}
+    }
+  ],
+  "routing_accuracy": 0.9733333333333334,
+  "routing_correct": 73,
+  "routing_evaluated": 75,
+  "total_entries": 75
+}

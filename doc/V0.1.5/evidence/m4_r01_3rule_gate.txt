@@ -1,0 +1,3 @@
+﻿{"summary": {"harmful": {"passed": false, "targeted": 24, "violations": ["target_score_decreased", "margin_shrunk"], "snapshot_errors": [], "score_comparisons": 23}, "beneficial": {"passed": true, "targeted": 22, "violations": [], "snapshot_errors": [], "score_comparisons": 21}, "neutral": {"passed": true, "targeted": 16, "violations": [], "snapshot_errors": [], "score_comparisons": 16}}, "score_comparison_diffs": []}
+ELAPSED_SECONDS=55.379
+GATE3_EXIT=0 WALL_SECONDS=63.074

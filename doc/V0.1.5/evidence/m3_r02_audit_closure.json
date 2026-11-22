@@ -1,0 +1,266 @@
+{
+  "baseline": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "verdict": "退回整改",
+  "next_package": "V015-M3 R03 only",
+  "closed": [
+    "A-M3-03",
+    "A-M3-04"
+  ],
+  "open_P1": [
+    "A-M3-01",
+    "A-M3-02"
+  ],
+  "new_blocking_P2": [
+    "A-M3-05"
+  ],
+  "deferred_P2": "R-M3-01 unchanged",
+  "initial_delivery": {
+    "matched": 50,
+    "total": 50
+  },
+  "stable_hashes_after": 47,
+  "expected_live_document_changes": [
+    {
+      "file": "doc/V0.1.5/02_任务台账.md",
+      "expected": "efd5ea580a60b2bc6f21fdc75aa125863ead605a23477f6aea3732cdf269a76c",
+      "actual": "a40bc65d7b513cd805b6c6c17ed367bd6b573ab490d90d26e3a5f2457a4f443d",
+      "matches": false
+    },
+    {
+      "file": "doc/V0.1.5/rounds/README.md",
+      "expected": "6816dab4c37a7362539f3260600371bc63d175cc1e3b989ee19e4c3fa839fa22",
+      "actual": "42390bda1c543b61756f1653bf1a05bfcd1f883423d753b79fb7227c4c92daa3",
+      "matches": false
+    },
+    {
+      "file": "doc/V0.1.5/evidence/README.md",
+      "expected": "1e3b102b2aea55baf958a1590079c9fd8ce683743d4d77df98f6b3e3bbad7868",
+      "actual": "72188c93cf469146a126929f9abfa58521173ceeb461632c37420690026cd8ff",
+      "matches": false
+    }
+  ],
+  "unexpected_changes": [],
+  "backup_checks": [
+    {
+      "file": "app/matcher.py",
+      "expected": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "actual": "fe08ca6a07a3431f75b740837edd573a8514a395da53619652b90b04be92a946",
+      "matches": true
+    },
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "actual": "3288cccd00c022b6094570621baa6d23eb9fc73d4c36e3e795879b17a9b18f60",
+      "matches": true
+    },
+    {
+      "file": "app/server.py",
+      "expected": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "actual": "abcc88fe7ae289df76e99086031ca4f0919bccb7f90fc2fd47e027d7637a755a",
+      "matches": true
+    },
+    {
+      "file": "app/domain_extractors.py",
+      "expected": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "actual": "27d5f63bc78bc6771e2e56ac885d1cf4916eadbfae32a67f664b5f83237eb080",
+      "matches": true
+    },
+    {
+      "file": "app/llm_rule_engine.py",
+      "expected": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "actual": "f223af4e06c819ca66f3b1342df9187d9b81ac0e005f55d6c30ad476f6e2645f",
+      "matches": true
+    },
+    {
+      "file": "app/query_preprocessor.py",
+      "expected": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "actual": "d0753c3a26da448060f9c2044c0fa4e7c0be250e2ca610943b6b57360fcffe25",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints.py",
+      "expected": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "actual": "ee927e1c94a29d807266459b1f6b0bbe8eaeac9381aa1b656e7ea9ee15157139",
+      "matches": true
+    },
+    {
+      "file": "tests/test_m3_hard_constraints_http.py",
+      "expected": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "actual": "bef0487653fd6966760a5dea36df999e5567d08bbf8bd07908691696adbeae38",
+      "matches": true
+    }
+  ],
+  "snapshots": [
+    {
+      "file": "m3_r02_audit_snapshot_before.json",
+      "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "golden_paths": {
+        "tests/fixtures/golden_last_run.json": false,
+        "data/golden_last_run.json": false
+      }
+    },
+    {
+      "file": "m3_r02_audit_snapshot_after.json",
+      "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "golden_paths": {
+        "tests/fixtures/golden_last_run.json": false,
+        "data/golden_last_run.json": false
+      }
+    },
+    {
+      "file": "m3_r02_audit_snapshot_before_probes.json",
+      "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "golden_paths": {
+        "tests/fixtures/golden_last_run.json": false,
+        "data/golden_last_run.json": false
+      }
+    },
+    {
+      "file": "m3_r02_audit_snapshot_after_probes.json",
+      "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "golden_paths": {
+        "tests/fixtures/golden_last_run.json": false,
+        "data/golden_last_run.json": false
+      }
+    },
+    {
+      "file": "m3_r02_audit_snapshot_closure.json",
+      "sha256": "5768bdcabea117274da0ebf58378a61d5bffae7698d1e1fb3d4f5f5f68bd5c7e",
+      "golden_paths": {
+        "tests/fixtures/golden_last_run.json": false,
+        "data/golden_last_run.json": false
+      }
+    }
+  ],
+  "execution": {
+    "main": [
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "tests/verify_isolation.py",
+          "--out",
+          "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_verify_before.json"
+        ],
+        "exit": 0,
+        "seconds": 8.28,
+        "log": "m3_r02_audit_verify_before.log",
+        "sha256": "189d260a7e123a19793c76e8f1948396872e20692630145414d3fc3550a28f1f"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_m3_hard_constraints.py",
+          "tests/test_m3_hard_constraints_http.py",
+          "-q",
+          "--tb=short"
+        ],
+        "exit": 0,
+        "seconds": 11.713,
+        "log": "m3_r02_audit_m3.log",
+        "sha256": "8fd59c98bcd232325a3015be72b5542648c33cfe6bcdaee04b581079416fdd35"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_m0_isolation.py",
+          "tests/test_m0_guardrail_regression.py",
+          "tests/test_query_contract.py",
+          "tests/test_auto_binding.py",
+          "tests/test_binding_decisions.py",
+          "-q",
+          "--tb=short"
+        ],
+        "exit": 0,
+        "seconds": 14.731,
+        "log": "m3_r02_audit_required.log",
+        "sha256": "86415550b79077777c25c8b368be64cc6686d5feddf98ab5db9ad488d8bd94d0"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "-m",
+          "pytest",
+          "tests/test_flywheel_sandbox.py",
+          "-k",
+          "compare or nonzero",
+          "-q",
+          "--tb=short"
+        ],
+        "exit": 0,
+        "seconds": 8.453,
+        "log": "m3_r02_audit_boundaries.log",
+        "sha256": "fc0bf9f92b8b3f77eeabca005dcb2faecf4f6833158f0e2b63df7ee39936d2a9"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_gate.py"
+        ],
+        "exit": 0,
+        "seconds": 55.04,
+        "log": "m3_r02_audit_gate.log",
+        "sha256": "56797e187597a0d5af497ccf9e6fdf872cc6c4a1ae5ace4a36b887dfaa740035"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "-m",
+          "pytest",
+          "tests/",
+          "-q",
+          "--tb=short"
+        ],
+        "exit": 0,
+        "seconds": 103.895,
+        "log": "m3_r02_audit_full.log",
+        "sha256": "863a9eca7e3fa5dded171fb5035c91598de97b5910e4eb2da8ed78c23c23e64f"
+      },
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "tests/verify_isolation.py",
+          "--out",
+          "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_verify_after.json"
+        ],
+        "exit": 0,
+        "seconds": 7.117,
+        "log": "m3_r02_audit_verify_after.log",
+        "sha256": "c8093340b41f9dddb9ba0c7c0987a4b401534feb806aa8968165aec439024b6c"
+      }
+    ],
+    "extra": [
+      {
+        "command": [
+          "C:\\Users\\tlyer\\project\\ListTrans\\venv\\Scripts\\python.exe",
+          "-u",
+          "C:\\Users\\tlyer\\project\\ListTrans\\doc\\V0.1.5\\evidence\\m3_r02_audit_probes.py"
+        ],
+        "exit": 0,
+        "seconds": 9.954,
+        "log": "m3_r02_audit_probes.log",
+        "sha256": "6e19cdb050e795ac45573b081ebd5336e7e7e3d268fba0f4f75024be7c5955ae"
+      }
+    ],
+    "environment": "approved local execution outside socketpair-limited sandbox; writable app paths isolated; offline; LLM false"
+  },
+  "probe_cases": [
+    "RAW-KM",
+    "CONVERTED-KM",
+    "UNIT-ONE",
+    "DN-EMPTY",
+    "DN-BAD",
+    "GRADE-BAD",
+    "GRADE-OK",
+    "PUMP-REV",
+    "PUMP-FWD",
+    "PUMP-UNKNOWN",
+    "EMPTY-TARGET-UNIT-DRIFT",
+    "RULE-READ-FAIL-OPEN",
+    "SCOPE-PLUMBING-ON-HVAC"
+  ],
+  "boundaries": "No app/test implementation changes; no git writes, deployment, real data migration, or later packages executed"
+}

@@ -1,0 +1,2029 @@
+{
+  "method": "controlled_recall_and_scores_using_M4_regression_fixture",
+  "stage_metrics": {
+    "total": 5,
+    "hit@1": 20.0,
+    "recall@3": 20.0,
+    "recall@5": 20.0,
+    "recall@10": 20.0,
+    "mrr": 0.2,
+    "miss@10": 80.0,
+    "candidate_recall": 60.0,
+    "candidate_recall_numerator": 3,
+    "candidate_recall_denominator": 5,
+    "channel_contributions": {
+      "fts": 3,
+      "semantic": 3
+    },
+    "diagnostic_failed_targets_count": 0,
+    "failed_samples_count": 0,
+    "skipped_samples_count": 0,
+    "not_in_catalog_count": 1,
+    "not_recalled_count": 1,
+    "hard_blocked_count": 1,
+    "ranked_gt10_count": 1,
+    "top10_hit_count": 1
+  },
+  "rows": [
+    {
+      "id": "MISSING",
+      "professional": "暖通",
+      "name": "MISSING",
+      "clean_name": "MISSING",
+      "specification": "",
+      "target_codes": [
+        "MISSING"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 0,
+      "weight": 1,
+      "top": [
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "name": "C4",
+          "spec": "",
+          "score": 56.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        },
+        {
+          "code": "C9",
+          "score": 51.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 12,
+        "targets": [
+          {
+            "code": "MISSING",
+            "in_catalog": false,
+            "recalled": false,
+            "recall_sources": [],
+            "recall_pool_size": 12,
+            "hard_blocked": false,
+            "reasons": [],
+            "max_score": null,
+            "full_rank": null,
+            "top10": false,
+            "T": null,
+            "W": 60,
+            "margin": null,
+            "state": "not_in_catalog"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "MISSING"
+          },
+          "model": "",
+          "name": "MISSING",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "MISSING",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "MISSING",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "NOTREC",
+      "professional": "暖通",
+      "name": "NOTREC",
+      "clean_name": "NOTREC",
+      "specification": "",
+      "target_codes": [
+        "NOTREC"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 0,
+      "weight": 1,
+      "top": [
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "name": "C4",
+          "spec": "",
+          "score": 56.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        },
+        {
+          "code": "C9",
+          "score": 51.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 12,
+        "targets": [
+          {
+            "code": "NOTREC",
+            "in_catalog": true,
+            "recalled": false,
+            "recall_sources": [],
+            "recall_pool_size": 12,
+            "hard_blocked": false,
+            "reasons": [],
+            "max_score": null,
+            "full_rank": null,
+            "top10": false,
+            "T": null,
+            "W": 60,
+            "margin": null,
+            "state": "not_recalled"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "NOTREC"
+          },
+          "model": "",
+          "name": "NOTREC",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "NOTREC",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "NOTREC",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "BLOCK",
+      "professional": "暖通",
+      "name": "BLOCK",
+      "clean_name": "BLOCK",
+      "specification": "",
+      "target_codes": [
+        "BLOCK"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 0,
+      "weight": 1,
+      "top": [
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "name": "C4",
+          "spec": "",
+          "score": 56.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        },
+        {
+          "code": "C9",
+          "score": 51.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 13,
+        "targets": [
+          {
+            "code": "BLOCK",
+            "in_catalog": true,
+            "recalled": true,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "recall_pool_size": 13,
+            "hard_blocked": true,
+            "reasons": [
+              "防爆冲突",
+              "动态排除",
+              "完整第三条原因"
+            ],
+            "max_score": 0.0,
+            "full_rank": 13,
+            "top10": false,
+            "T": 0,
+            "W": 60,
+            "margin": -60,
+            "state": "hard_blocked"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "BLOCK"
+          },
+          "model": "",
+          "name": "BLOCK",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "BLOCK",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "BLOCK",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "BLOCK",
+            "score": 0,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": true,
+            "max_score": 0.0,
+            "match_reasons": [
+              "防爆冲突",
+              "动态排除",
+              "完整第三条原因"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "LOW",
+      "professional": "暖通",
+      "name": "LOW",
+      "clean_name": "LOW",
+      "specification": "",
+      "target_codes": [
+        "LOW"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 0,
+      "weight": 1,
+      "top": [
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "name": "C4",
+          "spec": "",
+          "score": 56.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        },
+        {
+          "code": "C9",
+          "score": 51.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 13,
+        "targets": [
+          {
+            "code": "LOW",
+            "in_catalog": true,
+            "recalled": true,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "recall_pool_size": 13,
+            "hard_blocked": false,
+            "reasons": [
+              "候选"
+            ],
+            "max_score": 1.0,
+            "full_rank": 13,
+            "top10": false,
+            "T": 1,
+            "W": 60,
+            "margin": -59,
+            "state": "ranked_gt10"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "LOW"
+          },
+          "model": "",
+          "name": "LOW",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "LOW",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "LOW",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "LOW",
+            "score": 1,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "HIT",
+      "professional": "暖通",
+      "name": "HIT",
+      "clean_name": "HIT",
+      "specification": "",
+      "target_codes": [
+        "HIT"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 1,
+      "weight": 1,
+      "top": [
+        {
+          "code": "HIT",
+          "name": "HIT",
+          "spec": "",
+          "score": 99.0
+        },
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "HIT",
+          "score": 99.0
+        },
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 13,
+        "targets": [
+          {
+            "code": "HIT",
+            "in_catalog": true,
+            "recalled": true,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "recall_pool_size": 13,
+            "hard_blocked": false,
+            "reasons": [
+              "候选"
+            ],
+            "max_score": 1.0,
+            "full_rank": 1,
+            "top10": true,
+            "T": 99,
+            "W": 60,
+            "margin": 39,
+            "state": "top10_hit"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "HIT"
+          },
+          "model": "",
+          "name": "HIT",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "HIT",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "HIT",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "HIT",
+            "score": 99,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "failure_skip_metrics": {
+    "total": 2,
+    "hit@1": 50.0,
+    "recall@3": 50.0,
+    "recall@5": 50.0,
+    "recall@10": 50.0,
+    "mrr": 0.5,
+    "miss@10": 50.0,
+    "candidate_recall": 50.0,
+    "candidate_recall_numerator": 1,
+    "candidate_recall_denominator": 2,
+    "channel_contributions": {
+      "fts": 1,
+      "semantic": 1
+    },
+    "diagnostic_failed_targets_count": 1,
+    "failed_samples_count": 1,
+    "skipped_samples_count": 2,
+    "not_in_catalog_count": 0,
+    "not_recalled_count": 0,
+    "hard_blocked_count": 0,
+    "ranked_gt10_count": 0,
+    "top10_hit_count": 1
+  },
+  "failure_skip_rows": [
+    {
+      "id": "EMPTY",
+      "professional": "暖通",
+      "rank": 0,
+      "top": [],
+      "skipped": true,
+      "skip_reason": "no_valid_target_codes"
+    },
+    {
+      "id": "INVALID",
+      "professional": "",
+      "rank": 0,
+      "top": [],
+      "skipped": true,
+      "skip_reason": "no_valid_target_codes"
+    },
+    {
+      "id": "HIT",
+      "professional": "暖通",
+      "name": "HIT",
+      "clean_name": "HIT",
+      "specification": "",
+      "target_codes": [
+        "HIT"
+      ],
+      "target_name": "",
+      "target_spec": "",
+      "rank": 1,
+      "weight": 1,
+      "top": [
+        {
+          "code": "HIT",
+          "name": "HIT",
+          "spec": "",
+          "score": 99.0
+        },
+        {
+          "code": "C0",
+          "name": "C0",
+          "spec": "",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "name": "C1",
+          "spec": "",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "name": "C2",
+          "spec": "",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "name": "C3",
+          "spec": "",
+          "score": 57.0
+        }
+      ],
+      "candidates": [
+        {
+          "code": "HIT",
+          "score": 99.0
+        },
+        {
+          "code": "C0",
+          "score": 60.0
+        },
+        {
+          "code": "C1",
+          "score": 59.0
+        },
+        {
+          "code": "C2",
+          "score": 58.0
+        },
+        {
+          "code": "C3",
+          "score": 57.0
+        },
+        {
+          "code": "C4",
+          "score": 56.0
+        },
+        {
+          "code": "C5",
+          "score": 55.0
+        },
+        {
+          "code": "C6",
+          "score": 54.0
+        },
+        {
+          "code": "C7",
+          "score": 53.0
+        },
+        {
+          "code": "C8",
+          "score": 52.0
+        }
+      ],
+      "diagnostics": {
+        "recall_pool_size": 13,
+        "targets": [
+          {
+            "code": "HIT",
+            "in_catalog": true,
+            "recalled": true,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "recall_pool_size": 13,
+            "hard_blocked": false,
+            "reasons": [
+              "候选"
+            ],
+            "max_score": 1.0,
+            "full_rank": 1,
+            "top10": true,
+            "T": 99,
+            "W": 60,
+            "margin": 39,
+            "state": "top10_hit"
+          }
+        ],
+        "query_parsed_spec": {
+          "domain": "ahu",
+          "attrs": {
+            "名称": "HIT"
+          },
+          "model": "",
+          "name": "HIT",
+          "spec": "",
+          "clean_text": "",
+          "noise_text": "",
+          "kv_dict": {},
+          "rule_diagnostics": {
+            "context": {
+              "professional": "暖通",
+              "raw_professional": "暖通",
+              "material_category": "",
+              "domain": "ahu",
+              "name": "HIT",
+              "stage": "extraction"
+            },
+            "cleaning": {
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "extraction": {
+              "stage": "extraction",
+              "context": {
+                "professional": "暖通",
+                "raw_professional": "暖通",
+                "material_category": "",
+                "domain": "ahu",
+                "name": "HIT",
+                "stage": "extraction"
+              },
+              "applied_rules": [],
+              "skipped_rules": [],
+              "errors": [],
+              "degraded": false
+            },
+            "errors": [],
+            "degraded": false
+          }
+        },
+        "candidates": [
+          {
+            "code": "HIT",
+            "score": 99,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C0",
+            "score": 60,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C1",
+            "score": 59,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C2",
+            "score": 58,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C3",
+            "score": 57,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C4",
+            "score": 56,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C5",
+            "score": 55,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C6",
+            "score": 54,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C7",
+            "score": 53,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C8",
+            "score": 52,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C9",
+            "score": 51,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C10",
+            "score": 50,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          },
+          {
+            "code": "C11",
+            "score": 49,
+            "recall_sources": [
+              "fts",
+              "semantic"
+            ],
+            "hard_blocked": false,
+            "max_score": 1.0,
+            "match_reasons": [
+              "候选"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "FAIL",
+      "professional": "暖通",
+      "rank": 0,
+      "target_codes": [
+        "FAIL"
+      ],
+      "error": "controlled_sample_exception",
+      "top": []
+    }
+  ]
+}

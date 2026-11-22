@@ -1,0 +1,6 @@
+{
+ "before": "outer_snapshot_before.json",
+ "after": "outer_snapshot_after.json",
+ "unchanged": true,
+ "changes": []
+}

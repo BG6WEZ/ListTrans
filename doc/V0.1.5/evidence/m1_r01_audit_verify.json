@@ -1,0 +1,80 @@
+{
+  "task": "V015-M1",
+  "round": "R01",
+  "role": "reviewer",
+  "audited_at": "2026-11-13 14:38:30",
+  "baseline_commit": "4cbbbe5bd6e1bee21ad908ed1f631a919920ea8f",
+  "delivery_hashes": {
+    "manifest": "doc/V0.1.5/evidence/m1_r01_delivery_hashes.md",
+    "code_and_scripts_matched": 15,
+    "code_and_scripts_total": 15,
+    "evidence_matched": 5,
+    "evidence_total": 9,
+    "evidence_transcription_typos": [
+      "m1_r01_pre_baseline_hashes.md (line 37)",
+      "m1_r01_outer_snapshot_before.json (line 38)",
+      "m1_r01_outer_snapshot_after.json (line 39)",
+      "m1_r01_verify_after.json (line 41)"
+    ]
+  },
+  "venv_python": {
+    "executable": "venv/Scripts/python.exe",
+    "verify_isolation_before": {
+      "command": "venv/Scripts/python.exe tests/verify_isolation.py --out doc/V0.1.5/evidence/m1_r01_audit_venv_verify.json",
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true
+    },
+    "pytest_contract": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_query_contract.py -q",
+      "exit_code": 0,
+      "summary": "11 passed, 1 warning in 8.57s"
+    },
+    "pytest_guardrail_and_smoke": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_m0_guardrail_regression.py tests/test_m0_isolation.py -q",
+      "exit_code": 0,
+      "summary": "18 passed in 10.10s"
+    },
+    "pytest_auto_binding": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_auto_binding.py -q",
+      "exit_code": 0,
+      "summary": "3 passed, 1 warning in 7.44s"
+    },
+    "pytest_flywheel_sandbox": {
+      "command": "venv/Scripts/python.exe -m pytest tests/test_flywheel_sandbox.py -q",
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 3 warnings in 74.09s"
+    },
+    "pytest_full": {
+      "command": "venv/Scripts/python.exe -m pytest tests/ -q --tb=short",
+      "exit_code": 1,
+      "summary": "1 failed, 89 passed, 3 warnings in 96.55s",
+      "failed": [
+        "tests/test_flywheel_sandbox.py::test_sandbox_harmful_rule_rejected"
+      ],
+      "skipped": [],
+      "warnings": [
+        "app/vector_index.py:92 FutureWarning: get_sentence_embedding_dimension renamed to get_embedding_dimension",
+        "app/db_manager.py:486 Pandas4Warning: fillna str on float64 dtype",
+        "app/db_manager.py:487 Pandas4Warning: fillna str on float64 dtype"
+      ]
+    },
+    "verify_isolation_after": {
+      "command": "venv/Scripts/python.exe tests/verify_isolation.py --out doc/V0.1.5/evidence/m1_r01_audit_verify_after.json",
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true
+    },
+    "diag_score_breakdown_rerun": {
+      "command": "venv/Scripts/python.exe .local-archive/diag_score_breakdown.py",
+      "exit_code": 0,
+      "baseline_top1": { "code": "3.55.09.0012", "score": 88.8 },
+      "baseline_harmful": { "code": "2.28.03.HARMFUL1", "score": 6.7 },
+      "candidate_top1": { "code": "3.55.09.0012", "score": 50.7 },
+      "candidate_harmful": { "code": "2.28.03.HARMFUL1", "score": 43.1 },
+      "snapshot_diff": []
+    },
+    "outer_snapshot_diff_after_all_venv_runs": [],
+    "golden_last_run_exists": false
+  }
+}

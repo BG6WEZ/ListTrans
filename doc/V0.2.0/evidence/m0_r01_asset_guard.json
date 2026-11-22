@@ -1,0 +1,53 @@
+{
+  "business_file_count": 35,
+  "business_snapshot_differences": {
+    "after_end": [],
+    "after_start": [],
+    "before_end": [],
+    "before_start": [],
+    "current": []
+  },
+  "effective_baseline_count": 191,
+  "effective_baseline_unchanged": 190,
+  "exit_code": 0,
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "inherited_test_sha256": {
+    "tests/test_v019_m0_ranking.py": "adac33bbbe64bb26b5a0474f58597b65fad0ad8f3039a2561ecfcdcd08ddc47f"
+  },
+  "preexisting_dispatch_log_append": {
+    "appended_before_first_snapshot_bytes": 90,
+    "dispatch_prefix_bytes": 2439,
+    "dispatch_sha256": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340",
+    "file": "logs/security.log",
+    "first_isolation_sha256": "21a7a621d6b32cc445ca1d49f375b575d7106bda4dea4dbbb0d8668c214e6eac"
+  },
+  "protected_probe_parity": [
+    "GT-0674",
+    "GT-0677",
+    "GT-0678"
+  ],
+  "recovery_archive_count": 72,
+  "recovery_archive_sha256": "29b712dd7de8e23a49f72e6367c06dee94e6e1178849a60fb04c59417c697115",
+  "removed_added_files_in_rollback_copy": [
+    "app/feedback_ranker.py",
+    "scripts/v020_feedback_audit.py",
+    "tests/test_v020_m0_feedback_ranker.py"
+  ],
+  "restored": {
+    "app/matcher.py": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0"
+  },
+  "rollback_sha256": "cc7e9ff5544db07fd653a895dc02a982d45b52fa6a6d9fa17f8361283eaffba2",
+  "rule_safety_parity": [
+    "empty",
+    "harmful",
+    "beneficial",
+    "beneficial_constrained",
+    "neutral"
+  ],
+  "source_sha256": {
+    "app/feedback_ranker.py": "0b9c1a9fcca9c06c42de4c9d0f132913385e459372b2df90d940220d9ad251cc",
+    "app/matcher.py": "9b285e6ecec524dd14a9a7ad0d86abae5c25178a745acd85ea9fd505d7387bca",
+    "scripts/v020_feedback_audit.py": "a698586a14f9c40f3514fe818d930d9c637d081bd5b372495dfaa0cb49e4aba9",
+    "tests/test_v020_m0_feedback_ranker.py": "17695259ea87190b11874af7f085ac90190270bcddbb576f58a0bd6372190ad0"
+  }
+}

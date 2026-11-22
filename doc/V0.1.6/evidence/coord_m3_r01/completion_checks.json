@@ -1,0 +1,40 @@
+{
+  "coordinator_66_raw_rerun": "65 passed, 1 failed in 236.77s, EXIT=1 (archived in targeted_pytest_66_raw.log; test_v0_0_8_llm_rules.py:141 45s poll limit registered as OBS-M3-01 / C-M4-07)",
+  "coordinator_65_deterministic_rerun": "65 passed, 1 deselected in 161.46s, EXIT=0 (9 files covering M3 8, M2 5, M1 7, miner 2, M0 15, llm_rules DSL 3, LLM/isolation/guardrails 25)",
+  "isolation_verify_after": {
+    "verdict": "PASS",
+    "exit_code": 0,
+    "business_hash_unchanged": true
+  },
+  "checks": {
+    "business_equal_to_m2_final": true,
+    "business_equal_after_to_final": true,
+    "wal_shm_note": "4 zero-byte/clean WAL/SHM sidecars recreated at 17:00:38 by inspect_evidence.py ?mode=ro, restoring exact match with coord_m2_r01/state_final.json (business_file_diffs_vs_m2_final == {}); materials.db and auth.db mtime unchanged since 10:46:37.",
+    "delivery_matches_before": "73/74 (only doc/V0.1.6/02_任务台账.md updated by Auditor before Coordinator opening)",
+    "protected_changes": [
+      "doc/V0.1.6/rounds/V016-M3_R01_统筹裁决.md",
+      "doc/V0.1.6/rounds/V016-M4_R01_统筹下发.md"
+    ],
+    "pre_backup_hashes_match": "12/12",
+    "asset_hashes_unchanged_vs_m2": 43,
+    "audit_evidence_count": 21,
+    "gate_cross_check_equal": true,
+    "image_layers_cross_check_equal": true,
+    "new_rounds": [
+      "doc/V0.1.6/rounds/V016-M3_R01_统筹裁决.md",
+      "doc/V0.1.6/rounds/V016-M4_R01_统筹下发.md"
+    ],
+    "updated_management_files": [
+      "doc/00_项目管理/版本路线图.md",
+      "doc/00_项目管理/进度总表.md",
+      "doc/00_项目管理/问题与版本归属总台账.md",
+      "doc/README.md",
+      "doc/V0.1.6/01_实施方案与任务包.md",
+      "doc/V0.1.6/02_任务台账.md",
+      "doc/V0.1.6/03_终审与版本准入.md"
+    ],
+    "checked_relative_links": 219,
+    "broken_relative_links": [],
+    "relative_document_links_valid": true
+  }
+}

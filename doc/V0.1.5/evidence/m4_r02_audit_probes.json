@@ -1,0 +1,87 @@
+{
+  "fixture": "all accounts/rows synthetic; Excel decoder substituted only; auth/SQLite/HTTP real",
+  "probes": {
+    "excel_role_change_old_token": {
+      "import_success": true,
+      "updated": 1,
+      "role_before": "manager",
+      "role_after": "employee",
+      "token_version_before": 2,
+      "token_version_after": 3,
+      "http_before": 200,
+      "http_after_old_token": 401,
+      "expected_after": 401,
+      "requirement_met": true
+    },
+    "excel_shared_explicit_initial_password": {
+      "created": 2,
+      "distinct_initial_passwords": 2,
+      "requirement_met": true
+    },
+    "http_shared_initial_and_reset_passwords": {
+      "create_statuses": [
+        200,
+        200
+      ],
+      "create_distinct_passwords": 2,
+      "reset_statuses": [
+        200,
+        200
+      ],
+      "reset_distinct_passwords": 2,
+      "requirement_met": true
+    },
+    "service_fabricated_existing_admin_identity": {
+      "employee_http_publish": 403,
+      "service_authenticated_token_supplied": false,
+      "service_publish_success": false,
+      "persisted_status": "approved_pending_publish",
+      "requirement_met": true,
+      "limit": "Service boundary reproduction; HTTP request-body identity impersonation is NOT established"
+    },
+    "binding_persistence_missing_actor": {
+      "actor_supplied": false,
+      "permission_denied": true,
+      "global_file_written": false,
+      "requirement_met": true
+    },
+    "normal_http_authorization_control": {
+      "employee_publish_denied": true,
+      "employee_binding_confirm": 403,
+      "admin_current_token": 200
+    },
+    "excel_reactivation_regression": {
+      "comparison": {
+        "r01_function": {
+          "deactivate_http": 200,
+          "before_login_http": 403,
+          "import_success": true,
+          "after_is_active": 0,
+          "after_login_http": 403,
+          "explicit_activation_field_supplied": false
+        },
+        "r02_current": {
+          "deactivate_http": 200,
+          "before_login_http": 403,
+          "import_success": true,
+          "after_is_active": 1,
+          "after_login_http": 200,
+          "explicit_activation_field_supplied": false
+        }
+      },
+      "requirement_met": false
+    },
+    "logout_revocation_real_process_restart": {
+      "logout_http": 200,
+      "child_exit": 0,
+      "child_session_status": 401,
+      "child_accepted": false,
+      "requirement_met": true
+    },
+    "admin_role_change_token_control": {
+      "update_success": true,
+      "old_token_http": 401,
+      "requirement_met": true
+    }
+  }
+}

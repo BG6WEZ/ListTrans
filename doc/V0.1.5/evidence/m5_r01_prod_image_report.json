@@ -1,0 +1,41 @@
+{
+  "image_tag": "listtrans:m5-r01-prod",
+  "generated": "2026-11-16 09:43:06",
+  "elapsed_seconds": 28.107,
+  "tar_audit": {
+    "image_id": "sha256:7943d8d8984fc4dd045009d9aa676c7dd688a498bf54c50d9f0de672baf32877",
+    "layer_count": 11,
+    "diff_ids_count": 11,
+    "save_tar_sha256": "0847a56bea6c31d23f00c7e2a5da35eb773a201fc1ede0aa0286ba1cf5af1237",
+    "canary_hits": [],
+    "configs_found_count": 16,
+    "unexpected_configs": [],
+    "missing_configs": [],
+    "env_keys": [
+      "PATH",
+      "LANG",
+      "GPG_KEY",
+      "PYTHON_VERSION",
+      "PYTHON_SHA256",
+      "PYTHONDONTWRITEBYTECODE",
+      "PYTHONUNBUFFERED",
+      "HF_ENDPOINT"
+    ]
+  },
+  "deps_audit": {
+    "pip_check_rc": 0,
+    "pip_check": "No broken requirements found.",
+    "psutil": "7.2.2",
+    "xlrd": "2.0.2",
+    "openpyxl": "3.1.5"
+  },
+  "runtime_audit": {
+    "http_health_status": 200,
+    "status": "healthy",
+    "metrics_available": true,
+    "hardware_memory_total_gb": 9.71,
+    "hardware_disk_total_gb": 1006.85,
+    "network_none_readonly_ok": true
+  },
+  "passed": true
+}

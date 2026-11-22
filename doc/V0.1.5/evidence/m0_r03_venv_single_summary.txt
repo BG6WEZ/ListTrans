@@ -1,0 +1,8 @@
+﻿test_admin_dashboard EXIT=1
+test_auth_security_fix EXIT=1
+test_auto_binding EXIT=1
+test_feedback_miner EXIT=1
+test_flywheel_sandbox EXIT=1
+test_flywheel_end2end EXIT=0
+test_phase0_phase1 EXIT=0
+test_llm_integration EXIT=0

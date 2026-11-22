@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-20",
+  "generated_at": "2026-11-20T22:48:42.942866+08:00",
+  "role": "coordinator",
+  "version": "V0.2.0",
+  "task": "V020-M0/R01",
+  "verdict": "RELEASED_EXPERIMENT_OFF",
+  "head": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "effective_baseline_check": {
+    "total": 191,
+    "unchanged": 190,
+    "changed": {
+      "app/matcher.py": {
+        "before": "b923c574d020e13c50a76899175faef7f9391672b5dcf42bd166d43ae76d7ce0",
+        "after": "9b285e6ecec524dd14a9a7ad0d86abae5c25178a745acd85ea9fd505d7387bca"
+      }
+    }
+  },
+  "delivery_sha256_check": {
+    "total": 40,
+    "exact_match": 39,
+    "changed": {
+      "doc/V0.2.0/02_任务台账.md": {
+        "delivery": "1b49b44ba1b70bb4ee230cd7c7c440385efb1f4555164e8798ceed98610d5d69",
+        "current": "5bb5428bc216c199821c85fe819fbf5f7c5fdbd80a70b570ed70f07e2f5dd7ae"
+      }
+    },
+    "audit_summary_path": "doc/V0.2.0/rounds/V020-M0_R01_审核小结.md",
+    "audit_summary_actual_sha256": "debdd4dbc3d9a274d6fa9f9fa7526480e756a096290c470117f41ee3c665e668",
+    "audit_summary_self_ref_note": "File text cites pre-write hash c769d406...; actual on-disk SHA256 after write is recorded here."
+  },
+  "recovery_archive_check": {
+    "path": ".local-archive/v019_final_v020_m0_source_baseline.zip",
+    "sha256": "29b712dd7de8e23a49f72e6367c06dee94e6e1178849a60fb04c59417c697115",
+    "matches_dispatch": true,
+    "entry_count": 72
+  },
+  "coordinator_specialist_pytest": {
+    "modules": [
+      "tests/test_v020_m0_feedback_ranker.py",
+      "tests/test_m0_isolation.py",
+      "tests/test_binding_decisions.py",
+      "tests/test_v019_m2_calibration.py",
+      "tests/test_v017_m2_catalog_revision.py",
+      "tests/test_m3_hard_constraints.py",
+      "tests/test_m3_hard_constraints_http.py"
+    ],
+    "passed": 164,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "elapsed_seconds": 23.01,
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "hard_errors": []
+    }
+  },
+  "business_assets_check": {
+    "asset_count": 0,
+    "diff_vs_m0_after": {},
+    "security_log_prefix_check": {
+      "total_bytes": 2529,
+      "prefix_2439_sha256": "90205977656a999712b401b300ea505c7ac57a834101240913af7c28e36cf340",
+      "appended_bytes": 90,
+      "matches_m0_dispatch_prefix": true
+    }
+  },
+  "readonly_local_flywheel_counts": {
+    "flywheel_config_snapshots": 0,
+    "flywheel_documents": 0,
+    "flywheel_feedback_samples": 0,
+    "flywheel_pattern_aggregates": 0,
+    "flywheel_recommendation_snapshots": 0,
+    "flywheel_records": 0,
+    "flywheel_rule_suggestions": 0,
+    "flywheel_schema_meta": 3,
+    "flywheel_sheets": 0,
+    "flywheel_source_rows": 0
+  },
+  "default_switches_verified": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off"
+  },
+  "selection_ruling": {
+    "v020_m0_ranker_adopted": false,
+    "v020_m0_ranker_default": "off",
+    "online_auto_training_enabled": false,
+    "reason": "Local flywheel feedback count is 0 (data insufficient); Dev 218 has zero rank delta in both keyword and BGE modes (no net gain). Keep default OFF; preserve dataset/audit/hard-negative tooling and evidence."
+  },
+  "observations_ruling": {
+    "OBS-AUDIT-M0-01": "P3, logged (concurrent pytest 90s sandbox timeout in test_flywheel_end_to_end_pipeline; isolated 2x ~73s pass and low-contention full suite 481/481 EXIT=0 pass; track in V020-M3 serial full regression).",
+    "UNVERIFIED-PROJ-TIME-SPLIT": "Known external data boundary: Train 842/Dev 218 share P1/P2 projects and lack row-level collected_at; diagnostic only until real provenance is supplied.",
+    "UNVERIFIED-FULL-QUALITY-GATE": "Experiment remains OFF; full-set quality gate (OBS-A-M3-01/02, OBS-A-M2-01) remains open under V0.1.7 signed targets."
+  },
+  "next_dispatch": "V020-M1/R01"
+}
