@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip --default-timeout=120 -i https://mi
 # (sensitive files, .env variants, DBs/WAL/SHM, personnel lists, and runtime state must NEVER enter any image layer)
 COPY app/*.py /app/app/
 COPY app/eval_assets/golden_runtime_v1.json app/eval_assets/report_template_v1.json app/eval_assets/smoke_materials_v1.json /app/app/eval_assets/
+COPY app/calibration_assets/v019_m2_policy.json app/calibration_assets/v019_m2_equivalences.json /app/app/calibration_assets/
 COPY web/ /app/web/
 COPY config/ /app/config/
 

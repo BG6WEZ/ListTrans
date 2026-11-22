@@ -85,6 +85,17 @@ def init_flywheel_tables(
         );
         """)
 
+        # Concentrated confirmations are audit feedback only. Training and mining read the
+        # trusted single-row event/sample tables, never this separate event stream.
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS flywheel_priority_confirmation_events (
+            event_id TEXT PRIMARY KEY,
+            source TEXT NOT NULL CHECK (source = 'priority_review'),
+            payload_json TEXT NOT NULL,
+            received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+
         # 1. Flow of user feedback records
         cur.execute("""
         CREATE TABLE IF NOT EXISTS flywheel_records (
@@ -255,6 +266,7 @@ def init_flywheel_tables(
             auto_top1_name TEXT DEFAULT '',
             auto_candidates_json TEXT DEFAULT '[]',
             initial_bindings_json TEXT DEFAULT '[]',
+            initial_match_json TEXT,
             decision_status TEXT DEFAULT 'recommended',
             algo_version TEXT NOT NULL,
             model_version TEXT NOT NULL,
@@ -264,6 +276,10 @@ def init_flywheel_tables(
             UNIQUE(source_row_id, revision)
         );
         """)
+        if "initial_match_json" not in {
+            column[1] for column in cur.execute("PRAGMA table_info(flywheel_recommendation_snapshots)")
+        }:
+            cur.execute("ALTER TABLE flywheel_recommendation_snapshots ADD COLUMN initial_match_json TEXT")
         cur.execute(
             "CREATE INDEX IF NOT EXISTS idx_fwrs_row_rev "
             "ON flywheel_recommendation_snapshots(source_row_id, revision);"

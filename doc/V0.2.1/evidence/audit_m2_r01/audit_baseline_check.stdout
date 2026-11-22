@@ -1,0 +1,97 @@
+{
+  "baseline_total": 82,
+  "baseline_verified": 76,
+  "baseline_mismatch": [
+    {
+      "file": "app/binding_decisions.py",
+      "expected": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef",
+      "actual_raw": "3acdf248ddc0cbf32cc618083ab202b4abceb5df379ac2b33ec20393c9481542"
+    },
+    {
+      "file": "app/flywheel_db.py",
+      "expected": "a26fb8af195b3802737f814f7745bcf4533c06f426883988d26f5fe02acae574",
+      "actual_raw": "a5449d8c176e507d36099a23fd55f10a88708d7d86814f98965f17533e2a0e5c"
+    },
+    {
+      "file": "app/server.py",
+      "expected": "24913205aeba406d15c45d0fc27c3fe84334835c288c899302dc40f5dc733898",
+      "actual_raw": "fd49773c281ed5b2aa4457eea9b64149ce859a24b281acefc6b4f220176338ce"
+    },
+    {
+      "file": "web/app.js",
+      "expected": "69b5a6bcbd353f8a0e97ed753ade8793b77b826d50977066530c231ac6e6a8da",
+      "actual_raw": "a27b5d78dcbd77b661042e3289bccbe6e9d2bd0888014bba5bcdea6cdebc0381"
+    },
+    {
+      "file": "web/index.css",
+      "expected": "d7ca94466a6116d391b9c6638b52204cb09f66d39b4bb4d5ffe3c2cbc298a989",
+      "actual_raw": "dfdca898c26c4540dab521d32825e8e02a82fed5e5f4b5a26c7fdf3e4545d4bf"
+    },
+    {
+      "file": "web/index.html",
+      "expected": "3f2e037ceca73f5f803fdf9514ae9aa1f001bb4c0c82ab77b8db1f1750047bec",
+      "actual_raw": "9465e3e352a584c7eb789f974459f88a3414a10c4ba487af763251d946f6cb4b"
+    }
+  ],
+  "changed_vs_m2_dispatch_baseline": [
+    "app/binding_decisions.py",
+    "app/flywheel_db.py",
+    "app/server.py",
+    "web/app.js",
+    "web/index.css",
+    "web/index.html"
+  ],
+  "dispatch_35_asset_count": 35,
+  "dispatch_snapshot_file_diffs": [
+    "app/materials.db-wal",
+    "app/materials.db-shm"
+  ],
+  "dispatch_snapshot_tree_diffs": [],
+  "reanchored_33_file_diffs": [],
+  "reanchored_33_tree_diffs": [],
+  "live_asset_count": 33,
+  "reanchored_33_zero_diff": true,
+  "config_file_count": 16,
+  "config_all_unchanged": true,
+  "auto_binding_rules_is_empty": true,
+  "switch_off_defaults_in_source": {
+    "app/feedback_ranker.py": {
+      "os.getenv(\"LISTTRANS_V020_M0_RANKER\") != \"on\"": true
+    },
+    "app/llm_client.py": {
+      "os.getenv(\"LLM_ENABLED\", \"false\")": true
+    },
+    "app/matcher.py": {
+      "os.getenv(\"LISTTRANS_V019_M1_RERANK\", \"off\")": true
+    },
+    "app/server.py": {
+      "os.getenv(\"ENABLE_SERIES_RERUN\", \"false\")": true
+    }
+  },
+  "frozen_switches_record": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false"
+  },
+  "sealed_test160_assets": {
+    "tests/fixtures/golden_set_v1.json": {
+      "head_blob_matches": true,
+      "git_diff_empty": true
+    },
+    "tests/fixtures/golden_governance_v1.json": {
+      "head_blob_matches": true,
+      "git_diff_empty": true
+    }
+  },
+  "eol_dual_form": {
+    "Dockerfile": "daec95abd9c7a08b3cdfaef31e2f08541e3ddd71425c12eb44207840dc6062ae",
+    ".dockerignore": "6a9b96c72cca01b542095f08b2181677432901fad61c66c9b928eb76cc1a1778"
+  }
+}

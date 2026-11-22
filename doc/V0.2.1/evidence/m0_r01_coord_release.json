@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-22T16:54:00+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "task": "V021-M0/R01",
+  "verdict": "RELEASED",
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "v014_rollback_anchor": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "plan_r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "r2_hash_unchanged": true,
+  "auto_binding_rules_empty": true,
+  "default_switches_frozen_off": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false"
+  },
+  "baseline_audit": {
+    "dispatch_entries": 80,
+    "unchanged_exact": 73,
+    "changed_files_matching_delivery": 7,
+    "added_files_matching_delivery": 2,
+    "unexpected_diffs": []
+  },
+  "delivery_audit": {
+    "total": 35,
+    "exact_match": 34,
+    "expected_ledger_update_by_audit": [
+      {
+        "rel": "doc/V0.2.1/02_任务台账.md",
+        "expected": "ba4c2296019262af70e167573fe71204e38c071b5a4cc42cb89de62b2f612e38",
+        "actual": "80813971d1e12b93fcd0b29323a375d6297f752eda46c08ac187da709dd54693"
+      }
+    ],
+    "audit_summary_sha256": "4789b3beaeec56d57f43aaf9c34c5f07e1247a260fd5ca1443df5a8e05fa0a6d",
+    "dev_summary_sha256": "632b1ba2de7ac08c36ca39da13781bf05228a2c5cd8918e8e48e2456f0877d4d"
+  },
+  "replay_cross_check": {
+    "keyword": {
+      "total_rows": 1060,
+      "actual_prefilled_match": true,
+      "tiers_match": true,
+      "c_subtypes_match": true,
+      "tier_sum_eq_total": true,
+      "c_sum_eq_tier_c": true,
+      "prof_sum_eq_total": true,
+      "all_budget_pass": true,
+      "observed_budget": {
+        "single_p50_ms": 25.566,
+        "single_p95_ms": 243.709,
+        "up50_p50_ms": 1197.246,
+        "up50_p95_ms": 6675.954,
+        "wset_mib": 619.24609375
+      }
+    },
+    "vector": {
+      "total_rows": 1060,
+      "actual_prefilled_match": true,
+      "tiers_match": true,
+      "c_subtypes_match": true,
+      "tier_sum_eq_total": true,
+      "c_sum_eq_tier_c": true,
+      "prof_sum_eq_total": true,
+      "all_budget_pass": true,
+      "observed_budget": {
+        "single_p50_ms": 62.847,
+        "single_p95_ms": 288.417,
+        "up50_p50_ms": 4455.161,
+        "up50_p95_ms": 8937.911,
+        "wset_mib": 1237.9375
+      }
+    }
+  },
+  "audit_artifacts_verified": {
+    "iso_before": "PASS",
+    "iso_after": "PASS",
+    "probe_kw_safety": true,
+    "probe_kw_power": true,
+    "probe_vec_safety": true,
+    "probe_vec_power": true,
+    "serial_log_tail": [
+      "512 passed, 1 deselected in 777.62s (0:12:57)",
+      "EXIT=0"
+    ]
+  },
+  "coordinator_independent_checks": {
+    "isolation_before": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": [],
+      "python": "3.12.10"
+    },
+    "focused_cross_package_pytest": {
+      "modules": [
+        "tests/test_v021_m0_initial_match.py",
+        "tests/test_auto_binding.py",
+        "tests/test_binding_decisions.py",
+        "tests/test_m3_hard_constraints_http.py",
+        "tests/test_v016_m0_feedback_contract.py",
+        "tests/test_v019_m2_calibration.py",
+        "tests/test_v020_m1_bom.py",
+        "tests/test_v020_m2_llm_decision.py"
+      ],
+      "passed": 115,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "summary": [
+        "........................................................................ [ 62%]",
+        "...........................................                              [100%]",
+        "115 passed in 33.31s"
+      ]
+    },
+    "isolated_http_probe": {
+      "exit_code": 0,
+      "http_probe_pass": true,
+      "duplicate_source_rows_counted": 2,
+      "snapshot_rows_verified": 2,
+      "forged_initial_match_rejected": true,
+      "partial_status": "partial",
+      "legacy_status": "unrecorded"
+    }
+  },
+  "business_assets_audit": {
+    "count": 35,
+    "before_coordinator_run_diffs": [],
+    "note": "开发与独立审核结束后 35/35 项业务资产零差异。统筹首次内联 HTTP 探针漏设 LOG_DIR 导致 logs/security.log 追加 176 字节两条非生产 INFO（2,529→2,705 字节，原 2,529 字节前缀 SHA256 21a7a621… 完全不变）；补齐完整 10 项隔离环境变量复跑 HTTP 探针与终检 verify_isolation.py 后全量资产零改动。app/materials.db、app/auth.db、config/ 16 文件、app/vector_cache/ 5 文件、data/ 及反馈 JSON 全程零差异。",
+    "security_log_prefix_2529_sha256": "21a7a621d6b32cc445ca1d49f375b575d7106bda4dea4dbbb0d8668c214e6eac",
+    "security_log_current_2705_sha256": "93acb68937d89ff557cf3148e656805a57a647f0c6ea7730da287b7ad98a14e7"
+  },
+  "adjudications": {
+    "OBS-AUDIT-M0-01": "P3 留痕不阻断；M1 开工基线同步记录工作区与 LF 规范化双 SHA256。",
+    "OBS-AUDIT-M0-02": "P3 留痕不阻断；要求后续任务包退出码汇总自解释。",
+    "HOLD-M0-01": "留出边界待验证（非删断言）；维持开放至获授权的 Test 160 一次性只读终验。"
+  }
+}

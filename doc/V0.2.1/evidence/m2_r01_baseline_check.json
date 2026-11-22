@@ -1,0 +1,39 @@
+{
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "hashes_checked": 80,
+  "mismatches": [],
+  "sealed_assets": [
+    "tests/fixtures/golden_set_v1.json",
+    "tests/fixtures/golden_governance_v1.json"
+  ],
+  "isolation": "PASS",
+  "sealed_asset_git_blobs": {
+    "tests/fixtures/golden_set_v1.json": "f906169cb413c424915ef1b86745226e45ffff6c",
+    "tests/fixtures/golden_governance_v1.json": "5761e77d543189374e78cc09970acb4a5449a6f6"
+  },
+  "sealed_asset_sha256_recomputed": false,
+  "business_snapshot_assets_equal_to_dispatch": 35,
+  "exit_code": 0,
+  "docker_lf_sha256": {
+    "Dockerfile": "daec95abd9c7a08b3cdfaef31e2f08541e3ddd71425c12eb44207840dc6062ae",
+    ".dockerignore": "6a9b96c72cca01b542095f08b2181677432901fad61c66c9b928eb76cc1a1778"
+  },
+  "r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "ledger_before_sha256": "d5dfef502e75e6cb0dbed71fec43ebb80e099ec13b8f1a29e6dda32ca09a698c",
+  "additional_tracked_baseline_sha256": {
+    "tests/test_m5_file_boundary_and_compat.py": "957458bb61d105e198647a83c6c747fe68cb2b1859d16ea84eeb3f30abf4ff91",
+    "tests/test_v020_m1_bom.py": "0ae326c87b2eb239d341a8fcd505ea21a52a3b560c5a0020fe1c37a977edeea6",
+    "tests/test_feedback_miner.py": "49e8bcc4442b0bed70a070cb9d38d6bbddced5d11f06f04366174d5a74e8b321"
+  },
+  "effective_baseline_code_changes": [
+    "app/binding_decisions.py",
+    "app/flywheel_db.py",
+    "app/server.py",
+    "web/app.js",
+    "web/index.css",
+    "web/index.html"
+  ],
+  "effective_baseline_untouched_sha256_count": 74,
+  "offline_bge_model_assets_unchanged": 29,
+  "binding_rules_still_empty": true
+}

@@ -1,0 +1,38 @@
+{
+  "browser": {
+    "exit_code": 0,
+    "meaning": "Real Chrome and isolated API assertions passed",
+    "evidence": "m1_r01_browser_delivery/result.json"
+  },
+  "pytest": {
+    "exit_code": 0,
+    "passed": 512,
+    "deselected": 1,
+    "held_out": "HOLD-M0-01",
+    "evidence": "m1_r01_serial.log"
+  },
+  "rule_gate": {
+    "exit_code": 0,
+    "population": "Train/Dev",
+    "comparisons": 18,
+    "differences": 0,
+    "evidence": "m1_r01_rule_gate.json"
+  },
+  "isolation": {
+    "before": {
+      "exit_code": 0,
+      "business_assets_equal_to_dispatch": 35,
+      "evidence": "m1_r01_isolation_before.json"
+    },
+    "after": {
+      "exit_code": 0,
+      "business_assets_equal_to_dispatch": 35,
+      "evidence": "m1_r01_isolation_after.json"
+    }
+  },
+  "rollback": {
+    "exit_code": 0,
+    "byte_identical": 3,
+    "evidence": "m1_r01_rollback.json"
+  }
+}

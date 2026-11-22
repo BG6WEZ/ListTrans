@@ -1,0 +1,132 @@
+{
+  "date": "2026-11-23T07:12:44+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "verdict": "FINAL_AUDIT_PASSED_CONDITIONAL_RC",
+  "scope": "V0.2.1 已批准实现、选型、回归与发布候选（RC）范围终审通过（M0～M2 实现交付 + M3 实验维持默认 OFF 收口）",
+  "production_release_authorized": false,
+  "remote_push_authorized": false,
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "v014_rollback_anchor": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "plan_r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "r2_hash_unchanged": true,
+  "auto_binding_rules_empty": true,
+  "default_switches_frozen_off": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false",
+    "LISTTRANS_V021_M3_RERANKER": "off"
+  },
+  "packages_released": {
+    "V021-M0": {
+      "status": "R01 审核通过并已统筹放行",
+      "patch_sha256": "8ca41a418a0bae9c58f32fd9a9a16f111e3eac41f2eea98571e9401b39a4d8c0"
+    },
+    "V021-M1": {
+      "status": "R01 审核通过并已统筹放行",
+      "patch_sha256": "9cb8aba931200f6af65ceb9ebc129ab23fd0200cc5dcb7826d45d69c9243662e"
+    },
+    "V021-M2": {
+      "status": "R01 审核通过并已统筹放行",
+      "patch_sha256": "cb592de833e493e4967a920ecd8b973ad10287b08b6c14ef6d241177d0c6751a"
+    },
+    "V021-M3": {
+      "status": "R01 审核通过并已统筹放行（维持默认 OFF，按 M0～M2 收口）",
+      "patch_sha256": "5660400e84f7fd2d164b688dfe44f263256babfda7281431cfafd81230545996"
+    }
+  },
+  "final_independent_checks": {
+    "node_syntax_check_exit": 0,
+    "focused_9_modules_pytest": {
+      "passed": 114,
+      "failed": 0,
+      "exit_code": 0,
+      "duration_sec": 44.02
+    },
+    "hold_m0_01_authorized_readonly_closure": {
+      "user_authorized": true,
+      "node_id": "tests/test_v017_m0_governance.py::test_frozen_assignment_covers_same_sheet_and_near_query_edges",
+      "passed": 1,
+      "exit_code": 0,
+      "test160_tuned": false,
+      "sample_content_emitted": false,
+      "status": "CLOSED_PASSED"
+    },
+    "full_suite_coverage_accounting": {
+      "m3_dev_guarded_serial_passed": 543,
+      "m3_dev_guarded_serial_deselected_hold_m0_01": 1,
+      "coord_authorized_hold_m0_01_passed": 1,
+      "combined_total_effective": 544
+    },
+    "off_18_group_rule_gate": {
+      "exit_code": 0,
+      "passed_protected_probes": true,
+      "hist_zero_diff": true,
+      "legacy_unconstrained_benefit": "harmful",
+      "legacy_unconstrained_degraded": 17,
+      "subset_rows": 1060
+    },
+    "final_real_chrome_cdp_e2e": {
+      "exit_code": 0,
+      "engine": "Chrome/158.0.8127.18",
+      "exceptions": [],
+      "request_count": 120,
+      "dialog_count": 25,
+      "fixed_dark_prefilled": "63/100",
+      "fixed_dark_exportable": "1->11",
+      "fixed_light_prefilled": "63/100",
+      "fixed_light_exportable": "1->11",
+      "checks_count": 10
+    },
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_changes": []
+    },
+    "isolation_final": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_changes": []
+    },
+    "reanchored_33_business_snapshot_zero_diff": true,
+    "immutable_db_verification": {
+      "materials": {
+        "sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+        "quick_check": "ok",
+        "rows": 26863,
+        "fw_rows": 0,
+        "m0_leak": false,
+        "m2_leak": false
+      },
+      "auth": {
+        "sha256": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+        "quick_check": "ok",
+        "m2_leak": false
+      }
+    }
+  },
+  "open_p0_p1_count": 0,
+  "closed_in_final_audit": [
+    "HOLD-M0-01"
+  ],
+  "retained_p3_observations": [
+    "OBS-AUDIT-M0-01 (已签认关闭，双摘要已固化)",
+    "OBS-AUDIT-M0-02 (已留痕，自解释退出码已落地)",
+    "OBS-AUDIT-V021-M1-01 (环境层 safe-delete，短临时目录规范已落地)",
+    "OBS-COORD-V021-M2-01 (35->33 空 WAL 边车清理，两主库零篡改，归因 unknown)",
+    "OBS-AUDIT-V021-M2-01 (flywheel_db.py:46-55 M0 既有导入期回退，建议后续统一解析器)",
+    "OBS-AUDIT-V021-M3-01 (串行日志单次沙箱计时跳变，非产品缺陷)"
+  ],
+  "mandatory_pre_production_gates_remaining_open": [
+    "PRG-F11 (首次真实部署前凭据轮换脱敏验收)",
+    "ENV-V017-01 (目标 Linux Python 3.11 断网正式镜像验收，含 V0.2.1 精确两校准 JSON 镜像内哈希与篡改降级实测)",
+    "A-M3-01 (目标 Linux 正式低负载环境受控性能复测，不放宽 V0.1.7 预算)"
+  ]
+}

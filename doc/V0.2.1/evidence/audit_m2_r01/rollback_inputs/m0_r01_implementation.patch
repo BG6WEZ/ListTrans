@@ -1,0 +1,807 @@
+diff --git a/.dockerignore b/.dockerignore
+index 1e8a854..967c253 100644
+--- a/.dockerignore
++++ b/.dockerignore
+@@ -135,3 +135,8 @@ app/eval_assets/**
+ !app/eval_assets/golden_runtime_v1.json
+ !app/eval_assets/report_template_v1.json
+ !app/eval_assets/smoke_materials_v1.json
++
++!app/calibration_assets/
++app/calibration_assets/**
++!app/calibration_assets/v019_m2_policy.json
++!app/calibration_assets/v019_m2_equivalences.json
+diff --git a/Dockerfile b/Dockerfile
+index 3c51b46..35ce9ab 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -19,6 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip --default-timeout=120 -i https://mi
+ # (sensitive files, .env variants, DBs/WAL/SHM, personnel lists, and runtime state must NEVER enter any image layer)
+ COPY app/*.py /app/app/
+ COPY app/eval_assets/golden_runtime_v1.json app/eval_assets/report_template_v1.json app/eval_assets/smoke_materials_v1.json /app/app/eval_assets/
++COPY app/calibration_assets/v019_m2_policy.json app/calibration_assets/v019_m2_equivalences.json /app/app/calibration_assets/
+ COPY web/ /app/web/
+ COPY config/ /app/config/
+ 
+diff --git a/app/acceptance_calibration.py b/app/acceptance_calibration.py
+index 7f83d9e..c97dfcd 100644
+--- a/app/acceptance_calibration.py
++++ b/app/acceptance_calibration.py
+@@ -25,6 +25,11 @@ _PHYSICAL = (
+ )
+ _UNKNOWN = frozenset({"", "-", "—", "/", "未知", "未说明", "待定", "unknown", "n/a", "none"})
+ _UNKNOWN_FLAG_VALUE = r"(?:未知|未说明|待定|不详|未明确|unknown\b|n/a\b)"
++SAFETY_FIELDS = frozenset({"防爆", "提升泵", "单位倍率"})
++_POWER_RANGE = re.compile(
++    r"(?<![\d.])(\d+(?:\.\d+)?\s*[-‐–—~～至]\s*\d+(?:\.\d+)?\s*(?:kW|W|千瓦|瓦))(?![a-z\d])",
++    re.I,
++)
+ 
+ 
+ @dataclass(frozen=True)
+@@ -37,10 +42,15 @@ class Policy:
+     equivalences: dict[str, frozenset[str]]
+ 
+ 
+-@lru_cache(maxsize=1)
+-def load_policy():
++@lru_cache(maxsize=2)
++def load_policy(*, require_frozen=False):
+     try:
+-        config = json.loads((ASSETS / "v019_m2_policy.json").read_bytes())
++        policy_bytes = (ASSETS / "v019_m2_policy.json").read_bytes()
++        if require_frozen and hashlib.sha256(policy_bytes).hexdigest() != (
++            "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981"
++        ):
++            return None
++        config = json.loads(policy_bytes)
+         group_bytes = (ASSETS / "v019_m2_equivalences.json").read_bytes()
+         groups = json.loads(group_bytes)
+         if config["version"] != VERSION or tuple(config["features"]) != FEATURES:
+@@ -171,10 +181,26 @@ def _physical_evidence(row, query, material):
+     fields.update(key for key in _PHYSICAL if _field(q_attrs, key) is not None)
+     fields.update(key for key in ("材质", "管径", "外径") if _field(c_attrs, key) is not None)
+ 
+-    missing, different = [], []
++    missing, different, comparisons = [], [], []
++
++    def record(key, a, b, state, *, requested=False):
++        missing_side = None
++        if state == "missing":
++            missing.append(key)
++            missing_side = "both" if a is None and b is None else "query" if a is None else "candidate"
++        elif state == "different":
++            different.append(key)
++        comparisons.append({
++            "field": key, "state": state, "missing_side": missing_side,
++            "query_value": a, "candidate_value": b,
++            "safety_critical_unknown": state == "missing" and key in SAFETY_FIELDS,
++            "requested_unverified": requested and missing_side == "candidate",
++        })
++
+     equal = 0
+     for key in sorted(fields):
+         query_value, candidate_value = _field(q_attrs, key), _field(c_attrs, key)
++        requested = key in _PHYSICAL and query_value is not None
+         if key == "管径":
+             query_value, candidate_value = map(_dn_field_to_float, (query_value, candidate_value))
+         if key == "材质":
+@@ -185,21 +211,29 @@ def _physical_evidence(row, query, material):
+                 query_value, candidate_value = (g if g in KNOWN_MATERIAL_GRADES else None for g in grades)
+                 key = "材质牌号"
+         if query_value is None or candidate_value is None:
+-            missing.append(key)
++            # Preserve the frozen features. The light-fixture parser does not
++            # structure unlabelled ranges such as "1200*300,40-50w".
++            if key == "功率" and query_value is None and candidate_value is None:
++                power_range = _POWER_RANGE.search(q_spec or "")
++                if power_range:
++                    query_value, requested = power_range.group(1), True
++            record(key, query_value, candidate_value, "missing", requested=requested)
+         elif _equal(query_value, candidate_value):
+             equal += 1
++            record(key, query_value, candidate_value, "equal")
+         else:
+-            different.append(key)
++            record(key, query_value, candidate_value, "different")
+ 
+-    if q_prof in ("", "全部", "其它", "通用") or c_prof in ("", "全部", "其它", "通用"):
+-        missing.append("专业")
+-    elif q_prof != c_prof:
+-        different.append("专业")
++    unspecified = ("", "全部", "其它", "通用")
++    a = None if q_prof in unspecified else q_prof
++    b = None if c_prof in unspecified else c_prof
++    record("专业", a, b, "missing" if a is None or b is None else "equal" if a == b else "different")
+     q_unit, c_unit = row.get("original_unit"), material.get("unit")
+     if not _known(q_unit) or not _known(c_unit):
+-        missing.append("单位倍率")
+-    elif get_unit_multiplier(str(q_unit), str(c_unit)) != 1.0:
+-        different.append("单位倍率")
++        record("单位倍率", q_unit if _known(q_unit) else None, c_unit if _known(c_unit) else None, "missing")
++    else:
++        compatible = get_unit_multiplier(str(q_unit), str(c_unit)) == 1.0
++        record("单位倍率", q_unit, c_unit, "equal" if compatible else "different")
+ 
+     def explosion_state(text):
+         if _explicit_unknown(text, r"防爆(?:要求|等级)?|(?<![a-z0-9])EX(?![a-z0-9])"):
+@@ -223,24 +257,31 @@ def _physical_evidence(row, query, material):
+         a, b = states
+         if relevant or a is not None or b is not None:
+             if a is None or b is None:
+-                missing.append(key)
++                record(key, a, b, "missing")
+             elif a != b:
+-                different.append(key)
++                record(key, a, b, "different")
++            else:
++                record(key, a, b, "equal")
+ 
+     q_model = _text(parsed.get("model"))
+     c_model = _text(extract_model(c_spec_text))
+     model_exact = bool(q_model and q_model == c_model)
+     if q_model and not c_model:
+-        missing.append("型号")
++        record("型号", parsed.get("model"), None, "missing", requested=True)
+     elif q_model and not model_exact:
+-        different.append("型号")
++        record("型号", q_model, c_model, "different")
++    elif model_exact:
++        record("型号", q_model, c_model, "equal")
+     spec_exact = _known(q_spec) and _text(q_spec) == _text(c_spec)
+     if not _known(q_spec) or not _known(c_spec):
+-        missing.append("核心规格")
++        record("核心规格", q_spec if _known(q_spec) else None, c_spec if _known(c_spec) else None, "missing")
+     elif not spec_exact and not (model_exact and fields and equal == len(fields)):
+-        different.append("核心规格")
++        record("核心规格", q_spec, c_spec, "different")
++    else:
++        record("核心规格", q_spec, c_spec, "equal")
+     return {
+-        "missing": missing, "different": different, "exact_name": _text(q_name) == _text(c_name),
++        "missing": missing, "different": different, "comparisons": comparisons,
++        "exact_name": _text(q_name) == _text(c_name),
+         "exact_spec": bool(spec_exact), "exact_model": model_exact,
+         "core_agreement": equal / len(fields) if fields else float(spec_exact),
+         "core_completeness": (len(fields) - len([k for k in missing if k in fields or k == "材质牌号"])) / len(fields)
+@@ -253,6 +294,12 @@ def confidence(features, policy):
+     return (math.tanh(value / 2) + 1) / 2
+ 
+ 
++def match_features(score, margin, uncapped, physical):
++    return (score / 100, max(-1.0, min(1.0, margin / 100)) if margin is not None else 0.0,
++            float(physical["exact_name"]), float(physical["exact_spec"]), float(physical["exact_model"]),
++            physical["core_agreement"], physical["core_completeness"], float(uncapped))
++
++
+ def assess_match(row, query, match, policy, *, trusted=True):
+     """Apply non-compensating safeguards before a learned confidence threshold."""
+     from app.binding_decisions import (
+@@ -293,9 +340,7 @@ def assess_match(row, query, match, policy, *, trusted=True):
+                 reasons.append("ambiguous_distinct_candidate")
+             if score < 75:
+                 reasons.append("insufficient_ranking_evidence")
+-    features = (score / 100, max(-1.0, min(1.0, margin / 100)) if margin is not None else 0.0,
+-                float(physical["exact_name"]), float(physical["exact_spec"]), float(physical["exact_model"]),
+-                physical["core_agreement"], physical["core_completeness"], float(uncapped))
++    features = match_features(score, margin, uncapped, physical)
+     ready = not reasons
+     value = confidence(features, policy)
+     if "no_answer" in reasons or "hard_conflict" in reasons or (
+@@ -319,6 +364,7 @@ def assess_match(row, query, match, policy, *, trusted=True):
+         "equivalent_codes": ranking.get("equivalent_codes", []) if evidence_current else [],
+         "reason_codes": reasons, "missing_fields": physical["missing"], "different_fields": physical["different"],
+         "hard_conflict": hard, "eligible": ready, "features": features,
++        "field_comparisons": physical.get("comparisons", []),
+     }
+ 
+ 
+diff --git a/app/feedback_contract.py b/app/feedback_contract.py
+index c310593..6240896 100644
+--- a/app/feedback_contract.py
++++ b/app/feedback_contract.py
+@@ -369,9 +369,9 @@ def persist_upload_document_tree(
+                     snapshot_id, document_id, sheet_id, source_row_id,
+                     revision, is_initial, snapshot_kind, professional, parsed_spec_json,
+                     auto_top1_code, auto_top1_score, auto_top1_name, auto_candidates_json,
+-                    initial_bindings_json, decision_status,
++                    initial_bindings_json, initial_match_json, decision_status,
+                     algo_version, model_version, config_version, config_digest_full
+-                ) VALUES (?, ?, ?, ?, 1, 1, 'initial_upload', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
++                ) VALUES (?, ?, ?, ?, 1, 1, 'initial_upload', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 """,
+                 (
+                     snapshot_id,
+@@ -385,6 +385,8 @@ def persist_upload_document_tree(
+                     auto_top1_name,
+                     json.dumps(compact_cands, ensure_ascii=False),
+                     initial_bindings_json,
++                    json.dumps(res_row["initial_match"], ensure_ascii=False)
++                    if res_row.get("initial_match") is not None else None,
+                     str(res_row.get("decision_status") or "recommended"),
+                     versions["algo_version"],
+                     versions["model_version"],
+@@ -1475,6 +1477,7 @@ def annotate_items_identity(
+     try:
+         cur = conn.cursor()
+         for item in items:
++            item["initial_match"] = None
+             doc_id = str(item.get("document_id") or "").strip()
+             sh_id = str(item.get("sheet_id") or "").strip()
+             sr_id = str(item.get("source_row_id") or "").strip()
+@@ -1503,7 +1506,7 @@ def annotate_items_identity(
+             if verified_row:
+                 init_snap = cur.execute(
+                     """
+-                    SELECT snapshot_id, auto_top1_code, algo_version, model_version, config_version, config_digest_full
++                    SELECT snapshot_id, auto_top1_code, initial_match_json
+                     FROM flywheel_recommendation_snapshots
+                     WHERE source_row_id = ? AND is_initial = 1
+                     ORDER BY revision ASC LIMIT 1
+@@ -1551,6 +1554,8 @@ def annotate_items_identity(
+                 if init_snap:
+                     item["initial_snapshot_id"] = init_snap["snapshot_id"]
+                     item["initial_auto_code"] = init_snap["auto_top1_code"]
++                    if init_snap["initial_match_json"]:
++                        item["initial_match"] = json.loads(init_snap["initial_match_json"])
+                 if latest_snap:
+                     item["recommendation_snapshot_id"] = latest_snap["snapshot_id"]
+                     item["recommendation_revision"] = int(latest_snap["revision"])
+diff --git a/app/flywheel_db.py b/app/flywheel_db.py
+index ec5d2ac..2f5c912 100644
+--- a/app/flywheel_db.py
++++ b/app/flywheel_db.py
+@@ -255,6 +255,7 @@ def init_flywheel_tables(
+             auto_top1_name TEXT DEFAULT '',
+             auto_candidates_json TEXT DEFAULT '[]',
+             initial_bindings_json TEXT DEFAULT '[]',
++            initial_match_json TEXT,
+             decision_status TEXT DEFAULT 'recommended',
+             algo_version TEXT NOT NULL,
+             model_version TEXT NOT NULL,
+@@ -264,6 +265,10 @@ def init_flywheel_tables(
+             UNIQUE(source_row_id, revision)
+         );
+         """)
++        if "initial_match_json" not in {
++            column[1] for column in cur.execute("PRAGMA table_info(flywheel_recommendation_snapshots)")
++        }:
++            cur.execute("ALTER TABLE flywheel_recommendation_snapshots ADD COLUMN initial_match_json TEXT")
+         cur.execute(
+             "CREATE INDEX IF NOT EXISTS idx_fwrs_row_rev "
+             "ON flywheel_recommendation_snapshots(source_row_id, revision);"
+diff --git a/app/matcher.py b/app/matcher.py
+index 88b8e4e..553a4d6 100644
+--- a/app/matcher.py
++++ b/app/matcher.py
+@@ -2747,7 +2747,7 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
+     return pool_list
+ 
+ @catalog_read
+-def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None, calibration_groups=None) -> Dict[str, Any]:
++def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None, calibration_groups=None, initial_match_groups=None) -> Dict[str, Any]:
+     """
+     Main entry point for matching a single query item.
+     """
+@@ -2802,7 +2802,7 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
+         "exact_code" in (c.get("recall_sources") or ()) for c in candidates
+     )
+     score_contexts = {}
+-    capped_codes = set() if calibration_groups is not None else None
++    capped_codes = set() if calibration_groups is not None or initial_match_groups is not None else None
+     rerank_profile = os.getenv("LISTTRANS_V019_M1_RERANK", "off")
+     rerank_enabled = rerank_profile not in ("", "0", "off")
+     feedback_model = None
+@@ -3021,6 +3021,19 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
+             is_exact = True
+             matched_code = top_one["code"]
+             
++    rank = {}
++    if capped_codes is not None:
++        from app.acceptance_calibration import ranking_evidence
++
++        uncapped = bool(scored_candidates and scored_candidates[0]["code"] not in capped_codes)
++        if calibration_groups is not None:
++            rank["_acceptance_rank"] = ranking_evidence(scored_candidates, calibration_groups, uncapped)
++        if initial_match_groups is not None:
++            rank["_initial_match_rank"] = (
++                rank["_acceptance_rank"] if initial_match_groups is calibration_groups
++                else ranking_evidence(scored_candidates, initial_match_groups, uncapped)
++            )
++
+     res_candidates = []
+     evidence = {}
+     for c in scored_candidates[:10]:
+@@ -3033,13 +3046,9 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
+     result = {
+         "is_exact": is_exact,
+         "matched_code": matched_code,
+-        "top_candidates": res_candidates # Output Top 10 for detailed view
++        "top_candidates": res_candidates, # Output Top 10 for detailed view
++        **rank,
+     }
+-    if capped_codes is not None:
+-        from app.acceptance_calibration import ranking_evidence
+-
+-        uncapped = bool(scored_candidates and scored_candidates[0]["code"] not in capped_codes)
+-        result["_acceptance_rank"] = ranking_evidence(scored_candidates, calibration_groups, uncapped)
+     if diagnostic_targets is not None:
+         targets = list(dict.fromkeys(str(code).strip() for code in diagnostic_targets if str(code).strip()))
+         from app.db_manager import get_thread_db_connection
+diff --git a/app/server.py b/app/server.py
+index 0949196..f094ce7 100644
+--- a/app/server.py
++++ b/app/server.py
+@@ -240,7 +240,8 @@ from app.binding_decisions import (
+     fetch_live_material_map,
+     get_unit_multiplier,
+ )
+-from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding
++from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding, load_policy
++from app.match_assessment import assess_initial_match, summarize_initial_matches
+ from app.llm_decision import CallBudget, active_engine as active_llm_decision
+ from app.bom import expand as expand_bom, is_bom_name, positive as positive_quantity
+ from app.audit_manager import (
+@@ -847,6 +848,7 @@ def api_annotate_session(
+         "actor_user_id": current_user["id"],
+         "actor_account_epoch": str(current_user.get("account_epoch") or ""),
+         "items": items,
++        "initial_match_summary": summarize_initial_matches(items),
+         "downgraded": downgraded,
+         "legacy_untrusted_count": legacy_untrusted_count,
+     }
+@@ -2265,6 +2267,7 @@ def async_process_upload_task(
+             task_id,
+             status="completed",
+             result=parsed_rows,
++            initial_match_summary=summarize_initial_matches(parsed_rows),
+             document_id=doc_summary.get("document_id") or task_meta.get("document_id", ""),
+             work_session_id=doc_summary.get("work_session_id") or task_meta.get("work_session_id", ""),
+             algo_version=doc_summary.get("algo_version", ""),
+@@ -2397,6 +2400,13 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
+     total_results = []
+     total_items = len(raw_rows)
+     policy = acceptance_policy()
++    initial_policy = load_policy(require_frozen=True) if task_id else None
++    first_revision = get_db_revision() if task_id else None
++    rank_options = {}
++    if policy is not None:
++        rank_options["calibration_groups"] = policy.equivalences
++    if initial_policy is not None:
++        rank_options["initial_match_groups"] = initial_policy.equivalences
+     task_meta = (get_task_status(task_id) or {}) if policy is not None and task_id else {}
+     llm_engine = active_llm_decision()
+     if llm_engine is not None:
+@@ -2508,10 +2518,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
+             
+             logger.debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
+             t_start_match = time.time()
+-            if policy is None:
+-                res = match_item(q_info, q_vector)
+-            else:
+-                res = match_item(q_info, q_vector, calibration_groups=policy.equivalences)
++            res = match_item(q_info, q_vector, **rank_options)
+             t_elapsed_match = time.time() - t_start_match
+             logger.debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
+             first_pass_results.append(res)
+@@ -2586,7 +2593,9 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
+                 if not res["is_exact"] and confirmed_series and res.get("top_candidates"):
+                     if ENABLE_SERIES_RERUN:
+                         # Full second-pass rematch if explicitly enabled
+-                        res = match_item(q_info, q_vector, confirmed_series)
++                        initial_options = {k: v for k, v in rank_options.items() if k == "initial_match_groups"}
++                        res = match_item(q_info, q_vector, confirmed_series, **initial_options)
++                        first_pass_results[i] = res
+                     else:
+                         # Fast in-memory series rank boost without re-running full recall/scoring (default)
+                         # V015-M3：blocked 候选不享受第二遍系列加分；+5 受候选不可逆 max_score
+@@ -2603,6 +2612,8 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
+                                     item_cap = max(0.0, float(cap) if cap is not None else 1.0) * 100.0
+                                     prior_score = cand["score"]
+                                     cand["score"] = min(item_cap, prior_score + 5.0)
++                                    if task_id and cand["score"] != prior_score:
++                                        res["_initial_rank_stale"] = True
+                                     if "score_evidence" in cand:
+                                         cand["score_evidence"]["components"]["batch_series_adjustment"] = (
+                                             cand["score"] - prior_score
+@@ -2707,6 +2718,25 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
+                         _apply_llm_review(llm_engine, llm_budget, row_for_decision, q_info, result_row)
+                 final_chunk_results.append(result_row)
+             
++        if task_id:
++            codes = [binding.get("code") for result in final_chunk_results for binding in result["bindings"]]
++            for result in final_chunk_results:
++                if result["top_candidates"]:
++                    codes.append(result["top_candidates"][0].get("code"))
++            with catalog_lock:
++                revision = get_db_revision()
++                live = fetch_live_material_map(codes)
++            for job, match, result in zip(match_jobs, first_pass_results, final_chunk_results, strict=True):
++                checkpoint()
++                query, _, raw = job
++                source = "bom" if is_bom_name(raw.get("name")) else (
++                    "rule" if result["decision_source"] == SOURCE_RULE else "matcher"
++                )
++                if revision != first_revision:
++                    match["_initial_rank_stale"] = True
++                result["initial_match"] = assess_initial_match(
++                    result, query, match, result, source, initial_policy, live, revision,
++                )
+         total_results.extend(final_chunk_results)
+         
+         if task_id:
+diff --git a/app/match_assessment.py b/app/match_assessment.py
+new file mode 100644
+index 0000000..1a6b97f
+--- /dev/null
++++ b/app/match_assessment.py
+@@ -0,0 +1,123 @@
++"""Read-only classification of the first workbench recommendation."""
++
++import math
++from collections import Counter, defaultdict
++
++from app.acceptance_calibration import _physical_evidence, confidence, match_features
++from app.binding_decisions import STATUS_AUTO_ACCEPTED, STATUS_REJECTED, evaluate_hard_conflicts
++
++VERSION = "v021-m0-initial-match-v1"
++
++
++def assess_initial_match(row, query, match, decision, source, policy, live, db_revision):
++    bindings = decision.get("bindings") or []
++    top = next(iter(match.get("top_candidates") or ()), {})
++    score = float(top.get("score") or 0)
++    score = score if math.isfinite(score) else 0
++    rank = match.get("_initial_match_rank") or {}
++    margin = rank.get("margin")
++    if match.get("_initial_rank_stale"):
++        rank_state = "stale"
++    elif not rank or rank.get("top_code") != top.get("code") or rank.get("ranking_score") != score:
++        rank_state = "unavailable"
++    else:
++        rank_state = "current" if margin is not None else "no_comparable_candidate"
++
++    tier, reason, subtype = "D", "no_candidate", None
++    output, comparisons = None, []
++    effective = []
++    valid_codes = all(binding.get("code") in live for binding in bindings)
++    unavailable = source == "matcher" and (policy is None or rank_state in ("stale", "unavailable"))
++    if source in ("bom", "rule"):
++        if bindings and valid_codes and decision["decision_status"] == STATUS_AUTO_ACCEPTED:
++            tier, reason, effective = "A", "verified_binding", bindings
++        elif bindings and not valid_codes:
++            reason = "invalid_code"
++        elif decision["decision_status"] == STATUS_REJECTED:
++            reason = "hard_conflict"
++        else:
++            reason = "unverified_binding"
++    elif top.get("hard_blocked") or decision["decision_status"] == STATUS_REJECTED:
++        reason = "hard_conflict"
++    elif top and score > 0:
++        material = live.get(top.get("code"))
++        if material is None or not valid_codes:
++            reason = "invalid_code"
++        elif evaluate_hard_conflicts(row, material, allow_unit_conversion=False):
++            reason = "hard_conflict"
++        else:
++            physical = _physical_evidence(row, query, material if match.get("_initial_rank_stale") else top)
++            comparisons = physical["comparisons"]
++            uncapped = rank_state in ("current", "no_comparable_candidate") and rank.get("uncapped") is True
++            if not unavailable:
++                output = confidence(match_features(score, margin, uncapped, physical), policy)
++
++            # The workbench starts from the actual matcher binding, never a bare suggestion.
++            if len(bindings) == 1 and bindings[0]["code"] == top["code"]:
++                effective = bindings
++            if any(field["safety_critical_unknown"] for field in comparisons):
++                tier, reason, subtype, effective = "C", "safety_missing", "safety_missing", []
++            elif score < 60.0 and effective:
++                tier, reason, subtype = "C", "low_score_prefill", "low_score_prefill"
++            elif not effective:
++                reason = "no_initial_binding"
++            elif (score >= 75.0 and output is not None and output >= 0.65
++                  and not (set(physical["different"]) - {"核心规格"})):
++                tier, reason = "A", "priority_review"
++            else:
++                tier, reason = "B", "candidate_review"
++
++    reasons = [reason]
++    if unavailable and top and score > 0:
++        reasons.append("priority_review_unavailable")
++    usable_rank = rank_state in ("current", "no_comparable_candidate")
++    return {
++        "tier": tier, "subtype": subtype, "source": source,
++        "effective_bindings": [dict(binding) for binding in effective],
++        "actual_prefilled": bool(effective), "reason_codes": reasons,
++        "ranking_score": score if source == "matcher" and top else None,
++        "distinct_margin": margin if source == "matcher" and usable_rank else None,
++        "competitor_code": rank.get("competitor_code") if source == "matcher" and usable_rank else None,
++        "ranking_evidence_status": rank_state if source == "matcher" else "not_applicable",
++        "uncapped": rank.get("uncapped") if source == "matcher" and usable_rank else None,
++        "priority_review_unavailable": unavailable and bool(top) and score > 0,
++        "model_output": output, "field_comparisons": comparisons,
++        "db_revision": db_revision, "policy_version": VERSION,
++        "professional": str(row.get("professional") or "暖通"),
++    }
++
++
++def summarize_initial_matches(items):
++    """Count a single set of authoritative source rows for all views."""
++    counts = defaultdict(list)
++    seen = set()
++    for row in items:
++        identity = tuple(row.get(key) for key in ("document_id", "sheet_id", "source_row_id"))
++        if all(identity):
++            if identity in seen:
++                continue
++            seen.add(identity)
++        assessment = row.get("initial_match")
++        professional = (assessment or {}).get("professional") or row.get("professional") or "暖通"
++        counts[str(professional)].append(assessment)
++
++    def summarize(assessments):
++        total = len(assessments)
++        known = [item for item in assessments if item is not None]
++        prefilled = sum(item["actual_prefilled"] for item in known)
++        tiers = Counter(item["tier"] for item in known)
++        subtypes = Counter(item["subtype"] for item in known if item["tier"] == "C")
++        return {
++            "total_rows": total, "known_rows": len(known), "missing_rows": total - len(known),
++            "actual_prefilled": prefilled,
++            "prefill_rate": prefilled / total if total and len(known) == total else None,
++            "status": ("empty" if not total else "unrecorded" if not known
++                       else "partial" if len(known) < total else "recorded"),
++            "tiers": {tier: tiers[tier] for tier in "ABCD"},
++            "c_subtypes": {key: subtypes[key] for key in ("low_score_prefill", "safety_missing")},
++        }
++
++    return {
++        **summarize([item for assessments in counts.values() for item in assessments]),
++        "by_professional": {name: summarize(items) for name, items in counts.items()},
++    }
+diff --git a/tests/test_v021_m0_initial_match.py b/tests/test_v021_m0_initial_match.py
+new file mode 100644
+index 0000000..e093402
+--- /dev/null
++++ b/tests/test_v021_m0_initial_match.py
+@@ -0,0 +1,240 @@
++from pathlib import Path
++
++import pytest
++
++
++@pytest.fixture
++def candidate():
++    return {"code": "X", "name": "样例", "unit": "个", "score": 75.0}
++
++
++def classify(candidate, *, score=75, value=0.65, stale=False, source="matcher",
++             status="recommended", live=True, safety=False, query_unit="个"):
++    from math import log
++
++    from app.acceptance_calibration import Policy
++    from app.match_assessment import assess_initial_match
++
++    top = dict(candidate, score=score)
++    match = {"top_candidates": [top], "_initial_rank_stale": stale, "_initial_match_rank": {
++        "top_code": top["code"], "ranking_score": score, "margin": 10.0, "uncapped": True,
++    }}
++    policy = Policy((0.0,) * 8, log(value / (1 - value)), None, 10.0, 0.0, {})
++    row = {"original_name": ("防爆未知风机" if safety else top["name"]), "original_unit": query_unit}
++    result = {"bindings": [top], "decision_status": status}
++    return assess_initial_match(row, {}, match, result, source, policy, {top["code"]: top} if live else {}, 4)
++
++
++@pytest.mark.parametrize(("score", "value", "tier"), [
++    (59.9, .65, "C"), (60, .65, "B"), (74.9, .65, "B"), (75, .649, "B"), (75, .65, "A"),
++])
++def test_inclusive_policy_boundaries(candidate, score, value, tier):
++    result = classify(candidate, score=score, value=value)
++    assert result["tier"] == tier
++    assert result["actual_prefilled"]
++
++
++def test_stale_rank_and_safety_are_independent_of_legacy_binding(candidate):
++    stale = classify(candidate, stale=True)
++    assert stale["tier"] == "B" and stale["priority_review_unavailable"]
++    assert stale["ranking_evidence_status"] == "stale"
++    safety = classify(candidate, safety=True)
++    assert safety["tier"] == "C" and safety["subtype"] == "safety_missing"
++    assert safety["effective_bindings"] == []
++    assert any(row["field"] == "防爆" and row["safety_critical_unknown"] for row in safety["field_comparisons"])
++
++
++def test_unit_mismatch_and_unverified_bindings(candidate):
++    mismatch = classify(dict(candidate, unit="m"), query_unit="km")
++    assert mismatch["tier"] == "D" and not mismatch["effective_bindings"]
++    assert classify(candidate, live=False)["reason_codes"] == ["invalid_code"]
++    for source in ("rule", "bom"):
++        valid = classify(candidate, source=source, status="auto_accepted", score=0)
++        assert valid["tier"] == "A" and valid["effective_bindings"]
++        assert valid["ranking_score"] is None
++        assert not classify(candidate, source=source)["actual_prefilled"]
++
++
++def test_explicit_power_and_model_missing_from_candidate():
++    from app.acceptance_calibration import _physical_evidence
++
++    row = {"original_name": "样例设备", "original_unit": "个"}
++    evidence = _physical_evidence(row, {"parsed_spec": {"attrs": {"功率": "40-50w"}, "model": "Z-A12"}},
++                                  {"name": "样例设备", "unit": "个"})
++    fields = {field["field"]: field for field in evidence["comparisons"]}
++    for key in ("功率", "型号"):
++        assert fields[key]["missing_side"] == "candidate"
++        assert fields[key]["requested_unverified"]
++
++
++def test_unstructured_lighting_power_range_preserves_frozen_features():
++    from app.acceptance_calibration import _physical_evidence
++
++    row = {"original_name": "医用LED气密净化灯", "original_spec": "1200*300,40-50w",
++           "original_unit": "套", "professional": "强电"}
++    query = {"parsed_spec": {"domain": "lighting", "attrs": {"尺寸": "1200*300"}}}
++    candidate = {"name": row["original_name"], "unit": "套",
++                 "specification": "1200*300*10,吸顶安装,48W", "category": "格栅灯（荧光灯盘）"}
++    result = _physical_evidence(row, query, candidate)
++    power = next(field for field in result["comparisons"] if field["field"] == "功率")
++    assert "功率" in result["missing"]
++    assert power["query_value"] == "40-50w"
++    assert power["missing_side"] == "candidate" and power["requested_unverified"]
++
++
++def test_full_ranking_finds_first_non_equivalent_after_top_ten():
++    from app.acceptance_calibration import ranking_evidence
++
++    candidates = [{"code": str(i), "score": 100 - i, "name": "同规格"} for i in range(11)]
++    equivalents = {str(i): {"0"} for i in range(1, 10)}
++    assert ranking_evidence(candidates[:10], equivalents, True)["margin"] is None
++    evidence = ranking_evidence(candidates, equivalents, True)
++    assert evidence["competitor_code"] == "10" and evidence["margin"] == 10
++
++
++def test_batch_series_score_change_marks_initial_rank_stale(monkeypatch):
++    from app import server
++    from app.vector_index import index_manager
++
++    monkeypatch.setattr(type(index_manager), "is_enabled", property(lambda _self: False))
++    monkeypatch.setattr(server, "ENABLE_SERIES_RERUN", False)
++    monkeypatch.setattr(server, "load_auto_binding_rules", lambda: [])
++    monkeypatch.setattr(server, "acceptance_policy", lambda: None)
++    monkeypatch.setattr(server, "extract_params", lambda _text: {"model": "YX-01"})
++    first = {"code": "A", "name": "电缆桥架", "specification": "YX-01", "unit": "个", "score": 98.0}
++    second = dict(first, code="B", score=72.0)
++    monkeypatch.setattr(server, "fetch_live_material_map", lambda _: {"A": first, "B": second})
++    matches = iter([
++        {"is_exact": True, "matched_code": "A", "top_candidates": [first]},
++        {"is_exact": False, "matched_code": None, "top_candidates": [second], "_initial_match_rank": {
++            "top_code": "B", "ranking_score": 72.0, "margin": 10, "uncapped": True,
++        }},
++    ])
++    monkeypatch.setattr(server, "match_item", lambda *args, **kwargs: next(matches))
++    rows = server.batch_match_rows([
++        {"row_idx": i, "name": "电缆桥架", "specification": "YX-01", "professional": "强电",
++         "category": "桥架", "qty": 1, "unit": "个", "loss": 0}
++        for i in (1, 2)
++    ], task_id="isolated-test")
++    result = rows[1]["initial_match"]
++    assert result["ranking_score"] == 77.0
++    assert result["ranking_evidence_status"] == "stale" and result["distinct_margin"] is None
++    assert result["tier"] == "B" and result["priority_review_unavailable"]
++    assert rows[1]["bindings"] == result["effective_bindings"]
++
++
++def test_invalid_frozen_assets_fail_closed(monkeypatch, tmp_path):
++    from app import acceptance_calibration as calibration
++
++    original = calibration.ASSETS
++    for filename in ("v019_m2_policy.json", "v019_m2_equivalences.json"):
++        (tmp_path / filename).write_bytes((original / filename).read_bytes())
++    calibration.load_policy.cache_clear()
++    monkeypatch.setattr(calibration, "ASSETS", tmp_path)
++    try:
++        assert calibration.load_policy(require_frozen=True)
++        calibration.load_policy.cache_clear()
++        policy = tmp_path / "v019_m2_policy.json"
++        policy.write_bytes(policy.read_bytes() + b"\n")
++        assert calibration.load_policy(require_frozen=True) is None
++        calibration.load_policy.cache_clear()
++        policy.unlink()
++        assert calibration.load_policy(require_frozen=True) is None
++    finally:
++        calibration.load_policy.cache_clear()
++
++
++def test_summary_deduplicates_source_rows_and_preserves_unknown_count(candidate):
++    from app.match_assessment import summarize_initial_matches
++
++    row = {"document_id": "d", "sheet_id": "s", "source_row_id": "1",
++           "professional": "暖通", "initial_match": classify(candidate)}
++    expected = summarize_initial_matches([row, row, dict(row, source_row_id="2", initial_match=None)])
++    assert expected["total_rows"] == 2
++    assert expected["missing_rows"] == 1 and expected["prefill_rate"] is None
++    assert expected["by_professional"]["暖通"]["tiers"]["A"] == 1
++    assert summarize_initial_matches([])["status"] == "empty"
++    assert summarize_initial_matches([{}])["status"] == "unrecorded"
++
++
++def test_migration_is_nullable_idempotent_and_preserves_legacy_data(tmp_path):
++    import sqlite3
++
++    from app.flywheel_db import init_flywheel_tables
++
++    path = str(tmp_path / "test.db")
++    init_flywheel_tables(db_path=path)
++    with sqlite3.connect(path) as conn:
++        conn.execute("ALTER TABLE flywheel_recommendation_snapshots DROP COLUMN initial_match_json")
++        conn.execute("""
++            INSERT INTO flywheel_recommendation_snapshots
++            (snapshot_id, document_id, sheet_id, source_row_id, revision, professional, parsed_spec_json,
++             initial_bindings_json, algo_version, model_version, config_version, config_digest_full)
++            VALUES ('snap', 'doc', 'sheet', 'row', 1, '暖通', '{}', '[1,2]', '', '', '', '')
++        """)
++    init_flywheel_tables(db_path=path)
++    init_flywheel_tables(db_path=path)
++    with sqlite3.connect(path) as conn:
++        assert conn.execute("SELECT initial_bindings_json, initial_match_json FROM "
++                            "flywheel_recommendation_snapshots").fetchone() == ("[1,2]", None)
++
++
++def test_upload_rollback_retry_and_authoritative_restore(monkeypatch, tmp_path, candidate):
++    from copy import deepcopy
++    import json
++    import sqlite3
++
++    from app import feedback_contract, flywheel_db
++
++    path = str(tmp_path / "test.db")
++    actor = {"actor_user_id": 1, "actor_account_epoch": "test-account"}
++    monkeypatch.setattr(feedback_contract, "extract_verified_actor", lambda user: user)
++    flywheel_db.init_flywheel_tables(db_path=path)
++    with sqlite3.connect(path) as conn:
++        conn.execute("""
++            CREATE TRIGGER fail_second_snapshot BEFORE INSERT ON flywheel_recommendation_snapshots
++            WHEN (SELECT COUNT(*) FROM flywheel_recommendation_snapshots) > 0
++            BEGIN SELECT RAISE(ABORT, 'isolated failure'); END
++        """)
++    raw = [{"name": "样例", "row_idx": i} for i in (1, 2)]
++    rows = [{"professional": "暖通", "bindings": [candidate], "initial_match": classify(candidate)},
++            {"professional": "暖通", "bindings": []}]
++    versions = {key: "isolation" for key in (
++        "algo_version", "model_version", "config_version", "config_digest_full",
++    )}
++    params = (actor, "doc", "task", "session", "test.xlsx", "file-digest", raw, rows)
++    with pytest.raises(sqlite3.IntegrityError, match="isolated failure"):
++        feedback_contract.persist_upload_document_tree(*params, runtime_versions=versions, db_path=path)
++    with sqlite3.connect(path) as conn:
++        assert conn.execute("SELECT COUNT(*) FROM flywheel_documents").fetchone() == (0,)
++        conn.execute("DROP TRIGGER fail_second_snapshot")
++    feedback_contract.persist_upload_document_tree(*params, runtime_versions=versions, db_path=path)
++    with sqlite3.connect(path) as conn:
++        bindings, assessment = conn.execute(
++            "SELECT initial_bindings_json, initial_match_json FROM flywheel_recommendation_snapshots "
++            "WHERE source_row_id=?", (rows[0]["source_row_id"],),
++        ).fetchone()
++    assert json.loads(bindings) == [candidate]
++    assert json.loads(assessment) == rows[0]["initial_match"]
++    restored = deepcopy(rows)
++    restored[0]["initial_match"] = {"tier": "forged"}
++    restored[1]["initial_match"] = rows[0]["initial_match"]
++    verified, legacy = feedback_contract.annotate_items_identity(actor, restored, db_path=path)
++    assert legacy == 0
++    assert verified[0]["initial_match"] == rows[0]["initial_match"]
++    assert verified[1]["initial_match"] is None
++    foreign = dict(actor, actor_account_epoch="foreign")
++    rejected, legacy = feedback_contract.annotate_items_identity(foreign, deepcopy(rows), db_path=path)
++    assert legacy == 2 and all(item["initial_match"] is None for item in rejected)
++
++
++def test_docker_assets_have_exact_allowlist():
++    root = Path(__file__).resolve().parents[1]
++    directory = "app/calibration_assets/"
++    assets = [directory + filename for filename in ("v019_m2_policy.json", "v019_m2_equivalences.json")]
++    context = (root / ".dockerignore").read_text(encoding="utf-8").splitlines()
++    assert {line for line in context if line.startswith("!" + directory)} == {
++        "!" + value for value in (directory, *assets)
++    }
++    lines = (root / "Dockerfile").read_text(encoding="utf-8").splitlines()
++    assert [line.split()[1:-1] for line in lines if line.startswith("COPY " + directory)] == [assets]

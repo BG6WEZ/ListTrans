@@ -135,3 +135,8 @@ app/eval_assets/**
 !app/eval_assets/golden_runtime_v1.json
 !app/eval_assets/report_template_v1.json
 !app/eval_assets/smoke_materials_v1.json
+
+!app/calibration_assets/
+app/calibration_assets/**
+!app/calibration_assets/v019_m2_policy.json
+!app/calibration_assets/v019_m2_equivalences.json

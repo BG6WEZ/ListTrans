@@ -1,0 +1,110 @@
+{
+  "task": "V021-M1/R01",
+  "role": "independent_audit",
+  "python": "3.12.10",
+  "pytest": "9.2.0",
+  "browser_engine": "Chrome/158.0.8127.18 (real Chrome via CDP)",
+  "serial_pytest": {
+    "final_exit": 0,
+    "summary": "512 passed, 1 deselected in 753.02s",
+    "held_out": "HOLD-M0-01 (test_frozen_assignment_covers_same_sheet_and_near_query_edges, needs Test 160 decode, excluded by -k not deleted)",
+    "evidence": "audit_serial3.log",
+    "attempts": [
+      {
+        "run": 1,
+        "command": "m0_r01_pytest.py (default system basetemp)",
+        "process_exit": 1,
+        "test_outcome": "all collected tests passed (100% dots, zero F/E); pytest final summary line never flushed",
+        "root_cause": "Environment-layer only: WorkBuddy sandbox safe-delete bulk guard (CODEBUDDY_SAFE_DELETE_BULK_THRESHOLD=50) blocked pytest's end-of-session cleanup of 542 temp files (SAFE_DELETE_BULK_CONFIRM_REQUIRED). Not a test or code failure.",
+        "evidence": "audit_serial.log, audit_serial.exit.txt"
+      },
+      {
+        "run": 2,
+        "command": "m0_r01_pytest.py --basetemp=<inside repo> -o tmp_path_retention_policy=all",
+        "process_exit": "killed (24m, slow + early F/E)",
+        "test_outcome": "invalid run - environment polluted by auditor-chosen deep in-repo basetemp (long Windows path / isolation assumptions)",
+        "root_cause": "Auditor-introduced basetemp placement, NOT a product regression. The failing run used a path under the repository; rerun on a short system temp path produced zero F/E.",
+        "evidence": "audit_serial2.log (retained as honest trace; conclusions not based on this run)"
+      },
+      {
+        "run": 3,
+        "command": "m0_r01_pytest.py --basetemp=C:/Users/tlyer/AppData/Local/Temp/audit_m1_bt_<pid> -o tmp_path_retention_policy=all -p no:cacheprovider",
+        "process_exit": 0,
+        "test_outcome": "512 passed, 1 deselected, zero F/E; retention=all keeps temp dirs so no bulk-delete guard is triggered",
+        "root_cause_of_prior_anomalies_confirmed": "Both run-1 exit 1 and run-2 F/E were environment artifacts; clean short-path run matches dev record (512/1/0).",
+        "evidence": "audit_serial3.log, audit_serial3.exit.txt"
+      }
+    ],
+    "collection_crosscheck": "pytest tests --collect-only = 513 items; minus 1 HOLD-M0-01 = 512 executed"
+  },
+  "rule_gate": {
+    "exit": 0,
+    "command": "doc/V0.2.0/evidence/m0_r01_replay.py --arm off --mode rules",
+    "comparison_groups": 18,
+    "nonzero_deltas": 0,
+    "subset_rows": 1060,
+    "protected_probes_passed": true,
+    "matcher_sha256": "3514a641bbf562649c30f0575336a3e88ac3ebbed6cf2d0474bdc12bc798ac2c",
+    "matches_dev_record": true,
+    "evidence": "audit_rule_gate.json"
+  },
+  "isolation": {
+    "before": {"exit": 0, "verdict": "PASS", "business_hash_unchanged": true, "evidence": "audit_isolation_before.json"},
+    "after": {"exit": 0, "verdict": "PASS", "business_hash_unchanged": true, "evidence": "audit_isolation_after.json"},
+    "before_after_snapshot_identical": true
+  },
+  "baseline_and_assets": {
+    "exit": 0,
+    "effective_baseline_total": 82,
+    "baseline_identical": 79,
+    "changed_vs_m1_start": ["web/app.js", "web/index.css", "web/index.html"],
+    "business_assets": "35/35 zero diff (8 files + 5 trees)",
+    "config_files": "16/16 unchanged, auto_binding_rules.json == []",
+    "switches": "10/10 default OFF/legacy verified in source getenv defaults",
+    "delivery_manifest": "21/21 SHA256 matched; dispatch baseline & frozen R2 plan integrity verified",
+    "evidence": "audit_baseline_check.json, audit_baseline_check.py"
+  },
+  "rollback": {
+    "exit": 0,
+    "patch_sha256": "9cb8aba931200f6af65ceb9ebc129ab23fd0200cc5dcb7826d45d69c9243662e",
+    "reverse_apply": "ok in external temp dir",
+    "web_three_files_byte_identical_to_m1_start": true,
+    "nonweb_79_baseline_identical": true,
+    "evidence": "audit_rollback.json, audit_rollback.py"
+  },
+  "browser_e2e": {
+    "exit": 0,
+    "real_browser": true,
+    "static_dom_or_unit_test_substitute": false,
+    "themes": ["dark", "light"],
+    "exceptions": [],
+    "requests": 89,
+    "fixed_100": {
+      "prefilled_frozen": "63/100 (63.0%)",
+      "unprefilled": 37,
+      "tiers": {"A": 21, "B": 32, "C": 20, "D": 27},
+      "c_subtypes": {"low_score_prefill": 10, "safety_missing": 10},
+      "exportable_before_confirm": "1/100",
+      "exportable_after_confirming_10": "11/100",
+      "first_match_remained_frozen_after_confirm": true,
+      "safety_empty_binding_export": "HTTP 422 (10 safety rows, bindings & matched_code both empty), seen on both themes",
+      "first_adoption": {"reviewed": 10, "retained": 10, "unreviewed": 53, "rate": 1.0}
+    },
+    "advanced": [
+      "single+batch rematch (3 calls), manual reselect to CDP-B, draft round trip all preserve frozen first-match JSON (Object.isFrozen asserted)",
+      "native reject preserves frozen first-match totals",
+      "legacy full-missing 'no record' and partial-missing 'known 1 / unrecorded 1, rate -' via authoritative annotate",
+      "native BOM v1 = 2 components",
+      "keyword scale 510/1060, tiers 34/205/344/477",
+      "1024px light+dark no overflow/clipping; zero DTO, rejected XLSX 400, failed async task"
+    ],
+    "independent_artifacts_timestamp": "2026-11-22 18:43 (dev delivery 17:17) - separate rerun, not reused files",
+    "matches_dev_record": true,
+    "evidence": "browser/result.json, browser/workbench-*.png"
+  },
+  "overall_verdict": "PASS",
+  "p0": 0,
+  "p1": 0,
+  "p2": 0,
+  "p3_observations": ["OBS-AUDIT-V021-M1-01 (environment-only safe-delete guard; distinct from legacy V0.2.0 OBS-AUDIT-M1-01 BOM boundary)"]
+}

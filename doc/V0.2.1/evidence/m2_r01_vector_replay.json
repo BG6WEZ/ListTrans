@@ -1,0 +1,445 @@
+{
+  "mode": "vector",
+  "index": {
+    "enabled": true,
+    "dimension": 512,
+    "rows": 26863,
+    "faiss": false
+  },
+  "staged_inputs": {
+    "catalog": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "config": {
+      "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+    },
+    "cache": {
+      "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+      "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+      "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+      "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+      "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+    },
+    "model": {
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/.gitignore": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/CACHEDIR.TAG": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/.gitattributes.metadata": "e9a5e1a933a1afc1dfb53f306adc00fc3ae94c1cce56c23cd779752f81cf0c7c",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/1_Pooling/config.json.metadata": "00fcdb3869a02f849a3dcddf7dfc8b11b68c58ec8ad3e4a6e0a6202bedc84459",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/README.md.metadata": "d6a832e3ea518feeb09687319893f6ec77a22f9c5bd1043503a651bf61a21052",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config.json.metadata": "10ff5d7a7af27da81dcfa5017033d2a1228087221fc46648a3585c78af78984e",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/config_sentence_transformers.json.metadata": "aad08e0084715136365e0380ebe2c5ea71ceee9411dd0f6a61f2e68fb321bc2a",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/model.safetensors.metadata": "8bb53682b8ecc77e89aea7627f6a7f5c714c77cfc847b0e383a7e2c7f8efc49b",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/modules.json.metadata": "e1811acf4c00db0c0542e9a74f58eb33d2264d16bd142d74eada40a4168b9c72",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/pytorch_model.bin.metadata": "c52cf209b8995efd52a7f4410494f9cda4c389753a03e8989d7943b30ec329dc",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/sentence_bert_config.json.metadata": "39cd1c75c6bda78b76662adc8acb22e574b3f01ddb946f18cdbc1659db70b9e7",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/special_tokens_map.json.metadata": "e611bd5816b6f3462874ed067fbe73d275ec3038f4a1e13d22187b04e430b374",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer.json.metadata": "55b6d8b7aef78bb252c112264ecd4715e5c6bb3c36d61edfc8f54004f8d9a213",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/tokenizer_config.json.metadata": "cc5984fb271a91df41454320e0a66fe7b150262956b6efd41fc1f6705d2adbce",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/download/vocab.txt.metadata": "cee295dc78e14cdb5987eb3d146c30f09fcf0393bec1bf77d0fe21da6bb81b11",
+      "model_offline/bge-small-zh-v1.5/.cache/huggingface/trees/7999e1d3359715c523056ef9478215996d62a620.json": "2346229ecde3983842cb8e070285e8aae7d6680819af7d7aa17e56bc0f48cbc9",
+      "model_offline/bge-small-zh-v1.5/.gitattributes": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+      "model_offline/bge-small-zh-v1.5/1_Pooling/config.json": "aaa8861589f80c961a03cc86c7eeaef7605c1676b9ab55329d33a304738769c6",
+      "model_offline/bge-small-zh-v1.5/README.md": "c48a4eeea77f6b1d38b48ec1c5b8d4f86d5550cc43fa345a0db1b2ca1d082369",
+      "model_offline/bge-small-zh-v1.5/config.json": "3853a7979202c348751b753e36f579c41d8da7d36af617d3d907e1fc9b441f2a",
+      "model_offline/bge-small-zh-v1.5/config_sentence_transformers.json": "940d5f50db195fa6e5e6a4f122c095f77880de259d74b14a65779ed48bdd7c56",
+      "model_offline/bge-small-zh-v1.5/model.safetensors": "354763b9b1357bc9c44f62c6be2276321081ed2567773608c0d0785b61d5a026",
+      "model_offline/bge-small-zh-v1.5/modules.json": "84e40c8e006c9b1d6c122e02cba9b02458120b5fb0c87b746c41e0207cf642cf",
+      "model_offline/bge-small-zh-v1.5/pytorch_model.bin": "7c5fe667bbed05dc10e246e229b701ad266fe4d95ab946e9e5aa402056611b88",
+      "model_offline/bge-small-zh-v1.5/sentence_bert_config.json": "84e39fda68ccbff05bfa723ae9c0e70e23e2ec373b76e0f8c6e71af72a693cbf",
+      "model_offline/bge-small-zh-v1.5/special_tokens_map.json": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+      "model_offline/bge-small-zh-v1.5/tokenizer.json": "48cea5d44424912a6fd1ea647bf4fe50b55ab8b1e5879c3275f80e339e8fae26",
+      "model_offline/bge-small-zh-v1.5/tokenizer_config.json": "e6f3b96db926a37d4039995fbf5ad17de158dfb8f6343d607e4dbaad18d75f5a",
+      "model_offline/bge-small-zh-v1.5/vocab.txt": "45bbac6b341c319adc98a532532882e91a9cefc0329aa57bac9ae761c27b291c"
+    }
+  },
+  "confirmed_definition": "Successful isolated HTTP commit after Train/Dev gold-supported simulated review",
+  "by_split_and_professional": {
+    "train": {
+      "医气": {
+        "rows": 147,
+        "priority": 2,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "弱电": {
+        "rows": 161,
+        "priority": 4,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "强电": {
+        "rows": 288,
+        "priority": 27,
+        "eligible": 1,
+        "confirmed": 1,
+        "not_acted_without_gold_evidence": 0
+      },
+      "暖通": {
+        "rows": 246,
+        "priority": 0,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      }
+    },
+    "dev": {
+      "暖通": {
+        "rows": 13,
+        "priority": 3,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "装饰": {
+        "rows": 205,
+        "priority": 0,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      }
+    }
+  },
+  "probes": {
+    "GT-0004": {
+      "initial": {
+        "tier": "A",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [
+          {
+            "code": "2.17.25.0069",
+            "name": "UPVC管",
+            "specification": "De32*2，介质：水",
+            "unit": "m",
+            "brand": "华生",
+            "category": "塑料管",
+            "qty": 1.0,
+            "qty_ratio": 1.0
+          }
+        ],
+        "actual_prefilled": true,
+        "reason_codes": [
+          "priority_review"
+        ],
+        "ranking_score": 98.6,
+        "distinct_margin": 0.09999999999999432,
+        "competitor_code": "2.17.25.0086",
+        "ranking_evidence_status": "current",
+        "uncapped": true,
+        "priority_review_unavailable": false,
+        "model_output": 0.662302638812984,
+        "field_comparisons": [
+          {
+            "field": "壁厚",
+            "state": "missing",
+            "missing_side": "query",
+            "query_value": null,
+            "candidate_value": 2.0,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "外径",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": 32.0,
+            "candidate_value": 32.0,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "材质",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "UPVC",
+            "candidate_value": "UPVC",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "管径",
+            "state": "missing",
+            "missing_side": "query",
+            "query_value": null,
+            "candidate_value": 25.0,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "专业",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "医气",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "单位倍率",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "m",
+            "candidate_value": "m",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "核心规格",
+            "state": "different",
+            "missing_side": null,
+            "query_value": "1.名称:UPVC管\n2.介质：其他空调（风管机、分体式空调器）冷凝水管\n3.规格:De32\n4.连接形式:粘接\n5.工作内容：留堵洞眼、切管、套丝、粘接、管道及管件安装、灌水试验\n6.管件为甲供材",
+            "candidate_value": "De32*2，介质：水",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          }
+        ],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "医气"
+      },
+      "eligible": false,
+      "reason": "no_distinct_margin",
+      "confirmed": false,
+      "split": "train"
+    },
+    "GT-0300": {
+      "initial": {
+        "tier": "B",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [
+          {
+            "code": "2.25.15.0129",
+            "name": "高显指LED气密平板灯",
+            "specification": "1200*300，吸顶，41~50W，显色指数大于等于90",
+            "unit": "套",
+            "brand": "台夏",
+            "category": "格栅灯（荧光灯盘）",
+            "qty": 1.0,
+            "qty_ratio": 1.0
+          }
+        ],
+        "actual_prefilled": true,
+        "reason_codes": [
+          "candidate_review"
+        ],
+        "ranking_score": 99.3,
+        "distinct_margin": 0.09999999999999432,
+        "competitor_code": "2.25.15.0115",
+        "ranking_evidence_status": "current",
+        "uncapped": true,
+        "priority_review_unavailable": false,
+        "model_output": 0.2064653510893681,
+        "field_comparisons": [
+          {
+            "field": "功率",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "40-50w",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": true
+          },
+          {
+            "field": "尺寸",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1200*300",
+            "candidate_value": "1200*300",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "类型",
+            "state": "missing",
+            "missing_side": "both",
+            "query_value": null,
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "专业",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "强电",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "单位倍率",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "套",
+            "candidate_value": "套",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "核心规格",
+            "state": "different",
+            "missing_side": null,
+            "query_value": "1.名称：医用LED气密净化灯\n2.规格：1200*300,40-50w\n3.安装形式：吸顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整",
+            "candidate_value": "1200*300，吸顶，41~50W，显色指数大于等于90",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          }
+        ],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "强电"
+      },
+      "eligible": false,
+      "reason": "not_priority",
+      "confirmed": false,
+      "split": "train"
+    },
+    "GT-0551": {
+      "initial": {
+        "tier": "A",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [
+          {
+            "code": "2.28.03.0227",
+            "name": "无卤低烟阻燃B级交联聚乙烯绝缘布电线",
+            "specification": "WDZB-BYJ 1.5",
+            "unit": "m",
+            "brand": "",
+            "category": "电气装备用电线电缆",
+            "qty": 1.0,
+            "qty_ratio": 1.0
+          }
+        ],
+        "actual_prefilled": true,
+        "reason_codes": [
+          "priority_review"
+        ],
+        "ranking_score": 85.0,
+        "distinct_margin": 0.09999999999999432,
+        "competitor_code": "2.28.03.7808",
+        "ranking_evidence_status": "current",
+        "uncapped": false,
+        "priority_review_unavailable": false,
+        "model_output": 0.6940953224347065,
+        "field_comparisons": [
+          {
+            "field": "主截面",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": 1.5,
+            "candidate_value": 1.5,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "主芯数",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": 1,
+            "candidate_value": 1,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "型号族",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "BYJ",
+            "candidate_value": "BYJ",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "截面积",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1.5",
+            "candidate_value": 1.5,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "材质",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "铜",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": true
+          },
+          {
+            "field": "芯数",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1",
+            "candidate_value": "1",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "专业",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "强电",
+            "candidate_value": "强电",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "单位倍率",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "m",
+            "candidate_value": "m",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "型号",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "wdzb-byj",
+            "candidate_value": "wdzb-byj",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "核心规格",
+            "state": "different",
+            "missing_side": null,
+            "query_value": "1.名称：配线\n2.配线形式：管内穿线\n3.规格：WDZB-BYJ-1.5mm²\n4.材质：铜芯线\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+            "candidate_value": "WDZB-BYJ 1.5",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          }
+        ],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "强电"
+      },
+      "eligible": false,
+      "reason": "score_capped",
+      "confirmed": false,
+      "split": "train"
+    }
+  },
+  "heldout_payloads_decoded": 0,
+  "heldout_rows_used": 0
+}

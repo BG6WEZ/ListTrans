@@ -1,0 +1,11 @@
+{
+  "task": "V021-M2/R01 independent audit",
+  "topic": "auditor-side transient side effect on logs/security.log and exact restoration",
+  "finding": "首次运行 audit_db_path_probe.py 时未设置 LOG_DIR，导入 app.auth_manager 触发其模块级安全日志初始化，向仓库 logs/security.log 追加两行 'Generated ephemeral non-production session signing key.'（时间戳 2026-11-22 20:20:49 / 20:21:02），使 33 项重锚快照出现 logs 树差异。该差异由审核探针引入，非 M2 实现或开发留档造成。",
+  "action": "按字节比对确认统筹 33 项快照的 security.log 基线恰为当前文件前 30 行（SHA256 93acb689…），精确截断回前 30 行、逐字节还原；随后在探针中设置 LOG_DIR/UPLOAD_DIR/OUTPUT_DIR/CONFIG_DIR/VECTOR_CACHE_DIR 全部指向仓外临时目录并复跑，security.log 保持基线哈希、33 项快照零差。",
+  "status": "closed_no_product_defect",
+  "evidence": [
+    "audit_baseline_check.json（重锚 33 项零差、dispatch 35 项差异仅两项空边车）",
+    "audit_db_path_probe.py / audit_db_path_probe.json（修正后探针）"
+  ]
+}

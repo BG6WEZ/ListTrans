@@ -1,0 +1,31 @@
+{
+  "package": "V021-M1/R01",
+  "code_baseline": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "dispatch_sha256": "d2da00d3e0e23f16a9c6cc15f677e599ca10271056f86dd8b614a3d0d1903245",
+  "frozen_plan_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "unchanged_business_assets": 35,
+  "effective_baseline_count": 82,
+  "sha256": {
+    "web/index.html": "3f2e037ceca73f5f803fdf9514ae9aa1f001bb4c0c82ab77b8db1f1750047bec",
+    "web/index.css": "d7ca94466a6116d391b9c6638b52204cb09f66d39b4bb4d5ffe3c2cbc298a989",
+    "web/app.js": "69b5a6bcbd353f8a0e97ed753ade8793b77b826d50977066530c231ac6e6a8da",
+    "doc/V0.2.1/rounds/V021-M1_R01_开发小结.md": "1d02976fe34b1d1025069d18c04390d21bf2c2736a59f84ad0e25e6bb27f6dea",
+    "doc/V0.2.1/02_任务台账.md": "4ce81efe07c42c6bcb8d6b47226397a866c5af40c5761277af1937e72a4c7b9b",
+    "doc/V0.2.1/evidence/m1_r01_browser.mjs": "3e6f530667f1bc1a7ea880c3f09f40cc4d9c670d357966ca3f9d2fa1413ae541",
+    "doc/V0.2.1/evidence/m1_r01_browser.py": "19dd3444da00f56b5a9ebdb21abf5936e4a8b19b10b62173705c34373747ab89",
+    "doc/V0.2.1/evidence/m1_r01_exits.json": "7f5d1f0bd7f77b82bc8e0f048357f98e57827e845a8124819d8e1d9bcc1ef91b",
+    "doc/V0.2.1/evidence/m1_r01_isolation_after.json": "f5ccd3b1e8e0e5ecc5c6fd5a42e44eabc7f502abf6e342b39db7d4b61634bfa2",
+    "doc/V0.2.1/evidence/m1_r01_isolation_before.json": "431ad93e1b3c865d117ef8356876a696b9d7936fe21b389504518a8a4ac03ee3",
+    "doc/V0.2.1/evidence/m1_r01_rollback.json": "45228acaba8f98ae4c931432e3292ce65b36426082f81cf46e4b12a6ba8228b4",
+    "doc/V0.2.1/evidence/m1_r01_rollback.py": "028ab080626f8620342b6df9394394a9b54d62f0588a49db8ca65c242a13e2f2",
+    "doc/V0.2.1/evidence/m1_r01_rule_gate.json": "7f0158892d3ee047cee05fccce4460354ae4342c26e9040006388453597ac7fb",
+    "doc/V0.2.1/evidence/m1_r01_serial.log": "4b4a19d6837639ffe5aded230f15878cbc963db9395324de5a4abbf7ffe2bddc",
+    "doc/V0.2.1/evidence/m1_r01_serial_exits.json": "014b25c00d36c81be7f3f5f4e8021246e3e8edc0998a79f323deccd60e4fce68",
+    "doc/V0.2.1/evidence/m1_r01_workbench.patch": "9cb8aba931200f6af65ceb9ebc129ab23fd0200cc5dcb7826d45d69c9243662e",
+    "doc/V0.2.1/evidence/m1_r01_browser_delivery/result.json": "9293a0462ee07119958bd4565b20b1ecee244d9cf676523b93621fd3f90fdc3d",
+    "doc/V0.2.1/evidence/m1_r01_browser_delivery/workbench-1024-dark.png": "5420046aacf011aad8c49f4efc5ba8055e64c88736ee3a4e0be651a0331e9b10",
+    "doc/V0.2.1/evidence/m1_r01_browser_delivery/workbench-1024.png": "cab524f56eb5899e8381bbcbd38cb4ecbf3413e1ee96fcc9dfbf1e21509d66cd",
+    "doc/V0.2.1/evidence/m1_r01_browser_delivery/workbench-dark.png": "04636eeb0ffa7f53882857ed881eb1a6cf8919bef5f1368064888623156921d0",
+    "doc/V0.2.1/evidence/m1_r01_browser_delivery/workbench-light.png": "443f8a09aa5fe1aa2caad84e17760c24c7979bb1d3808e848d2af82f9e15b099"
+  }
+}

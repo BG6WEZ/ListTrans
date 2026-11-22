@@ -1,0 +1,28 @@
+{
+  "task": "V021-M2/R01 independent audit",
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "verdict": "PASS_IN_SCOPE",
+  "exit_codes": {
+    "delivery_hash_recompute": {
+      "matched": 42,
+      "total": 43,
+      "expected_exception": "doc/V0.2.1/02_任务台账.md: 交付时 cccc47fe… → 统筹签认更新 04e1c327…；交审基线 frozen_delivery_anchor.coordinator_updated_ledger_sha256 明确记录后者，故非篡改。",
+      "exit_code": 0
+    },
+    "node_check_web_app_js": {"exit_code": 0},
+    "py_compile_m2_python_files": {"exit_code": 0},
+    "focused_pytest_4_modules": {"command": "pytest tests/test_v021_m2_priority_review.py tests/test_m5_file_boundary_and_compat.py tests/test_v020_m1_bom.py tests/test_feedback_miner.py", "result": "43 passed in 43.17s", "exit_code": 0},
+    "serial_guard": {"result": "520 passed, 1 deselected in 801.89s", "exit_code": 0, "method": "短系统临时目录 + tmp_path_retention_policy=all + no:cacheprovider，规避沙箱 safe-delete 批量清理拦截；maxfail=1；审计钩子封禁完整金标、HOLD-M0-01 以 -k 排除"},
+    "replay_keyword": {"result": "Train 842 / Dev 218, eligible 0, confirmed 0", "exit_code": 0},
+    "replay_vector": {"result": "Train 842 / Dev 218, eligible 1, confirmed 1", "exit_code": 0},
+    "rule_gate_off_rules": {"result": "18 组历史零差、受保护探针全过、旧无约束规则 17 处退化判有害", "exit_code": 0},
+    "rollback_independent_copy": {"result": "9 个代码/测试文件逐字节回退 + 2 新增文件移除 + 双库迁移/旧读写入口验证", "exit_code": 0, "note": "台账按协议在冻结后被统筹与审核更新，原开发回退脚本的冻结台账断言已失效；独立副本排除文档台账，仅验证代码/测试文件。开发补丁与开发留档未被覆写。"},
+    "browser_chrome_e2e": {"result": "Chrome 158, exit 0, exceptions=[], 120 requests, 25 dialogs, 双主题", "exit_code": 0},
+    "verify_isolation_before": {"result": "PASS, business_changes=[]", "exit_code": 0},
+    "verify_isolation_after": {"result": "PASS, business_changes=[]", "exit_code": 0},
+    "dispatch_35_snapshot_comparison": {"result": "33/35 一致，两项空 WAL 边车消失", "exit_code": 1, "meaning": "已在 OBS-COORD-V021-M2-01 由统筹签认重锚 33 项在盘快照；独立审核复核 33 项零差、两主库 SHA 不变、零 schema 泄漏。该退出码非 M2 实现失败。", "expected": true},
+    "db_path_probe": {"result": "三类连接工厂均指向仓外临时库、仓库两主库 SHA 不变、M2 新表仅建于隔离库", "exit_code": 0, "note": "首轮探针因未设 LOG_DIR 追加两行审核侧日志，已按字节精确还原并重设日志目录后复跑，见 audit_self_effect_note.json。"}
+  },
+  "p3_observations": ["OBS-COORD-V021-M2-01", "OBS-AUDIT-V021-M2-01"],
+  "held_out": ["HOLD-M0-01"]
+}

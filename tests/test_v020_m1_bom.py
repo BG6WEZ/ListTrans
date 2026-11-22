@@ -97,9 +97,13 @@ class TestBom(M2Base):
         assert incomplete["decision_status"] == "recommended" and incomplete["bindings"] == []
         qty_row = server._raw_item_from_export(item)
         confirm = self._confirm_payload({**qty_row, "row_idx": item["original_row_idx"]}, item["bindings"], SCOPE)
+        confirm.update({key: item[key] for key in (
+            "document_id", "sheet_id", "source_row_id", "recommendation_revision",
+        )})
         confirmed = self._post("/api/binding/submit", confirm)
         assert confirmed.status_code == 200, confirmed.text
         assert confirmed.json()["decision"]["decision_status"] == "manual_confirmed"
+        confirm["decision_version"] = confirmed.json()["decision_version"]
         save = self._post("/api/session/draft", dict(original_filename=SCOPE, professional="暖通",
                                                      items_json=json.dumps([item], ensure_ascii=False)))
         assert save.status_code == 200, save.text

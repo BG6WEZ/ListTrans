@@ -1,0 +1,582 @@
+{
+  "engine": "Chrome/158.0.8127.18",
+  "fixed": {
+    "dark": {
+      "prefilled": 63,
+      "total": 100,
+      "exportable_before": 1,
+      "exportable_after": 11,
+      "checks": {
+        "A": 21,
+        "B": 32,
+        "C": 20,
+        "D": 27,
+        "low_score_prefill": 10,
+        "safety_missing": 10,
+        "unprefilled": 37
+      },
+      "layout": {
+        "theme": "dark",
+        "overflow": false,
+        "cardsClipped": false,
+        "navClipped": false,
+        "listHeight": 228
+      },
+      "elapsed_ms": 1082,
+      "reviewed": 10,
+      "retained": 10,
+      "unreviewed": 53,
+      "adoption": 1,
+      "safety_export": 422
+    },
+    "light": {
+      "prefilled": 63,
+      "total": 100,
+      "exportable_before": 1,
+      "exportable_after": 11,
+      "checks": {
+        "A": 21,
+        "B": 32,
+        "C": 20,
+        "D": 27,
+        "low_score_prefill": 10,
+        "safety_missing": 10,
+        "unprefilled": 37
+      },
+      "layout": {
+        "theme": "light",
+        "overflow": false,
+        "cardsClipped": false,
+        "navClipped": false,
+        "listHeight": 228
+      },
+      "elapsed_ms": 1109,
+      "reviewed": 10,
+      "retained": 10,
+      "unreviewed": 53,
+      "adoption": 1,
+      "safety_export": 422
+    }
+  },
+  "checks": [
+    {
+      "name": "single and batch rematch, changed current binding, draft round trip",
+      "rematches": 3,
+      "current": [
+        "CDP-B"
+      ]
+    },
+    {
+      "name": "native reject preserves frozen first-match totals"
+    },
+    {
+      "name": "legacy and partial recovery via authoritative annotate"
+    },
+    {
+      "name": "native BOM v1",
+      "components": 2
+    },
+    {
+      "name": "keyword-scale workbench",
+      "prefilled": 510,
+      "total": 1060,
+      "counts": [
+        34,
+        205,
+        344,
+        477
+      ]
+    },
+    {
+      "name": "narrow desktop layout",
+      "theme": "light",
+      "overflow": false,
+      "cardsClipped": false,
+      "navClipped": false,
+      "listHeight": 268
+    },
+    {
+      "name": "narrow desktop dark layout",
+      "theme": "dark",
+      "overflow": false,
+      "cardsClipped": false,
+      "navClipped": false,
+      "listHeight": 268
+    },
+    {
+      "name": "zero DTO, rejected XLSX, failed async task",
+      "precheckStatus": 400
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/heartbeat",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/export",
+      "method": "POST",
+      "firstSafetyRows": 10,
+      "emptySafety": true,
+      "status": 422
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/heartbeat",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/export",
+      "method": "POST",
+      "firstSafetyRows": 10,
+      "emptySafety": true,
+      "status": 422
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/invalidate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/match",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/invalidate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/invalidate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/match",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/match",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/match",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/search",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/flywheel/record",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/feedback/submit",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/heartbeat",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/annotate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/binding/reject",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/heartbeat",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/annotate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/auth/heartbeat",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/annotate",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload/status",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "path": "/api/session/draft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 400
+    },
+    {
+      "path": "/api/upload",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/upload/status",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "exceptions": [],
+  "dialogs": [
+    "导出失败: 第 1 行「核对轴流风机」：无有效绑定：未匹配或已拒绝，禁止导出（不默选 top1）",
+    "",
+    "系统检测到您有未保存的编辑草稿（fixed-100.xlsx，最后编辑时间：2026-11-22 18:43:21，共 100 条数据）。\n\n是否载入该草稿并继续工作？",
+    "导出失败: 第 1 行「核对轴流风机」：无有效绑定：未匹配或已拒绝，禁止导出（不默选 top1）",
+    "确认要将当前的特征选择应用到所有同类设备（名称为 \"核对配电箱\"，共 3 项）并批量重新匹配吗？",
+    "批量匹配完成！已成功重新校准并对齐了 3 个 \"核对配电箱\" 设备。",
+    "",
+    "系统检测到您有未保存的编辑草稿（fixed-100-light.xlsx，最后编辑时间：2026-11-22 18:43:27，共 100 条数据）。\n\n是否载入该草稿并继续工作？",
+    "已载入进度：52 条记录的旧绑定/确认状态无法核验或已失效，已统一降为「待确认」，请逐项复核后再导出。",
+    "",
+    "系统检测到您有未保存的编辑草稿（legacy-fixture.xlsx，最后编辑时间：2026-11-22 18:43:27，共 2 条数据）。\n\n是否载入该草稿并继续工作？",
+    "旧草稿/会话隔离提示：1 条记录缺少可核验的服务端文档/源行身份，已隔离为只读复核，不会提交可信反馈；如需新采集反馈请重新上传清单。",
+    "系统检测到您有未保存的编辑草稿（legacy-fixture.xlsx，最后编辑时间：2026-11-22 18:43:27，共 1 条数据）。\n\n是否载入该草稿并继续工作？",
+    "旧草稿/会话隔离提示：1 条记录缺少可核验的服务端文档/源行身份，已隔离为只读复核，不会提交可信反馈；如需新采集反馈请重新上传清单。",
+    "错误: 文件头签名与标准 .xlsx (OOXML ZIP) 格式不符，请确认文件未损坏且非其他格式改名",
+    "比对处理失败: 隔离后台失败验收"
+  ],
+  "exit_code": 0
+}

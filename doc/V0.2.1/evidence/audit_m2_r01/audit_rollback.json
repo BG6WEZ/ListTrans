@@ -1,0 +1,35 @@
+{
+  "exit_code": 0,
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "rollback_patch_sha256": "4c657b374953019fc626a1c7c1edcd5c6673649db9bb575a55de858ee1163eb0",
+  "byte_identical": {
+    "app/binding_decisions.py": "2e225e67c5c62e4b6db9e4ee470171f8266e6fbb37aee3e174d81a80021c93ef",
+    "app/server.py": "24913205aeba406d15c45d0fc27c3fe84334835c288c899302dc40f5dc733898",
+    "app/flywheel_db.py": "a26fb8af195b3802737f814f7745bcf4533c06f426883988d26f5fe02acae574",
+    "web/app.js": "69b5a6bcbd353f8a0e97ed753ade8793b77b826d50977066530c231ac6e6a8da",
+    "web/index.html": "3f2e037ceca73f5f803fdf9514ae9aa1f001bb4c0c82ab77b8db1f1750047bec",
+    "web/index.css": "d7ca94466a6116d391b9c6638b52204cb09f66d39b4bb4d5ffe3c2cbc298a989",
+    "tests/test_m5_file_boundary_and_compat.py": "957458bb61d105e198647a83c6c747fe68cb2b1859d16ea84eeb3f30abf4ff91",
+    "tests/test_v020_m1_bom.py": "0ae326c87b2eb239d341a8fcd505ea21a52a3b560c5a0020fe1c37a977edeea6",
+    "tests/test_feedback_miner.py": "49e8bcc4442b0bed70a070cb9d38d6bbddced5d11f06f04366174d5a74e8b321"
+  },
+  "added_removed_in_copy": [
+    "app/source_binding_review.py",
+    "tests/test_v021_m2_priority_review.py"
+  ],
+  "preserve_schema_rollback": {
+    "auth": {
+      "retained_rows": {
+        "source_binding_decisions": 1,
+        "priority_binding_receipts": 1,
+        "priority_binding_outbox": 1
+      },
+      "legacy_reads_and_writes": true,
+      "legacy_cannot_use_priority_credentials": true
+    },
+    "materials": {
+      "legacy_read_write": "legacy works",
+      "priority_rows_retained": 1
+    }
+  }
+}

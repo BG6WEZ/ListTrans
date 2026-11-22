@@ -1,0 +1,21 @@
+{
+  "verdict": "PASS",
+  "isolated_paths": {
+    "db_manager.get_db_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\materials.db",
+    "auth_manager.get_auth_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\auth.db",
+    "flywheel_db.open_flywheel_tx_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\materials.db"
+  },
+  "expected_paths": {
+    "db_manager.get_db_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\materials.db",
+    "auth_manager.get_auth_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\auth.db",
+    "flywheel_db.open_flywheel_tx_connection": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\audit_m2_dbpath_lq7z343s\\materials.db"
+  },
+  "repo_db_sha_unchanged": true,
+  "auth_m2_tables_created_in_isolated_db": [
+    "priority_binding_outbox",
+    "priority_binding_receipts",
+    "source_binding_decisions"
+  ],
+  "materials_m2_table_created_in_isolated_db": true,
+  "note": "db_manager 未定义 _resolve_db_path；flywheel_db 回退到导入期 db_manager.DB_PATH（由 MATERIALS_DB_PATH 初始化）。本探针在导入前设置环境变量，符合 conftest/stage 与 M2 脚本的实际调用顺序。"
+}

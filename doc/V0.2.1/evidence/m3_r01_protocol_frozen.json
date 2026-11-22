@@ -1,0 +1,54 @@
+{
+  "task": "V021-M3/R01",
+  "preset_date_asia_shanghai": "2026-11-22",
+  "parameter_source": "Prior-only, no fit or result-driven parameter selection. Frozen before Train/Dev matching or related metrics.",
+  "model": {
+    "id": "BAAI/bge-reranker-base",
+    "revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+    "weights_sha256": "ced967c45fd1902eb92716c9ceeca7c95a936770ea9db611f5a841b926e33fbd",
+    "device": "cpu",
+    "precision": "float32",
+    "cpu_threads": 4,
+    "interop_threads": 1,
+    "padding": "longest in request",
+    "truncation": "longest_first",
+    "batch": "one batch per query, no cross-query cache",
+    "max_sequence_tokens": 128,
+    "max_chars_per_side": 512,
+    "load_timeout_seconds": 45,
+    "inference_timeout_seconds": 2,
+    "max_simultaneous_workers_per_app_process": 1,
+    "busy_policy": "immediate OFF fallback",
+    "worker_error_policy": "terminate worker, remain degraded until app process restart"
+  },
+  "policy": {
+    "switch": "LISTTRANS_V021_M3_RERANKER",
+    "default": "off",
+    "depth": 20,
+    "query_fields": ["name", "specification", "unit"],
+    "candidate_fields": ["name", "specification", "unit"],
+    "text": "Existing matcher fields in listed order. Strip each populated field, join with one space, strip outer whitespace and truncate to max_chars_per_side.",
+    "eligible": "Legacy profile only and only with previous ranking and automatic acceptance experiments inactive. Skip the whole pool on exact_code. Restrict movement to contiguous live, uncapped, positive, finite, non-blocked prefix of frozen Top-20. Stop at hard conflict, expired/inactive code, protection for safety unknown or disagreement including unit ratio, or explicitly requested unverified field. Need at least two eligible scores with nonzero score range.",
+    "fusion": "stable descending clip(base_score + 3 * (2 * sigmoid(logit) - 1), original eligible minimum, original eligible maximum)",
+    "max_absolute_score_shift": 3,
+    "tie_break": "preserve baseline candidate order",
+    "evidence": "Replay original M0 evidence function on final full pool. Existing M0 stale-evidence and M2 authority checks continue to apply."
+  },
+  "evaluation": {
+    "inputs": {
+      "train": 842,
+      "dev": 218,
+      "heldout_policy": "Original gold and governance fixtures forbidden for opening. Use pre-existing Train/Dev-only materialized inputs and build/verify projected labels from independent frozen evidence.",
+      "projected_queries_sha256": "1c6a38fe59cb8cf70172117ea091e2d68768ba825b2d9a82bfee150bdfd5e678"
+    },
+    "modes": ["keyword", "vector"],
+    "arms": ["off", "on"],
+    "comparison": "Same staged V017 catalog/config/index and M2 implementation, separate serial fresh processes, ordered replay with original IDs paired. No changes based on Dev.",
+    "ranking_cohort": "V017 legacy core and governance answerable, non-blocked ranks; strict original target, equivalent approved alternative.",
+    "paired_ci": "95% deterministic percentile paired bootstrap (10000 replicates, seed 210301); paired wins/ties/losses by metric.",
+    "binding_ci": "Wilson 95%, null for zero adjudicable denominator. A tier counts at all rows; correctness uses adjudicable core answerable/explicit negatives and confirmed equivalent codes. Error automatic binding uses upload decision_status auto_accepted on adjudicable core, tracks unknown independently.",
+    "domain_floor": "Apply signed V017 cohort floors at corresponding rates on each domain cohort with n>=20 and require same-mode paired non-regression in Recall@100/200 and equivalent Hit@1; report all nine including cohorts below 20.",
+    "performance": "Five single plus one five-row upload warmups, ranking pass, 1060 real single route calls, 21 complete 50-row upload route calls plus 10-row tail excluded from upload quantiles. Nearest rank. Sample combined parent and model worker RSS across phases, report Windows per-process peak working set and combined maximum simultaneous working set.",
+    "selection": "Both ranking metrics Hit@1 and MRR@10 and A coverage strictly increase on Dev, A precision does not decrease and is adjudicable, zero erroneous auto bindings on frozen Train/Dev, protected probes and domain floors and all signed resource budgets pass. Candidate selection only, default OFF."
+  }
+}

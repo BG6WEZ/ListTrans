@@ -1,0 +1,22 @@
+{
+  "exit_code": 0,
+  "patch_sha256": "5660400e84f7fd2d164b688dfe44f263256babfda7281431cfafd81230545996",
+  "strip": 2,
+  "reverse_restored_sha256": {
+    "app/matcher.py": "3514a641bbf562649c30f0575336a3e88ac3ebbed6cf2d0474bdc12bc798ac2c",
+    "app/server.py": "fd49773c281ed5b2aa4457eea9b64149ce859a24b281acefc6b4f220176338ce",
+    "doc/V0.2.1/02_任务台账.md": "be4ceaa827ec4b5d6747b8fd4574513312d2b81185deec2ed25745b5aa9e7b0b"
+  },
+  "reverse_removed_new_files": [
+    "app/cross_encoder_reranker.py",
+    "tests/test_v021_m3_cross_encoder.py"
+  ],
+  "forward_restored_sha256": {
+    "app/matcher.py": "f6fc6d7db2b290240392732029abd5b4e1dae06343e6fa0a1ccad6aef805b5c2",
+    "app/server.py": "81bf25c8e5aad625af2198ada547dd4fe643c3ec56f91c180e2689b8b1d7334c",
+    "doc/V0.2.1/02_任务台账.md": "2da857838c5cdf613760d5c21670da0b67e30c0c0a8c43ed0bcffd262742a216",
+    "app/cross_encoder_reranker.py": "40f1014fcb5dae476ace9f8c0c9ac5757bf3f94c0473e871c87d64c3cf1ae92a",
+    "tests/test_v021_m3_cross_encoder.py": "9b88ada66e6e4169ca9dac5dfa2c888d38f7d38bed8107d5a5de3cf7a941f2ba"
+  },
+  "schema_changes": []
+}

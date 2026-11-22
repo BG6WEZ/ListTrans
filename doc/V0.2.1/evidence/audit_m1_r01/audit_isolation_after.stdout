@@ -1,0 +1,11 @@
+{
+  "verdict": "PASS",
+  "exit_code": 0,
+  "business_hash_unchanged": true,
+  "business_changes": [],
+  "pending_modules": [],
+  "hard_errors": [],
+  "isolation_root": "C:\\Users\\tlyer\\AppData\\Local\\Temp\\listtrans_m0_verify_f0uy3z4h",
+  "out": "doc\\V0.2.1\\evidence\\audit_m1_r01\\audit_isolation_after.json",
+  "missing_deps": []
+}

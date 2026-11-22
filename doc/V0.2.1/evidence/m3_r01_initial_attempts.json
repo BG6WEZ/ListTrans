@@ -1,0 +1,61 @@
+{
+  "protocol_guard_preflight": {
+    "exit_code": 1,
+    "cause": "hoisted typed protocol digest literal contained an extra character",
+    "actual_matching_started": false
+  },
+  "specialist_preflight": {
+    "exit_code": 1,
+    "count_pass": 20,
+    "count_fail": 1,
+    "cause": "synthetic scoring fixture had not initialized its isolated materials table"
+  },
+  "keyword_on_checksum_fallback": {
+    "exit_code": 2,
+    "cause": "transcribed tokenizer_config digest did not match the signed freeze",
+    "degraded_status_counts": {
+      "rank": {
+        "degraded:model_hash_mismatch": 68,
+        "skipped:direct_code_or_short_pool": 223,
+        "skipped:no_movable_range": 769
+      },
+      "single": {
+        "degraded:model_hash_mismatch": 68,
+        "skipped:direct_code_or_short_pool": 223,
+        "skipped:no_movable_range": 769
+      },
+      "upload": {
+        "degraded:model_hash_mismatch": 67,
+        "skipped:direct_code_or_short_pool": 223,
+        "skipped:no_movable_range": 770
+      }
+    },
+    "full_selected_row_differences": {
+      "rows": 0,
+      "protected_probes": 0,
+      "priority_dispositions": 0
+    },
+    "arm_source_effective": "OFF fallback on every eligible row; excluded from ON result",
+    "raw_sha256": "6ec33cb3754b3d1a9bb5f8378999b7903fde13bc740a02e38974c1063a0c2e00"
+  },
+  "retries": [
+    "correct digest literal to the frozen file hash; JSON strategy unchanged",
+    "initialize the isolated fixture schema",
+    "copy the coordinator tokenizer_config pin verbatim; assert all runtime pins against dispatch; protocol and model assets unchanged",
+    "Omit empty fields from the frozen single-separator input; rerun BGE ON and the guarded suite against delivery bytes."
+  ],
+  "serial_before_text_fix": {
+    "exit_code": 1,
+    "passed": 542,
+    "failed": 1,
+    "deselected": 1,
+    "cause": "pre-registered single separator contract violated by retaining a separator for an empty optional field",
+    "test_assertion_preserved": true,
+    "evidence": "m3_r01_serial.log"
+  },
+  "vector_on_before_text_fix": {
+    "execution_exit_code": 0,
+    "raw_sha256": "d13cff3e1a9ac1a468c76defab52f4dd446fc1f5ba820ef337042fc4b35635e6",
+    "excluded_from_final_results": true
+  }
+}

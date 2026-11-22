@@ -1,0 +1,372 @@
+{
+  "mode": "keyword",
+  "index": {
+    "enabled": false
+  },
+  "staged_inputs": {
+    "catalog": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "config": {
+      "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+    },
+    "cache": {},
+    "model": {}
+  },
+  "confirmed_definition": "Successful isolated HTTP commit after Train/Dev gold-supported simulated review",
+  "by_split_and_professional": {
+    "train": {
+      "医气": {
+        "rows": 147,
+        "priority": 0,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "弱电": {
+        "rows": 161,
+        "priority": 4,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "强电": {
+        "rows": 288,
+        "priority": 26,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "暖通": {
+        "rows": 246,
+        "priority": 0,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      }
+    },
+    "dev": {
+      "暖通": {
+        "rows": 13,
+        "priority": 3,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      },
+      "装饰": {
+        "rows": 205,
+        "priority": 1,
+        "eligible": 0,
+        "confirmed": 0,
+        "not_acted_without_gold_evidence": 0
+      }
+    }
+  },
+  "probes": {
+    "GT-0004": {
+      "initial": {
+        "tier": "D",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [],
+        "actual_prefilled": false,
+        "reason_codes": [
+          "no_candidate"
+        ],
+        "ranking_score": null,
+        "distinct_margin": null,
+        "competitor_code": null,
+        "ranking_evidence_status": "unavailable",
+        "uncapped": null,
+        "priority_review_unavailable": false,
+        "model_output": null,
+        "field_comparisons": [],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "医气"
+      },
+      "eligible": false,
+      "reason": "not_priority",
+      "confirmed": false,
+      "split": "train"
+    },
+    "GT-0300": {
+      "initial": {
+        "tier": "A",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [
+          {
+            "code": "2.25.15.0143",
+            "name": "医用LED气密净化灯",
+            "specification": "1200*300*10,吸顶安装,48W",
+            "unit": "套",
+            "brand": "台夏",
+            "category": "格栅灯（荧光灯盘）",
+            "qty": 1.0,
+            "qty_ratio": 1.0
+          }
+        ],
+        "actual_prefilled": true,
+        "reason_codes": [
+          "priority_review"
+        ],
+        "ranking_score": 98.9,
+        "distinct_margin": 34.60000000000001,
+        "competitor_code": "2.25.15.0013",
+        "ranking_evidence_status": "current",
+        "uncapped": true,
+        "priority_review_unavailable": false,
+        "model_output": 0.7795584841208083,
+        "field_comparisons": [
+          {
+            "field": "功率",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "40-50w",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": true
+          },
+          {
+            "field": "尺寸",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1200*300",
+            "candidate_value": "1200*300",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "类型",
+            "state": "missing",
+            "missing_side": "both",
+            "query_value": null,
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "专业",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "强电",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "单位倍率",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "套",
+            "candidate_value": "套",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "核心规格",
+            "state": "different",
+            "missing_side": null,
+            "query_value": "1.名称：医用LED气密净化灯\n2.规格：1200*300,40-50w\n3.安装形式：吸顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整",
+            "candidate_value": "1200*300*10,吸顶安装,48W",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          }
+        ],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "强电"
+      },
+      "eligible": false,
+      "reason": "requested_unverified",
+      "confirmed": false,
+      "split": "train"
+    },
+    "GT-0551": {
+      "initial": {
+        "tier": "A",
+        "subtype": null,
+        "source": "matcher",
+        "effective_bindings": [
+          {
+            "code": "2.28.03.0227",
+            "name": "无卤低烟阻燃B级交联聚乙烯绝缘布电线",
+            "specification": "WDZB-BYJ 1.5",
+            "unit": "m",
+            "brand": "",
+            "category": "电气装备用电线电缆",
+            "qty": 1.0,
+            "qty_ratio": 1.0
+          }
+        ],
+        "actual_prefilled": true,
+        "reason_codes": [
+          "priority_review"
+        ],
+        "ranking_score": 85.0,
+        "distinct_margin": 0.09999999999999432,
+        "competitor_code": "2.28.03.7808",
+        "ranking_evidence_status": "current",
+        "uncapped": false,
+        "priority_review_unavailable": false,
+        "model_output": 0.6940953224347065,
+        "field_comparisons": [
+          {
+            "field": "主截面",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": 1.5,
+            "candidate_value": 1.5,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "主芯数",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": 1,
+            "candidate_value": 1,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "型号族",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "BYJ",
+            "candidate_value": "BYJ",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "截面积",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1.5",
+            "candidate_value": 1.5,
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "材质",
+            "state": "missing",
+            "missing_side": "candidate",
+            "query_value": "铜",
+            "candidate_value": null,
+            "safety_critical_unknown": false,
+            "requested_unverified": true
+          },
+          {
+            "field": "芯数",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "1",
+            "candidate_value": "1",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "专业",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "强电",
+            "candidate_value": "强电",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "单位倍率",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "m",
+            "candidate_value": "m",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "型号",
+            "state": "equal",
+            "missing_side": null,
+            "query_value": "wdzb-byj",
+            "candidate_value": "wdzb-byj",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          },
+          {
+            "field": "核心规格",
+            "state": "different",
+            "missing_side": null,
+            "query_value": "1.名称：配线\n2.配线形式：管内穿线\n3.规格：WDZB-BYJ-1.5mm²\n4.材质：铜芯线\n5.工作内容：穿引线、扫管、穿线、编号、焊接包头、线路检测、调试",
+            "candidate_value": "WDZB-BYJ 1.5",
+            "safety_critical_unknown": false,
+            "requested_unverified": false
+          }
+        ],
+        "db_revision": 0,
+        "policy_version": "v021-m0-initial-match-v1",
+        "professional": "强电"
+      },
+      "eligible": false,
+      "reason": "score_capped",
+      "confirmed": false,
+      "split": "train"
+    }
+  },
+  "priority_disposition_counts": {
+    "requested_unverified": 13,
+    "no_distinct_margin": 4,
+    "score_capped": 17
+  },
+  "priority_disposition_by_sample": {
+    "GT-0258": "requested_unverified",
+    "GT-0259": "requested_unverified",
+    "GT-0260": "requested_unverified",
+    "GT-0298": "no_distinct_margin",
+    "GT-0300": "requested_unverified",
+    "GT-0525": "requested_unverified",
+    "GT-0526": "requested_unverified",
+    "GT-0527": "requested_unverified",
+    "GT-0528": "requested_unverified",
+    "GT-0529": "requested_unverified",
+    "GT-0536": "requested_unverified",
+    "GT-0537": "requested_unverified",
+    "GT-0538": "requested_unverified",
+    "GT-0542": "score_capped",
+    "GT-0543": "score_capped",
+    "GT-0544": "score_capped",
+    "GT-0545": "score_capped",
+    "GT-0546": "score_capped",
+    "GT-0547": "score_capped",
+    "GT-0548": "score_capped",
+    "GT-0549": "score_capped",
+    "GT-0550": "score_capped",
+    "GT-0551": "score_capped",
+    "GT-0552": "score_capped",
+    "GT-0553": "score_capped",
+    "GT-0554": "score_capped",
+    "GT-0556": "score_capped",
+    "GT-0577": "score_capped",
+    "GT-0578": "score_capped",
+    "GT-0973": "requested_unverified",
+    "GT-1028": "score_capped",
+    "GT-1215": "no_distinct_margin",
+    "GT-1216": "no_distinct_margin",
+    "GT-1217": "no_distinct_margin"
+  },
+  "heldout_payloads_decoded": 0,
+  "heldout_rows_used": 0
+}

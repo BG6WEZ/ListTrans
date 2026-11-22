@@ -1,0 +1,47 @@
+{
+  "exit_code": 0,
+  "method": "Re-run the real application using byte-exact reconstructed M2 matcher/server, then compare selected outputs by immutable Train/Dev ID",
+  "heldout_rows_read": 0,
+  "modes": {
+    "keyword": {
+      "checks": {
+        "rows": {
+          "n": 1060,
+          "differences": []
+        },
+        "protected_probes": {
+          "n": 6,
+          "differences": []
+        },
+        "priority_dispositions": {
+          "n": 35,
+          "differences": []
+        }
+      },
+      "raw_sha256": {
+        "off": "8cd0f0de8adaa8e60b8c9ad2c31049cd0c8c14e46c7ff88da0dcd16472974a0e",
+        "m2": "f7569b5fb6bd13183c7fa0a7cfe18802f9d05cc98c8bff29f27587434df7b96c"
+      }
+    },
+    "vector": {
+      "checks": {
+        "rows": {
+          "n": 1060,
+          "differences": []
+        },
+        "protected_probes": {
+          "n": 6,
+          "differences": []
+        },
+        "priority_dispositions": {
+          "n": 37,
+          "differences": []
+        }
+      },
+      "raw_sha256": {
+        "off": "dc5ca0ffcc046a2003e4bf0383af88f6976066318f706c0b629cdf744e03ce17",
+        "m2": "fd732e60ee416cc994cfbb4d28fbfc5a34b9eaa4669dc83ef050e04b3ca449ac"
+      }
+    }
+  }
+}

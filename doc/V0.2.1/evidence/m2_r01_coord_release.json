@@ -1,0 +1,313 @@
+{
+  "date": "2026-11-22T20:47:46+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "task": "V021-M2/R01",
+  "verdict": "RELEASED",
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "v014_rollback_anchor": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "plan_r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "r2_hash_unchanged": true,
+  "auto_binding_rules_empty": true,
+  "default_switches_frozen_off": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false"
+  },
+  "baseline_audit": {
+    "dispatch_entries": 82,
+    "unchanged_exact": 76,
+    "changed_code_files_count": 6,
+    "changed_code_files": [
+      "app/binding_decisions.py",
+      "app/flywheel_db.py",
+      "app/server.py",
+      "web/app.js",
+      "web/index.css",
+      "web/index.html"
+    ],
+    "added_code_and_test_files": [
+      "app/source_binding_review.py",
+      "tests/test_v021_m2_priority_review.py"
+    ],
+    "frozen_code_and_test_11_exact": true,
+    "frozen_code_and_test_mismatches": [],
+    "unexpected_diffs": [],
+    "sealed_assets_git_metadata": {
+      "tests/fixtures/golden_governance_v1.json": {
+        "head_blob": "5761e77d543189374e78cc09970acb4a5449a6f6",
+        "head_blob_matches": true,
+        "git_diff_empty": true
+      },
+      "tests/fixtures/golden_set_v1.json": {
+        "head_blob": "f906169cb413c424915ef1b86745226e45ffff6c",
+        "head_blob_matches": true,
+        "git_diff_empty": true
+      }
+    }
+  },
+  "delivery_audit": {
+    "total": 43,
+    "exact_match": 42,
+    "expected_ledger_progression": [
+      {
+        "rel": "doc/V0.2.1/02_任务台账.md",
+        "delivery_sha256": "cccc47fea1475322412cc574816876ada8733195b0d8cfa9e5ca50940e7d4586",
+        "handover_sha256": "04e1c3271bf4fe49e083fb6fe5b162bf7856c90f47c8132937370947ef1daf95",
+        "current_audit_updated_sha256": "6703558b0aeee2920d5490320991406dfc911096ab11589cc5b76ddbf5d40dea"
+      }
+    ],
+    "unexpected_diffs": [],
+    "dev_summary_sha256": "84e560e75d27d59894c5a020050fa0d4a62fd23b6286638ac1aaa5b65de31d6b",
+    "handover_ruling_sha256": "c81bf89af4e9e63e6164c8512e04dc9aa0eb496e1e6b72b078a05fb35f68c2f6",
+    "audit_summary_sha256": "5f9b9c0da07872a7e9b66fab6ecfaf0e46368405c70f3515f4d80c37858b38df",
+    "audit_evidence_file_count": 44
+  },
+  "reanchored_33_business_snapshot_audit": {
+    "reanchored_asset_count": 33,
+    "file_diffs": [],
+    "tree_diffs": [],
+    "zero_diff": true,
+    "security_log_restored_exact": true,
+    "immutable_db_verification": {
+      "app/materials.db": {
+        "sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+        "matches_anchor": true,
+        "quick_check": "ok",
+        "materials_count": 26863,
+        "flywheel_data_rows": 0,
+        "m0_column_leaked": false,
+        "m2_table_leaked": false
+      },
+      "app/auth.db": {
+        "sha256": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+        "matches_anchor": true,
+        "quick_check": "ok",
+        "m2_tables_leaked": false
+      }
+    }
+  },
+  "coordinator_independent_checks": {
+    "node_syntax_check_exit": 0,
+    "isolation_before": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "exit_code": 0,
+      "verdict": "PASS",
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": []
+    },
+    "focused_cross_package_pytest": {
+      "modules": [
+        "tests/test_v021_m2_priority_review.py",
+        "tests/test_v021_m0_initial_match.py",
+        "tests/test_binding_decisions.py",
+        "tests/test_m5_file_boundary_and_compat.py",
+        "tests/test_v020_m1_bom.py",
+        "tests/test_feedback_miner.py",
+        "tests/test_v019_m3_review.py"
+      ],
+      "passed": 88,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "duration_sec": 41.06
+    },
+    "independent_real_chrome_cdp": {
+      "exit_code": 0,
+      "engine": "Chrome/158.0.8127.18",
+      "exceptions": [],
+      "request_count": 120,
+      "dialog_count": 25,
+      "fixed_dark": {
+        "prefilled": 63,
+        "total": 100,
+        "exportable_before": 1,
+        "exportable_after": 11,
+        "checks": {
+          "A": 21,
+          "B": 32,
+          "C": 20,
+          "D": 27,
+          "low_score_prefill": 10,
+          "safety_missing": 10,
+          "unprefilled": 37
+        },
+        "layout": {
+          "theme": "dark",
+          "overflow": false,
+          "cardsClipped": false,
+          "navClipped": false,
+          "listHeight": 228
+        },
+        "elapsed_ms": 1138,
+        "reviewed": 10,
+        "retained": 10,
+        "unreviewed": 53,
+        "adoption": 1,
+        "safety_export": 422
+      },
+      "fixed_light": {
+        "prefilled": 63,
+        "total": 100,
+        "exportable_before": 1,
+        "exportable_after": 11,
+        "checks": {
+          "A": 21,
+          "B": 32,
+          "C": 20,
+          "D": 27,
+          "low_score_prefill": 10,
+          "safety_missing": 10,
+          "unprefilled": 37
+        },
+        "layout": {
+          "theme": "light",
+          "overflow": false,
+          "cardsClipped": false,
+          "navClipped": false,
+          "listHeight": 228
+        },
+        "elapsed_ms": 1078,
+        "reviewed": 10,
+        "retained": 10,
+        "unreviewed": 53,
+        "adoption": 1,
+        "safety_export": 422
+      },
+      "checks": [
+        {
+          "name": "single and batch rematch, changed current binding, draft round trip",
+          "rematches": 3,
+          "current": [
+            "CDP-B"
+          ]
+        },
+        {
+          "name": "native reject preserves frozen first-match totals"
+        },
+        {
+          "name": "legacy and partial recovery via authoritative annotate"
+        },
+        {
+          "name": "native BOM v1",
+          "components": 2
+        },
+        {
+          "name": "keyword-scale workbench",
+          "prefilled": 510,
+          "total": 1060,
+          "counts": [
+            34,
+            205,
+            344,
+            477
+          ]
+        },
+        {
+          "name": "narrow desktop layout",
+          "theme": "light",
+          "overflow": false,
+          "cardsClipped": false,
+          "navClipped": false,
+          "listHeight": 239
+        },
+        {
+          "name": "narrow desktop dark layout",
+          "theme": "dark",
+          "overflow": false,
+          "cardsClipped": false,
+          "navClipped": false,
+          "listHeight": 239
+        },
+        {
+          "name": "zero DTO, rejected XLSX, failed async task",
+          "precheckStatus": 400
+        },
+        {
+          "name": "M2 priority review and export",
+          "theme": "light",
+          "defaultSelected": 0,
+          "eligible": 1,
+          "viewOnly": 1,
+          "requiresExpandedComparison": true,
+          "export": 200,
+          "editExport": 422
+        },
+        {
+          "name": "M2 priority review and export",
+          "theme": "dark",
+          "defaultSelected": 0,
+          "eligible": 1,
+          "viewOnly": 1,
+          "requiresExpandedComparison": true,
+          "export": 200,
+          "editExport": 422
+        }
+      ]
+    },
+    "screenshots_visually_inspected": [
+      "doc/V0.2.1/evidence/audit_m2_r01/browser/priority-light.png",
+      "doc/V0.2.1/evidence/audit_m2_r01/browser/priority-dark.png",
+      "doc/V0.2.1/evidence/audit_m2_r01/browser/workbench-light.png",
+      "doc/V0.2.1/evidence/audit_m2_r01/browser/workbench-1024-dark.png"
+    ]
+  },
+  "audit_received_evidence": {
+    "focused_4_modules_passed": 43,
+    "dual_mode_replay": {
+      "keyword": {
+        "train_rows": 842,
+        "dev_rows": 218,
+        "priority": 34,
+        "eligible": 0,
+        "confirmed": 0
+      },
+      "vector": {
+        "train_rows": 842,
+        "dev_rows": 218,
+        "priority": 36,
+        "eligible": 1,
+        "confirmed": 1
+      }
+    },
+    "serial_guard": {
+      "passed": 520,
+      "deselected": 1,
+      "exit_code": 0,
+      "duration_sec": 801.89
+    },
+    "rule_gate_18_zero_diff": true,
+    "rollback_9_files_byte_identical_and_dual_db_ok": true,
+    "db_path_probe_verdict": "PASS"
+  },
+  "m3_readiness_check": {
+    "model_offline_directories": [
+      "bge-small-zh-v1.5",
+      "paraphrase-multilingual-MiniLM-L12-v2"
+    ],
+    "authorized_offline_cross_encoder_present": false,
+    "m3_status": "CONDITIONAL_PENDING_NOT_DISPATCHED"
+  },
+  "adjudications": {
+    "OBS-COORD-V021-M2-01": "P3 观察，留痕不阻断。原 35 项开工快照保留不覆写；33 项在盘快照经审核与统筹两次复核零差，两主库 SHA 不变、零 schema 泄漏；无裸连仓库主库路径已由静态与动态探针实证。归因继续诚实标注 unknown。",
+    "OBS-AUDIT-V021-M2-01": "P3 观察，签认留痕不阻断。确认 app/flywheel_db.py:46-55 查找 db_manager._resolve_db_path 未定义而回退至导入期 db_manager.DB_PATH，属 M0 既有实现（非 M2 引入），当前 conftest 与全部脚本均在导入前注入隔离路径、未导致任何越界；登记归后续工程硬化项（或在 V0.2.1 终审记录中列为已知 P3 留痕，若后续需要动态切换 MATERIALS_DB_PATH 须在 db_manager 补齐 _resolve_db_path）。",
+    "audit_self_effect_note": "审核首轮 DB 探针未设 LOG_DIR 致 logs/security.log 追加 2 行非产品缺陷日志，已逐字节还原至 93acb689… 并复跑闭环；统筹实测 security_log_restored_exact=true，予以签认闭环。",
+    "HOLD-M0-01": "留出边界待验证（test_frozen_assignment_covers_same_sheet_and_near_query_edges 须解码 Test 160）；本轮未触碰 Test 160，维持开放至 V0.2.1 终验阶段获授权的一次性 Test 160 只读复验统一收口。"
+  }
+}

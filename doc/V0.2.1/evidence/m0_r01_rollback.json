@@ -1,0 +1,19 @@
+{
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "baseline_entries_verified": 80,
+  "implementation_patch_sha256": "8ca41a418a0bae9c58f32fd9a9a16f111e3eac41f2eea98571e9401b39a4d8c0",
+  "restored_baseline_sha256": {
+    ".dockerignore": "76a933dd31f7381e9fd6fb62c5b8d8c25aa6569ac9ee20ff08c1fb3fa2b66a35",
+    "Dockerfile": "86d798f3fde80fbbbdeb218a94625f0bd58ea1ffa42c0ae3f3352945406ce466",
+    "app/acceptance_calibration.py": "d986e5afba7afae8efb153113e0d95d065a009f44b1baa4318c284bcca1c9951",
+    "app/feedback_contract.py": "9a978a054aa5ae598a46f2cc35e748f315f226b2b5424f8ba42d1c43de6f3af6",
+    "app/flywheel_db.py": "5277096a601817f94c6e489dbe605b813fd3e646496c68864b4c6014dd41b260",
+    "app/matcher.py": "9b285e6ecec524dd14a9a7ad0d86abae5c25178a745acd85ea9fd505d7387bca",
+    "app/server.py": "efe76b8645d375867756ad2c93b9d4e69c4f87629b46d70ea43805117d611b2d"
+  },
+  "added_files_removed_from_temporary_copy": [
+    "app/match_assessment.py",
+    "tests/test_v021_m0_initial_match.py"
+  ],
+  "old_schema_initializer_and_legacy_insert_preserve_v021_snapshot": true
+}

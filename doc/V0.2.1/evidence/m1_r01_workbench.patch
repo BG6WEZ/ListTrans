@@ -1,0 +1,926 @@
+diff --git a/web/app.js b/web/app.js
+index dea9063..39d9523 100644
+--- a/web/app.js
++++ b/web/app.js
+@@ -137,6 +137,7 @@ let selectedItem = null; // Selected row dict
+ let currentFilter = 'all'; // Current filter tab
+ let searchQuery = ''; // Search query on left list
+ let currentProfessional = '全部'; // Active professional tab filter
++let initialFilter = '';
+ let professionals = []; // List of professionals detected in uploaded list
+ let originalFileName = ""; // Uploaded original list filename
+ let currentDocumentId = ""; // Server-issued document ID for current upload/restored workbook
+@@ -853,6 +854,19 @@ function initEventListeners() {
+         });
+     });
+ 
++    document.querySelectorAll('[data-initial-filter]').forEach(button => {
++        button.addEventListener('click', () => {
++            initialFilter = initialFilter === button.dataset.initialFilter ? '' : button.dataset.initialFilter;
++            refreshInitialFilter();
++        });
++    });
++    document.getElementById('initial-score-filter').addEventListener('change', refreshInitialFilter);
++    document.getElementById('clear-initial-filter').addEventListener('click', () => {
++        initialFilter = '';
++        document.getElementById('initial-score-filter').checked = false;
++        refreshInitialFilter();
++    });
++
+     // Left panel Search input
+     const listSearch = document.getElementById('list-search');
+     listSearch.addEventListener('input', (e) => {
+@@ -1326,6 +1340,7 @@ async function resetAndEndTask() {
+     currentFilter = 'all';
+     currentPage = 1;
+     selectedItem = null;
++    resetInitialFilters();
+     professionals = ['全部'];
+     currentProfessional = '全部';
+     
+@@ -1336,8 +1351,8 @@ async function resetAndEndTask() {
+     // Reset filter tabs DOM
+     const filterTabs = document.querySelectorAll('.filter-tab');
+     filterTabs.forEach(t => {
+-        if (t.dataset.filter === 'all') t.classList.add('active');
+-        else t.classList.remove('active');
++        t.classList.toggle('active', t.dataset.filter === 'all');
++        t.setAttribute('aria-pressed', String(t.dataset.filter === 'all'));
+     });
+     
+     // Toggle UI views
+@@ -1377,6 +1392,7 @@ async function handleFileUpload(file) {
+         return;
+     }
+ 
++    document.getElementById('initial-overview').hidden = true;
+     showLoading("正在上传并分析清单...", "系统正在初始化后台比对任务...", 0);
+     
+     // Show and reset the segmented progress container
+@@ -1449,11 +1465,11 @@ async function handleFileUpload(file) {
+                     window.uploadPollInterval = null;
+                     hideLoading();
+                     processUploadResult(taskState.result, file.name, taskState);
+-                } else if (taskState.status === 'failed') {
++                } else if (['failed', 'cancelled', 'timed_out'].includes(taskState.status)) {
+                     clearInterval(window.uploadPollInterval);
+                     window.uploadPollInterval = null;
+                     hideLoading();
+-                    alert(`比对处理失败: ${taskState.error}`);
++                    alert(`比对处理失败: ${taskState.error || taskState.current_step || taskState.status}`);
+                 }
+             } catch (err) {
+                 console.error("Error polling task status:", err);
+@@ -1481,17 +1497,18 @@ function processUploadResult(resultItems, fileName, taskState = null) {
+     if (listSearch) listSearch.value = '';
+     
+     currentFilter = 'all';
++    resetInitialFilters();
+     const filterTabs = document.querySelectorAll('.filter-tab');
+     filterTabs.forEach(t => {
+-        if (t.dataset.filter === 'all') t.classList.add('active');
+-        else t.classList.remove('active');
++        t.classList.toggle('active', t.dataset.filter === 'all');
++        t.setAttribute('aria-pressed', String(t.dataset.filter === 'all'));
+     });
+     
+     activeSessionId = null;
+     currentPage = 1;
+     selectedItem = null;
+ 
+-    items = resultItems;
++    items = uniqueWorkbenchRows(resultItems);
+     const firstItem = (items && items.length > 0) ? items[0] : null;
+     currentDocumentId = (taskState && taskState.document_id) || (firstItem && firstItem.document_id) || '';
+     currentUploadTaskId = (firstItem && firstItem.upload_task_id) || '';
+@@ -1506,13 +1523,13 @@ function processUploadResult(resultItems, fileName, taskState = null) {
+         }
+         item._event_seq = Number(item.max_event_seq || 0);
+         item._feedback_seq = Number(item.max_feedback_seq || 0);
+-        item.bindings ??= [];
++        initializeWorkbenchBinding(item);
+     });
+     
+     // Initialize professional list
+     const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
+     professionals = ['全部', ...uniqueProfs];
+-    currentProfessional = uniqueProfs.includes('暖通') ? '暖通' : uniqueProfs[0] || '全部';
++    currentProfessional = '全部';
+     
+     // Render professional tabs
+     renderProfessionalTabs();
+@@ -1526,7 +1543,8 @@ function processUploadResult(resultItems, fileName, taskState = null) {
+     }
+     document.getElementById('welcome-slate').style.display = 'none';
+     document.getElementById('workbench').style.display = 'flex';
+-    document.getElementById('export-btn').disabled = false;
++    document.getElementById('initial-overview').hidden = false;
++    document.getElementById('export-btn').disabled = items.length === 0;
+     
+     const saveTrigger = document.getElementById('save-trigger');
+     if (saveTrigger) saveTrigger.style.display = 'inline-flex';
+@@ -1552,7 +1570,8 @@ function renderProfessionalTabs() {
+     const container = document.getElementById('prof-tabs');
+     container.innerHTML = '';
+     
+-    const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
++    const uniqueProfs = [...new Set(items.map(workbenchProfessional))];
++    if (!uniqueProfs.includes(currentProfessional)) currentProfessional = '全部';
+     
+     if (uniqueProfs.length === 0) {
+         wrapper.style.display = 'none';
+@@ -1566,6 +1585,8 @@ function renderProfessionalTabs() {
+     tabs.forEach(prof => {
+         const btn = document.createElement('button');
+         btn.className = `prof-tab ${currentProfessional === prof ? 'active' : ''}`;
++        btn.type = 'button';
++        btn.setAttribute('aria-pressed', String(currentProfessional === prof));
+         btn.innerText = prof;
+         btn.addEventListener('click', () => {
+             currentProfessional = prof;
+@@ -1617,25 +1638,28 @@ function renderTable() {
+         const statusHtml = `<span class="row-status-pill" data-state="${state}"
+             title="${escapeHtml(item.decision_reason || REVIEW_LABELS[state])}">${REVIEW_LABELS[state]}</span>`;
+ 
+-        let codeDisplay = '-';
+-        if (item.bindings && item.bindings.length > 0) {
+-            if (item.bindings.length === 1) {
+-                codeDisplay = item.bindings[0].code;
+-            } else {
+-                codeDisplay = `${item.bindings[0].code} (+${item.bindings.length - 1})`;
+-            }
+-        }
++        tr.dataset.sourceRow = item.source_row_id || '';
++        const initial = item.initial_match;
++        const firstCode = bindingCodes(initial?.effective_bindings);
++        const currentCode = bindingCodes(item.bindings);
+ 
+         tr.innerHTML = `
+             <td>${escapeHtml(item.original_row_idx)}</td>
+             <td>
+                 <div style="font-weight: 500;">${escapeHtml(item.original_name)}</div>
+-                <div style="font-size: 11px; color: var(--color-text-muted); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
++                <div class="workbench-row-spec">
+                     ${escapeHtml((item.original_spec || '').replace(/\n/g, ' '))}
+                 </div>
+             </td>
+-            <td><code class="row-code-lbl">${escapeHtml(codeDisplay)}</code></td>
+-            <td>${statusHtml}</td>
++            <td class="initial-row-result">
++                <div class="workbench-row-note">${escapeHtml(initialRowLabel(initial))}</div>
++                ${firstCode ? `<code class="row-code-lbl">${escapeHtml(firstCode)}</code>` : ''}
++            </td>
++            <td class="current-row-result">
++                ${currentCode ? `<code class="row-code-lbl">${escapeHtml(currentCode)}</code>`
++                    : state === 'needs_parameters' ? '' : '<span class="workbench-row-note">待选材</span>'}
++                ${statusHtml}
++            </td>
+         `;
+         
+         tr.addEventListener('click', () => {
+@@ -1702,9 +1726,103 @@ const REVIEW_LABELS = Object.freeze({
+ });
+ const pendingReviewEdits = new WeakMap();
+ 
++const INITIAL_TIER_LABELS = Object.freeze({
++    A: '优先核对', B: '普通候选', C: '重点核对或补参', D: '无有效匹配或冲突'
++});
++const INITIAL_REASON_LABELS = Object.freeze({
++    safety_missing: '安全参数待补', low_score_prefill: '低分已预填',
++    hard_conflict: '规格或单位冲突', invalid_code: '物料编码失效',
++    no_candidate: '无有效候选', unverified_binding: '规则或组合未核验',
++    no_initial_binding: '首选未填入'
++});
++
++function uniqueWorkbenchRows(rows) {
++    const seen = new Set();
++    return rows.filter(row => {
++        if (!row.source_row_id) return true;
++        if (seen.has(row.source_row_id)) return false;
++        seen.add(row.source_row_id);
++        return true;
++    });
++}
++
++function workbenchProfessional(item) {
++    return item.initial_match?.professional || item.professional || '暖通';
++}
++
++function freezeInitialMatch(value) {
++    if (value && typeof value === 'object') {
++        Object.values(value).forEach(freezeInitialMatch);
++        Object.freeze(value);
++    }
++    return value;
++}
++
++function initializeWorkbenchBinding(item, restored = false) {
++    const initial = item.initial_match;
++    if (initial) {
++        const savedCurrent = restored && item.workbench_bindings_initialized === true
++            && item.identity_status === 'verified';
++        const confirmed = restored && item.decision_status === 'manual_confirmed';
++        const edited = restored && item.decision_source === 'manual_edit' && initial.actual_prefilled;
++        if (!savedCurrent && !confirmed && !edited) {
++            item.bindings = initial.effective_bindings.map(binding => ({...binding}));
++            item.workbench_rematched = Boolean(restored && Number(item.recommendation_revision) > 1);
++            if (item.workbench_rematched) item.bindings = [];
++        }
++        freezeInitialMatch(initial);
++    }
++    if (item.decision_status === 'rejected') item.bindings = [];
++    item.bindings ??= [];
++    item.workbench_bindings_initialized = true;
++    syncBindingDisplay(item);
++}
++
++function bindingCodes(bindings) {
++    if (!bindings?.length) return '';
++    const suffix = bindings.length > 1 ? ` (+${bindings.length - 1})` : '';
++    return `${bindings[0].code}${suffix}`;
++}
++
++function initialRowLabel(initial) {
++    if (!initial) return '首次统计未记录';
++    const source = initial.source === 'rule' ? '规则匹配' : '组合匹配';
++    const reason = INITIAL_REASON_LABELS[initial.reason_codes?.[0]];
++    const label = initial.tier === 'A' && initial.source !== 'matcher'
++        ? `${INITIAL_TIER_LABELS.A} · ${source}` : (reason || INITIAL_TIER_LABELS[initial.tier]);
++    return `首次${initial.actual_prefilled ? '已预填' : '未预填'} · ${label}`;
++}
++
++function initialSafetyPending(item) {
++    return item.initial_match?.subtype === 'safety_missing' && !item.workbench_rematched
++        && !item.bindings?.length && item.decision_status !== 'rejected';
++}
++
++function syncInitialFilterControls() {
++    document.querySelectorAll('[data-initial-filter]').forEach(button => {
++        button.setAttribute('aria-pressed', String(initialFilter === button.dataset.initialFilter));
++    });
++    const scoreOnly = document.getElementById('initial-score-filter').checked;
++    document.getElementById('clear-initial-filter').hidden = !initialFilter && !scoreOnly;
++}
++
++function resetInitialFilters() {
++    initialFilter = '';
++    document.getElementById('initial-score-filter').checked = false;
++    syncInitialFilterControls();
++}
++
++function refreshInitialFilter() {
++    currentPage = 1;
++    syncInitialFilterControls();
++    renderTable();
++}
++
+ function reviewState(item) {
+     if (item.decision_source !== 'manual_edit' && item.decision_status === 'recommended' &&
+-        item.acceptance_calibration?.outcome === 'needs_parameters') return 'needs_parameters';
++        (initialSafetyPending(item) || item.acceptance_calibration?.outcome === 'needs_parameters')) {
++        return 'needs_parameters';
++    }
+     return Object.hasOwn(REVIEW_LABELS, item.decision_status) ? item.decision_status : 'recommended';
+ }
+ 
+@@ -1714,9 +1832,18 @@ function hasReviewApproval(item) {
+ }
+ 
+ function matchesWorkbenchFilters(item) {
+-    return (currentProfessional === '全部' || item.professional === currentProfessional)
++    const initial = item.initial_match;
++    const initialMatch = !initialFilter || (initial && (
++        initialFilter === initial.tier || initialFilter === initial.subtype
++        || (initialFilter === 'prefilled' && initial.actual_prefilled)
++        || (initialFilter === 'unprefilled' && !initial.actual_prefilled)
++    ));
++    return (currentProfessional === '全部' || workbenchProfessional(item) === currentProfessional)
+         && (currentFilter === 'all' || currentFilter === reviewState(item))
+-        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code]
++        && initialMatch
++        && (!document.getElementById('initial-score-filter').checked || initial?.ranking_score >= 90)
++        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code,
++            ...((initial?.effective_bindings || []).map(binding => binding.code))]
+             .some(value => String(value ?? '').toLowerCase().includes(searchQuery)));
+ }
+ 
+@@ -1844,6 +1971,20 @@ function renderReviewDetail() {
+ 
+     const differences = document.getElementById('review-differences');
+     differences.replaceChildren();
++    const initial = item.initial_match;
++    const describe = bindings => bindings.map(binding =>
++        [binding.code, binding.name, binding.specification].filter(Boolean).join(' · ')).join(' / ');
++    const firstFields = initial?.field_comparisons || [];
++    const initialSpec = firstFields.find(field => field.field === '核心规格');
++    const firstBinding = describe(initial?.effective_bindings || []);
++    const firstReference = [item.initial_auto_code, initialSpec?.candidate_value].filter(Boolean).join(' · ');
++    document.getElementById('initial-review-binding').textContent = initial
++        ? [initialRowLabel(initial), firstBinding || firstReference,
++            Number.isFinite(initial.ranking_score) ? `匹配评分 ${initial.ranking_score} 分` : '']
++            .filter(Boolean).join(' / ')
++        : '首次统计未记录';
++    document.getElementById('current-review-binding').textContent = describe(item.bindings || [])
++        || (initialSafetyPending(item) ? '待补参后重新匹配' : '待选材');
+     const evidence = item.acceptance_calibration;
+     const add = (label, value) => {
+         if (!value) return;
+@@ -1853,6 +1994,27 @@ function renderReviewDetail() {
+         detail.textContent = value;
+         differences.append(term, detail);
+     };
++    if (initial) {
++        add('清单原文', initialSpec?.query_value || item.original_spec || '未填写');
++        const missingSide = {query: '清单缺失', candidate: '目录缺失', both: '清单与目录均缺失'};
++        for (const field of firstFields) {
++            if (field.state === 'missing') {
++                const warning = field.safety_critical_unknown ? ' · 安全参数待补' : '';
++                const requested = field.requested_unverified ? ' · 清单明确要求，目录待核验' : '';
++                add(`首次 · ${field.field}`,
++                    `${missingSide[field.missing_side] || '字段缺失'}${warning}${requested}`
++                    + (field.query_value != null ? ` · 清单值 ${field.query_value}` : ''));
++            } else if (field.state === 'different' && field.field !== '核心规格') {
++                add(`首次 · ${field.field}`, `清单 ${field.query_value} ／ 目录 ${field.candidate_value}`);
++            }
++        }
++        if (initial.source === 'matcher') {
++            if (initial.priority_review_unavailable) add('首次分差', '优先核对评估不可用');
++            else if (Number.isFinite(initial.distinct_margin) && initial.competitor_code) {
++                add('首次分差', `次选 ${initial.competitor_code} · 相差 ${initial.distinct_margin.toFixed(2)} 分`);
++            } else add('首次分差', '无可比较候选');
++        }
++    }
+     add('待补参数', evidence?.missing_fields?.join('、'));
+     add('关键差异', evidence?.different_fields?.join('、'));
+     add('硬冲突', evidence?.hard_conflict);
+@@ -1861,9 +2023,9 @@ function renderReviewDetail() {
+     if (top) {
+         const rival = evidence ? evidence.competitor_code : second?.code;
+         const gap = evidence ? evidence.distinct_margin : second && Number(top.score) - Number(second.score);
+-        add('候选分差', Number.isFinite(gap) && rival
++        if (item.workbench_rematched || !initial) add('当前候选分差', Number.isFinite(gap) && rival
+             ? `${top.code} 与 ${rival} 相差 ${gap.toFixed(2)} 分` : '缺少可比较的第二候选');
+-        add('清单与首选规格', `${item.original_spec || '未填写'} ／ ${top.specification || '未填写'}`);
++        if (item.workbench_rematched || !initial) add('当前首选规格', top.specification || '未填写');
+         add('首选理由', top.match_reasons?.join('、'));
+         const runnerUp = eligible.find(candidate => candidate.code === rival);
+         add('次选理由', runnerUp?.match_reasons?.join('、'));
+@@ -1885,7 +2047,10 @@ function renderBoundMaterials() {
+     document.getElementById('bound-materials-count').innerText = selectedItem.bindings.length;
+     
+     if (selectedItem.bindings.length === 0) {
+-        container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--color-text-muted); font-size: 12px; padding: 10px; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">暂无绑定物料，请点击下方推荐卡片或检索套用以绑定</div>`;
++        const message = initialSafetyPending(selectedItem)
++            ? '待补参。请补充安全参数后重新匹配。'
++            : '待选材。可点选候选或从物料库搜索。';
++        container.innerHTML = `<div class="workbench-empty-binding">${message}</div>`;
+         return;
+     }
+     
+@@ -1960,6 +2125,9 @@ function renderBoundMaterials() {
+ function renderCandidates() {
+     const container = document.getElementById('candidates-container');
+     container.innerHTML = '';
++    const referenceOnly = initialSafetyPending(selectedItem);
++    document.getElementById('candidate-interaction-hint').textContent = referenceOnly
++        ? '仅供参考 · 补参后重新匹配' : '点选加入绑定，再次点选移除';
+     
+     if (!selectedItem.top_candidates || selectedItem.top_candidates.length === 0) {
+         container.innerHTML = `<div style="text-align: center; color: var(--color-text-muted); font-size: 13px; padding: 20px; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">暂无推荐物料</div>`;
+@@ -1970,8 +2138,13 @@ function renderCandidates() {
+         const card = document.createElement('div');
+         card.className = 'candidate-card';
+         card.dataset.code = cand.code;
+-        card.tabIndex = 0;
+-        card.setAttribute('role', 'button');
++        if (referenceOnly) {
++            card.classList.add('candidate-reference');
++            card.setAttribute('role', 'group');
++        } else {
++            card.tabIndex = 0;
++            card.setAttribute('role', 'button');
++        }
+         card.setAttribute('aria-label', `${cand.name} ${cand.code}`);
+         
+         const isActive = selectedItem.bindings && selectedItem.bindings.some(b => b.code === cand.code);
+@@ -2008,7 +2181,7 @@ function renderCandidates() {
+                 </div>
+                 <div style="display: flex; align-items: center; gap: 6px;">
+                     ${boundBadge}
+-                    <div class="match-percentage-badge">${escapeHtml(cand.score)}% 相似</div>
++                    <div class="match-percentage-badge">匹配评分 ${escapeHtml(cand.score)} 分</div>
+                 </div>
+             </div>
+             <div class="candidate-spec" title="${escapeHtml(cand.specification || '无规格描述')}">${escapeHtml(cand.specification || '无规格描述')}</div>
+@@ -2020,14 +2193,16 @@ function renderCandidates() {
+             </div>
+         `;
+         
+-        card.setAttribute('aria-pressed', String(isActive));
+-        card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
+-        card.addEventListener('keydown', (event) => {
+-            if (event.key === 'Enter' || event.key === ' ') {
+-                event.preventDefault();
+-                card.click();
+-            }
+-        });
++        if (!referenceOnly) {
++            card.setAttribute('aria-pressed', String(isActive));
++            card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
++            card.addEventListener('keydown', (event) => {
++                if (event.key === 'Enter' || event.key === ' ') {
++                    event.preventDefault();
++                    card.click();
++                }
++            });
++        }
+         
+         container.appendChild(card);
+     });
+@@ -2036,6 +2211,10 @@ function renderCandidates() {
+ // 5. Apply selected candidate to matched item & submit feedback + flywheel record
+ async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
+     if (!selectedItem) return;
++    if (initialSafetyPending(selectedItem)) {
++        alert('请补充安全参数并重新匹配后选材。');
++        return;
++    }
+     
+     if (!selectedItem.bindings) {
+         selectedItem.bindings = [];
+@@ -2765,6 +2944,7 @@ async function batchApplyParamsAndRematch() {
+ 
+ function applyRematchResult(item, result) {
+     // Preserve initial_auto_code and initial_snapshot_id for feedback provenance.
++    item.workbench_rematched = true;
+     item.bindings = [];
+     item.top_candidates = result.top_candidates || [];
+     item.acceptance_calibration = result.acceptance_calibration;
+@@ -2777,10 +2957,9 @@ function applyRematchResult(item, result) {
+ 
+ // 8. Update progress indicators
+ function updateProgress() {
+-    if (items.length === 0) return;
+-    
+     // 1. Overall progress
+-    const matchedCount = items.filter(item => hasReviewApproval(item)).length;
++    const ready = item => hasReviewApproval(item) && Boolean(item.bindings?.length);
++    const matchedCount = items.filter(ready).length;
+     const progressPercent = Math.round((matchedCount / items.length) * 100) || 0;
+     
+     document.getElementById('match-progress-bar').style.width = `${progressPercent}%`;
+@@ -2789,15 +2968,59 @@ function updateProgress() {
+     // 2. Current Professional progress
+     let profItems = items;
+     if (currentProfessional !== '全部') {
+-        profItems = items.filter(item => item.professional === currentProfessional);
++        profItems = items.filter(item => workbenchProfessional(item) === currentProfessional);
+     }
+     
+-    const profMatchedCount = profItems.filter(item => hasReviewApproval(item)).length;
++    const profMatchedCount = profItems.filter(ready).length;
+     const profProgressPercent = Math.round((profMatchedCount / profItems.length) * 100) || 0;
+     
+     document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}可导出进度`;
+     document.getElementById('current-prof-progress-bar').style.width = `${profProgressPercent}%`;
+     document.getElementById('current-prof-progress-percent').innerText = `${profProgressPercent}%`;
++    renderInitialOverview(profItems, profMatchedCount);
++}
++
++function renderInitialOverview(rows, exportCount) {
++    const counts = {A: 0, B: 0, C: 0, D: 0, low_score_prefill: 0, safety_missing: 0, unprefilled: 0};
++    let known = 0;
++    let prefilled = 0;
++    let ruleCount = 0;
++    let bomCount = 0;
++    for (const row of rows) {
++        const initial = row.initial_match;
++        if (!initial) continue;
++        known++;
++        counts[initial.tier]++;
++        if (initial.subtype) counts[initial.subtype]++;
++        if (initial.actual_prefilled) prefilled++;
++        if (initial.tier === 'A' && initial.source === 'rule') ruleCount++;
++        if (initial.tier === 'A' && initial.source === 'bom') bomCount++;
++    }
++    counts.unprefilled = known - prefilled;
++    const total = rows.length;
++    const missing = total - known;
++    const scope = currentProfessional === '全部' ? '全单' : currentProfessional;
++    document.getElementById('initial-scope').textContent = `${scope} · ${total} 条`;
++    document.getElementById('initial-export-count').textContent = `已确认可导出 ${exportCount} / ${total} 条`;
++    const rate = missing || !total ? '—' : `${(100 * prefilled / total).toFixed(1)}%`;
++    const main = document.getElementById('initial-prefilled-count');
++    main.hidden = !known;
++    main.textContent = known ? `系统已自动预填 ${prefilled} / ${total} 条（${rate}）` : '';
++    document.getElementById('initial-summary-message').textContent = !total ? '无可匹配物料'
++        : !known ? '首次统计未记录'
++            : missing ? `已知 ${known} 条 · 未记录 ${missing} 条` : '';
++    for (const group of document.querySelectorAll('.initial-tier-grid, .initial-subfilters')) {
++        group.hidden = !known;
++    }
++    document.querySelectorAll('[data-initial-count]').forEach(node => {
++        node.textContent = counts[node.dataset.initialCount];
++    });
++    const sources = document.getElementById('initial-source-counts');
++    sources.hidden = !ruleCount && !bomCount;
++    sources.textContent = [
++        ruleCount ? `规则匹配 ${ruleCount} 条` : '',
++        bomCount ? `组合匹配 ${bomCount} 条` : ''
++    ].filter(Boolean).join(' · ');
+ }
+ 
+ // 9. Export standard sheet blob handler (V0.0.2 non-destructive)
+@@ -3722,6 +3945,9 @@ async function annotateRestoredItems() {
+                 item.decision_source = 'legacy_draft';
+                 item.decision_reason = '服务端状态未能核验，请重新人工确认';
+             }
++            item.initial_match = null;
++            item.bindings = [];
++            syncBindingDisplay(item);
+         });
+         if (downgraded > 0) {
+             alert(`已载入进度：${downgraded} 条记录的服务端确认状态无法核验，已降为「待确认」，请复核后再导出。`);
+@@ -3743,10 +3969,11 @@ async function annotateRestoredItems() {
+             if (data.actor_user_id !== undefined && data.actor_user_id !== null) {
+                 applyVerifiedActorIdentity(data.actor_user_id, data.actor_account_epoch || '');
+             }
+-            items = data.items;
++            items = uniqueWorkbenchRows(data.items);
+             items.forEach(it => {
+                 it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0));
+                 it._feedback_seq = Math.max(Number(it._feedback_seq || 0), Number(it.max_feedback_seq || 0));
++                initializeWorkbenchBinding(it, true);
+             });
+             const firstVerified = items.find(it => it.identity_status === 'verified' && it.document_id);
+             if (firstVerified) {
+@@ -3789,6 +4016,7 @@ async function checkForDraft() {
+ 
+                 document.getElementById('welcome-slate').style.display = 'none';
+                 document.getElementById('workbench').style.display = 'flex';
++                document.getElementById('initial-overview').hidden = false;
+                 document.getElementById('export-btn').disabled = false;
+                 
+                 const saveTrigger = document.getElementById('save-trigger');
+@@ -3932,6 +4160,7 @@ async function loadSession(sessionId) {
+         // Render view
+         document.getElementById('welcome-slate').style.display = 'none';
+         document.getElementById('workbench').style.display = 'flex';
++        document.getElementById('initial-overview').hidden = false;
+         document.getElementById('export-btn').disabled = false;
+         
+         const saveTrigger = document.getElementById('save-trigger');
+diff --git a/web/index.css b/web/index.css
+index 674ae7e..f80ec77 100644
+--- a/web/index.css
++++ b/web/index.css
+@@ -1632,6 +1632,241 @@ body {
+     flex-wrap: wrap;
+ }
+ 
++.initial-overview {
++    padding: 10px 11px;
++    background: var(--bg-subtle);
++    border: 1px solid var(--border-color);
++    border-radius: var(--radius-sm);
++    font-variant-numeric: tabular-nums;
++}
++
++.initial-overview[hidden],
++.initial-overview [hidden],
++.initial-filter-tools [hidden] {
++    display: none;
++}
++
++.initial-overview-heading,
++.initial-subfilters,
++.initial-filter-tools {
++    display: flex;
++    flex-wrap: wrap;
++    align-items: center;
++    column-gap: 8px;
++    row-gap: 4px;
++    font-size: 11px;
++}
++
++.initial-overview-heading {
++    justify-content: space-between;
++    color: var(--color-text-secondary);
++}
++
++.initial-overview h4 {
++    margin: 4px 0 7px;
++    font-size: 13px;
++}
++
++.initial-total,
++.initial-tier-grid button,
++.initial-subfilters button,
++#clear-initial-filter {
++    font: inherit;
++    color: var(--color-text-primary);
++    cursor: pointer;
++    border-radius: var(--radius-sm);
++}
++
++.initial-total {
++    border: 0;
++    background: transparent;
++    text-align: left;
++    font-size: 15px;
++    font-weight: 700;
++    padding: 3px 2px;
++}
++
++#initial-summary-message {
++    padding-inline-start: 2px;
++    font-weight: 500;
++}
++
++.initial-tier-grid {
++    display: grid;
++    grid-template-columns: repeat(2, minmax(0, 1fr));
++    gap: 4px;
++}
++
++.initial-tier-grid button,
++.initial-subfilters button {
++    display: flex;
++    justify-content: space-between;
++    gap: 6px;
++    padding: 3px 6px;
++    min-block-size: 25px;
++    text-align: left;
++    font-size: 11px;
++    background: var(--bg-surface);
++    border: 1px solid var(--border-color);
++}
++
++.initial-overview button:hover,
++.initial-overview button[aria-pressed="true"] {
++    background: var(--color-primary-bg, var(--bg-surface-elevated));
++    box-shadow: inset 0 0 0 1px var(--color-primary);
++}
++
++.initial-overview button:focus-visible,
++#clear-initial-filter:focus-visible {
++    outline: 2px solid var(--color-primary);
++    outline-offset: 2px;
++}
++
++.initial-subfilters {
++    margin-top: 5px;
++}
++
++.initial-source-counts {
++    margin: 4px 0 0;
++    color: var(--color-text-secondary);
++    font-size: 11px;
++}
++
++#clear-initial-filter {
++    padding: 2px 4px;
++    border: 0;
++    background: transparent;
++    text-decoration: underline;
++}
++
++#items-table {
++    table-layout: fixed;
++}
++
++#items-table th,
++#items-table td {
++    padding-inline: 6px;
++    overflow-wrap: anywhere;
++}
++
++#items-table .workbench-row-number {
++    width: 42px;
++}
++
++.workbench-row-spec,
++.workbench-row-note {
++    color: var(--color-text-secondary);
++    font-size: 11px;
++}
++
++.workbench-row-spec {
++    display: -webkit-box;
++    -webkit-line-clamp: 2;
++    -webkit-box-orient: vertical;
++    overflow: hidden;
++}
++
++.current-row-result .row-status-pill {
++    margin-top: 2px;
++    white-space: normal;
++}
++
++.workbench-comparison {
++    display: grid;
++    grid-template-columns: repeat(2, minmax(0, 1fr));
++    gap: 10px;
++    margin-block: 7px;
++}
++
++.workbench-comparison > div,
++.workbench-empty-binding {
++    padding: 7px 8px;
++    border: 1px solid var(--border-color);
++    border-radius: var(--radius-sm);
++}
++
++.workbench-comparison h5,
++.workbench-comparison p {
++    margin: 0;
++    overflow-wrap: anywhere;
++}
++
++.workbench-comparison h5 {
++    margin-bottom: 2px;
++    color: var(--color-text-primary);
++    font-size: 12px;
++}
++
++.workbench-empty-binding {
++    grid-column: 1 / -1;
++    color: var(--color-text-secondary);
++    font-size: 12px;
++    text-align: center;
++}
++
++.candidate-reference {
++    cursor: default;
++}
++
++.workbench .pagination-toolbar .btn {
++    color: var(--color-text-primary);
++    background: var(--bg-surface-elevated);
++    border: 1px solid var(--border-color);
++}
++
++.workbench .pagination-toolbar .btn:disabled {
++    color: var(--color-text-muted);
++    opacity: 0.7;
++}
++
++@media (max-width: 1140px) {
++    .app-header {
++        display: grid;
++        grid-template-columns: minmax(0, 1fr) auto;
++        height: auto;
++        max-height: none;
++        padding-block: 8px;
++        row-gap: 6px;
++    }
++
++    .app-header .nav-links {
++        grid-row: 2;
++        grid-column: 1 / -1;
++        margin: 0;
++    }
++}
++
++@media (max-width: 820px) {
++    .app-header {
++        grid-template-columns: minmax(0, 1fr);
++    }
++
++    .app-header .nav-links,
++    .app-header .header-actions {
++        flex-wrap: wrap;
++    }
++
++    .app-header .header-actions {
++        margin: 0;
++    }
++
++    .workbench {
++        flex-direction: column;
++        overflow: auto;
++    }
++
++    .workbench .panel {
++        width: 100%;
++        min-width: 0;
++        height: auto;
++        flex: 0 0 auto;
++    }
++
++    .workbench .list-scroll {
++        max-height: 45vh;
++    }
++}
++
+ .review-filters .filter-tab {
+     white-space: nowrap;
+ }
+diff --git a/web/index.html b/web/index.html
+index 5a58aef..1a84534 100644
+--- a/web/index.html
++++ b/web/index.html
+@@ -27,7 +27,7 @@
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+     <!-- FontAwesome Icons -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+-    <link rel="stylesheet" href="index.css?v=v019_m3">
++    <link rel="stylesheet" href="index.css?v=v021_m1">
+ </head>
+ <body>
+     <div class="app-container">
+@@ -114,6 +114,28 @@
+                                 <!-- Dynamically loaded tabs -->
+                             </div>
+                         </div>
++                        <section class="initial-overview" id="initial-overview" aria-label="首次匹配统计" hidden>
++                            <div class="initial-overview-heading">
++                                <span id="initial-scope">全单</span>
++                                <span id="initial-export-count"></span>
++                            </div>
++                            <h4>
++                                <button type="button" class="initial-total" data-initial-filter="prefilled" id="initial-prefilled-count" aria-pressed="false"></button>
++                                <span id="initial-summary-message" role="status"></span>
++                            </h4>
++                            <div class="initial-tier-grid" aria-label="首次匹配分档">
++                                <button type="button" data-initial-filter="A" aria-pressed="false"><span>优先核对</span><strong data-initial-count="A">0</strong></button>
++                                <button type="button" data-initial-filter="B" aria-pressed="false"><span>普通候选</span><strong data-initial-count="B">0</strong></button>
++                                <button type="button" data-initial-filter="C" aria-pressed="false"><span>重点核对或补参</span><strong data-initial-count="C">0</strong></button>
++                                <button type="button" data-initial-filter="D" aria-pressed="false"><span>无有效匹配或冲突</span><strong data-initial-count="D">0</strong></button>
++                            </div>
++                            <p id="initial-source-counts" class="initial-source-counts" hidden></p>
++                            <div class="initial-subfilters" aria-label="首次匹配细分">
++                                <button type="button" data-initial-filter="low_score_prefill" aria-pressed="false">低分已预填 <strong data-initial-count="low_score_prefill">0</strong></button>
++                                <button type="button" data-initial-filter="safety_missing" aria-pressed="false">安全参数待补 <strong data-initial-count="safety_missing">0</strong></button>
++                                <button type="button" data-initial-filter="unprefilled" aria-pressed="false">未预填 <strong data-initial-count="unprefilled">0</strong></button>
++                            </div>
++                        </section>
+                         <div class="filter-bar review-filters" role="group" aria-label="按复核状态筛选">
+                             <button class="filter-tab active" data-filter="all" aria-pressed="true">全部</button>
+                             <button class="filter-tab" data-filter="auto_accepted" aria-pressed="false">自动接受</button>
+@@ -122,6 +144,10 @@
+                             <button class="filter-tab" data-filter="needs_parameters" aria-pressed="false">待补参</button>
+                             <button class="filter-tab" data-filter="rejected" aria-pressed="false">拒绝</button>
+                         </div>
++                        <div class="initial-filter-tools">
++                            <label><input type="checkbox" id="initial-score-filter"> 首次评分 ≥90 分</label>
++                            <button type="button" id="clear-initial-filter" hidden>清除首次筛选</button>
++                        </div>
+                         <div class="search-box">
+                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                             <input type="text" id="list-search" placeholder="搜索清单名称、规格...">
+@@ -131,10 +157,10 @@
+                         <table class="data-table" id="items-table">
+                             <thead>
+                                 <tr>
+-                                    <th width="80">序号</th>
++                                    <th class="workbench-row-number">序号</th>
+                                     <th>清单物料名称</th>
+-                                    <th width="140">匹配物料编码</th>
+-                                    <th width="100">状态</th>
++                                    <th>首次推荐</th>
++                                    <th>当前选择</th>
+                                 </tr>
+                             </thead>
+                             <tbody id="items-tbody">
+@@ -248,12 +274,22 @@
+                                         <span id="review-status" class="row-status-pill" role="status"></span>
+                                     </div>
+                                     <p id="review-reason"></p>
++                                    <div class="workbench-comparison">
++                                        <div>
++                                            <h5>首次推荐</h5>
++                                            <p id="initial-review-binding"></p>
++                                        </div>
++                                        <div>
++                                            <h5>当前选择</h5>
++                                            <p id="current-review-binding"></p>
++                                        </div>
++                                    </div>
+                                     <dl id="review-differences"></dl>
+                                 </section>
+                                 <!-- Bound Materials Section -->
+                                 <div class="glass-card section-card bound-materials-card">
+                                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+-                                        <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 已绑定物料 (<span id="bound-materials-count">0</span>)</span>
++                                        <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 当前绑定 (<span id="bound-materials-count">0</span>)</span>
+                                         <div class="review-actions">
+                                             <button class="btn btn-secondary review-reject" id="reject-match-btn" type="button">拒绝此行</button>
+                                             <button class="btn btn-success" id="confirm-match-finished-btn" type="button">确认绑定</button>
+@@ -268,7 +304,7 @@
+                                 <div class="recommendations-section">
+                                     <div class="section-header" style="margin-top: 0;">
+                                         <h4>推荐候选</h4>
+-                                        <span class="sub">点选加入绑定，再次点选移除</span>
++                                        <span class="sub" id="candidate-interaction-hint">点选加入绑定，再次点选移除</span>
+                                     </div>
+                                     
+                                     <div class="candidates-list" id="candidates-container" style="margin-top: 10px;">
+@@ -1390,6 +1426,6 @@
+         </div>
+     </div>
+ 
+-    <script src="app.js?v=v019_m3"></script>
++    <script src="app.js?v=v021_m1"></script>
+ </body>
+ </html>

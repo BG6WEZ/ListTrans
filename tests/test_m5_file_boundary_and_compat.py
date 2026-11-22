@@ -863,17 +863,19 @@ def test_compat_m5_01_zero_target_warnings(isolated_env, tmp_path: Path):
         )
         assert r_fb.status_code == 200
 
-        # Confirm item cleanly and export
+        # M2：现代上传的确认和导出携带服务端源行与其当前推荐版本。
+        reviewed_row = {
+            key: row_ctx[key] for key in (
+                "document_id", "sheet_id", "source_row_id", "recommendation_revision",
+                "original_row_idx", "original_name", "original_spec", "original_qty", "original_unit",
+                "original_loss", "original_brand", "original_category", "original_code", "professional",
+            )
+        }
         r_confirm = client.post(
             "/api/binding/submit",
             headers=headers,
             json={
-                "original_name": "止回阀",
-                "original_spec": "DN100",
-                "original_qty": 2,
-                "original_unit": "台",
-                "original_loss": 1.0,
-                "original_row_idx": 1,
+                **reviewed_row,
                 "scope_filename": "compat.xlsx",
                 "bindings": [
                     {
@@ -895,14 +897,10 @@ def test_compat_m5_01_zero_target_warnings(isolated_env, tmp_path: Path):
             headers=headers,
             json={
                 "scope_filename": "compat.xlsx",
+                "document_id": row_ctx["document_id"],
                 "items": [
                     {
-                        "original_row_idx": 1,
-                        "original_name": "止回阀",
-                        "original_spec": "DN100",
-                        "original_qty": 2,
-                        "original_unit": "台",
-                        "original_loss": 1.0,
+                        **reviewed_row,
                         "matched_code": "0010",
                         "matched_name": "止回阀",
                         "matched_category": "阀门",

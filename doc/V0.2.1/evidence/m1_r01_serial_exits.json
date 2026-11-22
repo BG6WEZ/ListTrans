@@ -1,0 +1,6 @@
+{
+  "pytest_serial_exit": 0,
+  "rule_gate_exit": 0,
+  "held_out": "HOLD-M0-01",
+  "rule_gate_population": "Train+Dev"
+}

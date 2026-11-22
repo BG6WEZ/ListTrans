@@ -1,0 +1,409 @@
+{
+  "mode": "vector",
+  "source_rows": 100,
+  "probes": {
+    "GT-0300": {
+      "tier": "B",
+      "subtype": null,
+      "source": "matcher",
+      "effective_bindings": [
+        {
+          "code": "2.25.15.0129",
+          "name": "高显指LED气密平板灯",
+          "specification": "1200*300，吸顶，41~50W，显色指数大于等于90",
+          "unit": "套",
+          "brand": "台夏",
+          "category": "格栅灯（荧光灯盘）",
+          "qty": 1.0,
+          "qty_ratio": 1.0
+        }
+      ],
+      "actual_prefilled": true,
+      "reason_codes": [
+        "candidate_review"
+      ],
+      "ranking_score": 99.3,
+      "distinct_margin": 0.09999999999999432,
+      "competitor_code": "2.25.15.0115",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.2064653510893681,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": "40-50w",
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "尺寸",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "1200*300",
+          "candidate_value": "1200*300",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "类型",
+          "state": "missing",
+          "missing_side": "both",
+          "query_value": null,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": "强电",
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "套",
+          "candidate_value": "套",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用LED气密净化灯\n2.规格：1200*300,40-50w\n3.安装形式：吸顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整",
+          "candidate_value": "1200*300，吸顶，41~50W，显色指数大于等于90",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "强电"
+    },
+    "GT-0674": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 97.6,
+      "distinct_margin": 0.5999999999999943,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10186681902455075,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 300.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：300m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    },
+    "GT-0677": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 96.9,
+      "distinct_margin": 0.6000000000000085,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10075131852892705,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 500.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式:落地安装\n4.工作内容：设备安装、风电接口、检查接线、调试、试运转\n5.含减震垫",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    },
+    "GT-0678": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 96.9,
+      "distinct_margin": 0.6000000000000085,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10075131852892705,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 500.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    }
+  },
+  "legacy_export_checks": {
+    "GT-0674": 422,
+    "GT-0677": 422,
+    "GT-0678": 422
+  },
+  "safety_probes_pass": true,
+  "power_evidence_pass": true
+}

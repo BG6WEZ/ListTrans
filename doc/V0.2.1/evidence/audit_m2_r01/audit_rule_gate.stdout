@@ -1,0 +1,9 @@
+Loading offline sentence-transformers model from C:\Users\tlyer\project\ListTrans\model_offline\bge-small-zh-v1.5...
+SentenceTransformer model [bge-small-zh-v1.5] loaded successfully (dim=512).
+Building vector index candidate for 35 materials with model [bge-small-zh-v1.5] (dim=512)...
+FAISS candidate built in 0.34s.
+legacy empty invalid safe=False
+legacy harmful harmful safe=False
+legacy beneficial harmful safe=False
+legacy beneficial_constrained improved safe=True
+legacy neutral neutral safe=True

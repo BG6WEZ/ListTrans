@@ -18,7 +18,7 @@ import uuid
 import pandas as pd
 import openpyxl
 import time
-from contextlib import asynccontextmanager, ExitStack
+from contextlib import asynccontextmanager, closing, ExitStack
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks, Query
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -129,6 +129,7 @@ async def lifespan(app_instance: FastAPI):
     init_session_db()
     init_audit_tables()
     init_flywheel_tables()
+    await asyncio.to_thread(deliver_priority_feedback)
     try:
         clean_old_draft_sessions()
     except Exception as e:
@@ -148,12 +149,14 @@ async def lifespan(app_instance: FastAPI):
 
     logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
     expiry_task = asyncio.create_task(_expire_runtime_tasks())
+    priority_delivery_task = asyncio.create_task(_retry_priority_feedback())
     try:
         yield
     finally:
         mining_bg_task.cancel()
         expiry_task.cancel()
-        await asyncio.gather(mining_bg_task, expiry_task, return_exceptions=True)
+        priority_delivery_task.cancel()
+        await asyncio.gather(mining_bg_task, expiry_task, priority_delivery_task, return_exceptions=True)
 
 app = FastAPI(
     title="武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统",
@@ -240,7 +243,8 @@ from app.binding_decisions import (
     fetch_live_material_map,
     get_unit_multiplier,
 )
-from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding
+from app.acceptance_calibration import active_policy as acceptance_policy, assess_match, confirmed_binding, load_policy
+from app.match_assessment import assess_initial_match, summarize_initial_matches
 from app.llm_decision import CallBudget, active_engine as active_llm_decision
 from app.bom import expand as expand_bom, is_bom_name, positive as positive_quantity
 from app.audit_manager import (
@@ -259,6 +263,41 @@ from app.feedback_contract import (
     record_rematch_snapshot,
     verify_document_ownership,
 )
+from app.flywheel_db import open_flywheel_tx_connection
+from app.source_binding_review import (
+    IDENTITY, SOURCE_PRIORITY_REVIEW, check_revision, check_source_write, commit_priority,
+    confirmed_source, deliver_priority_feedback, invalidate_source, priority_eligibility,
+    priority_key, receipt_for, resolve_source, source_decision, source_version, source_write,
+    write_source_decision,
+)
+
+
+async def _retry_priority_feedback():
+    while True:
+        await asyncio.sleep(60)
+        await asyncio.to_thread(deliver_priority_feedback)
+
+
+def _binding_source(materials, user, row, filename, document_id=None):
+    try:
+        return resolve_source(materials, user, row, filename or "", document_id=document_id)
+    except FeedbackContractError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
+
+
+@catalog_read
+def _save_rematch_revision(**kwargs):
+    # Share the auth write lock with confirmation so revision checks serialize with rematch.
+    with source_write():
+        return record_rematch_snapshot(**kwargs)
+
+
+class SourceReviewFields(BaseModel):
+    document_id: Optional[str] = None
+    sheet_id: Optional[str] = None
+    source_row_id: Optional[str] = None
+    recommendation_revision: Optional[StrictInt] = Field(default=None, ge=1)
+    decision_version: Optional[StrictInt] = Field(default=None, ge=0)
 
 class LoginRequest(BaseModel):
     username: str
@@ -549,7 +588,7 @@ def api_save_draft(req: DraftSaveRequest, current_user: dict = Depends(get_curre
         current_user["id"],
         req.original_filename,
         req.professional,
-        _checked_session_boms(req.items_json, current_user, req.original_filename),
+        _checked_session_decisions(req.items_json, current_user, req.original_filename, doc_id),
         account_epoch=str(current_user.get("account_epoch") or ""),
         document_id=doc_id,
         work_session_id=ws_id,
@@ -574,7 +613,8 @@ def api_get_draft(current_user: dict = Depends(get_current_user)):
             "id": draft["id"],
             "original_filename": draft["original_filename"],
             "professional": draft["professional"],
-            "items_json": _checked_session_boms(draft["items_json"], current_user, draft["original_filename"]),
+            "items_json": _checked_session_decisions(draft["items_json"], current_user, draft["original_filename"],
+                                                     draft.get("document_id")),
             "document_id": draft.get("document_id") or "",
             "work_session_id": draft.get("work_session_id") or "",
             "trust_level": draft.get("trust_level") or "legacy_untrusted",
@@ -598,7 +638,7 @@ def api_save_session(req: NamedSaveRequest, current_user: dict = Depends(get_cur
         req.session_name,
         req.original_filename,
         req.professional,
-        _checked_session_boms(req.items_json, current_user, req.original_filename),
+        _checked_session_decisions(req.items_json, current_user, req.original_filename, doc_id),
         account_epoch=str(current_user.get("account_epoch") or ""),
         document_id=doc_id,
         work_session_id=ws_id,
@@ -629,7 +669,8 @@ def api_get_session(session_id: str, current_user: dict = Depends(get_current_us
             "session_name": session["session_name"],
             "original_filename": session["original_filename"],
             "professional": session["professional"],
-            "items_json": _checked_session_boms(session["items_json"], current_user, session["original_filename"]),
+            "items_json": _checked_session_decisions(session["items_json"], current_user, session["original_filename"],
+                                                     session.get("document_id")),
             "document_id": session.get("document_id") or "",
             "work_session_id": session.get("work_session_id") or "",
             "trust_level": session.get("trust_level") or "legacy_untrusted",
@@ -654,7 +695,8 @@ def api_update_session(session_id: str, req: UpdateSessionRequest, current_user:
     update_named_session(
         current_user["id"],
         session_id,
-        _checked_session_boms(req.items_json, current_user, session["original_filename"]),
+        _checked_session_decisions(req.items_json, current_user, session["original_filename"],
+                                   doc_id if doc_id is not None else session.get("document_id")),
         account_epoch=ep,
         document_id=doc_id,
         work_session_id=ws_id,
@@ -679,22 +721,57 @@ class DraftAnnotateRequest(BaseModel):
     work_session_id: Optional[str] = ""
 
 
-def _checked_session_boms(items_json, current_user, filename):
+def _checked_session_decisions(items_json, current_user, filename, document_id):
     try:
         items = json.loads(items_json)
     except (ValueError, TypeError):
         return items_json
     if not isinstance(items, list):
         return items_json
-    groups = [item for item in items if isinstance(item, dict) and is_bom_name(item.get("original_name"))]
+    groups = [
+        item for item in items if isinstance(item, dict) and (
+            document_id or any(item.get(field) for field in IDENTITY) or is_bom_name(item.get("original_name"))
+        )
+    ]
     if not groups:
         return items_json
-    _annotate_restored_items(groups, current_user, filename)
+    _annotate_restored_items(groups, current_user, filename, document_id)
     return json.dumps(items, ensure_ascii=False)
 
 
+def _restore_source_decision(item, user, scope, document_id):
+    try:
+        with closing(open_flywheel_tx_connection()) as materials:
+            ctx = _binding_source(materials, user, item, scope, document_id)
+            if not ctx:
+                return False
+            with closing(get_auth_connection()) as auth:
+                record = source_decision(auth, ctx)
+            item["decision_version"] = source_version(record)
+            try:
+                live = _gate_export_row(item, user, scope, document_id=document_id, materials=materials)
+            except HTTPException as exc:
+                reason = exc.detail.get("row", {}).get("reason") or "源行决定无法核验，请重新确认"
+                status = STATUS_REJECTED if record and record["decision"] == STATUS_REJECTED else STATUS_RECOMMENDED
+                source = record["source"] if record else SOURCE_RESTORE
+                item.update(_annotate_decision(item, [], status, source, reason))
+            else:
+                status = STATUS_MANUAL_CONFIRMED if record else STATUS_AUTO_ACCEPTED
+                source = record["source"] if record else SOURCE_RULE
+                item.update(_annotate_decision(item, live, status, source, "已恢复服务端确认"))
+                if record:
+                    item.update(row_fingerprint=record["row_fingerprint"],
+                                binding_fingerprint=record["binding_fingerprint"])
+                item.update(bindings=live, matched_code=",".join(b["code"] for b in live))
+            return True
+    except HTTPException:
+        item.update(dict.fromkeys(IDENTITY, ""))
+        item.update(_annotate_decision(item, [], STATUS_RECOMMENDED, SOURCE_RESTORE, "源行身份无法核验，请重新确认"))
+        return True
+
+
 @catalog_read
-def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str):
+def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str, document_id=None):
     """V015-M2：草稿/保存进度恢复时的服务端权威状态注释。
 
     可导出状态来自服务端人工确认、约束规则或新鲜校准复核。
@@ -705,6 +782,10 @@ def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, sc
     policy = acceptance_policy()
     for item in items:
         item.pop("acceptance_calibration", None)
+        if _restore_source_decision(item, current_user, scope, document_id):
+            downgraded += item["decision_status"] not in EXPORTABLE_STATUSES
+            annotated.append(item)
+            continue
         professional = item.get("professional") or "暖通"
         scope_key = make_scope_key(scope or "", professional)
         row = {
@@ -837,7 +918,7 @@ def api_annotate_session(
     current_user: dict = Depends(get_current_user),
 ):
     """草稿恢复注释：返回带服务端权威决策状态与可核验文档/表/源行身份的 items 与降级数量。"""
-    items, downgraded = _annotate_restored_items(req.items, current_user, req.scope_filename or "")
+    items, downgraded = _annotate_restored_items(req.items, current_user, req.scope_filename or "", req.document_id)
     try:
         items, legacy_untrusted_count = annotate_items_identity(current_user, items)
     except FeedbackContractError as exc:
@@ -847,6 +928,7 @@ def api_annotate_session(
         "actor_user_id": current_user["id"],
         "actor_account_epoch": str(current_user.get("account_epoch") or ""),
         "items": items,
+        "initial_match_summary": summarize_initial_matches(items),
         "downgraded": downgraded,
         "legacy_untrusted_count": legacy_untrusted_count,
     }
@@ -1929,7 +2011,7 @@ class BindingModel(BaseModel):
             raise ValueError("工程量和比例须为数值")
         return value
 
-class MatchedItemModel(BaseModel):
+class MatchedItemModel(SourceReviewFields):
     original_row_idx: int
     original_name: str
     original_spec: str
@@ -1957,6 +2039,7 @@ class MatchedItemModel(BaseModel):
 
 class ExportRequest(BaseModel):
     items: List[MatchedItemModel]
+    document_id: Optional[str] = ""
     # V015-M2：导出工作范围（原始文件名），与人工确认记录的 scope_key 对齐。
     scope_filename: Optional[str] = ""
 
@@ -2265,6 +2348,7 @@ def async_process_upload_task(
             task_id,
             status="completed",
             result=parsed_rows,
+            initial_match_summary=summarize_initial_matches(parsed_rows),
             document_id=doc_summary.get("document_id") or task_meta.get("document_id", ""),
             work_session_id=doc_summary.get("work_session_id") or task_meta.get("work_session_id", ""),
             algo_version=doc_summary.get("algo_version", ""),
@@ -2397,6 +2481,13 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
     total_results = []
     total_items = len(raw_rows)
     policy = acceptance_policy()
+    initial_policy = load_policy(require_frozen=True) if task_id else None
+    first_revision = get_db_revision() if task_id else None
+    rank_options = {}
+    if policy is not None:
+        rank_options["calibration_groups"] = policy.equivalences
+    if initial_policy is not None:
+        rank_options["initial_match_groups"] = initial_policy.equivalences
     task_meta = (get_task_status(task_id) or {}) if policy is not None and task_id else {}
     llm_engine = active_llm_decision()
     if llm_engine is not None:
@@ -2508,10 +2599,7 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
             
             logger.debug(f"  Matching job {idx + offset}: name={q_info['name']}, spec={q_info['specification']}, category={q_info['category']}, brand={q_info['brand']}")
             t_start_match = time.time()
-            if policy is None:
-                res = match_item(q_info, q_vector)
-            else:
-                res = match_item(q_info, q_vector, calibration_groups=policy.equivalences)
+            res = match_item(q_info, q_vector, **rank_options)
             t_elapsed_match = time.time() - t_start_match
             logger.debug(f"    Job {idx + offset} matched in {t_elapsed_match:.4f}s. is_exact={res['is_exact']}. Candidates={len(res['top_candidates'])}")
             first_pass_results.append(res)
@@ -2586,7 +2674,9 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                 if not res["is_exact"] and confirmed_series and res.get("top_candidates"):
                     if ENABLE_SERIES_RERUN:
                         # Full second-pass rematch if explicitly enabled
-                        res = match_item(q_info, q_vector, confirmed_series)
+                        initial_options = {k: v for k, v in rank_options.items() if k == "initial_match_groups"}
+                        res = match_item(q_info, q_vector, confirmed_series, **initial_options)
+                        first_pass_results[i] = res
                     else:
                         # Fast in-memory series rank boost without re-running full recall/scoring (default)
                         # V015-M3：blocked 候选不享受第二遍系列加分；+5 受候选不可逆 max_score
@@ -2603,6 +2693,8 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                                     item_cap = max(0.0, float(cap) if cap is not None else 1.0) * 100.0
                                     prior_score = cand["score"]
                                     cand["score"] = min(item_cap, prior_score + 5.0)
+                                    if task_id and cand["score"] != prior_score:
+                                        res["_initial_rank_stale"] = True
                                     if "score_evidence" in cand:
                                         cand["score_evidence"]["components"]["batch_series_adjustment"] = (
                                             cand["score"] - prior_score
@@ -2705,8 +2797,29 @@ def batch_match_rows(raw_rows: List[Dict[str, Any]], task_id: Optional[str] = No
                     scope = make_scope_key(llm_task.get("original_filename"), result_row["professional"])
                     if owner is None or not get_row_decision(owner, scope, result_row):
                         _apply_llm_review(llm_engine, llm_budget, row_for_decision, q_info, result_row)
+                if "cross_encoder_rerank" in res:
+                    result_row["cross_encoder_rerank"] = res["cross_encoder_rerank"]
                 final_chunk_results.append(result_row)
             
+        if task_id:
+            codes = [binding.get("code") for result in final_chunk_results for binding in result["bindings"]]
+            for result in final_chunk_results:
+                if result["top_candidates"]:
+                    codes.append(result["top_candidates"][0].get("code"))
+            with catalog_lock:
+                revision = get_db_revision()
+                live = fetch_live_material_map(codes)
+            for job, match, result in zip(match_jobs, first_pass_results, final_chunk_results, strict=True):
+                checkpoint()
+                query, _, raw = job
+                source = "bom" if is_bom_name(raw.get("name")) else (
+                    "rule" if result["decision_source"] == SOURCE_RULE else "matcher"
+                )
+                if revision != first_revision:
+                    match["_initial_rank_stale"] = True
+                result["initial_match"] = assess_initial_match(
+                    result, query, match, result, source, initial_policy, live, revision,
+                )
         total_results.extend(final_chunk_results)
         
         if task_id:
@@ -2848,7 +2961,7 @@ def api_match_single(payload: Dict[str, Any], current_user: dict = Depends(requi
     checkpoint()
     if has_doc_ctx:
         try:
-            snap_meta = record_rematch_snapshot(
+            snap_meta = _save_rematch_revision(
                 actor_user=current_user,
                 document_id=str(doc_id or ""),
                 sheet_id=str(sheet_id or ""),
@@ -2958,7 +3071,7 @@ def api_rematch(req: RematchRequest, current_user: dict = Depends(require_employ
     )
     if has_doc_ctx:
         try:
-            snap_meta = record_rematch_snapshot(
+            snap_meta = _save_rematch_revision(
                 actor_user=current_user,
                 document_id=str(req.document_id or ""),
                 sheet_id=str(req.sheet_id or ""),
@@ -3947,7 +4060,7 @@ def api_submit_feedback(req: FeedbackSubmitRequest, current_user: dict = Depends
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-class BindingRowRequest(BaseModel):
+class BindingRowRequest(SourceReviewFields):
     original_name: str
     original_spec: str
     original_qty: float
@@ -3964,11 +4077,29 @@ class BindingRowRequest(BaseModel):
 
     def row(self):
         row = self.model_dump(exclude={"scope_filename", "bindings"})
+        for key in ("original_spec", "original_unit", "original_category", "original_brand", "original_code"):
+            row[key] = row[key] or ""
+        row["original_loss"] = row["original_loss"] or 0.0
+        row["original_row_idx"] = row["original_row_idx"] or 0
         return {**row, "professional": self.professional or "暖通"}
 
 
 class BindingSubmitRequest(BindingRowRequest):
     bindings: List[BindingModel]
+
+
+class PriorityReviewRequest(BaseModel):
+    rows: List[BindingSubmitRequest] = Field(min_length=1, max_length=200)
+
+
+class PriorityConfirmRow(BindingSubmitRequest):
+    idempotency_key: str = Field(min_length=64, max_length=64)
+    reviewed_missing: bool = False
+
+
+class PriorityConfirmRequest(BaseModel):
+    batch_request_id: str = Field(min_length=1, max_length=128)
+    rows: List[PriorityConfirmRow] = Field(min_length=1, max_length=200)
 
 class BindingRuleConfirmRequest(BaseModel):
     original_name: str
@@ -3993,11 +4124,118 @@ def _with_live_binding_fields(bindings, live):
     return canonical
 
 
+@app.post("/api/binding/priority", dependencies=[Depends(require_employee)])
+@catalog_read
+def api_priority_review(req: PriorityReviewRequest, current_user: dict = Depends(get_current_user)):
+    results = []
+    with closing(open_flywheel_tx_connection()) as materials, closing(get_auth_connection()) as auth:
+        for entry in req.rows:
+            row = entry.row()
+            try:
+                ctx = _binding_source(materials, current_user, row, entry.scope_filename)
+                if not ctx:
+                    raise HTTPException(422, {"error": "source_identity_required", "message": "须提供已验证源行。"})
+                binds = normalize_bindings([b.model_dump() for b in entry.bindings], row["original_qty"])
+                result = priority_eligibility(ctx, source_decision(auth, ctx), row, binds)
+            except HTTPException as exc:
+                result = {"eligible": False, "reason": exc.detail["error"]}
+            results.append({"source_row_id": entry.source_row_id, **result})
+    return {"code": 0, "rows": results}
+
+
+@app.post("/api/binding/priority/submit", dependencies=[Depends(require_employee)])
+@catalog_read
+def api_submit_priority_review(req: PriorityConfirmRequest, current_user: dict = Depends(get_current_user)):
+    results = []
+    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
+        for entry in req.rows:
+            try:
+                result = _submit_priority_row(auth, materials, current_user, req.batch_request_id, entry)
+            except (HTTPException, FeedbackContractError) as exc:
+                result = {"ok": False, "reason": exc.detail["error"], "message": exc.detail.get("message")}
+            results.append({"source_row_id": entry.source_row_id, **result})
+    return {"code": 0, "rows": results, "feedback_delivery_ok": deliver_priority_feedback()}
+
+
+def _submit_priority_row(auth, materials, user, batch_id, entry):
+    row = entry.row()
+    ctx = _binding_source(materials, user, row, entry.scope_filename)
+    if not ctx:
+        raise HTTPException(422, {"error": "source_identity_required", "message": "须提供已验证源行。"})
+    binds = normalize_bindings([b.model_dump() for b in entry.bindings], row["original_qty"])
+    record = source_decision(auth, ctx)
+    previous = receipt_for(auth, ctx, entry.idempotency_key)
+    if previous:
+        receipt = json.loads(previous["receipt_json"])
+        submitted_ctx = {**ctx, "revision": row.get("recommendation_revision")}
+        if previous["payload_digest"] != priority_key(submitted_ctx, row, binds):
+            return {"ok": False, "reason": "idempotency_conflict"}
+        active = (
+            source_version(record) == receipt["decision_version"]
+            and ctx["revision"] == receipt["recommendation_revision"]
+            and confirmed_source(record, ctx, row, receipt["bindings"])
+            and validate_bindings_against_row(
+                row, binds, saved_bindings=extract_saved_bindings(record), require_saved_unit_evidence=True,
+            )["ok"]
+        )
+        return {"ok": bool(active), "replayed": True, "reason": "confirmed" if active else "confirmation_inactive",
+                "receipt": receipt}
+    check_source_write(ctx, record, row)
+    eligibility = priority_eligibility(ctx, record, row, binds)
+    if not eligibility["eligible"]:
+        return {"ok": False, "reason": eligibility["reason"]}
+    if entry.idempotency_key != eligibility["idempotency_key"]:
+        return {"ok": False, "reason": "idempotency_conflict"}
+    if eligibility["missing"] and not entry.reviewed_missing:
+        return {"ok": False, "reason": "missing_review_required"}
+    live = fetch_live_material_map([binds[0]["code"]])
+    canonical = _with_live_binding_fields(binds, live)
+    reason = "优先核对逐行勾选确认"
+    version = write_source_decision(auth, ctx, record, row, canonical, STATUS_MANUAL_CONFIRMED,
+                                    SOURCE_PRIORITY_REVIEW, reason)
+    result = {
+        "bindings": canonical, **version,
+        "decision": {
+            **_annotate_decision(row, canonical, STATUS_MANUAL_CONFIRMED, SOURCE_PRIORITY_REVIEW, reason),
+            **version,
+        },
+    }
+    receipt = commit_priority(auth, ctx, row, binds, canonical, entry.idempotency_key, batch_id, result)
+    return {"ok": True, "reason": "confirmed", "receipt": receipt}
+
+
 @app.post("/api/binding/invalidate", dependencies=[Depends(require_employee)])
+@catalog_read
 def api_invalidate_binding(req: BindingRowRequest, current_user: dict = Depends(get_current_user)):
     row = req.row()
+    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
+        ctx = _binding_source(materials, current_user, row, req.scope_filename)
+        if ctx:
+            record = source_decision(auth, ctx)
+            try:
+                check_source_write(ctx, record, row, editing=True)
+            except FeedbackContractError as exc:
+                raise HTTPException(exc.status_code, exc.detail) from exc
+            return {"code": 0, **invalidate_source(auth, ctx, record, row)}
     invalidate_decision(current_user["id"], make_scope_key(req.scope_filename, row["professional"]), row)
     return {"code": 0}
+
+
+def _record_binding_review(req, current_user, row, binds, decision, source, reason):
+    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
+        ctx = _binding_source(materials, current_user, row, req.scope_filename)
+        if ctx:
+            record = source_decision(auth, ctx)
+            try:
+                check_source_write(ctx, record, row)
+            except FeedbackContractError as exc:
+                raise HTTPException(exc.status_code, exc.detail) from exc
+            return write_source_decision(auth, ctx, record, row, binds, decision, source, reason)
+    return record_decision(
+        current_user["id"], make_scope_key(req.scope_filename, row["professional"]),
+        row, binds, decision, source, reason,
+    )
+
 
 @app.post("/api/binding/submit", dependencies=[Depends(require_employee)])
 @catalog_read
@@ -4029,20 +4267,8 @@ def api_submit_binding(
     if not binds:
         raise HTTPException(status_code=400, detail="至少需要一个绑定编码才能确认")
 
-    row_item = {
-        "original_row_idx": req.original_row_idx or 0,
-        "original_name": req.original_name,
-        "original_spec": req.original_spec or "",
-        "original_qty": req.original_qty,
-        "original_unit": req.original_unit or "",
-        "original_loss": req.original_loss or 0.0,
-        "original_category": req.original_category or "",
-        "original_brand": req.original_brand or "",
-        "original_code": req.original_code or "",
-        "professional": req.professional or "暖通",
-    }
+    row_item = req.row()
     binds = normalize_bindings(binds, req.original_qty)
-    scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
     bom = _current_bom({**row_item, "professional": req.professional
                         if "professional" in req.model_fields_set else None})
     if bom is not None:
@@ -4080,14 +4306,8 @@ def api_submit_binding(
         raise HTTPException(status_code=409, detail="绑定数量与比例不一致")
 
     binds = bom.bindings if bom is not None else _with_live_binding_fields(binds, validation["live_materials"])
-    record = record_decision(
-        user_id=current_user["id"],
-        scope_key=scope_key,
-        row=row_item,
-        bindings=binds,
-        decision=STATUS_MANUAL_CONFIRMED,
-        source=SOURCE_MANUAL,
-        reason="人工显式确认",
+    record = _record_binding_review(
+        req, current_user, row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认",
     )
 
     # 反馈学习日志（历史功能保留，非可导出凭据；失败不影响权威确认结果）
@@ -4115,49 +4335,36 @@ def api_submit_binding(
         "code": 0,
         "msg": "绑定关系已由服务端确认",
         "bindings": binds,
-        "decision": _annotate_decision(
-            row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认"
-        ),
+        "decision": {
+            **_annotate_decision(row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认"),
+            "binding_fingerprint": record["binding_fingerprint"],
+        },
         "row_fingerprint": record["row_fingerprint"],
         "binding_fingerprint": record["binding_fingerprint"],
+        "decision_version": record.get("decision_version"),
     }
 
 
 @app.post("/api/binding/reject", dependencies=[Depends(require_employee)])
+@catalog_read
 def api_reject_binding(
     req: BindingSubmitRequest,
     current_user: dict = Depends(get_current_user),
 ):
     """V015-M2：人工拒绝当前推荐，显式置为不可导出，等待重新选材。"""
-    binds = [{"code": (b.code or "").strip(), "qty": float(b.qty or 0.0)} for b in req.bindings]
-    row_item = {
-        "original_row_idx": req.original_row_idx or 0,
-        "original_name": req.original_name,
-        "original_spec": req.original_spec or "",
-        "original_qty": req.original_qty,
-        "original_unit": req.original_unit or "",
-        "original_loss": req.original_loss or 0.0,
-        "original_category": req.original_category or "",
-        "original_brand": req.original_brand or "",
-        "original_code": req.original_code or "",
-        "professional": req.professional or "暖通",
-    }
-    scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
-    record_decision(
-        user_id=current_user["id"],
-        scope_key=scope_key,
-        row=row_item,
-        bindings=binds,
-        decision=STATUS_REJECTED,
-        source=SOURCE_MANUAL_REJECT,
-        reason="人工拒绝推荐",
+    row_item = req.row()
+    binds = normalize_bindings([b.model_dump() for b in req.bindings], req.original_qty)
+    record = _record_binding_review(
+        req, current_user, row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐",
     )
     return {
         "code": 0,
         "msg": "已拒绝当前推荐",
-        "decision": _annotate_decision(
-            row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐"
-        ),
+        "decision_version": record.get("decision_version"),
+        "decision": {
+            **_annotate_decision(row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐"),
+            "binding_fingerprint": record["binding_fingerprint"],
+        },
     }
 
 @app.get("/api/binding/suggestions", dependencies=[Depends(require_employee)])
@@ -4358,7 +4565,7 @@ def _export_row_bindings(item: dict) -> List[dict]:
 
 @catalog_read
 def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
-                     allow_calibrated=True) -> Optional[List[Dict[str, Any]]]:
+                     allow_calibrated=True, document_id=None, materials=None) -> Optional[List[Dict[str, Any]]]:
     """对单行执行导出可导出性核验；不可导出时抛 HTTPException(422) 并带行级原因。"""
     row_idx = item.get("original_row_idx")
     name = item.get("original_name", "")
@@ -4380,9 +4587,23 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
         }
         raise HTTPException(status_code=422, detail=detail)
 
-    row_decision = get_row_decision(
-        user_id=current_user["id"], scope_key=scope_key, row=item,
-    )
+    try:
+        if materials is None:
+            with closing(open_flywheel_tx_connection()) as lookup:
+                ctx = _binding_source(lookup, current_user, item, request_scope, document_id)
+        else:
+            ctx = _binding_source(materials, current_user, item, request_scope, document_id)
+        if ctx:
+            check_revision(ctx, item)
+    except (HTTPException, FeedbackContractError) as exc:
+        if exc.status_code == 404:
+            raise
+        deny(exc.detail["message"])
+    if ctx:
+        with closing(get_auth_connection()) as auth:
+            row_decision = source_decision(auth, ctx)
+    else:
+        row_decision = get_row_decision(user_id=current_user["id"], scope_key=scope_key, row=item)
     if row_decision and row_decision["decision"] == STATUS_REJECTED:
         deny("人工拒绝：须重新选材并显式确认后方可导出")
     if row_decision and row_decision["source"] == SOURCE_MANUAL_EDIT:
@@ -4396,12 +4617,9 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
             deny(issue)
 
     # 1) 人工确认：服务端确认记录 + 行/绑定双指纹一致 + 编码当前有效 + 无硬冲突
-    record = get_decision(
-        user_id=current_user["id"],
-        scope_key=scope_key,
-        row=item,
-        bindings=binds,
-    )
+    record = (
+        row_decision if confirmed_source(row_decision, ctx, item, binds) else None
+    ) if ctx else get_decision(user_id=current_user["id"], scope_key=scope_key, row=item, bindings=binds)
     if record:
         validation = validate_bindings_against_row(
             item,
@@ -4422,6 +4640,9 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
             saved = quantities.get(binding_fingerprint([binding])) or {}
             checked.append({**binding, **{key: saved[key] for key in ("qty", "qty_ratio") if key in saved}})
         return _with_live_binding_fields(checked, validation["live_materials"])
+
+    if ctx and (row_decision or row_content_fingerprint(item) != ctx["original_fingerprint"] or ctx["revision"] != 1):
+        deny("当前源行或绑定已变化，请重新确认")
 
     if bom is not None:
         if row_decision:
@@ -4471,16 +4692,17 @@ def export_report(req: ExportRequest, current_user: dict = Depends(require_emplo
     # V015-M2：导出前逐行 fail-closed 核验，任一不合规即整批 422（不默选 top1）。
     request_scope = req.scope_filename or ""
     items_to_write = []
-    for it in req.items:
-        checkpoint()
-        item = it.model_dump()
-        if is_bom_name(item["original_name"]) and "professional" not in it.model_fields_set:
-            item["professional"] = None
-        live = _gate_export_row(item, current_user, request_scope,
-                                allow_calibrated="professional" in it.model_fields_set)
-        if live:
-            item["bindings"] = live
-        items_to_write.append(item)
+    with closing(open_flywheel_tx_connection()) as materials:
+        for it in req.items:
+            checkpoint()
+            item = it.model_dump()
+            if is_bom_name(item["original_name"]) and "professional" not in it.model_fields_set:
+                item["professional"] = None
+            live = _gate_export_row(item, current_user, request_scope, document_id=req.document_id,
+                                    allow_calibrated="professional" in it.model_fields_set, materials=materials)
+            if live:
+                item["bindings"] = live
+            items_to_write.append(item)
     try:
         output_filename = f"标准格式_{uuid.uuid4().hex[:8]}.xlsx"
         output_path = os.path.join(UPLOAD_DIR, output_filename)

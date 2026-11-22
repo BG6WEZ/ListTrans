@@ -25,6 +25,11 @@ _PHYSICAL = (
 )
 _UNKNOWN = frozenset({"", "-", "—", "/", "未知", "未说明", "待定", "unknown", "n/a", "none"})
 _UNKNOWN_FLAG_VALUE = r"(?:未知|未说明|待定|不详|未明确|unknown\b|n/a\b)"
+SAFETY_FIELDS = frozenset({"防爆", "提升泵", "单位倍率"})
+_POWER_RANGE = re.compile(
+    r"(?<![\d.])(\d+(?:\.\d+)?\s*[-‐–—~～至]\s*\d+(?:\.\d+)?\s*(?:kW|W|千瓦|瓦))(?![a-z\d])",
+    re.I,
+)
 
 
 @dataclass(frozen=True)
@@ -37,10 +42,15 @@ class Policy:
     equivalences: dict[str, frozenset[str]]
 
 
-@lru_cache(maxsize=1)
-def load_policy():
+@lru_cache(maxsize=2)
+def load_policy(*, require_frozen=False):
     try:
-        config = json.loads((ASSETS / "v019_m2_policy.json").read_bytes())
+        policy_bytes = (ASSETS / "v019_m2_policy.json").read_bytes()
+        if require_frozen and hashlib.sha256(policy_bytes).hexdigest() != (
+            "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981"
+        ):
+            return None
+        config = json.loads(policy_bytes)
         group_bytes = (ASSETS / "v019_m2_equivalences.json").read_bytes()
         groups = json.loads(group_bytes)
         if config["version"] != VERSION or tuple(config["features"]) != FEATURES:
@@ -171,10 +181,26 @@ def _physical_evidence(row, query, material):
     fields.update(key for key in _PHYSICAL if _field(q_attrs, key) is not None)
     fields.update(key for key in ("材质", "管径", "外径") if _field(c_attrs, key) is not None)
 
-    missing, different = [], []
+    missing, different, comparisons = [], [], []
+
+    def record(key, a, b, state, *, requested=False):
+        missing_side = None
+        if state == "missing":
+            missing.append(key)
+            missing_side = "both" if a is None and b is None else "query" if a is None else "candidate"
+        elif state == "different":
+            different.append(key)
+        comparisons.append({
+            "field": key, "state": state, "missing_side": missing_side,
+            "query_value": a, "candidate_value": b,
+            "safety_critical_unknown": state == "missing" and key in SAFETY_FIELDS,
+            "requested_unverified": requested and missing_side == "candidate",
+        })
+
     equal = 0
     for key in sorted(fields):
         query_value, candidate_value = _field(q_attrs, key), _field(c_attrs, key)
+        requested = key in _PHYSICAL and query_value is not None
         if key == "管径":
             query_value, candidate_value = map(_dn_field_to_float, (query_value, candidate_value))
         if key == "材质":
@@ -185,21 +211,29 @@ def _physical_evidence(row, query, material):
                 query_value, candidate_value = (g if g in KNOWN_MATERIAL_GRADES else None for g in grades)
                 key = "材质牌号"
         if query_value is None or candidate_value is None:
-            missing.append(key)
+            # Preserve the frozen features. The light-fixture parser does not
+            # structure unlabelled ranges such as "1200*300,40-50w".
+            if key == "功率" and query_value is None and candidate_value is None:
+                power_range = _POWER_RANGE.search(q_spec or "")
+                if power_range:
+                    query_value, requested = power_range.group(1), True
+            record(key, query_value, candidate_value, "missing", requested=requested)
         elif _equal(query_value, candidate_value):
             equal += 1
+            record(key, query_value, candidate_value, "equal")
         else:
-            different.append(key)
+            record(key, query_value, candidate_value, "different")
 
-    if q_prof in ("", "全部", "其它", "通用") or c_prof in ("", "全部", "其它", "通用"):
-        missing.append("专业")
-    elif q_prof != c_prof:
-        different.append("专业")
+    unspecified = ("", "全部", "其它", "通用")
+    a = None if q_prof in unspecified else q_prof
+    b = None if c_prof in unspecified else c_prof
+    record("专业", a, b, "missing" if a is None or b is None else "equal" if a == b else "different")
     q_unit, c_unit = row.get("original_unit"), material.get("unit")
     if not _known(q_unit) or not _known(c_unit):
-        missing.append("单位倍率")
-    elif get_unit_multiplier(str(q_unit), str(c_unit)) != 1.0:
-        different.append("单位倍率")
+        record("单位倍率", q_unit if _known(q_unit) else None, c_unit if _known(c_unit) else None, "missing")
+    else:
+        compatible = get_unit_multiplier(str(q_unit), str(c_unit)) == 1.0
+        record("单位倍率", q_unit, c_unit, "equal" if compatible else "different")
 
     def explosion_state(text):
         if _explicit_unknown(text, r"防爆(?:要求|等级)?|(?<![a-z0-9])EX(?![a-z0-9])"):
@@ -223,24 +257,31 @@ def _physical_evidence(row, query, material):
         a, b = states
         if relevant or a is not None or b is not None:
             if a is None or b is None:
-                missing.append(key)
+                record(key, a, b, "missing")
             elif a != b:
-                different.append(key)
+                record(key, a, b, "different")
+            else:
+                record(key, a, b, "equal")
 
     q_model = _text(parsed.get("model"))
     c_model = _text(extract_model(c_spec_text))
     model_exact = bool(q_model and q_model == c_model)
     if q_model and not c_model:
-        missing.append("型号")
+        record("型号", parsed.get("model"), None, "missing", requested=True)
     elif q_model and not model_exact:
-        different.append("型号")
+        record("型号", q_model, c_model, "different")
+    elif model_exact:
+        record("型号", q_model, c_model, "equal")
     spec_exact = _known(q_spec) and _text(q_spec) == _text(c_spec)
     if not _known(q_spec) or not _known(c_spec):
-        missing.append("核心规格")
+        record("核心规格", q_spec if _known(q_spec) else None, c_spec if _known(c_spec) else None, "missing")
     elif not spec_exact and not (model_exact and fields and equal == len(fields)):
-        different.append("核心规格")
+        record("核心规格", q_spec, c_spec, "different")
+    else:
+        record("核心规格", q_spec, c_spec, "equal")
     return {
-        "missing": missing, "different": different, "exact_name": _text(q_name) == _text(c_name),
+        "missing": missing, "different": different, "comparisons": comparisons,
+        "exact_name": _text(q_name) == _text(c_name),
         "exact_spec": bool(spec_exact), "exact_model": model_exact,
         "core_agreement": equal / len(fields) if fields else float(spec_exact),
         "core_completeness": (len(fields) - len([k for k in missing if k in fields or k == "材质牌号"])) / len(fields)
@@ -251,6 +292,12 @@ def _physical_evidence(row, query, material):
 def confidence(features, policy):
     value = policy.intercept + sum(f * w for f, w in zip(features, policy.weights, strict=True))
     return (math.tanh(value / 2) + 1) / 2
+
+
+def match_features(score, margin, uncapped, physical):
+    return (score / 100, max(-1.0, min(1.0, margin / 100)) if margin is not None else 0.0,
+            float(physical["exact_name"]), float(physical["exact_spec"]), float(physical["exact_model"]),
+            physical["core_agreement"], physical["core_completeness"], float(uncapped))
 
 
 def assess_match(row, query, match, policy, *, trusted=True):
@@ -293,9 +340,7 @@ def assess_match(row, query, match, policy, *, trusted=True):
                 reasons.append("ambiguous_distinct_candidate")
             if score < 75:
                 reasons.append("insufficient_ranking_evidence")
-    features = (score / 100, max(-1.0, min(1.0, margin / 100)) if margin is not None else 0.0,
-                float(physical["exact_name"]), float(physical["exact_spec"]), float(physical["exact_model"]),
-                physical["core_agreement"], physical["core_completeness"], float(uncapped))
+    features = match_features(score, margin, uncapped, physical)
     ready = not reasons
     value = confidence(features, policy)
     if "no_answer" in reasons or "hard_conflict" in reasons or (
@@ -319,6 +364,7 @@ def assess_match(row, query, match, policy, *, trusted=True):
         "equivalent_codes": ranking.get("equivalent_codes", []) if evidence_current else [],
         "reason_codes": reasons, "missing_fields": physical["missing"], "different_fields": physical["different"],
         "hard_conflict": hard, "eligible": ready, "features": features,
+        "field_comparisons": physical.get("comparisons", []),
     }
 
 

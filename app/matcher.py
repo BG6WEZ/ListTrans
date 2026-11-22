@@ -2747,7 +2747,7 @@ def hybrid_recall(query_info: Dict[str, Any], query_vector: Optional[Any] = None
     return pool_list
 
 @catalog_read
-def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None, calibration_groups=None) -> Dict[str, Any]:
+def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, batch_confirmed_series: Optional[List[str]] = None, *, diagnostic_targets: Optional[List[str]] = None, calibration_groups=None, initial_match_groups=None) -> Dict[str, Any]:
     """
     Main entry point for matching a single query item.
     """
@@ -2802,7 +2802,10 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
         "exact_code" in (c.get("recall_sources") or ()) for c in candidates
     )
     score_contexts = {}
-    capped_codes = set() if calibration_groups is not None else None
+    cross_encoder_enabled = os.getenv("LISTTRANS_V021_M3_RERANKER", "off") == "on"
+    capped_codes = (
+        set() if cross_encoder_enabled or calibration_groups is not None or initial_match_groups is not None else None
+    )
     rerank_profile = os.getenv("LISTTRANS_V019_M1_RERANK", "off")
     rerank_enabled = rerank_profile not in ("", "0", "off")
     feedback_model = None
@@ -3009,6 +3012,14 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
                                 exact_threshold=exact_threshold)
         rerank_detail = {"profile": "v020-m0", "model_sha256": feedback_model[1], "moved_count": moved}
 
+    if cross_encoder_enabled:
+        if profile != "legacy" or rerank_enabled or feedback_model is not None or calibration_groups is not None:
+            cross_encoder = {"status": "skipped", "reason": "other_ranking_or_acceptance_profile"}
+        else:
+            from app.cross_encoder_reranker import rerank
+
+            cross_encoder = rerank(query_info, scored_candidates, capped_codes)
+
     # Threshold for 100% exact match
     is_exact = False
     matched_code = None
@@ -3021,6 +3032,19 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
             is_exact = True
             matched_code = top_one["code"]
             
+    rank = {}
+    if capped_codes is not None:
+        from app.acceptance_calibration import ranking_evidence
+
+        uncapped = bool(scored_candidates and scored_candidates[0]["code"] not in capped_codes)
+        if calibration_groups is not None:
+            rank["_acceptance_rank"] = ranking_evidence(scored_candidates, calibration_groups, uncapped)
+        if initial_match_groups is not None:
+            rank["_initial_match_rank"] = (
+                rank["_acceptance_rank"] if initial_match_groups is calibration_groups
+                else ranking_evidence(scored_candidates, initial_match_groups, uncapped)
+            )
+
     res_candidates = []
     evidence = {}
     for c in scored_candidates[:10]:
@@ -3033,13 +3057,11 @@ def match_item(query_info: Dict[str, Any], query_vector: Optional[Any] = None, b
     result = {
         "is_exact": is_exact,
         "matched_code": matched_code,
-        "top_candidates": res_candidates # Output Top 10 for detailed view
+        "top_candidates": res_candidates, # Output Top 10 for detailed view
+        **rank,
     }
-    if capped_codes is not None:
-        from app.acceptance_calibration import ranking_evidence
-
-        uncapped = bool(scored_candidates and scored_candidates[0]["code"] not in capped_codes)
-        result["_acceptance_rank"] = ranking_evidence(scored_candidates, calibration_groups, uncapped)
+    if cross_encoder_enabled:
+        result["cross_encoder_rerank"] = cross_encoder
     if diagnostic_targets is not None:
         targets = list(dict.fromkeys(str(code).strip() for code in diagnostic_targets if str(code).strip()))
         from app.db_manager import get_thread_db_connection

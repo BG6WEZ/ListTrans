@@ -1,0 +1,109 @@
+{
+  "task": "V021-M3/R01",
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "matching_replay_exit_codes": {
+    "keyword": {
+      "off": 0,
+      "on": 0
+    },
+    "vector": {
+      "off": 0,
+      "on": 0
+    },
+    "exit_zero_means": "exercised the chosen profile without inference fallback; selection gates are recorded separately",
+    "command": "venv/Scripts/python.exe doc/V0.2.1/evidence/m3_r01_replay.py --projection <pinned-materialized-TrainDev> --mode <keyword|vector> --arm <off|on> --out <fresh JSON>"
+  },
+  "selection": {
+    "keyword": {
+      "meets_all_gates": false,
+      "failed": [
+        "dev_equivalent_hit1_strict_gain",
+        "dev_equivalent_mrr10_strict_gain",
+        "dev_A_strict_gain",
+        "domain_floors",
+        "all_signed_resources_on"
+      ],
+      "budget_failures": [
+        "single_p50_ms",
+        "up50_p50_ms",
+        "wset_mib"
+      ]
+    },
+    "vector": {
+      "meets_all_gates": false,
+      "failed": [
+        "dev_equivalent_hit1_strict_gain",
+        "dev_equivalent_mrr10_strict_gain",
+        "dev_A_strict_gain",
+        "domain_floors",
+        "all_signed_resources_on"
+      ],
+      "budget_failures": [
+        "single_p95_ms",
+        "up50_p50_ms",
+        "up50_p95_ms",
+        "wset_mib"
+      ]
+    }
+  },
+  "focused": {
+    "exit_code": 0,
+    "passed": 23,
+    "log": "m3_r01_focused.log",
+    "note": "The restricted sandbox printed Windows exception 0xc0000008 during FAISS import, then exited normally with all cases passing. Delivery also passed native serial pytest.",
+    "command": "venv/Scripts/python.exe -m pytest -q tests/test_v021_m3_cross_encoder.py --basetemp=<native short temp> -o tmp_path_retention_policy=all -p no:cacheprovider"
+  },
+  "serial": {
+    "exit_code": 0,
+    "passed": 543,
+    "failed": 0,
+    "deselected": 1,
+    "elapsed_seconds_reported": 24402.68,
+    "timing_note": "One setup elapsed time jumped to 23807.70s. Serial elapsed time is preserved from pytest and does not inform performance budgets.",
+    "deselected_reason": "HOLD-M0-01 test_frozen_assignment_covers_same_sheet_and_near_query_edges would decode Test 160",
+    "log": "m3_r01_serial_verified.log",
+    "command": "venv/Scripts/python.exe doc/V0.2.1/evidence/m3_r01_pytest.py <pinned-materialized-TrainDev> --basetemp=<native short temp> -o tmp_path_retention_policy=all -p no:cacheprovider --durations=10"
+  },
+  "rule_gate": {
+    "exit_code": 0,
+    "reference_comparisons": 18,
+    "row_differences": 0,
+    "legacy_unconstrained_regressions": 17,
+    "verdict": "harmful",
+    "command": "m3_r01_replay.py --projection <pinned-materialized-TrainDev> --mode rules --out <JSON>"
+  },
+  "archive_off_replay": {
+    "keyword": 0,
+    "vector": 0,
+    "command": "m3_r01_off_parity.py --projection <pinned-materialized-TrainDev> --mode <keyword|vector> --out <fresh JSON>"
+  },
+  "pair_summary": {
+    "exit_code": 0,
+    "command": "m3_r01_compare.py --projection <pinned-materialized-TrainDev> --raw-dir <raw reports>"
+  },
+  "isolation": {
+    "before_exit": 0,
+    "after_exit": 0,
+    "verdicts": {
+      "before": "PASS",
+      "after": "PASS"
+    },
+    "command": "tests/verify_isolation.py --out <distinct JSON per phase>"
+  },
+  "scope_baseline": {
+    "exit_code": 0,
+    "assets_on_disk": 33,
+    "business_differences": [],
+    "command": "m3_r01_baseline.py --final"
+  },
+  "rollback": {
+    "exit_code": 0,
+    "command": "m3_r01_rollback.py"
+  },
+  "syntax_ast": {
+    "exit_code": 0,
+    "files_checked": 11
+  },
+  "superseded_runs": "m3_r01_initial_attempts.json",
+  "default": "off"
+}

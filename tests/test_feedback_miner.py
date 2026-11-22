@@ -74,7 +74,8 @@ def test_tokenizer_and_abbreviation_extraction():
 
 def test_mining_multi_tier_gating():
     """Verify support count, distinct users, and consistency gating logic over M0 trusted records."""
-    uid = uuid.uuid4().hex[:6]
+    # Keep the synthetic alias distinct without accidentally generating a material grade such as 304.
+    uid = uuid.uuid4().hex[:6].translate(str.maketrans("0123456789", "ghijklmnop"))
     raw_name = f"试验阀门{uid}"
     raw_norm = clean_text(raw_name)
 

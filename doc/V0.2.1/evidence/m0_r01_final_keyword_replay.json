@@ -1,0 +1,640 @@
+{
+  "mode": "keyword",
+  "splits": {
+    "train": 842,
+    "dev": 218
+  },
+  "hardware": {
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "physical_cores": 14,
+    "logical_cores": 20,
+    "ram_mib": 16068.73828125,
+    "os": "Windows-11-10.0.26300-SP0",
+    "python": "3.12.10"
+  },
+  "inputs": {
+    "catalog": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "config": {
+      "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+      "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+      "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+      "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+      "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+      "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+      "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+      "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+      "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+      "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+      "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+      "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+      "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+      "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+      "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+      "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+    },
+    "cache": {},
+    "model": {}
+  },
+  "index": {
+    "enabled": false
+  },
+  "phases": {
+    "startup": {
+      "seconds": 6.816536000002088,
+      "sampled_peak_rss_mib": 482.89453125,
+      "process_peak_working_set_mib": 482.8984375
+    },
+    "warmup": {
+      "seconds": 0.8009283999999752,
+      "sampled_peak_rss_mib": 492.84765625,
+      "process_peak_working_set_mib": 492.90234375
+    },
+    "single": {
+      "seconds": 69.26469150000048,
+      "sampled_peak_rss_mib": 555.26953125,
+      "process_peak_working_set_mib": 556.75
+    },
+    "upload": {
+      "seconds": 54.881227599998965,
+      "sampled_peak_rss_mib": 619.2421875,
+      "process_peak_working_set_mib": 619.24609375
+    }
+  },
+  "latency": {
+    "single": {
+      "n": 1060,
+      "p50_ms": 25.566,
+      "p95_ms": 243.709,
+      "max_ms": 1053.869
+    },
+    "upload50": {
+      "n": 21,
+      "p50_ms": 1197.246,
+      "p95_ms": 6675.954,
+      "max_ms": 19059.493
+    }
+  },
+  "observed_budget": {
+    "single_p50_ms": 25.566,
+    "single_p95_ms": 243.709,
+    "up50_p50_ms": 1197.246,
+    "up50_p95_ms": 6675.954,
+    "wset_mib": 619.24609375
+  },
+  "signed_budget": {
+    "single_p50_ms": 30.0,
+    "single_p95_ms": 300.0,
+    "up50_p50_ms": 1750.0,
+    "up50_p95_ms": 10000.0,
+    "wset_mib": 768.0
+  },
+  "budget_pass": {
+    "single_p50_ms": true,
+    "single_p95_ms": true,
+    "up50_p50_ms": true,
+    "up50_p95_ms": true,
+    "wset_mib": true
+  },
+  "summary": {
+    "total_rows": 1060,
+    "known_rows": 1060,
+    "missing_rows": 0,
+    "actual_prefilled": 510,
+    "prefill_rate": 0.4811320754716981,
+    "status": "recorded",
+    "tiers": {
+      "A": 34,
+      "B": 205,
+      "C": 344,
+      "D": 477
+    },
+    "c_subtypes": {
+      "low_score_prefill": 271,
+      "safety_missing": 73
+    },
+    "by_professional": {
+      "医气": {
+        "total_rows": 147,
+        "known_rows": 147,
+        "missing_rows": 0,
+        "actual_prefilled": 71,
+        "prefill_rate": 0.48299319727891155,
+        "status": "recorded",
+        "tiers": {
+          "A": 0,
+          "B": 29,
+          "C": 42,
+          "D": 76
+        },
+        "c_subtypes": {
+          "low_score_prefill": 42,
+          "safety_missing": 0
+        }
+      },
+      "弱电": {
+        "total_rows": 161,
+        "known_rows": 161,
+        "missing_rows": 0,
+        "actual_prefilled": 104,
+        "prefill_rate": 0.6459627329192547,
+        "status": "recorded",
+        "tiers": {
+          "A": 4,
+          "B": 35,
+          "C": 68,
+          "D": 54
+        },
+        "c_subtypes": {
+          "low_score_prefill": 65,
+          "safety_missing": 3
+        }
+      },
+      "强电": {
+        "total_rows": 288,
+        "known_rows": 288,
+        "missing_rows": 0,
+        "actual_prefilled": 130,
+        "prefill_rate": 0.4513888888888889,
+        "status": "recorded",
+        "tiers": {
+          "A": 26,
+          "B": 64,
+          "C": 43,
+          "D": 155
+        },
+        "c_subtypes": {
+          "low_score_prefill": 40,
+          "safety_missing": 3
+        }
+      },
+      "暖通": {
+        "total_rows": 259,
+        "known_rows": 259,
+        "missing_rows": 0,
+        "actual_prefilled": 129,
+        "prefill_rate": 0.4980694980694981,
+        "status": "recorded",
+        "tiers": {
+          "A": 3,
+          "B": 64,
+          "C": 129,
+          "D": 63
+        },
+        "c_subtypes": {
+          "low_score_prefill": 62,
+          "safety_missing": 67
+        }
+      },
+      "装饰": {
+        "total_rows": 205,
+        "known_rows": 205,
+        "missing_rows": 0,
+        "actual_prefilled": 76,
+        "prefill_rate": 0.37073170731707317,
+        "status": "recorded",
+        "tiers": {
+          "A": 1,
+          "B": 13,
+          "C": 62,
+          "D": 129
+        },
+        "c_subtypes": {
+          "low_score_prefill": 62,
+          "safety_missing": 0
+        }
+      }
+    }
+  },
+  "historical_r2": {
+    "actual_prefilled": 510,
+    "A": 34,
+    "B": 205,
+    "C": 344,
+    "D": 477,
+    "low_score_prefill": 271,
+    "safety_missing": 73
+  },
+  "r2_deltas": {
+    "actual_prefilled": 0,
+    "A": 0,
+    "B": 0,
+    "C": 0,
+    "D": 0,
+    "low_score_prefill": 0,
+    "safety_missing": 0
+  },
+  "reason_counts": {
+    "low_score_prefill": 271,
+    "no_candidate": 174,
+    "hard_conflict": 303,
+    "candidate_review": 205,
+    "priority_review_unavailable": 7,
+    "safety_missing": 73,
+    "priority_review": 34
+  },
+  "probes": {
+    "GT-0300": {
+      "tier": "A",
+      "subtype": null,
+      "source": "matcher",
+      "effective_bindings": [
+        {
+          "code": "2.25.15.0143",
+          "name": "医用LED气密净化灯",
+          "specification": "1200*300*10,吸顶安装,48W",
+          "unit": "套",
+          "brand": "台夏",
+          "category": "格栅灯（荧光灯盘）",
+          "qty": 1.0,
+          "qty_ratio": 1.0
+        }
+      ],
+      "actual_prefilled": true,
+      "reason_codes": [
+        "priority_review"
+      ],
+      "ranking_score": 98.9,
+      "distinct_margin": 34.60000000000001,
+      "competitor_code": "2.25.15.0013",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.7795584841208083,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": "40-50w",
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "尺寸",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "1200*300",
+          "candidate_value": "1200*300",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "类型",
+          "state": "missing",
+          "missing_side": "both",
+          "query_value": null,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": "强电",
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "套",
+          "candidate_value": "套",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用LED气密净化灯\n2.规格：1200*300,40-50w\n3.安装形式：吸顶式\n4.工作内容：测位、划线、打眼、埋螺栓、灯具安装、接线、焊接包头\n5.不论灯具是否带应急电源，单价不做任何调整",
+          "candidate_value": "1200*300*10,吸顶安装,48W",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "强电"
+    },
+    "GT-0674": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 97.6,
+      "distinct_margin": 0.5999999999999943,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10186681902455075,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 300.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：300m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    },
+    "GT-0677": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 96.9,
+      "distinct_margin": 0.6000000000000085,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10075131852892705,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 500.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式:落地安装\n4.工作内容：设备安装、风电接口、检查接线、调试、试运转\n5.含减震垫",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    },
+    "GT-0678": {
+      "tier": "C",
+      "subtype": "safety_missing",
+      "source": "matcher",
+      "effective_bindings": [],
+      "actual_prefilled": false,
+      "reason_codes": [
+        "safety_missing"
+      ],
+      "ranking_score": 96.9,
+      "distinct_margin": 0.6000000000000085,
+      "competitor_code": "3.50.29.0002",
+      "ranking_evidence_status": "current",
+      "uncapped": true,
+      "priority_review_unavailable": false,
+      "model_output": 0.10075131852892705,
+      "field_comparisons": [
+        {
+          "field": "功率",
+          "state": "missing",
+          "missing_side": "candidate",
+          "query_value": 0.2,
+          "candidate_value": null,
+          "safety_critical_unknown": false,
+          "requested_unverified": true
+        },
+        {
+          "field": "机型",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "离心",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "机外余压",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 250.0,
+          "candidate_value": 500.0,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "材质",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": "镀锌",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "风量",
+          "state": "different",
+          "missing_side": null,
+          "query_value": 500.0,
+          "candidate_value": 250.5,
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "专业",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "暖通",
+          "candidate_value": "暖通",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "单位倍率",
+          "state": "equal",
+          "missing_side": null,
+          "query_value": "台",
+          "candidate_value": "台",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        },
+        {
+          "field": "防爆",
+          "state": "missing",
+          "missing_side": "query",
+          "query_value": null,
+          "candidate_value": false,
+          "safety_critical_unknown": true,
+          "requested_unverified": false
+        },
+        {
+          "field": "核心规格",
+          "state": "different",
+          "missing_side": null,
+          "query_value": "1.名称：医用静音型排风机\n2.规格：风量：500m3/h；机外余压：250pa；配电功率：0.2kw；启动方式：直接；电源：220/1/50( V/Ph/H )；\n3.安装形式：吊装\n4.工作内容：设备安装、支吊架制作安装、风电接口、检查接线、调试、试运转",
+          "candidate_value": "风量：1~500m³/h，机外余压≤500Pa，镀锌钢板，非防爆",
+          "safety_critical_unknown": false,
+          "requested_unverified": false
+        }
+      ],
+      "db_revision": 0,
+      "policy_version": "v021-m0-initial-match-v1",
+      "professional": "暖通"
+    }
+  },
+  "legacy_export_checks": {
+    "GT-0674": 422,
+    "GT-0677": 422,
+    "GT-0678": 422
+  },
+  "safety_probes_pass": true,
+  "power_evidence_pass": true
+}

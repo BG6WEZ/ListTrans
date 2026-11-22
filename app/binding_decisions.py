@@ -70,6 +70,7 @@ def init_binding_decision_db():
     """在账号库创建人工确认/拒绝记录表（幂等）。"""
     conn = get_auth_connection()
     try:
+        conn.execute("BEGIN IMMEDIATE")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS binding_decisions (
@@ -92,6 +93,30 @@ def init_binding_decision_db():
             "CREATE INDEX IF NOT EXISTS idx_binding_decisions_user_scope "
             "ON binding_decisions(user_id, scope_key)"
         )
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_binding_decisions (
+                user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL,
+                document_id TEXT NOT NULL, sheet_id TEXT NOT NULL, source_row_id TEXT NOT NULL,
+                version INTEGER NOT NULL, revision INTEGER NOT NULL,
+                row_fingerprint TEXT NOT NULL, binding_fingerprint TEXT NOT NULL,
+                decision TEXT NOT NULL, source TEXT NOT NULL, reason TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                PRIMARY KEY (user_id, account_epoch, document_id, sheet_id, source_row_id)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS priority_binding_receipts (
+                user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+                batch_request_id TEXT NOT NULL, payload_digest TEXT NOT NULL, receipt_json TEXT NOT NULL,
+                PRIMARY KEY (user_id, account_epoch, idempotency_key)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS priority_binding_outbox (
+                event_id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL,
+                payload_json TEXT NOT NULL
+            )
+        """)
         conn.commit()
     finally:
         conn.close()
@@ -99,12 +124,18 @@ def init_binding_decision_db():
 
 def clear_binding_decisions(user_id: Optional[int] = None):
     """系统重置/测试清理：默认清空全部决策；给定 user_id 时仅清该账号。"""
+    init_binding_decision_db()
     conn = get_auth_connection()
     try:
         if user_id is None:
             conn.execute("DELETE FROM binding_decisions")
         else:
             conn.execute("DELETE FROM binding_decisions WHERE user_id = ?", (user_id,))
+        for table in ("source_binding_decisions", "priority_binding_receipts", "priority_binding_outbox"):
+            if user_id is None:
+                conn.execute(f"DELETE FROM {table}")
+            else:
+                conn.execute(f"DELETE FROM {table} WHERE user_id = ?", (user_id,))
         conn.commit()
     finally:
         conn.close()

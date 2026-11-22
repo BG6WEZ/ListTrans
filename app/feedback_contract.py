@@ -369,9 +369,9 @@ def persist_upload_document_tree(
                     snapshot_id, document_id, sheet_id, source_row_id,
                     revision, is_initial, snapshot_kind, professional, parsed_spec_json,
                     auto_top1_code, auto_top1_score, auto_top1_name, auto_candidates_json,
-                    initial_bindings_json, decision_status,
+                    initial_bindings_json, initial_match_json, decision_status,
                     algo_version, model_version, config_version, config_digest_full
-                ) VALUES (?, ?, ?, ?, 1, 1, 'initial_upload', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, 1, 1, 'initial_upload', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     snapshot_id,
@@ -385,6 +385,8 @@ def persist_upload_document_tree(
                     auto_top1_name,
                     json.dumps(compact_cands, ensure_ascii=False),
                     initial_bindings_json,
+                    json.dumps(res_row["initial_match"], ensure_ascii=False)
+                    if res_row.get("initial_match") is not None else None,
                     str(res_row.get("decision_status") or "recommended"),
                     versions["algo_version"],
                     versions["model_version"],
@@ -1475,6 +1477,7 @@ def annotate_items_identity(
     try:
         cur = conn.cursor()
         for item in items:
+            item["initial_match"] = None
             doc_id = str(item.get("document_id") or "").strip()
             sh_id = str(item.get("sheet_id") or "").strip()
             sr_id = str(item.get("source_row_id") or "").strip()
@@ -1503,7 +1506,7 @@ def annotate_items_identity(
             if verified_row:
                 init_snap = cur.execute(
                     """
-                    SELECT snapshot_id, auto_top1_code, algo_version, model_version, config_version, config_digest_full
+                    SELECT snapshot_id, auto_top1_code, initial_match_json
                     FROM flywheel_recommendation_snapshots
                     WHERE source_row_id = ? AND is_initial = 1
                     ORDER BY revision ASC LIMIT 1
@@ -1551,6 +1554,8 @@ def annotate_items_identity(
                 if init_snap:
                     item["initial_snapshot_id"] = init_snap["snapshot_id"]
                     item["initial_auto_code"] = init_snap["auto_top1_code"]
+                    if init_snap["initial_match_json"]:
+                        item["initial_match"] = json.loads(init_snap["initial_match_json"])
                 if latest_snap:
                     item["recommendation_snapshot_id"] = latest_snap["snapshot_id"]
                     item["recommendation_revision"] = int(latest_snap["revision"])

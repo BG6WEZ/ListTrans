@@ -1,0 +1,157 @@
+{
+  "date": "2026-11-22T20:15:00+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "task": "V021-M2/R01",
+  "verdict": "HANDED_OVER_TO_INDEPENDENT_AUDIT",
+  "m2_released": false,
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "v014_rollback_anchor": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "plan_r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "original_dispatch_baseline": "doc/V0.2.1/evidence/m2_r01_dispatch_baseline.json",
+  "original_dispatch_asset_count": 35,
+  "sidecar_disposition": {
+    "id": "OBS-COORD-V021-M2-01",
+    "severity": "P3",
+    "blocks_handover": false,
+    "attribution": "unknown",
+    "absent_stale_sidecars": {
+      "app/materials.db-wal": {
+        "dispatch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "dispatch_size_bytes": 0,
+        "current": null
+      },
+      "app/materials.db-shm": {
+        "dispatch_sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+        "dispatch_size_bytes": 32768,
+        "current": null
+      }
+    },
+    "immutable_db_verification": {
+      "app/materials.db": {
+        "sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+        "matches_dispatch": true,
+        "quick_check": "ok",
+        "materials_count": 26863,
+        "flywheel_data_rows": 0,
+        "m0_column_leaked": false,
+        "m2_table_leaked": false
+      },
+      "app/auth.db": {
+        "sha256": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+        "matches_dispatch": true,
+        "quick_check": "ok",
+        "m2_tables_leaked": false
+      }
+    },
+    "sqlite_empty_wal_ro_cleanup_reproduced": true
+  },
+  "reanchored_audit_business_asset_count": 33,
+  "reanchored_audit_business_snapshot": {
+    "files": {
+      "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "app/materials.db-wal": null,
+      "app/materials.db-shm": null,
+      "app/auth.db": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "app/auth.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "app/auth.db-shm": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "app/binding_feedback.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "app/feedback_samples.json": "28527fdd35410664c2993516f125a6885f3080ab6030c3b0b36c4b78fe388944"
+    },
+    "trees": {
+      "config": {
+        "__exists__": true,
+        "files": {
+          "alias_dict.json": "3f5dbcbddb4f262a43464e86d05bcced77859c26c3f0aca6da08577161f300fc",
+          "auto_binding_rules.json": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+          "boost_rules.json": "2c7bcf9d72450d322c85f5d930facdabed9bcd811c5139412c7363e646b00656",
+          "category_domain_map.json": "0f615fb2bc00a59cec764bea445baf3e5cef3202b4ac2aacf8ed31006b3f543d",
+          "connection_dict.json": "33991d4a976de9919ce0b95888265d976dff90124dca426f8f8df54f7e62d716",
+          "domain_schema.json": "7c72f42753df3ff5f996bcc05bd88b384d7e74bd7740ebc4692df371080a96eb",
+          "flags_dict.json": "6aba6692d4151e9d37b407efc3e6ccb4cdb5089dfc7c843d41ca91d6326a0cdb",
+          "llm_config.json": "35461ef62f87ff1736f3beafa0acc649c9b56e3951bf735826f044f4f2439feb",
+          "llm_prompts.json": "53ff44b8ed3a6f9da2284d8cac22501f3fd31be2faca61c19fbd17f0207d180d",
+          "material_dict.json": "228e562ea3567e211c9bc9cee70506f8e50f169d01106e901b469fe0a086bdc3",
+          "model_config.json": "a76a24f33a6670d43bb3a72ce2f94735b019f7ae0963bd06c062a549f8064940",
+          "stop_words.json": "d3330c7dc62b0a8f5e18a45c5dc9209fc8dda08278596a4f1c4527cc6f5cc34e",
+          "tolerance_rules.json": "4e0e89a196e49e0deb5a84821006d512e85362a8110785b23a7e1d3ef5e4b39b",
+          "unit_norm.json": "4c80f4fc8807494e2a551897e20aa2401b3fcfd29ef48796daa70ae3f0969870",
+          "unit_rules.json": "12b15e953e4cafbd47b0d06488d6da8f36af227d76381946e827e963e6af4ed6",
+          "weight_rules.json": "109f4395208f9c8e375d3c163cd831dd17fc44f55a919dcefd2127023beca803"
+        }
+      },
+      "app/vector_cache": {
+        "__exists__": true,
+        "files": {
+          "cache_metadata.json": "da193d7782ad5b7bdc5f21d5225455a47de8a6010658fc72b62a045f8ec2ffc6",
+          "db_timestamp.txt": "1fc443b0deb8686fc130855c67f1e268dfff7203ab59d67760b8cb97448a0ba7",
+          "index_to_material.json": "35b47e03e276a881bcc381dc99f46b215a4eb2491de9651bc7daaccf0f33b94d",
+          "materials.index": "78da6a6347d8fb1c96addfe6c0a95915f267667028d557f8de99d8ae5fa959d5",
+          "materials_embeddings.npy": "f0b75860e918832d089d2e3527be8e53729c89fd77fa6b1971dee91df700c1bb"
+        }
+      },
+      "app/uploads": {
+        "__exists__": true,
+        "files": {}
+      },
+      "logs": {
+        "__exists__": true,
+        "files": {
+          "app_runtime.log": "5ac68b3995ddbe9753063de82010149fd6f19653026e5b5e560dc197a05f1999",
+          "security.log": "93acb68937d89ff557cf3148e656805a57a647f0c6ea7730da287b7ad98a14e7"
+        }
+      },
+      "data": {
+        "__exists__": true,
+        "files": {
+          "audit_disabled_materials_20260818.csv": "5394ff9a5e8b1381fcd810a404c88a75801e91ba00c958246b8464ad6e745064",
+          "audit_disabled_materials_20260820.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398",
+          "audit_disabled_materials_20260824.csv": "c24fef7e5039b411bd29137f1c4c6e74f62a80d7940d3078eaa7d9f886ae2de6",
+          "audit_disabled_materials_20260902.csv": "ef96003118e073906c8b8347b66c5622f1b15b429daa9d0c87096903ea3c9398"
+        }
+      }
+    }
+  },
+  "frozen_delivery_anchor": {
+    "delivery_manifest": "doc/V0.2.1/evidence/m2_r01_delivery_sha256.json",
+    "delivery_manifest_sha256": "cc224a6d4b4c9504d121ea98302213da0409de8bdc614673e16085bb85fd2505",
+    "delivery_entries_verified_before_coord_ledger_update": "43/43",
+    "coordinator_updated_ledger_sha256": "04e1c3271bf4fe49e083fb6fe5b162bf7856c90f47c8132937370947ef1daf95",
+    "coordinator_ruling_sha256": "c81bf89af4e9e63e6164c8512e04dc9aa0eb496e1e6b72b078a05fb35f68c2f6",
+    "frozen_code_and_test_files": {
+      "app/binding_decisions.py": "3acdf248ddc0cbf32cc618083ab202b4abceb5df379ac2b33ec20393c9481542",
+      "app/flywheel_db.py": "a5449d8c176e507d36099a23fd55f10a88708d7d86814f98965f17533e2a0e5c",
+      "app/server.py": "fd49773c281ed5b2aa4457eea9b64149ce859a24b281acefc6b4f220176338ce",
+      "app/source_binding_review.py": "fa0d4d45a6f0ef1aa4f7a07b94d7e3d52e9b372c283d6818d9bc0ed5a72d7fa8",
+      "tests/test_feedback_miner.py": "63ce9c55d294067c9dfd8235dbf82ca8a2c700f662b39ba0b8510b525f6a39f2",
+      "tests/test_m5_file_boundary_and_compat.py": "0d886a94a10d97f1c0872b2beaf355bddc484db1ce3ab043e9e235f5459e1106",
+      "tests/test_v020_m1_bom.py": "9e54e8e3b7a4307087c1f7c98034fa342a088fdc8f176684ae266f9b497df175",
+      "tests/test_v021_m2_priority_review.py": "3bbf51aaa707b75e84c76abcaf4712363ea331d4a38d3d3a6e3d6f24f73df7d2",
+      "web/app.js": "a27b5d78dcbd77b661042e3289bccbe6e9d2bd0888014bba5bcdea6cdebc0381",
+      "web/index.css": "dfdca898c26c4540dab521d32825e8e02a82fed5e5f4b5a26c7fdf3e4545d4bf",
+      "web/index.html": "9465e3e352a584c7eb789f974459f88a3414a10c4ba487af763251d946f6cb4b"
+    }
+  },
+  "sealed_assets_git_metadata": {
+    "tests/fixtures/golden_set_v1.json": {
+      "head_blob": "f906169cb413c424915ef1b86745226e45ffff6c",
+      "git_diff_empty": true
+    },
+    "tests/fixtures/golden_governance_v1.json": {
+      "head_blob": "5761e77d543189374e78cc09970acb4a5449a6f6",
+      "git_diff_empty": true
+    }
+  },
+  "coordinator_precheck": {
+    "verify_isolation": "PASS / EXIT=0",
+    "node_check_web_app_js": "EXIT=0",
+    "focused_pytest_modules": [
+      "tests/test_v021_m2_priority_review.py",
+      "tests/test_m5_file_boundary_and_compat.py",
+      "tests/test_v020_m1_bom.py",
+      "tests/test_feedback_miner.py"
+    ],
+    "focused_pytest_passed": 43,
+    "focused_pytest_exit": 0
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "exit_code": 0,
+  "isolation": "scratch, no network, native temporary context",
+  "canary_excluded": true,
+  "files": {
+    "app/app/calibration_assets": {
+      "v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+      "v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120"
+    },
+    "context-check": {
+      "v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981",
+      "v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120"
+    }
+  }
+}

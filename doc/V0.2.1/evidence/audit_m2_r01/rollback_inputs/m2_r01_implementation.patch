@@ -1,0 +1,1884 @@
+diff --git before/app/binding_decisions.py after/app/binding_decisions.py
+index 0646fb5..9c7da8f 100644
+--- before/app/binding_decisions.py
++++ after/app/binding_decisions.py
+@@ -70,6 +70,7 @@ def init_binding_decision_db():
+     """在账号库创建人工确认/拒绝记录表（幂等）。"""
+     conn = get_auth_connection()
+     try:
++        conn.execute("BEGIN IMMEDIATE")
+         conn.execute(
+             """
+             CREATE TABLE IF NOT EXISTS binding_decisions (
+@@ -92,6 +93,30 @@ def init_binding_decision_db():
+             "CREATE INDEX IF NOT EXISTS idx_binding_decisions_user_scope "
+             "ON binding_decisions(user_id, scope_key)"
+         )
++        conn.execute("""
++            CREATE TABLE IF NOT EXISTS source_binding_decisions (
++                user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL,
++                document_id TEXT NOT NULL, sheet_id TEXT NOT NULL, source_row_id TEXT NOT NULL,
++                version INTEGER NOT NULL, revision INTEGER NOT NULL,
++                row_fingerprint TEXT NOT NULL, binding_fingerprint TEXT NOT NULL,
++                decision TEXT NOT NULL, source TEXT NOT NULL, reason TEXT NOT NULL,
++                payload_json TEXT NOT NULL,
++                PRIMARY KEY (user_id, account_epoch, document_id, sheet_id, source_row_id)
++            )
++        """)
++        conn.execute("""
++            CREATE TABLE IF NOT EXISTS priority_binding_receipts (
++                user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL, idempotency_key TEXT NOT NULL,
++                batch_request_id TEXT NOT NULL, payload_digest TEXT NOT NULL, receipt_json TEXT NOT NULL,
++                PRIMARY KEY (user_id, account_epoch, idempotency_key)
++            )
++        """)
++        conn.execute("""
++            CREATE TABLE IF NOT EXISTS priority_binding_outbox (
++                event_id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, account_epoch TEXT NOT NULL,
++                payload_json TEXT NOT NULL
++            )
++        """)
+         conn.commit()
+     finally:
+         conn.close()
+@@ -99,12 +124,18 @@ def init_binding_decision_db():
+ 
+ def clear_binding_decisions(user_id: Optional[int] = None):
+     """系统重置/测试清理：默认清空全部决策；给定 user_id 时仅清该账号。"""
++    init_binding_decision_db()
+     conn = get_auth_connection()
+     try:
+         if user_id is None:
+             conn.execute("DELETE FROM binding_decisions")
+         else:
+             conn.execute("DELETE FROM binding_decisions WHERE user_id = ?", (user_id,))
++        for table in ("source_binding_decisions", "priority_binding_receipts", "priority_binding_outbox"):
++            if user_id is None:
++                conn.execute(f"DELETE FROM {table}")
++            else:
++                conn.execute(f"DELETE FROM {table} WHERE user_id = ?", (user_id,))
+         conn.commit()
+     finally:
+         conn.close()
+diff --git before/app/flywheel_db.py after/app/flywheel_db.py
+index 2f5c912..1005efe 100644
+--- before/app/flywheel_db.py
++++ after/app/flywheel_db.py
+@@ -85,6 +85,17 @@ def init_flywheel_tables(
+         );
+         """)
+ 
++        # Concentrated confirmations are audit feedback only. Training and mining read the
++        # trusted single-row event/sample tables, never this separate event stream.
++        cur.execute("""
++        CREATE TABLE IF NOT EXISTS flywheel_priority_confirmation_events (
++            event_id TEXT PRIMARY KEY,
++            source TEXT NOT NULL CHECK (source = 'priority_review'),
++            payload_json TEXT NOT NULL,
++            received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
++        );
++        """)
++
+         # 1. Flow of user feedback records
+         cur.execute("""
+         CREATE TABLE IF NOT EXISTS flywheel_records (
+diff --git before/app/server.py after/app/server.py
+index f094ce7..3c82941 100644
+--- before/app/server.py
++++ after/app/server.py
+@@ -18,7 +18,7 @@ import uuid
+ import pandas as pd
+ import openpyxl
+ import time
+-from contextlib import asynccontextmanager, ExitStack
++from contextlib import asynccontextmanager, closing, ExitStack
+ from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request, BackgroundTasks, Query
+ from fastapi.responses import JSONResponse
+ from fastapi.staticfiles import StaticFiles
+@@ -129,6 +129,7 @@ async def lifespan(app_instance: FastAPI):
+     init_session_db()
+     init_audit_tables()
+     init_flywheel_tables()
++    await asyncio.to_thread(deliver_priority_feedback)
+     try:
+         clean_old_draft_sessions()
+     except Exception as e:
+@@ -148,12 +149,14 @@ async def lifespan(app_instance: FastAPI):
+ 
+     logger.info("SQLite DB, Auth DB, Session DB checked and Vector Index ready.")
+     expiry_task = asyncio.create_task(_expire_runtime_tasks())
++    priority_delivery_task = asyncio.create_task(_retry_priority_feedback())
+     try:
+         yield
+     finally:
+         mining_bg_task.cancel()
+         expiry_task.cancel()
+-        await asyncio.gather(mining_bg_task, expiry_task, return_exceptions=True)
++        priority_delivery_task.cancel()
++        await asyncio.gather(mining_bg_task, expiry_task, priority_delivery_task, return_exceptions=True)
+ 
+ app = FastAPI(
+     title="武汉华康世纪洁净科技股份有限公司 · 物料清单匹配系统",
+@@ -260,6 +263,41 @@ from app.feedback_contract import (
+     record_rematch_snapshot,
+     verify_document_ownership,
+ )
++from app.flywheel_db import open_flywheel_tx_connection
++from app.source_binding_review import (
++    IDENTITY, SOURCE_PRIORITY_REVIEW, check_revision, check_source_write, commit_priority,
++    confirmed_source, deliver_priority_feedback, invalidate_source, priority_eligibility,
++    priority_key, receipt_for, resolve_source, source_decision, source_version, source_write,
++    write_source_decision,
++)
++
++
++async def _retry_priority_feedback():
++    while True:
++        await asyncio.sleep(60)
++        await asyncio.to_thread(deliver_priority_feedback)
++
++
++def _binding_source(materials, user, row, filename, document_id=None):
++    try:
++        return resolve_source(materials, user, row, filename or "", document_id=document_id)
++    except FeedbackContractError as exc:
++        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
++
++
++@catalog_read
++def _save_rematch_revision(**kwargs):
++    # Share the auth write lock with confirmation so revision checks serialize with rematch.
++    with source_write():
++        return record_rematch_snapshot(**kwargs)
++
++
++class SourceReviewFields(BaseModel):
++    document_id: Optional[str] = None
++    sheet_id: Optional[str] = None
++    source_row_id: Optional[str] = None
++    recommendation_revision: Optional[StrictInt] = Field(default=None, ge=1)
++    decision_version: Optional[StrictInt] = Field(default=None, ge=0)
+ 
+ class LoginRequest(BaseModel):
+     username: str
+@@ -550,7 +588,7 @@ def api_save_draft(req: DraftSaveRequest, current_user: dict = Depends(get_curre
+         current_user["id"],
+         req.original_filename,
+         req.professional,
+-        _checked_session_boms(req.items_json, current_user, req.original_filename),
++        _checked_session_decisions(req.items_json, current_user, req.original_filename, doc_id),
+         account_epoch=str(current_user.get("account_epoch") or ""),
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -575,7 +613,8 @@ def api_get_draft(current_user: dict = Depends(get_current_user)):
+             "id": draft["id"],
+             "original_filename": draft["original_filename"],
+             "professional": draft["professional"],
+-            "items_json": _checked_session_boms(draft["items_json"], current_user, draft["original_filename"]),
++            "items_json": _checked_session_decisions(draft["items_json"], current_user, draft["original_filename"],
++                                                     draft.get("document_id")),
+             "document_id": draft.get("document_id") or "",
+             "work_session_id": draft.get("work_session_id") or "",
+             "trust_level": draft.get("trust_level") or "legacy_untrusted",
+@@ -599,7 +638,7 @@ def api_save_session(req: NamedSaveRequest, current_user: dict = Depends(get_cur
+         req.session_name,
+         req.original_filename,
+         req.professional,
+-        _checked_session_boms(req.items_json, current_user, req.original_filename),
++        _checked_session_decisions(req.items_json, current_user, req.original_filename, doc_id),
+         account_epoch=str(current_user.get("account_epoch") or ""),
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -630,7 +669,8 @@ def api_get_session(session_id: str, current_user: dict = Depends(get_current_us
+             "session_name": session["session_name"],
+             "original_filename": session["original_filename"],
+             "professional": session["professional"],
+-            "items_json": _checked_session_boms(session["items_json"], current_user, session["original_filename"]),
++            "items_json": _checked_session_decisions(session["items_json"], current_user, session["original_filename"],
++                                                     session.get("document_id")),
+             "document_id": session.get("document_id") or "",
+             "work_session_id": session.get("work_session_id") or "",
+             "trust_level": session.get("trust_level") or "legacy_untrusted",
+@@ -655,7 +695,8 @@ def api_update_session(session_id: str, req: UpdateSessionRequest, current_user:
+     update_named_session(
+         current_user["id"],
+         session_id,
+-        _checked_session_boms(req.items_json, current_user, session["original_filename"]),
++        _checked_session_decisions(req.items_json, current_user, session["original_filename"],
++                                   doc_id if doc_id is not None else session.get("document_id")),
+         account_epoch=ep,
+         document_id=doc_id,
+         work_session_id=ws_id,
+@@ -680,22 +721,57 @@ class DraftAnnotateRequest(BaseModel):
+     work_session_id: Optional[str] = ""
+ 
+ 
+-def _checked_session_boms(items_json, current_user, filename):
++def _checked_session_decisions(items_json, current_user, filename, document_id):
+     try:
+         items = json.loads(items_json)
+     except (ValueError, TypeError):
+         return items_json
+     if not isinstance(items, list):
+         return items_json
+-    groups = [item for item in items if isinstance(item, dict) and is_bom_name(item.get("original_name"))]
++    groups = [
++        item for item in items if isinstance(item, dict) and (
++            document_id or any(item.get(field) for field in IDENTITY) or is_bom_name(item.get("original_name"))
++        )
++    ]
+     if not groups:
+         return items_json
+-    _annotate_restored_items(groups, current_user, filename)
++    _annotate_restored_items(groups, current_user, filename, document_id)
+     return json.dumps(items, ensure_ascii=False)
+ 
+ 
++def _restore_source_decision(item, user, scope, document_id):
++    try:
++        with closing(open_flywheel_tx_connection()) as materials:
++            ctx = _binding_source(materials, user, item, scope, document_id)
++            if not ctx:
++                return False
++            with closing(get_auth_connection()) as auth:
++                record = source_decision(auth, ctx)
++            item["decision_version"] = source_version(record)
++            try:
++                live = _gate_export_row(item, user, scope, document_id=document_id, materials=materials)
++            except HTTPException as exc:
++                reason = exc.detail.get("row", {}).get("reason") or "源行决定无法核验，请重新确认"
++                status = STATUS_REJECTED if record and record["decision"] == STATUS_REJECTED else STATUS_RECOMMENDED
++                source = record["source"] if record else SOURCE_RESTORE
++                item.update(_annotate_decision(item, [], status, source, reason))
++            else:
++                status = STATUS_MANUAL_CONFIRMED if record else STATUS_AUTO_ACCEPTED
++                source = record["source"] if record else SOURCE_RULE
++                item.update(_annotate_decision(item, live, status, source, "已恢复服务端确认"))
++                if record:
++                    item.update(row_fingerprint=record["row_fingerprint"],
++                                binding_fingerprint=record["binding_fingerprint"])
++                item.update(bindings=live, matched_code=",".join(b["code"] for b in live))
++            return True
++    except HTTPException:
++        item.update(dict.fromkeys(IDENTITY, ""))
++        item.update(_annotate_decision(item, [], STATUS_RECOMMENDED, SOURCE_RESTORE, "源行身份无法核验，请重新确认"))
++        return True
++
++
+ @catalog_read
+-def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str):
++def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, scope: str, document_id=None):
+     """V015-M2：草稿/保存进度恢复时的服务端权威状态注释。
+ 
+     可导出状态来自服务端人工确认、约束规则或新鲜校准复核。
+@@ -706,6 +782,10 @@ def _annotate_restored_items(items: List[Dict[str, Any]], current_user: dict, sc
+     policy = acceptance_policy()
+     for item in items:
+         item.pop("acceptance_calibration", None)
++        if _restore_source_decision(item, current_user, scope, document_id):
++            downgraded += item["decision_status"] not in EXPORTABLE_STATUSES
++            annotated.append(item)
++            continue
+         professional = item.get("professional") or "暖通"
+         scope_key = make_scope_key(scope or "", professional)
+         row = {
+@@ -838,7 +918,7 @@ def api_annotate_session(
+     current_user: dict = Depends(get_current_user),
+ ):
+     """草稿恢复注释：返回带服务端权威决策状态与可核验文档/表/源行身份的 items 与降级数量。"""
+-    items, downgraded = _annotate_restored_items(req.items, current_user, req.scope_filename or "")
++    items, downgraded = _annotate_restored_items(req.items, current_user, req.scope_filename or "", req.document_id)
+     try:
+         items, legacy_untrusted_count = annotate_items_identity(current_user, items)
+     except FeedbackContractError as exc:
+@@ -1931,7 +2011,7 @@ class BindingModel(BaseModel):
+             raise ValueError("工程量和比例须为数值")
+         return value
+ 
+-class MatchedItemModel(BaseModel):
++class MatchedItemModel(SourceReviewFields):
+     original_row_idx: int
+     original_name: str
+     original_spec: str
+@@ -1959,6 +2039,7 @@ class MatchedItemModel(BaseModel):
+ 
+ class ExportRequest(BaseModel):
+     items: List[MatchedItemModel]
++    document_id: Optional[str] = ""
+     # V015-M2：导出工作范围（原始文件名），与人工确认记录的 scope_key 对齐。
+     scope_filename: Optional[str] = ""
+ 
+@@ -2878,7 +2959,7 @@ def api_match_single(payload: Dict[str, Any], current_user: dict = Depends(requi
+     checkpoint()
+     if has_doc_ctx:
+         try:
+-            snap_meta = record_rematch_snapshot(
++            snap_meta = _save_rematch_revision(
+                 actor_user=current_user,
+                 document_id=str(doc_id or ""),
+                 sheet_id=str(sheet_id or ""),
+@@ -2988,7 +3069,7 @@ def api_rematch(req: RematchRequest, current_user: dict = Depends(require_employ
+     )
+     if has_doc_ctx:
+         try:
+-            snap_meta = record_rematch_snapshot(
++            snap_meta = _save_rematch_revision(
+                 actor_user=current_user,
+                 document_id=str(req.document_id or ""),
+                 sheet_id=str(req.sheet_id or ""),
+@@ -3977,7 +4058,7 @@ def api_submit_feedback(req: FeedbackSubmitRequest, current_user: dict = Depends
+     except Exception as e:
+         raise HTTPException(status_code=500, detail=str(e))
+ 
+-class BindingRowRequest(BaseModel):
++class BindingRowRequest(SourceReviewFields):
+     original_name: str
+     original_spec: str
+     original_qty: float
+@@ -3994,12 +4075,30 @@ class BindingRowRequest(BaseModel):
+ 
+     def row(self):
+         row = self.model_dump(exclude={"scope_filename", "bindings"})
++        for key in ("original_spec", "original_unit", "original_category", "original_brand", "original_code"):
++            row[key] = row[key] or ""
++        row["original_loss"] = row["original_loss"] or 0.0
++        row["original_row_idx"] = row["original_row_idx"] or 0
+         return {**row, "professional": self.professional or "暖通"}
+ 
+ 
+ class BindingSubmitRequest(BindingRowRequest):
+     bindings: List[BindingModel]
+ 
++
++class PriorityReviewRequest(BaseModel):
++    rows: List[BindingSubmitRequest] = Field(min_length=1, max_length=200)
++
++
++class PriorityConfirmRow(BindingSubmitRequest):
++    idempotency_key: str = Field(min_length=64, max_length=64)
++    reviewed_missing: bool = False
++
++
++class PriorityConfirmRequest(BaseModel):
++    batch_request_id: str = Field(min_length=1, max_length=128)
++    rows: List[PriorityConfirmRow] = Field(min_length=1, max_length=200)
++
+ class BindingRuleConfirmRequest(BaseModel):
+     original_name: str
+     bindings: List[BindingModel]
+@@ -4023,12 +4122,119 @@ def _with_live_binding_fields(bindings, live):
+     return canonical
+ 
+ 
++@app.post("/api/binding/priority", dependencies=[Depends(require_employee)])
++@catalog_read
++def api_priority_review(req: PriorityReviewRequest, current_user: dict = Depends(get_current_user)):
++    results = []
++    with closing(open_flywheel_tx_connection()) as materials, closing(get_auth_connection()) as auth:
++        for entry in req.rows:
++            row = entry.row()
++            try:
++                ctx = _binding_source(materials, current_user, row, entry.scope_filename)
++                if not ctx:
++                    raise HTTPException(422, {"error": "source_identity_required", "message": "须提供已验证源行。"})
++                binds = normalize_bindings([b.model_dump() for b in entry.bindings], row["original_qty"])
++                result = priority_eligibility(ctx, source_decision(auth, ctx), row, binds)
++            except HTTPException as exc:
++                result = {"eligible": False, "reason": exc.detail["error"]}
++            results.append({"source_row_id": entry.source_row_id, **result})
++    return {"code": 0, "rows": results}
++
++
++@app.post("/api/binding/priority/submit", dependencies=[Depends(require_employee)])
++@catalog_read
++def api_submit_priority_review(req: PriorityConfirmRequest, current_user: dict = Depends(get_current_user)):
++    results = []
++    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
++        for entry in req.rows:
++            try:
++                result = _submit_priority_row(auth, materials, current_user, req.batch_request_id, entry)
++            except (HTTPException, FeedbackContractError) as exc:
++                result = {"ok": False, "reason": exc.detail["error"], "message": exc.detail.get("message")}
++            results.append({"source_row_id": entry.source_row_id, **result})
++    return {"code": 0, "rows": results, "feedback_delivery_ok": deliver_priority_feedback()}
++
++
++def _submit_priority_row(auth, materials, user, batch_id, entry):
++    row = entry.row()
++    ctx = _binding_source(materials, user, row, entry.scope_filename)
++    if not ctx:
++        raise HTTPException(422, {"error": "source_identity_required", "message": "须提供已验证源行。"})
++    binds = normalize_bindings([b.model_dump() for b in entry.bindings], row["original_qty"])
++    record = source_decision(auth, ctx)
++    previous = receipt_for(auth, ctx, entry.idempotency_key)
++    if previous:
++        receipt = json.loads(previous["receipt_json"])
++        submitted_ctx = {**ctx, "revision": row.get("recommendation_revision")}
++        if previous["payload_digest"] != priority_key(submitted_ctx, row, binds):
++            return {"ok": False, "reason": "idempotency_conflict"}
++        active = (
++            source_version(record) == receipt["decision_version"]
++            and ctx["revision"] == receipt["recommendation_revision"]
++            and confirmed_source(record, ctx, row, receipt["bindings"])
++            and validate_bindings_against_row(
++                row, binds, saved_bindings=extract_saved_bindings(record), require_saved_unit_evidence=True,
++            )["ok"]
++        )
++        return {"ok": bool(active), "replayed": True, "reason": "confirmed" if active else "confirmation_inactive",
++                "receipt": receipt}
++    check_source_write(ctx, record, row)
++    eligibility = priority_eligibility(ctx, record, row, binds)
++    if not eligibility["eligible"]:
++        return {"ok": False, "reason": eligibility["reason"]}
++    if entry.idempotency_key != eligibility["idempotency_key"]:
++        return {"ok": False, "reason": "idempotency_conflict"}
++    if eligibility["missing"] and not entry.reviewed_missing:
++        return {"ok": False, "reason": "missing_review_required"}
++    live = fetch_live_material_map([binds[0]["code"]])
++    canonical = _with_live_binding_fields(binds, live)
++    reason = "优先核对逐行勾选确认"
++    version = write_source_decision(auth, ctx, record, row, canonical, STATUS_MANUAL_CONFIRMED,
++                                    SOURCE_PRIORITY_REVIEW, reason)
++    result = {
++        "bindings": canonical, **version,
++        "decision": {
++            **_annotate_decision(row, canonical, STATUS_MANUAL_CONFIRMED, SOURCE_PRIORITY_REVIEW, reason),
++            **version,
++        },
++    }
++    receipt = commit_priority(auth, ctx, row, binds, canonical, entry.idempotency_key, batch_id, result)
++    return {"ok": True, "reason": "confirmed", "receipt": receipt}
++
++
+ @app.post("/api/binding/invalidate", dependencies=[Depends(require_employee)])
++@catalog_read
+ def api_invalidate_binding(req: BindingRowRequest, current_user: dict = Depends(get_current_user)):
+     row = req.row()
++    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
++        ctx = _binding_source(materials, current_user, row, req.scope_filename)
++        if ctx:
++            record = source_decision(auth, ctx)
++            try:
++                check_source_write(ctx, record, row, editing=True)
++            except FeedbackContractError as exc:
++                raise HTTPException(exc.status_code, exc.detail) from exc
++            return {"code": 0, **invalidate_source(auth, ctx, record, row)}
+     invalidate_decision(current_user["id"], make_scope_key(req.scope_filename, row["professional"]), row)
+     return {"code": 0}
+ 
++
++def _record_binding_review(req, current_user, row, binds, decision, source, reason):
++    with source_write() as auth, closing(open_flywheel_tx_connection()) as materials:
++        ctx = _binding_source(materials, current_user, row, req.scope_filename)
++        if ctx:
++            record = source_decision(auth, ctx)
++            try:
++                check_source_write(ctx, record, row)
++            except FeedbackContractError as exc:
++                raise HTTPException(exc.status_code, exc.detail) from exc
++            return write_source_decision(auth, ctx, record, row, binds, decision, source, reason)
++    return record_decision(
++        current_user["id"], make_scope_key(req.scope_filename, row["professional"]),
++        row, binds, decision, source, reason,
++    )
++
++
+ @app.post("/api/binding/submit", dependencies=[Depends(require_employee)])
+ @catalog_read
+ def api_submit_binding(
+@@ -4059,20 +4265,8 @@ def api_submit_binding(
+     if not binds:
+         raise HTTPException(status_code=400, detail="至少需要一个绑定编码才能确认")
+ 
+-    row_item = {
+-        "original_row_idx": req.original_row_idx or 0,
+-        "original_name": req.original_name,
+-        "original_spec": req.original_spec or "",
+-        "original_qty": req.original_qty,
+-        "original_unit": req.original_unit or "",
+-        "original_loss": req.original_loss or 0.0,
+-        "original_category": req.original_category or "",
+-        "original_brand": req.original_brand or "",
+-        "original_code": req.original_code or "",
+-        "professional": req.professional or "暖通",
+-    }
++    row_item = req.row()
+     binds = normalize_bindings(binds, req.original_qty)
+-    scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
+     bom = _current_bom({**row_item, "professional": req.professional
+                         if "professional" in req.model_fields_set else None})
+     if bom is not None:
+@@ -4110,14 +4304,8 @@ def api_submit_binding(
+         raise HTTPException(status_code=409, detail="绑定数量与比例不一致")
+ 
+     binds = bom.bindings if bom is not None else _with_live_binding_fields(binds, validation["live_materials"])
+-    record = record_decision(
+-        user_id=current_user["id"],
+-        scope_key=scope_key,
+-        row=row_item,
+-        bindings=binds,
+-        decision=STATUS_MANUAL_CONFIRMED,
+-        source=SOURCE_MANUAL,
+-        reason="人工显式确认",
++    record = _record_binding_review(
++        req, current_user, row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认",
+     )
+ 
+     # 反馈学习日志（历史功能保留，非可导出凭据；失败不影响权威确认结果）
+@@ -4145,49 +4333,36 @@ def api_submit_binding(
+         "code": 0,
+         "msg": "绑定关系已由服务端确认",
+         "bindings": binds,
+-        "decision": _annotate_decision(
+-            row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认"
+-        ),
++        "decision": {
++            **_annotate_decision(row_item, binds, STATUS_MANUAL_CONFIRMED, SOURCE_MANUAL, "人工显式确认"),
++            "binding_fingerprint": record["binding_fingerprint"],
++        },
+         "row_fingerprint": record["row_fingerprint"],
+         "binding_fingerprint": record["binding_fingerprint"],
++        "decision_version": record.get("decision_version"),
+     }
+ 
+ 
+ @app.post("/api/binding/reject", dependencies=[Depends(require_employee)])
++@catalog_read
+ def api_reject_binding(
+     req: BindingSubmitRequest,
+     current_user: dict = Depends(get_current_user),
+ ):
+     """V015-M2：人工拒绝当前推荐，显式置为不可导出，等待重新选材。"""
+-    binds = [{"code": (b.code or "").strip(), "qty": float(b.qty or 0.0)} for b in req.bindings]
+-    row_item = {
+-        "original_row_idx": req.original_row_idx or 0,
+-        "original_name": req.original_name,
+-        "original_spec": req.original_spec or "",
+-        "original_qty": req.original_qty,
+-        "original_unit": req.original_unit or "",
+-        "original_loss": req.original_loss or 0.0,
+-        "original_category": req.original_category or "",
+-        "original_brand": req.original_brand or "",
+-        "original_code": req.original_code or "",
+-        "professional": req.professional or "暖通",
+-    }
+-    scope_key = make_scope_key(req.scope_filename or "", req.professional or "暖通")
+-    record_decision(
+-        user_id=current_user["id"],
+-        scope_key=scope_key,
+-        row=row_item,
+-        bindings=binds,
+-        decision=STATUS_REJECTED,
+-        source=SOURCE_MANUAL_REJECT,
+-        reason="人工拒绝推荐",
++    row_item = req.row()
++    binds = normalize_bindings([b.model_dump() for b in req.bindings], req.original_qty)
++    record = _record_binding_review(
++        req, current_user, row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐",
+     )
+     return {
+         "code": 0,
+         "msg": "已拒绝当前推荐",
+-        "decision": _annotate_decision(
+-            row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐"
+-        ),
++        "decision_version": record.get("decision_version"),
++        "decision": {
++            **_annotate_decision(row_item, binds, STATUS_REJECTED, SOURCE_MANUAL_REJECT, "人工拒绝推荐"),
++            "binding_fingerprint": record["binding_fingerprint"],
++        },
+     }
+ 
+ @app.get("/api/binding/suggestions", dependencies=[Depends(require_employee)])
+@@ -4388,7 +4563,7 @@ def _export_row_bindings(item: dict) -> List[dict]:
+ 
+ @catalog_read
+ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+-                     allow_calibrated=True) -> Optional[List[Dict[str, Any]]]:
++                     allow_calibrated=True, document_id=None, materials=None) -> Optional[List[Dict[str, Any]]]:
+     """对单行执行导出可导出性核验；不可导出时抛 HTTPException(422) 并带行级原因。"""
+     row_idx = item.get("original_row_idx")
+     name = item.get("original_name", "")
+@@ -4410,9 +4585,23 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+         }
+         raise HTTPException(status_code=422, detail=detail)
+ 
+-    row_decision = get_row_decision(
+-        user_id=current_user["id"], scope_key=scope_key, row=item,
+-    )
++    try:
++        if materials is None:
++            with closing(open_flywheel_tx_connection()) as lookup:
++                ctx = _binding_source(lookup, current_user, item, request_scope, document_id)
++        else:
++            ctx = _binding_source(materials, current_user, item, request_scope, document_id)
++        if ctx:
++            check_revision(ctx, item)
++    except (HTTPException, FeedbackContractError) as exc:
++        if exc.status_code == 404:
++            raise
++        deny(exc.detail["message"])
++    if ctx:
++        with closing(get_auth_connection()) as auth:
++            row_decision = source_decision(auth, ctx)
++    else:
++        row_decision = get_row_decision(user_id=current_user["id"], scope_key=scope_key, row=item)
+     if row_decision and row_decision["decision"] == STATUS_REJECTED:
+         deny("人工拒绝：须重新选材并显式确认后方可导出")
+     if row_decision and row_decision["source"] == SOURCE_MANUAL_EDIT:
+@@ -4426,12 +4615,9 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+             deny(issue)
+ 
+     # 1) 人工确认：服务端确认记录 + 行/绑定双指纹一致 + 编码当前有效 + 无硬冲突
+-    record = get_decision(
+-        user_id=current_user["id"],
+-        scope_key=scope_key,
+-        row=item,
+-        bindings=binds,
+-    )
++    record = (
++        row_decision if confirmed_source(row_decision, ctx, item, binds) else None
++    ) if ctx else get_decision(user_id=current_user["id"], scope_key=scope_key, row=item, bindings=binds)
+     if record:
+         validation = validate_bindings_against_row(
+             item,
+@@ -4453,6 +4639,9 @@ def _gate_export_row(item: dict, current_user: dict, request_scope: str, *,
+             checked.append({**binding, **{key: saved[key] for key in ("qty", "qty_ratio") if key in saved}})
+         return _with_live_binding_fields(checked, validation["live_materials"])
+ 
++    if ctx and (row_decision or row_content_fingerprint(item) != ctx["original_fingerprint"] or ctx["revision"] != 1):
++        deny("当前源行或绑定已变化，请重新确认")
++
+     if bom is not None:
+         if row_decision:
+             deny("BOM 绑定与服务端确认不一致，须重新确认")
+@@ -4501,16 +4690,17 @@ def export_report(req: ExportRequest, current_user: dict = Depends(require_emplo
+     # V015-M2：导出前逐行 fail-closed 核验，任一不合规即整批 422（不默选 top1）。
+     request_scope = req.scope_filename or ""
+     items_to_write = []
+-    for it in req.items:
+-        checkpoint()
+-        item = it.model_dump()
+-        if is_bom_name(item["original_name"]) and "professional" not in it.model_fields_set:
+-            item["professional"] = None
+-        live = _gate_export_row(item, current_user, request_scope,
+-                                allow_calibrated="professional" in it.model_fields_set)
+-        if live:
+-            item["bindings"] = live
+-        items_to_write.append(item)
++    with closing(open_flywheel_tx_connection()) as materials:
++        for it in req.items:
++            checkpoint()
++            item = it.model_dump()
++            if is_bom_name(item["original_name"]) and "professional" not in it.model_fields_set:
++                item["professional"] = None
++            live = _gate_export_row(item, current_user, request_scope, document_id=req.document_id,
++                                    allow_calibrated="professional" in it.model_fields_set, materials=materials)
++            if live:
++                item["bindings"] = live
++            items_to_write.append(item)
+     try:
+         output_filename = f"标准格式_{uuid.uuid4().hex[:8]}.xlsx"
+         output_path = os.path.join(UPLOAD_DIR, output_filename)
+diff --git after/app/source_binding_review.py after/app/source_binding_review.py
+new file mode 100644
+index 0000000..1acec6a
+--- /dev/null
++++ after/app/source_binding_review.py
+@@ -0,0 +1,273 @@
++"""Source-row decisions and the priority review feedback outbox."""
++
++import hashlib
++import json
++import logging
++import math
++import sqlite3
++from contextlib import closing, contextmanager
++
++from app.acceptance_calibration import _physical_evidence
++from app.auth_manager import get_auth_connection
++from app.binding_decisions import (
++    SOURCE_MANUAL_EDIT,
++    STATUS_MANUAL_CONFIRMED,
++    STATUS_RECOMMENDED,
++    STATUS_REJECTED,
++    _enrich_saved_bindings,
++    binding_fingerprint,
++    get_unit_multiplier,
++    normalize_bindings,
++    row_content_fingerprint,
++    validate_bindings_against_row,
++)
++from app.feedback_contract import FeedbackContractError, verify_row_ownership
++from app.flywheel_db import open_flywheel_tx_connection
++from app.query_preprocessor import prepare_query
++
++
++IDENTITY = ("document_id", "sheet_id", "source_row_id")
++SOURCE_PRIORITY_REVIEW = "priority_review"
++_ROW_FIELDS = (
++    "name", "spec", "qty", "unit", "loss", "category", "brand", "code",
++)
++_KEY_FILTER = "user_id = ? AND account_epoch = ? AND document_id = ? AND sheet_id = ? AND source_row_id = ?"
++logger = logging.getLogger(__name__)
++
++
++def _json(value):
++    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
++
++
++def _digest(value):
++    return hashlib.sha256(_json(value).encode("utf-8")).hexdigest()
++
++
++def scoped_binding_fingerprint(bindings):
++    # The legacy fingerprint deliberately omitted target units. New receipts bind them.
++    units = sorted((str(b["code"]).strip(), str(b.get("unit") or "").strip()) for b in bindings)
++    return _digest([binding_fingerprint(bindings), units])
++
++
++@contextmanager
++def source_write():
++    with closing(get_auth_connection()) as conn, conn:
++        # Callers take the catalog lock first. SQLite serializes auth writes across processes.
++        conn.execute("PRAGMA busy_timeout=30000")
++        conn.execute("BEGIN IMMEDIATE")
++        yield conn
++
++
++def resolve_source(materials, actor, row, filename, *, document_id=None):
++    ids = tuple(str(row.get(field) or "").strip() for field in IDENTITY)
++    epoch = str(actor.get("account_epoch") or "")
++    owner = (actor["id"], epoch)
++    if not any(ids) and not document_id:
++        if epoch and materials.execute(
++            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='flywheel_documents'"
++        ).fetchone():
++            # An older client may omit the complete lineage. Never look up legacy
++            # credentials for a registered upload or an unchanged registered row.
++            registered = materials.execute("""
++                SELECT 1 FROM flywheel_documents d
++                JOIN flywheel_source_rows r ON r.document_id = d.document_id
++                WHERE d.actor_user_id = ? AND d.actor_account_epoch = ?
++                  AND ((? <> '' AND d.original_filename = ?)
++                       OR (r.raw_name = ? AND r.raw_spec = ? AND r.raw_qty = ?
++                           AND r.raw_unit = ? AND r.professional = ?))
++                LIMIT 1
++            """, (*owner, filename, filename, row.get("original_name"), row.get("original_spec") or "",
++                  row.get("original_qty"), row.get("original_unit") or "", row.get("professional") or "暖通")).fetchone()
++            if registered:
++                raise FeedbackContractError(422, "source_identity_required", "已登记清单须提供服务端源行身份。")
++        return None
++    if document_id and ids[0] != document_id:
++        raise FeedbackContractError(422, "source_identity_required", "源行缺少当前文档身份或属于另一文档。")
++    doc, sheet, source = verify_row_ownership(materials.cursor(), *owner, *ids)
++    if row.get("original_row_idx") != source["display_row_idx"]:
++        raise FeedbackContractError(422, "source_row_mismatch", "清单行号与服务端源行不一致。")
++    snapshot = materials.execute("""
++        SELECT revision, is_initial, initial_match_json, decision_status FROM flywheel_recommendation_snapshots
++        WHERE document_id = ? AND sheet_id = ? AND source_row_id = ? ORDER BY revision DESC LIMIT 1
++    """, ids).fetchone()
++    if not snapshot:
++        raise FeedbackContractError(422, "source_revision_missing", "源行缺少服务端推荐版本。")
++    original = {f"original_{field}": source[f"raw_{field}"] for field in _ROW_FIELDS}
++    original["professional"] = source["professional"]
++    return {
++        "key": (*owner, doc["document_id"], sheet["sheet_id"], source["source_row_id"]),
++        "revision": snapshot["revision"],
++        "initial": json.loads(snapshot["initial_match_json"] or "null") if snapshot["is_initial"] else None,
++        "initial_decision": snapshot["decision_status"],
++        "original_fingerprint": row_content_fingerprint(original),
++    }
++
++
++def source_decision(auth, ctx):
++    record = auth.execute(f"SELECT * FROM source_binding_decisions WHERE {_KEY_FILTER}", ctx["key"]).fetchone()
++    return dict(record) if record else None
++
++
++def source_version(record):
++    return record["version"] if record else 0
++
++
++def check_revision(ctx, row):
++    if row.get("recommendation_revision") != ctx["revision"]:
++        raise FeedbackContractError(409, "source_revision_conflict", "推荐版本已变化，请重新载入该行。")
++
++
++def check_source_write(ctx, record, row, *, editing=False):
++    check_revision(ctx, row)
++    if (row.get("decision_version") or 0) != source_version(record):
++        raise FeedbackContractError(409, "source_decision_conflict", "该行决定已变化，请重新载入该行。")
++    expected = record["row_fingerprint"] if record else ctx["original_fingerprint"]
++    if not editing and row_content_fingerprint(row) != expected:
++        raise FeedbackContractError(409, "source_content_conflict", "行内容已变化，请先登记编辑。")
++
++
++def write_source_decision(auth, ctx, record, row, bindings, decision, source, reason):
++    version = source_version(record) + 1
++    row_fp = row_content_fingerprint(row)
++    binding_fp = scoped_binding_fingerprint(bindings)
++    payload = _json({"row": row, "bindings": _enrich_saved_bindings(row, bindings)})
++    auth.execute("""
++        INSERT INTO source_binding_decisions
++        (user_id, account_epoch, document_id, sheet_id, source_row_id, version, revision,
++         row_fingerprint, binding_fingerprint, decision, source, reason, payload_json)
++        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
++        ON CONFLICT (user_id, account_epoch, document_id, sheet_id, source_row_id)
++        DO UPDATE SET version=excluded.version, revision=excluded.revision,
++          row_fingerprint=excluded.row_fingerprint, binding_fingerprint=excluded.binding_fingerprint,
++          decision=excluded.decision, source=excluded.source, reason=excluded.reason, payload_json=excluded.payload_json
++    """, (*ctx["key"], version, ctx["revision"], row_fp, binding_fp, decision, source, reason, payload))
++    return {"decision_version": version, "row_fingerprint": row_fp, "binding_fingerprint": binding_fp}
++
++
++def invalidate_source(auth, ctx, record, row):
++    if record and record["decision"] == STATUS_REJECTED:
++        return write_source_decision(auth, ctx, record, row, [], STATUS_REJECTED, record["source"], record["reason"])
++    return write_source_decision(
++        auth, ctx, record, row, [], STATUS_RECOMMENDED, SOURCE_MANUAL_EDIT, "内容已修改，请重新确认",
++    )
++
++
++def confirmed_source(record, ctx, row, bindings):
++    return (record and record["decision"] == STATUS_MANUAL_CONFIRMED
++            and record["revision"] == ctx["revision"]
++            and record["row_fingerprint"] == row_content_fingerprint(row)
++            and record["binding_fingerprint"] == scoped_binding_fingerprint(bindings))
++
++
++def priority_eligibility(ctx, record, row, bindings):
++    """Assess the frozen first choice against the current catalog and row state."""
++    def blocked(reason):
++        return {"eligible": False, "reason": reason}
++
++    initial = ctx["initial"]
++    if ctx["revision"] != 1 or row.get("recommendation_revision") != ctx["revision"]:
++        return blocked("recommendation_changed")
++    if record:
++        return blocked("decision_changed")
++    if not initial or initial["tier"] != "A":
++        return blocked("not_priority")
++    if initial["source"] != "matcher":
++        return blocked("rule_or_bom")
++    if ctx["initial_decision"] != STATUS_RECOMMENDED:
++        return blocked("decision_changed")
++    if initial["uncapped"] is not True:
++        return blocked("score_capped")
++    margin = initial.get("distinct_margin")
++    if (initial["ranking_evidence_status"] != "current" or not initial.get("competitor_code")
++            or margin is None or margin < 10):
++        return blocked("no_distinct_margin")
++    baseline = normalize_bindings(initial["effective_bindings"], row["original_qty"])
++    if (len(bindings) != 1 or row_content_fingerprint(row) != ctx["original_fingerprint"]
++            or scoped_binding_fingerprint(bindings) != scoped_binding_fingerprint(baseline)):
++        return blocked("choice_changed")
++    binding = bindings[0]
++    if (not binding["code"].strip() or not math.isfinite(binding["qty"]) or binding["qty"] <= 0
++            or binding["qty_ratio"] != 1 or not math.isclose(binding["qty"], row["original_qty"])):
++        return blocked("invalid_quantity")
++
++    checked = validate_bindings_against_row(row, bindings)
++    if checked["invalid_codes"]:
++        return blocked("invalid_code")
++    if checked["conflicts"]:
++        return blocked("hard_conflict")
++    live = checked["live_materials"][binding["code"].strip()]
++    if not row.get("original_unit") or not live["unit"] or get_unit_multiplier(row["original_unit"], live["unit"]) != 1:
++        return blocked("unit_unverified")
++    if get_unit_multiplier(binding.get("unit") or "", live["unit"]) != 1:
++        return blocked("unit_changed")
++    query = prepare_query(
++        row["original_name"], row["original_spec"], row["professional"],
++        category=row.get("original_category"), brand=row.get("original_brand"), unit=row["original_unit"],
++    )
++    fields = _physical_evidence(row, query, live)["comparisons"]
++    all_fields = fields + initial.get("field_comparisons", [])
++    if any(field["safety_critical_unknown"] for field in all_fields):
++        return blocked("safety_unverified")
++    if any(field["requested_unverified"] for field in all_fields):
++        return blocked("requested_unverified")
++    missing = [field for field in fields if field["state"] == "missing"]
++    return {
++        "eligible": True, "reason": "review_missing_fields" if missing else "eligible",
++        "missing": missing,
++        "catalog_spec": live.get("specification") or "",
++        "catalog_name": live.get("name") or "",
++        "idempotency_key": priority_key(ctx, row, bindings),
++    }
++
++
++def priority_key(ctx, row, bindings):
++    return _digest([ctx["key"], ctx["revision"], row_content_fingerprint(row), scoped_binding_fingerprint(bindings)])
++
++
++def receipt_for(auth, ctx, key):
++    return auth.execute("""
++        SELECT payload_digest, receipt_json FROM priority_binding_receipts
++        WHERE user_id = ? AND account_epoch = ? AND idempotency_key = ?
++    """, (*ctx["key"][:2], key)).fetchone()
++
++
++def commit_priority(auth, ctx, row, bindings, canonical, key, batch_id, result):
++    receipt = {
++        "batch_request_id": batch_id, "source_row_id": ctx["key"][-1],
++        "recommendation_revision": ctx["revision"], "idempotency_key": key,
++        "event_id": "priority_" + key, **result,
++    }
++    auth.execute("INSERT INTO priority_binding_receipts VALUES (?, ?, ?, ?, ?, ?)",
++                 (*ctx["key"][:2], key, batch_id, priority_key(ctx, row, bindings), _json(receipt)))
++    event = {
++        "source": SOURCE_PRIORITY_REVIEW, "document_id": ctx["key"][2], "sheet_id": ctx["key"][3],
++        "source_row_id": ctx["key"][4], "revision": ctx["revision"],
++        "targets": [{"code": b["code"], "qty": b["qty"], "unit": b["unit"]} for b in canonical],
++    }
++    auth.execute("INSERT INTO priority_binding_outbox VALUES (?, ?, ?, ?)",
++                 (receipt["event_id"], *ctx["key"][:2], _json(event)))
++    return receipt
++
++
++def deliver_priority_feedback(limit=200):
++    """A crash after the materials commit leaves a safely replayable auth outbox record."""
++    try:
++        with closing(get_auth_connection()) as auth:
++            pending = auth.execute("""
++                SELECT event_id, payload_json FROM priority_binding_outbox ORDER BY rowid LIMIT ?
++            """, (limit,)).fetchall()
++            if not pending:
++                return True
++            with closing(open_flywheel_tx_connection()) as materials, materials:
++                materials.execute("BEGIN IMMEDIATE")
++                materials.executemany("""
++                    INSERT INTO flywheel_priority_confirmation_events (event_id, source, payload_json)
++                    VALUES (?, 'priority_review', ?) ON CONFLICT(event_id) DO NOTHING
++                """, pending)
++            with auth:
++                auth.executemany("DELETE FROM priority_binding_outbox WHERE event_id = ?",
++                                 [(event["event_id"],) for event in pending])
++            return auth.execute("SELECT 1 FROM priority_binding_outbox LIMIT 1").fetchone() is None
++    except (OSError, sqlite3.Error) as exc:
++        logger.warning("优先核对反馈待重投 (%s)", type(exc).__name__)
++        return False
+diff --git before/tests/test_feedback_miner.py after/tests/test_feedback_miner.py
+index b73d580..68e95b6 100644
+--- before/tests/test_feedback_miner.py
++++ after/tests/test_feedback_miner.py
+@@ -74,7 +74,8 @@ def test_tokenizer_and_abbreviation_extraction():
+ 
+ def test_mining_multi_tier_gating():
+     """Verify support count, distinct users, and consistency gating logic over M0 trusted records."""
+-    uid = uuid.uuid4().hex[:6]
++    # Keep the synthetic alias distinct without accidentally generating a material grade such as 304.
++    uid = uuid.uuid4().hex[:6].translate(str.maketrans("0123456789", "ghijklmnop"))
+     raw_name = f"试验阀门{uid}"
+     raw_norm = clean_text(raw_name)
+ 
+diff --git before/tests/test_m5_file_boundary_and_compat.py after/tests/test_m5_file_boundary_and_compat.py
+index a56d712..3c6b656 100644
+--- before/tests/test_m5_file_boundary_and_compat.py
++++ after/tests/test_m5_file_boundary_and_compat.py
+@@ -863,17 +863,19 @@ def test_compat_m5_01_zero_target_warnings(isolated_env, tmp_path: Path):
+         )
+         assert r_fb.status_code == 200
+ 
+-        # Confirm item cleanly and export
++        # M2：现代上传的确认和导出携带服务端源行与其当前推荐版本。
++        reviewed_row = {
++            key: row_ctx[key] for key in (
++                "document_id", "sheet_id", "source_row_id", "recommendation_revision",
++                "original_row_idx", "original_name", "original_spec", "original_qty", "original_unit",
++                "original_loss", "original_brand", "original_category", "original_code", "professional",
++            )
++        }
+         r_confirm = client.post(
+             "/api/binding/submit",
+             headers=headers,
+             json={
+-                "original_name": "止回阀",
+-                "original_spec": "DN100",
+-                "original_qty": 2,
+-                "original_unit": "台",
+-                "original_loss": 1.0,
+-                "original_row_idx": 1,
++                **reviewed_row,
+                 "scope_filename": "compat.xlsx",
+                 "bindings": [
+                     {
+@@ -895,14 +897,10 @@ def test_compat_m5_01_zero_target_warnings(isolated_env, tmp_path: Path):
+             headers=headers,
+             json={
+                 "scope_filename": "compat.xlsx",
++                "document_id": row_ctx["document_id"],
+                 "items": [
+                     {
+-                        "original_row_idx": 1,
+-                        "original_name": "止回阀",
+-                        "original_spec": "DN100",
+-                        "original_qty": 2,
+-                        "original_unit": "台",
+-                        "original_loss": 1.0,
++                        **reviewed_row,
+                         "matched_code": "0010",
+                         "matched_name": "止回阀",
+                         "matched_category": "阀门",
+diff --git before/tests/test_v020_m1_bom.py after/tests/test_v020_m1_bom.py
+index 82af13f..4049386 100644
+--- before/tests/test_v020_m1_bom.py
++++ after/tests/test_v020_m1_bom.py
+@@ -97,9 +97,13 @@ class TestBom(M2Base):
+         assert incomplete["decision_status"] == "recommended" and incomplete["bindings"] == []
+         qty_row = server._raw_item_from_export(item)
+         confirm = self._confirm_payload({**qty_row, "row_idx": item["original_row_idx"]}, item["bindings"], SCOPE)
++        confirm.update({key: item[key] for key in (
++            "document_id", "sheet_id", "source_row_id", "recommendation_revision",
++        )})
+         confirmed = self._post("/api/binding/submit", confirm)
+         assert confirmed.status_code == 200, confirmed.text
+         assert confirmed.json()["decision"]["decision_status"] == "manual_confirmed"
++        confirm["decision_version"] = confirmed.json()["decision_version"]
+         save = self._post("/api/session/draft", dict(original_filename=SCOPE, professional="暖通",
+                                                      items_json=json.dumps([item], ensure_ascii=False)))
+         assert save.status_code == 200, save.text
+diff --git after/tests/test_v021_m2_priority_review.py after/tests/test_v021_m2_priority_review.py
+new file mode 100644
+index 0000000..6caf340
+--- /dev/null
++++ after/tests/test_v021_m2_priority_review.py
+@@ -0,0 +1,310 @@
++"""Priority review through the real API with isolated stores and synthetic first recommendations."""
++
++from concurrent.futures import ThreadPoolExecutor
++from contextlib import closing
++import io
++import json
++from uuid import uuid4
++
++import pytest
++from fastapi.testclient import TestClient
++from openpyxl import load_workbook
++
++
++def initial(binding, *, requested=False):
++    return {
++        "tier": "A", "source": "matcher", "effective_bindings": [binding], "actual_prefilled": True,
++        "uncapped": True, "distinct_margin": 14, "competitor_code": "M2-RIVAL", "ranking_evidence_status": "current",
++        "field_comparisons": [{
++            "field": "功率", "state": "missing", "missing_side": "candidate",
++            "requested_unverified": True, "safety_critical_unknown": False,
++        }] if requested else [],
++    }
++
++
++@pytest.fixture
++def api(monkeypatch, tmp_path):
++    from app import auth_manager, db_manager, server
++    from app.feedback_contract import persist_upload_document_tree
++    from app.flywheel_db import init_flywheel_tables
++    from app.session_manager import init_session_db
++    from app.audit_manager import init_audit_tables
++
++    monkeypatch.setattr(auth_manager, "AUTH_DB_PATH", str(tmp_path / "auth.db"))
++    monkeypatch.setattr(db_manager, "DB_PATH", str(tmp_path / "materials.db"))
++    monkeypatch.setattr(server, "BINDING_FEEDBACK_FILE", str(tmp_path / "binding_feedback.json"))
++    monkeypatch.setattr(server, "UPLOAD_DIR", str(tmp_path))
++    auth_manager.init_auth_db()
++    init_session_db()
++    init_audit_tables()
++    db_manager.init_db()
++    init_flywheel_tables()
++    actors = {}
++    for i in (1, 2):
++        first = f"m2-fixture-{i}"
++        with closing(auth_manager.get_auth_connection()) as conn, conn:
++            conn.execute("""
++                INSERT INTO users (username, password_hash, role, is_active, must_change_password, account_epoch)
++                VALUES (?, 'synthetic', 'employee', 1, 0, ?)
++            """, (first, first))
++        actor = auth_manager.get_user_by_username(first)
++        actors[i] = actor, {"Authorization": f"Bearer {auth_manager.issue_token_for_user(actor)}"}
++
++    client = TestClient(server.app)
++    with closing(db_manager.get_db_connection()) as conn, conn:
++        for code, name, spec, category in (
++            ("M2-CLEAN", "核对配电箱", "AZ-421 配电箱 400x300x200", "强电"),
++            ("M2-MISSING", "核对专用支架", "AZ-421", "其它"),
++            ("M2-RIVAL", "核对配电箱", "AZ-422 配电箱 400x300x200", "强电"),
++        ):
++            conn.execute("""
++                INSERT INTO materials(code, name, specification, unit, category, brand, description, search_tokens)
++                VALUES (?, ?, ?, '个', ?, '', '', '')
++            """, (code, name, spec, category))
++
++    def upload(*codes, filename="same.xlsx", requested=False):
++        rows = []
++        for index, code in enumerate(codes, 1):
++            name, spec = (
++                ("核对配电箱", "AZ-421 配电箱 400x300x200") if code == "M2-CLEAN" else ("核对专用支架", "AZ-421")
++            )
++            binding = {"code": code, "name": name, "specification": spec, "unit": "个",
++                       "category": "强电", "brand": "", "qty": 3, "qty_ratio": 1}
++            row = {
++                "original_row_idx": index, "original_name": name, "original_spec": spec,
++                "original_qty": 3, "original_unit": "个", "original_loss": 1,
++                "original_brand": "", "original_category": "", "original_code": "",
++                "professional": "强电", "scope_filename": filename, "decision_status": "recommended",
++                "bindings": [binding], "initial_match": initial(binding, requested=requested),
++                "matched_code": code, "matched_name": binding["name"], "matched_spec": binding["specification"],
++                "matched_unit": "个", "matched_category": binding["category"], "matched_brand": "",
++            }
++            rows.append(row)
++        uid = uuid4().hex
++        persist_upload_document_tree(actors[1][0], "doc_" + uid, "task_" + uid, "work_" + uid,
++                                     filename, uid, [{} for _ in rows], rows)
++        return rows
++
++    def post(path, payload, actor=1):
++        return client.post(path, headers=actors[actor][1], json=payload)
++
++    def get(path):
++        return client.get(path, headers=actors[1][1])
++
++    return upload, post, tmp_path, get
++
++
++def preflight(post, *rows):
++    response = post("/api/binding/priority", {"rows": list(rows)})
++    assert response.status_code == 200, response.text
++    return response.json()["rows"]
++
++
++def prepared(post, row):
++    result, = preflight(post, row)
++    assert result["eligible"], result
++    return {**row, "idempotency_key": result["idempotency_key"], "reviewed_missing": bool(result["missing"])}
++
++
++def submit(post, *rows, batch_id="synthetic-fixture"):
++    response = post("/api/binding/priority/submit", {"batch_request_id": batch_id, "rows": list(rows)})
++    assert response.status_code == 200, response.text
++    return response.json()
++
++
++def export(post, item):
++    return post("/api/export", {"items": [item], "scope_filename": item["scope_filename"]})
++
++
++def restore(post, *rows):
++    response = post("/api/session/annotate", {"items": list(rows), "scope_filename": rows[0]["scope_filename"]})
++    assert response.status_code == 200, response.text
++    return response.json()["items"]
++
++
++def with_receipt(row, result):
++    receipt = result["receipt"]
++    return {**row, "bindings": receipt["bindings"], "decision_version": receipt["decision_version"]}
++
++
++def test_priority_export_xlsx_duplicate_rows_and_same_filename(api):
++    upload, post, _, _ = api
++    first, second = upload("M2-CLEAN", "M2-CLEAN")
++    retransmitted, = upload("M2-CLEAN")
++    assert [export(post, row).status_code for row in (first, second, retransmitted)] == [422, 422, 422]
++    entry = prepared(post, first)
++    assert not entry["reviewed_missing"]
++    result, = submit(post, entry)["rows"]
++    assert result["ok"], result
++    first = with_receipt(first, result)
++    assert [row["decision_status"] for row in restore(post, first, second, retransmitted)] == [
++        "manual_confirmed", "recommended", "recommended",
++    ]
++    report = export(post, first)
++    assert report.status_code == 200, report.text
++    workbook = load_workbook(io.BytesIO(report.content), read_only=True)
++    material_rows = [cells for cells in workbook.active.values if len(cells) > 8 and cells[4] == "M2-CLEAN"]
++    assert len(material_rows) == 1
++    assert (material_rows[0][4], material_rows[0][8]) == ("M2-CLEAN", 3)
++    workbook.close()
++    rejected = post("/api/binding/reject", second)
++    assert rejected.status_code == 200, rejected.text
++    assert export(post, first).status_code == 200
++    assert restore(post, second)[0]["decision_status"] == "rejected"
++    assert restore(post, retransmitted)[0]["decision_status"] == "recommended"
++    edit = post("/api/binding/invalidate", first)
++    assert edit.status_code == 200, edit.text
++    assert export(post, first).status_code == 422
++    assert restore(post, second)[0]["decision_status"] == "rejected"
++    assert prepared(post, retransmitted)
++
++
++def test_priority_requested_unverified_and_ordinary_missing(api):
++    upload, post, _, _ = api
++    missing, = upload("M2-MISSING")
++    unverified, = upload("M2-MISSING", requested=True)
++    eligible, blocked = preflight(post, missing, unverified)
++    assert eligible["eligible"] and any(f["missing_side"] == "candidate" for f in eligible["missing"]), eligible
++    assert blocked["reason"] == "requested_unverified", blocked
++    entry = {**missing, "idempotency_key": eligible["idempotency_key"]}
++    assert submit(post, entry)["rows"][0]["reason"] == "missing_review_required"
++    assert submit(post, {**entry, "reviewed_missing": True})["rows"][0]["ok"]
++    assert submit(post, {**entry, **unverified, "reviewed_missing": True})["rows"][0]["reason"] == "idempotency_conflict"
++
++
++def test_priority_scoped_forgery_omission_and_epoch(api):
++    upload, post, _, _ = api
++    row, = upload("M2-CLEAN")
++    candidate = prepared(post, row)
++    assert post("/api/binding/submit", row, actor=2).status_code == 404
++    assert post("/api/binding/reject", {**row, "source_row_id": "row_forged"}).status_code == 422
++    absent = {k: v for k, v in row.items() if k not in {"document_id", "sheet_id", "source_row_id"}}
++    assert post("/api/binding/submit", absent).status_code == 422
++    assert export(post, absent).status_code == 422
++    assert post("/api/binding/priority/submit", {"rows": [candidate], "batch_request_id": "foreign"},
++                actor=2).json()["rows"][0]["reason"] == "document_not_found_or_forbidden"
++    assert post("/api/binding/invalidate", {**row, "sheet_id": ""}).status_code == 422
++
++
++def test_priority_partial_retry_returns_original_but_never_reactivates(api):
++    upload, post, _, _ = api
++    one, two = upload("M2-CLEAN", "M2-CLEAN")
++    prepared_one, prepared_two = prepared(post, one), prepared(post, two)
++    bad = {**prepared_two, "bindings": [{**two["bindings"][0], "qty": 8}]}
++    first, failed = submit(post, prepared_one, bad)["rows"]
++    assert first["ok"] and not failed["ok"]
++    replayed, corrected = submit(post, prepared_one, prepared_two, batch_id="different-batch")["rows"]
++    assert replayed["ok"] and replayed["replayed"] and replayed["receipt"] == first["receipt"]
++    assert corrected["ok"]
++    assert post("/api/binding/invalidate", with_receipt(one, first)).status_code == 200
++    inactive = submit(post, prepared_one)["rows"][0]
++    assert inactive["reason"] == "confirmation_inactive" and inactive["receipt"] == first["receipt"]
++    assert export(post, one).status_code == 422
++    assert export(post, with_receipt(two, corrected)).status_code == 200
++
++
++def test_priority_concurrent_edit_or_rematch_conflicts(api):
++    upload, post, _, _ = api
++    row, = upload("M2-CLEAN")
++    entry = prepared(post, row)
++    with ThreadPoolExecutor(max_workers=2) as pool:
++        batch = pool.submit(submit, post, entry)
++        edit = pool.submit(post, "/api/binding/invalidate", row)
++    confirmed = batch.result()["rows"][0]["ok"]
++    assert edit.result().status_code == (409 if confirmed else 200)
++    if confirmed:
++        reviewed = with_receipt(row, batch.result()["rows"][0])
++        assert post("/api/binding/invalidate", reviewed).status_code == 200
++    assert export(post, row).status_code == 422
++
++    row, = upload("M2-CLEAN")
++    entry = prepared(post, row)
++    rematch = post("/api/rematch", {**row, "row_id": row["original_row_idx"], "text": row["original_spec"],
++                                   "fixed_params": {}})
++    assert rematch.status_code == 200, rematch.text
++    assert submit(post, entry)["rows"][0]["reason"] == "source_revision_conflict"
++
++
++def test_priority_outbox_recovery_and_learning_isolation(api):
++    upload, post, tmp, get = api
++    from app import auth_manager, db_manager
++    from app.feedback_train import get_feedback_suggestions
++    from app.feedback_miner import FlywheelMiner
++
++    row, = upload("M2-CLEAN")
++    entry = prepared(post, row)
++    feedback = tmp / "binding_feedback.json"
++    feedback.write_text("[]", encoding="utf-8")
++    previous = get("/api/binding/suggestions").json()
++    with closing(db_manager.get_db_connection()) as db, db:
++        db.execute("""
++            CREATE TRIGGER m2_fail_delivery BEFORE INSERT ON flywheel_priority_confirmation_events
++            BEGIN SELECT RAISE(ABORT, 'isolated delivery failure'); END
++        """)
++    first = submit(post, entry)
++    receipt = first["rows"][0]
++    assert receipt["ok"] and not first["feedback_delivery_ok"]
++    assert export(post, with_receipt(row, receipt)).status_code == 200
++    with closing(auth_manager.get_auth_connection()) as db:
++        pending = tuple(db.execute("SELECT * FROM priority_binding_outbox").fetchone())
++    with closing(db_manager.get_db_connection()) as db, db:
++        db.execute("DROP TRIGGER m2_fail_delivery")
++    assert submit(post, entry)["feedback_delivery_ok"]
++    with closing(auth_manager.get_auth_connection()) as db, db:
++        assert db.execute("SELECT COUNT(*) FROM priority_binding_outbox").fetchone()[0] == 0
++        db.execute("INSERT INTO priority_binding_outbox VALUES (?,?,?,?)", pending)
++    assert submit(post, entry)["feedback_delivery_ok"]
++    with closing(db_manager.get_db_connection()) as db:
++        assert db.execute("SELECT source FROM flywheel_priority_confirmation_events").fetchone()[0] == "priority_review"
++        assert db.execute("SELECT COUNT(*) FROM flywheel_priority_confirmation_events").fetchone()[0] == 1
++        assert db.execute("SELECT COUNT(*) FROM flywheel_records").fetchone()[0] == 0
++        assert db.execute("SELECT COUNT(*) FROM flywheel_feedback_samples").fetchone()[0] == 0
++    assert feedback.read_bytes() == b"[]"
++    assert get("/api/binding/suggestions").json() == previous
++    assert get_feedback_suggestions() == []
++    result = FlywheelMiner().run_mining()
++    assert result["processed_records_count"] == result["analyzed_patterns_count"] == 0
++
++
++def test_auth_write_failure_rolls_back_decisions_and_receipts(api):
++    from app.auth_manager import get_auth_connection
++    from sqlite3 import IntegrityError
++
++    upload, post, _, _ = api
++    first, second = upload("M2-CLEAN", "M2-CLEAN")
++    entries = [prepared(post, first), prepared(post, second)]
++    with closing(get_auth_connection()) as auth, auth:
++        auth.execute("""
++            CREATE TRIGGER m2_fail_second_outbox BEFORE INSERT ON priority_binding_outbox
++            WHEN (SELECT COUNT(*) FROM priority_binding_outbox) > 0
++            BEGIN SELECT RAISE(ABORT, 'isolated auth failure'); END
++        """)
++    with pytest.raises(IntegrityError, match="isolated auth failure"):
++        submit(post, *entries)
++    with closing(get_auth_connection()) as auth, auth:
++        for table in ("source_binding_decisions", "priority_binding_receipts", "priority_binding_outbox"):
++            assert auth.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] == 0
++        auth.execute("DROP TRIGGER m2_fail_second_outbox")
++    assert [r["ok"] for r in submit(post, *entries)["rows"]] == [True, True]
++
++
++def test_scoped_restore_does_not_reuse_old_filename_credential(api):
++    from app.auth_manager import get_user_by_username
++    from app.binding_decisions import make_scope_key, normalize_bindings, record_decision
++
++    upload, post, _, get = api
++    row, = upload("M2-CLEAN")
++    actor = get_user_by_username("m2-fixture-1")
++    scope = make_scope_key(row["scope_filename"], row["professional"])
++    record_decision(actor["id"], scope, row, normalize_bindings(row["bindings"], row["original_qty"]),
++                    "manual_confirmed", "manual")
++    assert export(post, row).status_code == 422
++    assert restore(post, row)[0]["decision_status"] == "recommended"
++    save = post("/api/session/draft", {
++        "original_filename": row["scope_filename"], "professional": "强电",
++        "document_id": row["document_id"], "work_session_id": row["work_session_id"],
++        "items_json": json.dumps([{**row, "decision_status": "manual_confirmed"}]),
++    })
++    assert save.status_code == 200, save.text
++    draft = get("/api/session/draft").json()["draft"]
++    assert json.loads(draft["items_json"])[0]["decision_status"] == "recommended"
+diff --git before/web/app.js after/web/app.js
+index 57460e2..9fccc6a 100644
+--- before/web/app.js
++++ after/web/app.js
+@@ -866,6 +866,12 @@ function initEventListeners() {
+         document.getElementById('initial-score-filter').checked = false;
+         refreshInitialFilter();
+     });
++    document.getElementById('open-priority-review')?.addEventListener('click', openPriorityReview);
++    document.getElementById('close-priority-review')?.addEventListener('click', closePriorityReview);
++    document.getElementById('submit-priority-review')?.addEventListener('click', submitPriorityReview);
++    document.getElementById('priority-review')?.addEventListener('cancel', event => {
++        if (priorityReview?.submitting) event.preventDefault();
++    });
+ 
+     // Left panel Search input
+     const listSearch = document.getElementById('list-search');
+@@ -1859,7 +1865,12 @@ function reviewPayload(item) {
+         original_code: item.original_code || '',
+         original_row_idx: item.original_row_idx || 0,
+         professional: item.professional || '暖通',
+-        scope_filename: originalFileName || ''
++        scope_filename: originalFileName || '',
++        document_id: item.document_id || currentDocumentId || null,
++        sheet_id: item.sheet_id || null,
++        source_row_id: item.source_row_id || null,
++        recommendation_revision: item.recommendation_revision || null,
++        decision_version: item.decision_version ?? 0
+     };
+ }
+ 
+@@ -1876,12 +1887,259 @@ async function postReview(action, payload) {
+     return data;
+ }
+ 
++const PRIORITY_REASONS = {
++    rule_or_bom: '规则及组合匹配走原有核对流程',
++    not_priority: '缺少可核验的首次优先推荐',
++    recommendation_changed: '已重算或推荐版本已变化',
++    decision_changed: '已确认、拒绝或编辑',
++    source_decision_conflict: '服务端状态已变化，请重新载入',
++    source_revision_conflict: '推荐版本已变化，请重新载入',
++    source_content_conflict: '原始行内容已变化，请单行核对',
++    score_capped: '首选评分已封顶',
++    no_distinct_margin: '缺少可靠的独立对手或分差小于 10 分',
++    choice_changed: '当前绑定与首次推荐不一致',
++    invalid_code: '目录编码已失效',
++    invalid_quantity: '绑定数量或比例不一致',
++    hard_conflict: '实时目录与清单存在硬冲突',
++    unit_unverified: '单位倍率无法核验为 1',
++    unit_changed: '绑定单位已变化',
++    safety_unverified: '安全关键字段待补',
++    requested_unverified: '清单明确要求的参数缺少目录依据，请单行补证',
++    missing_review_required: '请展开并核对缺失字段',
++    confirmation_inactive: '该行的原确认已失效，请单行复核',
++    confirmed: '已确认'
++};
++const PRIORITY_MISSING_SIDE = {query: '清单缺失', candidate: '目录缺失', both: '均缺失'};
++let priorityReview;
++
++function priorityLocalIssue(item) {
++    const initial = item.initial_match;
++    if (initial.source !== 'matcher') return 'rule_or_bom';
++    if (!item.source_row_id || !item.sheet_id || !item.document_id) return 'not_priority';
++    if (Number(item.recommendation_revision) !== 1 || item.workbench_rematched) return 'recommendation_changed';
++    if (reviewState(item) !== 'recommended' || item.decision_source === 'manual_edit'
++        || item.decision_version > 0 || pendingReviewEdits.has(item)) return 'decision_changed';
++    if (initial.uncapped !== true) return 'score_capped';
++    if (initial.ranking_evidence_status !== 'current' || !initial.competitor_code
++        || !Number.isFinite(initial.distinct_margin) || initial.distinct_margin < 10) return 'no_distinct_margin';
++    if (initial.field_comparisons?.some(field => field.safety_critical_unknown)) return 'safety_unverified';
++    if (initial.field_comparisons?.some(field => field.requested_unverified)) return 'requested_unverified';
++    const current = item.bindings || [];
++    const baseline = initial.effective_bindings || [];
++    const original = baseline[0];
++    const choice = current[0];
++    if (baseline.length !== 1 || current.length !== 1 || choice.code !== original.code
++        || choice.unit !== original.unit || Number(choice.qty) !== Number(original.qty)
++        || Number(choice.qty_ratio ?? 1) !== Number(original.qty_ratio ?? 1)) return 'choice_changed';
++    return null;
++}
++
++async function openPriorityReview() {
++    const dialog = document.getElementById('priority-review');
++    if (dialog.open) return;
++    const rows = items.filter(item => item.initial_match?.tier === 'A'
++        && (currentProfessional === '全部' || workbenchProfessional(item) === currentProfessional))
++        .map(item => ({item, checked: false, opened: false, reason: priorityLocalIssue(item)}));
++    const review = {rows, batchId: generateClientEventId('priority'), loading: true, submitting: false};
++    priorityReview = review;
++    dialog.showModal();
++    renderPriorityReview();
++    const candidates = rows.filter(row => !row.reason);
++    try {
++        for (let start = 0; start < candidates.length; start += 200) {
++            const entries = candidates.slice(start, start + 200);
++            const result = await postReview('priority', {
++                rows: entries.map(({item}) => ({...reviewPayload(item), bindings: item.bindings}))
++            });
++            for (const [index, entry] of entries.entries()) {
++                const server = result.rows[index];
++                if (server.source_row_id !== entry.item.source_row_id) throw new Error('源行核验结果不一致');
++                Object.assign(entry, server);
++            }
++        }
++    } catch (error) {
++        review.message = `核验失败，关闭后可重试。${error.message}`;
++        rows.forEach(entry => { entry.eligible = false; });
++    } finally {
++        review.loading = false;
++        if (priorityReview === review && dialog.open) renderPriorityReview();
++    }
++}
++
++function closePriorityReview() {
++    if (!priorityReview?.submitting) document.getElementById('priority-review').close();
++}
++
++function openPriorityRow(item) {
++    closePriorityReview();
++    currentFilter = 'all';
++    searchQuery = '';
++    document.getElementById('list-search').value = '';
++    resetInitialFilters();
++    document.querySelectorAll('.review-filters [data-filter]').forEach(button => {
++        const active = button.dataset.filter === 'all';
++        button.classList.toggle('active', active);
++        button.setAttribute('aria-pressed', String(active));
++    });
++    jumpToItem(item);
++}
++
++function renderPriorityReview() {
++    const review = priorityReview;
++    const body = document.getElementById('priority-review-rows');
++    body.replaceChildren();
++    if (review.loading) {
++        body.textContent = '正在核验当前目录和源行状态…';
++    } else if (!review.rows.length) {
++        const empty = document.createElement('button');
++        empty.type = 'button';
++        empty.className = 'btn btn-secondary';
++        empty.textContent = '当前范围没有优先项，返回逐行核对';
++        empty.addEventListener('click', closePriorityReview);
++        body.append(empty);
++    }
++    for (const [eligible, title] of [[true, '可逐行勾选'], [false, '仅查看']]) {
++        const rows = review.rows.filter(row => Boolean(row.eligible) === eligible);
++        if (!rows.length || review.loading) continue;
++        const section = document.createElement('section');
++        const heading = document.createElement('h3');
++        heading.textContent = `${title}（${rows.length}）`;
++        section.append(heading);
++        for (const entry of rows) section.append(renderPriorityRow(entry));
++        body.append(section);
++    }
++    updatePriorityControls();
++}
++
++function renderPriorityRow(entry) {
++    const item = entry.item;
++    const initial = item.initial_match;
++    const row = document.createElement('article');
++    row.className = 'priority-review-row';
++    const missing = entry.missing || initial.field_comparisons?.filter(field => field.state === 'missing') || [];
++    const initialBinding = initial.effective_bindings?.[0];
++    const differences = initial.field_comparisons?.filter(field => field.state === 'different') || [];
++    const ranking = [
++        Number.isFinite(initial.ranking_score) ? `首次评分 ${initial.ranking_score.toFixed(2)} 分` : '',
++        initial.competitor_code && Number.isFinite(initial.distinct_margin)
++            ? `次选 ${initial.competitor_code} · 分差 ${initial.distinct_margin.toFixed(2)} 分` : ''
++    ].filter(Boolean).join(' · ');
++    row.innerHTML = `
++        <div class="priority-row-heading">
++            <label><strong>第 ${escapeHtml(item.original_row_idx)} 行 · ${escapeHtml(item.original_name)}</strong></label>
++            <button type="button" class="btn btn-secondary">单行核对</button>
++        </div>
++        <p>${escapeHtml(entry.catalog_name || initialBinding?.name || '无目录物料')}
++            ${escapeHtml(initialBinding?.code || '')}</p>
++        <p class="priority-row-reason">${escapeHtml(ranking)}</p>
++        <p class="priority-row-reason">${escapeHtml(PRIORITY_REASONS[entry.reason] || (entry.eligible ? '' : '须单行核对'))}</p>
++        ${missing.length ? `<p class="priority-missing">${missing.map(field =>
++            `${escapeHtml(field.field)}（${PRIORITY_MISSING_SIDE[field.missing_side] || '缺失'}）`).join(' · ')}</p>` : ''}
++        <details>
++            <summary>展开清单原文与目录规格</summary>
++            <dl class="priority-comparison">
++                <div><dt>清单原文</dt><dd>${escapeHtml(item.original_spec || '未填写')}</dd></div>
++                <div><dt>目录规格</dt><dd>${escapeHtml(entry.catalog_spec || initialBinding?.specification || '未标注')}</dd></div>
++            </dl>
++            ${differences.length ? `<ul class="priority-differences">${differences.map(field => `
++                <li>${escapeHtml(field.field)} · 清单 ${escapeHtml(field.query_value)} · 目录 ${escapeHtml(field.candidate_value)}</li>`
++            ).join('')}</ul>` : ''}
++        </details>`;
++    row.querySelector('button').addEventListener('click', () => openPriorityRow(item));
++    row.querySelector('button').disabled = priorityReview.submitting;
++    const details = row.querySelector('details');
++    details.open = entry.opened;
++    if (entry.eligible) {
++        const checkbox = document.createElement('input');
++        checkbox.type = 'checkbox';
++        checkbox.checked = entry.checked;
++        checkbox.disabled = priorityReview.submitting || (missing.length > 0 && !entry.opened);
++        details.addEventListener('toggle', () => {
++            if (details.open) {
++                entry.opened = true;
++                checkbox.disabled = priorityReview.submitting;
++            }
++        });
++        checkbox.addEventListener('change', () => {
++            entry.checked = checkbox.checked;
++            updatePriorityControls();
++        });
++        row.querySelector('label').prepend(checkbox);
++    }
++    return row;
++}
++
++function updatePriorityControls() {
++    const review = priorityReview;
++    const count = review.rows.filter(row => row.eligible && row.checked).length;
++    const submit = document.getElementById('submit-priority-review');
++    submit.textContent = `确认所选行（${count}）`;
++    submit.disabled = review.loading || review.submitting || !count;
++    document.getElementById('close-priority-review').disabled = review.submitting;
++    document.getElementById('priority-review-status').textContent = review.message || (
++        !review.loading && !review.rows.some(row => row.eligible)
++            ? '没有可勾选的行。可打开单行核对查看详情。' : '');
++}
++
++async function submitPriorityReview() {
++    const review = priorityReview;
++    const selected = review.rows.filter(row => row.eligible && row.checked);
++    if (review.submitting || !selected.length) return;
++    review.submitting = true;
++    review.message = '正在提交所选行…';
++    renderPriorityReview();
++    let confirmed = 0;
++    let failed = 0;
++    let feedbackPending = false;
++    try {
++        for (let start = 0; start < selected.length; start += 200) {
++            const entries = selected.slice(start, start + 200);
++            const result = await postReview('priority/submit', {batch_request_id: review.batchId,
++                rows: entries.map(entry => ({
++                    ...reviewPayload(entry.item), bindings: entry.item.bindings,
++                    idempotency_key: entry.idempotency_key, reviewed_missing: entry.opened
++                }))
++            });
++            feedbackPending ||= !result.feedback_delivery_ok;
++            for (const [index, entry] of entries.entries()) {
++                const row = result.rows[index];
++                entry.checked = false;
++                entry.eligible = false;
++                entry.reason = row.reason;
++                if (!row.ok || row.source_row_id !== entry.item.source_row_id) {
++                    failed++;
++                    continue;
++                }
++                const {decision, bindings, decision_version} = row.receipt;
++                Object.assign(entry.item, decision, {bindings, decision_version});
++                syncBindingDisplay(entry.item);
++                confirmed++;
++            }
++        }
++        review.message = `已确认 ${confirmed} 行${failed ? ` · ${failed} 行未确认` : ''}${feedbackPending ? ' · 反馈待重投' : ''}`;
++    } catch (error) {
++        review.message = `已收到 ${confirmed} 行确认。剩余所选行可重新提交。${error.message}`;
++    } finally {
++        review.submitting = false;
++        if (selectedItem) {
++            renderReviewDetail();
++            renderBoundMaterials();
++        }
++        renderTable();
++        updateProgress();
++        renderPriorityReview();
++    }
++}
++
+ function persistReviewEdit(item) {
+     const pending = pendingReviewEdits.get(item);
+     if (!pending) return Promise.resolve();
+     if (!pending.request) {
+         pending.request = postReview('invalidate', pending.payload)
+-            .then(() => pendingReviewEdits.delete(item))
++            .then(response => {
++                if (response.decision_version != null) item.decision_version = response.decision_version;
++                pendingReviewEdits.delete(item);
++            })
+             .catch(error => {
+                 pending.request = null;
+                 throw error;
+@@ -1899,7 +2157,7 @@ function invalidateItemDecision(item, reason) {
+     item.decision_codes = [];
+     item.row_fingerprint = '';
+     item.binding_fingerprint = '';
+-    if (approved && !pendingReviewEdits.has(item)) {
++    if ((approved || item.source_row_id) && !pendingReviewEdits.has(item)) {
+         pendingReviewEdits.set(item, {payload: reviewPayload(item)});
+         persistReviewEdit(item).catch(() => {
+             item.decision_reason = '服务端失效登记失败。保存或确认时会重试。';
+@@ -1931,6 +2189,7 @@ async function submitReview(action) {
+         const status = action === 'reject' ? 'rejected' : 'manual_confirmed';
+         if (response.decision?.decision_status !== status) throw new Error('服务端未返回有效复核状态');
+         Object.assign(item, response.decision);
++        if (response.decision_version != null) item.decision_version = response.decision_version;
+         item.bindings = action === 'reject' ? [] : response.bindings ?? item.bindings;
+         syncBindingDisplay(item);
+         if (selectedItem === item) {
+@@ -3085,30 +3344,20 @@ async function handleExport() {
+ function jsonPayloadData() {
+     const mapped = items.map(item => {
+         return {
+-            original_row_idx: item.original_row_idx,
+-            original_name: item.original_name,
+-            original_spec: item.original_spec,
+-            original_qty: item.original_qty,
+-            original_unit: item.original_unit,
+-            original_loss: item.original_loss,
++            ...reviewPayload(item),
+             matched_code: item.matched_code,
+             matched_name: item.matched_name,
+             matched_category: item.matched_category,
+             matched_spec: item.matched_spec,
+             matched_unit: item.matched_unit,
+             matched_brand: item.matched_brand,
+-            professional: item.professional || "暖通",
+-            original_code: item.original_code || "",
+-            // V015-M1 / F19：原始品类/品牌随导出 payload 贯通，缺失回退空串兼容旧会话
+-            original_category: item.original_category || "",
+-            original_brand: item.original_brand || "",
+             bindings: item.bindings || null,
+             // V015-M2：决策状态仅作展示上下文，导出端不信任，服务端逐项复核
+             decision_status: item.decision_status || "",
+             decision_source: item.decision_source || ""
+         };
+     });
+-    return JSON.stringify({ items: mapped, scope_filename: originalFileName || "" });
++    return JSON.stringify({ items: mapped, scope_filename: originalFileName || "", document_id: currentDocumentId || "" });
+ }
+ 
+ // 10. Configurations panel loading & rendering
+diff --git before/web/index.css after/web/index.css
+index 27c7a7b..99819b7 100644
+--- before/web/index.css
++++ after/web/index.css
+@@ -1726,6 +1726,140 @@ body {
+     margin-top: 5px;
+ }
+ 
++.priority-review {
++    width: min(740px, calc(100vw - 32px));
++    max-height: min(760px, calc(100dvh - 32px));
++    margin: auto;
++    padding: 0;
++    border: 1px solid var(--border-color-hover);
++    border-radius: var(--radius-lg);
++    background: var(--bg-surface);
++    color: var(--color-text-primary);
++    box-shadow: var(--shadow-elevated);
++}
++
++.priority-review[open] {
++    display: flex;
++    flex-direction: column;
++}
++
++.priority-review::backdrop {
++    background: rgb(5 10 20 / 60%);
++}
++
++.priority-review-header,
++.priority-review-footer,
++.priority-row-heading {
++    display: flex;
++    align-items: center;
++    justify-content: space-between;
++    gap: 12px;
++}
++
++.priority-review-header,
++.priority-review-footer {
++    padding: 14px 20px;
++}
++
++.priority-review-header h2 {
++    font-size: 18px;
++}
++
++.priority-review-footer {
++    border-top: 1px solid var(--border-color);
++}
++
++.priority-review-footer button {
++    flex-shrink: 0;
++}
++
++.priority-review-body {
++    padding: 4px 20px 16px;
++    overflow: auto;
++    overscroll-behavior: contain;
++}
++
++.priority-review-body h3 {
++    margin: 12px 0 8px;
++    color: var(--color-text-secondary);
++    font-size: 14px;
++}
++
++.priority-review-row {
++    display: grid;
++    gap: 6px;
++    margin-bottom: 8px;
++    padding: 12px;
++    border: 1px solid var(--border-color);
++    border-radius: var(--radius-md);
++    background: var(--bg-subtle);
++}
++
++.priority-row-heading label {
++    display: flex;
++    align-items: center;
++    gap: 8px;
++}
++
++.priority-row-heading button {
++    flex-shrink: 0;
++}
++
++.priority-review-row p,
++.priority-review-row summary,
++.priority-review-footer span {
++    font-size: 13px;
++}
++
++.priority-review-row p:empty {
++    display: none;
++}
++
++.priority-row-reason {
++    color: var(--color-text-secondary);
++}
++
++.priority-review-row .priority-missing {
++    padding: 6px 8px;
++    border-radius: var(--radius-sm);
++    background: var(--color-warning-bg);
++    color: var(--color-text-primary);
++}
++
++.priority-review-row summary {
++    width: fit-content;
++    color: var(--color-accent-text);
++    cursor: pointer;
++}
++
++.priority-comparison {
++    display: grid;
++    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
++    gap: 10px;
++    margin-top: 8px;
++}
++
++.priority-comparison div {
++    padding: 8px;
++    border-radius: var(--radius-sm);
++    background: var(--bg-surface-elevated);
++}
++
++.priority-comparison dt {
++    color: var(--color-text-secondary);
++    font-size: 12px;
++}
++
++.priority-comparison dd {
++    white-space: pre-wrap;
++    overflow-wrap: anywhere;
++}
++
++.priority-differences {
++    margin: 8px 0 0 18px;
++    font-size: 13px;
++}
++
+ .initial-source-counts {
+     margin: 4px 0 0;
+     color: var(--color-text-secondary);
+diff --git before/web/index.html after/web/index.html
+index cf499d7..d288151 100644
+--- before/web/index.html
++++ after/web/index.html
+@@ -27,7 +27,7 @@
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+     <!-- FontAwesome Icons -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+-    <link rel="stylesheet" href="index.css?v=v021_m1">
++    <link rel="stylesheet" href="index.css?v=v021_m2">
+ </head>
+ <body>
+     <div class="app-container">
+@@ -131,6 +131,7 @@
+                             </div>
+                             <p id="initial-source-counts" class="initial-source-counts" hidden></p>
+                             <div class="initial-subfilters" aria-label="首次匹配细分">
++                                <button type="button" id="open-priority-review">集中核对优先项</button>
+                                 <button type="button" data-initial-filter="low_score_prefill" aria-pressed="false">低分已预填 <strong data-initial-count="low_score_prefill">0</strong></button>
+                                 <button type="button" data-initial-filter="safety_missing" aria-pressed="false">安全参数待补 <strong data-initial-count="safety_missing">0</strong></button>
+                                 <button type="button" data-initial-filter="unprefilled" aria-pressed="false">未预填 <strong data-initial-count="unprefilled">0</strong></button>
+@@ -1426,6 +1427,17 @@
+         </div>
+     </div>
+ 
+-    <script src="app.js?v=v021_m1"></script>
++    <dialog id="priority-review" class="priority-review" aria-labelledby="priority-review-title">
++        <header class="priority-review-header">
++            <h2 id="priority-review-title">集中核对优先项</h2>
++            <button type="button" id="close-priority-review" class="btn btn-secondary">关闭</button>
++        </header>
++        <div class="priority-review-body" id="priority-review-rows"></div>
++        <footer class="priority-review-footer">
++            <span id="priority-review-status" role="status"></span>
++            <button type="button" id="submit-priority-review" class="btn btn-primary" disabled>确认所选行（0）</button>
++        </footer>
++    </dialog>
++    <script src="app.js?v=v021_m2"></script>
+ </body>
+ </html>

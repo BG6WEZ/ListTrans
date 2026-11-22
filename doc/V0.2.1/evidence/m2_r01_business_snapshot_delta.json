@@ -1,0 +1,30 @@
+{
+  "comparison_exit_code": 1,
+  "required": "35 assets identical to the original dispatch snapshot",
+  "meaning": "Two SQLite sidecar paths present at dispatch were absent in both final reports.",
+  "unchanged_sha256": 33,
+  "dispatch_asset_count": 35,
+  "sidecar_disappearance_attribution": "unknown",
+  "differences": {
+    "app/materials.db-shm": {
+      "dispatch_sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "final_sha256": null,
+      "recheck_sha256": null
+    },
+    "app/materials.db-wal": {
+      "dispatch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "final_sha256": null,
+      "recheck_sha256": null
+    }
+  },
+  "primary_database_sha256": {
+    "app/materials.db": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+    "app/auth.db": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8"
+  },
+  "original_baseline_retained": true,
+  "reports": [
+    "m2_r01_isolation_before.json",
+    "m2_r01_isolation_after.json",
+    "m2_r01_isolation_recheck.json"
+  ]
+}

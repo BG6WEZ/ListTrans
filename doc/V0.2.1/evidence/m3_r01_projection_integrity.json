@@ -1,0 +1,41 @@
+{
+  "sealed_fixtures_opened": 0,
+  "test_rows_read_or_decoded": 0,
+  "query_projection": {
+    "origin": "materialized from prior V021 guarded pytest",
+    "rows": 1060,
+    "sha256": "1c6a38fe59cb8cf70172117ea091e2d68768ba825b2d9a82bfee150bdfd5e678"
+  },
+  "labels": {
+    "origin": "V017 signed component metadata and Train/Dev-only V017 deterministic governance reconstruction",
+    "sha256": "cc89042d636ce05c3104154bbf807479840794ea7f713ec1cda6f45aef1d0d4b",
+    "split_counts": {
+      "train": 842,
+      "dev": 218
+    },
+    "comparison_to_prior_replay": {
+      "rank_cohort_ids_and_splits_exact": 651,
+      "core_status_counts_exact": true,
+      "sampled_complete_label_records_exact": 200,
+      "archived_200_label_carrier_sha256": "518630be792c1e7837367ba87e6b5bc780b0f8a9f959a74dffffdcdb8ff2427b"
+    }
+  },
+  "component_manifest": {
+    "path": "doc/V0.1.7/evidence/m0_r01_reconciliation.json",
+    "byte_offset": 1555813,
+    "component_json_bytes": 2493,
+    "component_json_sha256": "50de94e15bb3a9801cc54396c0f07331ca85229cb5dbd9b45542bcb8779d63ff",
+    "usage": "Train/Dev assignment metadata only"
+  },
+  "environment_packages": {
+    "torch": "2.15.0",
+    "transformers": "5.22.2",
+    "sentence-transformers": "6.3.0",
+    "numpy": "2.5.4",
+    "psutil": "7.2.2",
+    "fastapi": "0.162.5",
+    "pytest": "9.2.0",
+    "tokenizers": "0.23.3",
+    "safetensors": "0.8.0"
+  }
+}

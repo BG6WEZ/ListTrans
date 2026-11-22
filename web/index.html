@@ -27,7 +27,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="index.css?v=v019_m3">
+    <link rel="stylesheet" href="index.css?v=v021_m2">
 </head>
 <body>
     <div class="app-container">
@@ -114,6 +114,29 @@
                                 <!-- Dynamically loaded tabs -->
                             </div>
                         </div>
+                        <section class="initial-overview" id="initial-overview" aria-label="首次匹配统计" hidden>
+                            <div class="initial-overview-heading">
+                                <span id="initial-scope">全单</span>
+                                <span id="initial-export-count"></span>
+                            </div>
+                            <h4>
+                                <button type="button" class="initial-total" data-initial-filter="prefilled" id="initial-prefilled-count" aria-pressed="false"></button>
+                                <span id="initial-summary-message" role="status"></span>
+                            </h4>
+                            <div class="initial-tier-grid" aria-label="首次匹配分档">
+                                <button type="button" data-initial-filter="A" aria-pressed="false"><span>优先核对</span><strong data-initial-count="A">0</strong></button>
+                                <button type="button" data-initial-filter="B" aria-pressed="false"><span>普通候选</span><strong data-initial-count="B">0</strong></button>
+                                <button type="button" data-initial-filter="C" aria-pressed="false"><span>重点核对或补参</span><strong data-initial-count="C">0</strong></button>
+                                <button type="button" data-initial-filter="D" aria-pressed="false"><span>无有效匹配或冲突</span><strong data-initial-count="D">0</strong></button>
+                            </div>
+                            <p id="initial-source-counts" class="initial-source-counts" hidden></p>
+                            <div class="initial-subfilters" aria-label="首次匹配细分">
+                                <button type="button" id="open-priority-review">集中核对优先项</button>
+                                <button type="button" data-initial-filter="low_score_prefill" aria-pressed="false">低分已预填 <strong data-initial-count="low_score_prefill">0</strong></button>
+                                <button type="button" data-initial-filter="safety_missing" aria-pressed="false">安全参数待补 <strong data-initial-count="safety_missing">0</strong></button>
+                                <button type="button" data-initial-filter="unprefilled" aria-pressed="false">未预填 <strong data-initial-count="unprefilled">0</strong></button>
+                            </div>
+                        </section>
                         <div class="filter-bar review-filters" role="group" aria-label="按复核状态筛选">
                             <button class="filter-tab active" data-filter="all" aria-pressed="true">全部</button>
                             <button class="filter-tab" data-filter="auto_accepted" aria-pressed="false">自动接受</button>
@@ -121,6 +144,10 @@
                             <button class="filter-tab" data-filter="recommended" aria-pressed="false">待复核</button>
                             <button class="filter-tab" data-filter="needs_parameters" aria-pressed="false">待补参</button>
                             <button class="filter-tab" data-filter="rejected" aria-pressed="false">拒绝</button>
+                        </div>
+                        <div class="initial-filter-tools">
+                            <label><input type="checkbox" id="initial-score-filter"> 首次评分 ≥90 分</label>
+                            <button type="button" id="clear-initial-filter" hidden>清除首次筛选</button>
                         </div>
                         <div class="search-box">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
@@ -131,10 +158,10 @@
                         <table class="data-table" id="items-table">
                             <thead>
                                 <tr>
-                                    <th width="80">序号</th>
+                                    <th class="workbench-row-number">序号</th>
                                     <th>清单物料名称</th>
-                                    <th width="140">匹配物料编码</th>
-                                    <th width="100">状态</th>
+                                    <th>首次推荐</th>
+                                    <th>当前选择</th>
                                 </tr>
                             </thead>
                             <tbody id="items-tbody">
@@ -248,12 +275,22 @@
                                         <span id="review-status" class="row-status-pill" role="status"></span>
                                     </div>
                                     <p id="review-reason"></p>
+                                    <div class="workbench-comparison">
+                                        <div>
+                                            <h5>首次推荐</h5>
+                                            <p id="initial-review-binding"></p>
+                                        </div>
+                                        <div>
+                                            <h5>当前选择</h5>
+                                            <p id="current-review-binding"></p>
+                                        </div>
+                                    </div>
                                     <dl id="review-differences"></dl>
                                 </section>
                                 <!-- Bound Materials Section -->
                                 <div class="glass-card section-card bound-materials-card">
                                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
-                                        <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 已绑定物料 (<span id="bound-materials-count">0</span>)</span>
+                                        <span class="section-tag" style="background-color: var(--color-success-bg); color: var(--color-success);"><i class="fa-solid fa-link"></i> 当前绑定 (<span id="bound-materials-count">0</span>)</span>
                                         <div class="review-actions">
                                             <button class="btn btn-secondary review-reject" id="reject-match-btn" type="button">拒绝此行</button>
                                             <button class="btn btn-success" id="confirm-match-finished-btn" type="button">确认绑定</button>
@@ -268,7 +305,7 @@
                                 <div class="recommendations-section">
                                     <div class="section-header" style="margin-top: 0;">
                                         <h4>推荐候选</h4>
-                                        <span class="sub">点选加入绑定，再次点选移除</span>
+                                        <span class="sub" id="candidate-interaction-hint">点选加入绑定，再次点选移除</span>
                                     </div>
                                     
                                     <div class="candidates-list" id="candidates-container" style="margin-top: 10px;">
@@ -1390,6 +1427,17 @@
         </div>
     </div>
 
-    <script src="app.js?v=v019_m3"></script>
+    <dialog id="priority-review" class="priority-review" aria-labelledby="priority-review-title">
+        <header class="priority-review-header">
+            <h2 id="priority-review-title">集中核对优先项</h2>
+            <button type="button" id="close-priority-review" class="btn btn-secondary">关闭</button>
+        </header>
+        <div class="priority-review-body" id="priority-review-rows"></div>
+        <footer class="priority-review-footer">
+            <span id="priority-review-status" role="status"></span>
+            <button type="button" id="submit-priority-review" class="btn btn-primary" disabled>确认所选行（0）</button>
+        </footer>
+    </dialog>
+    <script src="app.js?v=v021_m2"></script>
 </body>
 </html>

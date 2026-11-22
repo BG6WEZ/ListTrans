@@ -137,6 +137,7 @@ let selectedItem = null; // Selected row dict
 let currentFilter = 'all'; // Current filter tab
 let searchQuery = ''; // Search query on left list
 let currentProfessional = '全部'; // Active professional tab filter
+let initialFilter = '';
 let professionals = []; // List of professionals detected in uploaded list
 let originalFileName = ""; // Uploaded original list filename
 let currentDocumentId = ""; // Server-issued document ID for current upload/restored workbook
@@ -853,6 +854,25 @@ function initEventListeners() {
         });
     });
 
+    document.querySelectorAll('[data-initial-filter]').forEach(button => {
+        button.addEventListener('click', () => {
+            initialFilter = initialFilter === button.dataset.initialFilter ? '' : button.dataset.initialFilter;
+            refreshInitialFilter();
+        });
+    });
+    document.getElementById('initial-score-filter').addEventListener('change', refreshInitialFilter);
+    document.getElementById('clear-initial-filter').addEventListener('click', () => {
+        initialFilter = '';
+        document.getElementById('initial-score-filter').checked = false;
+        refreshInitialFilter();
+    });
+    document.getElementById('open-priority-review')?.addEventListener('click', openPriorityReview);
+    document.getElementById('close-priority-review')?.addEventListener('click', closePriorityReview);
+    document.getElementById('submit-priority-review')?.addEventListener('click', submitPriorityReview);
+    document.getElementById('priority-review')?.addEventListener('cancel', event => {
+        if (priorityReview?.submitting) event.preventDefault();
+    });
+
     // Left panel Search input
     const listSearch = document.getElementById('list-search');
     listSearch.addEventListener('input', (e) => {
@@ -1326,6 +1346,7 @@ async function resetAndEndTask() {
     currentFilter = 'all';
     currentPage = 1;
     selectedItem = null;
+    resetInitialFilters();
     professionals = ['全部'];
     currentProfessional = '全部';
     
@@ -1336,8 +1357,8 @@ async function resetAndEndTask() {
     // Reset filter tabs DOM
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(t => {
-        if (t.dataset.filter === 'all') t.classList.add('active');
-        else t.classList.remove('active');
+        t.classList.toggle('active', t.dataset.filter === 'all');
+        t.setAttribute('aria-pressed', String(t.dataset.filter === 'all'));
     });
     
     // Toggle UI views
@@ -1377,6 +1398,7 @@ async function handleFileUpload(file) {
         return;
     }
 
+    document.getElementById('initial-overview').hidden = true;
     showLoading("正在上传并分析清单...", "系统正在初始化后台比对任务...", 0);
     
     // Show and reset the segmented progress container
@@ -1449,11 +1471,11 @@ async function handleFileUpload(file) {
                     window.uploadPollInterval = null;
                     hideLoading();
                     processUploadResult(taskState.result, file.name, taskState);
-                } else if (taskState.status === 'failed') {
+                } else if (['failed', 'cancelled', 'timed_out'].includes(taskState.status)) {
                     clearInterval(window.uploadPollInterval);
                     window.uploadPollInterval = null;
                     hideLoading();
-                    alert(`比对处理失败: ${taskState.error}`);
+                    alert(`比对处理失败: ${taskState.error || taskState.current_step || taskState.status}`);
                 }
             } catch (err) {
                 console.error("Error polling task status:", err);
@@ -1481,17 +1503,18 @@ function processUploadResult(resultItems, fileName, taskState = null) {
     if (listSearch) listSearch.value = '';
     
     currentFilter = 'all';
+    resetInitialFilters();
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(t => {
-        if (t.dataset.filter === 'all') t.classList.add('active');
-        else t.classList.remove('active');
+        t.classList.toggle('active', t.dataset.filter === 'all');
+        t.setAttribute('aria-pressed', String(t.dataset.filter === 'all'));
     });
     
     activeSessionId = null;
     currentPage = 1;
     selectedItem = null;
 
-    items = resultItems;
+    items = uniqueWorkbenchRows(resultItems);
     const firstItem = (items && items.length > 0) ? items[0] : null;
     currentDocumentId = (taskState && taskState.document_id) || (firstItem && firstItem.document_id) || '';
     currentUploadTaskId = (firstItem && firstItem.upload_task_id) || '';
@@ -1506,13 +1529,13 @@ function processUploadResult(resultItems, fileName, taskState = null) {
         }
         item._event_seq = Number(item.max_event_seq || 0);
         item._feedback_seq = Number(item.max_feedback_seq || 0);
-        item.bindings ??= [];
+        initializeWorkbenchBinding(item);
     });
     
     // Initialize professional list
     const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
     professionals = ['全部', ...uniqueProfs];
-    currentProfessional = uniqueProfs.includes('暖通') ? '暖通' : uniqueProfs[0] || '全部';
+    currentProfessional = '全部';
     
     // Render professional tabs
     renderProfessionalTabs();
@@ -1526,7 +1549,8 @@ function processUploadResult(resultItems, fileName, taskState = null) {
     }
     document.getElementById('welcome-slate').style.display = 'none';
     document.getElementById('workbench').style.display = 'flex';
-    document.getElementById('export-btn').disabled = false;
+    document.getElementById('initial-overview').hidden = false;
+    document.getElementById('export-btn').disabled = items.length === 0;
     
     const saveTrigger = document.getElementById('save-trigger');
     if (saveTrigger) saveTrigger.style.display = 'inline-flex';
@@ -1552,7 +1576,8 @@ function renderProfessionalTabs() {
     const container = document.getElementById('prof-tabs');
     container.innerHTML = '';
     
-    const uniqueProfs = [...new Set(items.map(item => item.professional).filter(Boolean))];
+    const uniqueProfs = [...new Set(items.map(workbenchProfessional))];
+    if (!uniqueProfs.includes(currentProfessional)) currentProfessional = '全部';
     
     if (uniqueProfs.length === 0) {
         wrapper.style.display = 'none';
@@ -1566,6 +1591,8 @@ function renderProfessionalTabs() {
     tabs.forEach(prof => {
         const btn = document.createElement('button');
         btn.className = `prof-tab ${currentProfessional === prof ? 'active' : ''}`;
+        btn.type = 'button';
+        btn.setAttribute('aria-pressed', String(currentProfessional === prof));
         btn.innerText = prof;
         btn.addEventListener('click', () => {
             currentProfessional = prof;
@@ -1617,25 +1644,28 @@ function renderTable() {
         const statusHtml = `<span class="row-status-pill" data-state="${state}"
             title="${escapeHtml(item.decision_reason || REVIEW_LABELS[state])}">${REVIEW_LABELS[state]}</span>`;
 
-        let codeDisplay = '-';
-        if (item.bindings && item.bindings.length > 0) {
-            if (item.bindings.length === 1) {
-                codeDisplay = item.bindings[0].code;
-            } else {
-                codeDisplay = `${item.bindings[0].code} (+${item.bindings.length - 1})`;
-            }
-        }
+        tr.dataset.sourceRow = item.source_row_id || '';
+        const initial = item.initial_match;
+        const firstCode = bindingCodes(initial?.effective_bindings);
+        const currentCode = bindingCodes(item.bindings);
 
         tr.innerHTML = `
             <td>${escapeHtml(item.original_row_idx)}</td>
             <td>
                 <div style="font-weight: 500;">${escapeHtml(item.original_name)}</div>
-                <div style="font-size: 11px; color: var(--color-text-muted); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div class="workbench-row-spec">
                     ${escapeHtml((item.original_spec || '').replace(/\n/g, ' '))}
                 </div>
             </td>
-            <td><code class="row-code-lbl">${escapeHtml(codeDisplay)}</code></td>
-            <td>${statusHtml}</td>
+            <td class="initial-row-result">
+                <div class="workbench-row-note">${escapeHtml(initialRowLabel(initial))}</div>
+                ${firstCode ? `<code class="row-code-lbl">${escapeHtml(firstCode)}</code>` : ''}
+            </td>
+            <td class="current-row-result">
+                ${currentCode ? `<code class="row-code-lbl">${escapeHtml(currentCode)}</code>`
+                    : state === 'needs_parameters' ? '' : '<span class="workbench-row-note">待选材</span>'}
+                ${statusHtml}
+            </td>
         `;
         
         tr.addEventListener('click', () => {
@@ -1702,9 +1732,103 @@ const REVIEW_LABELS = Object.freeze({
 });
 const pendingReviewEdits = new WeakMap();
 
+const INITIAL_TIER_LABELS = Object.freeze({
+    A: '优先核对', B: '普通候选', C: '重点核对或补参', D: '无有效匹配或冲突'
+});
+const INITIAL_REASON_LABELS = Object.freeze({
+    safety_missing: '安全参数待补', low_score_prefill: '低分已预填',
+    hard_conflict: '规格或单位冲突', invalid_code: '物料编码失效',
+    no_candidate: '无有效候选', unverified_binding: '规则或组合未核验',
+    no_initial_binding: '首选未填入'
+});
+
+function uniqueWorkbenchRows(rows) {
+    const seen = new Set();
+    return rows.filter(row => {
+        if (!row.source_row_id) return true;
+        if (seen.has(row.source_row_id)) return false;
+        seen.add(row.source_row_id);
+        return true;
+    });
+}
+
+function workbenchProfessional(item) {
+    return item.initial_match?.professional || item.professional || '暖通';
+}
+
+function freezeInitialMatch(value) {
+    if (value && typeof value === 'object') {
+        Object.values(value).forEach(freezeInitialMatch);
+        Object.freeze(value);
+    }
+    return value;
+}
+
+function initializeWorkbenchBinding(item, restored = false) {
+    const initial = item.initial_match;
+    if (initial) {
+        const savedCurrent = restored && item.workbench_bindings_initialized === true
+            && item.identity_status === 'verified';
+        const confirmed = restored && item.decision_status === 'manual_confirmed';
+        const edited = restored && item.decision_source === 'manual_edit' && initial.actual_prefilled;
+        if (!savedCurrent && !confirmed && !edited) {
+            item.bindings = initial.effective_bindings.map(binding => ({...binding}));
+            item.workbench_rematched = Boolean(restored && Number(item.recommendation_revision) > 1);
+            if (item.workbench_rematched) item.bindings = [];
+        }
+        freezeInitialMatch(initial);
+    }
+    if (item.decision_status === 'rejected') item.bindings = [];
+    item.bindings ??= [];
+    item.workbench_bindings_initialized = true;
+    syncBindingDisplay(item);
+}
+
+function bindingCodes(bindings) {
+    if (!bindings?.length) return '';
+    const suffix = bindings.length > 1 ? ` (+${bindings.length - 1})` : '';
+    return `${bindings[0].code}${suffix}`;
+}
+
+function initialRowLabel(initial) {
+    if (!initial) return '首次统计未记录';
+    const source = initial.source === 'rule' ? '规则匹配' : '组合匹配';
+    const reason = INITIAL_REASON_LABELS[initial.reason_codes?.[0]];
+    const label = initial.tier === 'A' && initial.source !== 'matcher'
+        ? `${INITIAL_TIER_LABELS.A} · ${source}` : (reason || INITIAL_TIER_LABELS[initial.tier]);
+    return `首次${initial.actual_prefilled ? '已预填' : '未预填'} · ${label}`;
+}
+
+function initialSafetyPending(item) {
+    return item.initial_match?.subtype === 'safety_missing' && !item.workbench_rematched
+        && !item.bindings?.length && item.decision_status !== 'rejected';
+}
+
+function syncInitialFilterControls() {
+    document.querySelectorAll('[data-initial-filter]').forEach(button => {
+        button.setAttribute('aria-pressed', String(initialFilter === button.dataset.initialFilter));
+    });
+    const scoreOnly = document.getElementById('initial-score-filter').checked;
+    document.getElementById('clear-initial-filter').hidden = !initialFilter && !scoreOnly;
+}
+
+function resetInitialFilters() {
+    initialFilter = '';
+    document.getElementById('initial-score-filter').checked = false;
+    syncInitialFilterControls();
+}
+
+function refreshInitialFilter() {
+    currentPage = 1;
+    syncInitialFilterControls();
+    renderTable();
+}
+
 function reviewState(item) {
     if (item.decision_source !== 'manual_edit' && item.decision_status === 'recommended' &&
-        item.acceptance_calibration?.outcome === 'needs_parameters') return 'needs_parameters';
+        (initialSafetyPending(item) || item.acceptance_calibration?.outcome === 'needs_parameters')) {
+        return 'needs_parameters';
+    }
     return Object.hasOwn(REVIEW_LABELS, item.decision_status) ? item.decision_status : 'recommended';
 }
 
@@ -1714,9 +1838,18 @@ function hasReviewApproval(item) {
 }
 
 function matchesWorkbenchFilters(item) {
-    return (currentProfessional === '全部' || item.professional === currentProfessional)
+    const initial = item.initial_match;
+    const initialMatch = !initialFilter || (initial && (
+        initialFilter === initial.tier || initialFilter === initial.subtype
+        || (initialFilter === 'prefilled' && initial.actual_prefilled)
+        || (initialFilter === 'unprefilled' && !initial.actual_prefilled)
+    ));
+    return (currentProfessional === '全部' || workbenchProfessional(item) === currentProfessional)
         && (currentFilter === 'all' || currentFilter === reviewState(item))
-        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code]
+        && initialMatch
+        && (!document.getElementById('initial-score-filter').checked || initial?.ranking_score >= 90)
+        && (!searchQuery || [item.original_name, item.original_spec, item.matched_code,
+            ...((initial?.effective_bindings || []).map(binding => binding.code))]
             .some(value => String(value ?? '').toLowerCase().includes(searchQuery)));
 }
 
@@ -1732,7 +1865,12 @@ function reviewPayload(item) {
         original_code: item.original_code || '',
         original_row_idx: item.original_row_idx || 0,
         professional: item.professional || '暖通',
-        scope_filename: originalFileName || ''
+        scope_filename: originalFileName || '',
+        document_id: item.document_id || currentDocumentId || null,
+        sheet_id: item.sheet_id || null,
+        source_row_id: item.source_row_id || null,
+        recommendation_revision: item.recommendation_revision || null,
+        decision_version: item.decision_version ?? 0
     };
 }
 
@@ -1749,12 +1887,259 @@ async function postReview(action, payload) {
     return data;
 }
 
+const PRIORITY_REASONS = {
+    rule_or_bom: '规则及组合匹配走原有核对流程',
+    not_priority: '缺少可核验的首次优先推荐',
+    recommendation_changed: '已重算或推荐版本已变化',
+    decision_changed: '已确认、拒绝或编辑',
+    source_decision_conflict: '服务端状态已变化，请重新载入',
+    source_revision_conflict: '推荐版本已变化，请重新载入',
+    source_content_conflict: '原始行内容已变化，请单行核对',
+    score_capped: '首选评分已封顶',
+    no_distinct_margin: '缺少可靠的独立对手或分差小于 10 分',
+    choice_changed: '当前绑定与首次推荐不一致',
+    invalid_code: '目录编码已失效',
+    invalid_quantity: '绑定数量或比例不一致',
+    hard_conflict: '实时目录与清单存在硬冲突',
+    unit_unverified: '单位倍率无法核验为 1',
+    unit_changed: '绑定单位已变化',
+    safety_unverified: '安全关键字段待补',
+    requested_unverified: '清单明确要求的参数缺少目录依据，请单行补证',
+    missing_review_required: '请展开并核对缺失字段',
+    confirmation_inactive: '该行的原确认已失效，请单行复核',
+    confirmed: '已确认'
+};
+const PRIORITY_MISSING_SIDE = {query: '清单缺失', candidate: '目录缺失', both: '均缺失'};
+let priorityReview;
+
+function priorityLocalIssue(item) {
+    const initial = item.initial_match;
+    if (initial.source !== 'matcher') return 'rule_or_bom';
+    if (!item.source_row_id || !item.sheet_id || !item.document_id) return 'not_priority';
+    if (Number(item.recommendation_revision) !== 1 || item.workbench_rematched) return 'recommendation_changed';
+    if (reviewState(item) !== 'recommended' || item.decision_source === 'manual_edit'
+        || item.decision_version > 0 || pendingReviewEdits.has(item)) return 'decision_changed';
+    if (initial.uncapped !== true) return 'score_capped';
+    if (initial.ranking_evidence_status !== 'current' || !initial.competitor_code
+        || !Number.isFinite(initial.distinct_margin) || initial.distinct_margin < 10) return 'no_distinct_margin';
+    if (initial.field_comparisons?.some(field => field.safety_critical_unknown)) return 'safety_unverified';
+    if (initial.field_comparisons?.some(field => field.requested_unverified)) return 'requested_unverified';
+    const current = item.bindings || [];
+    const baseline = initial.effective_bindings || [];
+    const original = baseline[0];
+    const choice = current[0];
+    if (baseline.length !== 1 || current.length !== 1 || choice.code !== original.code
+        || choice.unit !== original.unit || Number(choice.qty) !== Number(original.qty)
+        || Number(choice.qty_ratio ?? 1) !== Number(original.qty_ratio ?? 1)) return 'choice_changed';
+    return null;
+}
+
+async function openPriorityReview() {
+    const dialog = document.getElementById('priority-review');
+    if (dialog.open) return;
+    const rows = items.filter(item => item.initial_match?.tier === 'A'
+        && (currentProfessional === '全部' || workbenchProfessional(item) === currentProfessional))
+        .map(item => ({item, checked: false, opened: false, reason: priorityLocalIssue(item)}));
+    const review = {rows, batchId: generateClientEventId('priority'), loading: true, submitting: false};
+    priorityReview = review;
+    dialog.showModal();
+    renderPriorityReview();
+    const candidates = rows.filter(row => !row.reason);
+    try {
+        for (let start = 0; start < candidates.length; start += 200) {
+            const entries = candidates.slice(start, start + 200);
+            const result = await postReview('priority', {
+                rows: entries.map(({item}) => ({...reviewPayload(item), bindings: item.bindings}))
+            });
+            for (const [index, entry] of entries.entries()) {
+                const server = result.rows[index];
+                if (server.source_row_id !== entry.item.source_row_id) throw new Error('源行核验结果不一致');
+                Object.assign(entry, server);
+            }
+        }
+    } catch (error) {
+        review.message = `核验失败，关闭后可重试。${error.message}`;
+        rows.forEach(entry => { entry.eligible = false; });
+    } finally {
+        review.loading = false;
+        if (priorityReview === review && dialog.open) renderPriorityReview();
+    }
+}
+
+function closePriorityReview() {
+    if (!priorityReview?.submitting) document.getElementById('priority-review').close();
+}
+
+function openPriorityRow(item) {
+    closePriorityReview();
+    currentFilter = 'all';
+    searchQuery = '';
+    document.getElementById('list-search').value = '';
+    resetInitialFilters();
+    document.querySelectorAll('.review-filters [data-filter]').forEach(button => {
+        const active = button.dataset.filter === 'all';
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+    jumpToItem(item);
+}
+
+function renderPriorityReview() {
+    const review = priorityReview;
+    const body = document.getElementById('priority-review-rows');
+    body.replaceChildren();
+    if (review.loading) {
+        body.textContent = '正在核验当前目录和源行状态…';
+    } else if (!review.rows.length) {
+        const empty = document.createElement('button');
+        empty.type = 'button';
+        empty.className = 'btn btn-secondary';
+        empty.textContent = '当前范围没有优先项，返回逐行核对';
+        empty.addEventListener('click', closePriorityReview);
+        body.append(empty);
+    }
+    for (const [eligible, title] of [[true, '可逐行勾选'], [false, '仅查看']]) {
+        const rows = review.rows.filter(row => Boolean(row.eligible) === eligible);
+        if (!rows.length || review.loading) continue;
+        const section = document.createElement('section');
+        const heading = document.createElement('h3');
+        heading.textContent = `${title}（${rows.length}）`;
+        section.append(heading);
+        for (const entry of rows) section.append(renderPriorityRow(entry));
+        body.append(section);
+    }
+    updatePriorityControls();
+}
+
+function renderPriorityRow(entry) {
+    const item = entry.item;
+    const initial = item.initial_match;
+    const row = document.createElement('article');
+    row.className = 'priority-review-row';
+    const missing = entry.missing || initial.field_comparisons?.filter(field => field.state === 'missing') || [];
+    const initialBinding = initial.effective_bindings?.[0];
+    const differences = initial.field_comparisons?.filter(field => field.state === 'different') || [];
+    const ranking = [
+        Number.isFinite(initial.ranking_score) ? `首次评分 ${initial.ranking_score.toFixed(2)} 分` : '',
+        initial.competitor_code && Number.isFinite(initial.distinct_margin)
+            ? `次选 ${initial.competitor_code} · 分差 ${initial.distinct_margin.toFixed(2)} 分` : ''
+    ].filter(Boolean).join(' · ');
+    row.innerHTML = `
+        <div class="priority-row-heading">
+            <label><strong>第 ${escapeHtml(item.original_row_idx)} 行 · ${escapeHtml(item.original_name)}</strong></label>
+            <button type="button" class="btn btn-secondary">单行核对</button>
+        </div>
+        <p>${escapeHtml(entry.catalog_name || initialBinding?.name || '无目录物料')}
+            ${escapeHtml(initialBinding?.code || '')}</p>
+        <p class="priority-row-reason">${escapeHtml(ranking)}</p>
+        <p class="priority-row-reason">${escapeHtml(PRIORITY_REASONS[entry.reason] || (entry.eligible ? '' : '须单行核对'))}</p>
+        ${missing.length ? `<p class="priority-missing">${missing.map(field =>
+            `${escapeHtml(field.field)}（${PRIORITY_MISSING_SIDE[field.missing_side] || '缺失'}）`).join(' · ')}</p>` : ''}
+        <details>
+            <summary>展开清单原文与目录规格</summary>
+            <dl class="priority-comparison">
+                <div><dt>清单原文</dt><dd>${escapeHtml(item.original_spec || '未填写')}</dd></div>
+                <div><dt>目录规格</dt><dd>${escapeHtml(entry.catalog_spec || initialBinding?.specification || '未标注')}</dd></div>
+            </dl>
+            ${differences.length ? `<ul class="priority-differences">${differences.map(field => `
+                <li>${escapeHtml(field.field)} · 清单 ${escapeHtml(field.query_value)} · 目录 ${escapeHtml(field.candidate_value)}</li>`
+            ).join('')}</ul>` : ''}
+        </details>`;
+    row.querySelector('button').addEventListener('click', () => openPriorityRow(item));
+    row.querySelector('button').disabled = priorityReview.submitting;
+    const details = row.querySelector('details');
+    details.open = entry.opened;
+    if (entry.eligible) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = entry.checked;
+        checkbox.disabled = priorityReview.submitting || (missing.length > 0 && !entry.opened);
+        details.addEventListener('toggle', () => {
+            if (details.open) {
+                entry.opened = true;
+                checkbox.disabled = priorityReview.submitting;
+            }
+        });
+        checkbox.addEventListener('change', () => {
+            entry.checked = checkbox.checked;
+            updatePriorityControls();
+        });
+        row.querySelector('label').prepend(checkbox);
+    }
+    return row;
+}
+
+function updatePriorityControls() {
+    const review = priorityReview;
+    const count = review.rows.filter(row => row.eligible && row.checked).length;
+    const submit = document.getElementById('submit-priority-review');
+    submit.textContent = `确认所选行（${count}）`;
+    submit.disabled = review.loading || review.submitting || !count;
+    document.getElementById('close-priority-review').disabled = review.submitting;
+    document.getElementById('priority-review-status').textContent = review.message || (
+        !review.loading && !review.rows.some(row => row.eligible)
+            ? '没有可勾选的行。可打开单行核对查看详情。' : '');
+}
+
+async function submitPriorityReview() {
+    const review = priorityReview;
+    const selected = review.rows.filter(row => row.eligible && row.checked);
+    if (review.submitting || !selected.length) return;
+    review.submitting = true;
+    review.message = '正在提交所选行…';
+    renderPriorityReview();
+    let confirmed = 0;
+    let failed = 0;
+    let feedbackPending = false;
+    try {
+        for (let start = 0; start < selected.length; start += 200) {
+            const entries = selected.slice(start, start + 200);
+            const result = await postReview('priority/submit', {batch_request_id: review.batchId,
+                rows: entries.map(entry => ({
+                    ...reviewPayload(entry.item), bindings: entry.item.bindings,
+                    idempotency_key: entry.idempotency_key, reviewed_missing: entry.opened
+                }))
+            });
+            feedbackPending ||= !result.feedback_delivery_ok;
+            for (const [index, entry] of entries.entries()) {
+                const row = result.rows[index];
+                entry.checked = false;
+                entry.eligible = false;
+                entry.reason = row.reason;
+                if (!row.ok || row.source_row_id !== entry.item.source_row_id) {
+                    failed++;
+                    continue;
+                }
+                const {decision, bindings, decision_version} = row.receipt;
+                Object.assign(entry.item, decision, {bindings, decision_version});
+                syncBindingDisplay(entry.item);
+                confirmed++;
+            }
+        }
+        review.message = `已确认 ${confirmed} 行${failed ? ` · ${failed} 行未确认` : ''}${feedbackPending ? ' · 反馈待重投' : ''}`;
+    } catch (error) {
+        review.message = `已收到 ${confirmed} 行确认。剩余所选行可重新提交。${error.message}`;
+    } finally {
+        review.submitting = false;
+        if (selectedItem) {
+            renderReviewDetail();
+            renderBoundMaterials();
+        }
+        renderTable();
+        updateProgress();
+        renderPriorityReview();
+    }
+}
+
 function persistReviewEdit(item) {
     const pending = pendingReviewEdits.get(item);
     if (!pending) return Promise.resolve();
     if (!pending.request) {
         pending.request = postReview('invalidate', pending.payload)
-            .then(() => pendingReviewEdits.delete(item))
+            .then(response => {
+                if (response.decision_version != null) item.decision_version = response.decision_version;
+                pendingReviewEdits.delete(item);
+            })
             .catch(error => {
                 pending.request = null;
                 throw error;
@@ -1772,7 +2157,7 @@ function invalidateItemDecision(item, reason) {
     item.decision_codes = [];
     item.row_fingerprint = '';
     item.binding_fingerprint = '';
-    if (approved && !pendingReviewEdits.has(item)) {
+    if ((approved || item.source_row_id) && !pendingReviewEdits.has(item)) {
         pendingReviewEdits.set(item, {payload: reviewPayload(item)});
         persistReviewEdit(item).catch(() => {
             item.decision_reason = '服务端失效登记失败。保存或确认时会重试。';
@@ -1804,6 +2189,7 @@ async function submitReview(action) {
         const status = action === 'reject' ? 'rejected' : 'manual_confirmed';
         if (response.decision?.decision_status !== status) throw new Error('服务端未返回有效复核状态');
         Object.assign(item, response.decision);
+        if (response.decision_version != null) item.decision_version = response.decision_version;
         item.bindings = action === 'reject' ? [] : response.bindings ?? item.bindings;
         syncBindingDisplay(item);
         if (selectedItem === item) {
@@ -1844,6 +2230,20 @@ function renderReviewDetail() {
 
     const differences = document.getElementById('review-differences');
     differences.replaceChildren();
+    const initial = item.initial_match;
+    const describe = bindings => bindings.map(binding =>
+        [binding.code, binding.name, binding.specification].filter(Boolean).join(' · ')).join(' / ');
+    const firstFields = initial?.field_comparisons || [];
+    const initialSpec = firstFields.find(field => field.field === '核心规格');
+    const firstBinding = describe(initial?.effective_bindings || []);
+    const firstReference = [item.initial_auto_code, initialSpec?.candidate_value].filter(Boolean).join(' · ');
+    document.getElementById('initial-review-binding').textContent = initial
+        ? [initialRowLabel(initial), firstBinding || firstReference,
+            Number.isFinite(initial.ranking_score) ? `匹配评分 ${initial.ranking_score} 分` : '']
+            .filter(Boolean).join(' / ')
+        : '首次统计未记录';
+    document.getElementById('current-review-binding').textContent = describe(item.bindings || [])
+        || (initialSafetyPending(item) ? '待补参后重新匹配' : '待选材');
     const evidence = item.acceptance_calibration;
     const add = (label, value) => {
         if (!value) return;
@@ -1853,6 +2253,27 @@ function renderReviewDetail() {
         detail.textContent = value;
         differences.append(term, detail);
     };
+    if (initial) {
+        add('清单原文', initialSpec?.query_value || item.original_spec || '未填写');
+        const missingSide = {query: '清单缺失', candidate: '目录缺失', both: '清单与目录均缺失'};
+        for (const field of firstFields) {
+            if (field.state === 'missing') {
+                const warning = field.safety_critical_unknown ? ' · 安全参数待补' : '';
+                const requested = field.requested_unverified ? ' · 清单明确要求，目录待核验' : '';
+                add(`首次 · ${field.field}`,
+                    `${missingSide[field.missing_side] || '字段缺失'}${warning}${requested}`
+                    + (field.query_value != null ? ` · 清单值 ${field.query_value}` : ''));
+            } else if (field.state === 'different' && field.field !== '核心规格') {
+                add(`首次 · ${field.field}`, `清单 ${field.query_value} ／ 目录 ${field.candidate_value}`);
+            }
+        }
+        if (initial.source === 'matcher') {
+            if (initial.priority_review_unavailable) add('首次分差', '优先核对评估不可用');
+            else if (Number.isFinite(initial.distinct_margin) && initial.competitor_code) {
+                add('首次分差', `次选 ${initial.competitor_code} · 相差 ${initial.distinct_margin.toFixed(2)} 分`);
+            } else add('首次分差', '无可比较候选');
+        }
+    }
     add('待补参数', evidence?.missing_fields?.join('、'));
     add('关键差异', evidence?.different_fields?.join('、'));
     add('硬冲突', evidence?.hard_conflict);
@@ -1861,9 +2282,9 @@ function renderReviewDetail() {
     if (top) {
         const rival = evidence ? evidence.competitor_code : second?.code;
         const gap = evidence ? evidence.distinct_margin : second && Number(top.score) - Number(second.score);
-        add('候选分差', Number.isFinite(gap) && rival
+        if (item.workbench_rematched || !initial) add('当前候选分差', Number.isFinite(gap) && rival
             ? `${top.code} 与 ${rival} 相差 ${gap.toFixed(2)} 分` : '缺少可比较的第二候选');
-        add('清单与首选规格', `${item.original_spec || '未填写'} ／ ${top.specification || '未填写'}`);
+        if (item.workbench_rematched || !initial) add('当前首选规格', top.specification || '未填写');
         add('首选理由', top.match_reasons?.join('、'));
         const runnerUp = eligible.find(candidate => candidate.code === rival);
         add('次选理由', runnerUp?.match_reasons?.join('、'));
@@ -1885,7 +2306,10 @@ function renderBoundMaterials() {
     document.getElementById('bound-materials-count').innerText = selectedItem.bindings.length;
     
     if (selectedItem.bindings.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--color-text-muted); font-size: 12px; padding: 10px; border: 1px dashed var(--border-color); border-radius: var(--radius-sm);">暂无绑定物料，请点击下方推荐卡片或检索套用以绑定</div>`;
+        const message = initialSafetyPending(selectedItem)
+            ? '待补参。请补充安全参数后重新匹配。'
+            : '待选材。可点选候选或从物料库搜索。';
+        container.innerHTML = `<div class="workbench-empty-binding">${message}</div>`;
         return;
     }
     
@@ -1960,6 +2384,9 @@ function renderBoundMaterials() {
 function renderCandidates() {
     const container = document.getElementById('candidates-container');
     container.innerHTML = '';
+    const referenceOnly = initialSafetyPending(selectedItem);
+    document.getElementById('candidate-interaction-hint').textContent = referenceOnly
+        ? '仅供参考 · 补参后重新匹配' : '点选加入绑定，再次点选移除';
     
     if (!selectedItem.top_candidates || selectedItem.top_candidates.length === 0) {
         container.innerHTML = `<div style="text-align: center; color: var(--color-text-muted); font-size: 13px; padding: 20px; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">暂无推荐物料</div>`;
@@ -1970,8 +2397,13 @@ function renderCandidates() {
         const card = document.createElement('div');
         card.className = 'candidate-card';
         card.dataset.code = cand.code;
-        card.tabIndex = 0;
-        card.setAttribute('role', 'button');
+        if (referenceOnly) {
+            card.classList.add('candidate-reference');
+            card.setAttribute('role', 'group');
+        } else {
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+        }
         card.setAttribute('aria-label', `${cand.name} ${cand.code}`);
         
         const isActive = selectedItem.bindings && selectedItem.bindings.some(b => b.code === cand.code);
@@ -2008,7 +2440,7 @@ function renderCandidates() {
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
                     ${boundBadge}
-                    <div class="match-percentage-badge">${escapeHtml(cand.score)}% 相似</div>
+                    <div class="match-percentage-badge">匹配评分 ${escapeHtml(cand.score)} 分</div>
                 </div>
             </div>
             <div class="candidate-spec" title="${escapeHtml(cand.specification || '无规格描述')}">${escapeHtml(cand.specification || '无规格描述')}</div>
@@ -2020,14 +2452,16 @@ function renderCandidates() {
             </div>
         `;
         
-        card.setAttribute('aria-pressed', String(isActive));
-        card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
-        card.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                card.click();
-            }
-        });
+        if (!referenceOnly) {
+            card.setAttribute('aria-pressed', String(isActive));
+            card.addEventListener('click', () => applyMatchCandidate(cand, 'PICK_CANDIDATE'));
+            card.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    card.click();
+                }
+            });
+        }
         
         container.appendChild(card);
     });
@@ -2036,6 +2470,10 @@ function renderCandidates() {
 // 5. Apply selected candidate to matched item & submit feedback + flywheel record
 async function applyMatchCandidate(cand, actionType = 'PICK_CANDIDATE') {
     if (!selectedItem) return;
+    if (initialSafetyPending(selectedItem)) {
+        alert('请补充安全参数并重新匹配后选材。');
+        return;
+    }
     
     if (!selectedItem.bindings) {
         selectedItem.bindings = [];
@@ -2765,6 +3203,7 @@ async function batchApplyParamsAndRematch() {
 
 function applyRematchResult(item, result) {
     // Preserve initial_auto_code and initial_snapshot_id for feedback provenance.
+    item.workbench_rematched = true;
     item.bindings = [];
     item.top_candidates = result.top_candidates || [];
     item.acceptance_calibration = result.acceptance_calibration;
@@ -2777,10 +3216,9 @@ function applyRematchResult(item, result) {
 
 // 8. Update progress indicators
 function updateProgress() {
-    if (items.length === 0) return;
-    
     // 1. Overall progress
-    const matchedCount = items.filter(item => hasReviewApproval(item)).length;
+    const ready = item => hasReviewApproval(item) && Boolean(item.bindings?.length);
+    const matchedCount = items.filter(ready).length;
     const progressPercent = Math.round((matchedCount / items.length) * 100) || 0;
     
     document.getElementById('match-progress-bar').style.width = `${progressPercent}%`;
@@ -2789,15 +3227,59 @@ function updateProgress() {
     // 2. Current Professional progress
     let profItems = items;
     if (currentProfessional !== '全部') {
-        profItems = items.filter(item => item.professional === currentProfessional);
+        profItems = items.filter(item => workbenchProfessional(item) === currentProfessional);
     }
     
-    const profMatchedCount = profItems.filter(item => hasReviewApproval(item)).length;
+    const profMatchedCount = profItems.filter(ready).length;
     const profProgressPercent = Math.round((profMatchedCount / profItems.length) * 100) || 0;
     
     document.getElementById('current-prof-progress-label').innerText = `${currentProfessional}可导出进度`;
     document.getElementById('current-prof-progress-bar').style.width = `${profProgressPercent}%`;
     document.getElementById('current-prof-progress-percent').innerText = `${profProgressPercent}%`;
+    renderInitialOverview(profItems, profMatchedCount);
+}
+
+function renderInitialOverview(rows, exportCount) {
+    const counts = {A: 0, B: 0, C: 0, D: 0, low_score_prefill: 0, safety_missing: 0, unprefilled: 0};
+    let known = 0;
+    let prefilled = 0;
+    let ruleCount = 0;
+    let bomCount = 0;
+    for (const row of rows) {
+        const initial = row.initial_match;
+        if (!initial) continue;
+        known++;
+        counts[initial.tier]++;
+        if (initial.subtype) counts[initial.subtype]++;
+        if (initial.actual_prefilled) prefilled++;
+        if (initial.tier === 'A' && initial.source === 'rule') ruleCount++;
+        if (initial.tier === 'A' && initial.source === 'bom') bomCount++;
+    }
+    counts.unprefilled = known - prefilled;
+    const total = rows.length;
+    const missing = total - known;
+    const scope = currentProfessional === '全部' ? '全单' : currentProfessional;
+    document.getElementById('initial-scope').textContent = `${scope} · ${total} 条`;
+    document.getElementById('initial-export-count').textContent = `已确认可导出 ${exportCount} / ${total} 条`;
+    const rate = missing || !total ? '—' : `${(100 * prefilled / total).toFixed(1)}%`;
+    const main = document.getElementById('initial-prefilled-count');
+    main.hidden = !known;
+    main.textContent = known ? `系统已自动预填 ${prefilled} / ${total} 条（${rate}）` : '';
+    document.getElementById('initial-summary-message').textContent = !total ? '无可匹配物料'
+        : !known ? '首次统计未记录'
+            : missing ? `已知 ${known} 条 · 未记录 ${missing} 条` : '';
+    for (const group of document.querySelectorAll('.initial-tier-grid, .initial-subfilters')) {
+        group.hidden = !known;
+    }
+    document.querySelectorAll('[data-initial-count]').forEach(node => {
+        node.textContent = counts[node.dataset.initialCount];
+    });
+    const sources = document.getElementById('initial-source-counts');
+    sources.hidden = !ruleCount && !bomCount;
+    sources.textContent = [
+        ruleCount ? `规则匹配 ${ruleCount} 条` : '',
+        bomCount ? `组合匹配 ${bomCount} 条` : ''
+    ].filter(Boolean).join(' · ');
 }
 
 // 9. Export standard sheet blob handler (V0.0.2 non-destructive)
@@ -2862,30 +3344,20 @@ async function handleExport() {
 function jsonPayloadData() {
     const mapped = items.map(item => {
         return {
-            original_row_idx: item.original_row_idx,
-            original_name: item.original_name,
-            original_spec: item.original_spec,
-            original_qty: item.original_qty,
-            original_unit: item.original_unit,
-            original_loss: item.original_loss,
+            ...reviewPayload(item),
             matched_code: item.matched_code,
             matched_name: item.matched_name,
             matched_category: item.matched_category,
             matched_spec: item.matched_spec,
             matched_unit: item.matched_unit,
             matched_brand: item.matched_brand,
-            professional: item.professional || "暖通",
-            original_code: item.original_code || "",
-            // V015-M1 / F19：原始品类/品牌随导出 payload 贯通，缺失回退空串兼容旧会话
-            original_category: item.original_category || "",
-            original_brand: item.original_brand || "",
             bindings: item.bindings || null,
             // V015-M2：决策状态仅作展示上下文，导出端不信任，服务端逐项复核
             decision_status: item.decision_status || "",
             decision_source: item.decision_source || ""
         };
     });
-    return JSON.stringify({ items: mapped, scope_filename: originalFileName || "" });
+    return JSON.stringify({ items: mapped, scope_filename: originalFileName || "", document_id: currentDocumentId || "" });
 }
 
 // 10. Configurations panel loading & rendering
@@ -3722,6 +4194,9 @@ async function annotateRestoredItems() {
                 item.decision_source = 'legacy_draft';
                 item.decision_reason = '服务端状态未能核验，请重新人工确认';
             }
+            item.initial_match = null;
+            item.bindings = [];
+            syncBindingDisplay(item);
         });
         if (downgraded > 0) {
             alert(`已载入进度：${downgraded} 条记录的服务端确认状态无法核验，已降为「待确认」，请复核后再导出。`);
@@ -3743,10 +4218,11 @@ async function annotateRestoredItems() {
             if (data.actor_user_id !== undefined && data.actor_user_id !== null) {
                 applyVerifiedActorIdentity(data.actor_user_id, data.actor_account_epoch || '');
             }
-            items = data.items;
+            items = uniqueWorkbenchRows(data.items);
             items.forEach(it => {
                 it._event_seq = Math.max(Number(it._event_seq || 0), Number(it.max_event_seq || 0));
                 it._feedback_seq = Math.max(Number(it._feedback_seq || 0), Number(it.max_feedback_seq || 0));
+                initializeWorkbenchBinding(it, true);
             });
             const firstVerified = items.find(it => it.identity_status === 'verified' && it.document_id);
             if (firstVerified) {
@@ -3789,6 +4265,7 @@ async function checkForDraft() {
 
                 document.getElementById('welcome-slate').style.display = 'none';
                 document.getElementById('workbench').style.display = 'flex';
+                document.getElementById('initial-overview').hidden = false;
                 document.getElementById('export-btn').disabled = false;
                 
                 const saveTrigger = document.getElementById('save-trigger');
@@ -3932,6 +4409,7 @@ async function loadSession(sessionId) {
         // Render view
         document.getElementById('welcome-slate').style.display = 'none';
         document.getElementById('workbench').style.display = 'flex';
+        document.getElementById('initial-overview').hidden = false;
         document.getElementById('export-btn').disabled = false;
         
         const saveTrigger = document.getElementById('save-trigger');

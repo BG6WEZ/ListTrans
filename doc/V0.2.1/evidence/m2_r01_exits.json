@@ -1,0 +1,129 @@
+{
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "task": "V021-M2/R01",
+  "development_gate_status": "blocked_by_dispatch_snapshot_delta",
+  "baseline": {
+    "exit_code": 0,
+    "raw_sha256_checked": 80,
+    "sealed_assets_metadata_only": 2,
+    "evidence": "m2_r01_baseline_check.json"
+  },
+  "syntax": {
+    "exit_code": 0,
+    "commands": [
+      "node --check web/app.js",
+      "python -m py_compile (modified Python files)"
+    ]
+  },
+  "focused": {
+    "exit_code": 0,
+    "passed": 14,
+    "m2_cases": 8,
+    "warning_and_bom_compat_cases": 6,
+    "evidence": "m2_r01_focused_delivery.log",
+    "clean_export": {
+      "before_confirmation": 422,
+      "confirmed": 200,
+      "xlsx_E": "M2-CLEAN",
+      "xlsx_I": 3,
+      "edited": 422
+    }
+  },
+  "serial": {
+    "exit_code": 0,
+    "passed": 520,
+    "deselected": 1,
+    "elapsed_seconds": 569.5,
+    "deselected_reason": "HOLD-M0-01, test_frozen_assignment_covers_same_sheet_and_near_query_edges",
+    "command": "python doc/V0.2.1/evidence/m0_r01_pytest.py --basetemp=<native temp>/m2s88833c -o tmp_path_retention_policy=all -p no:cacheprovider --maxfail=1 --durations=10 -v",
+    "evidence": "m2_r01_serial_verified.log"
+  },
+  "replay": {
+    "keyword": {
+      "exit_code": 0,
+      "train_rows": 842,
+      "dev_rows": 218,
+      "eligible": 0,
+      "confirmed": 0,
+      "evidence": "m2_r01_keyword_replay_final.json"
+    },
+    "vector": {
+      "exit_code": 0,
+      "train_rows": 842,
+      "dev_rows": 218,
+      "eligible": 1,
+      "confirmed": 1,
+      "evidence": "m2_r01_vector_replay_final.json"
+    }
+  },
+  "browser": {
+    "exit_code": 0,
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "real_http_requests": 120,
+    "exceptions": 0,
+    "evidence": "m2_r01_browser/result.json"
+  },
+  "rules": {
+    "exit_code": 0,
+    "comparisons": 18,
+    "differences": 0,
+    "legacy_unconstrained_degradations": 17,
+    "legacy_unconstrained_assessment": "harmful",
+    "evidence": "m2_r01_rule_gate_delivery.json"
+  },
+  "isolation": {
+    "before": {
+      "exit_code": 0,
+      "within_run_verdict": "PASS",
+      "evidence": "m2_r01_isolation_before.json"
+    },
+    "after": {
+      "exit_code": 0,
+      "within_run_verdict": "PASS",
+      "evidence": "m2_r01_isolation_after.json"
+    },
+    "recheck": {
+      "exit_code": 0,
+      "within_run_verdict": "PASS",
+      "evidence": "m2_r01_isolation_recheck.json"
+    }
+  },
+  "dispatch_snapshot_comparison": {
+    "exit_code": 1,
+    "meaning": "33/35 SHA256 match, two materials SQLite sidecars absent",
+    "evidence": "m2_r01_business_snapshot_delta.json"
+  },
+  "rollback": {
+    "exit_code": 0,
+    "byte_identical_files": 10,
+    "added_files_absent_after_reverse": 2,
+    "migrations_and_legacy_writes_verified_for": [
+      "auth.db",
+      "materials.db"
+    ],
+    "evidence": "m2_r01_rollback.json"
+  },
+  "superseded_attempts": [
+    {
+      "exit_code": 1,
+      "meaning": "AppContainer blocked asyncio local socketpair and no HTTP or browser pass was credited."
+    },
+    {
+      "exit_code": 1,
+      "meaning": "Two old upload fixtures omitted source identity; the concurrent review exposed lock order inversion.",
+      "evidence": "m2_r01_serial_final.log"
+    },
+    {
+      "exit_code": 1,
+      "meaning": "Intermediate serial run stopped after the old mining fixture failed."
+    },
+    {
+      "exit_code": 1,
+      "meaning": "Injecting synthetic suffix 304a16 reproduces the pre-existing mining fixture mismatch.",
+      "evidence": "m2_r01_miner_fixture_probe.log"
+    }
+  ]
+}

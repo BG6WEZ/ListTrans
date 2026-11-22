@@ -1,0 +1,251 @@
+{
+  "date": "2026-11-23T07:12:44+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "task": "V021-M3/R01",
+  "verdict": "RELEASED_KEEP_OFF",
+  "selection_decision": "KEEP_DEFAULT_OFF_CLOSE_ON_M0_TO_M2",
+  "head": "a22fcd4c75c28030915bbdc46c5f0489244bfee0",
+  "v014_rollback_anchor": "e964fb16848de9dece8e729e801b61c7d81dd341",
+  "plan_r2_sha256": "a054949f1068cfb156b81caff050bd18dc974b11c6dec86dd0c81a1b7047fac5",
+  "r2_hash_unchanged": true,
+  "auto_binding_rules_empty": true,
+  "default_switches_frozen_off": {
+    "LISTTRANS_V018_M0_RECALL": "0",
+    "LISTTRANS_V018_M1_RECALL": "0",
+    "LISTTRANS_V018_M2_RECALL": "0",
+    "LISTTRANS_V019_M0_SCORING": "legacy",
+    "LISTTRANS_V019_M1_RERANK": "off",
+    "LISTTRANS_V019_M2_CALIBRATION": "off",
+    "ENABLE_SERIES_RERUN": "false",
+    "LISTTRANS_V020_M0_RANKER": "off",
+    "LISTTRANS_V020_M2_LLM_DECISION": "off",
+    "LLM_ENABLED": "false",
+    "LISTTRANS_V021_M3_RERANKER": "off"
+  },
+  "baseline_84_audit": {
+    "unchanged": 82,
+    "changed": [
+      "app/matcher.py",
+      "app/server.py"
+    ],
+    "unexpected": [],
+    "sealed": {
+      "tests/fixtures/golden_governance_v1.json": {
+        "head_blob": "5761e77d543189374e78cc09970acb4a5449a6f6",
+        "matches": true
+      },
+      "tests/fixtures/golden_set_v1.json": {
+        "head_blob": "f906169cb413c424915ef1b86745226e45ffff6c",
+        "matches": true
+      }
+    }
+  },
+  "delivery_40_audit": {
+    "total": 40,
+    "exact": 39,
+    "ledger_diff": [
+      {
+        "rel": "doc/V0.2.1/02_任务台账.md",
+        "delivery": "2da857838c5cdf613760d5c21670da0b67e30c0c0a8c43ed0bcffd262742a216",
+        "current": "3fa3e5758cf074ef68c7a2eb094a7f02d044303a23f0fc283cf08ff4d92809d6"
+      }
+    ],
+    "unexpected": [],
+    "dev_summary_sha256": "432ed0ccd5fe0a737e6e972fc851227b1b572ccbd73ec72708bf22290257604a",
+    "audit_summary_sha256": "04c4c1ceebce4b99f8a9791bf2fa087c49e20b5eb3bcd97355419ddf0b13a8d4",
+    "protocol_frozen_sha256": "ea3fa4a1cff5be0de57a32ed8addf95e4335bbea4670bff814151a62e44cccf9"
+  },
+  "authorized_cross_encoder_asset_integrity": {
+    "repo_id": "BAAI/bge-reranker-base",
+    "pinned_revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+    "core_files_8_zero_diff": true,
+    "diffs": []
+  },
+  "paired_eval_and_budget_verified": {
+    "heldout_samples_read_during_m3": {
+      "keyword": 0,
+      "vector": 0
+    },
+    "keyword_candidate_meets_gates": false,
+    "vector_candidate_meets_gates": false,
+    "keyword_checks": {
+      "dev_equivalent_hit1_strict_gain": false,
+      "dev_equivalent_mrr10_strict_gain": false,
+      "dev_A_strict_gain": false,
+      "dev_adjudicable_A_precision_non_regression": true,
+      "zero_frozen_wrong_automatics": true,
+      "protected_checks": true,
+      "domain_floors": false,
+      "all_signed_resources_on": false,
+      "on_completed_without_degradation": true,
+      "off_R2_and_M2": true
+    },
+    "vector_checks": {
+      "dev_equivalent_hit1_strict_gain": false,
+      "dev_equivalent_mrr10_strict_gain": false,
+      "dev_A_strict_gain": false,
+      "dev_adjudicable_A_precision_non_regression": true,
+      "zero_frozen_wrong_automatics": true,
+      "protected_checks": true,
+      "domain_floors": false,
+      "all_signed_resources_on": false,
+      "on_completed_without_degradation": true,
+      "off_R2_and_M2": true
+    },
+    "selection_failures": {
+      "keyword": {
+        "meets_all_gates": false,
+        "failed": [
+          "dev_equivalent_hit1_strict_gain",
+          "dev_equivalent_mrr10_strict_gain",
+          "dev_A_strict_gain",
+          "domain_floors",
+          "all_signed_resources_on"
+        ],
+        "budget_failures": [
+          "single_p50_ms",
+          "up50_p50_ms",
+          "wset_mib"
+        ]
+      },
+      "vector": {
+        "meets_all_gates": false,
+        "failed": [
+          "dev_equivalent_hit1_strict_gain",
+          "dev_equivalent_mrr10_strict_gain",
+          "dev_A_strict_gain",
+          "domain_floors",
+          "all_signed_resources_on"
+        ],
+        "budget_failures": [
+          "single_p95_ms",
+          "up50_p50_ms",
+          "up50_p95_ms",
+          "wset_mib"
+        ]
+      }
+    },
+    "performance_recommended_default": "off",
+    "performance_modes_summary": {
+      "keyword": {
+        "off": {
+          "single_p50_ms": 27.317,
+          "single_p95_ms": 270.758,
+          "upload50_p50_ms": 1368.373,
+          "upload50_p95_ms": 7662.133,
+          "memory": {
+            "app_peak_working_set_mib": 667.00390625,
+            "combined_sampled_working_set_mib": 666.3359375
+          },
+          "arm_exercised_without_degradation": true,
+          "protocol_sha256": "ea3fa4a1cff5be0de57a32ed8addf95e4335bbea4670bff814151a62e44cccf9"
+        },
+        "on": {
+          "single_p50_ms": 31.098,
+          "single_p95_ms": 286.356,
+          "upload50_p50_ms": 2406.118,
+          "upload50_p95_ms": 7533.637,
+          "memory": {
+            "app_peak_working_set_mib": 666.31640625,
+            "combined_sampled_working_set_mib": 2615.3671875,
+            "worker_peak_working_set_mib": 2118.51171875
+          },
+          "arm_exercised_without_degradation": true,
+          "protocol_sha256": "ea3fa4a1cff5be0de57a32ed8addf95e4335bbea4670bff814151a62e44cccf9"
+        }
+      },
+      "vector": {
+        "off": {
+          "single_p50_ms": 71.038,
+          "single_p95_ms": 323.749,
+          "upload50_p50_ms": 4833.273,
+          "upload50_p95_ms": 9989.489,
+          "memory": {
+            "app_peak_working_set_mib": 1707.60546875,
+            "combined_sampled_working_set_mib": 1702.875
+          },
+          "arm_exercised_without_degradation": true,
+          "protocol_sha256": "ea3fa4a1cff5be0de57a32ed8addf95e4335bbea4670bff814151a62e44cccf9"
+        },
+        "on": {
+          "single_p50_ms": 76.757,
+          "single_p95_ms": 581.293,
+          "upload50_p50_ms": 7027.294,
+          "upload50_p95_ms": 13834.414,
+          "memory": {
+            "app_peak_working_set_mib": 1696.109375,
+            "combined_sampled_working_set_mib": 3425.625,
+            "worker_peak_working_set_mib": 2118.46875
+          },
+          "arm_exercised_without_degradation": true,
+          "protocol_sha256": "ea3fa4a1cff5be0de57a32ed8addf95e4335bbea4670bff814151a62e44cccf9"
+        }
+      }
+    }
+  },
+  "coordinator_independent_checks": {
+    "node_syntax_check_exit": 0,
+    "focused_9_modules_pytest": {
+      "modules": [
+        "tests/test_v021_m3_cross_encoder.py",
+        "tests/test_v021_m2_priority_review.py",
+        "tests/test_v021_m0_initial_match.py",
+        "tests/test_auto_binding.py",
+        "tests/test_binding_decisions.py",
+        "tests/test_m5_file_boundary_and_compat.py",
+        "tests/test_v020_m1_bom.py",
+        "tests/test_feedback_miner.py",
+        "tests/test_v019_m3_review.py"
+      ],
+      "passed": 114,
+      "failed": 0,
+      "exit_code": 0,
+      "duration_sec": 44.02
+    },
+    "off_18_group_rule_gate": {
+      "exit_code": 0,
+      "passed_protected_probes": true,
+      "hist_zero_diff": true,
+      "legacy_unconstrained_benefit": "harmful",
+      "legacy_unconstrained_degraded": 17,
+      "subset_rows": 1060
+    },
+    "isolation_before": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": []
+    },
+    "isolation_after": {
+      "verdict": "PASS",
+      "exit_code": 0,
+      "business_hash_unchanged": true,
+      "business_changes": [],
+      "pending_modules": [],
+      "hard_errors": []
+    },
+    "snap_33_post_zero_diff": true,
+    "immutable_db": {
+      "materials": {
+        "sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+        "quick_check": "ok",
+        "rows": 26863,
+        "fw_rows": 0,
+        "m0_leak": false,
+        "m2_leak": false
+      },
+      "auth": {
+        "sha256": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+        "quick_check": "ok",
+        "m2_leak": false
+      }
+    }
+  },
+  "adjudications": {
+    "OBS-AUDIT-V021-M3-01": "P3 观察，签认留痕不阻断。串行日志单次 setup 计时跳变 23,807.70s 系沙箱时钟异常，非产品缺陷；开发保留原始计时且性能门禁独立采信双模式回放实测，无需整改。",
+    "LISTTRANS_V021_M3_RERANKER": "实测关键词与离线 BGE 双模式 ON 均未达 Dev 提升门槛且多项延迟/内存超 V0.1.7 签认预算；按 R2 方案与协作协议第 4 节正式裁决维持默认 OFF，不提请启用，按 M0～M2 收口 V0.2.1。"
+  }
+}

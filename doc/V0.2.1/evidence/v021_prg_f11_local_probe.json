@@ -1,0 +1,17 @@
+{
+  "exit_code": 0,
+  "scope": "synthetic production-mode runtime only",
+  "before_rotation": {
+    "unauthenticated": 401,
+    "previous_token": null,
+    "current_login": 200,
+    "current_token": 200
+  },
+  "after_rotation": {
+    "unauthenticated": 401,
+    "previous_token": 401,
+    "current_login": 200,
+    "current_token": 200
+  },
+  "real_rotation_verified": false
+}
