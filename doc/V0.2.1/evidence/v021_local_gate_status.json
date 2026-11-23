@@ -1,0 +1,176 @@
+{
+  "scope": "user-designated local Docker Desktop Linux target only",
+  "image_id": "sha256:c321ac3563bab23db8fa7e4047315aaf0255a1eb051d39abf9062b8af9424432",
+  "git_head": "4d95ff1e4ede27cb15d65365405ffcdf6bd8d778",
+  "local_mandatory_gates_passed": {
+    "PRG-F11": true,
+    "ENV-V017-01": true,
+    "A-M3-01": true
+  },
+  "auth_database_sha256": "5757593ff839b59eb62a0f7925caa626bd0a8d1f0951860fe115774eb4c766f8",
+  "business_assets_unchanged": 33,
+  "performance": {
+    "keyword": [
+      {
+        "round": 1,
+        "observed": {
+          "single_p50_ms": 18.021280999960254,
+          "single_p95_ms": 198.5149359999241,
+          "upload50_p50_ms": 1099.5666219999976,
+          "upload50_p95_ms": 6408.72484199997,
+          "peak_working_set_mib": 759.00390625
+        },
+        "limits": {
+          "single_p50_ms": 30,
+          "single_p95_ms": 300,
+          "upload50_p50_ms": 1750,
+          "upload50_p95_ms": 10000,
+          "peak_working_set_mib": 768
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_keyword_1.json"
+      },
+      {
+        "round": 2,
+        "observed": {
+          "single_p50_ms": 20.186596000030477,
+          "single_p95_ms": 210.65151499988133,
+          "upload50_p50_ms": 1230.6332420000672,
+          "upload50_p95_ms": 6321.769430999893,
+          "peak_working_set_mib": 759.44921875
+        },
+        "limits": {
+          "single_p50_ms": 30,
+          "single_p95_ms": 300,
+          "upload50_p50_ms": 1750,
+          "upload50_p95_ms": 10000,
+          "peak_working_set_mib": 768
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_keyword_2.json"
+      },
+      {
+        "round": 3,
+        "observed": {
+          "single_p50_ms": 17.646298000045135,
+          "single_p95_ms": 194.90031999998791,
+          "upload50_p50_ms": 1109.295497000403,
+          "upload50_p95_ms": 6381.628552000166,
+          "peak_working_set_mib": 759.28125
+        },
+        "limits": {
+          "single_p50_ms": 30,
+          "single_p95_ms": 300,
+          "upload50_p50_ms": 1750,
+          "upload50_p95_ms": 10000,
+          "peak_working_set_mib": 768
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_keyword_3.json"
+      }
+    ],
+    "vector": [
+      {
+        "round": 1,
+        "observed": {
+          "single_p50_ms": 57.334448999881715,
+          "single_p95_ms": 246.95213800009697,
+          "upload50_p50_ms": 3745.4184579999037,
+          "upload50_p95_ms": 8266.128167999796,
+          "peak_working_set_mib": 1746.64453125
+        },
+        "limits": {
+          "single_p50_ms": 90,
+          "single_p95_ms": 375,
+          "upload50_p50_ms": 6000,
+          "upload50_p95_ms": 12500,
+          "peak_working_set_mib": 2048
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_vector_1.json"
+      },
+      {
+        "round": 2,
+        "observed": {
+          "single_p50_ms": 54.30121899985352,
+          "single_p95_ms": 240.75215700008812,
+          "upload50_p50_ms": 3674.5527460000176,
+          "upload50_p95_ms": 8005.592659000058,
+          "peak_working_set_mib": 1825.0703125
+        },
+        "limits": {
+          "single_p50_ms": 90,
+          "single_p95_ms": 375,
+          "upload50_p50_ms": 6000,
+          "upload50_p95_ms": 12500,
+          "peak_working_set_mib": 2048
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_vector_2.json"
+      },
+      {
+        "round": 3,
+        "observed": {
+          "single_p50_ms": 54.416051999851334,
+          "single_p95_ms": 244.527516999824,
+          "upload50_p50_ms": 3609.266673000093,
+          "upload50_p95_ms": 8114.565073999984,
+          "peak_working_set_mib": 1811.55078125
+        },
+        "limits": {
+          "single_p50_ms": 90,
+          "single_p95_ms": 375,
+          "upload50_p50_ms": 6000,
+          "upload50_p95_ms": 12500,
+          "peak_working_set_mib": 2048
+        },
+        "budget_pass": {
+          "single_p50_ms": true,
+          "single_p95_ms": true,
+          "upload50_p50_ms": true,
+          "upload50_p95_ms": true,
+          "peak_working_set_mib": true
+        },
+        "evidence": "v021_linux_perf_vector_3.json"
+      }
+    ]
+  },
+  "concurrent_budget_pass": {
+    "health_p95": true,
+    "status_p95": true,
+    "match_queue_wait_p95": true,
+    "each_probe_below_2000": true
+  },
+  "production_release_authorized": false,
+  "remote_push_authorized": false
+}

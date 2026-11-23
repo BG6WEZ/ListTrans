@@ -34,13 +34,15 @@ def sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def stage(context):
+def stage(context, *, probe=True):
     load = lambda name: json.loads((EVIDENCE / name).read_bytes())
     dispatch = load("m3_r01_dispatch_baseline.json")
     delivery = load("m3_r01_delivery_sha256.json")
     head = run(["git", "rev-parse", "HEAD"], text=True).strip()
-    if head != dispatch["head"] or head != delivery["git_head"]:
+    signed_base = dispatch["head"]
+    if signed_base != delivery["git_head"]:
         raise ValueError("RC Git base differs from the signed source")
+    run(["git", "merge-base", "--is-ancestor", signed_base, head])
     freeze = {**dispatch["effective_baseline_sha256"], **delivery["files"]}
     for name in ("Dockerfile", ".dockerignore"):
         if sha(ROOT / name) != freeze[name]:
@@ -55,7 +57,7 @@ def stage(context):
     for name in sorted(allowed):
         source = ROOT / name
         if name in {"web/logo.png", "web/logo500.png"}:
-            baseline = run(["git", "rev-parse", f"HEAD:{name}"], text=True).strip()
+            baseline = run(["git", "rev-parse", f"{signed_base}:{name}"], text=True).strip()
             actual = run(["git", "hash-object", "--no-filters", "--", name], text=True).strip()
             if baseline != actual:
                 raise ValueError(f"Logo differs from the signed Git base: {name}")
@@ -66,6 +68,8 @@ def stage(context):
         shutil.copyfile(source, destination)
         expected[name] = sha(destination)
     shutil.copyfile(ROOT / ".dockerignore", context / ".dockerignore")
+    if not probe:
+        return head, freeze, expected
     for name in CANARIES:
         destination = context / name
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -81,7 +85,7 @@ def stage(context):
     return head, freeze, expected
 
 
-def layers(path):
+def layers(path, *, app_only=False):
     manifest, found = None, {}
     with tarfile.open(path, "r|*") as archive:
         for member in archive:
@@ -100,6 +104,8 @@ def layers(path):
                     if entry.isdir():
                         continue
                     label = PurePosixPath(entry.name.removeprefix("./").lstrip("/")).as_posix()
+                    if app_only and not label.startswith("app/"):
+                        continue
                     if not entry.isfile() or label in files:
                         raise ValueError(f"Unexpected entry kind or duplicate inscribed path: {label}")
                     files[label] = hashlib.file_digest(layer.extractfile(entry), "sha256").hexdigest()

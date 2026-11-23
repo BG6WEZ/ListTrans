@@ -1,0 +1,31 @@
+{
+  "exit_code": 0,
+  "scope": "authorized local Docker application account and signing key",
+  "operator_authority": "user-authorized local Docker scope",
+  "image_id": "sha256:c321ac3563bab23db8fa7e4047315aaf0255a1eb051d39abf9062b8af9424432",
+  "verified_at": "2026-11-23T07:58:33+08:00",
+  "target_account_alias": "local-bootstrap-admin",
+  "local_ssh_service": false,
+  "auth_database_sha256": "5757593ff839b59eb62a0f7925caa626bd0a8d1f0951860fe115774eb4c766f8",
+  "password_rotation": {
+    "before": [
+      200,
+      200
+    ],
+    "changed": 200,
+    "old_token": 401,
+    "old_password": 400,
+    "new_login": 200,
+    "new_token": 200,
+    "must_change_password": false
+  },
+  "signing_key_rotation": {
+    "old_signature": 401,
+    "new_login": 200,
+    "new_token": 200
+  },
+  "isolated_uvicorn_start_modes": [
+    "keyword",
+    "vector"
+  ]
+}

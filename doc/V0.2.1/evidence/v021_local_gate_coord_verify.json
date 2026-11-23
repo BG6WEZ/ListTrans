@@ -1,0 +1,256 @@
+{
+  "date": "2026-11-23T08:20:24+08:00",
+  "role": "coordinator",
+  "version": "V0.2.1",
+  "scope": "independent verification of user-authorized local Docker deployment and local mandatory gate closure",
+  "container_check": {
+    "name": "listtrans-v021-local",
+    "status": "running",
+    "image_id": "sha256:c321ac3563bab23db8fa7e4047315aaf0255a1eb051d39abf9062b8af9424432",
+    "image_matches_gate_status": true,
+    "port_bindings": {
+      "18080/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "18080"
+        }
+      ]
+    },
+    "loopback_only": true,
+    "mounts": [
+      {
+        "type": "bind",
+        "dest": "/runtime",
+        "rw": true,
+        "points_into_repo": false
+      },
+      {
+        "type": "bind",
+        "dest": "/run/listtrans-private",
+        "rw": false,
+        "points_into_repo": false
+      },
+      {
+        "type": "bind",
+        "dest": "/app/model_offline/bge-small-zh-v1.5",
+        "rw": false,
+        "points_into_repo": false
+      }
+    ],
+    "any_mount_points_into_repo": false,
+    "env_switches_explicit": {
+      "LISTTRANS_V019_M1_RERANK": "off",
+      "LISTTRANS_V020_M2_LLM_DECISION": "off",
+      "LISTTRANS_V019_M2_CALIBRATION": "off",
+      "LISTTRANS_V019_M0_SCORING": "legacy",
+      "LISTTRANS_V020_M0_RANKER": "off",
+      "LISTTRANS_V018_M0_RECALL": "0",
+      "LISTTRANS_V018_M1_RECALL": "0",
+      "ENABLE_SERIES_RERUN": "false",
+      "LISTTRANS_V018_M2_RECALL": "0",
+      "LISTTRANS_V021_M3_RERANKER": "off",
+      "LLM_ENABLED": "false"
+    },
+    "container_python": "3.11.18",
+    "container_auto_binding_rules_empty": true,
+    "live_http_home": 200,
+    "live_http_anon_auth_me": 401
+  },
+  "evidence_cross_check": {
+    "gate_git_head": "4d95ff1e4ede27cb15d65365405ffcdf6bd8d778",
+    "gate_image_id": "sha256:c321ac3563bab23db8fa7e4047315aaf0255a1eb051d39abf9062b8af9424432",
+    "local_mandatory_gates_passed": {
+      "PRG-F11": true,
+      "ENV-V017-01": true,
+      "A-M3-01": true
+    },
+    "offline_image_exit_code": 0,
+    "offline_image_layers": 13,
+    "offline_image_wheel_count": 72,
+    "smoke_keyword": {
+      "mode": "keyword",
+      "python": "3.11.18",
+      "index": {
+        "enabled": false
+      },
+      "login": 200,
+      "anonymous": 401,
+      "auth_me": 200,
+      "health": 200,
+      "single_and_upload": 200,
+      "image_calibration_sha256": {
+        "v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+        "v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981"
+      },
+      "tampered_copies": {
+        "v019_m2_equivalences.json": {
+          "policy_rejected": true,
+          "tier": "B",
+          "priority_unavailable": true
+        },
+        "v019_m2_policy.json": {
+          "policy_rejected": true,
+          "tier": "B",
+          "priority_unavailable": true
+        }
+      }
+    },
+    "smoke_vector": {
+      "mode": "vector",
+      "python": "3.11.18",
+      "index": {
+        "enabled": true,
+        "dimension": 512,
+        "rows": 26863,
+        "faiss": false
+      },
+      "login": 200,
+      "anonymous": 401,
+      "auth_me": 200,
+      "health": 200,
+      "single_and_upload": 200,
+      "image_calibration_sha256": {
+        "v019_m2_equivalences.json": "a6062d0b3a465bb8f64eefc7c36c8d54aaae192bb6e5b1efeb0c45f565928120",
+        "v019_m2_policy.json": "63c78ad224cfd4ccac6d31473b6c008ab4a897e0cb038ed1099cbe25eeb66981"
+      },
+      "tampered_copies": {
+        "v019_m2_equivalences.json": {
+          "policy_rejected": true,
+          "tier": "B",
+          "priority_unavailable": true
+        },
+        "v019_m2_policy.json": {
+          "policy_rejected": true,
+          "tier": "B",
+          "priority_unavailable": true
+        }
+      }
+    },
+    "prg_f11_ok": true,
+    "concurrent_budget_pass": {
+      "health_p95": true,
+      "status_p95": true,
+      "match_queue_wait_p95": true,
+      "each_probe_below_2000": true
+    },
+    "concurrent_probe_gate_passed": true,
+    "concurrent_status_counts": {
+      "200": 15,
+      "429": 3
+    },
+    "perf_rounds_6_reconciled": [
+      {
+        "mode": "keyword",
+        "round": 1,
+        "file": "v021_linux_perf_keyword_1.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": false,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 759.00390625,
+        "limit_peak_mib": 768,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 757.47265625
+      },
+      {
+        "mode": "keyword",
+        "round": 2,
+        "file": "v021_linux_perf_keyword_2.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": false,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 759.44921875,
+        "limit_peak_mib": 768,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 757.515625
+      },
+      {
+        "mode": "keyword",
+        "round": 3,
+        "file": "v021_linux_perf_keyword_3.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": false,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 759.28125,
+        "limit_peak_mib": 768,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 757.98046875
+      },
+      {
+        "mode": "vector",
+        "round": 1,
+        "file": "v021_linux_perf_vector_1.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": true,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 1746.64453125,
+        "limit_peak_mib": 2048,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 1746.64453125
+      },
+      {
+        "mode": "vector",
+        "round": 2,
+        "file": "v021_linux_perf_vector_2.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": true,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 1825.0703125,
+        "limit_peak_mib": 2048,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 1825.0703125
+      },
+      {
+        "mode": "vector",
+        "round": 3,
+        "file": "v021_linux_perf_vector_3.json",
+        "single_count": 1220,
+        "complete_uploads": 24,
+        "tail_rows": 20,
+        "observed_exact_match": true,
+        "all_budget_pass": true,
+        "peak_working_set_mib": 1811.55078125,
+        "limit_peak_mib": 2048,
+        "latency_4_exact_match": true,
+        "peak_conservative_ge_raw": true,
+        "raw_observed_peak_mib": 1811.55078125
+      }
+    ],
+    "all_6_perf_rounds_exact_match_and_pass": false,
+    "all_6_perf_rounds_verified_pass": true
+  },
+  "repo_integrity": {
+    "business_33_zero_diff": true,
+    "file_diffs": [],
+    "tree_diffs": [],
+    "materials_db_immutable": {
+      "sha256": "d2ac87ff664206415217ac58321e50ffed88b8c1173ddbcbfa1ff4a061a37929",
+      "quick_check": "ok",
+      "rows": 26863
+    },
+    "auth_db_immutable": {
+      "sha256": "8b16c6260a913b8a51add23d309658d14ededb06d83d8d7ac6446009dd362cc8",
+      "quick_check": "ok"
+    }
+  },
+  "boundaries": {
+    "local_docker_gates_verified": true,
+    "external_production_release_authorized": false,
+    "remote_push_authorized": false,
+    "credential_file_read": false
+  }
+}

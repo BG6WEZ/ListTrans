@@ -1,0 +1,11 @@
+{
+  "exit_code": 0,
+  "scope": "localhost only",
+  "url": "http://127.0.0.1:18080",
+  "container": "5dbc44076350447c3b1e17dd7e77e1e28e1d973815f86794bd343160a118471f",
+  "anonymous_auth_me": 401,
+  "authenticated_auth_me": 200,
+  "host_homepage_http": 200,
+  "credential_file_present": true,
+  "repository_business_assets_unchanged_after_publish": 33
+}
